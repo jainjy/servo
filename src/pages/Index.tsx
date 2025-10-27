@@ -2,6 +2,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Load from "../components/Load";
+import EmplacementPub from '@/components/EmplacementPub';
 
 const Hero = lazy(() => import("@/components/Hero"));
 const ServiceCards = lazy(() => import("@/components/ServiceCards"));
@@ -42,15 +43,18 @@ const Index = () => {
         <Suspense fallback={<LoadingFallback />}>
           <Hero />
           <ServiceCards />
-          <TravauxPreview />
-          <Slider />
+          {/* Pass `homeCards` so TravauxPreview renders a homepage-specific card variant */}
+          <TravauxPreview homeCards />
+
+          <EmplacementPub />
+          
           {/* Show property listings on the home page in cards-only mode (no filters) */}
           <>
-          <h2 className="text-4xl font-bold ml-8 text-gray-700 my-6">Nos immobiliers</h2>
+          <h2 className="text-4xl font-bold ml-8 text-gray-700 my-6">Nos biens immobiliers</h2>
           <PropertyListings cardsOnly maxItems={4} />
+          <Slider />
           </>
         </Suspense>
-       
       </div>
     </>
   );

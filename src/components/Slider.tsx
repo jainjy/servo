@@ -2,39 +2,39 @@
 export default function Test() {
   const imageSrc = [
     {
-    src: "/logo1.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo2.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo1.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo2.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo1.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo2.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo1.png",
-    alt: "Image",
-  },
-  {
-    src: "/logo2.png",
-    alt: "Image",
-  }
-]
-  ; // exemple d’image
+      src: "/logo1.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo2.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo1.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo2.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo1.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo2.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo1.png",
+      alt: "Image",
+    },
+    {
+      src: "/logo2.png",
+      alt: "Image",
+    }
+  ]
+    ; // exemple d’image
 
   return (
     <div
@@ -57,10 +57,10 @@ export default function Test() {
           <div
             key={i}
             className="
-              flex-none py-5 flex justify-center items-center h-full w-40 rounded-sm
+              flex-none py-5 flex justify-center items-center h-full w-16 lg:w-40 rounded-sm
             "
           >
-         
+
             <img
               className="object-cover "
               src={image.src}
@@ -82,13 +82,13 @@ export default function Test() {
           <div
             key={i}
             className="
-              flex-none  flex justify-center items-center  h-full w-40 rounded-sm
+              flex-none  flex justify-center items-center  h-full w-16 lg:w-40 rounded-sm
             "
           >
 
             <img
               src={image.src}
-              alt="Image"  width={100} height={100}
+              alt="Image" width={100} height={100}
             />
           </div>
         ))}

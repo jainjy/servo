@@ -28,7 +28,7 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
-import { AuthService } from "@/lib/auth";
+import  AuthService  from "@/services/authService";
 import api from "@/lib/api";
 
 // Interface

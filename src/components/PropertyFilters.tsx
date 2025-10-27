@@ -32,7 +32,7 @@ const PropertyFilters = () => {
             RAYON
           </Button>
           <Button >
-          VENDRE / LOUER UN BIEN
+          VENDRE / LOUER SON BIEN
         </Button>
         </div>
         

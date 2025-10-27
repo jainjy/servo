@@ -427,13 +427,13 @@ const AdminDemandesPage = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header Admin avec badge de notification */}
       <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="relative">
             <h1 className="text-3xl font-bold text-gray-900">
               Gestion des demandes
             </h1>
           </div>
-          <p className="text-gray-600 mt-2">Administration de toutes les demandes clients</p>
+          <p className="text-gray-600 ">Administration de toutes les demandes clients</p>
         </div>
       </div>
 

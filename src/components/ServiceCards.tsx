@@ -1,24 +1,24 @@
-import { Home, Wrench, TrendingUp, Package, Globe } from "lucide-react";
+import { Home, Wrench, TrendingUp, Package } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const services = [
   {
     icon: Home,
-    title: "Acheter ou Louer",
-    description: "Tout est réuni pour vous simplifier la vie.",
+    title: "Acheter",
+    description: "Parcourez nos milliers de biens",
     color: "text-primary",
   },
   {
     icon: Wrench,
     title: "Services",
-    description: "Agents immobiliers, électriciens, plombiers et architectes.",
+    description: "Trouver un professionnel",
     color: "text-primary",
   },
   {
-    icon: Globe,
-    title: "Découvrir",
-    description: "Hôtels, gîtes et activités touristiques.",
-    color: "text-primary",
+    icon: TrendingUp,
+    title: "Vendre",
+    description: "Estimez votre bien",
+    color: "text-accent",
   },
   {
     icon: Package,
@@ -30,21 +30,19 @@ const services = [
 
 const ServiceCards = () => {
   return (
-    <section className="container mx-auto px-4 lg:-mt-14 -mt-24 relative z-20 mb-0">
-      <div className="place-items-center bg-white w-full lg:w-3/4 h-72 md:h-36 lg:h-36 mx-auto rounded-xl shadow-xl px-6 pt-2 lg:px-10 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-1">
-        {services.map((service, index) => (
-          <div
+    <section className="container mx-auto  md:px-8 sm:px-4 lg:px-12 -mt-24 relative z-20 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {services.map((service) => (
+          <Card 
             key={service.title}
-            className={` flex flex-col h-32 items-start flex-1 min-w-[140px] max-w-[180px] p-2 cursor-pointer
-          ${index !== services.length - 1 ? 'border-r border-gray-300 md:border-r' : ''}
-          border-r-0`}
+            className="p-4 text-center hover:shadow-2xl shadow-xl transition-all duration-300 cursor-pointer border-0 bg-card"
           >
-            <div className={`w-12  h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1`}>
-              <service.icon className={`h-5 w-5 ${service.color}`} />
+            <div className={`mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4`}>
+              <service.icon className={`h-8 w-8 ${service.color}`} />
             </div>
-            <h3 className="text-sm font-semibold ">{service.title}</h3>
-            <p className="text-xs text-muted-foreground text-start">{service.description}</p>
-          </div>
+            <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
+            <p className="text-sm text-muted-foreground">{service.description}</p>
+          </Card>
         ))}
       </div>
     </section>

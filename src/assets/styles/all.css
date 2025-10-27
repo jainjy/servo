@@ -1,0 +1,23 @@
+@keyframes pulse-slow {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.9; 
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) skew(-12deg); }
+  100% { transform: translateX(200%) skew(-12deg); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
+.animate-shine {
+  animation: shine 3s ease-in-out infinite;
+}

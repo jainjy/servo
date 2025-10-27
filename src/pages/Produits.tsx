@@ -1,7 +1,7 @@
-import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import '/fonts/Azonix.otf'
 import {
   Search,
   Home,
@@ -27,18 +27,15 @@ import {
   Phone,
   Calendar,
   MapPin,
-  Star,
   Users,
   Clock,
   Brush,
   Wand2,
   PaintBucket,
   Package,
-  Euro,
   ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import Footer from "@/components/layout/Footer";
 import api from "@/lib/api";
 
 // Composant Modal pour afficher les produits d'une catégorie
@@ -75,7 +72,7 @@ const CategoryModal = ({ isOpen, onClose, category, products }) => {
               {products.map((product) => (
                 <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow">
                   {product.images && product.images.length > 0 ? (
-                    <div 
+                    <div
                       className="w-full h-48 bg-cover bg-center rounded-lg mb-4"
                       style={{ backgroundImage: `url(${product.images[0]})` }}
                     />
@@ -84,15 +81,15 @@ const CategoryModal = ({ isOpen, onClose, category, products }) => {
                       <Package className="h-12 w-12 text-primary/40" />
                     </div>
                   )}
-                  
+
                   <h3 className="font-semibold text-lg mb-2 line-clamp-2">
                     {product.name}
                   </h3>
-                  
+
                   <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-bold text-primary">
                       €{product.price}
@@ -101,7 +98,7 @@ const CategoryModal = ({ isOpen, onClose, category, products }) => {
                       {product.quantity > 0 ? "En stock" : "Rupture"}
                     </Badge>
                   </div>
-                  
+
                   {product.vendor?.companyName && (
                     <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                       <ShoppingCart className="h-4 w-4" />
@@ -279,7 +276,7 @@ const Produits = () => {
       if (searchQuery) {
         params.search = searchQuery;
       }
-      
+
       const response = await api.get('/products', { params });
       setProducts(response.data.products);
     } catch (error) {
@@ -293,7 +290,7 @@ const Produits = () => {
     try {
       const response = await api.get('/products/categories');
       setCategories(response.data);
-      
+
       // Créer un objet avec les comptes par catégorie pour un accès facile
       const counts = {};
       response.data.forEach(cat => {
@@ -314,7 +311,7 @@ const Produits = () => {
     setSelectedCategory({ ...category, section });
     try {
       const response = await api.get('/products', {
-        params: { 
+        params: {
           category: category.name,
           status: 'active'
         }
@@ -344,41 +341,49 @@ const Produits = () => {
       name: "Équipements de chauffage",
       icon: Flame,
       description: "Chauffage et climatisation",
+      image: "/equipement/chauffage.jfif"
     },
     {
       name: "Électroménager",
       icon: Zap,
       description: "Appareils ménagers modernes",
+      image: "/equipement/electroménager.jfif"
     },
     {
       name: "Meubles",
       icon: Sofa,
       description: "Meubles design et fonctionnels",
+      image: "/equipement/Meubles.jfif"
     },
     {
       name: "Décoration",
       icon: Palette,
       description: "Décorations intérieures",
+      image: "/equipement/Decoration.jfif"
     },
     {
       name: "Jardinage",
       icon: Sprout,
       description: "Équipement de jardin",
+      image: "/equipement/Équipement_de_jardin.jfif"
     },
     {
       name: "Outillage",
       icon: Wrench,
       description: "Outils professionnels",
+      image: "/equipement/Outils_professionnels.jfif"
     },
     {
       name: "Sécurité maison",
       icon: Lock,
       description: "Systèmes de sécurité",
+      image: "/equipement/Systèmes_de_sécurité.jfif"
     },
     {
       name: "Luminaires",
       icon: Lamp,
       description: "Éclairage intérieur et extérieur",
+      image: "/equipement/Éclairage_intérieur_et_extérieur.jfif"
     },
   ];
 
@@ -387,41 +392,49 @@ const Produits = () => {
       name: "Matériaux de construction",
       icon: Warehouse,
       description: "Matériaux de base",
+      image: "/materiaux/Matériaux_de_construction.jfif"
     },
     {
       name: "Isolation",
       icon: Thermometer,
       description: "Isolation thermique et phonique",
+      image: "/materiaux/Isolation thermique et phonique.jfif"
     },
     {
       name: "Revêtements de sol",
       icon: Square,
       description: "Parquet, carrelage, moquette",
+      image: "/materiaux/Parquet, carrelage, moquette.jfif"
     },
     {
       name: "Carrelage",
       icon: Square,
       description: "Carreaux et faïence",
+      image: "/materiaux/Carreaux et faïence.jfif"
     },
     {
       name: "Bois et panneaux",
       icon: TreePine,
       description: "Bois massif et dérivés",
+      image: "/materiaux/Bois massif et dérivés.jfif"
     },
     {
       name: "Menuiserie",
       icon: DoorClosed,
       description: "Portes et fenêtres",
+      image: "/materiaux/Portes et fenêtres.jfif"
     },
     {
       name: "Plomberie",
       icon: Droplets,
       description: "Tuyauterie et sanitaires",
+      image: "/materiaux/Tuyauterie et sanitaires.jfif"
     },
     {
       name: "Électricité",
       icon: Zap,
       description: "Câbles et appareillages",
+      image: "/materiaux/Électricité.jfif"
     },
   ];
 
@@ -430,41 +443,49 @@ const Produits = () => {
       name: "Peinture & Revêtements",
       icon: PaintBucket,
       description: "Peintures et finitions murales",
+      image: "/design/Peinture & Revêtements.jfif"
     },
     {
       name: "Mobilier Design",
       icon: Sofa,
       description: "Meubles contemporains et design",
+      image: "/design/Meubles contemporains et design.jfif"
     },
     {
       name: "Décoration Murale",
       icon: Brush,
       description: "Éléments décoratifs muraux",
+      image: "/design/Éléments décoratifs muraux.jfif"
     },
     {
       name: "Luminaires Design",
       icon: Lamp,
       description: "Éclairage design et contemporain",
+      image: "/design/Éclairage design et contemporain.jfif"
     },
     {
       name: "Textiles Décoratifs",
       icon: Wand2,
       description: "Tissus et textiles d'ameublement",
+      image: "/design/Tissus et textiles d'ameublement.jfif"
     },
     {
       name: "Accessoires Déco",
       icon: Sparkles,
       description: "Accessoires de décoration",
+      image: "/design/Accessoires de décoration.jfif"
     },
     {
       name: "Art & Tableaux",
       icon: Palette,
       description: "Œuvres d'art et reproductions",
+      image: "/design/Œuvres d'art et reproductions.jfif"
     },
     {
       name: "Rangements Design",
       icon: Warehouse,
       description: "Solutions de rangement esthétiques",
+      image: "/design/Solutions de rangement esthétiques.jfif"
     },
   ];
 
@@ -489,13 +510,22 @@ const Produits = () => {
 
   return (
     <div className="min-h-screen relative pt-16 overflow-hidden bg-[#F6F8FA]">
-      {/* Background avec image réelle */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          backgroundImage: `linear-gradient(rgba(246, 248, 250, 0.85), rgba(246, 248, 250, 0.90)), url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
-        }}
-      />
+      {/* Background Image avec overlay */}
+      <div className="absolute inset-0">
+        {/* Image de fond */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
+          style={{
+            backgroundImage: `url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
+          }}
+        />
+
+        {/* Overlay par-dessus */}
+        <div className="absolute inset-0 bg-black bg-opacity-50" />
+      </div>
+
+
+
 
       {/* Overlay supplémentaire pour mieux lire le texte */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#F6F8FA]/50 to-[#F6F8FA]/30 z-1" />
@@ -518,46 +548,47 @@ const Produits = () => {
       </div>
 
       <div className="relative z-10">
-        <Header />
 
-        <section className="container mx-auto px-4 py-16 pt-24">
+        <section className="container mx-auto px-4 py-8">
           {/* En-tête avec animation */}
-          <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
-              Produits & Accessoires
-            </h1>
-            <p className="text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
-              Découvrez notre gamme complète pour équiper et embellir votre maison
-            </p>
-          </div>
-
-          {/* Barre de recherche améliorée */}
-          <form
-            onSubmit={handleSearch}
-            className="relative mb-16 max-w-2xl mx-auto animate-slide-up"
-          >
-            <div className="relative group">
-              <Input
-                type="text"
-                placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
-                className="h-16 pl-16 pr-8 rounded-2xl border-2 text-lg text-center uppercase tracking-wide transition-all duration-300 group-hover:shadow-xl group-hover:scale-105 border-[#0052FF]/30 bg-white/80 backdrop-blur-md"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[#0052FF] transition-transform duration-300 group-hover:scale-110" />
-              <Button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-12 px-6 bg-[#0052FF] hover:bg-[#003EE6] text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  "Rechercher"
-                )}
-              </Button>
+          <div className="bg-white py-5 rounded-lg">
+            <div className="text-center mb-5 animate-fade-in">
+              <h1 className="azonix text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
+                Produits & Accessoires
+              </h1>
+              <p className="text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
+                Découvrez notre gamme complète pour équiper et embellir votre maison
+              </p>
             </div>
-          </form>
+
+            {/* Barre de recherche améliorée */}
+            <form
+              onSubmit={handleSearch}
+              className="relative mb-5 max-w-2xl mx-auto animate-slide-up"
+            >
+              <div className="relative group">
+                <Input
+                  type="text"
+                  placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
+                  className="h-16 pl-16 pr-8 rounded-2xl border-2 text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-xl border-[#0052FF]/30 bg-white/80 backdrop-blur-md"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[#0052FF] transition-transform duration-300 group-hover:scale-110" />
+                <Button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-12 px-6 bg-[#0052FF] hover:bg-[#003EE6] text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    "Rechercher"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
 
           {/* Affichage des résultats de recherche */}
           {searchQuery && products.length > 0 && (
@@ -567,7 +598,7 @@ const Produits = () => {
                 {products.map((product) => (
                   <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow">
                     {product.images && product.images.length > 0 ? (
-                      <div 
+                      <div
                         className="w-full h-48 bg-cover bg-center rounded-lg mb-4"
                         style={{ backgroundImage: `url(${product.images[0]})` }}
                       />
@@ -576,15 +607,15 @@ const Produits = () => {
                         <Package className="h-12 w-12 text-primary/40" />
                       </div>
                     )}
-                    
+
                     <h3 className="font-semibold text-lg mb-2 line-clamp-2">
                       {product.name}
                     </h3>
-                    
+
                     <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                       {product.description}
                     </p>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-primary">
                         €{product.price}
@@ -593,7 +624,7 @@ const Produits = () => {
                         {product.quantity > 0 ? "En stock" : "Rupture"}
                       </Badge>
                     </div>
-                    
+
                     {product.vendor?.companyName && (
                       <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                         <ShoppingCart className="h-4 w-4" />
@@ -607,19 +638,19 @@ const Produits = () => {
           )}
 
           {/* Section Équipement */}
-          <div className="mb-20" id="equipement">
+          <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="equipement">
             <div
-              className="flex items-center gap-4 mb-8 animate-slide-from-left"
+              className=" flex items-center gap-4 mb-8 animate-slide-from-left"
               style={{ animationDelay: "0.2s" }}
             >
               <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
                 <Home className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-[#0A0A0A]">
+                <h2 className="text-4xl font-bold text-black/70">
                   Équipement Maison
                 </h2>
-                <p className="text-lg text-[#5A6470] mt-2">
+                <p className="text-sm text-[#5A6470] mt-2">
                   Tout le matériel et équipement pour aménager et équiper votre intérieur
                 </p>
               </div>
@@ -629,31 +660,27 @@ const Produits = () => {
               {filteredEquipment.map((category, index) => {
                 const IconComponent = category.icon;
                 const productCount = getProductCount(category.name);
-                
+
                 return (
                   <Card
                     key={category.name}
-                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border border-white/20 text-center animate-slide-from-left-card"
+                    className=" group p-4 flex flex-col border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
                     style={{
                       animationDelay: `${0.3 + index * 0.1}s`,
                     }}
                   >
-                    <div className="flex justify-center mb-4">
-                      <div className="p-4 rounded-2xl bg-[#0052FF]/10 transform transition-all duration-300 group-hover:scale-110 group-hover:bg-[#0052FF]/20 group-hover:rotate-3">
-                        <IconComponent className="h-8 w-8 text-[#0052FF] animate-pulse-slow" />
+                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                      <img src={category.image} alt="" className="w-full h-full object-cover" />
+                      <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                        <Badge variant="">
+                          {productCount} produit{productCount !== 1 ? 's' : ''}
+                        </Badge>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-center mb-2">
-                      <Badge variant="secondary" className="animate-pulse">
-                        {productCount} produit{productCount !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                    
                     <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
                       {category.name}
                     </h3>
-                    <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
+                    <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
                       {category.description}
                     </p>
                     <Button
@@ -677,7 +704,7 @@ const Produits = () => {
           </div>
 
           {/* Section Matériaux - Animation Slide From Right */}
-          <div className="mb-20" id="materiaux">
+          <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="materiaux">
             <div
               className="flex items-center gap-4 mb-8 animate-slide-from-right"
               style={{ animationDelay: "0.4s" }}
@@ -686,10 +713,10 @@ const Produits = () => {
                 <Construction className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-[#0A0A0A]">
+                <h2 className="text-4xl font-bold text-black/70">
                   Matériaux Construction
                 </h2>
-                <p className="text-lg text-[#5A6470] mt-2">
+                <p className="text-sm text-[#5A6470] mt-2">
                   Matériaux de construction et fournitures pour tous vos projets
                   de rénovation
                 </p>
@@ -700,27 +727,24 @@ const Produits = () => {
               {filteredMaterials.map((category, index) => {
                 const IconComponent = category.icon;
                 const productCount = getProductCount(category.name);
-                
+
                 return (
                   <Card
                     key={category.name}
-                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border border-white/20 text-center animate-slide-from-right-card"
+                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
                     style={{
                       animationDelay: `${0.5 + index * 0.1}s`,
                     }}
                   >
-                    <div className="flex justify-center mb-4">
-                      <div className="p-4 rounded-2xl bg-[#00C2A8]/10 transform transition-all duration-300 group-hover:scale-110 group-hover:bg-[#00C2A8]/20 group-hover:-rotate-3">
-                        <IconComponent className="h-8 w-8 text-[#00C2A8] animate-pulse-slow" />
+                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                      <img src={category.image} alt="" className="w-full h-full object-cover" />
+                      <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                        <Badge variant="">
+                          {productCount} produit{productCount !== 1 ? 's' : ''}
+                        </Badge>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-center mb-2">
-                      <Badge variant="secondary" className="animate-pulse">
-                        {productCount} produit{productCount !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                    
+
                     <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
                       {category.name}
                     </h3>
@@ -748,7 +772,7 @@ const Produits = () => {
           </div>
 
           {/* Section Design & Décoration - Animation Scale Up */}
-          <div className="mb-20" id="design">
+          <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="design">
             <div
               className="flex items-center gap-4 mb-8 animate-scale-up"
               style={{ animationDelay: "0.6s" }}
@@ -757,10 +781,10 @@ const Produits = () => {
                 <Brush className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-[#0A0A0A]">
+                <h2 className="text-4xl font-bold text-black/70">
                   Design & Décoration
                 </h2>
-                <p className="text-lg text-[#5A6470] mt-2">
+                <p className="text-sm text-[#5A6470] mt-2">
                   Solutions esthétiques pour sublimer votre intérieur
                 </p>
               </div>
@@ -770,27 +794,24 @@ const Produits = () => {
               {filteredDesign.map((category, index) => {
                 const IconComponent = category.icon;
                 const productCount = getProductCount(category.name);
-                
+
                 return (
                   <Card
                     key={category.name}
-                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border border-white/20 text-center animate-scale-up-card"
+                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
                     style={{
                       animationDelay: `${0.7 + index * 0.1}s`,
                     }}
                   >
-                    <div className="flex justify-center mb-4">
-                      <div className="p-4 rounded-2xl bg-[#0052FF]/10 transform transition-all duration-300 group-hover:scale-110 group-hover:bg-[#0052FF]/20 group-hover:rotate-3">
-                        <IconComponent className="h-8 w-8 text-[#0052FF] animate-pulse-slow" />
+                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                      <img src={category.image} alt="" className="w-full h-full object-cover" />
+                      <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                        <Badge variant="">
+                          {productCount} produit{productCount !== 1 ? 's' : ''}
+                        </Badge>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-center mb-2">
-                      <Badge variant="secondary" className="animate-pulse">
-                        {productCount} produit{productCount !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                    
+
                     <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
                       {category.name}
                     </h3>
@@ -819,7 +840,7 @@ const Produits = () => {
 
           {/* Section CTA */}
           <div
-            className="text-center mt-20 animate-bounce-in"
+            className="text-center animate-bounce-in"
             style={{ animationDelay: "0.8s" }}
           >
             <div className="bg-white/80 backdrop-blur-md rounded-3xl p-12 border border-white/20 shadow-2xl">

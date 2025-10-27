@@ -27,28 +27,12 @@ const quickActions = [
         bgColor: "bg-green-50"
     },
     {
-        name: "Messages",
-        description: "Répondre aux clients",
-        icon: MessageSquare,
-        href: "/messages",
-        color: "text-purple-600",
-        bgColor: "bg-purple-50"
-    },
-    {
         name: "Créer un devis",
         description: "Envoyer un devis",
         icon: FileText,
         href: "/pro/billing",
         color: "text-orange-600",
         bgColor: "bg-orange-50"
-    },
-    {
-        name: "Gérer l'équipe",
-        description: "Ajouter un collaborateur",
-        icon: Users,
-        href: "/pro/team",
-        color: "text-cyan-600",
-        bgColor: "bg-cyan-50"
     },
     {
         name: "Paramètres",

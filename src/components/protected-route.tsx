@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
-// NOTE: Assurez-vous que le chemin d'accès et l'implémentation de ce service sont valides en React.
 import  AuthService  from '@/services/authService'; 
 
 interface ProtectedRouteProps {
@@ -99,7 +98,7 @@ export function ProtectedRoute({
             navigate('/unauthorized');
             break;
           case 'Page access denied':
-            navigate(AuthService.redirectBasedOnRole());
+            navigate(AuthService.getRoleBasedRedirect());
             break;
           default:
             navigate(`${redirectTo}?error=unknown`);
@@ -134,17 +133,9 @@ export function ProtectedRoute({
     return null; // La redirection est gérée dans le useEffect
   }
 
-  // Rendu du contenu protégé
   return <>{children}</>;
 }
 
-// ----------------------------------------------------------------------
-// Composants enveloppants pour une utilisation facile des rôles
-// ----------------------------------------------------------------------
-
-/**
- * Utilisation: <AdminRoute>...</AdminRoute>
- */
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute requiredRole="admin">
@@ -153,9 +144,6 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * Utilisation: <ProRoute>...</ProRoute>
- */
 export function ProRoute({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute requiredRole={['admin', 'professional']}>
@@ -163,10 +151,6 @@ export function ProRoute({ children }: { children: React.ReactNode }) {
     </ProtectedRoute>
   );
 }
-
-/**
- * Utilisation: <UserRoute>...</UserRoute>
- */
 export function UserRoute({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute requiredRole={['admin', 'professional', 'user']}>
@@ -175,13 +159,6 @@ export function UserRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ----------------------------------------------------------------------
-// Public Route (Gère la redirection si l'utilisateur est déjà connecté)
-// ----------------------------------------------------------------------
-
-/**
- * Utilisation: <PublicRoute>...</PublicRoute>
- */
 export function PublicRoute({ 
   children, 
   redirectIfAuthenticated = true 
@@ -198,7 +175,7 @@ export function PublicRoute({
     if (redirectIfAuthenticated && AuthService.isAuthenticated()) {
       const user = AuthService.getCurrentUser();
       if (user) {
-        const redirectPath = AuthService.redirectBasedOnRole();
+        const redirectPath = AuthService.getRoleBasedRedirect();
         // Éviter la boucle de redirection
         if (pathname !== redirectPath) {
           navigate(redirectPath);

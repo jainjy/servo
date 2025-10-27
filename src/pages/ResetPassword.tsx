@@ -3,7 +3,7 @@ import { Eye, EyeOff, Lock, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AuthService } from "@/lib/auth";
+import  AuthService  from "@/services/authService";
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);

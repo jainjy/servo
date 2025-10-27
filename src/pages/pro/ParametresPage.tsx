@@ -164,7 +164,7 @@ const ParametresPage = () => {
                     </div>
                     
                     {parametres.horaires[jour.key].ouvert && (
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-col md:flex-row items-center gap-3">
                         <div className="flex items-center gap-2">
                           <Label>De</Label>
                           <Input
@@ -179,7 +179,7 @@ const ParametresPage = () => {
                                 }
                               }))
                             }
-                            className="w-32"
+                            className="w-24 md:w-32"
                           />
                         </div>
                         <div className="flex items-center gap-2">
@@ -196,7 +196,7 @@ const ParametresPage = () => {
                                 }
                               }))
                             }
-                            className="w-32"
+                             className="w-24 md:w-32"
                           />
                         </div>
                       </div>

@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
+import { UserPlus, LogIn } from 'lucide-react';
+import { AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import property1 from "@/assets/property-1.jpg";
 import property2 from "@/assets/property-2.jpg";
@@ -15,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import LocationPickerModal from "@/components/carte";
 import {
   Search,
   MapPin,
@@ -39,6 +42,45 @@ import {
   FileText,
 } from "lucide-react";
 import api from "@/lib/api";
+
+const styles = {
+  section: {
+    maxWidth: '400px',
+    margin: '40px auto',
+    padding: '30px',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    backgroundColor: '#fff',
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  },
+  phrase: {
+    fontSize: '1.25rem',
+    color: '#333',
+    marginBottom: '24px',
+  },
+  buttonsContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '16px',
+  },
+  button: {
+    padding: '12px 24px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, color 0.3s ease',
+  },
+  buttonPrimary: {
+    backgroundColor: '#007bff',
+    color: '#fff',
+  },
+  buttonSecondary: {
+    backgroundColor: '#6c757d',
+    color: '#fff',
+  },
+};
 
 // Données locales de fallback (garde les images existantes)
 const localBuyProperties = [
@@ -187,6 +229,18 @@ const formatFeaturesText = (property: any) => {
   return feats.join(" • ") || "Caractéristiques disponibles";
 };
 
+// Fonction pour normaliser les adresses (supprime accents et caractères spéciaux)
+const normalizeAddress = (address: string) => {
+  if (!address) return '';
+  return address
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Supprime les accents
+    .replace(/[^a-z0-9\s]/g, '') // Garde seulement lettres, chiffres et espaces
+    .replace(/\s+/g, ' ') // Réduit les espaces multiples
+    .trim();
+};
+
 // Composant Modal pour la demande de visite
 const ModalDemandeVisite = ({
   open,
@@ -230,6 +284,7 @@ const ModalDemandeVisite = ({
   if (!open) return null;
 
   return (
+
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* En-tête du modal */}
@@ -372,11 +427,14 @@ const ModalDemandeVisite = ({
       </div>
     </div>
   );
+
 };
 
 const PropertyListings = (
   { cardsOnly = false, initialTab, maxItems }: { cardsOnly?: boolean; initialTab?: 'tous' | 'achat' | 'location' | 'saisonniere'; maxItems?: number }
 ) => {
+  const navigate = useNavigate();
+  const [showCard, setShowCard] = useState(false);
   const [activeTab, setActiveTab] = useState<'achat' | 'location' | 'saisonniere' | 'tous'>(initialTab ?? 'tous');
   const [radiusKm, setRadiusKm] = useState(5);
   const [priceMin, setPriceMin] = useState<number | undefined>(undefined);
@@ -392,6 +450,9 @@ const PropertyListings = (
   const [typeBienSaison, setTypeBienSaison] = useState<string | undefined>(undefined);
   const [localisation, setLocalisation] = useState("");
 
+  // AJOUT: État pour la modale de carte
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+
   const [buyProperties, setBuyProperties] = useState<any[]>([]);
   const [rentProperties, setRentProperties] = useState<any[]>([]);
   const [seasonalProperties, setSeasonalProperties] = useState<any[]>([]);
@@ -405,8 +466,6 @@ const PropertyListings = (
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
-
-  const navigate = useNavigate();
 
   const fetchProperties = async () => {
     try {
@@ -435,7 +494,7 @@ const PropertyListings = (
       setRentProperties(forRent);
       // Stockez directement les propriétés saisonnières au lieu d'utiliser useMemo
       setSeasonalProperties(seasonal);
-      
+
     } catch (err) {
       console.error('Error fetching properties:', err);
       setError("Impossible de charger les propriétés. Affichage des exemples.");
@@ -477,17 +536,36 @@ const PropertyListings = (
     const applyFilters = (arr: any[]) =>
       arr.filter((p) => {
         if (!p) return false;
+
+        // FILTRE LOCALISATION AMÉLIORÉ
         if (localisation && localisation.trim()) {
-          const city = String(p.city || p.address || '').toLowerCase();
-          if (!city.includes(localisation.trim().toLowerCase())) return false;
+          const searchTerm = normalizeAddress(localisation);
+
+          // Normaliser aussi les adresses des propriétés
+          const city = normalizeAddress(p.city || '');
+          const address = normalizeAddress(p.address || '');
+          const zipCode = normalizeAddress(p.zipCode || '');
+
+          // Vérifier la correspondance dans les deux sens
+          const matchesLocation =
+            city.includes(searchTerm) ||
+            address.includes(searchTerm) ||
+            zipCode.includes(searchTerm) ||
+            searchTerm.includes(city) ||
+            searchTerm.includes(address);
+
+          if (!matchesLocation) return false;
         }
 
+        // Filtres prix
         if (priceMin !== undefined && (p.price === undefined || p.price < priceMin)) return false;
         if (priceMax !== undefined && (p.price === undefined || p.price > priceMax)) return false;
 
+        // Filtres surface
         if (surfaceMin !== undefined && (p.surface === undefined || p.surface < surfaceMin)) return false;
         if (surfaceMax !== undefined && (p.surface === undefined || p.surface > surfaceMax)) return false;
 
+        // Filtres pièces et chambres
         if (pieces !== undefined) {
           const pcs = p.rooms ?? p.pieces ?? p.bedrooms ?? 0;
           if (pcs < pieces) return false;
@@ -497,6 +575,7 @@ const PropertyListings = (
           if (ch < chambres) return false;
         }
 
+        // Filtres équipements
         if (exterieur !== undefined && exterieur !== '') {
           if (!hasFeature(p, exterieur)) return false;
         }
@@ -599,20 +678,21 @@ const PropertyListings = (
                   return (
                     <Card
                       key={property.id}
-                      className="overflow-hidden border-0 hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
+                      className="home-card group cursor-pointer h-full"
                       onClick={() => navigate(`/immobilier/${property.id}`)}
                     >
                       <div className="relative">
-                        <div className="relative h-48 overflow-hidden">
-                          <img
-                            src={images[idx % totalImages]}
-                            alt={property.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold">
+                        <div className="relative rounded-lg h-52 overflow-hidden">
+                            <img
+                              src={images[idx % totalImages]}
+                              alt={property.title}
+                              className="home-card-image h-full w-full group-hover:scale-110"
+                            />
+
+                          <div className="absolute bg-gray-700 rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge">
                             {property.type}
                           </div>
-                          <div className="absolute bottom-3 right-3 bg-green-200 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold">
+                          <div className="absolute bg-green-700 p-1 text-white font-semibold text-sm rounded-full bottom-3 right-3 home-card-price">
                             {priceLabel}
                           </div>
                           {totalImages > 1 && (
@@ -758,29 +838,115 @@ const PropertyListings = (
               onClick={() => setActiveTab('saisonniere')}
             >
               LOCATION SAISONNIÈRE
-            </Button>
+            </Button >
           </div>
+          <div>
 
-          <motion.button
-            onClick={() => navigate('/vendre')}
-            className="px-5 pointer-events-none h-11 flex items-center justify-center rounded-lg bg-gradient-to-r from-primary  to-accent "
-            style={{
-              backgroundSize: "200% 100%",
-              backgroundPosition: "0% 50%",
-            }}
-            animate={{
-              backgroundPosition: ["0% 50%", "100% 50%"],
-              transition: {
-                duration: 5,
-                repeat: Infinity,
-                repeatType: "loop",
-                ease: "linear",
-              },
-            }}
-          >
-            <Star className="h-4 w-4 mr-2 text-yellow-500" />
-            <span className="text-gray-800 font-bold">VENDRE / LOUER UN BIEN</span>
-          </motion.button>
+            <div className="relative z-10">
+              {/* Bouton principal */}
+              <motion.button
+                onClick={() => setShowCard(true)}
+                className="px-6 h-12 flex items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-white font-semibold shadow-md"
+                style={{
+                  backgroundSize: "200% 100%",
+                  backgroundPosition: "50% 50%",
+                }}
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%"],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  ease: "linear",
+                }}
+              >
+                <Star className="h-4 w-4 mr-2 text-yellow-500" />
+                VENDRE / LOUER SON BIEN
+              </motion.button>
+
+              {/* Overlay flouté + Card */}
+              <AnimatePresence>
+                {showCard && (
+                  <motion.div
+                    className="fixed inset-0 flex z-50 items-center justify-center bg-black/40 backdrop-blur-sm"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <motion.div
+                      initial={{ y: 50, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: 50, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="bg-gray-900 relative rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden bg-opacity-95"
+                    >
+                      <button
+                        onClick={() => setShowCard(false)}
+                        className="p-2 absolute right-0 z-50 group ml-2 flex-shrink-0"
+                      >
+                        <X className="w-5 h-5 text-red-500 group-hover:text-black transition-colors" />
+                      </button>
+                      {/* Conteneur d'image avec image réelle */}
+                      <div className="relative h-56 bg-gray-800  overflow-hidden">
+                        <img
+                          src="/illus.gif"
+                          alt="Immobilier"
+                          className="w-full h-full object-cover object-center"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
+                      </div>
+
+                      {/* Le reste du contenu reste identique */}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex items-start gap-4">
+                            <div className="w-3 h-12 bg-blue-500 rounded-full mt-1 shadow-lg shadow-blue-500/30" />
+                            <p className="text-gray-200 text-base leading-relaxed font-medium">
+                              Merci de vous connecter à votre compte afin de publier une annonce de location ou de vente de votre bien.
+                            </p>
+                          </div>
+
+                        </div>
+
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => navigate('/register')}
+                            className="w-full bg-blue-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-blue-700 active:bg-blue-800 transition-all flex items-center justify-center gap-3 group"
+                          >
+                            <div className="p-1.5 bg-white bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                              <UserPlus className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="text-base">Créer un compte</span>
+                          </button>
+
+                          <button
+                            onClick={() => navigate('/login')}
+                            className="w-full bg-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-purple-700 active:bg-purple-800 transition-all duration-200 flex items-center justify-center gap-3 group"
+                          >
+                            <div className="p-1.5 bg-white bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                              <LogIn className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="text-base">Se connecter</span>
+                          </button>
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-gray-700">
+                          <p className="text-gray-400 text-xs text-center">
+                            Accédez à tous vos biens et gérez vos annonces en toute simplicité
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+
+
+                )}
+
+              </AnimatePresence>
+            </div>
+
+          </div>
         </div>
 
         {/* Filtres */}
@@ -891,11 +1057,12 @@ const PropertyListings = (
             <Input
               value={localisation}
               onChange={(e) => setLocalisation(e.target.value)}
-              placeholder="Localisation"
-              className="pl-9 h-11 border-2"
+              onClick={() => setIsLocationModalOpen(true)}
+              placeholder="Cliquez pour choisir sur la carte"
+              className="pl-9 h-11 border-2 cursor-pointer bg-white"
+              readOnly
             />
           </div>
-
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>RAYON</span>
@@ -964,6 +1131,11 @@ const PropertyListings = (
             )}
           </div>
         </div>
+
+        {/* Indicateur de filtre actif */}
+        {localisation && (
+          <div></div>
+        )}
 
         {/* Résultats */}
         <div className="mt-6">
@@ -1126,12 +1298,6 @@ const PropertyListings = (
           )}
         </div>
 
-        {/* Voir plus button */}
-        <div className="text-center mt-6">
-          <Button className="px-8 py-3" onClick={() => navigate('/immobilier')}>
-            Voir plus
-          </Button>
-        </div>
       </div>
 
       {/* Modal de demande de visite */}
@@ -1140,7 +1306,35 @@ const PropertyListings = (
         onClose={() => setModalOpen(false)}
         property={selectedProperty}
       />
+
+      {/* Modal de sélection de localisation */}
+      <LocationPickerModal
+        open={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        value={localisation}
+        onChange={setLocalisation}
+        onLocationSelect={(location) => {
+          setLocalisation(location.address);
+          console.log('Location selected:', location);
+        }}
+        properties={[
+          ...buyProperties,
+          ...rentProperties,
+          ...seasonalProperties
+        ].map(p => ({
+          id: p.id,
+          title: p.title,
+          address: p.address || '',
+          city: p.city,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          type: p.type,
+          price: p.price,
+          status: p.status
+        }))}
+      />
     </section>
+
   );
 };
 

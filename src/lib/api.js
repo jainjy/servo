@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-
 // Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use(
   (config) => {

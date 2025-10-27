@@ -114,11 +114,11 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
   const handleScheduleVisit = () => {
     // Rediriger vers la page de contact ou ouvrir un formulaire
-    navigate("/contact", { 
-      state: { 
+    navigate("/contact", {
+      state: {
         propertyId: property.id,
-        propertyTitle: property.title 
-      } 
+        propertyTitle: property.title
+      }
     });
   };
 
@@ -149,7 +149,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
       sold: { label: "Vendu", variant: "destructive" },
       rented: { label: "Loué", variant: "destructive" }
     };
-    
+
     return statusMap[property.status] || { label: property.status, variant: "outline" };
   };
 
@@ -161,7 +161,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
       land: "Terrain",
       studio: "Studio"
     };
-    
+
     return typeMap[property.type] || property.type;
   };
 
@@ -174,20 +174,20 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
       balcony: <Square className="h-4 w-4" />,
       elevator: <UploadIcon className="h-4 w-4" />
     };
-    
+
     return iconMap[amenity] || <Home className="h-4 w-4" />;
   };
 
   const getFeaturesList = () => {
     const features = [];
-    
+
     if (property.hasPool) features.push("Piscine");
     if (property.hasGarden) features.push("Jardin");
     if (property.hasParking) features.push("Parking");
     if (property.hasTerrace) features.push("Terrasse");
     if (property.hasBalcony) features.push("Balcon");
     if (property.hasElevator) features.push("Ascenseur");
-    
+
     return features.length > 0 ? features : ["Aucun équipement spécifique"];
   };
 
@@ -198,18 +198,72 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
     if (property.city) parts.push(property.city);
     return parts.join(", ");
   };
+  const downloadAllImages = async (images: string[], propertyTitle: string) => {
+    try {
+      // Créer un nom de dossier propre
+      const folderName = propertyTitle
+        .replace(/[^a-zA-Z0-9\s]/g, '')
+        .replace(/\s+/g, '_')
+        .toLowerCase();
+
+      // Téléchargement séquentiel
+      for (let i = 0; i < images.length; i++) {
+        const imageUrl = images[i];
+        const fileName = `${folderName}_photo_${i + 1}.jpg`;
+
+        // Télécharger via blob pour éviter les blocages du navigateur
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+
+        // Libérer l’URL pour éviter les fuites mémoire
+        URL.revokeObjectURL(link.href);
+
+        // Petit délai (500 ms) pour éviter d’être bloqué par le navigateur
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      console.log("✅ Toutes les images ont été téléchargées !");
+    } catch (error) {
+      console.error("❌ Erreur lors du téléchargement des images :", error);
+    }
+  };
+
+
+  const downloadImage = (imageUrl: string, filename: string) => {
+    return new Promise((resolve, reject) => {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = filename;
+      link.target = '_blank';
+
+      // Déclencher le téléchargement
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      resolve(true);
+    });
+  };
 
   const statusBadge = getStatusBadge();
   const isAvailable = property.status === "published" && property.isActive;
-
+  const mm = gsap.matchMedia();
   useEffect(() => {
+    mm.add("(min-width: 1024px)", () => {
     ScrollTrigger.create({
       trigger: "#agent",
       start: "top 90px",
-      end: "+=380 55px",
+      end: "bottom 55px",
       pin: true,
-      scrub: true,
+      scrub: 1,
+      //markers: true
     });
+    })
   }, []);
 
   return (
@@ -252,11 +306,11 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                     <Badge className="bg-primary text-primary-foreground">
                       {getTypeLabel(property.type)}
                     </Badge>
-                    <Badge variant={statusBadge.variant}>
+                    <Badge className="bg-success hover:bg-green-900 text-primary-foreground">
                       {statusBadge.label}
                     </Badge>
                     {property.isFeatured && (
-                      <Badge variant="secondary" className="bg-yellow-500 text-white">
+                      <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">
                         En vedette
                       </Badge>
                     )}
@@ -279,26 +333,26 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 </div>
               </div>
 
-              {/* Vignettes */}
               <div className="grid grid-cols-2 gap-2">
                 {property.images && property.images.length > 0 ? (
-                  property.images.slice(0, 4).map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === index
-                          ? "border-primary"
-                          : "border-transparent"
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`${property.title} - Vue ${index + 1}`}
-                        className="object-cover w-full h-full"
-                      />
-                    </button>
-                  ))
+                  <>
+                    {property.images.slice(0, 4).map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
+                            ? "border-primary"
+                            : "border-transparent"
+                          }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${property.title} - Vue ${index + 1}`}
+                          className="object-cover w-full h-full"
+                        />
+                      </button>
+                    ))}
+                  </>
                 ) : (
                   [1, 2, 3, 4].map((index) => (
                     <div
@@ -309,12 +363,28 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                     </div>
                   ))
                 )}
+
+                {/* BOUTON TÉLÉCHARGER TOUTES LES PHOTOS - EN DESSOUS DES IMAGES */}
+                {property.images && property.images.length > 0 && (
+                  <div className="col-span-2 mt-[-160px]">
+                    <Button
+                      onClick={() => downloadAllImages(property.images, property.title)}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      <UploadIcon className="h-4 w-4 mr-2" />
+                      Télécharger toutes les photos ({property.images.length})
+                    </Button>
+
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Sidebar - Agent & Actions */}
-          <div id="agent" className="space-y-6">
+          <div id="agent" className="space-y-6 relative lg:absolute right-2 lg:w-80">
             {/* Carte Agent */}
             <Card>
               <CardContent className="p-6">
@@ -593,10 +663,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                         <MapPin className="h-4 w-4" />
                         <span>{getFullAddress()}</span>
                       </div>
-                      
+
                       {property.latitude && property.longitude ? (
                         <div className="h-96 rounded-lg overflow-hidden">
-                          <PropertyMap 
+                          <PropertyMap
                             latitude={property.latitude}
                             longitude={property.longitude}
                             address={getFullAddress()}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AuthService, type User as AuthUser } from "@/lib/auth";
+import { type User as AuthUser } from "@/types/type";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Mail, Phone, Building, Shield, User as UserIcon, Calendar, MapPin, Star, Edit3, X, Check } from "lucide-react";
-import Header from "@/components/layout/Header";
 import { toast } from "@/hooks/use-toast";
-import Footer from "@/components/layout/Footer";
+import AuthService  from "@/services/authService";
 
 export default function MonComptePage() {
   const [user, setUser] = useState<AuthUser | null>(null);

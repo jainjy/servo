@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 // Remplacement du Link de Next.js par celui de React Router
-import { Link, useNavigate } from "react-router-dom"; 
-
+import { Link, useNavigate } from "react-router-dom";
+import logo from '@/assets/logo.png';
 // Import des icônes
 import {
   Bell,
@@ -101,7 +101,7 @@ export function AuthHeader() {
     if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
       AuthService.logout();
       // Rediriger vers la page de connexion après la déconnexion
-      navigate('/login'); 
+      navigate('/login');
     }
   };
 
@@ -224,9 +224,18 @@ export function AuthHeader() {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
       {/* Barre de Recherche */}
-      <div className="flex flex-1 items-center gap-4">
+      <div className="relative flex flex-1 items-center">
+
+        <div className="absolute -left-2 lg:hidden sm:hidden p-1 rounded-full  bg-white border-black border-2">
+          {/* Remplacement de <Image> par <img> */}
+          <img
+            src={logo}
+            alt="Servo Logo"
+            className="w-10 h-10 rounded-full"
+          />
+        </div>
         {/* L'ajustement des classes Tailwind 'w-40 left-24' est conservé */}
-        <div className="lg:left-0 md:left-0 w-40 left-24 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96" ref={searchRef}>
+        <div className="lg:left-0 md:left-0 w-40 left-16 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -289,7 +298,7 @@ export function AuthHeader() {
 
       {/* Menus d'Actions (Notifications, Utilisateur) */}
       <div className="flex items-center gap-4">
-        
+
         {/* Notifications Dropdown (Personnalisé) */}
         <div className="relative" ref={notificationRef}>
           <Button
@@ -344,11 +353,10 @@ export function AuthHeader() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p
-                              className={`text-sm font-medium ${
-                                !notification.read
-                                  ? "text-foreground"
-                                  : "text-muted-foreground"
-                              }`}
+                              className={`text-sm font-medium ${!notification.read
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                                }`}
                             >
                               {notification.title}
                             </p>
@@ -375,7 +383,7 @@ export function AuthHeader() {
             </div>
           )}
         </div>
-        
+
         {/* Menu Utilisateur (Personnalisé) */}
         <div className="relative" ref={userMenuRef}> {/* Réf ajoutée ici */}
           <Button
@@ -399,7 +407,7 @@ export function AuthHeader() {
                 <p className="text-xs text-gray-500">{currentUser?.email}</p>
               </div>
               <div className="p-1">
-                {currentUser.role=="admin" ? <><Link // Utilisateur de Link de react-router-dom
+                {currentUser.role == "admin" ? <><Link // Utilisateur de Link de react-router-dom
                   to="/admin/profile" // Changé 'href' en 'to'
                   className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
                   onClick={() => setShowUserMenu(false)}
@@ -407,29 +415,29 @@ export function AuthHeader() {
                   <User className="mr-2 h-4 w-4" />
                   Profil
                 </Link>
-                <Link // Utilisateur de Link de react-router-dom
-                  to="/admin/settings" // Changé 'href' en 'to'
-                  className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Paramètres
-                </Link></>:<><Link // Utilisateur de Link de react-router-dom
-                  to="/pro/profile" // Changé 'href' en 'to'
-                  className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  Profil
-                </Link>
-                <Link // Utilisateur de Link de react-router-dom
-                  to="/pro/settings" // Changé 'href' en 'to'
-                  className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Paramètres
-                </Link></>}
+                  <Link // Utilisateur de Link de react-router-dom
+                    to="/admin/settings" // Changé 'href' en 'to'
+                    className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Paramètres
+                  </Link></> : <><Link // Utilisateur de Link de react-router-dom
+                    to="/pro/profile" // Changé 'href' en 'to'
+                    className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Profil
+                  </Link>
+                  <Link // Utilisateur de Link de react-router-dom
+                    to="/pro/settings" // Changé 'href' en 'to'
+                    className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Paramètres
+                  </Link></>}
                 <div className="border-t my-1"></div>
                 <button
                   onClick={handleLogout}

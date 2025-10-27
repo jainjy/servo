@@ -2,20 +2,28 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import Immobilier from "./pages/Immobilier";
+import BienEtre from "./pages/bien_etre";
 import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
 import Entreprise from "./pages/Entreprise";
 import Financement from "./pages/Financement";
 import Actualites from "./pages/Actualites";
-import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
+import ProRegisterPage from "./pages/ProRegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import TourismSection from "./pages/Tourisme";
 import ServicesPartnersPage from "./pages/ServicesPartnersPage";
 import EstimationImmobilierPage from "./pages/EstimationImmobilierPage";
 import Index from "./pages/Index";
+import Podcast from "./pages/podcast";
 import ProLayout from "./pages/pro/ProLayout";
 import Dashboard from "./pages/pro/Dashboard";
 import ListingsPage from "./pages/pro/ListingsPage";
@@ -23,7 +31,6 @@ import CalendarPage from "./pages/pro/CalendarPage";
 import ClientSection from "./pages/pro/ClientSection";
 import DocumentsPage from "./pages/pro/DocumentsPage";
 import ReviewsPage from "./pages/pro/ReviewsPage";
-import TeamPage from "./pages/pro/TeamPage";
 import TourismPage from "./pages/pro/TourismPage";
 import BillingSection from "./pages/pro/BillingSection";
 import ParametresPage from "./pages/pro/ParametresPage";
@@ -53,7 +60,6 @@ import DemandeMessage from "./pages/mon-compte/DemandeMessage";
 import PropertyPage from "./pages/PropertyPage";
 import MessagesLayout from "./pages/MessagesLayout";
 import ProMessage from "./pages/pro/ProMessage";
-import ProDashboard from "./pages/pro/ProDashboard";
 import { useEffect } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import ScrollToTop from "./ScrollToTop";
@@ -61,6 +67,22 @@ import NotFound from "./pages/NotFound";
 import Layout from "./Layout";
 import UnauthorizedPage from "./pages/Unauthorized";
 import ProfessionalServicesPage from "./pages/pro/ProfessionalServicesPage";
+import Investissement from "./components/Investissement/investissement";
+import ArtCommerce from "./pages/ArtCommerce";
+import ArtCommerceDetail from "./pages/ArtCommerceDetail";
+import HarmoniePage from "./pages/pro/HarmoniePage";
+import RoleSelectionPage from "./pages/RoleSelectionPage ";
+import ProfessionalSubscriptionPage from "./pages/ProfessionalSubscriptionPage";
+import DroitFamille from "./components/DroitFamille";
+import GestionImmobilier from "./components/GestionImmobilier";
+import Publicite from "./pages/Publicite";
+import LoginRoleSelectionPage from "./pages/LoginRoleSelectionPage";
+import SuccessPage from "./pages/SuccessPage";
+import PaymentPage from "./pages/PaymentPage";
+import ProLogin from "./pages/auth/ProLogin";
+import ParticularLogin from "./pages/auth/ParticularLogin";
+import InvestissementDetail from "./pages/InvestissementDetail";
+
 
 const queryClient = new QueryClient();
 
@@ -106,7 +128,11 @@ const App = () => (
           <Routes>
             {/* Section publiques Routes */}
             <Route path="/" element={<Index />} />
+            <Route path="/bien-etre" element={<BienEtre />} />
+            <Route path="/podcasts" element={<Podcast />} />
             <Route path="/immobilier" element={<Immobilier />} />
+            <Route path="/droitFamille" element={<DroitFamille />} />
+            <Route path="/gestion-immobilier" element={<GestionImmobilier />} />
             <Route path="/immobilier/:id" element={<PropertyPage />} />
             <Route path="/travaux" element={<Travaux />} />
             <Route path="/produits" element={<Produits />} />
@@ -115,16 +141,42 @@ const App = () => (
             <Route path="/actualites" element={<Actualites />} />
             <Route path="/tourisme" element={<TourismSection />} />
             <Route path="/service" element={<ServicesPartnersPage />} />
+            <Route path="/publicite" element={<Publicite />} />
             <Route path="/estimations" element={<EstimationImmobilierPage />} />
             <Route path="/messages/:id" element={<MessagesLayout />} />
             {/* singular routes for legacy links */}
             <Route path="/message" element={<MessagesLayout />} />
             <Route path="/message/:id" element={<MessagesLayout />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginRoleSelectionPage />} />
+            <Route path="/login/professional" element={<ProLogin />} />
+            <Route path="/login/particular" element={<ParticularLogin />} />
+            <Route path="/register" element={<RoleSelectionPage />} />
+            <Route
+              path="/register/professional/subscription"
+              element={<ProfessionalSubscriptionPage />}
+            />
+            <Route
+              path="/register/professional"
+              element={
+                <Navigate to="/register/professional/subscription" replace />
+              }
+            />
+            <Route
+              path="/register/professional/payment"
+              element={<PaymentPage />}
+            />
+            <Route
+              path="/register/professional/form"
+              element={<ProRegisterPage />}
+            />
+            <Route path="/register/success" element={<SuccessPage />} />
+            <Route path="/register/particular" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
+            <Route path="/investissement" element={<Investissement />} />
+            <Route path="/art-commerce" element={<ArtCommerce />} />
+            <Route path="/art-commerce/:id" element={<ArtCommerceDetail />} />
+            <Route path="/investir/:type" element={<InvestissementDetail />} />
             {/* Section pro Routes */}
             <Route path="/pro" element={<ProLayout />}>
               <Route index element={<Dashboard />} />
@@ -133,20 +185,18 @@ const App = () => (
               <Route path="clients" element={<ClientSection />} />
               <Route path="documents" element={<DocumentsPage />} />
               <Route path="reviews" element={<ReviewsPage />} />
-              <Route path="team" element={<TeamPage />} />
               <Route path="tourisme" element={<TourismPage />} />
               <Route path="services" element={<ProfessionalServicesPage />} />
               <Route path="billing" element={<BillingSection />} />
               <Route path="settings" element={<ParametresPage />} />
-              <Route path="bookings" element={<ProDashboard />} />
               <Route path="products" element={<Products />} />
               <Route path="demandes" element={<ArtisanDemandesPage />} />
               <Route path="message" element={<ProMessage />} />
               <Route path="message/:id" element={<ProMessage />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="harmonie" element={<HarmoniePage />} />
             </Route>
-
             {/* Section Mon Compte Routes */}
             <Route path="/mon-compte">
               <Route index element={<MonComptePage />} />
@@ -156,7 +206,6 @@ const App = () => (
               <Route path="demandes" element={<MesDemande />} />
               <Route path="demandes/message" element={<DemandeMessage />} />
             </Route>
-
             {/* Section Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
@@ -175,7 +224,6 @@ const App = () => (
               <Route path="demandes" element={<ListeDemande />} />
               <Route path="metiers" element={<AdminMetiers />} />
             </Route>
-
             {/* Section not found Routes */}
             <Route path="*" element={<NotFound />} />
           </Routes>

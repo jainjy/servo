@@ -1,3 +1,4 @@
+// hooks/useAuth.js
 import { useState, useEffect } from 'react';
 import AuthService from '../services/authService';
 
@@ -11,11 +12,13 @@ export const useAuth = () => {
     setUser(AuthService.getCurrentUser());
     setIsAuthenticated(AuthService.isAuthenticated());
     setLoading(false);
+
     // Écouter les changements d'authentification
     const handleAuthChange = () => {
       setUser(AuthService.getCurrentUser());
       setIsAuthenticated(AuthService.isAuthenticated());
     };
+
     window.addEventListener('auth-change', handleAuthChange);
     return () => {
       window.removeEventListener('auth-change', handleAuthChange);
@@ -30,7 +33,6 @@ export const useAuth = () => {
     logout: AuthService.logout.bind(AuthService),
     register: AuthService.register.bind(AuthService),
     hasRole: AuthService.hasRole.bind(AuthService),
-    canAccess: AuthService.canAccess.bind(AuthService),
     refreshToken: AuthService.refreshToken.bind(AuthService),
     forgotPassword: AuthService.forgotPassword.bind(AuthService),
     resetPassword: AuthService.resetPassword.bind(AuthService),

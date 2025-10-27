@@ -1,6 +1,5 @@
 // app/pro/layout.tsx
 import type React from "react"
-import { ProHeader } from "@/components/pro/pro-header"
 import { ProRoute } from "@/components/protected-route"
 import { ProSidebar } from "@/components/pro/pro-sidebar"
 import { AuthHeader } from "@/components/layout/AuthHeader"

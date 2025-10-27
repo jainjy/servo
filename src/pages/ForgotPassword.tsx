@@ -71,6 +71,10 @@ export default function ForgotPasswordPage() {
   return (
     <div className="h-screen flex relative overflow-hidden">
       {/* Effet de fond global */}
+      {/* Formes décoratives */}
+      <div className="absolute top-0 left-[-5rem] w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
+      <div className="absolute bottom-0 right-[-5rem] w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
       <div className="absolute inset-0 -z-20">
         <img
@@ -80,24 +84,21 @@ export default function ForgotPasswordPage() {
         />
       </div>
 
-      {/* Formes décoratives */}
-      <div className="absolute top-0 left-[-5rem] w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-0 right-[-5rem] w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-
+     
       {/* Contenu principal */}
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-10 px-6 py-16 lg:py-24 z-10 max-w-7xl">
         {/* Texte à gauche (caché sur petits écrans) */}
         <div className="hidden lg:block text-white max-w-lg space-y-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <img src="/logo.png" className="h-10 w-10" alt="Logo" />
+            <div className="w-12 h-12 bg-white/20 rounded-full overflow-hidden flex items-center justify-center">
+              <img src="/logo.png" className="h-full w-full" alt="Logo" />
             </div>
-            <h1 className="text-3xl font-bold tracking-wide">SERVO</h1>
+            <h1 className="text-3xl font-bold azonix tracking-wide">SERVO</h1>
           </div>
 
           <div>
             <h2 className="text-2xl font-semibold mb-2">Super-app de l'habitat</h2>
-            <p className="text-blue-100 text-lg">
+            <p className="text-blue-100 text-md">
               Retrouvez l'accès à votre compte en toute sécurité
             </p>
           </div>

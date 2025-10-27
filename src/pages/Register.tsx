@@ -11,6 +11,9 @@ import {
   Car,
   Trees,
   CheckCircle,
+  MapPin,
+  Hash,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,31 +26,83 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const RegisterPage = () => {
-  // Remplace le useRouter de Next.js par une fonction basique
-  const redirect = (url: string) => {
-    window.location.href = url;
-  };
-
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
+    // Informations de base
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
-    userType: "particular",
+
+    // Type d'utilisateur
+    userType: "CLIENT", // PRESTATAIRE | VENDEUR | LOUEUR | CLIENT | ADMIN
+    role: "particular", // particular ou professional
+    demandType: "", // agence immobilier, particulier ou syndicat
+
+    // Informations entreprise (si professionnel)
     companyName: "",
+    commercialName: "",
+    siret: "",
+
+    // Adresse
+    address: "",
+    addressComplement: "",
+    zipCode: "",
+    city: "",
+
+    // Coordonnées GPS
+    latitude: "",
+    longitude: "",
+
+    // Métiers (si prestataire)
+    metiers: [] as number[],
+
     acceptTerms: false,
-    newsletter: true,
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
-const { register } = useAuth();
+  const { register } = useAuth();
 
+  // Types d'utilisateurs disponibles
+  const userTypes = [
+    { value: "CLIENT", label: "Client" },
+    { value: "PRESTATAIRE", label: "Prestataire" },
+    { value: "VENDEUR", label: "Vendeur" },
+    { value: "LOUEUR", label: "Loueur" },
+  ];
+
+  // Types de demandes
+  const demandTypes = [
+    { value: "particulier", label: "Particulier" },
+    { value: "agence immobilier", label: "Agence immobilière" },
+    { value: "syndicat", label: "Syndicat" },
+  ];
+
+  // Liste des métiers (exemple)
+  const metiersList = [
+    { id: 1, libelle: "Plombier" },
+    { id: 2, libelle: "Électricien" },
+    { id: 3, libelle: "Peintre" },
+    { id: 4, libelle: "Menuisier" },
+    { id: 5, libelle: "Jardinier" },
+  ];
+
+  // Dans handleSubmit, après la validation du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -56,6 +111,7 @@ const { register } = useAuth();
       return;
     }
 
+    // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
       alert("Les mots de passe ne correspondent pas");
       return;
@@ -66,8 +122,8 @@ const { register } = useAuth();
       return;
     }
 
+    // Pour les particuliers, inscription directe
     setIsLoading(true);
-
     try {
       const registerData = {
         firstName: formData.firstName,
@@ -75,24 +131,51 @@ const { register } = useAuth();
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
+        role: formData.role,
         userType: formData.userType,
-        companyName: formData.userType === 'professional' ? formData.companyName : undefined
+        demandType: formData.demandType,
+        companyName: formData.companyName,
+        commercialName: formData.commercialName,
+        siret: formData.siret,
+        address: formData.address,
+        addressComplement: formData.addressComplement,
+        zipCode: formData.zipCode,
+        city: formData.city,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
+        longitude: formData.longitude
+          ? parseFloat(formData.longitude)
+          : undefined,
+        metiers: formData.metiers,
+        subscriptionType: "FREE", // Gratuit pour les particuliers
       };
 
-      await register(registerData);
-      // La redirection est gérée par le service d'authentification
+      const { user, token, route } = await register(registerData);
+      navigate(route);
     } catch (error: any) {
       console.error("Registration failed:", error);
-      alert(error.message || "Erreur lors de l'inscription. Veuillez réessayer.");
+      alert(
+        error.message || "Erreur lors de l'inscription. Veuillez réessayer."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (
+    field: string,
+    value: string | boolean | number[]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleMetierToggle = (metierId: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      metiers: prev.metiers.includes(metierId)
+        ? prev.metiers.filter((id) => id !== metierId)
+        : [...prev.metiers, metierId],
+    }));
+  };
 
   const features = [
     {
@@ -119,6 +202,7 @@ const { register } = useAuth();
 
   return (
     <div className="min-h-screen flex">
+      {/* Background reste identique */}
       <div className="w-screen h-screen bg-black/80 backdrop-blur-lg -z-10 top-0 absolute"></div>
       <div className="absolute w-screen h-screen top-0 left-0 -z-20 opacity-70">
         <img
@@ -127,7 +211,9 @@ const { register } = useAuth();
           className="w-full h-full object-cover"
         />
       </div>
+
       <div className="w-[80vw] lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
+        {/* Sidebar reste identique */}
         <div className="hidden lg:flex lg:flex-1  bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
@@ -135,17 +221,20 @@ const { register } = useAuth();
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
             <div className="mb-8">
               <div className="flex items-center gap-3">
-                <div className="w-10 overflow-hidden h-10 bg-black flex items-center justify-center">
-                  <img src="/logo.png" className="h-10 w-10 rounded-full" alt="Logo" />
+                <div className="w-10 overflow-hidden h-10 rounded-full bg-black flex items-center justify-center">
+                  <img
+                    src="/logo.png"
+                    className="h-10 w-10 rounded-full"
+                    alt="Logo"
+                  />
                 </div>
-                <h1 className="text-2xl font-bold">SERVO</h1>
+                <h1 className="text-2xl redhawk tracking-wide font-bold">SERVO</h1>
               </div>
-              <p className="text-xl font-semibold">
-                Rejoignez la super-app de l'habitat
+              <p className="text-md font-semibold">
+                REJOIGNEZ LA SUPER APP DE L'HABITAT
               </p>
-              <p className="text-blue-100 text-lg">
-                Une plateforme complète pour tous vos besoins immobiliers et
-                services
+              <p className="text-blue-100 text-sm mt-2">
+Des biens immobiliers, ses services additionnels, produits adaptés à vos besoins et vos locations au sein d’une seule plateforme
               </p>
             </div>
 
@@ -157,7 +246,9 @@ const { register } = useAuth();
                   </div>
                   <div>
                     <h3 className="font-semibold">{feature.title}</h3>
-                    <p className="text-blue-100 text-sm">{feature.description}</p>
+                    <p className="text-blue-100 text-sm">
+                      {feature.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -178,51 +269,48 @@ const { register } = useAuth();
           </div>
         </div>
 
-        <div className="relative flex-1 flex bg-white place-items-center overflow-y-auto">
-          <div className="w-full max-w-2xl ">
-            <Card className="border-0 p-0 m-0 h-full  rounded-none">
+        <div className="relative flex-1 flex bg-white overflow-y-auto">
+          <div className="w-full max-w-2xl">
+            <Card className="border-0 p-0 m-0 h-full rounded-none">
               <CardHeader>
-                <div className=" flex justify-between items-center">
+                <div className="flex justify-between items-center">
                   <div className="flex flex-col items-start justify-center">
                     <CardTitle className="text-2xl font-bold text-gray-900">
                       Créer un compte
                     </CardTitle>
                     <CardDescription className="text-gray-600">
-                      {step === 1 ? "Informations de base" : "Finalisez votre inscription"}
+                      {step === 1
+                        ? "Informations de base"
+                        : "Finalisez votre inscription"}
                     </CardDescription>
                   </div>
 
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 1 ? "bg-blue-600" : "bg-green-500"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${step === 1 ? "bg-blue-600" : "bg-green-500"
+                        }`}
                     ></div>
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 2 ? "bg-blue-600" : "bg-gray-300"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${step === 2 ? "bg-blue-600" : "bg-gray-300"
+                        }`}
                     ></div>
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-2">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {step === 1 ? (
                     <>
+                      {/* Informations personnelles */}
                       <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
                         <div className="space-y-2">
-                          <label
-                            htmlFor="firstName"
-                            className="text-sm font-medium text-gray-700"
-                          >
+                          <label className="text-sm font-medium text-gray-700">
                             Prénom *
                           </label>
                           <div className="relative">
                             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
-                              id="firstName"
                               placeholder="Votre prénom"
                               className="pl-10 h-11 bg-white border-gray-300"
                               value={formData.firstName}
@@ -235,14 +323,10 @@ const { register } = useAuth();
                         </div>
 
                         <div className="space-y-2">
-                          <label
-                            htmlFor="lastName"
-                            className="text-sm font-medium text-gray-700"
-                          >
+                          <label className="text-sm font-medium text-gray-700">
                             Nom *
                           </label>
                           <Input
-                            id="lastName"
                             placeholder="Votre nom"
                             className="h-11 bg-white border-gray-300"
                             value={formData.lastName}
@@ -255,16 +339,12 @@ const { register } = useAuth();
                       </div>
 
                       <div className="space-y-2">
-                        <label
-                          htmlFor="email"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Email professionnel *
+                        <label className="text-sm font-medium text-gray-700">
+                          Email *
                         </label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            id="email"
                             type="email"
                             placeholder="votre@email.mg"
                             className="pl-10 h-11 bg-white border-gray-300"
@@ -278,16 +358,12 @@ const { register } = useAuth();
                       </div>
 
                       <div className="space-y-2">
-                        <label
-                          htmlFor="phone"
-                          className="text-sm font-medium text-gray-700"
-                        >
+                        <label className="text-sm font-medium text-gray-700">
                           Téléphone *
                         </label>
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            id="phone"
                             placeholder="+261 34 12 345 67"
                             className="pl-10 h-11 bg-white border-gray-300"
                             value={formData.phone}
@@ -299,102 +375,148 @@ const { register } = useAuth();
                         </div>
                       </div>
 
-                      <div className="space-y-3 ">
-                        <label className="text-sm font-medium text-gray-700">
-                          Vous êtes *
-                        </label>
-                        <div className=" grid lg:grid-cols-2 grid-cols-1 gap-4">
-                          <div
-                            className={`border-2 rounded-lg p-2 cursor-pointer transition-all ${
-                              formData.userType === "particular"
-                                ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                            onClick={() =>
-                              handleInputChange("userType", "particular")
-                            }
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-5 h-5 rounded-full border-2 ${
-                                  formData.userType === "particular"
-                                    ? "border-blue-500 bg-blue-500"
-                                    : "border-gray-400"
-                                }`}
-                              ></div>
-                              <div>
-                                <p className="font-medium">Particulier</p>
-                                <p className="text-xs text-gray-600">
-                                  Propriétaire, locataire
-                                </p>
-                              </div>
-                            </div>
-                          </div>
 
-                          <div
-                            className={`border-2 rounded-lg p-2 cursor-pointer transition-all ${
-                              formData.userType === "professional"
-                                ? "border-blue-500 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                            onClick={() =>
-                              handleInputChange("userType", "professional")
-                            }
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-5 h-5 rounded-full border-2 ${
-                                  formData.userType === "professional"
-                                    ? "border-blue-500 bg-blue-500"
-                                    : "border-gray-400"
-                                }`}
-                              ></div>
-                              <div>
-                                <p className="font-medium">Professionnel</p>
-                                <p className="text-xs text-gray-600">
-                                  Agent, prestataire
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {formData.userType === "professional" && (
-                        <div className="space-y-2">
-                          <label
-                            htmlFor="companyName"
-                            className="text-sm font-medium text-gray-700"
-                          >
-                            Nom de l'entreprise *
+                      {/* Type de demande (si particulier) */}
+                      {formData.role === "particular" && (
+                        <div className="space-y-3">
+                          <label className="text-sm font-medium text-gray-700">
+                            Type de demande *
                           </label>
-                          <Input
-                            id="companyName"
-                            placeholder="Nom de votre société"
-                            className="h-11 bg-white border-gray-300"
-                            value={formData.companyName}
-                            onChange={(e) =>
-                              handleInputChange("companyName", e.target.value)
+                          <Select
+                            value={formData.demandType}
+                            onValueChange={(value) =>
+                              handleInputChange("demandType", value)
                             }
-                            required
-                          />
+                          >
+                            <SelectTrigger className="h-11 bg-white border-gray-300">
+                              <SelectValue placeholder="Sélectionnez votre type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {demandTypes.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       )}
                     </>
                   ) : (
                     <>
-                      <div className="space-y-4">
+                      {/* Étape 2 */}
+                      {/* Métiers (si prestataire) */}
+                      {formData.userType === "PRESTATAIRE" && (
+                        <div className="space-y-4">
+                          <label className="text-sm font-medium text-gray-700">
+                            Sélectionnez vos métiers *
+                          </label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {metiersList.map((metier) => (
+                              <div
+                                key={metier.id}
+                                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${formData.metiers.includes(metier.id)
+                                    ? "border-blue-500 bg-blue-50"
+                                    : "border-gray-300 hover:border-gray-400"
+                                  }`}
+                                onClick={() => handleMetierToggle(metier.id)}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-5 h-5 rounded-full border-2 ${formData.metiers.includes(metier.id)
+                                        ? "border-blue-500 bg-blue-500"
+                                        : "border-gray-400"
+                                      }`}
+                                  ></div>
+                                  <span className="text-sm font-medium">
+                                    {metier.libelle}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Adresse */}
+                      <div className="relative space-y-1">
                         <div className="space-y-2">
-                          <label
-                            htmlFor="password"
-                            className="text-sm font-medium text-gray-700"
-                          >
+                          <label className="text-sm font-medium text-gray-700">
+                            Adresse *
+                          </label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              placeholder="Votre adresse complète"
+                              className="pl-10 h-11 bg-white border-gray-300"
+                              value={formData.address}
+                              onChange={(e) =>
+                                handleInputChange("address", e.target.value)
+                              }
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
+                            Complément d'adresse
+                          </label>
+                          <Input
+                            placeholder="Appartement, étage, etc."
+                            className="h-11 bg-white border-gray-300"
+                            value={formData.addressComplement}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "addressComplement",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              Code postal *
+                            </label>
+                            <Input
+                              placeholder="75001"
+                              className="h-11 bg-white border-gray-300"
+                              value={formData.zipCode}
+                              onChange={(e) =>
+                                handleInputChange("zipCode", e.target.value)
+                              }
+                              required
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              Ville *
+                            </label>
+                            <Input
+                              placeholder="Paris"
+                              className="h-11 bg-white border-gray-300"
+                              value={formData.city}
+                              onChange={(e) =>
+                                handleInputChange("city", e.target.value)
+                              }
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mot de passe */}
+                      <div className="space-y-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
                             Mot de passe *
                           </label>
                           <div className="relative">
                             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
-                              id="password"
                               type={showPassword ? "text" : "password"}
                               placeholder="Créez un mot de passe sécurisé"
                               className="pl-10 pr-10 h-11 bg-white border-gray-300"
@@ -418,29 +540,28 @@ const { register } = useAuth();
                               )}
                             </Button>
                           </div>
-                          <p className="text-xs text-gray-500">
-                            Minimum 8 caractères avec majuscules, minuscules et
+                          <p className="text-[10px] text-gray-500">
+                           * Minimum 8 caractères avec majuscules, minuscules et
                             chiffres
                           </p>
                         </div>
 
                         <div className="space-y-2">
-                          <label
-                            htmlFor="confirmPassword"
-                            className="text-sm font-medium text-gray-700"
-                          >
+                          <label className="text-sm font-medium text-gray-700">
                             Confirmer le mot de passe *
                           </label>
                           <div className="relative">
                             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
-                              id="confirmPassword"
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="Confirmez votre mot de passe"
                               className="pl-10 pr-10 h-11 bg-white border-gray-300"
                               value={formData.confirmPassword}
                               onChange={(e) =>
-                                handleInputChange("confirmPassword", e.target.value)
+                                handleInputChange(
+                                  "confirmPassword",
+                                  e.target.value
+                                )
                               }
                               required
                             />
@@ -463,19 +584,23 @@ const { register } = useAuth();
                         </div>
                       </div>
 
+                      {/* Conditions */}
                       <div className="space-y-4">
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="acceptTerms"
                             checked={formData.acceptTerms}
                             onCheckedChange={(checked) =>
-                              handleInputChange("acceptTerms", checked as boolean)
+                              handleInputChange(
+                                "acceptTerms",
+                                checked as boolean
+                              )
                             }
                             required
                           />
                           <label
                             htmlFor="acceptTerms"
-                            className="text-sm text-gray-600 cursor-pointer"
+                            className="text-xs text-gray-600 cursor-pointer"
                           >
                             J'accepte les{" "}
                             <a
@@ -493,26 +618,11 @@ const { register } = useAuth();
                             </a>
                           </label>
                         </div>
-
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="newsletter"
-                            checked={formData.newsletter}
-                            onCheckedChange={(checked) =>
-                              handleInputChange("newsletter", checked as boolean)
-                            }
-                          />
-                          <label
-                            htmlFor="newsletter"
-                            className="text-sm text-gray-600 cursor-pointer"
-                          >
-                            Je souhaite recevoir les actualités et offres de SERVO
-                          </label>
-                        </div>
                       </div>
                     </>
                   )}
 
+                  {/* Boutons de navigation */}
                   <div className="flex gap-4">
                     {step === 2 && (
                       <Button
@@ -526,15 +636,16 @@ const { register } = useAuth();
                     )}
                     <Button
                       type="submit"
-                      className={`${
-                        step === 2 ? "flex-1" : "w-full"
-                      } h-11 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold`}
+                      className={`${step === 2 ? "flex-1" : "w-full"
+                        } h-11 bg-gradient-to-r from-slate-500 to-slate-900 hover:from-slate-600 hover:to-blue-700 text-white font-semibold`}
                       disabled={isLoading}
                     >
                       {isLoading ? (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          {step === 1 ? "Chargement..." : "Création du compte..."}
+                          {step === 1
+                            ? "Chargement..."
+                            : "Création du compte..."}
                         </div>
                       ) : step === 1 ? (
                         "Continuer"
@@ -545,21 +656,15 @@ const { register } = useAuth();
                   </div>
 
                   <div className="text-center text-sm text-gray-600 mb-4">
-                    Déjà un compte ?{" "}
+                    Vous avez déjà un compte ?{" "}
                     <a
                       href="/login"
-                      className="text-blue-600 hover:text-blue-700 font-medium"
+                      className="text-blue-600 ml-2 hover:text-blue-700 font-medium"
                     >
                       Se connecter
                     </a>
                   </div>
                 </form>
-
-                <div>
-                  <p className="text-center text-xs justify-end flex text-gray-600">
-                    © 2025 SERVO . Tous droits réservés.
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </div>

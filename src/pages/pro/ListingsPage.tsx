@@ -36,7 +36,7 @@ import {
   Loader2
 } from "lucide-react";
 import api from "@/lib/api";
-import { AuthService } from "@/lib/auth";
+import  AuthService  from "@/services/authService";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -756,8 +756,8 @@ const ListingsPage = () => {
 
   // Gestion des annonces
   const sauvegarderAnnonce = () => {
-    fetchAnnonces();
-    fetchStats();
+    fetchAnnonces(user?.id);
+    fetchStats(user?.id);
   };
 
   const supprimerAnnonce = async (id) => {
@@ -767,8 +767,8 @@ const ListingsPage = () => {
 
     try {
       await api.delete(`/properties/${id}`);
-      fetchAnnonces();
-      fetchStats();
+      fetchAnnonces(user?.id);
+      fetchStats(user?.id);
     } catch (error) {
       console.error('Error deleting property:', error);
       alert('Erreur lors de la suppression');

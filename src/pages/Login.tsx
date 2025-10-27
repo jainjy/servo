@@ -2,23 +2,29 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Mail, Lock, Trees, Car, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import AuthService from "@/services/authService";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from 'react-router-dom';
-import { useRedirectPath } from '@/hooks/useRedirectPath';
+import { useNavigate } from "react-router-dom";
+import { useRedirectPath } from "@/hooks/useRedirectPath";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const redirectPath = useRedirectPath();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -27,19 +33,18 @@ const LoginPage = () => {
 
     try {
       const { user } = await login(email, password);
-      console.log('Login successful:', user);
+      console.log("Login successful:", user);
 
       // Redirection intelligente
       if (redirectPath) {
         navigate(redirectPath);
       } else {
-        const defaultPath = AuthService.redirectBasedOnRole();
+        const defaultPath = AuthService.getRoleBasedRedirect();
         navigate(defaultPath);
       }
-      
     } catch (error) {
-      console.error('Login failed:', error);
-      alert(error.message || 'Identifiants invalides. Veuillez réessayer.');
+      console.error("Login failed:", error);
+      alert("Identifiants invalides. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
@@ -50,11 +55,15 @@ const LoginPage = () => {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
       <div className="absolute inset-0 -z-20">
         {/* Remplace cette image par un élément img classique */}
-        <img src="/nature.jpeg" alt="Login Illustration" className="w-full h-full object-cover" />
+        <img
+          src="/nature.jpeg"
+          alt="Login Illustration"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 -z-10 bg-white/5 rounded-full"></div>
 
       <div className="w-[80vw] lg:w-[60vw] h-[80vh] m-auto rounded-3xl shadow-xl flex flex-col lg:flex-row overflow-hidden bg-white/0">
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
@@ -62,13 +71,18 @@ const LoginPage = () => {
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
-                  <img src="/logo.png" className="h-10 w-10 rounded-full" alt="Logo" />
+                  <img
+                    src="/logo.png"
+                    className="h-10 w-10 rounded-full"
+                    alt="Logo"
+                  />
                 </div>
-                <h1 className="text-2xl font-bold">SERVO</h1>
+                <h1 className="text-3xl azonix font-bold">SERVO</h1>
               </div>
-              <p className="text-xl font-semibold mb-2">Super-app de l'habitat</p>
               <p className="text-blue-100 text-lg">
-                Immobilier, services, produits et tourisme en un seul endroit
+                Des biens immobiliers, ses services additionnels, produits
+                adaptés à vos besoins et vos locations au sein d’une seule
+                plateforme
               </p>
             </div>
 
@@ -79,7 +93,9 @@ const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold">Immobilier Intelligent</h3>
-                  <p className="text-blue-100 text-sm">Recherche IA et matching avancé</p>
+                  <p className="text-blue-100 text-sm">
+                    Recherche IA et matching avancé
+                  </p>
                 </div>
               </div>
 
@@ -89,7 +105,9 @@ const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold">Services Qualifiés</h3>
-                  <p className="text-blue-100 text-sm">Prestataires vérifiés et notés</p>
+                  <p className="text-blue-100 text-sm">
+                    Prestataires vérifiés et notés
+                  </p>
                 </div>
               </div>
 
@@ -99,7 +117,9 @@ const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold">Réservations</h3>
-                  <p className="text-blue-100 text-sm">Visites et activités touristiques</p>
+                  <p className="text-blue-100 text-sm">
+                    Visites et activités touristiques
+                  </p>
                 </div>
               </div>
             </div>
@@ -126,7 +146,10 @@ const LoginPage = () => {
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-2">
                   <div className="space-y-4">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700 block">
+                    <label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-700 block"
+                    >
                       Email
                     </label>
                     <div className="relative">
@@ -144,7 +167,10 @@ const LoginPage = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <label htmlFor="password" className="text-sm font-medium text-gray-700 block">
+                    <label
+                      htmlFor="password"
+                      className="text-sm font-medium text-gray-700 block"
+                    >
                       Mot de passe
                     </label>
                     <div className="relative">
@@ -179,7 +205,9 @@ const LoginPage = () => {
                       <Checkbox
                         id="remember"
                         checked={rememberMe}
-                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          setRememberMe(checked as boolean)
+                        }
                       />
                       <label
                         htmlFor="remember"
@@ -214,7 +242,10 @@ const LoginPage = () => {
 
                   <div className="text-center text-sm text-gray-600">
                     Pas encore de compte ?{" "}
-                    <a href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+                    <a
+                      href="/register"
+                      className="text-blue-600 w-full cursor-pointer hover:text-blue-700 font-medium"
+                    >
                       Créer un compte
                     </a>
                   </div>
@@ -224,7 +255,9 @@ const LoginPage = () => {
                       <div className="w-full border-t border-gray-300"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">Accès rapide</span>
+                      <span className="px-2 bg-white text-gray-500">
+                        Accès rapide
+                      </span>
                     </div>
                   </div>
                 </form>

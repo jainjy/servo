@@ -1,11 +1,9 @@
 import React from 'react';
-// Remplacement du composant 'Image' de Next.js par l'importation directe de l'image
-import logo from '../../assets/logo.png'; 
-// NOTE: S'assurer que le chemin vers le fichier CSS est valide dans votre configuration React
+import logo from '../../assets/logo.png';
 import "../../styles/font.css";
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
-  // L'utilisation de React.FC est standard en TypeScript React
   return (
     <footer className="bg-gray-900 text-gray-300 py-10">
       <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between">
@@ -14,10 +12,10 @@ const Footer: React.FC = () => {
           <div className='flex gap-4 items-center mb-4'>
             <div className="p-1 w-12 rounded-full bg-black border-black border-2">
               {/* Remplacement de <Image> par <img> */}
-              <img 
-                src={logo} 
-                alt="Servo Logo" 
-                className="w-10 h-10 rounded-full" 
+              <img
+                src={logo}
+                alt="Servo Logo"
+                className="w-10 h-10 rounded-full"
               />
             </div>
             <h2 className="text-2xl azonix font-bold text-white ">Servo</h2>
@@ -49,10 +47,22 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
+      <div className='flex px-10 justify-between mt-10'>
+       <div className=" text-center text-gray-500 text-sm">
+          &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
+        </div>
+       <button>
+          <Link to={"/publicite"}>
+            <span className='text-sm font-bold underline text-slate-600'>
+              Publicité
+            </span>
 
-      <div className="mt-10 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
+          </Link>
+        </button>
+        
       </div>
+
+
     </footer>
   );
 };

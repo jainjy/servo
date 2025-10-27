@@ -384,7 +384,7 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
   );
 };
 
-const TravauxPreview = () => {
+const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
   const navigate = useNavigate();
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [photosModal, setPhotosModal] = useState({
@@ -441,8 +441,8 @@ const TravauxPreview = () => {
   };
 
   return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="bg-white/95 backdrop-blur-sm shadow-xl px-8 py-12 rounded-3xl">
+    <section className="container mx-auto -mt-6 px-4 py-8">
+      <div className="bg-white shadow-lg px-8 py-5 rounded-3xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Nos Travaux
@@ -459,7 +459,7 @@ const TravauxPreview = () => {
             
             // Trouver la catégorie et le type de la prestation
             const category = Object.entries(prestationsData).find(([_, prestations]) =>
-              prestations.includes(prestation)
+                    (prestations as any[]).some((p) => p.id === prestation.id)
             )?.[0];
             const prestationType = prestationTypesByCategory[category]?.find(
               (t) => t.value === prestation.type
@@ -468,21 +468,27 @@ const TravauxPreview = () => {
             return (
               <Card
                 key={prestation.id}
-                className="group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
+                className={
+                  homeCards
+                    ? "home-card group cursor-pointer h-full"
+                    : "group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
+                }
               >
-                <div className="relative">
-                  <div className="relative h-56 overflow-hidden rounded-t-3xl">
+                <div className="relative overflow-hidden">
+                  <div className={homeCards ?"h-72 rounded-lg overflow-hidden":"relative h-56 overflow-hidden rounded-t-3xl"}>
                     <img
                       src={prestation.images[currentImageIndex]}
                       alt={prestation.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className={homeCards ? "h-full w-full" : "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"}
                     />
 
                     {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div 
+                    className={homeCards ? "absolute inset-0 rounded-lg bg-gradient-to-t from-black to-transparent opacity-100" :"absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"} />
 
                     {/* Badge type */}
-                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg">
+                    <div 
+                    className={homeCards ? "absolute top-1/2 left-1/2 text-sm -translate-x-1/2 -translate-y-1/2 font-extralight font-mono text-white bg-black/50 px-4 py-2 rounded-full":"absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg"}>
                       {prestationType?.label}
                     </div>
 
@@ -511,7 +517,8 @@ const TravauxPreview = () => {
                         </Button>
 
                         {/* Indicateur d'images */}
-                        <div className="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                        <div 
+                        className={homeCards ? "hidden":"absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm"}>
                           {currentImageIndex + 1}/{totalImages}
                         </div>
                       </>
@@ -519,7 +526,7 @@ const TravauxPreview = () => {
                   </div>
 
                   {/* Contenu de la carte */}
-                  <div className="p-6">
+                  <div className={homeCards ?"hidden":"p-6"}>
                     {/* Boutons d'action */}
                     <div className="flex gap-2">
                       <Button
@@ -547,10 +554,10 @@ const TravauxPreview = () => {
         <div className="text-center">
           <Button
             variant="outline"
-            className="rounded-2xl border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-lg px-10 py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
+            className="rounded-2xl border-1 bg-slate-950 border-gray-300 hover:border-blue-500 hover:bg-black text-lg px-10 py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
             onClick={() => navigate("/travaux")}
           >
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-purple-700">
+            <span className="text-white font-mono">
               VOIR TOUS NOS TRAVAUX
             </span>
             <ArrowRight className="ml-3 h-5 w-5 text-blue-600 group-hover:text-purple-600 transition-transform group-hover:translate-x-1" />

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import MetierForm from '../../components/admin/MetierForm';
 import metierService from '../../services/metierService';
+
 const AdminMetiers = () => {
   const [metiers, setMetiers] = useState([]);
   const [filteredMetiers, setFilteredMetiers] = useState([]);
@@ -268,6 +269,103 @@ const AdminMetiers = () => {
     );
   };
 
+  // Composant Card pour l'affichage mobile
+  const MetierCard = ({ metier, isSelected, onToggleSelect, onEdit, onDelete }) => {
+    const canDelete = metier.services.length === 0 && metier.users.length === 0;
+
+    return (
+      <div className={`bg-white rounded-lg border border-gray-200 p-4 mb-3 transition-all duration-200 ${
+        isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'
+      }`}>
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelect(metier.id)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
+            />
+            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <span className="text-blue-600 font-semibold text-sm">#{metier.id}</span>
+            </div>
+          </div>
+          <div className="flex gap-1">
+            <button
+              onClick={() => onEdit(metier)}
+              className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-colors"
+              title="Modifier"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => onDelete(metier)}
+              className={`p-2 rounded-lg transition-colors ${
+                canDelete
+                  ? 'bg-red-100 hover:bg-red-200 text-red-700'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              title={
+                canDelete
+                  ? 'Supprimer'
+                  : 'Impossible de supprimer - des dépendances existent'
+              }
+              disabled={!canDelete}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <h3 className="font-semibold text-gray-900 text-base mb-1">{metier.libelle}</h3>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500">Services:</span>
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                metier.services.length > 0 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-gray-100 text-gray-800'
+              }`}>
+                {metier.services.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500">Utilisateurs:</span>
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                metier.users.length > 0 
+                  ? 'bg-purple-100 text-purple-800' 
+                  : 'bg-gray-100 text-gray-800'
+              }`}>
+                {metier.users.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Indicateur de dépendances */}
+          {(metier.services.length > 0 || metier.users.length > 0) && (
+            <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span>
+                {metier.services.length > 0 && `${metier.services.length} service(s)`}
+                {metier.services.length > 0 && metier.users.length > 0 && ' • '}
+                {metier.users.length > 0 && `${metier.users.length} utilisateur(s)`}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return <LoadingSpinner message="Chargement des métiers..." />;
   }
@@ -498,116 +596,133 @@ const AdminMetiers = () => {
               )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="w-12 px-6 py-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedMetiers.size === filteredMetiers.length && filteredMetiers.length > 0}
-                        onChange={toggleSelectAll}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Métier
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Services
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Utilisateurs
-                    </th>
-                    <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredMetiers.map((metier) => (
-                    <tr 
-                      key={metier.id} 
-                      className={`hover:bg-gray-50 transition-colors ${
-                        selectedMetiers.has(metier.id) ? 'bg-blue-50' : ''
-                      }`}
-                    >
-                      <td className="px-6 py-4">
+            <>
+              {/* Version Desktop - Tableau */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="w-12 px-6 py-4">
                         <input
                           type="checkbox"
-                          checked={selectedMetiers.has(metier.id)}
-                          onChange={() => toggleSelectMetier(metier.id)}
+                          checked={selectedMetiers.size === filteredMetiers.length && filteredMetiers.length > 0}
+                          onChange={toggleSelectAll}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <span className="text-blue-600 font-semibold text-sm">
-                              #{metier.id}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {metier.libelle}
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Métier
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Services
+                      </th>
+                      <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Utilisateurs
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredMetiers.map((metier) => (
+                      <tr 
+                        key={metier.id} 
+                        className={`hover:bg-gray-50 transition-colors ${
+                          selectedMetiers.has(metier.id) ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedMetiers.has(metier.id)}
+                            onChange={() => toggleSelectMetier(metier.id)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-sm">
+                                #{metier.id}
+                              </span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {metier.libelle}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          metier.services.length > 0 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {metier.services.length}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          metier.users.length > 0 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {metier.users.length}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end items-center gap-2">
-                          <button
-                            onClick={() => handleEditClick(metier)}
-                            className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-colors"
-                            title="Modifier"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => confirmDelete(metier)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              metier.services.length > 0 || metier.users.length > 0
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-red-100 hover:bg-red-200 text-red-700'
-                            }`}
-                            title={
-                              metier.services.length > 0 || metier.users.length > 0
-                                ? 'Impossible de supprimer - des dépendances existent'
-                                : 'Supprimer'
-                            }
-                            disabled={metier.services.length > 0 || metier.users.length > 0}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            metier.services.length > 0 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {metier.services.length}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            metier.users.length > 0 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {metier.users.length}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end items-center gap-2">
+                            <button
+                              onClick={() => handleEditClick(metier)}
+                              className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-colors"
+                              title="Modifier"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => confirmDelete(metier)}
+                              className={`p-2 rounded-lg transition-colors ${
+                                metier.services.length > 0 || metier.users.length > 0
+                                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                  : 'bg-red-100 hover:bg-red-200 text-red-700'
+                              }`}
+                              title={
+                                metier.services.length > 0 || metier.users.length > 0
+                                  ? 'Impossible de supprimer - des dépendances existent'
+                                  : 'Supprimer'
+                              }
+                              disabled={metier.services.length > 0 || metier.users.length > 0}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Version Mobile - Cartes */}
+              <div className="lg:hidden p-4 space-y-3">
+                {filteredMetiers.map((metier) => (
+                  <MetierCard
+                    key={metier.id}
+                    metier={metier}
+                    isSelected={selectedMetiers.has(metier.id)}
+                    onToggleSelect={toggleSelectMetier}
+                    onEdit={handleEditClick}
+                    onDelete={confirmDelete}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 

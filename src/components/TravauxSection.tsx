@@ -20,9 +20,13 @@ import {
   ArrowRight,
   Clock,
   Square,
+  HomeIcon,
+  TreePalm,
+  Building,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { prestationsData, prestationTypesByCategory } from "./travauxData";
+import { useLocation } from "react-router-dom";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -59,8 +63,7 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-4 border-b">
           <div>
             <h2 className="text-xl font-bold text-gray-900">
               {prestation.title}
@@ -77,8 +80,7 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
           </Button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        <div className="p-4">
           <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
             <img
               src={prestation.images[currentImageIndex]}
@@ -86,7 +88,6 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
               className="w-full h-96 object-cover"
             />
 
-            {/* Navigation */}
             {prestation.images.length > 1 && (
               <>
                 <Button
@@ -108,13 +109,11 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
               </>
             )}
 
-            {/* Indicateur */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
               {currentImageIndex + 1} / {prestation.images.length}
             </div>
           </div>
 
-          {/* Features */}
           <div className="grid grid-cols-2 gap-2 mb-4">
             {prestation.features.map((feature, index) => (
               <div
@@ -127,7 +126,6 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
             ))}
           </div>
 
-          {/* Info */}
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
@@ -144,8 +142,7 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t bg-gray-50">
+        <div className="p-4 border-t bg-gray-50">
           <div className="flex gap-3">
             <Button className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800">
               <Share2 className="h-4 w-4 mr-2" />
@@ -214,7 +211,6 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -237,7 +233,6 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
           </Button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -363,7 +358,6 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
             />
           </div>
 
-          {/* Prestation Info */}
           <div className="bg-blue-50 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">
               Prestation sélectionnée
@@ -372,7 +366,6 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
             <p className="text-blue-600 text-xs">{prestation.description}</p>
           </div>
 
-          {/* Footer */}
           <div className="flex gap-3 pt-4 border-t">
             <Button
               type="button"
@@ -396,15 +389,14 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
   );
 };
 
-const IntelligiblesSection = () => {
+// Composant pour une section individuelle
+const PrestationSection = ({ category, isActive }) => {
   const [selectedType, setSelectedType] = useState("TOUS");
   const [location, setLocation] = useState("");
   const [favorites, setFavorites] = useState({});
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [showAllPrestations, setShowAllPrestations] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("interieurs");
 
-  // États pour les modals
   const [photosModal, setPhotosModal] = useState({
     isOpen: false,
     prestation: null,
@@ -414,25 +406,29 @@ const IntelligiblesSection = () => {
     prestation: null,
   });
 
-  const categories = [
-    {
+  const categories = {
+    interieurs: {
       id: "interieurs",
       label: "PRESTATIONS INTÉRIEURES",
       description: "Transformez votre intérieur avec nos experts",
+      sectionId: "prestation-interieur",
     },
-    {
+    exterieurs: {
       id: "exterieurs",
       label: "PRESTATIONS EXTÉRIEURES",
       description: "Aménagez vos espaces extérieurs",
+      sectionId: "prestation-exterieur",
     },
-    {
+    constructions: {
       id: "constructions",
       label: "CONSTRUCTIONS",
       description: "Bâtissez votre projet de A à Z",
+      sectionId: "construction",
     },
-  ];
+  };
 
-  // Initialiser les index d'images
+  const currentCategory = categories[category];
+
   useEffect(() => {
     const indexes = {};
     Object.values(prestationsData)
@@ -467,7 +463,6 @@ const IntelligiblesSection = () => {
     }));
   };
 
-  // Ouvrir les modals
   const openPhotosModal = (prestation) => {
     setPhotosModal({ isOpen: true, prestation });
   };
@@ -476,7 +471,6 @@ const IntelligiblesSection = () => {
     setDevisModal({ isOpen: true, prestation });
   };
 
-  // Fermer les modals
   const closePhotosModal = () => {
     setPhotosModal({ isOpen: false, prestation: null });
   };
@@ -485,8 +479,7 @@ const IntelligiblesSection = () => {
     setDevisModal({ isOpen: false, prestation: null });
   };
 
-  // Filtrer les prestations selon la catégorie active et le type sélectionné
-  const currentPrestations = prestationsData[activeCategory] || [];
+  const currentPrestations = prestationsData[category] || [];
   const filteredPrestations =
     selectedType === "TOUS"
       ? currentPrestations
@@ -498,61 +491,36 @@ const IntelligiblesSection = () => {
     ? filteredPrestations
     : filteredPrestations.slice(0, 4);
 
-  // Réinitialiser le filtre de type quand on change de catégorie
-  const handleCategoryChange = (categoryId) => {
-    setActiveCategory(categoryId);
-    setSelectedType("TOUS");
-    setShowAllPrestations(false);
-  };
+  if (!isActive) return null;
 
   return (
     <>
       <section
-        id="intelligibles"
+        id={currentCategory.sectionId}
         className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-100"
       >
-        {/* Background Image avec overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.95)), url(${backgroundImages[activeCategory]})`,
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.95)), url(${backgroundImages[category]})`,
           }}
         />
 
         <div className="relative container mx-auto px-4 pt-20 pb-16">
-          {/* En-tête Hero */}
           <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-3xl font-bold text-gray-900 mb-6">
+              {currentCategory.label}
+            </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-              {categories.find((cat) => cat.id === activeCategory)?.description}
+              {currentCategory.description}
             </p>
-
-            {/* Catégories principales */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`relative group rounded-2xl px-6 py-4 font-semibold transition-all duration-500 ${
-                    activeCategory === category.id
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl shadow-blue-500/25 scale-105"
-                      : "bg-white/80 backdrop-blur-sm text-gray-700 border-2 border-gray-200/80 hover:border-blue-300 hover:shadow-lg"
-                  }`}
-                  onClick={() => handleCategoryChange(category.id)}
-                >
-                  <span className="relative z-10">{category.label}</span>
-                  {activeCategory === category.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl animate-pulse-slow" />
-                  )}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Filtres améliorés */}
           <div className="bg-white/90 backdrop-blur-md rounded-3xl p-8 mb-12 shadow-2xl border border-white/20">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
               <div className="lg:col-span-2">
                 <label className="flex text-sm font-semibold text-gray-800 mb-3 items-center gap-2">
-                  {Search && <Search className="h-4 w-4" />}
+                  <Search className="h-4 w-4" />
                   Recherche avancée
                 </label>
                 <div className="flex gap-3">
@@ -565,16 +533,14 @@ const IntelligiblesSection = () => {
                       <option value="TOUS">
                         Tous les types de prestations
                       </option>
-                      {prestationTypesByCategory[activeCategory]?.map(
-                        (type) => {
-                          const IconComponent = type.icon;
-                          return (
-                            <option key={type.value} value={type.value}>
-                              {type.label}
-                            </option>
-                          );
-                        }
-                      )}
+                      {prestationTypesByCategory[category]?.map((type) => {
+                        const IconComponent = type.icon;
+                        return (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div className="flex-1">
@@ -585,22 +551,19 @@ const IntelligiblesSection = () => {
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                       />
-                      {MapPin && (
-                        <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      )}
+                      <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Types de prestation rapides */}
             <div className="flex flex-wrap gap-3 items-center">
               <span className="text-sm font-semibold text-gray-700 mr-2 flex items-center gap-2">
-                {Square && <Square className="h-4 w-4" />}
+                <Square className="h-4 w-4" />
                 CATÉGORIES :
               </span>
-              {prestationTypesByCategory[activeCategory]?.map((type) => {
+              {prestationTypesByCategory[category]?.map((type) => {
                 const IconComponent = type.icon;
                 return (
                   <button
@@ -619,17 +582,15 @@ const IntelligiblesSection = () => {
               })}
             </div>
           </div>
-          {/* Grille de prestations améliorée */}
-          <div
-            className={`grid gap-8 mb-12 ${"grid-cols-1 md:grid-cols-2 lg:grid-cols-4"}`}
-          >
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {displayedPrestations.map((prestation) => {
               const currentImageIndex = currentImageIndexes[prestation.id] || 0;
               const totalImages = prestation.images.length;
               const isFavorite = favorites[prestation.id];
-              const prestationType = prestationTypesByCategory[
-                activeCategory
-              ]?.find((t) => t.value === prestation.type);
+              const prestationType = prestationTypesByCategory[category]?.find(
+                (t) => t.value === prestation.type
+              );
               const IconComponent = prestationType?.icon;
 
               return (
@@ -638,7 +599,6 @@ const IntelligiblesSection = () => {
                   className="group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
                 >
                   <div className="relative">
-                    {/* Image avec navigation */}
                     <div className="relative h-56 overflow-hidden rounded-t-3xl">
                       <img
                         src={prestation.images[currentImageIndex]}
@@ -646,16 +606,13 @@ const IntelligiblesSection = () => {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
 
-                      {/* Overlay gradient */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                      {/* Badge type */}
                       <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg flex items-center gap-2">
                         {IconComponent && <IconComponent className="h-3 w-3" />}
                         {prestationType?.label}
                       </div>
 
-                      {/* Navigation images */}
                       {totalImages > 1 && (
                         <>
                           <Button
@@ -679,7 +636,6 @@ const IntelligiblesSection = () => {
                             <ChevronRight className="h-4 w-4" />
                           </Button>
 
-                          {/* Indicateur d'images */}
                           <div className="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
                             {currentImageIndex + 1}/{totalImages}
                           </div>
@@ -687,28 +643,24 @@ const IntelligiblesSection = () => {
                       )}
                     </div>
 
-                    {/* Contenu de la carte */}
                     <div className="p-6">
-                      {/* Stats et boutons */}
                       <div className="flex items-center justify-between">
-                        <>
-                          <div className="flex gap-2">
-                            <Button
-                              className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
-                              onClick={() => openPhotosModal(prestation)}
-                            >
-                              <Camera className="h-3.5 w-3.5 mr-1.5" />
-                              Photos
-                            </Button>
-                            <Button
-                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg"
-                              onClick={() => openDevisModal(prestation)}
-                            >
-                              <FileText className="h-3.5 w-3.5 mr-1.5" />
-                              FAIRE UN DEVIS
-                            </Button>
-                          </div>
-                        </>
+                        <div className="flex gap-2">
+                          <Button
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
+                            onClick={() => openPhotosModal(prestation)}
+                          >
+                            <Camera className="h-3.5 w-3.5 mr-1.5" />
+                            Photos
+                          </Button>
+                          <Button
+                            className=" text-white font-semibold bg-slate-900  py-2.5 px-4 rounded-xl text-xs hover:bg-black transition-all duration-300 hover:shadow-lg"
+                            onClick={() => openDevisModal(prestation)}
+                          >
+                            <FileText className="h-3.5 w-3.5 mr-1.5" />
+                            FAIRE UN DEVIS
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -717,7 +669,6 @@ const IntelligiblesSection = () => {
             })}
           </div>
 
-          {/* Bouton VOIR PLUS amélioré */}
           {!showAllPrestations && filteredPrestations.length > 4 && (
             <div className="text-center mb-12">
               <Button
@@ -725,16 +676,16 @@ const IntelligiblesSection = () => {
                 className="rounded-2xl border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-lg px-10 py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
                 onClick={() => setShowAllPrestations(true)}
               >
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-purple-700">
+                <span className="bg-blue-600  bg-clip-text text-transparent font-bold">
                   VOIR PLUS DE PRESTATIONS
                 </span>
                 <ArrowRight className="ml-3 h-5 w-5 text-blue-600 group-hover:text-purple-600 transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
           )}
-          {/* Footer Message amélioré */}
+
           <div className="text-center">
-            <div className="inline-flex items-center gap-4 bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 rounded-2xl shadow-2xl">
+            <div className="inline-flex items-center gap-4 bg-slate-950 px-8 py-4 rounded-2xl shadow-2xl">
               <div className="bg-white/20 p-2 rounded-lg">
                 <Clock className="h-6 w-6 text-white" />
               </div>
@@ -751,29 +702,57 @@ const IntelligiblesSection = () => {
         </div>
       </section>
 
-      {/* Modals */}
       <PhotosModal
         isOpen={photosModal.isOpen}
         onClose={closePhotosModal}
         prestation={photosModal.prestation}
       />
-
       <DevisModal
         isOpen={devisModal.isOpen}
         onClose={closeDevisModal}
         prestation={devisModal.prestation}
       />
-
-      <style>{`
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.8; }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 3s ease-in-out infinite;
-        }
-      `}</style>
     </>
+  );
+};
+
+// Composant principal avec navigation sans scroll
+const IntelligiblesSection = () => {
+  const [activeSection, setActiveSection] = useState("interieurs");
+  const location = useLocation();
+  const [categorie, setCategorie] = useState("");
+
+  const sections = [
+    { id: "interieurs", label: "Intérieur", icon: HomeIcon },
+    { id: "exterieurs", label: "Extérieur", icon: TreePalm },
+    { id: "constructions", label: "Construction", icon: Building },
+  ];
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get("categorie");
+
+    // Vérifie si la catégorie extraite correspond à une section valide
+    const validIds = sections.map((s) => s.id);
+    const validCategorie = validIds.includes(cat) ? cat : "interieurs"; // 👈 défaut ici
+
+    setCategorie(validCategorie);
+    setActiveSection(validCategorie);
+  }, [location.search]);
+
+  return (
+    <div id="intelligibles" className="relative">
+      {/* Sections de contenu */}
+      <div className="relative">
+        {sections.map((section) => (
+          <PrestationSection
+            key={section.id}
+            category={section.id}
+            isActive={activeSection === section.id}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 

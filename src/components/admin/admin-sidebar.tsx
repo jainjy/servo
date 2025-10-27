@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 // Remplacement du Link et du usePathname de Next.js
-import { Link, useLocation } from "react-router-dom"; 
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils"; // Utilitaire cn (à s'assurer qu'il est disponible)
 import {
   LayoutDashboard, Users, Building2, Wrench, Calendar,
@@ -8,31 +8,32 @@ import {
   ChevronUp, ChevronDown,
   MessageCircle,
   FileCheck,
+  Ruler,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
-import logo from '../../assets/logo.png'; 
+import logo from '../../assets/logo.png';
 
 const navigation = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Utilisateurs", href: "/admin/users", icon: Users },
-    // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
-    { name: "Annonces", href: "/admin/listings", icon: Building2 },
-    { name: "Services", href: "/admin/services", icon: Wrench },
-    { name: "blog", href: "/admin/blog", icon: Newspaper },
-    { name: "Réservations", href: "/admin/bookings", icon: Calendar },
-    { name: "Produits", href: "/admin/products", icon: ShoppingBag },
-    // { name: "Tourisme", href: "/admin/tourism", icon: Plane },
-    { name: "Paiements", href: "/admin/payments", icon: CreditCard },
-    { name: "Demandes", href: "/admin/demandes", icon:  FileCheck, },
-    { name: "Métiers", href: "/admin/metiers", icon:  FileCheck, },
-    { name: "Paramètres", href: "/admin/settings", icon: Settings },
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Utilisateurs", href: "/admin/users", icon: Users },
+  // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
+  { name: "Annonces", href: "/admin/listings", icon: Building2 },
+  { name: "Services", href: "/admin/services", icon: Wrench },
+  { name: "blog", href: "/admin/blog", icon: Newspaper },
+  { name: "Réservations", href: "/admin/bookings", icon: Calendar },
+  { name: "Produits", href: "/admin/products", icon: ShoppingBag },
+  // { name: "Tourisme", href: "/admin/tourism", icon: Plane },
+  { name: "Paiements", href: "/admin/payments", icon: CreditCard },
+  { name: "Demandes", href: "/admin/demandes", icon: FileCheck, },
+  { name: "Métiers", href: "/admin/metiers", icon: Ruler, },
+  { name: "Paramètres", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
   // Remplacement de usePathname (Next.js) par useLocation (React Router DOM)
   const location = useLocation();
   const pathname = location.pathname;
-  
+
   const [showAll, setShowAll] = useState(false);
 
   // Séparation pour la barre mobile
@@ -77,17 +78,14 @@ export function AdminSidebar() {
       </aside>
 
       {/* Sidebar mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-sidebar border-t border-sidebar-border py-1 shadow-lg md:hidden">
+      <nav className="fixed bg-white bottom-0 left-0 right-0 z-40 bg-sidebar border-t border-sidebar-border py-1 shadow-lg md:hidden">
         <div className={cn(
           "grid gap-1 px-2 place-items-center",
           showAll ? "grid-cols-4 sm:grid-cols-4" : "grid-cols-4"
         )}>
-           {/* Logo mobile (occupant la première colonne) */}
-           <div className="p-1 w-14 h-14 grid place-items-center rounded-full bg-white border-black border-2">
-            {/* Remplacement de <Image> par <img> */}
-            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
-          </div>
-          
+
+
+
           {/* Les 3 premières icônes principales */}
           {mainIcons.map((item, i) => {
             const isActive = pathname === item.href
@@ -109,23 +107,22 @@ export function AdminSidebar() {
               </Link>
             )
           })}
-          
-          {/* Bouton Plus/Moins : Attention au positionnement absolu dans la grid */}
-          {/* NOTE: Le positionnement absolu dans une grille pour ce bouton "Plus" peut nécessiter un ajustement du conteneur parent ou une refonte pour le rendre réactif et stable. */}
+
+
           <button
             aria-label={showAll ? "Réduire" : "Voir plus"}
             onClick={() => setShowAll(v => !v)}
             // Le style a été ajusté pour rester dans le flux de la grille pour la colonne 4
             className={cn(
-                "flex flex-col items-center justify-center py-2 px-1 rounded transition-colors w-full h-full",
-                "border-t shadow-lg border-sidebar-border font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90"
+              " flex flex-col items-center justify-center py-1 rounded transition-colors w-full h-full",
+              "border-t shadow-lg border-sidebar-border font-bold text-white bg-slate-800"
             )}
           >
             {showAll ? <ChevronUp className="h-6 w-6" />
-               : <ChevronDown className="h-6 w-6" />}
+              : <ChevronDown className="h-6 w-6" />}
             <span className="mt-1 text-xs"> {showAll ? "Moins" : "Plus"} </span>
           </button>
-          
+
           {/* Icônes additionnelles si ouvert. Ces icônes occuperont les lignes suivantes dans la grille. */}
           {showAll && otherIcons.map((item) => {
             const isActive = pathname === item.href

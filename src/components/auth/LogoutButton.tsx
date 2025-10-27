@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
-import { AuthService } from "@/lib/auth"
+import  AuthService  from "@/services/authService"
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"

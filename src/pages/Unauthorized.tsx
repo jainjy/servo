@@ -1,14 +1,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, Home, ArrowLeft } from "lucide-react";
-import { AuthService } from "@/lib/auth";
+import AuthService  from '@/services/authService';
 
 export default function UnauthorizedPage() {
   const user = AuthService.getCurrentUser();
 
   const getRedirectPath = () => {
     if (!user) return '/login';
-    return AuthService.redirectBasedOnRole();
+    return AuthService.getRoleBasedRedirect();
   };
 
   return (

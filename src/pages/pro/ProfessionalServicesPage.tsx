@@ -20,7 +20,7 @@ export default function ProfessionalServicesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center flex-col md:flex-row justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Mes Services</h1>
           <p className="text-muted-foreground">Gérez les services que vous proposez</p>

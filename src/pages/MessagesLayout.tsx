@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { AuthService } from "@/lib/auth";
+import  AuthService  from "@/services/authService";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { ProSidebar } from "@/components/pro/pro-sidebar";
 import { AuthHeader } from "@/components/layout/AuthHeader";
 import Header from "@/components/layout/Header";
 import { UserRoute } from "@/components/protected-route";
-import { Outlet } from "react-router-dom";
 import MessagesPage from "./Messages";
 
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 // Remplacement du Link de Next.js par le Link de React Router DOM
-import { Link, useLocation } from "react-router-dom"; 
+import { Link, useLocation } from "react-router-dom";
 // Remplacement de Image de Next.js par la balise <img>
 import logo from "../../assets/logo.png";
 // Les imports d'icônes Lucide et d'utilitaires restent les mêmes (assurez-vous d'avoir les dépendances)
@@ -22,42 +22,40 @@ import {
   Menu,
   X,
   ShoppingBag,
+  Leaf,
 } from "lucide-react";
 
 
 // Données de navigation (Inchangées)
 const navigation = [
-    { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
-    { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
-    { name: "Mes Services", href: "/pro/services", icon: Wrench },
-    { name: "Planning", href: "/pro/calendar", icon: Calendar },
-    { name: "Réservations", href: "/pro/bookings", icon: Calendar },
-    { name: "Clients", href: "/pro/clients", icon: Users },
-    { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-    // { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
-    { name: "Produits", href: "/pro/products", icon: ShoppingBag },
-    { name: "Demandes", href: "/pro/demandes", icon: FileText },
-    { name: "Avis", href: "/pro/reviews", icon: Star },
-    { name: "Mon Équipe", href: "/pro/team", icon: Users },
-    { name: "Paramètres", href: "/pro/settings", icon: Settings },
+  { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
+  { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
+  { name: "Mes Services", href: "/pro/services", icon: Wrench },
+  { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
+  { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
+  { name: "Mes Documents", href: "/pro/documents", icon: FileText },
+  { name: "Mes Clients", href: "/pro/clients", icon: Users },
+  { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
+  // { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
+  { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
+  { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
+  { name: "Avis", href: "/pro/reviews", icon: Star },
+  { name: "Paramètres", href: "/pro/settings", icon: Settings },
+
 ];
 
 export function ProSidebar() {
-  // Remplacement de usePathname (Next.js) par useLocation (React Router DOM)
   const location = useLocation();
   const pathname = location.pathname;
-  
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Définir la logique d'activité du lien
   const getIsActive = (href: string) => {
-      // Pour les chemins exacts
-      if (pathname === href) return true;
-
-      // Pour les chemins parents (ex: /pro/listings match /pro/listings/123)
-      if (href !== "/pro" && pathname.startsWith(href + "/")) return true;
-      
-      return false;
+    // Pour les chemins exacts
+    if (pathname === href) return true;
+    if (href !== "/pro" && pathname.startsWith(href + "/")) return true;
+    return false;
   };
 
   // Le contenu de la barre latérale pour le bureau et le mobile
@@ -86,7 +84,7 @@ export function ProSidebar() {
         {navigation.map((item) => {
           // Utilisation de la nouvelle fonction pour l'état actif
           const isActive = getIsActive(item.href);
-          
+
           return (
             <Link
               key={item.name}
@@ -119,6 +117,7 @@ export function ProSidebar() {
                   5
                 </span>
               )}
+
             </Link>
           );
         })}
@@ -134,8 +133,8 @@ export function ProSidebar() {
       </aside>
 
       {/* Mobile: header (Note: l'élément parent doit positionner correctement cette div) */}
-      <div className="flex md:hidden items-center h-16 border-b border-sidebar-border px-4 bg-sidebar w-screen fixed top-0 left-0 z-40">
-        <div className="p-1 rounded-full bg-white border-black border-2">
+      <div className="-z-0 flex md:hidden items-center h-16 border-b border-sidebar-border px-4 bg-sidebar w-screen fixed top-0 left-0">
+        <div className="p-1 rounded-full  bg-white border-black border-2">
           {/* Remplacement de <Image> par <img> */}
           <img
             src={logo}
@@ -143,19 +142,19 @@ export function ProSidebar() {
             className="w-10 h-10 rounded-full"
           />
         </div>
-        <button
+
+      </div>
+       <button
           aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           onClick={() => setMenuOpen((v) => !v)}
-          className="ml-auto p-2 rounded-full text-sidebar-foreground hover:bg-sidebar-accent"
+          className="absolute top-2 z-50 lg:hidden md:hidden right-28 ml-52 p-2 rounded-full text-sidebar-foreground hover:bg-sidebar-accent"
         >
           {menuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
         </button>
-      </div>
-
       {/* Mobile: Drawer sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 top-16 w-64 flex-col border-r border-sidebar-border bg-sidebar z-50 transition-transform duration-300 ease-in-out md:hidden",
+          "fixed bg-white inset-y-0 left-0 top-0 w-64 flex-col border-r border-sidebar-border z-50 transition-transform duration-300 ease-in-out md:hidden",
           menuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

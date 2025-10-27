@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { LogoutButton } from "@/components/auth/LogoutButton"
-import { AuthService } from "@/lib/auth"
+import  AuthService  from "@/services/authService"
 
 export function ProHeader() {
   const user = AuthService.getCurrentUser()

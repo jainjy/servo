@@ -5,13 +5,52 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AuthService, User as UserType } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import UserService from "@/services/userService";
+import { toast } from "sonner";
+
+interface UserProfile {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  phone: string | null;
+  role: string;
+  avatar: string | null;
+  status: string;
+  companyName: string | null;
+  demandType: string | null;
+  address: string | null;
+  zipCode: string | null;
+  city: string | null;
+  addressComplement: string | null;
+  commercialName: string | null;
+  siret: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  createdAt: string;
+  updatedAt: string;
+  metiers: Array<{
+    metier: {
+      id: number;
+      libelle: string;
+    };
+  }>;
+  services: Array<{
+    service: {
+      id: number;
+      libelle: string;
+    };
+  }>;
+}
 
 const ProfilePage = () => {
-  const [user, setUser] = useState<UserType | null>(null);
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,63 +58,127 @@ const ProfilePage = () => {
     phone: "",
     companyName: "",
     address: "",
-    bio: ""
+    zipCode: "",
+    city: "",
+    addressComplement: "",
+    commercialName: "",
+    siret: "",
   });
 
   useEffect(() => {
-    const currentUser = AuthService.getCurrentUser();
-    setUser(currentUser);
-    if (currentUser) {
-      setFormData({
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
-        email: currentUser.email || "",
-        phone: currentUser.phone || "",
-        companyName: currentUser.companyName || "",
-        address: "",
-        bio: "Spécialiste en gestion immobilière et services."
-      });
-    }
+    fetchUserProfile();
   }, []);
 
+  const fetchUserProfile = async () => {
+    try {
+      const userData = await UserService.getProfile();
+      setUser(userData);
+      setFormData({
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+        companyName: userData.companyName || "",
+        address: userData.address || "",
+        zipCode: userData.zipCode || "",
+        city: userData.city || "",
+        addressComplement: userData.addressComplement || "",
+        commercialName: userData.commercialName || "",
+        siret: userData.siret || "",
+      });
+    } catch (error) {
+      console.error('Erreur lors du chargement du profil:', error);
+      toast.error('Erreur lors du chargement du profil');
+    }
+  };
+
   const handleSave = async () => {
+    if (!user) return;
+    
     setIsLoading(true);
-    // Simuler une sauvegarde asynchrone, remplacer par appel API réel
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsEditing(false);
-    setIsLoading(false);
+    try {
+      // Filtrer seulement les champs qui peuvent être modifiés
+      const updateData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        companyName: formData.companyName,
+        address: formData.address,
+        zipCode: formData.zipCode,
+        city: formData.city,
+        addressComplement: formData.addressComplement,
+        commercialName: formData.commercialName,
+        siret: formData.siret,
+      };
+
+      await UserService.updateProfile(updateData);
+      await fetchUserProfile(); // Recharger les données
+      setIsEditing(false);
+      toast.success('Profil mis à jour avec succès');
+    } catch (error: any) {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast.error(error.message || 'Erreur lors de la mise à jour du profil');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    const currentUser = AuthService.getCurrentUser();
-    if (currentUser) {
+    if (user) {
       setFormData({
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
-        email: currentUser.email || "",
-        phone: currentUser.phone || "",
-        companyName: currentUser.companyName || "",
-        address: "",
-        bio: "Spécialiste en gestion immobilière et services."
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        companyName: user.companyName || "",
+        address: user.address || "",
+        zipCode: user.zipCode || "",
+        city: user.city || "",
+        addressComplement: user.addressComplement || "",
+        commercialName: user.commercialName || "",
+        siret: user.siret || "",
       });
     }
     setIsEditing(false);
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Veuillez sélectionner une image valide');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('L\'image ne doit pas dépasser 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await UserService.uploadAvatar(file);
+      await UserService.updateProfile({ avatar: response.url });
+      await fetchUserProfile(); // Recharger les données
+      toast.success('Avatar mis à jour avec succès');
+    } catch (error: any) {
+      console.error('Erreur lors de l\'upload:', error);
+      toast.error(error.message || 'Erreur lors de l\'upload de l\'avatar');
+    } finally {
+      setIsUploading(false);
+      event.target.value = '';
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement du profil...</p>
-        </div>
-      </div>
-    );
-  }
+  const handlePasswordChange = async () => {
+    // Implémentation basique - à compléter avec un formulaire de changement de mot de passe
+    toast.info('Fonctionnalité de changement de mot de passe à implémenter');
+  };
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -95,9 +198,20 @@ const ProfilePage = () => {
     }
   };
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement du profil...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between flex-col md:flex-row items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Profil Utilisateur</h1>
           <p className="text-muted-foreground">
@@ -124,11 +238,10 @@ const ProfilePage = () => {
       </div>
 
       <Tabs defaultValue="personal" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 h-auto lg:grid-cols-3">
           <TabsTrigger value="personal">Informations personnelles</TabsTrigger>
           <TabsTrigger value="professional">Informations professionnelles</TabsTrigger>
           <TabsTrigger value="security">Sécurité</TabsTrigger>
-          <TabsTrigger value="activity">Activité</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal" className="space-y-6">
@@ -144,15 +257,28 @@ const ProfilePage = () => {
               <CardContent className="space-y-4">
                 <div className="flex flex-col items-center space-y-4">
                   <Avatar className="h-32 w-32">
-                    <AvatarImage src="" />
+                    <AvatarImage src={user.avatar || ""} />
                     <AvatarFallback className="text-2xl bg-gradient-to-r from-blue-500 to-purple-600">
                       {user.firstName?.[0]}{user.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Camera className="h-4 w-4 mr-2" />
-                    Changer la photo
-                  </Button>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                  <label
+                    htmlFor="avatar-upload"
+                    className={`cursor-pointer w-full ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <Button variant="outline" size="sm" className="w-full" disabled={isUploading}>
+                      <Camera className="h-4 w-4 mr-2" />
+                      {isUploading ? "Upload..." : "Changer la photo"}
+                    </Button>
+                  </label>
                 </div>
               </CardContent>
             </Card>
@@ -199,8 +325,9 @@ const ProfilePage = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    disabled={!isEditing}
+                    disabled={true} // Email non modifiable
                     placeholder="votre@email.com"
+                    className="bg-muted"
                   />
                 </div>
 
@@ -217,6 +344,27 @@ const ProfilePage = () => {
                   />
                 </div>
 
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Code postal</label>
+                    <Input
+                      value={formData.zipCode}
+                      onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Code postal"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Ville</label>
+                    <Input
+                      value={formData.city}
+                      onChange={(e) => handleInputChange('city', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Ville"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
@@ -231,13 +379,12 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Bio</label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
+                  <label className="text-sm font-medium">Complément d'adresse</label>
+                  <Input
+                    value={formData.addressComplement}
+                    onChange={(e) => handleInputChange('addressComplement', e.target.value)}
                     disabled={!isEditing}
-                    placeholder="Décrivez-vous en quelques mots..."
-                    className="w-full min-h-[100px] p-3 border rounded-md resize-none disabled:bg-muted"
+                    placeholder="Appartement, étage, etc."
                   />
                 </div>
               </CardContent>
@@ -277,10 +424,12 @@ const ProfilePage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">SIRET / Numéro d'entreprise</label>
+                    <label className="text-sm font-medium">Nom commercial</label>
                     <Input
+                      value={formData.commercialName}
+                      onChange={(e) => handleInputChange('commercialName', e.target.value)}
                       disabled={!isEditing}
-                      placeholder="Numéro d'immatriculation"
+                      placeholder="Nom commercial"
                     />
                   </div>
                 </div>
@@ -291,7 +440,7 @@ const ProfilePage = () => {
                     <div>
                       <p className="font-medium">Membre depuis</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date().toLocaleDateString('fr-FR', {
+                        {new Date(user.createdAt).toLocaleDateString('fr-FR', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -301,31 +450,72 @@ const ProfilePage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Site web</label>
+                    <label className="text-sm font-medium">SIRET</label>
                     <Input
+                      value={formData.siret}
+                      onChange={(e) => handleInputChange('siret', e.target.value)}
                       disabled={!isEditing}
-                      placeholder="https://votre-site.com"
+                      placeholder="Numéro SIRET"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Spécialités</label>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">Immobilier</Badge>
-                      <Badge variant="outline">Services</Badge>
-                      <Badge variant="outline">Consultation</Badge>
+                  {user.demandType && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Type de demande</label>
+                      <div className="p-2 border rounded-md bg-muted">
+                        <Badge variant="outline" className="capitalize">
+                          {user.demandType}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
+              {/* Métiers et services pour les professionnels */}
               {user.role === 'professional' && (
-                <div className="p-4 border rounded-lg bg-blue-50">
-                  <h4 className="font-medium text-blue-900 mb-2">Statut professionnel</h4>
-                  <p className="text-sm text-blue-700">
-                    Votre profil professionnel est en attente de vérification. 
-                    Une fois approuvé, vous pourrez publier des annonces et offrir vos services.
-                  </p>
+                <div className="space-y-4">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div>
+                      <h4 className="font-medium mb-2">Métiers</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {user.metiers.length > 0 ? (
+                          user.metiers.map(({ metier }) => (
+                            <Badge key={metier.id} variant="secondary">
+                              {metier.libelle}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Aucun métier associé</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2">Services</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {user.services.length > 0 ? (
+                          user.services.map(({ service }) => (
+                            <Badge key={service.id} variant="outline">
+                              {service.libelle}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Aucun service associé</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {user.status === 'inactive' && (
+                    <div className="p-4 border rounded-lg bg-blue-50">
+                      <h4 className="font-medium text-blue-900 mb-2">Statut professionnel</h4>
+                      <p className="text-sm text-blue-700">
+                        Votre profil professionnel est en attente de vérification. 
+                        Une fois approuvé, vous pourrez publier des annonces et offrir vos services.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -345,11 +535,15 @@ const ProfilePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full" variant="outline">
+                <Button 
+                  className="w-full" 
+                  variant="outline"
+                  onClick={handlePasswordChange}
+                >
                   Changer le mot de passe
                 </Button>
                 <div className="text-sm text-muted-foreground">
-                  <p>• Dernière modification : Il y a 30 jours</p>
+                  <p>• Dernière modification : À déterminer</p>
                   <p>• Force : <span className="text-green-600">Fort</span></p>
                 </div>
               </CardContent>
@@ -368,7 +562,11 @@ const ProfilePage = () => {
                     <p className="font-medium">Authentification à deux facteurs</p>
                     <p className="text-sm text-muted-foreground">Ajoutez une couche de sécurité supplémentaire</p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => toast.info('Fonctionnalité à venir')}
+                  >
                     Activer
                   </Button>
                 </div>
@@ -378,43 +576,17 @@ const ProfilePage = () => {
                     <p className="font-medium">Sessions actives</p>
                     <p className="text-sm text-muted-foreground">Gérez vos connexions</p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => toast.info('Fonctionnalité à venir')}
+                  >
                     Voir
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="activity" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Activité récente</CardTitle>
-              <CardDescription>
-                Historique de vos actions sur la plateforme
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { action: "Connexion", date: "Il y a 2 minutes", icon: "🔐" },
-                  { action: "Modification du profil", date: "Il y a 1 heure", icon: "✏️" },
-                  { action: "Consultation des statistiques", date: "Il y a 3 heures", icon: "📊" },
-                  { action: "Validation d'annonce", date: "Il y a 5 heures", icon: "✅" },
-                  { action: "Réponse à un message", date: "Il y a 1 jour", icon: "💬" },
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="text-2xl">{activity.icon}</div>
-                    <div className="flex-1">
-                      <p className="font-medium">{activity.action}</p>
-                      <p className="text-sm text-muted-foreground">{activity.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>

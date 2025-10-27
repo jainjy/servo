@@ -1,4 +1,4 @@
-import { api } from './authService';
+import  api  from '@/lib/api';
 
 class UserService {
   // Récupérer le profil utilisateur
@@ -18,6 +18,23 @@ class UserService {
       return response.data;
     } catch (error) {
       throw this.handleError(error, 'Erreur lors de la mise à jour du profil');
+    }
+  }
+
+  // Upload d'avatar
+  static async uploadAvatar(file) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/upload/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error, 'Erreur lors de l\'upload de l\'avatar');
     }
   }
 
