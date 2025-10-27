@@ -28,7 +28,7 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
     try {
       // 1️⃣ Créer le PaymentIntent côté serveur
       const response = await api.post("/payments/create", {
-        userId: formData.id,
+        user:formData,
         amount: parseInt(subscriptionData.price),
         currency: "eur",
         description: `Abonnement: ${subscriptionData.planTitle}`,

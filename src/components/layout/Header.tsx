@@ -70,17 +70,41 @@ const Header = () => {
     {
       title: "IMMOBILIER",
       items: [
-        { title: "Vente et location", description: "Vendre ou louer vos biens", href: "/immobilier" },
-        { title: "Droit de la famille", description: "Divorce, succession, donation, . . .", href: "/droitFamille" },
-        { title: "Gestion immobilière", description: "Gestion locative et syndic", href: "/gestion-immobilier" },
+        {
+          title: "Vente et location",
+          description: "Vendre ou louer vos biens",
+          href: "/immobilier",
+        },
+        {
+          title: "Droit de la famille",
+          description: "Divorce, succession, donation, . . .",
+          href: "/droitFamille",
+        },
+        {
+          title: "Gestion immobilière",
+          description: "Gestion locative et syndic",
+          href: "/gestion-immobilier",
+        },
       ],
     },
     {
       title: "TRAVAUX & CONSTRUCTION",
       items: [
-        { title: "Prestation Intérieur", description: "Services pour l'intérieur", href: "/travaux?categorie=interieurs" },
-        { title: "Prestation Extérieur", description: "Services pour l'extérieur", href: "/travaux?categorie=exterieurs" },
-        { title: "Construction", description: "Travaux de construction", href: "/travaux?categorie=constructions" },
+        {
+          title: "Prestation Intérieur",
+          description: "Services pour l'intérieur",
+          href: "/travaux?categorie=interieurs",
+        },
+        {
+          title: "Prestation Extérieur",
+          description: "Services pour l'extérieur",
+          href: "/travaux?categorie=exterieurs",
+        },
+        {
+          title: "Construction",
+          description: "Travaux de construction",
+          href: "/travaux?categorie=constructions",
+        },
       ],
     },
     {
@@ -106,15 +130,31 @@ const Header = () => {
     {
       title: "ENTREPRISE",
       items: [
-        { title: "Solutions professionnelles", description: "Services sur mesure pour les entreprises", href: "/entreprise#services" },
-        { title: "Devenir partenaire", description: "Rejoignez notre réseau d'experts", href: "/entreprise#partenaire" },
+        {
+          title: "Solutions professionnelles",
+          description: "Services sur mesure pour les entreprises",
+          href: "/entreprise#services",
+        },
+        {
+          title: "Devenir partenaire",
+          description: "Rejoignez notre réseau d'experts",
+          href: "/entreprise#partenaire",
+        },
       ],
     },
     {
       title: "FINANCEMENT",
       items: [
-        { title: "Financement immobilier", description: "Solutions de crédit adaptées à votre projet", href: "/financement#partenaires" },
-        { title: "Assurance habitation", description: "Protection complète pour votre logement", href: "/financement#assurances" },
+        {
+          title: "Financement immobilier",
+          description: "Solutions de crédit adaptées à votre projet",
+          href: "/financement#partenaires",
+        },
+        {
+          title: "Assurance habitation",
+          description: "Protection complète pour votre logement",
+          href: "/financement#assurances",
+        },
       ],
     },
     {
@@ -126,9 +166,8 @@ const Header = () => {
       href: "/investissement",
     },
     {
-            title: "ACTUALITÉS",
+      title: "ACTUALITÉS",
       href: "/actualites",
-
     },
     {
       title: "CONSULTATIONS/AIDES",
@@ -137,6 +176,10 @@ const Header = () => {
     {
       title: "ART & COMMERCES",
       href: "/art-commerce",
+    },
+    {
+        title: "TOURISME",
+        href: "/tourisme",
     },
   ];
 
