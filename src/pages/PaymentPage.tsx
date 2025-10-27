@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, CreditCard } from "lucide-react";
 import api from "@/lib/api";
-
+import { useAuth } from "@/hooks/useAuth";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const CheckoutForm = ({ formData, subscriptionData }) => {
@@ -19,6 +19,7 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState("");
+  const { signupPro, confirmPayment } = useAuth();
 
   const handlePayment = async () => {
     if (!stripe || !elements) return;
@@ -26,17 +27,9 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
     setMessage("");
 
     try {
-      // 1️⃣ Créer le PaymentIntent côté serveur
-      const response = await api.post("/payments/create", {
-        user:formData,
-        amount: parseInt(subscriptionData.price),
-        currency: "eur",
-        description: `Abonnement: ${subscriptionData.planTitle}`,
-        referenceType: "subscription",
-        referenceId: subscriptionData.id,
-      });
-
-      const { clientSecret } = response.data;
+      // 1️⃣ Créer le PaymentIntent avec signupPro
+      const response = await signupPro(formData, parseInt(subscriptionData.price));
+      const { clientSecret, paymentIntentId } = response;
 
       if (!clientSecret) {
         throw new Error("Client secret manquant");
@@ -52,22 +45,27 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
       if (result.error) {
         setMessage(result.error.message || "Erreur lors du paiement");
       } else if (result.paymentIntent.status === "succeeded") {
-        setMessage("✅ Paiement réussi !");
+        // 3️⃣ Confirmer le paiement avec confirmPayment
+        const confirmResponse = await confirmPayment(paymentIntentId);
 
-        // Redirection vers succès
-        navigate("/register/success", {
-          state: {
-            user: formData,
-            plan: subscriptionData,
-            paymentStatus: "completed",
-          },
-        });
+        if (confirmResponse.success) {
+          setMessage("✅ Paiement réussi !");
+          
+          navigate("/register/success", {
+            state: {
+              user: confirmResponse.user,
+              plan: subscriptionData,
+              paymentStatus: "completed",
+            },
+          });
+        } else {
+          setMessage("Erreur lors de la confirmation du paiement");
+        }
       }
     } catch (err) {
       console.error("Erreur paiement:", err);
       setMessage(
-        err.response?.data?.error ||
-          "Erreur lors du paiement. Veuillez réessayer."
+        err.message || "Erreur lors du paiement. Veuillez réessayer."
       );
     } finally {
       setIsProcessing(false);
@@ -171,9 +169,9 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
 export default function PaymentPage() {
   const location = useLocation();
   const { formData, subscriptionData } = location.state || {};
-  useEffect(()=>{
-    console.log(subscriptionData)
-  },[])
+  useEffect(() => {
+    console.log(subscriptionData);
+  }, []);
 
   // Validation des données
   if (!formData || !subscriptionData) {
@@ -210,3 +208,4 @@ export default function PaymentPage() {
     </Elements>
   );
 }
+

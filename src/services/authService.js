@@ -55,41 +55,72 @@ class AuthService {
     }
   }
 
-// register
-static async register(userData) {
-  try {
-    const registerData = {
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      phone: userData.phone,
-      password: userData.password,
-      userType: userData.userType,
-      demandType: userData.demandType,
-      role: userData.role,
-      companyName: userData.companyName,
-      commercialName: userData.commercialName,
-      siret: userData.siret,
-      address: userData.address,
-      addressComplement: userData.addressComplement,
-      zipCode: userData.zipCode,
-      city: userData.city,
-      latitude: userData.latitude,
-      longitude: userData.longitude,
-      metiers: userData.metiers,
-    };
+  // register
+  static async register(userData) {
+    try {
+      const registerData = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+        password: userData.password,
+        userType: userData.userType,
+        demandType: userData.demandType,
+        role: userData.role,
+        companyName: userData.companyName,
+        commercialName: userData.commercialName,
+        siret: userData.siret,
+        address: userData.address,
+        addressComplement: userData.addressComplement,
+        zipCode: userData.zipCode,
+        city: userData.city,
+        latitude: userData.latitude,
+        longitude: userData.longitude,
+        metiers: userData.metiers,
+      };
 
-    const response = await api.post("/auth/signup", registerData);
-    const { user, token } = response.data;
+      const response = await api.post("/auth/signup", registerData);
+      const { user, token } = response.data;
 
-    this.setAuthData(user, token);
-    this.startTokenRefresh();
+      this.setAuthData(user, token);
+      this.startTokenRefresh();
 
-    return { user, token };
-  } catch (error) {
-    throw this.handleError(error, "Erreur lors de l'inscription");
+      return { user, token };
+    } catch (error) {
+      throw this.handleError(error, "Erreur lors de l'inscription");
+    }
   }
-}
+
+  // Inscription Pro avec paiement
+  static async signupPro(userData, amount) {
+    try {
+      const response = await api.post("/auth/signup-pro", {
+        utilisateur: userData,
+        amount,
+      });
+      
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error, "Erreur lors de l'inscription professionnelle");
+    }
+  }
+
+  // Confirmation du paiement
+  static async confirmPayment(paymentIntentId) {
+    try {
+      const response = await api.post("/auth/confirm-payment", { paymentIntentId });
+      const { user, token } = response.data;
+
+      if (user && token) {
+        this.setAuthData(user, token);
+        this.startTokenRefresh();
+      }
+
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error, "Erreur lors de la confirmation du paiement");
+    }
+  }
 
   // Stockage des données d'authentification
   static setAuthData(user, token) {

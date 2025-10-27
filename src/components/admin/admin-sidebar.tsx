@@ -22,7 +22,7 @@ const navigation = [
   { name: "blog", href: "/admin/blog", icon: Newspaper },
   { name: "Réservations", href: "/admin/bookings", icon: Calendar },
   { name: "Produits", href: "/admin/products", icon: ShoppingBag },
-  // { name: "Tourisme", href: "/admin/tourism", icon: Plane },
+  { name: "Tourisme", href: "/admin/tourism", icon: Plane },
   { name: "Paiements", href: "/admin/payments", icon: CreditCard },
   { name: "Demandes", href: "/admin/demandes", icon: FileCheck, },
   { name: "Métiers", href: "/admin/metiers", icon: Ruler, },
