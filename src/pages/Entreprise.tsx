@@ -339,7 +339,7 @@ const Entreprise = () => {
       <Header />
 
       {/* Hero Section avec background image */}
-      <section className="relative py-24 overflow-hidden">
+      <section className="relative py-8 pt-24 lg:py-24 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
@@ -354,15 +354,15 @@ const Entreprise = () => {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            <h1 className="text-xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
               Solutions <span className="text-blue-400">Professionnelles</span>
             </h1>
-            <p className="text-xl text-slate-200 mb-10 leading-relaxed">
+            <p className="text-sm lg:text-xl text-slate-200 mb-10 leading-relaxed">
               Des services sur mesure pour répondre aux besoins spécifiques de votre entreprise.
               Accompagnement personnalisé de A à Z.
             </p>
 
-            <div className="flex flex-wrap gap-5 justify-center">
+            <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -395,24 +395,24 @@ const Entreprise = () => {
 
       {/* Section Services d'entreprise */}
       <motion.section
-        className="container mx-auto px-4 py-20"
+        className="container mx-auto px-4 py-8 lg:py-20"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
         id="services"
       >
-        <motion.div variants={itemVariants} className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-slate-900">
+        <motion.div variants={itemVariants} className="text-center mb-0 lg:mb-16">
+          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
             Services <span className="text-slate-900">d'Entreprise</span>
           </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
+          <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto mb-8">
             Tous les services essentiels pour le développement et la gestion de votre entreprise
           </p>
         </motion.div>
 
         {/* Barre de recherche unifiée */}
         <motion.div
-          className="max-w-2xl mx-auto flex gap-4 mb-16"
+          className="max-w-2xl mx-auto grid place-items-center lg:flex gap-4 mb-8 lg:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -441,7 +441,7 @@ const Entreprise = () => {
 
         {/* Filtres des services */}
         <motion.div variants={itemVariants} className="mb-12">
-          <div className="flex flex-wrap gap-3 mb-8 justify-center">
+          <div className="grid grid-cols-3 place-items-center lg:flex flex-wrap gap-3 mb-4 lg:mb-8 justify-center">
             {serviceCategories.map((category, index) => (
               <motion.div
                 key={index}
@@ -450,7 +450,7 @@ const Entreprise = () => {
               >
                 <Button
                   variant={activeServiceCategory === category.value ? "default" : "outline"}
-                  className={`rounded-xl font-semibold px-6 py-3 ${activeServiceCategory === category.value
+                  className={`rounded-xl font-semibold px-4 lg:px-6 py-3 ${activeServiceCategory === category.value
                     ? "text-white"
                     : "border-2 border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900"
                     }`}
@@ -541,18 +541,18 @@ const Entreprise = () => {
 
       {/* Section Devenir partenaire */}
       <motion.section
-        className="py-20 bg-slate-50"
+        className="py-0 lg:py-20 bg-slate-50"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
         id="partenaire"
       >
         <div className="container mx-auto px-4">
-          <motion.div variants={itemVariants} className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-slate-900">
+          <motion.div variants={itemVariants} className="text-center mb-4 lg:mb-16">
+            <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
               Devenir <span className="text-slate-900">Partenaire</span>
             </h1>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
+            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto mb-4 lg:mb-8">
               Rejoignez notre réseau d'experts et développez votre activité
             </p>
           </motion.div>
@@ -990,7 +990,7 @@ const Entreprise = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-center mb-12 text-slate-900">
+            <h2 className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12 text-slate-900">
               Avantages du partenariat
             </h2>
 
@@ -1078,17 +1078,17 @@ const Entreprise = () => {
       </motion.section>
 
       {/* CTA Final Section */}
-      <section className="py-20 bg-white shadow-inner">
+      <section className="py-8 lg:py-20 bg-white shadow-inner">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl font-bold mb-6 text-slate-900">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-900">
               Prêt à développer votre entreprise ?
             </h2>
-            <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm lg:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans tous vos projets d'entreprise
             </p>
             <motion.div

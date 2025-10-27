@@ -336,7 +336,7 @@ const ArtCommerceDetail = () => {
               <div className="absolute top-4 left-4">
                 <Link to="/art-commerce" className="inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm text-slate-700 px-4 py-3 rounded-xl hover:bg-white transition-all duration-200 font-medium shadow-lg border border-white/20 hover:border-white/40 group">
                   <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                  <span>Retour aux Art & Commerces</span>
+                  <span className='text-xs lg:text-md'>Retour aux Art & Commerces</span>
                 </Link>
               </div>
             </div>
@@ -437,7 +437,7 @@ const ArtCommerceDetail = () => {
               <div className="lg:w-2/3">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
                   <div className="mb-4 lg:mb-0">
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                    <h1 className="text-xl lg:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                       {listing.title}
                     </h1>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">

@@ -683,11 +683,11 @@ const PropertyListings = (
                     >
                       <div className="relative">
                         <div className="relative rounded-lg h-52 overflow-hidden">
-                            <img
-                              src={images[idx % totalImages]}
-                              alt={property.title}
-                              className="home-card-image h-full w-full group-hover:scale-110"
-                            />
+                          <img
+                            src={images[idx % totalImages]}
+                            alt={property.title}
+                            className="home-card-image h-full w-full group-hover:scale-110"
+                          />
 
                           <div className="absolute bg-gray-700 rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge">
                             {property.type}
@@ -806,13 +806,13 @@ const PropertyListings = (
 
   return (
     <section className="w-full">
-      <div className="container mx-auto px-4 py-6">
+      <div className=" container mx-auto px-4 py-6">
         {/* Barre d'onglets + CTA */}
         <div className="sticky top-16 z-30 bg-white flex flex-col lg:flex-row gap-4 items-center justify-between rounded-2xl border border-border/50 p-4">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-1">
             <Button
               variant={activeTab === 'tous' ? 'default' : 'outline'}
-              className={`px-6 h-11 ${activeTab === 'tous' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'tous' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
               onClick={() => setActiveTab('tous')}
             >
               TOUS
@@ -820,21 +820,21 @@ const PropertyListings = (
 
             <Button
               variant={activeTab === 'achat' ? 'default' : 'outline'}
-              className={`px-6 h-11 ${activeTab === 'achat' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'achat' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
               onClick={() => setActiveTab('achat')}
             >
               ACHAT
             </Button>
             <Button
               variant={activeTab === 'location' ? 'default' : 'outline'}
-              className={`px-6 h-11 ${activeTab === 'location' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'location' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
               onClick={() => setActiveTab('location')}
             >
               LOCATION LONGUE DURÉE
             </Button>
             <Button
               variant={activeTab === 'saisonniere' ? 'default' : 'outline'}
-              className={`px-6 h-11 ${activeTab === 'saisonniere' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'saisonniere' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
               onClick={() => setActiveTab('saisonniere')}
             >
               LOCATION SAISONNIÈRE
@@ -846,7 +846,7 @@ const PropertyListings = (
               {/* Bouton principal */}
               <motion.button
                 onClick={() => setShowCard(true)}
-                className="px-6 h-12 flex items-center justify-center rounded-lg bg-gradient-to-r from-primary to-accent text-white font-semibold shadow-md"
+                className="p-2 text-xs lg:p-4 lg:text-sm flex items-center justify-center rounded-lg bg-gradient-to-r from-slate-900 to-blue-950 text-white font-semibold shadow-md"
                 style={{
                   backgroundSize: "200% 100%",
                   backgroundPosition: "50% 50%",
@@ -885,7 +885,7 @@ const PropertyListings = (
                         onClick={() => setShowCard(false)}
                         className="p-2 absolute right-0 z-50 group ml-2 flex-shrink-0"
                       >
-                        <X className="w-5 h-5 text-red-500 group-hover:text-black transition-colors" />
+                        <X className="w-7 h-7 text-white bg-red-700 rounded-full p-1 group-hover:text-black transition-colors" />
                       </button>
                       {/* Conteneur d'image avec image réelle */}
                       <div className="relative h-56 bg-gray-800  overflow-hidden">
@@ -902,14 +902,14 @@ const PropertyListings = (
                         <div className="flex items-start justify-between mb-6">
                           <div className="flex items-start gap-4">
                             <div className="w-3 h-12 bg-blue-500 rounded-full mt-1 shadow-lg shadow-blue-500/30" />
-                            <p className="text-gray-200 text-base leading-relaxed font-medium">
+                            <p className="text-gray-200 text-sm lg:text-base leading-relaxed font-medium">
                               Merci de vous connecter à votre compte afin de publier une annonce de location ou de vente de votre bien.
                             </p>
                           </div>
 
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="grid lg:flex gap-3">
                           <button
                             onClick={() => navigate('/register')}
                             className="w-full bg-blue-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-blue-700 active:bg-blue-800 transition-all flex items-center justify-center gap-3 group"
