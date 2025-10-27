@@ -18,7 +18,7 @@ const AutoPlayVideo = ({ src, className = "" }) => {
 
   return (
     <div 
-      className={`relative rounded-xl overflow-hidden shadow-lg cursor-pointer group ${className}`}
+      className={`relative rounded-xl lg:h-full h-60 overflow-hidden shadow-lg cursor-pointer group ${className}`}
       onClick={togglePlay}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}

@@ -7,9 +7,12 @@ export default function Test() {
    const counterRef = useRef<HTMLHeadingElement | null>(null);
   const barRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const counterObj = { value: 0 };
+ useEffect(() => {
+  const counterObj = { value: 0 };
 
+  const mm = gsap.matchMedia();
+
+  mm.add("(min-width: 768px)", () => {
     // Animation du compteur de 0 à 100%
     gsap.to(counterObj, {
       value: 100,
@@ -34,7 +37,7 @@ export default function Test() {
     gsap.to("#logo", {
       duration: 0.25,
       delay: 3.5,
-     opacity: 0,
+      opacity: 0,
     });
 
     // Animation largeur barre de 0 à 1/6 puis retour à 0 et disparition
@@ -68,7 +71,18 @@ export default function Test() {
       },
       duration: 1.5,
     });
-  }, []);
+  });
+
+  // Version mobile - masquer tous les contenus
+  mm.add("(max-width: 767px)", () => {
+    gsap.set(["#counter", "#logo", ".bar", barRef.current], {
+      display: "none",
+      opacity: 0
+    });
+  });
+
+  return () => mm.revert();
+}, []);
 
   return (
     <div className="pointer-events-none flex gap-5 flex-col  items-center justify-center z-[9999] fixed top-0 left-0 w-full h-full overflow-hidden">

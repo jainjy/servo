@@ -66,7 +66,10 @@ const Hero = () => {
       return next;
     });
   };
-  useEffect(() => {
+useEffect(() => {
+  const mm = gsap.matchMedia();
+
+  mm.add("(min-width: 768px)", () => {
     gsap
       .timeline()
       .fromTo(
@@ -80,7 +83,11 @@ const Hero = () => {
         { opacity: 1, y: 0, duration: 1, ease: "power2.out" },
         "-=1"
       );
-  }, []);
+  });
+
+  // N'oubliez pas de retourner une fonction de nettoyage
+  return () => mm.revert();
+}, []);
 
   useEffect(() => {
     setSearchHistory(loadHistory());

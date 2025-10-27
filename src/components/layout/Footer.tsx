@@ -51,14 +51,14 @@ const Footer: React.FC = () => {
        <div className=" text-center text-gray-500 text-sm">
           &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
         </div>
-       <button>
+       {/* {<button>
           <Link to={"/publicite"}>
             <span className='text-sm font-bold underline text-slate-600'>
               Publicité
             </span>
 
           </Link>
-        </button>
+        </button>} */}
         
       </div>
 
