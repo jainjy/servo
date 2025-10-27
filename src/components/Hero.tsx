@@ -296,7 +296,7 @@ useEffect(() => {
 
         {/* Modal plein écran */}
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="p-0 border-0 sm:max-w-[100vw] sm:w-[80vw] sm:h-[90vh] overflow-hidden w-11/12 h-11/12 max-w-none bg-white">
+          <DialogContent className="p-0 border-0 sm:max-w-[100vw] rounded-lg sm:w-[80vw] h-[80vh] lg:h-[90vh] overflow-hidden w-11/12 max-w-none bg-white">
             <div className="relative w-full h-full flex flex-col">
               {/* Bouton Close stylisé */}
               <button
@@ -330,7 +330,7 @@ useEffect(() => {
 
               {/* Sidebar Historique */}
               <aside
-                className={`absolute top-0 left-0 z-50 h-full w-72 bg-white border-r border-gray-200 shadow-xl transform rounded-e-2xl transition-transform duration-300 ${historyOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`absolute top-0 left-0 z-50 h-full w-60 lg:w-72 bg-white border-r border-gray-200 shadow-xl transform rounded-e-2xl transition-transform duration-300 ${historyOpen ? 'translate-x-0' : '-translate-x-full'}`}
               >
                 <div className="h-full flex flex-col">
                   <div className="px-4 py-3 border-b flex items-center justify-between">
@@ -368,7 +368,7 @@ useEffect(() => {
 
               {/* Barre supérieure visible en mode loading/results */}
               {stage !== "idle" && (
-                <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-200">
+                <div className="sticky lg:top-0 top-12 z-20 bg-white/90 backdrop-blur border-b border-gray-200">
                   <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-2">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -398,7 +398,7 @@ useEffect(() => {
               )}
 
               {/* Contenu principal du modal */}
-              <div className="flex-1 overflow-auto">
+              <div className="flex-1 overflow-auto ">
                 {stage === "idle" && (
                   <div className="h-full w-full flex items-center justify-center p-6">
                     <div className="w-full max-w-2xl">
@@ -407,7 +407,7 @@ useEffect(() => {
                         <p className="text-gray-600">Saisissez un mot-clé (ex: ville, type de bien, caractéristiques)</p>
                       </div>
                       <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-4">
-                        <div className="flex items-center gap-3">
+                        <div className="grid lg:grid-cols-2 grid-cols-1 items-center gap-3">
                           <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
@@ -435,7 +435,7 @@ useEffect(() => {
                 )}
 
                 {stage === "results" && (
-                  <div className="max-w-5xl mx-auto p-4">
+                  <div className="bg-black lg:mt-0 mt-10 max-w-5xl mx-auto p-4">
                     {results.length > 0 ? (
                       (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {results.map((r, idx) => (
