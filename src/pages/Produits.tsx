@@ -553,10 +553,10 @@ const Produits = () => {
           {/* En-tête avec animation */}
           <div className="bg-white py-5 rounded-lg">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className="azonix text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
+              <h1 className="azonix text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
                 Produits & Accessoires
               </h1>
-              <p className="text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm px-2 lg:text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
                 Découvrez notre gamme complète pour équiper et embellir votre maison
               </p>
             </div>
@@ -564,26 +564,35 @@ const Produits = () => {
             {/* Barre de recherche améliorée */}
             <form
               onSubmit={handleSearch}
-              className="relative mb-5 max-w-2xl mx-auto animate-slide-up"
+              className="relative mb-5 w-full max-w-2xl mx-auto animate-slide-up px-4 sm:px-6 lg:px-2"
             >
               <div className="relative group">
                 <Input
                   type="text"
                   placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
-                  className="h-16 pl-16 pr-8 rounded-2xl border-2 text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-xl border-[#0052FF]/30 bg-white/80 backdrop-blur-md"
+                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-lg border-[#0052FF]/30 bg-white/80 backdrop-blur-md focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[#0052FF] transition-transform duration-300 group-hover:scale-110" />
+
+                {/* Icône de recherche */}
+                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-[#0052FF] transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
+
+                {/* Bouton de recherche */}
                 <Button
                   type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-12 px-6 bg-[#0052FF] hover:bg-[#003EE6] text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-[#0052FF] hover:bg-[#003EE6] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                   ) : (
-                    "Rechercher"
+                    <>
+                      {/* Texte visible sur desktop/tablette */}
+                      <span className="hidden sm:inline">Rechercher</span>
+                      {/* Icône uniquement sur mobile */}
+                      <Search className="sm:hidden h-4 w-4" />
+                    </>
                   )}
                 </Button>
               </div>
@@ -647,10 +656,10 @@ const Produits = () => {
                 <Home className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-black/70">
+                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
                   Équipement Maison
                 </h2>
-                <p className="text-sm text-[#5A6470] mt-2">
+                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
                   Tout le matériel et équipement pour aménager et équiper votre intérieur
                 </p>
               </div>
@@ -713,10 +722,10 @@ const Produits = () => {
                 <Construction className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-black/70">
+                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
                   Matériaux Construction
                 </h2>
-                <p className="text-sm text-[#5A6470] mt-2">
+                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
                   Matériaux de construction et fournitures pour tous vos projets
                   de rénovation
                 </p>
@@ -781,10 +790,10 @@ const Produits = () => {
                 <Brush className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-black/70">
+                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
                   Design & Décoration
                 </h2>
-                <p className="text-sm text-[#5A6470] mt-2">
+                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
                   Solutions esthétiques pour sublimer votre intérieur
                 </p>
               </div>
@@ -843,11 +852,11 @@ const Produits = () => {
             className="text-center animate-bounce-in"
             style={{ animationDelay: "0.8s" }}
           >
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-12 border border-white/20 shadow-2xl">
-              <h3 className="text-3xl font-bold text-gray-700 mb-4">
+            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 lg:p-12 border border-white/20 shadow-2xl">
+              <h3 className="text-xl lg:text-3xl font-bold text-gray-700 mb-4">
                 Vous ne trouvez pas ce que vous cherchez ?
               </h3>
-              <p className="text-xl text-[#5A6470] mb-8 max-w-2xl mx-auto">
+              <p className="text-sm lg:text-xl text-[#5A6470] mb-8 max-w-2xl mx-auto">
                 Notre équipe d'experts est là pour vous accompagner dans tous vos projets
               </p>
               <div className="flex gap-4 justify-center flex-wrap">

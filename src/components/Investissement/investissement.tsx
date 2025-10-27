@@ -221,7 +221,7 @@ const Investissement = () => {
                         <img src={home} alt="" className="absolute -top-28 w-screen h-screen" />
                     </div>
                     <div className="relative z-20 max-w-8xl py-10 mx-auto px-4 sm:px-6 lg:px-8">
-                        <h1 className="text-5xl sm:text-6xl font-extrabold text-slate-300 mb-6 leading-tight">
+                        <h1 className="text-xl lg:text-5xl sm:text-2xl font-extrabold text-slate-300 mb-6 leading-tight">
                             Accélérez votre <span className="inline-block">Patrimoine Financier</span>
                         </h1>
                         <p className="max-w-4xl mx-auto text-md font-semibold text-white mt-4">

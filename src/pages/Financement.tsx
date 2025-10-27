@@ -172,10 +172,10 @@ export default function Financement() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
+            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
               Financement & <span className="text-blue-400">Assurance</span>
             </h1>
-            <p className="text-xl text-slate-200 mb-10 leading-relaxed">
+            <p className="text-sm lg:text-xl text-slate-200 mb-4 lg:mb-10 leading-relaxed">
               Des solutions complètes pour financer votre projet et le protéger avec nos partenaires de confiance. 
               Accompagnement personnalisé de A à Z.
             </p>
@@ -212,18 +212,18 @@ export default function Financement() {
       </section>
 
       {/* Section Partenaires Financement */}
-      <section className="py-20 bg-white" id="partenaires">
+      <section className="py-8 lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4 text-slate-900">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Nos <span className="text-slate-900">Partenaires Financement</span>
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
               Travaillons avec les meilleurs acteurs du marché pour votre projet
             </p>
           </motion.div>
@@ -277,18 +277,18 @@ export default function Financement() {
       </section>
 
       {/* Section Assurance */}
-      <section className="py-20 bg-slate-50" id="assurances">
+      <section className="py-8 lg:py-20 bg-slate-50" id="assurances">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4 text-slate-900">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Solutions <span className="text-slate-900">d'Assurance</span>
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
               Protégez votre projet, votre patrimoine et votre activité avec nos assurances sur mesure
             </p>
           </motion.div>
@@ -336,17 +336,17 @@ export default function Financement() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-white" id="audit">
+      <section className="py-8 lg:py-20 bg-white" id="audit">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl font-bold mb-6 text-slate-900">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-900">
               Prêt à concrétiser votre projet ?
             </h2>
-            <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm lg:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans votre financement et vos assurances
             </p>
             <motion.div
@@ -596,7 +596,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
         />
       </div>
 
-      <div className="flex gap-4">
+      <div className="grid lg:flex gap-4">
         <Button 
           type="submit" 
           className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
@@ -643,7 +643,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
         <div className="p-8">
           {/* En-tête avec bouton fermer */}
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-900">{getModalTitle()}</h2>
+            <h2 className="text-xl lg:text-3xl font-bold text-slate-900">{getModalTitle()}</h2>
             <Button
               variant="ghost"
               size="sm"
