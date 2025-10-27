@@ -90,9 +90,9 @@ const MediaModal = ({ isOpen, onClose, type, data }) => {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800">{item.title}</h4>
+                  <h4 className="font-semibold text-xs lg:text-base text-gray-800">{item.title}</h4>
                   <div className="flex gap-4 text-sm text-gray-600">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{item.category}</span>
+                    <span className="bg-blue-100 text-xs lg:text-sm  text-blue-800 px-2 py-1 rounded-full">{item.category}</span>
                     <span>{item.duration}</span>
                   </div>
                 </div>
@@ -324,25 +324,25 @@ const Proadcast = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 py-12 px-4 sm:px-6 lg:px-8 mt-20">
+    <div className="min-h-screen bg-gray-50 text-gray-800 py-4 lg:py-12 px-4 sm:px-6 lg:px-8 mt-20">
       {/* En-tête avec bouton de navigation */}
       <div className="container mx-auto">
         <SlideIn direction="up">
           <div className="text-center mb-12 flex  relative">
             {/* Bouton pour basculer vers le bien-être */}
-            <div className=" top-0 left-0 absolute">
+            <div className=" top-0 -left-8 lg:left-0 absolute">
               <button
                 onClick={() => navigate("/bien-etre")}
-                className="inline-flex items-center gap-3 animate-accordion-down bg-slate-900 text-white px-6 py-3 rounded-xl hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg border border-slate-700 hover:border-slate-600 group"
+                className="inline-flex items-center gap-3 animate-accordion-down bg-slate-900 text-white lg:px-6 px-3 py-1 lg:py-3 rounded-xl hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg border border-slate-700 hover:border-slate-600 group"
               >
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
               </button>
             </div>
-            <div className="mt-10 mx-auto max-w-3xl">
-              <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <div className=" mx-auto max-w-3xl">
+              <h1 className="text-xl lg:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
                 Bibliothèque de <span className="text-blue-600">Médias</span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto">
                 Découvrez nos podcasts inspirants et nos vidéos éducatives pour votre bien-être
               </p>
             </div>
@@ -354,7 +354,7 @@ const Proadcast = () => {
           <SlideIn direction="left" delay={300}>
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+                <h2 className="text-xl lg:text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
                   <Headphones className="w-8 h-8 text-blue-600" />
                   Nos Podcasts
                 </h2>
@@ -386,7 +386,7 @@ const Proadcast = () => {
           <SlideIn direction="left" delay={300}>
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+                <h2 className="text-xl lg:text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
                   <Video className="w-8 h-8 text-red-600" />
                   Nos Vidéos
                 </h2>
@@ -416,7 +416,7 @@ const Proadcast = () => {
         {/* Section Call-to-Action */}
         <SlideIn direction="up" delay={500}>
           <div className="bg-white rounded-2xl p-8 border border-gray-200 mt-16 text-center shadow-lg">
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">
+            <h3 className="text-xl lg:text-2xl font-bold text-slate-900 mb-4">
               Rejoignez notre communauté de bien-être
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">

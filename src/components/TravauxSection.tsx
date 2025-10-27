@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Select from 'react-select';
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,6 +24,7 @@ import {
   HomeIcon,
   TreePalm,
   Building,
+  BookCheck,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { prestationsData, prestationTypesByCategory } from "./travauxData";
@@ -220,14 +222,14 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
               <h2 className="text-xl font-bold text-gray-900">
                 Demande de Devis
               </h2>
-              <p className="text-gray-600 text-sm">{prestation.title}</p>
+              <p className="text-gray-600 text-xs lg:text-sm">{prestation.title}</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-8 w-8 rounded-full hover:bg-gray-100"
+            className="absolute lg:relative right-2 top-2 h-8 w-8 bg-red-600 text-white font-bold rounded-full hover:bg-gray-100"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -366,7 +368,14 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
             <p className="text-blue-600 text-xs">{prestation.description}</p>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="grid lg:flex gap-3 pt-4 border-t">
+            <Button
+              type="submit"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Envoyer la demande
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -375,13 +384,7 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
             >
               Annuler
             </Button>
-            <Button
-              type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Envoyer la demande
-            </Button>
+
           </div>
         </form>
       </div>
@@ -484,8 +487,8 @@ const PrestationSection = ({ category, isActive }) => {
     selectedType === "TOUS"
       ? currentPrestations
       : currentPrestations.filter(
-          (prestation) => prestation.type === selectedType
-        );
+        (prestation) => prestation.type === selectedType
+      );
 
   const displayedPrestations = showAllPrestations
     ? filteredPrestations
@@ -507,11 +510,11 @@ const PrestationSection = ({ category, isActive }) => {
         />
 
         <div className="relative container mx-auto px-4 pt-20 pb-16">
-          <div className="text-center mb-12">
+          <div className="text-center mb-0 lg:mb-12">
             <h1 className="text-4xl md:text-3xl font-bold text-gray-900 mb-6">
               {currentCategory.label}
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            <p className="text-sm lg:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               {currentCategory.description}
             </p>
           </div>
@@ -523,25 +526,38 @@ const PrestationSection = ({ category, isActive }) => {
                   <Search className="h-4 w-4" />
                   Recherche avancée
                 </label>
-                <div className="flex gap-3">
+                <div className="grid lg:flex gap-3">
                   <div className="flex-1">
-                    <select
-                      className="w-full rounded-2xl border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 p-4 bg-white shadow-sm"
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                    >
-                      <option value="TOUS">
-                        Tous les types de prestations
-                      </option>
-                      {prestationTypesByCategory[category]?.map((type) => {
-                        const IconComponent = type.icon;
-                        return (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
-                          </option>
-                        );
-                      })}
-                    </select>
+                    <div className="relative">
+                      <select
+                        className="w-full rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 p-4 bg-white shadow-sm hover:shadow-md appearance-none cursor-pointer pr-12 text-gray-700 font-medium hover:border-gray-300"
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
+                      >
+                        <option value="TOUS" className="text-gray-400">
+                          Tous les types de prestations
+                        </option>
+                        {prestationTypesByCategory[category]?.map((type) => {
+                          return (
+                            <option key={type.value} value={type.value} className="">
+                              {type.label}
+                            </option>
+                          );
+                        })}
+                      </select>
+
+                      {/* Flèche animée */}
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none transition-transform duration-300 group-hover:rotate-180">
+                        <svg
+                          className="w-5 h-5 text-gray-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex-1">
                     <div className="relative">
@@ -560,7 +576,7 @@ const PrestationSection = ({ category, isActive }) => {
 
             <div className="flex flex-wrap gap-3 items-center">
               <span className="text-sm font-semibold text-gray-700 mr-2 flex items-center gap-2">
-                <Square className="h-4 w-4" />
+                <BookCheck className="h-4 w-4" />
                 CATÉGORIES :
               </span>
               {prestationTypesByCategory[category]?.map((type) => {
@@ -568,11 +584,10 @@ const PrestationSection = ({ category, isActive }) => {
                 return (
                   <button
                     key={type.value}
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
-                      selectedType === type.value
-                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${selectedType === type.value
+                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
+                      }`}
                     onClick={() => setSelectedType(type.value)}
                   >
                     {IconComponent && <IconComponent className="h-4 w-4" />}
@@ -690,10 +705,10 @@ const PrestationSection = ({ category, isActive }) => {
                 <Clock className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-white font-bold text-lg">
+                <p className="text-white font-bold text-sm lg:text-lg">
                   DEVIS ENVOYÉ DANS LES 48H
                 </p>
-                <p className="text-blue-100 text-sm">
+                <p className="text-blue-100 text-xs lg:text-sm">
                   Réponse garantie sous 2 jours ouvrés
                 </p>
               </div>

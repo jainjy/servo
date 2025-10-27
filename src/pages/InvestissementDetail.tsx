@@ -506,10 +506,10 @@ const InvestissementDetail = () => {
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Retour
               </button>
-              <h1 className="text-5xl font-bold text-white mb-4">
+              <h1 className="text-2xl lg:text-5xl font-bold text-white mb-4">
                 {investment.title}
               </h1>
-              <p className="text-xl text-gray-200 mb-6">
+              <p className="text-sm lg:text-xl text-gray-200 mb-6">
                 {investment.subtitle}
               </p>
               <RiskBadge level={investment.riskLevel} />
@@ -682,7 +682,7 @@ const InvestissementDetail = () => {
               </ol>
             </div>
             
-            <div className="flex gap-4 mt-6">
+            <div className="grid lg:flex gap-4 mt-6">
               <button
                 onClick={handleDownloadDocumentation}
                 className="flex-1 bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center"
