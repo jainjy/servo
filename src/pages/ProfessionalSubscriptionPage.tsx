@@ -28,7 +28,7 @@ const ProfessionalSubscriptionPage = () => {
       id: "real_estate",
       title: "Pro Immobilier Complet",
       description: "Pour les agences immobilières",
-      price: "139 €",
+      price: "139",
       period: "par mois",
       icon: <Building className="h-16 w-16" />,
       color: "blue",
@@ -48,7 +48,7 @@ const ProfessionalSubscriptionPage = () => {
       id: "services",
       title: "Prestataires de Services",
       description: "Pour les artisans et prestataires",
-      price: "39 €",
+      price: "39",
       period: "par mois",
       icon: <Wrench className="h-16 w-16" />,
       color: "emerald",
@@ -68,7 +68,7 @@ const ProfessionalSubscriptionPage = () => {
       id: "furniture",
       title: "Espace Ameublement",
       description: "Commerçants meubles et déco",
-      price: "49 €",
+      price: "49",
       period: "par mois",
       icon: <Sofa className="h-16 w-16" />,
       color: "purple",
@@ -88,7 +88,7 @@ const ProfessionalSubscriptionPage = () => {
       id: "wellness",
       title: "Bien-être",
       description: "Professionnels du bien-être",
-      price: "19 €",
+      price: "19",
       period: "par mois",
       icon: <Users className="h-16 w-16" />,
       color: "pink",
@@ -231,15 +231,19 @@ const ProfessionalSubscriptionPage = () => {
             return (
               <div
                 key={plan.id}
-                className={`relative border-2 ${isSelected ? color.hoverBorder : color.border
-                  } rounded-2xl p-6 hover:${color.hoverBorder
-                  } transition-all duration-500 cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-lg hover:shadow-2xl border-opacity-30 hover:border-opacity-60 group`}
+                className={`relative border-2 ${
+                  isSelected ? color.hoverBorder : color.border
+                } rounded-2xl p-6 hover:${
+                  color.hoverBorder
+                } transition-all duration-500 cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-lg hover:shadow-2xl border-opacity-30 hover:border-opacity-60 group`}
                 onClick={() => handleSubscriptionSelect(plan.id)}
               >
                 {/* Badge populaire amélioré */}
                 {plan.popular && (
                   <div className="absolute -top-4 left-2 z-10">
-                    <div className={`bg-gradient-to-r ${color.gradient} text-white px-2 py-1 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 backdrop-blur-sm border border-white/20 animate-pulse-slow relative overflow-hidden`}>
+                    <div
+                      className={`bg-gradient-to-r ${color.gradient} text-white px-2 py-1 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 backdrop-blur-sm border border-white/20 animate-pulse-slow relative overflow-hidden`}
+                    >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 animate-shine"></div>
                       <img src="/fire.gif" alt="" className="w-5 h-5 z-10" />
                       <span className="z-10">Le plus populaire</span>
@@ -248,11 +252,11 @@ const ProfessionalSubscriptionPage = () => {
                 )}
 
                 <div className="flex flex-col items-center text-center space-y-6 flex-1">
-
-                  <div className={`${color.text} text-2xl filter drop-shadow-lg`}>
+                  <div
+                    className={`${color.text} text-2xl filter drop-shadow-lg`}
+                  >
                     {plan.icon}
                   </div>
-
 
                   {/* Titre et description */}
                   <div className="space-y-2">
@@ -267,30 +271,37 @@ const ProfessionalSubscriptionPage = () => {
                   {/* Prix avec style moderne */}
                   <div className="space-y-2">
                     <div className="text-4xl flex font-semibold text-white">
-                      {plan.price} /
-                      <div className="text-gray-400 text-sm self-end font-medium">{plan.period}</div>
-
+                      {plan.price} € /
+                      <div className="text-gray-400 text-sm self-end font-medium">
+                        {plan.period}
+                      </div>
                     </div>
                   </div>
 
                   {/* Features avec style amélioré */}
                   <ul className="text-xs text-gray-300 gap-5 text-left grid grid-cols-1 lg:grid-cols-2 w-full">
                     {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3 p-0 rounded-xl ">
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 p-0 rounded-xl "
+                      >
                         <CheckCircle
                           className={`h-5 w-5 ${color.text} shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300 filter drop-shadow-lg`}
                         />
-                        <span className="leading-relaxed font-light flex-1">{feature}</span>
+                        <span className="leading-relaxed font-light flex-1">
+                          {feature}
+                        </span>
                       </li>
                     ))}
                   </ul>
 
                   {/* Bouton de sélection amélioré */}
                   <Button
-                    className={`w-full font-bold py-3 rounded-xl transition-all duration-500 transform hover:-translate-y-1 border ${isSelected
-                      ? `${color.button} bg-gradient-to-r ${color.gradient} text-white shadow-2xl hover:shadow-3xl border-white/20`
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-600 hover:border-gray-500"
-                      }`}
+                    className={`w-full font-bold py-3 rounded-xl transition-all duration-500 transform hover:-translate-y-1 border ${
+                      isSelected
+                        ? `${color.button} bg-gradient-to-r ${color.gradient} text-white shadow-2xl hover:shadow-3xl border-white/20`
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-600 hover:border-gray-500"
+                    }`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSubscriptionSelect(plan.id);
@@ -299,16 +310,36 @@ const ProfessionalSubscriptionPage = () => {
                     <span className="flex items-center justify-center gap-2">
                       {isSelected ? (
                         <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
                           </svg>
                           Sélectionné
                         </>
                       ) : (
                         <>
                           Sélectionner
-                          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                         </>
                       )}
@@ -318,11 +349,15 @@ const ProfessionalSubscriptionPage = () => {
 
                 {/* Effet de sélection */}
                 {isSelected && (
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-10 -z-10`}></div>
+                  <div
+                    className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-10 -z-10`}
+                  ></div>
                 )}
 
                 {/* Effet de bordure au survol */}
-                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-0 group-hover:opacity-15 transition-opacity duration-500 -z-20`}></div>
+                <div
+                  className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-0 group-hover:opacity-15 transition-opacity duration-500 -z-20`}
+                ></div>
               </div>
             );
           })}
