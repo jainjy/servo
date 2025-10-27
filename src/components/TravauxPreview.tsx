@@ -551,18 +551,17 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           })}
         </div>
 
-        <div className="text-center">
           <Button
             variant="outline"
-            className="rounded-2xl border-1 bg-slate-950 border-gray-300 hover:border-blue-500 hover:bg-black text-lg px-10 py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
+            className="rounded-2xl border-1 bg-slate-950 border-gray-300 hover:border-blue-500 hover:bg-black text-lg py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
             onClick={() => navigate("/travaux")}
           >
-            <span className="text-white font-mono">
+            <span className="text-white text-base font-mono">
               VOIR TOUS NOS TRAVAUX
             </span>
-            <ArrowRight className="ml-3 h-5 w-5 text-blue-600 group-hover:text-purple-600 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className=" h-5 w-5 text-blue-600 group-hover:text-purple-600 transition-transform group-hover:translate-x-1" />
           </Button>
-        </div>
+
       </div>
 
       {/* Modals */}
