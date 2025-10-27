@@ -1167,12 +1167,14 @@ const PropertyListings = (
                   >
                     <div className="relative">
                       {/* Zone image avec navigation */}
-                      <div className="relative h-48 overflow-hidden">
+                      <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
+                        
                         <img
                           src={images[idx % totalImages]}
                           alt={property.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-500"
                         />
+                        
 
                         {/* Badge type */}
                         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold">
