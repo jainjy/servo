@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Search, MapPin, Calendar, Users, Star, Filter, ChevronLeft, ChevronRight, 
+import {
+  Search, MapPin, Calendar, Users, Star, Filter, ChevronLeft, ChevronRight,
   Heart, Share2, Bed, Wifi, Car, Utensils, Snowflake, Dumbbell, Tv,
   Map, Phone, Mail, Shield, Clock, CheckCircle, X, Plus, Minus
 } from 'lucide-react';
-import Footer from '@/components/layout/Footer';
-import Header from '@/components/layout/Header';
+import '../styles/animationSlider.css'
 
 // Types basés sur le modèle de données
 interface TourismListing {
@@ -80,7 +79,7 @@ export const TourismSection = () => {
     amenities: [],
     instantBook: false
   });
-  const [currentImageIndex, setCurrentImageIndex] = useState<{[key: string]: number}>({});
+  const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: string]: number }>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [selectedListing, setSelectedListing] = useState<TourismListing | null>(null);
@@ -123,7 +122,7 @@ export const TourismSection = () => {
         geo: { lat: 48.8566, lng: 2.3522 },
         rating: 4.5,
         reviewCount: 127,
-        images: ['/img/hotel-1.jpg', '/img/hotel-2.jpg', '/img/hotel-3.jpg'],
+        images: ['https://i.pinimg.com/736x/27/cd/20/27cd20b21771ec82936e1edfe34c179e.jpg', 'https://i.pinimg.com/736x/e3/5b/ae/e35bae95c6700d23c3f02eaa11e2c213.jpg', 'https://i.pinimg.com/736x/4c/fa/82/4cfa8249306b071cf5347b7da38a1c9b.jpg'],
         amenities: ['wifi', 'pool', 'spa', 'breakfast', 'ac', 'tv', 'gym'],
         maxGuests: 2,
         available: true,
@@ -143,7 +142,7 @@ export const TourismSection = () => {
         geo: { lat: 48.8584, lng: 2.2945 },
         rating: 4.8,
         reviewCount: 89,
-        images: ['/img/apt-1.jpg', '/img/apt-2.jpg', '/img/apt-3.jpg'],
+        images: ['https://i.pinimg.com/736x/c1/df/24/c1df246f31ff14bb2be9528561ba722a.jpg', 'https://i.pinimg.com/736x/ad/08/05/ad080556218bd17798f19005faeeae3a.jpg', 'https://i.pinimg.com/736x/cd/94/ca/cd94cacef4e8f25f74a5b1883c1ea27f.jpg'],
         amenities: ['wifi', 'kitchen', 'ac', 'tv'],
         maxGuests: 4,
         available: true,
@@ -164,7 +163,7 @@ export const TourismSection = () => {
         geo: { lat: 43.7102, lng: 7.2620 },
         rating: 4.9,
         reviewCount: 45,
-        images: ['/img/villa-1.jpg', '/img/villa-2.jpg', '/img/villa-3.jpg'],
+        images: ['https://i.pinimg.com/736x/61/dd/43/61dd439fe0cc2c357b4d414ca9b97448.jpg', 'https://i.pinimg.com/736x/df/b6/ff/dfb6ff103a06e478e1dc32941f86e45e.jpg', 'https://i.pinimg.com/1200x/c4/b9/6b/c4b96b2fd74779249b9f66499ca9b21f.jpg'],
         amenities: ['wifi', 'pool', 'parking', 'garden', 'ac', 'tv', 'kitchen'],
         maxGuests: 6,
         available: true,
@@ -185,7 +184,7 @@ export const TourismSection = () => {
         geo: { lat: 43.9493, lng: 4.8059 },
         rating: 4.6,
         reviewCount: 67,
-        images: ['/img/guesthouse-1.jpg', '/img/guesthouse-2.jpg', '/img/guesthouse-3.jpg'],
+        images: ['https://i.pinimg.com/1200x/ef/c0/70/efc070efd7bb3716bda3d990a1908c32.jpg', 'https://i.pinimg.com/736x/54/cb/c3/54cbc3c145c748a9befe1382eea6b158.jpg', 'https://i.pinimg.com/736x/e0/e8/2c/e0e82c8370634e3d4936e6eeac08d5ed.jpg'],
         amenities: ['wifi', 'breakfast', 'parking', 'garden'],
         maxGuests: 2,
         available: true,
@@ -197,13 +196,13 @@ export const TourismSection = () => {
         cancellationPolicy: 'flexible'
       }
     ];
-    
+
     setListings(mockListings);
     setFilteredListings(mockListings);
     setLoading(false);
-    
+
     // Initialiser les index d'images
-    const initialIndexes: {[key: string]: number} = {};
+    const initialIndexes: { [key: string]: number } = {};
     mockListings.forEach(listing => {
       initialIndexes[listing.id] = 0;
     });
@@ -213,43 +212,43 @@ export const TourismSection = () => {
   // Filtrer les résultats
   useEffect(() => {
     let results = listings;
-    
+
     if (filters.destination) {
-      results = results.filter(listing => 
+      results = results.filter(listing =>
         listing.city.toLowerCase().includes(filters.destination.toLowerCase()) ||
         listing.title.toLowerCase().includes(filters.destination.toLowerCase())
       );
     }
-    
+
     if (filters.type.length > 0) {
       results = results.filter(listing => filters.type.includes(listing.type));
     }
-    
+
     if (filters.rating > 0) {
       results = results.filter(listing => listing.rating >= filters.rating);
     }
-    
+
     if (filters.amenities.length > 0) {
-      results = results.filter(listing => 
+      results = results.filter(listing =>
         filters.amenities.every(amenity => listing.amenities.includes(amenity))
       );
     }
-    
+
     if (filters.instantBook) {
       results = results.filter(listing => listing.instantBook);
     }
-    
-    results = results.filter(listing => 
+
+    results = results.filter(listing =>
       listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
-    
+
     setFilteredListings(results);
   }, [filters, listings]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     // Simulation de délai de recherche
     await new Promise(resolve => setTimeout(resolve, 1500));
     setLoading(false);
@@ -306,29 +305,43 @@ export const TourismSection = () => {
   };
 
   const scrollSlider = (direction: 'left' | 'right') => {
-    if (sliderRef.current) {
-      const scrollAmount = 300;
-      sliderRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
+  const slider = sliderRef.current;
+  if (!slider) return;
+
+  // Pause l'animation pendant le défilement manuel
+  slider.style.animationPlayState = 'paused';
+  
+  const scrollAmount = 300; // Ajustez cette valeur selon vos besoins
+  const currentScroll = slider.scrollLeft;
+  
+  if (direction === 'left') {
+    slider.scrollLeft = currentScroll - scrollAmount;
+  } else {
+    slider.scrollLeft = currentScroll + scrollAmount;
+  }
+
+  // Reprend l'animation après 3 secondes
+  setTimeout(() => {
+    if (slider) {
+      slider.style.animationPlayState = 'running';
     }
-  };
+  }, 3000);
+};
 
   const updateGuestCount = (type: 'adults' | 'children' | 'infants', delta: number) => {
     setFilters(prev => {
       const newValues = { ...prev };
       const current = newValues[type];
       const newValue = Math.max(0, current + delta);
-      const totalGuests = newValue + 
-        (type === 'adults' ? prev.children + prev.infants : 
-         type === 'children' ? prev.adults + prev.infants : prev.adults + prev.children);
-      
+      const totalGuests = newValue +
+        (type === 'adults' ? prev.children + prev.infants :
+          type === 'children' ? prev.adults + prev.infants : prev.adults + prev.children);
+
       if (totalGuests <= 16) { // Limite raisonnable
         newValues[type] = newValue;
         newValues.guests = newValues.adults + newValues.children + newValues.infants;
       }
-      
+
       return newValues;
     });
   };
@@ -339,29 +352,28 @@ export const TourismSection = () => {
   };
 
   return (
-    <section className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <section className=" min-h-screen">
 
       <div className="container mx-auto px-4 pt-24">
         {/* En-tête avec animation */}
+        <div className='-z-10 absolute inset-0 w-full h-96 overflow-hidden bg-black'>
+          <div className="absolute inset-0 bg-gradient-to-t backdrop-blur-sm from-black/80 via-black/40 to-transparent z-10"></div>          <img
+            src="https://i.pinimg.com/1200x/19/f3/34/19f334c7d66cf3393f146a9bcfe911f4.jpg"
+            alt=""
+            className='w-full h-full object-cover opacity-90'
+          />
+        </div>
+
         <div className="text-center mb-16">
-          <div 
-            className="inline-block mb-4"
-            data-aos="fade-down"
-            data-aos-delay="100"
-          >
-            <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-4 py-2 rounded-full">
-              Hébergements Premium
-            </span>
-          </div>
-          <h2 
-            className="md:text-5xl  text-3xl font-bold  mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+          <h2
+            className="md:text-5xl  text-3xl font-bold  mb-6 text-slate-100 tracking-wider"
             data-aos="fade-up"
             data-aos-delay="200"
           >
             Tourisme & Hébergements
           </h2>
-          <p 
-            className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+          <p
+            className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
             data-aos="fade-up"
             data-aos-delay="300"
           >
@@ -370,7 +382,7 @@ export const TourismSection = () => {
         </div>
 
         {/* Formulaire de recherche avec animations */}
-        <div 
+        <div
           className="bg-white rounded-3xl shadow-2xl p-8 mb-12 border border-gray-100 transform hover:shadow-2xl transition-all duration-500"
           data-aos="fade-up"
           data-aos-delay="400"
@@ -401,7 +413,7 @@ export const TourismSection = () => {
                   className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
                   value={filters.checkIn}
                   onChange={(e) => setFilters({ ...filters, checkIn: e.target.value })}
-                />                
+                />
               </div>
             </div>
 
@@ -410,7 +422,7 @@ export const TourismSection = () => {
                 <Users className="w-5 h-5 mr-2 text-blue-600" />
                 Voyageurs
               </label>
-              <div 
+              <div
                 className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300 cursor-pointer"
                 onClick={() => setShowFilters(!showFilters)}
               >
@@ -424,7 +436,7 @@ export const TourismSection = () => {
             <div className="flex items-end" data-aos="fade-left" data-aos-delay="400">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white p-4 rounded-xl font-bold flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="w-full bg-gradient-to-r from-slate-900 to-slate-600  text-white p-4 rounded-xl font-bold flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 <Search className="w-5 h-5 mr-3" />
                 {loading ? 'Recherche...' : 'Rechercher'}
@@ -533,7 +545,7 @@ export const TourismSection = () => {
                       />
                       <span className="ml-2 text-sm text-gray-700">Réservation instantanée</span>
                     </label>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Note minimum: {filters.rating > 0 ? `${filters.rating}+` : 'Toutes'}
@@ -557,7 +569,7 @@ export const TourismSection = () => {
               </div>
 
               <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
-                <button 
+                <button
                   type="button"
                   onClick={() => setFilters({
                     destination: '',
@@ -578,7 +590,7 @@ export const TourismSection = () => {
                 >
                   Réinitialiser les filtres
                 </button>
-                
+
                 <div className="text-sm text-gray-600 font-medium">
                   {filteredListings.length} hébergements trouvés
                 </div>
@@ -589,14 +601,14 @@ export const TourismSection = () => {
           {/* Filtres rapides */}
           {!showFilters && (
             <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
-              <button 
+              <button
                 onClick={() => setShowFilters(true)}
                 className="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-300 group"
               >
                 <Filter className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                 Plus de filtres
               </button>
-              
+
               <div className="text-sm text-gray-500 font-medium">
                 {filteredListings.length} hébergements trouvés
               </div>
@@ -606,67 +618,87 @@ export const TourismSection = () => {
 
         {/* Slider des destinations populaires */}
         <div className="relative mb-12" data-aos="fade-up">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Destinations populaires</h3>
-            <div className="flex space-x-3">
-              <button 
-                onClick={() => scrollSlider('left')}
-                className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={() => scrollSlider('right')}
-                className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+  <div className="flex items-center justify-between mb-6">
+    <h3 className="text-2xl font-bold text-gray-900">Destinations populaires</h3>
+    <div className="flex space-x-3">
+      <button
+        onClick={() => scrollSlider('left')}
+        className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => scrollSlider('right')}
+        className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+
+  {/* Conteneur avec animation infinie */}
+  <div className="relative overflow-hidden">
+    <div
+      ref={sliderRef}
+      className="flex space-x-6 scrollbar-hide py-4"
+      style={{
+        animation: 'infinite-scroll 40s linear infinite',
+        width: 'max-content'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.animationPlayState = 'paused';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.animationPlayState = 'running';
+      }}
+    >
+      {[
+        { city: 'Paris', price: 85, image: 'https://i.pinimg.com/736x/d0/a9/ee/d0a9eedeb877f0ffb5d0e58c23e5fa7c.jpg' },
+        { city: 'Nice', price: 95, image: 'https://i.pinimg.com/1200x/74/4b/10/744b1079a9927e3e239d77f9d71bc35b.jpg' },
+        { city: 'Lyon', price: 75, image: 'https://i.pinimg.com/1200x/bf/31/6a/bf316aba664f037dbd9ecfa3f98ff458.jpg' },
+        { city: 'Marseille', price: 70, image: 'https://i.pinimg.com/1200x/2a/56/86/2a56867db8955117fffa2d270d013c78.jpg' },
+        { city: 'Bordeaux', price: 80, image: 'https://i.pinimg.com/1200x/4f/b1/01/4fb101e13cf7f9bb55b3f4507dc0e8d5.jpg' },
+        { city: 'Toulouse', price: 65, image: 'https://i.pinimg.com/736x/50/b8/18/50b81828e8623577eee54e12ca0b353c.jpg' },
+        // Duplication pour l'effet infini
+        { city: 'Paris', price: 85, image: 'https://i.pinimg.com/736x/d0/a9/ee/d0a9eedeb877f0ffb5d0e58c23e5fa7c.jpg' },
+        { city: 'Nice', price: 95, image: 'https://i.pinimg.com/1200x/74/4b/10/744b1079a9927e3e239d77f9d71bc35b.jpg' },
+        { city: 'Lyon', price: 75, image: 'https://i.pinimg.com/1200x/bf/31/6a/bf316aba664f037dbd9ecfa3f98ff458.jpg' },
+        { city: 'Marseille', price: 70, image: 'https://i.pinimg.com/1200x/2a/56/86/2a56867db8955117fffa2d270d013c78.jpg' },
+        { city: 'Bordeaux', price: 80, image: 'https://i.pinimg.com/1200x/4f/b1/01/4fb101e13cf7f9bb55b3f4507dc0e8d5.jpg' },
+        { city: 'Toulouse', price: 65, image: 'https://i.pinimg.com/736x/50/b8/18/50b81828e8623577eee54e12ca0b353c.jpg' }
+      ].map((destination, index) => (
+        <div
+          key={`${destination.city}-${index}`}
+          className="flex-shrink-0 w-64 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 cursor-pointer group"
+          data-aos="zoom-in"
+          data-aos-delay={index * 100}
+        >
+          <div
+            className="h-40 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl relative overflow-hidden"
+            style={{
+              backgroundImage: `url(${destination.image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
+            <div className="absolute bottom-4 left-4 text-white">
+              <h4 className="font-bold text-lg">{destination.city}</h4>
+              <p className="text-xs rounded-full px-2 opacity-90 bg-white/20 backdrop-blur-sm p-1">À partir de {destination.price}€</p>
             </div>
           </div>
-          
-          <div 
-            ref={sliderRef}
-            className="flex space-x-6 overflow-x-auto scrollbar-hide scroll-smooth py-4"
-          >
-            {[
-              { city: 'Paris', price: 85, image: '/img/paris.jpg' },
-              { city: 'Nice', price: 95, image: '/img/nice.jpg' },
-              { city: 'Lyon', price: 75, image: '/img/lyon.jpg' },
-              { city: 'Marseille', price: 70, image: '/img/marseille.jpg' },
-              { city: 'Bordeaux', price: 80, image: '/img/bordeaux.jpg' },
-              { city: 'Toulouse', price: 65, image: '/img/toulouse.jpg' }
-            ].map((destination, index) => (
-              <div 
-                key={destination.city}
-                className="flex-shrink-0 w-64 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 cursor-pointer group"
-                data-aos="zoom-in"
-                data-aos-delay={index * 100}
-              >
-                <div 
-                  className="h-40 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl relative overflow-hidden"
-                  style={{ 
-                    backgroundImage: `url(${destination.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <h4 className="font-bold text-lg">{destination.city}</h4>
-                    <p className="text-sm opacity-90">À partir de {destination.price}€</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
+      ))}
+    </div>
+  </div>
+</div>
 
         {/* Résultats avec animations améliorées */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
             // Squelettes de chargement animés
             Array.from({ length: 6 }).map((_, i) => (
-              <div 
+              <div
                 key={i}
                 className="bg-white rounded-3xl shadow-lg overflow-hidden animate-pulse"
                 data-aos="fade-up"
@@ -682,7 +714,7 @@ export const TourismSection = () => {
             ))
           ) : (
             filteredListings.map((listing, index) => (
-              <div 
+              <div
                 key={listing.id}
                 className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:scale-105 group"
                 data-aos="fade-up"
@@ -690,14 +722,14 @@ export const TourismSection = () => {
               >
                 {/* Carousel d'images */}
                 <div className="h-60 bg-gray-200 relative overflow-hidden">
-                  <div 
+                  <div
                     className="flex h-full transition-transform duration-500 ease-out"
                     style={{ transform: `translateX(-${currentImageIndex[listing.id] * 100}%)` }}
                   >
                     {listing.images.map((image, imgIndex) => (
                       <div key={imgIndex} className="w-full h-full flex-shrink-0">
-                        <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                          Image {imgIndex + 1}
+                        <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                          <img src={image} alt="" />
                         </div>
                       </div>
                     ))}
@@ -720,37 +752,33 @@ export const TourismSection = () => {
 
                   {/* Boutons favori et partage */}
                   <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button 
+                    <button
                       onClick={() => toggleFavorite(listing.id)}
-                      className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                        favorites.has(listing.id) 
-                          ? 'bg-red-500 text-white' 
-                          : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
-                      }`}
+                      className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favorites.has(listing.id)
+                        ? 'bg-red-500 text-white'
+                        : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                        }`}
                     >
                       <Heart className={`w-4 h-4 ${favorites.has(listing.id) ? 'fill-current' : ''}`} />
-                    </button>
-                    <button className="p-2 rounded-full bg-white bg-opacity-90 text-gray-700 hover:bg-blue-500 hover:text-white transition-all duration-300">
-                      <Share2 className="w-4 h-4" />
                     </button>
                   </div>
 
                   {/* Contrôles du carousel */}
                   {listing.images.length > 1 && (
                     <>
-                      <button 
+                      <button
                         onClick={() => prevImage(listing.id, listing.images.length)}
                         className="absolute left-3 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-300 opacity-0 group-hover:opacity-100"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => nextImage(listing.id, listing.images.length)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-300 opacity-0 group-hover:opacity-100"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
-                      
+
                       {/* Indicateurs de slide */}
                       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
                         {listing.images.map((_, dotIndex) => (
@@ -760,11 +788,10 @@ export const TourismSection = () => {
                               ...prev,
                               [listing.id]: dotIndex
                             }))}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                              currentImageIndex[listing.id] === dotIndex 
-                                ? 'bg-white scale-125' 
-                                : 'bg-white bg-opacity-50'
-                            }`}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${currentImageIndex[listing.id] === dotIndex
+                              ? 'bg-white scale-125'
+                              : 'bg-white bg-opacity-50'
+                              }`}
                           />
                         ))}
                       </div>
@@ -800,7 +827,7 @@ export const TourismSection = () => {
                     {listing.amenities.slice(0, 3).map(amenity => {
                       const IconComponent = getAmenityIcon(amenity);
                       return (
-                        <span 
+                        <span
                           key={amenity}
                           className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 hover:bg-blue-100 hover:scale-105 flex items-center"
                         >
@@ -828,7 +855,7 @@ export const TourismSection = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <button
                       onClick={() => handleBooking(listing)}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
@@ -845,14 +872,14 @@ export const TourismSection = () => {
         {/* Modal de réservation */}
         {showBookingModal && selectedListing && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div 
+            <div
               className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
               data-aos="zoom-in"
             >
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <h3 className="text-2xl font-bold text-gray-900">Finaliser votre réservation</h3>
-                  <button 
+                  <button
                     onClick={() => setShowBookingModal(false)}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
@@ -863,7 +890,10 @@ export const TourismSection = () => {
 
               <div className="p-6">
                 <div className="flex items-start space-x-4 mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0"></div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0">
+                    {selectedListing.images[0] ? <img src={selectedListing.images[0]} alt="" className="w-full h-full object-cover rounded-xl" /> :
+                    <img  alt="" />}
+                  </div>
                   <div>
                     <h4 className="font-bold text-lg text-gray-900">{selectedListing.title}</h4>
                     <p className="text-gray-600 flex items-center">
@@ -1019,7 +1049,7 @@ export const TourismSection = () => {
         )}
 
         {/* Intégration IA - Suggestions personnalisées avec animations */}
-        <div 
+        <div
           className="mt-16 bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl shadow-2xl p-8 border border-blue-100"
           data-aos="fade-up"
           data-aos-delay="200"
@@ -1032,7 +1062,7 @@ export const TourismSection = () => {
               Notre IA analyse vos préférences pour des recommandations sur mesure
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
@@ -1054,26 +1084,23 @@ export const TourismSection = () => {
                 icon: "⚡"
               }
             ].map((feature, index) => (
-              <div 
+              <div
                 key={feature.title}
-                className={`p-6 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 border-l-4 ${
-                  feature.color === 'blue' ? 'border-blue-500' : 
+                className={`p-6 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 border-l-4 ${feature.color === 'blue' ? 'border-blue-500' :
                   feature.color === 'green' ? 'border-green-500' : 'border-purple-500'
-                }`}
+                  }`}
                 data-aos="zoom-in"
                 data-aos-delay={index * 200}
               >
                 <div className="text-3xl mb-4">{feature.icon}</div>
-                <div className={`font-bold ${
-                  feature.color === 'blue' ? 'text-blue-900' : 
+                <div className={`font-bold ${feature.color === 'blue' ? 'text-blue-900' :
                   feature.color === 'green' ? 'text-green-900' : 'text-purple-900'
-                } text-lg mb-2`}>
+                  } text-lg mb-2`}>
                   {feature.title}
                 </div>
-                <div className={`${
-                  feature.color === 'blue' ? 'text-blue-700' : 
+                <div className={`${feature.color === 'blue' ? 'text-blue-700' :
                   feature.color === 'green' ? 'text-green-700' : 'text-purple-700'
-                }`}>{feature.desc}</div>
+                  }`}>{feature.desc}</div>
               </div>
             ))}
           </div>

@@ -499,7 +499,7 @@ const animatePopoverText = () => {
         </Link>
 
         {/* Menu desktop */}
-        <nav className="hidden lg:flex items-center gap-2">
+        <nav className="hidden md:hidden lg:flex items-center gap-2">
           <ul className="flex items-center">
             {menuSections.slice(0, 7).map((section, index) => (
               <li key={index} className="group relative">
