@@ -40,7 +40,7 @@ const SuccessPage = () => {
   };
 
   const handleGoToDashboard = () => {
-    navigate("/dashboard");
+    navigate("/pro");
   };
 
   return (

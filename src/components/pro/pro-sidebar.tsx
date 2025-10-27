@@ -24,8 +24,6 @@ import {
   ShoppingBag,
   Leaf,
 } from "lucide-react";
-
-
 // Données de navigation (Inchangées)
 const navigation = [
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
@@ -36,7 +34,7 @@ const navigation = [
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
   { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-  // { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
+  { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
   { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
   { name: "Avis", href: "/pro/reviews", icon: Star },

@@ -32,6 +32,8 @@ export const useAuth = () => {
     login: AuthService.login.bind(AuthService),
     logout: AuthService.logout.bind(AuthService),
     register: AuthService.register.bind(AuthService),
+    signupPro: AuthService.signupPro.bind(AuthService),
+    confirmPayment: AuthService.confirmPayment.bind(AuthService),
     hasRole: AuthService.hasRole.bind(AuthService),
     refreshToken: AuthService.refreshToken.bind(AuthService),
     forgotPassword: AuthService.forgotPassword.bind(AuthService),
