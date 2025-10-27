@@ -104,26 +104,6 @@ const ProfessionalSubscriptionPage = () => {
       ],
       userTypes: ["PRESTATAIRE"],
     },
-    {
-      id: "map_display",
-      title: "Affichage sur la carte",
-      description: "Restaurants et commerces locaux",
-      price: "9,99 €",
-      period: "par mois",
-      icon: <MapPin className="h-16 w-16" />,
-      color: "orange",
-      popular: false,
-      features: [
-        "Visibilité sur la carte",
-        "Fiche établissement",
-        "Horaires d'ouverture",
-        "Promotions géolocalisées",
-        "Notifications push",
-        "Statistiques de visibilité",
-        "Badge vérifié",
-      ],
-      userTypes: ["VENDEUR", "PRESTATAIRE"],
-    },
   ];
 
   const getColorClasses = (color: string) => {
