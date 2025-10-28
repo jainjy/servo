@@ -1,10 +1,13 @@
-// components/Header.js
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import logo from '../../assets/logo.png';
+import { useNavigate, Link, useRoutes } from "react-router-dom";
+import logo from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -14,7 +17,6 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 
 // Import des icônes
 import {
@@ -25,20 +27,23 @@ import {
   ChevronDown,
   Calendar,
   CreditCard,
+  MessageCircle,
   CheckCheck,
+  CheckCircle2,
   ListCheck,
   ShoppingCart,
+  Bell,
+  Badge,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"
-import { useCart } from "@/components/contexts/CartContext";
-import Cart from "@/components/Cart";
-
+import { useAuth } from "@/hooks/useAuth";
 // Authentification et Types
-import AuthService from "@/services/authService"
+import AuthService from "@/services/authService";
 import type { User as AuthUser } from "@/types/type";
 
 // Import GSAP
 import { gsap } from "gsap";
+import Cart from "../Cart";
+import { useCart } from "../contexts/CartContext";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,14 +52,14 @@ const Header = () => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(AuthService.getCurrentUser());
-  const { logout } = useAuth()
-
+  const [user, setUser] = useState<AuthUser | null>(
+    AuthService.getCurrentUser()
+  );
+  const { logout } = useAuth();
   // Utiliser le contexte panier
   const { getCartItemsCount } = useCart();
 
   const [isCartOpen, setIsCartOpen] = useState(false);
-
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
     setRole(user?.role);
@@ -63,14 +68,17 @@ const Header = () => {
   const handleLogin = () => {
     navigate("/login");
   };
+  const handleRegister = () => {
+    navigate("/register");
+  };
 
   const handleLogout = () => {
     logout();
     setIsAuthenticated(false);
     setRole(null);
     setUser(null);
-    navigate('/');
-  }
+    navigate("/");
+  };
 
   const menuSections = [
     {
@@ -184,8 +192,8 @@ const Header = () => {
       href: "/art-commerce",
     },
     {
-        title: "TOURISME",
-        href: "/tourisme",
+      title: "TOURISME",
+      href: "/tourisme",
     },
   ];
 
@@ -197,24 +205,24 @@ const Header = () => {
     role === "admin"
       ? "/admin"
       : role === "professional"
-        ? "/pro"
-        : "/mon-compte/profil";
+      ? "/pro"
+      : "/mon-compte/profil";
 
   const initials = user
     ? (() => {
-      let base = "";
-      if (user.firstName && user.firstName.trim().length > 0) {
-        base = user.firstName.trim();
-      } else if (user.email) {
-        base = user.email.split("@")[0];
-      }
-      base = base.replace(/[^A-Za-z0-9]/g, "");
-      const two = base.slice(0, 2).toUpperCase();
-      if (two && two.length === 2) return two;
-      if (!two && user.lastName)
-        return user.lastName.slice(0, 2).toUpperCase();
-      return two || "US";
-    })()
+        let base = "";
+        if (user.firstName && user.firstName.trim().length > 0) {
+          base = user.firstName.trim();
+        } else if (user.email) {
+          base = user.email.split("@")[0];
+        }
+        base = base.replace(/[^A-Za-z0-9]/g, "");
+        const two = base.slice(0, 2).toUpperCase();
+        if (two && two.length === 2) return two;
+        if (!two && user.lastName)
+          return user.lastName.slice(0, 2).toUpperCase();
+        return two || "US";
+      })()
     : "";
 
   // Animation GSAP pour le texte du popover
@@ -233,61 +241,127 @@ const Header = () => {
     }
   }, [isPopoverOpen]);
 
-const animatePopoverText = () => {
-  const characters = "ABCDEFGHIJKstuvwxyz0123456789";
-  const textElements = popoverContentRef.current?.querySelectorAll('.animated-text') || [];
-
-  // Créer une timeline principale
-  const masterTimeline = gsap.timeline();
-
-  textElements.forEach((element, index) => {
-    const finalText = element.textContent || '';
-    
-    // Sauvegarder le texte final
-    element.setAttribute('data-final-text', finalText);
-
-    // Ajouter chaque animation à la timeline avec un délai progressif
-    masterTimeline.add(() => {
-      let currentIteration = 0;
-      const totalIterations = 5;
-      const originalText = finalText;
-
-      const scramble = () => {
-        let scrambledText = '';
-        
-        for (let i = 0; i < originalText.length; i++) {
-          if (currentIteration === totalIterations) {
-            // Dernière itération - afficher le vrai caractère
-            scrambledText += originalText[i];
-          } else if (Math.random() < 0.7 && originalText[i] !== ' ') {
-            // Caractère aléatoire
-            scrambledText += characters[Math.floor(Math.random() * characters.length)];
-          } else {
-            // Garder le caractère original (ou espace)
-            scrambledText += originalText[i];
+  // notification count for user demandes
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    // fetch user's demandes and count non-pending ones
+    (async () => {
+      try {
+        const resp = await fetch(
+          `${
+            import.meta.env.VITE_API_URL || "http://localhost:3001/api"
+          }/demandes/user/${user.id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+            },
           }
-        }
+        );
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const count = (data || []).filter(
+          (d: any) => !d.statut || !/en attente/i.test(d.statut)
+        ).length;
+        setNotifCount(count);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, [user?.id]);
 
-        element.textContent = scrambledText;
-        
-        if (currentIteration < totalIterations) {
-          currentIteration++;
-          setTimeout(scramble, 50);
+  const loadNotifications = async () => {
+    if (!user?.id) return;
+    setNotifLoading(true);
+    try {
+      const resp = await fetch(
+        `${
+          import.meta.env.VITE_API_URL || "http://localhost:3001/api"
+        }/demandes/user/${user.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+          },
         }
-      };
+      );
+      if (!resp.ok) return setNotifications([]);
+      const data = await resp.json();
+      // keep only non-pending notifications
+      const notifs = (data || []).filter(
+        (d: any) => !/en attente/i.test(d.statut || "")
+      );
+      setNotifications(notifs);
+    } catch (e) {
+      console.error("Erreur loading notifications", e);
+      setNotifications([]);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
 
-      scramble();
-    }, index * 0.02); // 0.2 seconde entre chaque élément
-  });
-};
+  const animatePopoverText = () => {
+    const characters = "ABCDEFGHIJKstuvwxyz0123456789";
+    const textElements =
+      popoverContentRef.current?.querySelectorAll(".animated-text") || [];
+
+    // Créer une timeline principale
+    const masterTimeline = gsap.timeline();
+
+    textElements.forEach((element, index) => {
+      const finalText = element.textContent || "";
+
+      // Sauvegarder le texte final
+      element.setAttribute("data-final-text", finalText);
+
+      // Ajouter chaque animation à la timeline avec un délai progressif
+      masterTimeline.add(() => {
+        let currentIteration = 0;
+        const totalIterations = 5;
+        const originalText = finalText;
+
+        const scramble = () => {
+          let scrambledText = "";
+
+          for (let i = 0; i < originalText.length; i++) {
+            if (currentIteration === totalIterations) {
+              // Dernière itération - afficher le vrai caractère
+              scrambledText += originalText[i];
+            } else if (Math.random() < 0.7 && originalText[i] !== " ") {
+              // Caractère aléatoire
+              scrambledText +=
+                characters[Math.floor(Math.random() * characters.length)];
+            } else {
+              // Garder le caractère original (ou espace)
+              scrambledText += originalText[i];
+            }
+          }
+
+          element.textContent = scrambledText;
+
+          if (currentIteration < totalIterations) {
+            currentIteration++;
+            setTimeout(scramble, 50);
+          }
+        };
+
+        scramble();
+      }, index * 0.02); // 0.2 seconde entre chaque élément
+    });
+  };
 
   const handlePopoverOpenChange = (open: boolean) => {
     setIsPopoverOpen(open);
     if (!open) {
       // Réinitialiser le texte quand le popover se ferme
-      const textElements = popoverContentRef.current?.querySelectorAll('.animated-text') || [];
+      const textElements =
+        popoverContentRef.current?.querySelectorAll(".animated-text") || [];
       textElements.forEach((element) => {
-        const finalText = element.getAttribute('data-final-text');
+        const finalText = element.getAttribute("data-final-text");
         if (finalText) {
           element.textContent = finalText;
         }
@@ -347,8 +421,9 @@ const animatePopoverText = () => {
                             {section.title}
                           </span>
                           <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${openSubmenu === section.title ? "rotate-180" : ""
-                              }`}
+                            className={`w-4 h-4 transition-transform duration-200 ${
+                              openSubmenu === section.title ? "rotate-180" : ""
+                            }`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -363,10 +438,11 @@ const animatePopoverText = () => {
                         </button>
 
                         <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${openSubmenu === section.title
-                            ? "max-h-96 opacity-100"
-                            : "max-h-0 opacity-0"
-                            }`}
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubmenu === section.title
+                              ? "max-h-96 opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
                         >
                           <div className="pb-3 px-4 space-y-2">
                             {section.items.map((item, itemIndex) => (
@@ -408,7 +484,7 @@ const animatePopoverText = () => {
             {/* Footer Mobile */}
             <div className="border-t border-gray-200 bg-gray-50 p-6 space-y-4">
               {!isAuthenticated ? (
-                <div className="space-y-3" >
+                <div className="space-y-3">
                   <Button
                     className="w-full bg-gray-900 hover:bg-gray-800 transition-all duration-200 text-white"
                     size="lg"
@@ -422,25 +498,6 @@ const animatePopoverText = () => {
                 </div>
               ) : (
                 <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-                  {/* Icône Panier dans le menu mobile */}
-                  <button
-                    onClick={() => {
-                      setIsCartOpen(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors w-full text-left"
-                  >
-                    <div className="relative">
-                      <ShoppingCart className="h-4 w-4 text-gray-700" />
-                      {getCartItemsCount() > 0 && (
-                        <Badge className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
-                          {getCartItemsCount()}
-                        </Badge>
-                      )}
-                    </div>
-                    <span className="text-sm font-medium">Panier</span>
-                  </button>
-                  
                   <Link
                     to={profilePath}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -464,6 +521,16 @@ const animatePopoverText = () => {
                   >
                     <CheckCheck className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Mes demandes </span>
+                  </Link>
+                  <Link
+                    to="/mon-compte/demandes-immobilier"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <ListCheck className="h-4 w-4 text-gray-700" />
+                    <span className="text-sm font-medium">
+                      Mes demandes immobilières
+                    </span>
                   </Link>
                   <Link
                     to="/mon-compte/payement"
@@ -567,7 +634,10 @@ const animatePopoverText = () => {
 
             {/* Desktop hamburger: Popover avec animation GSAP */}
             <div className="hidden lg:block">
-              <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
+              <Popover
+                open={isPopoverOpen}
+                onOpenChange={handlePopoverOpenChange}
+              >
                 <PopoverTrigger asChild>
                   <Button className="h-9 hover:bg-slate-800 bg-slate-900">
                     <Menu className="text-white" />
@@ -604,7 +674,10 @@ const animatePopoverText = () => {
                       {/* Sections avec items */}
                       <div className="grid grid-cols-4 place-content-center gap-10">
                         {sectionsWithItems.map((section, i) => (
-                          <div key={i} className="flex flex-col gap-2 min-w-[200px]">
+                          <div
+                            key={i}
+                            className="flex flex-col gap-2 min-w-[200px]"
+                          >
                             <span className="font-semibold animated-text">
                               {section.title}
                             </span>
@@ -676,7 +749,6 @@ const animatePopoverText = () => {
                 )}
               </Button>
             )}
-
             {!isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <Button
@@ -688,69 +760,169 @@ const animatePopoverText = () => {
                 </Button>
               </div>
             ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="hidden lg:flex p-0 w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 items-center justify-center z-50 relative">
-                  <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-gray-900 text-white text-sm font-semibold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-56 z-[1050] shadow-lg"
-                >
-                  <DropdownMenuLabel className="flex flex-col">
-                    <span className="text-sm font-medium">
-                      {user?.firstName} {user?.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </span>
-                  </DropdownMenuLabel>
-                  {role != 'user' ? <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      Tableau de bord
+              <>
+                {/* notification icon for users — opens a modal (Sheet) with notifications */}
+                {role === "user" && (
+                  <>
+                    <Sheet
+                      open={notifOpen}
+                      onOpenChange={(open) => {
+                        setNotifOpen(open);
+                        if (open) loadNotifications();
+                      }}
+                    >
+                      <SheetTrigger asChild>
+                        <button className="relative mr-3 hidden lg:flex items-center">
+                          <Bell className="w-5 h-5 text-gray-700" />
+                          {notifCount > 0 && (
+                            <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                              {notifCount}
+                            </span>
+                          )}
+                        </button>
+                      </SheetTrigger>
+
+                      <SheetContent side="right" className="w-[380px] p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-semibold">
+                            Notifications
+                          </h4>
+                        </div>
+
+                        {notifLoading ? (
+                          <div className="text-center text-sm text-gray-500">
+                            Chargement...
+                          </div>
+                        ) : notifications.length === 0 ? (
+                          <div className="text-center text-sm text-gray-500">
+                            Aucune notification.
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {notifications.map((n) => (
+                              <div
+                                key={n.id}
+                                className="p-3 bg-white rounded-lg border"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-800">
+                                      {n.titre || "Nouvelle notification"}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {n.statut} —{" "}
+                                      {n.propertyId ? "Bien lié" : "Général"}
+                                    </div>
+                                  </div>
+                                  <div className="text-xs text-gray-400">
+                                    {n.createdAt
+                                      ? new Date(
+                                          n.createdAt
+                                        ).toLocaleDateString("fr-FR")
+                                      : ""}
+                                  </div>
+                                </div>
+                                {n.propertyId && (
+                                  <div className="mt-3">
+                                    <a
+                                      href={`/immobilier/${n.propertyId}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-xs text-blue-600 hover:underline"
+                                    >
+                                      Voir le bien
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </SheetContent>
+                    </Sheet>
+                  </>
+                )}
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="hidden lg:flex p-0 w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 items-center justify-center z-50 relative">
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className="bg-gray-900 text-white text-sm font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 z-[1050] shadow-lg"
+                  >
+                    <DropdownMenuLabel className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {user?.firstName} {user?.lastName}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {user?.email}
+                      </span>
+                    </DropdownMenuLabel>
+                    {role != "user" ? (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                          <UserIcon className="mr-2 h-4 w-4" />
+                          Tableau de bord
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                          <UserIcon className="mr-2 h-4 w-4" />
+                          Profil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/mon-compte/demandes")}
+                        >
+                          <ListCheck className="mr-2 h-4 w-4" />
+                          Mes demandes
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate("/mon-compte/demandes-immobilier")
+                          }
+                        >
+                          <ListCheck className="mr-2 h-4 w-4" />
+                          Mes demandes immobilières
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/mon-compte/reservation")}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Réservations
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/mon-compte/payement")}
+                        >
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Paiements
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Déconnexion
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator /> </> : <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      Profil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
-                      <ListCheck className="mr-2 h-4 w-4" />
-                      Mes demandes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Réservations
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Paiements
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>}
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Déconnexion
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <MobileMenu />
+              </>
             )}
-            <MobileMenu />
           </div>
         </div>
       </header>
-
       {/* Composant Cart */}
-      <Cart
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 };

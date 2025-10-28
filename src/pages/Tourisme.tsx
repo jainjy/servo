@@ -892,7 +892,7 @@ export const TourismSection = () => {
                 <div className="flex items-start space-x-4 mb-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0">
                     {selectedListing.images[0] ? <img src={selectedListing.images[0]} alt="" className="w-full h-full object-cover rounded-xl" /> :
-                    <img  alt="" />}
+                    <img  alt="images non disponible" />}
                   </div>
                   <div>
                     <h4 className="font-bold text-lg text-gray-900">{selectedListing.title}</h4>

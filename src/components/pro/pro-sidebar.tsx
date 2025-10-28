@@ -37,6 +37,7 @@ const navigation = [
   { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
   { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
+  { name: "Liste demande immobilier", href: "/pro/demandes-immobilier", icon: Building2 },
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
 

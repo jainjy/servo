@@ -42,6 +42,8 @@ import {
   FileText,
 } from "lucide-react";
 import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const styles = {
   section: {
@@ -245,11 +247,15 @@ const normalizeAddress = (address: string) => {
 const ModalDemandeVisite = ({
   open,
   onClose,
-  property
+  property,
+  onSuccess,
+  isAlreadySent,
 }: {
   open: boolean;
   onClose: () => void;
   property: any;
+  onSuccess?: (propertyId: string) => void;
+  isAlreadySent?: boolean;
 }) => {
   const [formData, setFormData] = useState({
     nomPrenom: "",
@@ -259,21 +265,83 @@ const ModalDemandeVisite = ({
     dateSouhaitee: "",
     heureSouhaitee: "",
   });
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { user, isAuthenticated } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici vous pouvez ajouter la logique pour envoyer la demande
-    console.log("Demande de visite:", { property, ...formData });
-    // Réinitialiser le formulaire et fermer le modal
-    setFormData({
-      nomPrenom: "",
-      email: "",
-      telephone: "",
-      message: "",
-      dateSouhaitee: "",
-      heureSouhaitee: "",
-    });
-    onClose();
+    if (!property) return;
+    if (isAlreadySent) {
+      toast({ title: "Demande déjà envoyée", description: "Vous avez déjà envoyé une demande pour ce bien." });
+      return;
+    }
+
+    if (!isAuthenticated || !user) {
+      toast({ title: 'Connexion requise', description: 'Veuillez vous connecter pour demander une visite.' });
+      return;
+    }
+
+    setLoadingSubmit(true);
+    try {
+      // Récupérer un service pertinent (préférence pour un service lié à l'immobilier/visite)
+      const servicesResp = await api.get('/services');
+      const services = servicesResp.data || [];
+
+      if (!Array.isArray(services) || services.length === 0) {
+        toast({ title: 'Aucun service', description: 'Aucun service disponible sur le serveur. Créez un service ou configurez-en un pour les visites.' });
+        setLoadingSubmit(false);
+        return;
+      }
+
+      // Essayer de trouver un service lié aux visites ou à l'immobilier
+      let chosenService = services.find((s: any) => /visite|visiter/i.test(String(s.name || s.libelle || '')));
+      if (!chosenService) {
+        chosenService = services.find((s: any) => /immobilier|property|bien/i.test(String(s.name || s.libelle || '')));
+      }
+      if (!chosenService) {
+        // fallback: first service
+        chosenService = services[0];
+      }
+
+      const payload = {
+        // backend expects serviceId and createdById
+        serviceId: chosenService.id,
+        createdById: user.id,
+        propertyId: property?.id,
+        contactNom: formData.nomPrenom,
+        contactEmail: formData.email,
+        contactTel: formData.telephone,
+        description: `Demande visite pour le bien: ${property?.title || property?.id} (${property?.id}). ${formData.message || ''}`,
+        lieuAdresse: property?.address || property?.city || '',
+        dateSouhaitee: formData.dateSouhaitee,
+        heureSouhaitee: formData.heureSouhaitee,
+        // nombreArtisans, optionAssurance etc left as defaults
+      };
+
+      await api.post('/demandes', payload);
+
+      // Notify parent that a request was sent
+      onSuccess?.(String(property.id));
+
+      toast({ title: "Demande envoyée", description: "Votre demande de visite a bien été envoyée." });
+
+      // Réinitialiser le formulaire et fermer le modal
+      setFormData({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+      });
+      onClose();
+    } catch (err: any) {
+      console.error('Erreur en envoyant la demande de visite', err);
+      toast({ title: "Erreur", description: err?.response?.data?.error || err?.message || 'Impossible d\'envoyer la demande. Réessayez.' });
+    } finally {
+      setLoadingSubmit(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -369,20 +437,30 @@ const ModalDemandeVisite = ({
                     type="date"
                     value={formData.dateSouhaitee}
                     onChange={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
                     required
                     className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    name="heureSouhaitee"
-                    type="time"
-                    value={formData.heureSouhaitee}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+                    <select
+                      id="heureSouhaitee"
+                      name="heureSouhaitee"
+                      value={formData.heureSouhaitee}
+                      onChange={handleChange}
+                      required
+                      className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none hover:bg-white"
+                    >
+                      <option value="">Sélectionnez un créneau</option>
+                      <option value="08:00-10:00">Matin : 08h00 - 10h00</option>
+                      <option value="10:00-12:00">Matin : 10h00 - 12h00</option>
+                      <option value="14:00-16:00">Après-midi : 14h00 - 16h00</option>
+                      <option value="16:00-18:00">Après-midi : 16h00 - 18h00</option>
+                      <option value="18:00-20:00">Soir : 18h00 - 20h00</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -417,10 +495,11 @@ const ModalDemandeVisite = ({
             <button
               type="submit"
               onClick={handleSubmit}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+              disabled={loadingSubmit || !!isAlreadySent}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <Calendar className="w-4 h-4" />
-              Demander la visite
+              {loadingSubmit ? 'Envoi...' : isAlreadySent ? 'Demande déjà envoyée' : 'Demander la visite'}
             </button>
           </div>
         </div>
@@ -459,13 +538,46 @@ const PropertyListings = (
   const [loading, setLoading] = useState({ buy: true, rent: true });
   const [error, setError] = useState<string | null>(null);
 
+  // Loading state for user's demandes
+  const [demandesLoading, setDemandesLoading] = useState(false);
+
   // Carousel/favorite state
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [currentImageIndexes, setCurrentImageIndexes] = useState<Record<string, number>>({});
+  const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+
+  // Auth (to load user's demandes and mark sent requests)
+  const { user, isAuthenticated } = useAuth();
+
+  // Load user's demandes to persist "demande déjà envoyée" state
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return;
+
+    let mounted = true;
+    const loadUserDemandes = async () => {
+      setDemandesLoading(true);
+      try {
+        const resp = await api.get(`/demandes/user/${user.id}`);
+        const demandes = resp.data || [];
+        const map: Record<string, boolean> = {};
+        demandes.forEach((d: any) => {
+          if (d && d.propertyId) map[String(d.propertyId)] = true;
+        });
+        if (mounted) setSentRequests(prev => ({ ...prev, ...map }));
+      } catch (err) {
+        console.error('Unable to load user demandes', err);
+      } finally {
+        if (mounted) setDemandesLoading(false);
+      }
+    };
+
+    loadUserDemandes();
+    return () => { mounted = false; };
+  }, [isAuthenticated, user?.id]);
 
   const fetchProperties = async () => {
     try {
@@ -646,6 +758,10 @@ const PropertyListings = (
 
   const handleDemanderVisite = (property: any, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (sentRequests?.[property?.id]) {
+      toast({ title: "Demande déjà envoyée", description: "Vous avez déjà envoyé une demande pour ce bien." });
+      return;
+    }
     setSelectedProperty(property);
     setModalOpen(true);
   };
@@ -765,10 +881,11 @@ const PropertyListings = (
                           {/* Boutons d'action */}
                           <div className="flex gap-1">
                             <button
-                              className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition"
+                              className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition disabled:opacity-60"
                               onClick={(e) => handleDemanderVisite(property, e)}
+                              disabled={!!sentRequests?.[property?.id]}
                             >
-                              Demander visite
+                              {sentRequests?.[property?.id] ? 'Demande déjà envoyée' : 'Demander visite'}
                             </button>
                             <button
                               className="border-2 p-2 rounded-md"
@@ -799,6 +916,8 @@ const PropertyListings = (
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           property={selectedProperty}
+          isAlreadySent={selectedProperty ? !!sentRequests?.[selectedProperty.id] : false}
+          onSuccess={(id: string) => setSentRequests(prev => ({ ...prev, [id]: true }))}
         />
       </section>
     );
@@ -864,6 +983,13 @@ const PropertyListings = (
                 <Star className="h-4 w-4 mr-2 text-yellow-500" />
                 VENDRE / LOUER SON BIEN
               </motion.button>
+
+              {demandesLoading && (
+                <div className="inline-flex items-center ml-3 text-sm text-muted-foreground">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                  Chargement demandes...
+                </div>
+              )}
 
               {/* Overlay flouté + Card */}
               <AnimatePresence>
@@ -1168,13 +1294,13 @@ const PropertyListings = (
                     <div className="relative">
                       {/* Zone image avec navigation */}
                       <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
-                        
+
                         <img
                           src={images[idx % totalImages]}
                           alt={property.title}
                           className="w-full h-full object-cover transition-transform duration-500"
                         />
-                        
+
 
                         {/* Badge type */}
                         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold">
@@ -1279,10 +1405,11 @@ const PropertyListings = (
                         {/* Boutons d'action */}
                         <div className="flex gap-1">
                           <button
-                            className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition"
+                            className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition disabled:opacity-60 disabled:bg-orange-600"
                             onClick={(e) => handleDemanderVisite(property, e)}
+                            disabled={!!sentRequests?.[property?.id]}
                           >
-                            Demander visite
+                            {sentRequests?.[property?.id] ? 'En attente' : 'Demander visite'}
                           </button>
                           <button
                             className="border-2 p-2 rounded-md"
@@ -1307,6 +1434,8 @@ const PropertyListings = (
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         property={selectedProperty}
+        isAlreadySent={selectedProperty ? !!sentRequests?.[selectedProperty.id] : false}
+        onSuccess={(id: string) => setSentRequests(prev => ({ ...prev, [id]: true }))}
       />
 
       {/* Modal de sélection de localisation */}
