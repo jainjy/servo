@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import Select from 'react-select';
+
 import {
   ChevronLeft,
   ChevronRight,
@@ -29,6 +29,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { prestationsData, prestationTypesByCategory } from "./travauxData";
 import { useLocation } from "react-router-dom";
+import api from "@/lib/api";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -40,8 +41,29 @@ const backgroundImages = {
     "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
 };
 
+const categories = {
+  interieurs: {
+    id: "interieurs",
+    label: "PRESTATIONS INTÉRIEURES",
+    description: "Transformez votre intérieur avec nos experts",
+    sectionId: "Prestations intérieures",
+  },
+  exterieurs: {
+    id: "exterieurs",
+    label: "PRESTATIONS EXTÉRIEURES",
+    description: "Aménagez vos espaces extérieurs",
+    sectionId: "Prestations extérieures",
+  },
+  constructions: {
+    id: "constructions",
+    label: "CONSTRUCTIONS",
+    description: "Bâtissez votre projet de A à Z",
+    sectionId: "Constructions",
+  },
+};
+
 // Modal pour les photos
-const PhotosModal = ({ isOpen, onClose, prestation }) => {
+export const PhotosModal = ({ isOpen, onClose, prestation }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
@@ -162,7 +184,7 @@ const PhotosModal = ({ isOpen, onClose, prestation }) => {
 };
 
 // Modal pour le devis
-const DevisModal = ({ isOpen, onClose, prestation }) => {
+export const DevisModal = ({ isOpen, onClose, prestation }) => {
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -222,7 +244,9 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
               <h2 className="text-xl font-bold text-gray-900">
                 Demande de Devis
               </h2>
-              <p className="text-gray-600 text-xs lg:text-sm">{prestation.title}</p>
+              <p className="text-gray-600 text-xs lg:text-sm">
+                {prestation.title}
+              </p>
             </div>
           </div>
           <Button
@@ -364,7 +388,7 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
             <h3 className="font-semibold text-blue-900 mb-2">
               Prestation sélectionnée
             </h3>
-            <p className="text-blue-800 text-sm">{prestation.title}</p>
+            <p className="text-blue-800 text-sm">{prestation.libelle}</p>
             <p className="text-blue-600 text-xs">{prestation.description}</p>
           </div>
 
@@ -384,7 +408,6 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
             >
               Annuler
             </Button>
-
           </div>
         </form>
       </div>
@@ -392,14 +415,16 @@ const DevisModal = ({ isOpen, onClose, prestation }) => {
   );
 };
 
-// Composant pour une section individuelle
-const PrestationSection = ({ category, isActive }) => {
-  const [selectedType, setSelectedType] = useState("TOUS");
-  const [location, setLocation] = useState("");
-  const [favorites, setFavorites] = useState({});
-  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
-  const [showAllPrestations, setShowAllPrestations] = useState(false);
+// Composant principal combiné
+const IntelligibleSection = ({ showAllPrestations }) => {
+  const location = useLocation();
+  const [categorie, setCategorie] = useState("interieurs");
+  const [servicesCategorie, setServicesCategorie] = useState([]);
 
+  // États pour la section de prestations
+  const [selectedType, setSelectedType] = useState("TOUS");
+  const [searchFilter, setSearchFilter] = useState("");
+  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [photosModal, setPhotosModal] = useState({
     isOpen: false,
     prestation: null,
@@ -409,46 +434,42 @@ const PrestationSection = ({ category, isActive }) => {
     prestation: null,
   });
 
-  const categories = {
-    interieurs: {
-      id: "interieurs",
-      label: "PRESTATIONS INTÉRIEURES",
-      description: "Transformez votre intérieur avec nos experts",
-      sectionId: "prestation-interieur",
-    },
-    exterieurs: {
-      id: "exterieurs",
-      label: "PRESTATIONS EXTÉRIEURES",
-      description: "Aménagez vos espaces extérieurs",
-      sectionId: "prestation-exterieur",
-    },
-    constructions: {
-      id: "constructions",
-      label: "CONSTRUCTIONS",
-      description: "Bâtissez votre projet de A à Z",
-      sectionId: "construction",
-    },
+  const sections = [
+    { id: "interieurs", label: "Intérieur", icon: HomeIcon },
+    { id: "exterieurs", label: "Extérieur", icon: TreePalm },
+    { id: "constructions", label: "Construction", icon: Building },
+  ];
+
+  const currentCategory = categories[categorie];
+
+  const fetchServicesCategorie = async (cat) => {
+    try {
+      const response = await api.get(`/categories/name/${cat}/services`);
+      console.log("Catégories de services:", response.data);
+      setServicesCategorie(response.data);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des catégories de services:",
+        error
+      );
+    }
   };
-
-  const currentCategory = categories[category];
-
+  const search=async(e)=>{
+    setSearchFilter(e.target.value)
+    
+  }
   useEffect(() => {
-    const indexes = {};
-    Object.values(prestationsData)
-      .flat()
-      .forEach((prestation) => {
-        indexes[prestation.id] = 0;
-      });
-    setCurrentImageIndexes(indexes);
-  }, []);
+    const params = new URLSearchParams(location.search);
+    const cat = params.get("categorie");
 
-  const toggleFavorite = (prestationId, e) => {
-    e?.stopPropagation();
-    setFavorites((prev) => ({
-      ...prev,
-      [prestationId]: !prev[prestationId],
-    }));
-  };
+    // Vérifie si la catégorie extraite correspond à une section valide
+    const validIds = sections.map((s) => s.id);
+    const validCategorie = validIds.includes(cat) ? cat : "interieurs";
+
+    setCategorie(cat);
+    fetchServicesCategorie(categories[validCategorie].sectionId);
+  }, [location.search]);
+
 
   const nextImage = (prestationId, totalImages, e) => {
     e?.stopPropagation();
@@ -482,19 +503,17 @@ const PrestationSection = ({ category, isActive }) => {
     setDevisModal({ isOpen: false, prestation: null });
   };
 
-  const currentPrestations = prestationsData[category] || [];
+  const currentPrestations = servicesCategorie?.services || [];
   const filteredPrestations =
     selectedType === "TOUS"
       ? currentPrestations
       : currentPrestations.filter(
-        (prestation) => prestation.type === selectedType
-      );
+          (prestation) => prestation.libelle === selectedType
+        );
 
   const displayedPrestations = showAllPrestations
     ? filteredPrestations
-    : filteredPrestations.slice(0, 4);
-
-  if (!isActive) return null;
+    : filteredPrestations;
 
   return (
     <>
@@ -505,7 +524,7 @@ const PrestationSection = ({ category, isActive }) => {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.95)), url(${backgroundImages[category]})`,
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.95)), url(${backgroundImages[categorie]})`,
           }}
         />
 
@@ -529,43 +548,11 @@ const PrestationSection = ({ category, isActive }) => {
                 <div className="grid lg:flex gap-3">
                   <div className="flex-1">
                     <div className="relative">
-                      <select
-                        className="w-full rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 p-4 bg-white shadow-sm hover:shadow-md appearance-none cursor-pointer pr-12 text-gray-700 font-medium hover:border-gray-300"
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value)}
-                      >
-                        <option value="TOUS" className="text-gray-400">
-                          Tous les types de prestations
-                        </option>
-                        {prestationTypesByCategory[category]?.map((type) => {
-                          return (
-                            <option key={type.value} value={type.value} className="">
-                              {type.label}
-                            </option>
-                          );
-                        })}
-                      </select>
-
-                      {/* Flèche animée */}
-                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none transition-transform duration-300 group-hover:rotate-180">
-                        <svg
-                          className="w-5 h-5 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="relative">
                       <Input
-                        placeholder="Ville, code postal..."
+                        placeholder="rechercher"
                         className="pl-12 rounded-2xl border-2 text-center border-gray-200 focus:border-blue-500 transition-all duration-300 p-4 bg-white shadow-sm"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
+                        value={searchFilter}
+                        onChange={(e) => search(e)}
                       />
                       <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     </div>
@@ -574,24 +561,34 @@ const PrestationSection = ({ category, isActive }) => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 items-center">
+            <div className="flex flex-wrap gap-3 items-center h-28 overflow-y-auto">
               <span className="text-sm font-semibold text-gray-700 mr-2 flex items-center gap-2">
                 <BookCheck className="h-4 w-4" />
-                CATÉGORIES :
+                LISTES :
               </span>
-              {prestationTypesByCategory[category]?.map((type) => {
-                const IconComponent = type.icon;
+              <button
+                key={"tous"}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
+                  selectedType === "TOUS"
+                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
+                }`}
+                onClick={() => setSelectedType("TOUS")}
+              >
+                {"TOUS"}
+              </button>
+              {servicesCategorie?.services?.map((type) => {
                 return (
                   <button
-                    key={type.value}
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${selectedType === type.value
-                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
-                      }`}
-                    onClick={() => setSelectedType(type.value)}
+                    key={type.id}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
+                      selectedType === type.libelle
+                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
+                    }`}
+                    onClick={() => setSelectedType(type.libelle)}
                   >
-                    {IconComponent && <IconComponent className="h-4 w-4" />}
-                    {type.label}
+                    {type.libelle}
                   </button>
                 );
               })}
@@ -602,11 +599,6 @@ const PrestationSection = ({ category, isActive }) => {
             {displayedPrestations.map((prestation) => {
               const currentImageIndex = currentImageIndexes[prestation.id] || 0;
               const totalImages = prestation.images.length;
-              const isFavorite = favorites[prestation.id];
-              const prestationType = prestationTypesByCategory[category]?.find(
-                (t) => t.value === prestation.type
-              );
-              const IconComponent = prestationType?.icon;
 
               return (
                 <Card
@@ -616,7 +608,7 @@ const PrestationSection = ({ category, isActive }) => {
                   <div className="relative">
                     <div className="relative h-56 overflow-hidden rounded-t-3xl">
                       <img
-                        src={prestation.images[currentImageIndex]}
+                        src={prestation.images[0]}
                         alt={prestation.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
@@ -624,8 +616,7 @@ const PrestationSection = ({ category, isActive }) => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                       <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg flex items-center gap-2">
-                        {IconComponent && <IconComponent className="h-3 w-3" />}
-                        {prestationType?.label}
+                        {prestation.libelle}
                       </div>
 
                       {totalImages > 1 && (
@@ -661,13 +652,14 @@ const PrestationSection = ({ category, isActive }) => {
                     <div className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex gap-2">
-                          <Button
+                          
+                          {prestation.images.length>0 && <Button
                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
                             onClick={() => openPhotosModal(prestation)}
                           >
                             <Camera className="h-3.5 w-3.5 mr-1.5" />
                             Photos
-                          </Button>
+                          </Button>}
                           <Button
                             className=" text-white font-semibold bg-slate-900  py-2.5 px-4 rounded-xl text-xs hover:bg-black transition-all duration-300 hover:shadow-lg"
                             onClick={() => openDevisModal(prestation)}
@@ -683,21 +675,6 @@ const PrestationSection = ({ category, isActive }) => {
               );
             })}
           </div>
-
-          {!showAllPrestations && filteredPrestations.length > 4 && (
-            <div className="text-center mb-12">
-              <Button
-                variant="outline"
-                className="rounded-2xl border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-lg px-10 py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
-                onClick={() => setShowAllPrestations(true)}
-              >
-                <span className="bg-blue-600  bg-clip-text text-transparent font-bold">
-                  VOIR PLUS DE PRESTATIONS
-                </span>
-                <ArrowRight className="ml-3 h-5 w-5 text-blue-600 group-hover:text-purple-600 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </div>
-          )}
 
           <div className="text-center">
             <div className="inline-flex items-center gap-4 bg-slate-950 px-8 py-4 rounded-2xl shadow-2xl">
@@ -731,44 +708,4 @@ const PrestationSection = ({ category, isActive }) => {
   );
 };
 
-// Composant principal avec navigation sans scroll
-const IntelligiblesSection = () => {
-  const [activeSection, setActiveSection] = useState("interieurs");
-  const location = useLocation();
-  const [categorie, setCategorie] = useState("");
-
-  const sections = [
-    { id: "interieurs", label: "Intérieur", icon: HomeIcon },
-    { id: "exterieurs", label: "Extérieur", icon: TreePalm },
-    { id: "constructions", label: "Construction", icon: Building },
-  ];
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const cat = params.get("categorie");
-
-    // Vérifie si la catégorie extraite correspond à une section valide
-    const validIds = sections.map((s) => s.id);
-    const validCategorie = validIds.includes(cat) ? cat : "interieurs"; // 👈 défaut ici
-
-    setCategorie(validCategorie);
-    setActiveSection(validCategorie);
-  }, [location.search]);
-
-  return (
-    <div id="intelligibles" className="relative">
-      {/* Sections de contenu */}
-      <div className="relative">
-        {sections.map((section) => (
-          <PrestationSection
-            key={section.id}
-            category={section.id}
-            isActive={activeSection === section.id}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default IntelligiblesSection;
+export default IntelligibleSection;

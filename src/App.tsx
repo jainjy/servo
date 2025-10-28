@@ -201,7 +201,7 @@ const App = () => (
             <Route path="/mon-compte">
               <Route index element={<MonComptePage />} />
               <Route path="payement" element={<PaiementPage />} />
-              <Route path="profil" element={<ProfilPage />} />
+              <Route path="profil" element={<MonComptePage />} />
               <Route path="reservation" element={<ReservationPage />} />
               <Route path="demandes" element={<MesDemande />} />
               <Route path="demandes/message" element={<DemandeMessage />} />
