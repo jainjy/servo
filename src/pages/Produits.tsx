@@ -1,6 +1,8 @@
+// pages/Produits.js
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import '/fonts/Azonix.otf'
 import {
   Search,
@@ -36,112 +38,11 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
+import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
-
-// Composant Modal pour afficher les produits d'une catégorie
-const CategoryModal = ({ isOpen, onClose, category, products }) => {
-  if (!isOpen || !category) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#0052FF]/10">
-              <category.icon className="h-6 w-6 text-[#0052FF]" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-[#0A0A0A]">
-                {category.name}
-              </h2>
-              <p className="text-[#5A6470]">{category.description}</p>
-            </div>
-          </div>
-          <Button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-            variant="ghost"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-
-        <div className="p-6">
-          {products && products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow">
-                  {product.images && product.images.length > 0 ? (
-                    <div
-                      className="w-full h-48 bg-cover bg-center rounded-lg mb-4"
-                      style={{ backgroundImage: `url(${product.images[0]})` }}
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-4 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-primary/40" />
-                    </div>
-                  )}
-
-                  <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                    {product.name}
-                  </h3>
-
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary">
-                      €{product.price}
-                    </span>
-                    <Badge variant={product.quantity > 0 ? "default" : "destructive"}>
-                      {product.quantity > 0 ? "En stock" : "Rupture"}
-                    </Badge>
-                  </div>
-
-                  {product.vendor?.companyName && (
-                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>{product.vendor.companyName}</span>
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit trouvé</h3>
-              <p className="text-muted-foreground">
-                Aucun produit disponible dans cette catégorie pour le moment.
-              </p>
-            </div>
-          )}
-
-          <div className="bg-[#F6F8FA] rounded-2xl p-6 mt-8">
-            <h3 className="text-lg font-semibold text-[#0A0A0A] mb-3 flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#00C2A8]" />
-              Service personnalisé
-            </h3>
-            <p className="text-[#5A6470] mb-4">
-              Nos experts sont disponibles pour vous conseiller sur cette catégorie de produits.
-            </p>
-            <div className="flex gap-3">
-              <Button className="flex-1 bg-[#0052FF] hover:bg-[#003EE6] text-white">
-                <Phone className="h-4 w-4 mr-2" />
-                Appeler
-              </Button>
-              <Button className="flex-1 bg-[#00C2A8] hover:bg-[#00A890] text-white">
-                <Calendar className="h-4 w-4 mr-2" />
-                Rendez-vous
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Composant Contact Modal
 const ContactModal = ({ isOpen, onClose, type }) => {
@@ -231,34 +132,18 @@ const ContactModal = ({ isOpen, onClose, type }) => {
   );
 };
 
-// Composant Badge
-const Badge = ({ children, variant = "default" }) => {
-  const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-  const variantClasses = {
-    default: "bg-primary/10 text-primary",
-    destructive: "bg-destructive/10 text-destructive",
-    outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-    secondary: "bg-[#0052FF]/10 text-[#0052FF]"
-  };
-
-  return (
-    <span className={`${baseClasses} ${variantClasses[variant]}`}>
-      {children}
-    </span>
-  );
-};
-
 const Produits = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactModalType, setContactModalType] = useState("contact");
-  const [categoryProducts, setCategoryProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [categoryCounts, setCategoryCounts] = useState({});
+  
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addToCart } = useCart(user);
 
   // Charger les produits et catégories au montage du composant
   useEffect(() => {
@@ -307,22 +192,19 @@ const Produits = () => {
     await fetchProducts();
   };
 
-  const handleCategoryClick = async (category, section) => {
-    setSelectedCategory({ ...category, section });
-    try {
-      const response = await api.get('/products', {
-        params: {
-          category: category.name,
-          status: 'active'
-        }
-      });
-      setCategoryProducts(response.data.products);
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error('Erreur lors du chargement des produits de la catégorie:', error);
-      setCategoryProducts([]);
-      setIsModalOpen(true);
-    }
+  // CORRECTION : Ne pas passer les composants React dans l'état de navigation
+  const handleCategoryClick = (category, section) => {
+    // Créer un objet simple sans composants React
+    const categoryData = {
+      name: category.name,
+      description: category.description,
+      image: category.image,
+      section: section
+    };
+    
+    navigate(`/produits/categorie/${encodeURIComponent(category.name)}`, {
+      state: categoryData
+    });
   };
 
   const handleContactClick = (type) => {
@@ -335,53 +217,53 @@ const Produits = () => {
     return categoryCounts[categoryName] || 0;
   };
 
-  // Catégories basées sur les données de l'API
+  // CORRECTION : Stocker les noms d'icônes au lieu des composants
   const equipmentCategories = [
     {
       name: "Équipements de chauffage",
-      icon: Flame,
+      iconName: "Flame",
       description: "Chauffage et climatisation",
       image: "/equipement/chauffage.jfif"
     },
     {
       name: "Électroménager",
-      icon: Zap,
+      iconName: "Zap",
       description: "Appareils ménagers modernes",
       image: "/equipement/electroménager.jfif"
     },
     {
       name: "Meubles",
-      icon: Sofa,
+      iconName: "Sofa",
       description: "Meubles design et fonctionnels",
       image: "/equipement/Meubles.jfif"
     },
     {
       name: "Décoration",
-      icon: Palette,
+      iconName: "Palette",
       description: "Décorations intérieures",
       image: "/equipement/Decoration.jfif"
     },
     {
       name: "Jardinage",
-      icon: Sprout,
+      iconName: "Sprout",
       description: "Équipement de jardin",
       image: "/equipement/Équipement_de_jardin.jfif"
     },
     {
       name: "Outillage",
-      icon: Wrench,
+      iconName: "Wrench",
       description: "Outils professionnels",
       image: "/equipement/Outils_professionnels.jfif"
     },
     {
       name: "Sécurité maison",
-      icon: Lock,
+      iconName: "Lock",
       description: "Systèmes de sécurité",
       image: "/equipement/Systèmes_de_sécurité.jfif"
     },
     {
       name: "Luminaires",
-      icon: Lamp,
+      iconName: "Lamp",
       description: "Éclairage intérieur et extérieur",
       image: "/equipement/Éclairage_intérieur_et_extérieur.jfif"
     },
@@ -390,49 +272,49 @@ const Produits = () => {
   const materialsCategories = [
     {
       name: "Matériaux de construction",
-      icon: Warehouse,
+      iconName: "Warehouse",
       description: "Matériaux de base",
       image: "/materiaux/Matériaux_de_construction.jfif"
     },
     {
       name: "Isolation",
-      icon: Thermometer,
+      iconName: "Thermometer",
       description: "Isolation thermique et phonique",
       image: "/materiaux/Isolation thermique et phonique.jfif"
     },
     {
       name: "Revêtements de sol",
-      icon: Square,
+      iconName: "Square",
       description: "Parquet, carrelage, moquette",
       image: "/materiaux/Parquet, carrelage, moquette.jfif"
     },
     {
       name: "Carrelage",
-      icon: Square,
+      iconName: "Square",
       description: "Carreaux et faïence",
       image: "/materiaux/Carreaux et faïence.jfif"
     },
     {
       name: "Bois et panneaux",
-      icon: TreePine,
+      iconName: "TreePine",
       description: "Bois massif et dérivés",
       image: "/materiaux/Bois massif et dérivés.jfif"
     },
     {
       name: "Menuiserie",
-      icon: DoorClosed,
+      iconName: "DoorClosed",
       description: "Portes et fenêtres",
       image: "/materiaux/Portes et fenêtres.jfif"
     },
     {
       name: "Plomberie",
-      icon: Droplets,
+      iconName: "Droplets",
       description: "Tuyauterie et sanitaires",
       image: "/materiaux/Tuyauterie et sanitaires.jfif"
     },
     {
       name: "Électricité",
-      icon: Zap,
+      iconName: "Zap",
       description: "Câbles et appareillages",
       image: "/materiaux/Électricité.jfif"
     },
@@ -441,53 +323,63 @@ const Produits = () => {
   const designCategories = [
     {
       name: "Peinture & Revêtements",
-      icon: PaintBucket,
+      iconName: "PaintBucket",
       description: "Peintures et finitions murales",
       image: "/design/Peinture & Revêtements.jfif"
     },
     {
       name: "Mobilier Design",
-      icon: Sofa,
+      iconName: "Sofa",
       description: "Meubles contemporains et design",
       image: "/design/Meubles contemporains et design.jfif"
     },
     {
       name: "Décoration Murale",
-      icon: Brush,
+      iconName: "Brush",
       description: "Éléments décoratifs muraux",
       image: "/design/Éléments décoratifs muraux.jfif"
     },
     {
       name: "Luminaires Design",
-      icon: Lamp,
+      iconName: "Lamp",
       description: "Éclairage design et contemporain",
       image: "/design/Éclairage design et contemporain.jfif"
     },
     {
       name: "Textiles Décoratifs",
-      icon: Wand2,
+      iconName: "Wand2",
       description: "Tissus et textiles d'ameublement",
       image: "/design/Tissus et textiles d'ameublement.jfif"
     },
     {
       name: "Accessoires Déco",
-      icon: Sparkles,
+      iconName: "Sparkles",
       description: "Accessoires de décoration",
       image: "/design/Accessoires de décoration.jfif"
     },
     {
       name: "Art & Tableaux",
-      icon: Palette,
+      iconName: "Palette",
       description: "Œuvres d'art et reproductions",
       image: "/design/Œuvres d'art et reproductions.jfif"
     },
     {
       name: "Rangements Design",
-      icon: Warehouse,
+      iconName: "Warehouse",
       description: "Solutions de rangement esthétiques",
       image: "/design/Solutions de rangement esthétiques.jfif"
     },
   ];
+
+  // Fonction pour obtenir l'icône par nom
+  const getIconByName = (iconName) => {
+    const icons = {
+      Flame, Zap, Sofa, Palette, Sprout, Wrench, Lock, Lamp,
+      Warehouse, Thermometer, Square, TreePine, DoorClosed, Droplets,
+      Brush, Wand2, PaintBucket, Home, Construction
+    };
+    return icons[iconName] || Package;
+  };
 
   // Filtrer les catégories basées sur la recherche
   const filteredEquipment = equipmentCategories.filter(
@@ -512,22 +404,15 @@ const Produits = () => {
     <div className="min-h-screen relative pt-16 overflow-hidden bg-[#F6F8FA]">
       {/* Background Image avec overlay */}
       <div className="absolute inset-0">
-        {/* Image de fond */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
           }}
         />
-
-        {/* Overlay par-dessus */}
         <div className="absolute inset-0 bg-black bg-opacity-50" />
       </div>
 
-
-
-
-      {/* Overlay supplémentaire pour mieux lire le texte */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#F6F8FA]/50 to-[#F6F8FA]/30 z-1" />
 
       {/* Éléments décoratifs animés */}
@@ -548,7 +433,6 @@ const Produits = () => {
       </div>
 
       <div className="relative z-10">
-
         <section className="container mx-auto px-4 py-8">
           {/* En-tête avec animation */}
           <div className="bg-white py-5 rounded-lg">
@@ -575,10 +459,8 @@ const Produits = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
-                {/* Icône de recherche */}
                 <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-[#0052FF] transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
 
-                {/* Bouton de recherche */}
                 <Button
                   type="submit"
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-[#0052FF] hover:bg-[#003EE6] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -588,9 +470,7 @@ const Produits = () => {
                     <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                   ) : (
                     <>
-                      {/* Texte visible sur desktop/tablette */}
                       <span className="hidden sm:inline">Rechercher</span>
-                      {/* Icône uniquement sur mobile */}
                       <Search className="sm:hidden h-4 w-4" />
                     </>
                   )}
@@ -602,45 +482,15 @@ const Produits = () => {
           {/* Affichage des résultats de recherche */}
           {searchQuery && products.length > 0 && (
             <div className="mb-12 animate-fade-in">
-              <h2 className="text-3xl font-bold mb-6">Résultats de recherche</h2>
+              <h2 className="text-3xl font-bold mb-6">Résultats pour "{searchQuery}"</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {products.map((product) => (
-                  <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow">
-                    {product.images && product.images.length > 0 ? (
-                      <div
-                        className="w-full h-48 bg-cover bg-center rounded-lg mb-4"
-                        style={{ backgroundImage: `url(${product.images[0]})` }}
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-4 flex items-center justify-center">
-                        <Package className="h-12 w-12 text-primary/40" />
-                      </div>
-                    )}
-
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                      {product.name}
-                    </h3>
-
-                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-primary">
-                        €{product.price}
-                      </span>
-                      <Badge variant={product.quantity > 0 ? "default" : "destructive"}>
-                        {product.quantity > 0 ? "En stock" : "Rupture"}
-                      </Badge>
-                    </div>
-
-                    {product.vendor?.companyName && (
-                      <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                        <ShoppingCart className="h-4 w-4" />
-                        <span>{product.vendor.companyName}</span>
-                      </div>
-                    )}
-                  </Card>
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={addToCart}
+                    user={user}
+                  />
                 ))}
               </div>
             </div>
@@ -667,7 +517,7 @@ const Produits = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredEquipment.map((category, index) => {
-                const IconComponent = category.icon;
+                const IconComponent = getIconByName(category.iconName);
                 const productCount = getProductCount(category.name);
 
                 return (
@@ -681,7 +531,7 @@ const Produits = () => {
                     <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
                       <img src={category.image} alt="" className="w-full h-full object-cover" />
                       <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                        <Badge variant="">
+                        <Badge>
                           {productCount} produit{productCount !== 1 ? 's' : ''}
                         </Badge>
                       </div>
@@ -712,7 +562,7 @@ const Produits = () => {
             </div>
           </div>
 
-          {/* Section Matériaux - Animation Slide From Right */}
+          {/* Section Matériaux */}
           <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="materiaux">
             <div
               className="flex items-center gap-4 mb-8 animate-slide-from-right"
@@ -726,15 +576,14 @@ const Produits = () => {
                   Matériaux Construction
                 </h2>
                 <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Matériaux de construction et fournitures pour tous vos projets
-                  de rénovation
+                  Matériaux de construction et fournitures pour tous vos projets de rénovation
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredMaterials.map((category, index) => {
-                const IconComponent = category.icon;
+                const IconComponent = getIconByName(category.iconName);
                 const productCount = getProductCount(category.name);
 
                 return (
@@ -748,7 +597,7 @@ const Produits = () => {
                     <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
                       <img src={category.image} alt="" className="w-full h-full object-cover" />
                       <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                        <Badge variant="">
+                        <Badge>
                           {productCount} produit{productCount !== 1 ? 's' : ''}
                         </Badge>
                       </div>
@@ -780,7 +629,7 @@ const Produits = () => {
             </div>
           </div>
 
-          {/* Section Design & Décoration - Animation Scale Up */}
+          {/* Section Design & Décoration */}
           <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="design">
             <div
               className="flex items-center gap-4 mb-8 animate-scale-up"
@@ -801,7 +650,7 @@ const Produits = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredDesign.map((category, index) => {
-                const IconComponent = category.icon;
+                const IconComponent = getIconByName(category.iconName);
                 const productCount = getProductCount(category.name);
 
                 return (
@@ -815,7 +664,7 @@ const Produits = () => {
                     <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
                       <img src={category.image} alt="" className="w-full h-full object-cover" />
                       <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                        <Badge variant="">
+                        <Badge>
                           {productCount} produit{productCount !== 1 ? 's' : ''}
                         </Badge>
                       </div>
@@ -879,14 +728,7 @@ const Produits = () => {
         </section>
       </div>
 
-      {/* Modals */}
-      <CategoryModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        category={selectedCategory}
-        products={categoryProducts}
-      />
-
+      {/* Modal de contact seulement */}
       <ContactModal
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}

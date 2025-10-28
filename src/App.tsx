@@ -10,6 +10,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Immobilier from "./pages/Immobilier";
+import CategorieProduits from "./components/CategorieProduits";
 import BienEtre from "./pages/bien_etre";
 import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
@@ -82,6 +83,9 @@ import PaymentPage from "./pages/PaymentPage";
 import ProLogin from "./pages/auth/ProLogin";
 import ParticularLogin from "./pages/auth/ParticularLogin";
 import InvestissementDetail from "./pages/InvestissementDetail";
+import { CartProvider } from "./components/contexts/CartContext";
+
+
 
 
 const queryClient = new QueryClient();
@@ -119,6 +123,119 @@ const ScrollToHash = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToHash />
+          <ScrollToTop />
+          <Layout>
+            <Routes>
+              {/* Section publiques Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/bien-etre" element={<BienEtre />} />
+              <Route path="/podcasts" element={<Podcast />} />
+              <Route path="/immobilier" element={<Immobilier />} />
+              <Route path="/droitFamille" element={<DroitFamille />} />
+              <Route path="/gestion-immobilier" element={<GestionImmobilier />} />
+              <Route path="/immobilier/:id" element={<PropertyPage />} />
+              <Route path="/travaux" element={<Travaux />} />
+              <Route path="/produits" element={<Produits />} />
+              <Route path="/produits/categorie/:categoryName" element={<CategorieProduits />} />
+              <Route path="/entreprise" element={<Entreprise />} />
+              <Route path="/financement" element={<Financement />} />
+              <Route path="/actualites" element={<Actualites />} />
+              <Route path="/tourisme" element={<TourismSection />} />
+              <Route path="/service" element={<ServicesPartnersPage />} />
+              <Route path="/publicite" element={<Publicite />} />
+              <Route path="/estimations" element={<EstimationImmobilierPage />} />
+              <Route path="/messages/:id" element={<MessagesLayout />} />
+              {/* singular routes for legacy links */}
+              <Route path="/message" element={<MessagesLayout />} />
+              <Route path="/message/:id" element={<MessagesLayout />} />
+              <Route path="/login" element={<LoginRoleSelectionPage />} />
+              <Route path="/login/professional" element={<ProLogin />} />
+              <Route path="/login/particular" element={<ParticularLogin />} />
+              <Route path="/register" element={<RoleSelectionPage />} />
+              <Route
+                path="/register/professional/subscription"
+                element={<ProfessionalSubscriptionPage />}
+              />
+              <Route
+                path="/register/professional"
+                element={
+                  <Navigate to="/register/professional/subscription" replace />
+                }
+              />
+              <Route
+                path="/register/professional/payment"
+                element={<PaymentPage />}
+              />
+              <Route
+                path="/register/professional/form"
+                element={<ProRegisterPage />}
+              />
+              <Route path="/register/success" element={<SuccessPage />} />
+              <Route path="/register/particular" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="/investissement" element={<Investissement />} />
+              <Route path="/art-commerce" element={<ArtCommerce />} />
+              <Route path="/art-commerce/:id" element={<ArtCommerceDetail />} />
+              <Route path="/investir/:type" element={<InvestissementDetail />} />
+              {/* Section pro Routes */}
+              <Route path="/pro" element={<ProLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="listings" element={<ListingsPage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route path="clients" element={<ClientSection />} />
+                <Route path="documents" element={<DocumentsPage />} />
+                <Route path="reviews" element={<ReviewsPage />} />
+                <Route path="tourisme" element={<TourismPage />} />
+                <Route path="services" element={<ProfessionalServicesPage />} />
+                <Route path="billing" element={<BillingSection />} />
+                <Route path="settings" element={<ParametresPage />} />
+                <Route path="products" element={<Products />} />
+                <Route path="demandes" element={<ArtisanDemandesPage />} />
+                <Route path="message" element={<ProMessage />} />
+                <Route path="message/:id" element={<ProMessage />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="harmonie" element={<HarmoniePage />} />
+              </Route>
+              {/* Section Mon Compte Routes */}
+              <Route path="/mon-compte">
+                <Route index element={<MonComptePage />} />
+                <Route path="payement" element={<PaiementPage />} />
+                <Route path="profil" element={<ProfilPage />} />
+                <Route path="reservation" element={<ReservationPage />} />
+                <Route path="demandes" element={<MesDemande />} />
+                <Route path="demandes/message" element={<DemandeMessage />} />
+              </Route>
+              {/* Section Admin Routes */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="blog" element={<Blog />} />
+                <Route path="bookings" element={<Bookings />} />
+                <Route path="listings" element={<Listings />} />
+                <Route path="payments" element={<Payements />} />
+                <Route path="products" element={<Products />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="services" element={<Services />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="tourism" element={<Tourism />} />
+                <Route path="users" element={<Users />} />
+                <Route path="vendors" element={<Vendors />} />
+                <Route path="demandes" element={<ListeDemande />} />
+                <Route path="metiers" element={<AdminMetiers />} />
+              </Route>
+              {/* Section not found Routes */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </CartProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
