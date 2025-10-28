@@ -35,6 +35,7 @@ import TourismPage from "./pages/pro/TourismPage";
 import BillingSection from "./pages/pro/BillingSection";
 import ParametresPage from "./pages/pro/ParametresPage";
 import ArtisanDemandesPage from "./pages/pro/ArtisanDemandesPage";
+import ListeDemandesImmobilier from "./pages/pro/ListeDemandesImmobilier";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Blog from "./pages/admin/Blog";
@@ -57,6 +58,7 @@ import ProfilPage from "./pages/mon-compte/ProfilPage";
 import ReservationPage from "./pages/mon-compte/ReservationPage";
 import MesDemande from "./pages/mon-compte/MesDemande";
 import DemandeMessage from "./pages/mon-compte/DemandeMessage";
+import MesDemandesImmobilier from "./pages/mon-compte/MesDemandesImmobilier";
 import PropertyPage from "./pages/PropertyPage";
 import MessagesLayout from "./pages/MessagesLayout";
 import ProMessage from "./pages/pro/ProMessage";
@@ -191,6 +193,7 @@ const App = () => (
               <Route path="settings" element={<ParametresPage />} />
               <Route path="products" element={<Products />} />
               <Route path="demandes" element={<ArtisanDemandesPage />} />
+              <Route path="demandes-immobilier" element={<ListeDemandesImmobilier />} />
               <Route path="message" element={<ProMessage />} />
               <Route path="message/:id" element={<ProMessage />} />
               <Route path="profile" element={<Profile />} />
@@ -205,6 +208,7 @@ const App = () => (
               <Route path="reservation" element={<ReservationPage />} />
               <Route path="demandes" element={<MesDemande />} />
               <Route path="demandes/message" element={<DemandeMessage />} />
+              <Route path="demandes-immobilier" element={<MesDemandesImmobilier />} />
             </Route>
             {/* Section Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>

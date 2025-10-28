@@ -27,6 +27,7 @@ import {
   CheckCheck,
   CheckCircle2,
   ListCheck,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth"
 // Authentification et Types
@@ -178,8 +179,8 @@ const Header = () => {
       href: "/art-commerce",
     },
     {
-        title: "TOURISME",
-        href: "/tourisme",
+      title: "TOURISME",
+      href: "/tourisme",
     },
   ];
 
@@ -227,53 +228,102 @@ const Header = () => {
     }
   }, [isPopoverOpen]);
 
-const animatePopoverText = () => {
-  const characters = "ABCDEFGHIJKstuvwxyz0123456789";
-  const textElements = popoverContentRef.current?.querySelectorAll('.animated-text') || [];
-
-  // Créer une timeline principale
-  const masterTimeline = gsap.timeline();
-
-  textElements.forEach((element, index) => {
-    const finalText = element.textContent || '';
-    
-    // Sauvegarder le texte final
-    element.setAttribute('data-final-text', finalText);
-
-    // Ajouter chaque animation à la timeline avec un délai progressif
-    masterTimeline.add(() => {
-      let currentIteration = 0;
-      const totalIterations = 5;
-      const originalText = finalText;
-
-      const scramble = () => {
-        let scrambledText = '';
-        
-        for (let i = 0; i < originalText.length; i++) {
-          if (currentIteration === totalIterations) {
-            // Dernière itération - afficher le vrai caractère
-            scrambledText += originalText[i];
-          } else if (Math.random() < 0.7 && originalText[i] !== ' ') {
-            // Caractère aléatoire
-            scrambledText += characters[Math.floor(Math.random() * characters.length)];
-          } else {
-            // Garder le caractère original (ou espace)
-            scrambledText += originalText[i];
+  // notification count for user demandes
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    // fetch user's demandes and count non-pending ones
+    (async () => {
+      try {
+        const resp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/demandes/user/${user.id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('auth-token')}`
           }
-        }
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const count = (data || []).filter((d: any) => !d.statut || !/en attente/i.test(d.statut)).length;
+        setNotifCount(count);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, [user?.id]);
 
-        element.textContent = scrambledText;
-        
-        if (currentIteration < totalIterations) {
-          currentIteration++;
-          setTimeout(scramble, 50);
+  const loadNotifications = async () => {
+    if (!user?.id) return;
+    setNotifLoading(true);
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/demandes/user/${user.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('auth-token')}`
         }
-      };
+      });
+      if (!resp.ok) return setNotifications([]);
+      const data = await resp.json();
+      // keep only non-pending notifications
+      const notifs = (data || []).filter((d: any) => !/en attente/i.test(d.statut || ''));
+      setNotifications(notifs);
+    } catch (e) {
+      console.error('Erreur loading notifications', e);
+      setNotifications([]);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
 
-      scramble();
-    }, index * 0.02); // 0.2 seconde entre chaque élément
-  });
-};
+  const animatePopoverText = () => {
+    const characters = "ABCDEFGHIJKstuvwxyz0123456789";
+    const textElements = popoverContentRef.current?.querySelectorAll('.animated-text') || [];
+
+    // Créer une timeline principale
+    const masterTimeline = gsap.timeline();
+
+    textElements.forEach((element, index) => {
+      const finalText = element.textContent || '';
+
+      // Sauvegarder le texte final
+      element.setAttribute('data-final-text', finalText);
+
+      // Ajouter chaque animation à la timeline avec un délai progressif
+      masterTimeline.add(() => {
+        let currentIteration = 0;
+        const totalIterations = 5;
+        const originalText = finalText;
+
+        const scramble = () => {
+          let scrambledText = '';
+
+          for (let i = 0; i < originalText.length; i++) {
+            if (currentIteration === totalIterations) {
+              // Dernière itération - afficher le vrai caractère
+              scrambledText += originalText[i];
+            } else if (Math.random() < 0.7 && originalText[i] !== ' ') {
+              // Caractère aléatoire
+              scrambledText += characters[Math.floor(Math.random() * characters.length)];
+            } else {
+              // Garder le caractère original (ou espace)
+              scrambledText += originalText[i];
+            }
+          }
+
+          element.textContent = scrambledText;
+
+          if (currentIteration < totalIterations) {
+            currentIteration++;
+            setTimeout(scramble, 50);
+          }
+        };
+
+        scramble();
+      }, index * 0.02); // 0.2 seconde entre chaque élément
+    });
+  };
 
   const handlePopoverOpenChange = (open: boolean) => {
     setIsPopoverOpen(open);
@@ -439,6 +489,14 @@ const animatePopoverText = () => {
                   >
                     <CheckCheck className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Mes demandes </span>
+                  </Link>
+                  <Link
+                    to="/mon-compte/demandes-immobilier"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <ListCheck className="h-4 w-4 text-gray-700" />
+                    <span className="text-sm font-medium">Mes demandes immobilières</span>
                   </Link>
                   <Link
                     to="/mon-compte/payement"
@@ -645,60 +703,117 @@ const animatePopoverText = () => {
               </Button>
             </div>
           ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="hidden lg:flex p-0 w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 items-center justify-center z-50 relative">
-                <Avatar className="w-10 h-10">
-                  <AvatarFallback className="bg-gray-900 text-white text-sm font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 z-[1050] shadow-lg"
-              >
-                <DropdownMenuLabel className="flex flex-col">
-                  <span className="text-sm font-medium">
-                    {user?.firstName} {user?.lastName}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {user?.email}
-                  </span>
-                </DropdownMenuLabel>
-                {role != 'user' ? <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Tableau de bord
+            <>
+
+
+              {/* notification icon for users — opens a modal (Sheet) with notifications */}
+              {role === 'user' && (
+                <>
+                  <Sheet open={notifOpen} onOpenChange={(open) => { setNotifOpen(open); if (open) loadNotifications(); }}>
+                    <SheetTrigger asChild>
+                      <button className="relative mr-3 hidden lg:flex items-center">
+                        <Bell className="w-5 h-5 text-gray-700" />
+                        {notifCount > 0 && (
+                          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{notifCount}</span>
+                        )}
+                      </button>
+                    </SheetTrigger>
+
+                    <SheetContent side="right" className="w-[380px] p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold">Notifications</h4>
+                      </div>
+
+                      {notifLoading ? (
+                        <div className="text-center text-sm text-gray-500">Chargement...</div>
+                      ) : notifications.length === 0 ? (
+                        <div className="text-center text-sm text-gray-500">Aucune notification.</div>
+                      ) : (
+                        <div className="space-y-3">
+                          {notifications.map((n) => (
+                            <div key={n.id} className="p-3 bg-white rounded-lg border">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <div className="text-sm font-medium text-gray-800">{n.titre || 'Nouvelle notification'}</div>
+                                  <div className="text-xs text-gray-500 mt-1">{n.statut} — {n.propertyId ? 'Bien lié' : 'Général'}</div>
+                                </div>
+                                <div className="text-xs text-gray-400">{n.createdAt ? new Date(n.createdAt).toLocaleDateString('fr-FR') : ''}</div>
+                              </div>
+                              {n.propertyId && (
+                                <div className="mt-3">
+                                  <a href={`/immobilier/${n.propertyId}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">Voir le bien</a>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </SheetContent>
+                  </Sheet>
+                </>
+              )}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger className="hidden lg:flex p-0 w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 items-center justify-center z-50 relative">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-gray-900 text-white text-sm font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 z-[1050] shadow-lg"
+                >
+                  <DropdownMenuLabel className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {user?.email}
+                    </span>
+                  </DropdownMenuLabel>
+                  {role != 'user' ? <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Tableau de bord
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </> : <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Profil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
+                      <ListCheck className="mr-2 h-4 w-4" />
+                      Mes demandes
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes-immobilier")}>
+                      <ListCheck className="mr-2 h-4 w-4" />
+                      Mes demandes immobilières
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Réservations
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Paiements
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>}
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Déconnexion
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator /> </> : <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Profil
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
-                    <ListCheck className="mr-2 h-4 w-4" />
-                    Mes demandes
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Réservations
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Paiements
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>}
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Déconnexion
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <MobileMenu />
+            </>
           )}
-          <MobileMenu />
         </div>
       </div>
     </header>
