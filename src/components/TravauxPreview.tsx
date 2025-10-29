@@ -21,7 +21,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { DevisModal, PhotosModal } from "./TravauxSection";
+import { PhotosModal } from "./TravauxSection";
 
 
 const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
@@ -203,19 +203,6 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           </Button>
 
       </div>
-
-      {/* Modals */}
-      <PhotosModal
-        isOpen={photosModal.isOpen}
-        onClose={closePhotosModal}
-        prestation={photosModal.prestation}
-      />
-
-      <DevisModal
-        isOpen={devisModal.isOpen}
-        onClose={closeDevisModal}
-        prestation={devisModal.prestation}
-      />
     </section>
   );
 };

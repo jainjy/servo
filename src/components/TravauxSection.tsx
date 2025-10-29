@@ -2,11 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
+import { useAuth } from "@/hooks/useAuth";
 import {
   ChevronLeft,
   ChevronRight,
-  Star,
   X,
   Camera,
   FileText,
@@ -18,16 +17,13 @@ import {
   Calendar,
   Share2,
   Search,
-  ArrowRight,
   Clock,
-  Square,
   HomeIcon,
   TreePalm,
   Building,
   BookCheck,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { prestationsData, prestationTypesByCategory } from "./travauxData";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import api from "@/lib/api";
 
@@ -67,10 +63,10 @@ export const PhotosModal = ({ isOpen, onClose, prestation }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && prestation) {
       setCurrentImageIndex(0);
     }
-  }, [isOpen]);
+  }, [isOpen, prestation]);
 
   if (!isOpen || !prestation) return null;
 
@@ -90,7 +86,7 @@ export const PhotosModal = ({ isOpen, onClose, prestation }) => {
         <div className="flex items-center justify-between p-4 border-b">
           <div>
             <h2 className="text-xl font-bold text-gray-900">
-              {prestation.title}
+              {prestation.libelle}
             </h2>
             <p className="text-gray-600 text-sm">{prestation.description}</p>
           </div>
@@ -108,7 +104,7 @@ export const PhotosModal = ({ isOpen, onClose, prestation }) => {
           <div className="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
             <img
               src={prestation.images[currentImageIndex]}
-              alt={`${prestation.title} - Image ${currentImageIndex + 1}`}
+              alt={`${prestation.libelle} - Image ${currentImageIndex + 1}`}
               className="w-full h-96 object-cover"
             />
 
@@ -135,33 +131,6 @@ export const PhotosModal = ({ isOpen, onClose, prestation }) => {
 
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
               {currentImageIndex + 1} / {prestation.images.length}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            {prestation.features.map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 text-sm text-gray-700"
-              >
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                {feature}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {prestation.location}
-              </div>
-              {prestation.rating && (
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                  {prestation.rating}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -195,7 +164,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
     dateSouhaitee: "",
     budget: "",
   });
-
+  const {user}=useAuth();
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -213,16 +182,38 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
 
   if (!isOpen || !prestation) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Formulaire devis envoyé:", {
-      ...formData,
-      prestation: prestation.title,
-    });
-    alert(
-      "Votre demande de devis a été envoyée avec succès ! Nous vous répondrons dans les 48h."
-    );
-    onClose();
+
+    try {
+      const userId=user.id;
+
+      const demandeData = {
+        contactNom: formData.nom,
+        contactPrenom: formData.prenom,
+        contactEmail: formData.email,
+        contactTel: formData.telephone,
+        lieuAdresse: formData.adresse,
+        lieuAdresseCp: "75000", // À adapter avec un système de géocodage
+        lieuAdresseVille: "Paris", // À adapter avec un système de géocodage
+        optionAssurance: false,
+        description: formData.message,
+        devis: `Budget estimé: ${formData.budget}, Date souhaitée: ${formData.dateSouhaitee}`, // Utilisation du nouveau champ
+        serviceId: prestation.id,
+        nombreArtisans: "UNIQUE",
+        createdById: userId,
+      };
+
+      const response = await api.post("/demandes", demandeData);
+
+      if (response.status === 201) {
+        alert("Votre demande a été créée avec succès !");
+        onClose();
+      }
+    } catch (error) {
+      console.error("Erreur création demande:", error);
+      alert("Erreur lors de la création de la demande");
+    }
   };
 
   const handleChange = (e) => {
@@ -245,7 +236,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 Demande de Devis
               </h2>
               <p className="text-gray-600 text-xs lg:text-sm">
-                {prestation.title}
+                {prestation.libelle}
               </p>
             </div>
           </div>
@@ -360,6 +351,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 value={formData.budget}
                 onChange={handleChange}
                 className="w-full rounded-lg border border-gray-300 p-3"
+                required
               >
                 <option value="">Sélectionnez un budget</option>
                 <option value="0-5000">0 - 5 000 €</option>
@@ -420,8 +412,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   const location = useLocation();
   const [categorie, setCategorie] = useState("interieurs");
   const [servicesCategorie, setServicesCategorie] = useState([]);
-
-  // États pour la section de prestations
+  const [displayedPrestations, setDisplayedPrestations] = useState([]);
   const [selectedType, setSelectedType] = useState("TOUS");
   const [searchFilter, setSearchFilter] = useState("");
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
@@ -447,6 +438,13 @@ const IntelligibleSection = ({ showAllPrestations }) => {
       const response = await api.get(`/categories/name/${cat}/services`);
       console.log("Catégories de services:", response.data);
       setServicesCategorie(response.data);
+
+      // Initialiser les index d'images pour chaque prestation
+      const initialIndexes = {};
+      response.data.services?.forEach((service) => {
+        initialIndexes[service.id] = 0;
+      });
+      setCurrentImageIndexes(initialIndexes);
     } catch (error) {
       console.error(
         "Erreur lors de la récupération des catégories de services:",
@@ -454,28 +452,60 @@ const IntelligibleSection = ({ showAllPrestations }) => {
       );
     }
   };
-  const search=async(e)=>{
-    setSearchFilter(e.target.value)
-    
-  }
+
+  // Fonction de recherche corrigée
+  const search = (e) => {
+    const mot = e.target.value;
+    setSearchFilter(mot);
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const cat = params.get("categorie");
 
-    // Vérifie si la catégorie extraite correspond à une section valide
     const validIds = sections.map((s) => s.id);
     const validCategorie = validIds.includes(cat) ? cat : "interieurs";
 
-    setCategorie(cat);
+    setCategorie(validCategorie);
     fetchServicesCategorie(categories[validCategorie].sectionId);
   }, [location.search]);
 
+  // Filtrage des prestations basé sur la recherche et le type sélectionné
+  useEffect(() => {
+    const currentPrestations = servicesCategorie?.services || [];
+
+    let filtered = currentPrestations;
+
+    // Filtre par type
+    if (selectedType !== "TOUS") {
+      filtered = filtered.filter(
+        (prestation) => prestation.libelle === selectedType
+      );
+    }
+
+    // Filtre par recherche
+    if (searchFilter) {
+      filtered = filtered.filter(
+        (prestation) =>
+          prestation.libelle
+            .toLowerCase()
+            .includes(searchFilter.toLowerCase()) ||
+          prestation.description
+            ?.toLowerCase()
+            .includes(searchFilter.toLowerCase())
+      );
+    }
+
+    setDisplayedPrestations(
+      showAllPrestations ? filtered : filtered.slice(0, 8)
+    );
+  }, [selectedType, servicesCategorie, searchFilter, showAllPrestations]);
 
   const nextImage = (prestationId, totalImages, e) => {
     e?.stopPropagation();
     setCurrentImageIndexes((prev) => ({
       ...prev,
-      [prestationId]: (prev[prestationId] + 1) % totalImages,
+      [prestationId]: ((prev[prestationId] || 0) + 1) % totalImages,
     }));
   };
 
@@ -483,7 +513,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     e?.stopPropagation();
     setCurrentImageIndexes((prev) => ({
       ...prev,
-      [prestationId]: (prev[prestationId] - 1 + totalImages) % totalImages,
+      [prestationId]:
+        ((prev[prestationId] || 0) - 1 + totalImages) % totalImages,
     }));
   };
 
@@ -502,18 +533,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   const closeDevisModal = () => {
     setDevisModal({ isOpen: false, prestation: null });
   };
-
-  const currentPrestations = servicesCategorie?.services || [];
-  const filteredPrestations =
-    selectedType === "TOUS"
-      ? currentPrestations
-      : currentPrestations.filter(
-          (prestation) => prestation.libelle === selectedType
-        );
-
-  const displayedPrestations = showAllPrestations
-    ? filteredPrestations
-    : filteredPrestations;
 
   return (
     <>
@@ -549,12 +568,12 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                   <div className="flex-1">
                     <div className="relative">
                       <Input
-                        placeholder="rechercher"
+                        placeholder="Rechercher une prestation..."
                         className="pl-12 rounded-2xl border-2 text-center border-gray-200 focus:border-blue-500 transition-all duration-300 p-4 bg-white shadow-sm"
                         value={searchFilter}
-                        onChange={(e) => search(e)}
+                        onChange={search}
                       />
-                      <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     </div>
                   </div>
                 </div>
@@ -567,7 +586,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 LISTES :
               </span>
               <button
-                key={"tous"}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
                   selectedType === "TOUS"
                     ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
@@ -575,30 +593,31 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 }`}
                 onClick={() => setSelectedType("TOUS")}
               >
-                {"TOUS"}
+                TOUS
               </button>
-              {servicesCategorie?.services?.map((type) => {
-                return (
-                  <button
-                    key={type.id}
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
-                      selectedType === type.libelle
-                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
-                    }`}
-                    onClick={() => setSelectedType(type.libelle)}
-                  >
-                    {type.libelle}
-                  </button>
-                );
-              })}
+              {servicesCategorie?.services?.map((type) => (
+                <button
+                  key={type.id}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${
+                    selectedType === type.libelle
+                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white border-transparent shadow-lg scale-105"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
+                  }`}
+                  onClick={() => setSelectedType(type.libelle)}
+                >
+                  {type.libelle}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {displayedPrestations.map((prestation) => {
               const currentImageIndex = currentImageIndexes[prestation.id] || 0;
-              const totalImages = prestation.images.length;
+              const totalImages = prestation.images?.length || 0;
+              const currentImage =
+                prestation.images?.[currentImageIndex] ||
+                "/placeholder-image.jpg";
 
               return (
                 <Card
@@ -606,16 +625,19 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                   className="group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
                 >
                   <div className="relative">
-                    <div className="relative h-56 overflow-hidden rounded-t-3xl">
+                    <div
+                      className="relative h-56 overflow-hidden rounded-t-3xl cursor-pointer"
+                      onClick={() => openPhotosModal(prestation)}
+                    >
                       <img
-                        src={prestation.images[0]}
-                        alt={prestation.title}
+                        src={currentImage}
+                        alt={prestation.libelle}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg flex items-center gap-2">
+                      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg">
                         {prestation.libelle}
                       </div>
 
@@ -650,18 +672,26 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                     </div>
 
                     <div className="p-6">
+                      <h3 className="font-semibold text-gray-900 mb-2">
+                        {prestation.libelle}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                        {prestation.description}
+                      </p>
+
                       <div className="flex items-center justify-between">
                         <div className="flex gap-2">
-                          
-                          {prestation.images.length>0 && <Button
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
-                            onClick={() => openPhotosModal(prestation)}
-                          >
-                            <Camera className="h-3.5 w-3.5 mr-1.5" />
-                            Photos
-                          </Button>}
+                          {totalImages > 0 && (
+                            <Button
+                              className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
+                              onClick={() => openPhotosModal(prestation)}
+                            >
+                              <Camera className="h-3.5 w-3.5 mr-1.5" />
+                              Photos ({totalImages})
+                            </Button>
+                          )}
                           <Button
-                            className=" text-white font-semibold bg-slate-900  py-2.5 px-4 rounded-xl text-xs hover:bg-black transition-all duration-300 hover:shadow-lg"
+                            className="text-white font-semibold bg-slate-900 py-2.5 px-4 rounded-xl text-xs hover:bg-black transition-all duration-300 hover:shadow-lg"
                             onClick={() => openDevisModal(prestation)}
                           >
                             <FileText className="h-3.5 w-3.5 mr-1.5" />
@@ -675,6 +705,14 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               );
             })}
           </div>
+
+          {displayedPrestations.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">
+                Aucune prestation trouvée pour votre recherche.
+              </p>
+            </div>
+          )}
 
           <div className="text-center">
             <div className="inline-flex items-center gap-4 bg-slate-950 px-8 py-4 rounded-2xl shadow-2xl">
