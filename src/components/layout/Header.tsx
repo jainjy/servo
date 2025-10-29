@@ -1,10 +1,14 @@
 // components/Header.js
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import logo from '../../assets/logo.png';
+import logo from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -29,12 +33,12 @@ import {
   ListCheck,
   ShoppingCart,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
 import Cart from "@/components/Cart";
 
 // Authentification et Types
-import AuthService from "@/services/authService"
+import AuthService from "@/services/authService";
 import type { User as AuthUser } from "@/types/type";
 
 // Import GSAP
@@ -47,8 +51,10 @@ const Header = () => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(AuthService.getCurrentUser());
-  const { logout } = useAuth()
+  const [user, setUser] = useState<AuthUser | null>(
+    AuthService.getCurrentUser()
+  );
+  const { logout } = useAuth();
 
   // Utiliser le contexte panier
   const { getCartItemsCount } = useCart();
@@ -69,8 +75,8 @@ const Header = () => {
     setIsAuthenticated(false);
     setRole(null);
     setUser(null);
-    navigate('/');
-  }
+    navigate("/");
+  };
 
   const menuSections = [
     {
@@ -184,8 +190,8 @@ const Header = () => {
       href: "/art-commerce",
     },
     {
-        title: "TOURISME",
-        href: "/tourisme",
+      title: "TOURISME",
+      href: "/tourisme",
     },
   ];
 
@@ -197,24 +203,24 @@ const Header = () => {
     role === "admin"
       ? "/admin"
       : role === "professional"
-        ? "/pro"
-        : "/mon-compte/profil";
+      ? "/pro"
+      : "/mon-compte/profil";
 
   const initials = user
     ? (() => {
-      let base = "";
-      if (user.firstName && user.firstName.trim().length > 0) {
-        base = user.firstName.trim();
-      } else if (user.email) {
-        base = user.email.split("@")[0];
-      }
-      base = base.replace(/[^A-Za-z0-9]/g, "");
-      const two = base.slice(0, 2).toUpperCase();
-      if (two && two.length === 2) return two;
-      if (!two && user.lastName)
-        return user.lastName.slice(0, 2).toUpperCase();
-      return two || "US";
-    })()
+        let base = "";
+        if (user.firstName && user.firstName.trim().length > 0) {
+          base = user.firstName.trim();
+        } else if (user.email) {
+          base = user.email.split("@")[0];
+        }
+        base = base.replace(/[^A-Za-z0-9]/g, "");
+        const two = base.slice(0, 2).toUpperCase();
+        if (two && two.length === 2) return two;
+        if (!two && user.lastName)
+          return user.lastName.slice(0, 2).toUpperCase();
+        return two || "US";
+      })()
     : "";
 
   // Animation GSAP pour le texte du popover
@@ -233,61 +239,64 @@ const Header = () => {
     }
   }, [isPopoverOpen]);
 
-const animatePopoverText = () => {
-  const characters = "ABCDEFGHIJKstuvwxyz0123456789";
-  const textElements = popoverContentRef.current?.querySelectorAll('.animated-text') || [];
+  const animatePopoverText = () => {
+    const characters = "ABCDEFGHIJKstuvwxyz0123456789";
+    const textElements =
+      popoverContentRef.current?.querySelectorAll(".animated-text") || [];
 
-  // Créer une timeline principale
-  const masterTimeline = gsap.timeline();
+    // Créer une timeline principale
+    const masterTimeline = gsap.timeline();
 
-  textElements.forEach((element, index) => {
-    const finalText = element.textContent || '';
-    
-    // Sauvegarder le texte final
-    element.setAttribute('data-final-text', finalText);
+    textElements.forEach((element, index) => {
+      const finalText = element.textContent || "";
 
-    // Ajouter chaque animation à la timeline avec un délai progressif
-    masterTimeline.add(() => {
-      let currentIteration = 0;
-      const totalIterations = 5;
-      const originalText = finalText;
+      // Sauvegarder le texte final
+      element.setAttribute("data-final-text", finalText);
 
-      const scramble = () => {
-        let scrambledText = '';
-        
-        for (let i = 0; i < originalText.length; i++) {
-          if (currentIteration === totalIterations) {
-            // Dernière itération - afficher le vrai caractère
-            scrambledText += originalText[i];
-          } else if (Math.random() < 0.7 && originalText[i] !== ' ') {
-            // Caractère aléatoire
-            scrambledText += characters[Math.floor(Math.random() * characters.length)];
-          } else {
-            // Garder le caractère original (ou espace)
-            scrambledText += originalText[i];
+      // Ajouter chaque animation à la timeline avec un délai progressif
+      masterTimeline.add(() => {
+        let currentIteration = 0;
+        const totalIterations = 5;
+        const originalText = finalText;
+
+        const scramble = () => {
+          let scrambledText = "";
+
+          for (let i = 0; i < originalText.length; i++) {
+            if (currentIteration === totalIterations) {
+              // Dernière itération - afficher le vrai caractère
+              scrambledText += originalText[i];
+            } else if (Math.random() < 0.7 && originalText[i] !== " ") {
+              // Caractère aléatoire
+              scrambledText +=
+                characters[Math.floor(Math.random() * characters.length)];
+            } else {
+              // Garder le caractère original (ou espace)
+              scrambledText += originalText[i];
+            }
           }
-        }
 
-        element.textContent = scrambledText;
-        
-        if (currentIteration < totalIterations) {
-          currentIteration++;
-          setTimeout(scramble, 50);
-        }
-      };
+          element.textContent = scrambledText;
 
-      scramble();
-    }, index * 0.02); // 0.2 seconde entre chaque élément
-  });
-};
+          if (currentIteration < totalIterations) {
+            currentIteration++;
+            setTimeout(scramble, 50);
+          }
+        };
+
+        scramble();
+      }, index * 0.02); // 0.2 seconde entre chaque élément
+    });
+  };
 
   const handlePopoverOpenChange = (open: boolean) => {
     setIsPopoverOpen(open);
     if (!open) {
       // Réinitialiser le texte quand le popover se ferme
-      const textElements = popoverContentRef.current?.querySelectorAll('.animated-text') || [];
+      const textElements =
+        popoverContentRef.current?.querySelectorAll(".animated-text") || [];
       textElements.forEach((element) => {
-        const finalText = element.getAttribute('data-final-text');
+        const finalText = element.getAttribute("data-final-text");
         if (finalText) {
           element.textContent = finalText;
         }
@@ -347,8 +356,9 @@ const animatePopoverText = () => {
                             {section.title}
                           </span>
                           <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${openSubmenu === section.title ? "rotate-180" : ""
-                              }`}
+                            className={`w-4 h-4 transition-transform duration-200 ${
+                              openSubmenu === section.title ? "rotate-180" : ""
+                            }`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -363,10 +373,11 @@ const animatePopoverText = () => {
                         </button>
 
                         <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${openSubmenu === section.title
-                            ? "max-h-96 opacity-100"
-                            : "max-h-0 opacity-0"
-                            }`}
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            openSubmenu === section.title
+                              ? "max-h-96 opacity-100"
+                              : "max-h-0 opacity-0"
+                          }`}
                         >
                           <div className="pb-3 px-4 space-y-2">
                             {section.items.map((item, itemIndex) => (
@@ -408,7 +419,7 @@ const animatePopoverText = () => {
             {/* Footer Mobile */}
             <div className="border-t border-gray-200 bg-gray-50 p-6 space-y-4">
               {!isAuthenticated ? (
-                <div className="space-y-3" >
+                <div className="space-y-3">
                   <Button
                     className="w-full bg-gray-900 hover:bg-gray-800 transition-all duration-200 text-white"
                     size="lg"
@@ -440,7 +451,7 @@ const animatePopoverText = () => {
                     </div>
                     <span className="text-sm font-medium">Panier</span>
                   </button>
-                  
+
                   <Link
                     to={profilePath}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -567,7 +578,10 @@ const animatePopoverText = () => {
 
             {/* Desktop hamburger: Popover avec animation GSAP */}
             <div className="hidden lg:block">
-              <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
+              <Popover
+                open={isPopoverOpen}
+                onOpenChange={handlePopoverOpenChange}
+              >
                 <PopoverTrigger asChild>
                   <Button className="h-9 hover:bg-slate-800 bg-slate-900">
                     <Menu className="text-white" />
@@ -604,7 +618,10 @@ const animatePopoverText = () => {
                       {/* Sections avec items */}
                       <div className="grid grid-cols-4 place-content-center gap-10">
                         {sectionsWithItems.map((section, i) => (
-                          <div key={i} className="flex flex-col gap-2 min-w-[200px]">
+                          <div
+                            key={i}
+                            className="flex flex-col gap-2 min-w-[200px]"
+                          >
                             <span className="font-semibold animated-text">
                               {section.title}
                             </span>
@@ -708,32 +725,43 @@ const animatePopoverText = () => {
                       {user?.email}
                     </span>
                   </DropdownMenuLabel>
-                  {role != 'user' ? <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      Tableau de bord
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator /> </> : <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(profilePath)}>
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      Profil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
-                      <ListCheck className="mr-2 h-4 w-4" />
-                      Mes demandes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Réservations
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Paiements
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>}
+                  {role != "user" ? (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Tableau de bord
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />{" "}
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate(profilePath)}>
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Profil
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/demandes")}
+                      >
+                        <ListCheck className="mr-2 h-4 w-4" />
+                        Mes demandes
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/reservation")}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Réservations
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/payement")}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Paiements
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Déconnexion
@@ -747,10 +775,7 @@ const animatePopoverText = () => {
       </header>
 
       {/* Composant Cart */}
-      <Cart
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 };
