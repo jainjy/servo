@@ -84,6 +84,10 @@ import ProLogin from "./pages/auth/ProLogin";
 import ParticularLogin from "./pages/auth/ParticularLogin";
 import InvestissementDetail from "./pages/InvestissementDetail";
 import { CartProvider } from "./components/contexts/CartContext";
+import { ToastContainer } from "react-toastify";
+
+
+
 
 const queryClient = new QueryClient();
 
@@ -122,6 +126,7 @@ const App = () => (
     <TooltipProvider>
       <CartProvider>
         <Toaster />
+           <ToastContainer /> 
         <Sonner />
         <BrowserRouter>
           <ScrollToHash />
