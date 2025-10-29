@@ -478,7 +478,7 @@ const Header = () => {
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
                   >
                     <CheckCheck className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Mes demandes </span>
+                    <span className="text-sm font-medium">Mes demandes de services </span>
                   </Link>
                   <Link
                     to="/mon-compte/payement"
@@ -749,7 +749,7 @@ const Header = () => {
                         onClick={() => navigate("/mon-compte/demandes")}
                       >
                         <ListCheck className="mr-2 h-4 w-4" />
-                        Mes demandes
+                        Mes demandes de services
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/reservation")}
