@@ -238,7 +238,7 @@ const Header = () => {
     // fetch user's demandes and count non-pending ones
     (async () => {
       try {
-        const resp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/demandes/user/${user.id}`, {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/immobilier/demandes/user/${user.id}`, {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${localStorage.getItem('auth-token')}`
@@ -258,7 +258,7 @@ const Header = () => {
     if (!user?.id) return;
     setNotifLoading(true);
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/demandes/user/${user.id}`, {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/immobilier/demandes/user/${user.id}`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('auth-token')}`
