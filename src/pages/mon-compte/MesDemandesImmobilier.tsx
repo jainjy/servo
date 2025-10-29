@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
-import { RefreshCw, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { RefreshCw, MapPin, Calendar, ArrowRight, Clock, Trash2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-const DemandeImmoCard = ({ demande, onDeleted, onStatusChange }: any) => {
+const DemandeImmoCard = ({ demande, onDeleted, onStatusChange, onAddHistory }: any) => {
     // Helpers for safe display
     const formatDate = (d: any) => {
         const dateStr = d?.createdAt || d?.date;
@@ -93,25 +95,27 @@ const getStatutStyles = (statut) => {
                 {/* Separator */}
                 <div className="border-t border-gray-700/50 pt-4 flex items-center justify-between gap-4">
                     {/* Action Button */}
-                    <Link
-                        to={
-                            (demande.propertyId || demande.property?.id)
-                                ? `/immobilier/${demande.propertyId || demande.property?.id}`
-                                : '#'
-                        }
-                        className="group/btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20"
-                    >
-                        <span>Voir le bien</span>
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to={
+                                (demande.propertyId || demande.property?.id)
+                                    ? `/immobilier/${demande.propertyId || demande.property?.id}`
+                                    : '#'
+                            }
+                            className="group/btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20"
+                        >
+                            <span>Voir le bien</span>
+                            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
+                        </Link>
+                    </div>
 
-                        {/* Actions: pending -> allow cancel. If refused -> allow resend + cancel. Otherwise show badge */}
+                    {/* Actions: pending -> allow cancel. If validated or refused -> allow delete. Otherwise show badge */}
+                    <div>
                         {['en attente', 'en cours', 'En attente', 'En cours'].includes(String(demande.statut)) ? (
-                            <CancelButton demande={demande} onDeleted={onDeleted} />
-                        ) : (/refus/i.test(String(demande.statut || '')) ? (
+                            <CancelButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
+                        ) : (/refus/i.test(String(demande.statut || '')) || /validée/i.test(String(demande.statut || '')) ? (
                             <div className="flex items-center gap-2">
-                                <ResendButton demande={demande} onStatusChange={onStatusChange} />
-                                <CancelButton demande={demande} onDeleted={onDeleted} />
+                                <DeleteButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
                             </div>
                         ) : (
                             <div className="px-4 py-2">
@@ -120,37 +124,44 @@ const getStatutStyles = (statut) => {
                                 </span>
                             </div>
                         ))}
+                    </div>
                 </div>
             </div>
+            
         </div>
     );
 };
 
 const ResendButton = ({ demande, onStatusChange }: any) => {
     const [sending, setSending] = React.useState(false);
-
     const handleResend = async () => {
-        if (!confirm("Voulez-vous renvoyer cette demande ?")) return;
-        setSending(true);
-        try {
-            // Build a minimal payload reusing available demande fields.
-            const payload: any = {
-                propertyId: demande.propertyId,
-                titre: demande.titre,
-                description: demande.description,
-                serviceId: demande.serviceId || demande.service?.id,
-            };
-            await api.post('/demandes', payload);
-            // update local status to pending so user sees it again
-            onStatusChange?.(demande.id, 'en attente');
-            alert('Demande renvoyée — elle apparaît maintenant comme en attente.');
-        } catch (err) {
-            console.error('Erreur en renvoyant la demande', err);
-            const msg = err?.response?.data?.error || err?.message || 'Impossible de renvoyer la demande.';
-            alert(msg);
-        } finally {
-            setSending(false);
-        }
+        let toastRef: any = null;
+        toastRef = toast({
+            title: 'Confirmer le renvoi',
+            description: 'Cliquez confirmer pour renvoyer la demande.',
+            action: (
+                <button
+                    className="px-3 py-1 rounded bg-blue-600 text-white text-sm"
+                    onClick={async () => {
+                        toastRef?.dismiss?.();
+                        setSending(true);
+                        try {
+                            await api.patch(`/immobilier/demandes/${demande.id}/statut`, { statut: 'en attente' });
+                            onStatusChange?.(demande.id, 'en attente');
+                            toast({ title: 'Demande renvoyée', description: 'Votre demande est de nouveau en attente.' });
+                        } catch (err) {
+                            console.error('Erreur en renvoyant la demande', err);
+                            const msg = err?.response?.data?.error || err?.message || 'Impossible de renvoyer la demande.';
+                            toast({ title: 'Erreur', description: msg });
+                        } finally {
+                            setSending(false);
+                        }
+                    }}
+                >
+                    Confirmer
+                </button>
+            ),
+        });
     };
 
     return (
@@ -160,22 +171,40 @@ const ResendButton = ({ demande, onStatusChange }: any) => {
     );
 };
 
-const CancelButton = ({ demande, onDeleted }: any) => {
+const CancelButton = ({ demande, onDeleted, onAddHistory, onStatusChange }: any) => {
     const [deleting, setDeleting] = React.useState(false);
-
     const handleCancel = async () => {
-        if (!confirm("Confirmez-vous l'annulation de cette demande ?")) return;
-        setDeleting(true);
-        try {
-            await api.delete(`/demandes/${demande.id}`);
-            // inform parent to remove from list
-            onDeleted?.(demande.id);
-        } catch (err) {
-            console.error('Erreur lors de la suppression de la demande', err);
-            alert("Impossible d'annuler la demande. Réessayez plus tard.");
-        } finally {
-            setDeleting(false);
-        }
+        let toastRef: any = null;
+        toastRef = toast({
+            title: 'Confirmer l\'annulation',
+            description: 'Confirmez pour annuler cette demande.',
+            action: (
+                <button className="px-3 py-1 rounded bg-red-600 text-white text-sm" onClick={async () => {
+                    toastRef?.dismiss?.();
+                    setDeleting(true);
+                    try {
+                        // create a history entry locally (optimistic)
+                        const entry = {
+                            title: 'Demande annulée',
+                            message: 'Vous avez annulé cette demande.',
+                            date: new Date().toISOString(),
+                            demandeId: demande.id,
+                            _sourceTitre: demande.titre
+                        };
+                        try { onAddHistory?.(entry); } catch (e) { /* ignore */ }
+
+                        await api.patch(`/immobilier/demandes/${demande.id}/statut`, { statut: 'annulée' });
+                        onStatusChange?.(demande.id, 'annulée');
+                        toast({ title: 'Demande annulée' });
+                    } catch (err) {
+                        console.error('Erreur lors de l\'annulation de la demande', err);
+                        toast({ title: 'Erreur', description: 'Impossible d\'annuler la demande. Réessayez plus tard.' });
+                    } finally {
+                        setDeleting(false);
+                    }
+                }}>Confirmer</button>
+            )
+        });
     };
 
     return (
@@ -189,10 +218,58 @@ const CancelButton = ({ demande, onDeleted }: any) => {
     );
 };
 
+const DeleteButton = ({ demande, onDeleted, onAddHistory, onStatusChange }: any) => {
+    const [deleting, setDeleting] = React.useState(false);
+
+    const handleDelete = async () => {
+        let toastRef: any = null;
+        toastRef = toast({
+            title: 'Confirmer la suppression',
+            description: 'Cette action supprimera définitivement la demande.',
+            action: (
+                <button className="px-3 py-1 rounded bg-red-600 text-white text-sm" onClick={async () => {
+                    toastRef?.dismiss?.();
+                    setDeleting(true);
+                    try {
+                        // create a history entry locally (optimistic)
+                        const entry = {
+                            title: 'Demande supprimée',
+                            message: 'Vous avez supprimé cette demande.',
+                            date: new Date().toISOString(),
+                            demandeId: demande.id,
+                            _sourceTitre: demande.titre
+                        };
+                        try { onAddHistory?.(entry); } catch (e) { /* ignore */ }
+
+                        await api.delete(`/immobilier/demandes/${demande.id}`);
+                        onDeleted?.(demande.id);
+                        toast({ title: 'Supprimé', description: 'La demande a été supprimée.' });
+                    } catch (err) {
+                        console.error('Erreur lors de la suppression de la demande', err);
+                        toast({ title: 'Erreur', description: 'Impossible de supprimer la demande pour le moment.' });
+                    } finally {
+                        setDeleting(false);
+                    }
+                }}>Confirmer</button>
+            )
+        });
+    };
+
+    return (
+        <button onClick={handleDelete} disabled={deleting} className="bg-transparent text-red-400 border border-red-500/20 hover:bg-red-500/5 px-4 py-2 rounded-lg text-sm font-semibold transition">
+            {deleting ? 'Suppression...' : 'Supprimer'}
+        </button>
+    );
+};
+
 const MesDemandesImmobilier = () => {
     const { user, isAuthenticated } = useAuth();
     const [demandes, setDemandes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [historyOpen, setHistoryOpen] = useState(false);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyItems, setHistoryItems] = useState<any[]>([]);
+    const [activeDemande, setActiveDemande] = useState<any | null>(null);
 
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
@@ -200,11 +277,9 @@ const MesDemandesImmobilier = () => {
         const load = async () => {
             setLoading(true);
             try {
-                const resp = await api.get(`/demandes/user/${user.id}`);
+                const resp = await api.get(`/immobilier/demandes/user/${user.id}`);
                 const all = resp.data || [];
-                // Filter demandes that are linked to a property
-                const immo = all.filter((d: any) => d.propertyId);
-                setDemandes(immo);
+                setDemandes(all); // Affiche toutes les demandes, sans filtrer sur propertyId
             } catch (err) {
                 console.error('Erreur en chargeant demandes immobilières', err);
             } finally {
@@ -230,8 +305,71 @@ const MesDemandesImmobilier = () => {
         setDemandes((prev) => prev.filter((d) => d.id !== id));
     };
 
+    const handleAddHistory = (entry: any) => {
+        // prepend to historyItems so modal shows recent entries immediately (optimistic)
+        const tmp = { ...entry, _optimistic: true };
+        setHistoryItems((prev) => [tmp, ...(prev || [])]);
+        // also attach to the demande in the list if present
+        if (entry?.demandeId) {
+            setDemandes((prev) => prev.map(d => d.id === entry.demandeId ? ({ ...d, history: [...(d.history || []), tmp] }) : d));
+            // try to persist on server
+            (async () => {
+                try {
+                    const resp = await api.post(`/immobilier/demandes/${entry.demandeId}/history`, { entry });
+                    const serverHistory = resp.data?.history || [];
+                    // replace optimistic entries for that demande with server data
+                    setDemandes((prev) => prev.map(d => d.id === entry.demandeId ? ({ ...d, history: serverHistory }) : d));
+                    // replace the global historyItems with server entries merged with local
+                    setHistoryItems((prev) => {
+                        // remove optimistic entries for this demande
+                        const cleaned = (prev || []).filter((it: any) => !(it._optimistic && it.demandeId === entry.demandeId));
+                        // prepend server entries
+                        return [...(serverHistory || []), ...cleaned];
+                    });
+                } catch (err) {
+                    console.error('Impossible de sauvegarder l\'historique sur le serveur', err);
+                    toast({ title: 'Erreur', description: "Impossible de sauvegarder l'historique sur le serveur." });
+                }
+            })();
+        }
+    };
+
     const handleStatusChange = (id: string, statut: string) => {
         setDemandes((prev) => prev.map(d => d.id === id ? { ...d, statut } : d));
+    };
+
+    const openHistory = async (demande: any) => {
+        setActiveDemande(demande);
+        setHistoryOpen(true);
+        setHistoryLoading(true);
+        try {
+            if (demande.history || demande.histories || demande.events) {
+                setHistoryItems(demande.history || demande.histories || demande.events || []);
+                return;
+            }
+
+            // try backend
+            try {
+                const resp = await api.get(`/immobilier/demandes/${demande.id}/history`);
+                setHistoryItems(resp.data || []);
+                return;
+            } catch (err) {
+                // fallback to fetching demande and inspect
+            }
+
+            try {
+                const r2 = await api.get(`/immobilier/demandes/${demande.id}`);
+                const dd = r2.data || {};
+                setHistoryItems(dd.history || dd.histories || dd.events || []);
+            } catch (err2) {
+                setHistoryItems([]);
+            }
+        } catch (e) {
+            console.error('Erreur openHistory', e);
+            setHistoryItems([]);
+        } finally {
+            setHistoryLoading(false);
+        }
     };
 
     if (!isAuthenticated) {
@@ -258,15 +396,39 @@ const MesDemandesImmobilier = () => {
     return (
         <div className="min-h-screen mt-12 bg-gray-50 p-6">
             <div className="flex items-center justify-between mb-6">
-                <div>
+                <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold text-gray-900">Mes demandes immobilières</h1>
+                    <button title="Historique global" onClick={async () => {
+                        // aggregate local histories from demandes and open modal (do NOT call backend automatically to avoid 404s)
+                        setHistoryLoading(true);
+                        setHistoryItems([]);
+                        try {
+                            const collected: any[] = [];
+                            for (const d of demandes) {
+                                const entries = d.history || d.histories || d.events;
+                                if (entries && entries.length) {
+                                    for (const e of entries) collected.push({ ...e, _sourceDemandeId: d.id, _sourceTitre: d.titre });
+                                }
+                            }
+                            setHistoryItems(collected);
+                            setHistoryOpen(true);
+                        } catch (e) {
+                            console.error('Erreur aggregation historique', e);
+                            setHistoryItems([]);
+                            setHistoryOpen(true);
+                        } finally {
+                            setHistoryLoading(false);
+                        }
+                    }} className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700">
+                        <Clock className="w-5 h-5" />
+                    </button>
                     <p className="text-gray-600 mt-2">Toutes les demandes de visite et demandes liées à vos biens</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                 {demandes.length > 0 ? (
-                    demandes.map((d) => <DemandeImmoCard key={d.id} demande={d} onDeleted={handleDeleted} onStatusChange={handleStatusChange} />)
+                    demandes.map((d) => <DemandeImmoCard key={d.id} demande={d} onDeleted={handleDeleted} onStatusChange={handleStatusChange} onAddHistory={handleAddHistory} />)
                 ) : (
                     <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
                         <h4 className="text-gray-700 text-lg font-medium mb-2">Aucune demande immobilière</h4>
@@ -274,6 +436,67 @@ const MesDemandesImmobilier = () => {
                     </div>
                 )}
             </div>
+            {/* Global History modal (Sheet) - moved to parent so a single modal shows aggregated histories */}
+            <Sheet open={historyOpen} onOpenChange={(open) => { setHistoryOpen(open); if (!open) { setActiveDemande(null); setHistoryItems([]); } }}>
+                <SheetTrigger asChild>
+                    {/* hidden trigger: we open programmatically from the button in the header */}
+                    <span style={{ display: 'none' }} />
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[420px] p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold">Historique</h4>
+                    </div>
+
+                    <div className="mb-3 flex items-center justify-end gap-2">
+                        <button className="text-sm text-blue-600 underline" onClick={async () => {
+                            // call the backend aggregated history endpoint for the current user
+                            if (!user?.id) {
+                                toast({ title: 'Erreur', description: "Utilisateur non authentifié." });
+                                return;
+                            }
+                            setHistoryLoading(true);
+                            try {
+                                const resp = await api.get(`/immobilier/demandes/user/${user.id}/history`);
+                                const items = resp.data || [];
+                                // sort descending by date/createdAt if present
+                                items.sort((a: any, b: any) => {
+                                    const da = new Date(a.date || a.createdAt || 0).getTime();
+                                    const db = new Date(b.date || b.createdAt || 0).getTime();
+                                    return db - da;
+                                });
+                                setHistoryItems(items.map((it: any) => ({ ...it })));
+                            } catch (e) {
+                                console.error('Erreur fetching aggregated histories', e);
+                                toast({ title: 'Erreur', description: "Impossible de charger l'historique depuis le serveur." });
+                                setHistoryItems([]);
+                            } finally {
+                                setHistoryLoading(false);
+                            }
+                        }}>Charger depuis le serveur</button>
+                    </div>
+
+                    {historyLoading ? (
+                        <div className="text-center text-sm text-gray-500">Chargement...</div>
+                    ) : historyItems && historyItems.length > 0 ? (
+                        <div className="space-y-3 overflow-auto max-h-[70vh]">
+                            {historyItems.map((h: any, idx: number) => (
+                                <div key={idx} className="p-3 bg-white rounded-lg border">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <div className="text-sm font-medium text-gray-800">{h.title || h.action || h.type || 'Événement'}</div>
+                                            <div className="text-xs text-gray-500 mt-1">{h.message || h.note || h.description || ''}</div>
+                                            {h._sourceTitre && <div className="text-xs text-gray-400 mt-1">Source: {h._sourceTitre}</div>}
+                                        </div>
+                                        <div className="text-xs text-gray-400">{h.date ? new Date(h.date).toLocaleString('fr-FR') : (h.createdAt ? new Date(h.createdAt).toLocaleString('fr-FR') : '')}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center text-sm text-gray-500">Aucun historique disponible.</div>
+                    )}
+                </SheetContent>
+            </Sheet>
         </div>
     );
 };

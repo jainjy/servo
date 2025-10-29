@@ -3,6 +3,7 @@ import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Eye, CheckCircle, XCircle, RefreshCw, Trash2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const DemandeCard = ({ demande, onValidate, onRefuse, onRemove }: any) => {
     return (
@@ -121,8 +122,8 @@ const ListeDemandesImmobilier = () => {
             setLoading(true);
             try {
                 // load all demandes for now (show every visit request)
-                // const resp = await api.get(`/demandes/all`);
-                const resp = await api.get(`/demandes/owner/${user.id}`);
+                // const resp = await api.get(`/immobilier/demandes/all`);
+                const resp = await api.get(`/immobilier/demandes/owner/${user.id}`);
 
                 setDemandes(resp.data || []);
 
@@ -144,41 +145,56 @@ const ListeDemandesImmobilier = () => {
     }, [isAuthenticated, user?.id]);
 
     const handleAction = async (id: number, action: 'validate' | 'refuse') => {
-        if (!confirm(`Confirmez-vous ${action === 'validate' ? 'la validation' : "l'annulation"} de cette demande ?`)) return;
-        setUpdatingIds((s) => [...s, id]);
-        try {
-            await api.patch(`/demandes/${id}/status`, { action });
-            const newStatus = action === 'validate' ? 'Validée' : 'Refusée';
-            setDemandes((prev) => prev.map(d => d.id === id ? { ...d, statut: newStatus } : d));
-            // notify other parts of the app (user's demandes page) that a demande changed
-            try {
-                window.dispatchEvent(new CustomEvent('demande:statusChanged', { detail: { demandeId: id, status: newStatus } }));
-            } catch (e) {
-                // ignore if CustomEvent isn't supported in this env
-                console.debug('Could not dispatch demande:statusChanged event', e);
-            }
-            // if refused, keep it in list but allow deletion via trash button (handled by onRemove)
-        } catch (err) {
-            console.error('Erreur action demande', err);
-            const msg = err?.response?.data?.error || err?.message || 'Impossible de traiter la demande pour le moment.';
-            alert(msg);
-        } finally {
-            setUpdatingIds((s) => s.filter(x => x !== id));
-        }
+        let toastRef: any = null;
+        toastRef = toast({
+            title: action === 'validate' ? 'Confirmer la validation' : 'Confirmer le refus',
+            description: action === 'validate' ? 'Valider cette demande la marquera comme validée.' : 'Refuser cette demande la marquera comme refusée.',
+            action: (
+                <button className="px-3 py-1 rounded bg-blue-600 text-white text-sm" onClick={async () => {
+                    toastRef?.dismiss?.();
+                    setUpdatingIds((s) => [...s, id]);
+                    try {
+                        await api.patch(`/immobilier/demandes/${id}/status`, { action });
+                        const newStatus = action === 'validate' ? 'Validée' : 'Refusée';
+                        setDemandes((prev) => prev.map(d => d.id === id ? { ...d, statut: newStatus } : d));
+                        try {
+                            window.dispatchEvent(new CustomEvent('demande:statusChanged', { detail: { demandeId: id, status: newStatus } }));
+                        } catch (e) { console.debug('Could not dispatch demande:statusChanged event', e); }
+                        toast({ title: 'Succès', description: `Demande ${newStatus.toLowerCase()}` });
+                    } catch (err) {
+                        console.error('Erreur action demande', err);
+                        const msg = err?.response?.data?.error || err?.message || 'Impossible de traiter la demande pour le moment.';
+                        toast({ title: 'Erreur', description: msg });
+                    } finally {
+                        setUpdatingIds((s) => s.filter(x => x !== id));
+                    }
+                }}>Confirmer</button>
+            )
+        });
     }
 
     const handleRemove = async (id: number) => {
-        if (!confirm('Confirmez-vous la suppression de cette demande ?')) return;
-        setUpdatingIds((s) => [...s, id]);
-        try {
-            await api.delete(`/demandes/${id}`);
-            setDemandes((prev) => prev.filter(d => d.id !== id));
-        } catch (err) {
-            console.error('Erreur suppression demande', err);
-            alert('Impossible de supprimer la demande pour le moment.');
-        } finally {
-            setUpdatingIds((s) => s.filter(x => x !== id));
-        }
+        let toastRef: any = null;
+        toastRef = toast({
+            title: 'Confirmer la suppression',
+            description: 'Cette action supprimera définitivement la demande.',
+            action: (
+                <button className="px-3 py-1 rounded bg-red-600 text-white text-sm" onClick={async () => {
+                    toastRef?.dismiss?.();
+                    setUpdatingIds((s) => [...s, id]);
+                    try {
+                        await api.delete(`/immobilier/demandes/${id}`);
+                        setDemandes((prev) => prev.filter(d => d.id !== id));
+                        toast({ title: 'Supprimé', description: 'La demande a été supprimée.' });
+                    } catch (err) {
+                        console.error('Erreur suppression demande', err);
+                        toast({ title: 'Erreur', description: 'Impossible de supprimer la demande pour le moment.' });
+                    } finally {
+                        setUpdatingIds((s) => s.filter(x => x !== id));
+                    }
+                }}>Confirmer</button>
+            )
+        });
     }
 
     if (!isAuthenticated) return (
@@ -227,7 +243,7 @@ const ListeDemandesImmobilier = () => {
 
                         <div className="mt-4 flex items-center justify-center gap-3">
                             <button onClick={() => { setDebugVisible(v => !v); }} className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200">{debugVisible ? 'Masquer debug' : 'Afficher debug'}</button>
-                            <button onClick={() => { setLoading(true); setDemandes([]); setProperties([]); (async () => { try { const resp = await api.get(`/demandes/owner/${user.id}`); setDemandes(resp.data || []); const props = await api.get('/properties', { params: { userId: user.id } }); setProperties(props.data || []); } catch (e) { console.error(e) } finally { setLoading(false) } })() }} className="px-4 py-2 rounded-md bg-blue-600 text-white">Réessayer</button>
+                            <button onClick={() => { setLoading(true); setDemandes([]); setProperties([]); (async () => { try { const resp = await api.get(`/immobilier/demandes/owner/${user.id}`); setDemandes(resp.data || []); const props = await api.get('/properties', { params: { userId: user.id } }); setProperties(props.data || []); } catch (e) { console.error(e) } finally { setLoading(false) } })() }} className="px-4 py-2 rounded-md bg-blue-600 text-white">Réessayer</button>
                         </div>
 
                         {debugVisible && (

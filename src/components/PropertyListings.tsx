@@ -304,12 +304,18 @@ const ModalDemandeVisite = ({
         chosenService = services[0];
       }
 
+      // Ensure backend-required contactPrenom and contactNom are provided
+      const nameParts = String(formData.nomPrenom || '').trim().split(/\s+/).filter(Boolean);
+      const contactPrenom = nameParts.length > 0 ? nameParts[0] : '';
+      const contactNom = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (nameParts[0] || '');
+
       const payload = {
         // backend expects serviceId and createdById
         serviceId: chosenService.id,
         createdById: user.id,
         propertyId: property?.id,
-        contactNom: formData.nomPrenom,
+        contactNom,
+        contactPrenom,
         contactEmail: formData.email,
         contactTel: formData.telephone,
         description: `Demande visite pour le bien: ${property?.title || property?.id} (${property?.id}). ${formData.message || ''}`,
@@ -319,7 +325,7 @@ const ModalDemandeVisite = ({
         // nombreArtisans, optionAssurance etc left as defaults
       };
 
-      await api.post('/demandes', payload);
+  await api.post('/immobilier/demandes', payload);
 
       // Notify parent that a request was sent
       onSuccess?.(String(property.id));
@@ -561,7 +567,7 @@ const PropertyListings = (
     const loadUserDemandes = async () => {
       setDemandesLoading(true);
       try {
-        const resp = await api.get(`/demandes/user/${user.id}`);
+  const resp = await api.get(`/immobilier/demandes/user/${user.id}`);
         const demandes = resp.data || [];
         const map: Record<string, boolean> = {};
         demandes.forEach((d: any) => {
