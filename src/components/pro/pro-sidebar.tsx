@@ -23,8 +23,9 @@ import {
   X,
   ShoppingBag,
   Leaf,
+  ShoppingCart,
 } from "lucide-react";
-// Données de navigation (Inchangées)
+// Données de navigation (Mise à jour avec la gestion des commandes)
 const navigation = [
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
@@ -36,11 +37,11 @@ const navigation = [
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
+  { name: "Mes Commandes", href: "/pro/orders", icon: ShoppingCart }, // NOUVEAU : Gestion des commandes
   { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
   { name: "Liste demande immobilier", href: "/pro/demandes-immobilier", icon: Building2 },
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
-
 ];
 
 export function ProSidebar() {
@@ -105,18 +106,24 @@ export function ProSidebar() {
                 )}
               />
               {item.name}
-              {/* Notifications */}
+              {/* Notifications pour les commandes */}
+              {item.name === "Mes Commandes" && (
+                <span className="ml-auto bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  2
+                </span>
+              )}
+              {/* Notifications pour les messages */}
               {item.name === "Messages" && (
                 <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   3
                 </span>
               )}
+              {/* Notifications pour les réservations */}
               {item.name === "Réservations" && (
                 <span className="ml-auto bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   5
                 </span>
               )}
-
             </Link>
           );
         })}
@@ -131,25 +138,34 @@ export function ProSidebar() {
         {sidebarContent}
       </aside>
 
-      {/* Mobile: header (Note: l'élément parent doit positionner correctement cette div) */}
-      <div className="-z-0 flex md:hidden items-center h-16 border-b border-sidebar-border px-4 bg-sidebar w-screen fixed top-0 left-0">
-        <div className="p-1 rounded-full  bg-white border-black border-2">
-          {/* Remplacement de <Image> par <img> */}
-          <img
-            src={logo}
-            alt="Servo Logo"
-            className="w-10 h-10 rounded-full"
-          />
+      {/* Mobile: header */}
+      <div className="flex md:hidden items-center h-16 border-b border-sidebar-border px-4 bg-sidebar w-screen fixed top-0 left-0 z-40">
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-full bg-white border-black border-2">
+            <img
+              src={logo}
+              alt="Servo Logo"
+              className="w-8 h-8 rounded-full"
+            />
+          </div>
+          <div>
+            <h1 className="text-sm font-semibold text-sidebar-foreground">
+              SERVO
+            </h1>
+            <p className="text-xs text-muted-foreground">Espace Pro</p>
+          </div>
         </div>
 
-      </div>
-       <button
+        {/* Bouton menu mobile */}
+        <button
           aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           onClick={() => setMenuOpen((v) => !v)}
-          className="absolute top-2 z-50 lg:hidden md:hidden right-28 ml-52 p-2 rounded-full text-sidebar-foreground hover:bg-sidebar-accent"
+          className="ml-auto p-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent"
         >
-          {menuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+          {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
+      </div>
+
       {/* Mobile: Drawer sidebar */}
       <aside
         className={cn(
