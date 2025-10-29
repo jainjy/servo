@@ -88,6 +88,7 @@ import InvestissementDetail from "./pages/InvestissementDetail";
 import { CartProvider } from "./components/contexts/CartContext";
 import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
+import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
 
 
 const queryClient = new QueryClient();
@@ -255,6 +256,10 @@ const App = () => (
                 <Route path="users" element={<Users />} />
                 <Route path="vendors" element={<Vendors />} />
                 <Route path="demandes" element={<ListeDemande />} />
+                <Route
+                  path="service-categories"
+                  element={<ServiceCategoriesPage />}
+                />
                 <Route path="metiers" element={<AdminMetiers />} />
               </Route>
               {/* Section not found Routes */}

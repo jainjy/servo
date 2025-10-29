@@ -56,37 +56,51 @@ export function ServicesStats() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">Services</CardTitle>
+          <CardTitle className="text-sm font-medium text-foreground">
+            Services
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-foreground">{stats.totalServices}</div>
+          <div className="text-2xl font-bold text-foreground">
+            {stats.totalServices}
+          </div>
           <p className="text-xs text-muted-foreground">Services disponibles</p>
         </CardContent>
       </Card>
 
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">Catégories</CardTitle>
+          <CardTitle className="text-sm font-medium text-foreground">
+            Catégories
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-foreground">{stats.totalCategories}</div>
+          <div className="text-2xl font-bold text-foreground">
+            {stats.totalCategories}
+          </div>
           <p className="text-xs text-muted-foreground">Catégories actives</p>
         </CardContent>
       </Card>
 
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">Métiers</CardTitle>
+          <CardTitle className="text-sm font-medium text-foreground">
+            Métiers
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-foreground">{stats.totalMetiers}</div>
+          <div className="text-2xl font-bold text-foreground">
+            {stats.totalMetiers}
+          </div>
           <p className="text-xs text-muted-foreground">Métiers associés</p>
         </CardContent>
       </Card>
 
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">Top Catégorie</CardTitle>
+          <CardTitle className="text-sm font-medium text-foreground">
+            Top Catégorie
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-foreground">
@@ -97,6 +111,19 @@ export function ServicesStats() {
           </p>
         </CardContent>
       </Card>
+      <Card className="bg-card border-border">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-foreground">
+            Catégories
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-foreground">
+            {stats.totalCategories}
+          </div>
+          <p className="text-xs text-muted-foreground">Catégories actives</p>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
