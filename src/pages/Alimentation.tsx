@@ -186,7 +186,7 @@ const Alimentation = () => {
       section: section,
     };
 
-    navigate(`/produits/categorie/${encodeURIComponent(category.name)}`, {
+    navigate(`/alimentation/categorie/${encodeURIComponent(category.name)}`, {
       state: categoryData,
     });
   };

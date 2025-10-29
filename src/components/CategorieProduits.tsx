@@ -251,32 +251,6 @@ const CategorieProduits = () => {
             </div>
           )}
 
-          {/* Section Service personnalisé */}
-          <div className="bg-[#F6F8FA] rounded-2xl p-6 mt-8">
-            <h3 className="text-lg font-semibold text-[#0A0A0A] mb-3 flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#00C2A8]" />
-              Service personnalisé
-            </h3>
-            <p className="text-[#5A6470] mb-4">
-              Nos experts sont disponibles pour vous conseiller sur cette catégorie de produits.
-            </p>
-            <div className="flex gap-3">
-              <Button 
-                className="flex-1 bg-[#0052FF] hover:bg-[#003EE6] text-white"
-                onClick={handleCallClick}
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                Appeler
-              </Button>
-              <Button 
-                className="flex-1 bg-[#00C2A8] hover:bg-[#00A890] text-white"
-                onClick={handleAppointmentClick}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Rendez-vous
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

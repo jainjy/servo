@@ -87,6 +87,8 @@ import ParticularLogin from "./pages/auth/ParticularLogin";
 import InvestissementDetail from "./pages/InvestissementDetail";
 import { CartProvider } from "./components/contexts/CartContext";
 import Alimentation from "./pages/Alimentation";
+import AlimentationCategorie from "./pages/AlimentationCategorie";
+
 
 const queryClient = new QueryClient();
 
@@ -145,6 +147,10 @@ const App = () => (
               <Route path="/travaux" element={<Travaux />} />
               <Route path="/produits" element={<Produits />} />
               <Route path="/alimentation" element={<Alimentation />} />
+              <Route
+                path="/alimentation/categorie/:categoryName"
+                element={<AlimentationCategorie />}
+              />
               <Route
                 path="/produits/categorie/:categoryName"
                 element={<CategorieProduits />}
