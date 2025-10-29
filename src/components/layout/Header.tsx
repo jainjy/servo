@@ -174,6 +174,10 @@ const Header = () => {
       href: "/bien-etre",
     },
     {
+      title: "ALIMENTATION",
+      href: "/alimentation",
+    },
+    {
       title: "INVESTISSEMENT",
       href: "/investissement",
     },

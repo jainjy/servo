@@ -86,6 +86,7 @@ import ProLogin from "./pages/auth/ProLogin";
 import ParticularLogin from "./pages/auth/ParticularLogin";
 import InvestissementDetail from "./pages/InvestissementDetail";
 import { CartProvider } from "./components/contexts/CartContext";
+import Alimentation from "./pages/Alimentation";
 
 const queryClient = new QueryClient();
 
@@ -143,6 +144,7 @@ const App = () => (
               <Route path="/immobilier/:id" element={<PropertyPage />} />
               <Route path="/travaux" element={<Travaux />} />
               <Route path="/produits" element={<Produits />} />
+              <Route path="/alimentation" element={<Alimentation />} />
               <Route
                 path="/produits/categorie/:categoryName"
                 element={<CategorieProduits />}
