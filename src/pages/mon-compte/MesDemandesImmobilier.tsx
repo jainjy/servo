@@ -146,7 +146,7 @@ const ResendButton = ({ demande, onStatusChange }: any) => {
                         toastRef?.dismiss?.();
                         setSending(true);
                         try {
-                            await api.patch(`/immobilier/demandes/${demande.id}/statut`, { statut: 'en attente' });
+                            await api.patch(`/demandes/immobilier/${demande.id}/statut`, { statut: 'en attente' });
                             onStatusChange?.(demande.id, 'en attente');
                             toast({ title: 'Demande renvoyée', description: 'Votre demande est de nouveau en attente.' });
                         } catch (err) {
@@ -193,7 +193,7 @@ const CancelButton = ({ demande, onDeleted, onAddHistory, onStatusChange }: any)
                         };
                         try { onAddHistory?.(entry); } catch (e) { /* ignore */ }
 
-                        await api.patch(`/immobilier/demandes/${demande.id}/statut`, { statut: 'annulée' });
+                        await api.patch(`/demandes/immobilier/${demande.id}/statut`, { statut: 'annulée' });
                         onStatusChange?.(demande.id, 'annulée');
                         toast({ title: 'Demande annulée' });
                     } catch (err) {
@@ -241,7 +241,7 @@ const DeleteButton = ({ demande, onDeleted, onAddHistory, onStatusChange }: any)
                         };
                         try { onAddHistory?.(entry); } catch (e) { /* ignore */ }
 
-                        await api.delete(`/immobilier/demandes/${demande.id}`);
+                        await api.delete(`/demandes/immobilier/${demande.id}`);
                         onDeleted?.(demande.id);
                         toast({ title: 'Supprimé', description: 'La demande a été supprimée.' });
                     } catch (err) {
@@ -277,7 +277,7 @@ const MesDemandesImmobilier = () => {
         const load = async () => {
             setLoading(true);
             try {
-                const resp = await api.get(`/immobilier/demandes/user/${user.id}`);
+                const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
                 const all = resp.data || [];
                 setDemandes(all); // Affiche toutes les demandes, sans filtrer sur propertyId
             } catch (err) {
@@ -315,7 +315,7 @@ const MesDemandesImmobilier = () => {
             // try to persist on server
             (async () => {
                 try {
-                    const resp = await api.post(`/immobilier/demandes/${entry.demandeId}/history`, { entry });
+                    const resp = await api.post(`/demandes/immobilier/${entry.demandeId}/history`, { entry });
                     const serverHistory = resp.data?.history || [];
                     // replace optimistic entries for that demande with server data
                     setDemandes((prev) => prev.map(d => d.id === entry.demandeId ? ({ ...d, history: serverHistory }) : d));
@@ -350,7 +350,7 @@ const MesDemandesImmobilier = () => {
 
             // try backend
             try {
-                const resp = await api.get(`/immobilier/demandes/${demande.id}/history`);
+                const resp = await api.get(`/demandes/immobilier/${demande.id}/history`);
                 setHistoryItems(resp.data || []);
                 return;
             } catch (err) {
@@ -358,7 +358,7 @@ const MesDemandesImmobilier = () => {
             }
 
             try {
-                const r2 = await api.get(`/immobilier/demandes/${demande.id}`);
+                const r2 = await api.get(`/demandes/immobilier/${demande.id}`);
                 const dd = r2.data || {};
                 setHistoryItems(dd.history || dd.histories || dd.events || []);
             } catch (err2) {
@@ -456,7 +456,7 @@ const MesDemandesImmobilier = () => {
                             }
                             setHistoryLoading(true);
                             try {
-                                const resp = await api.get(`/immobilier/demandes/user/${user.id}/history`);
+                                const resp = await api.get(`/demandes/immobilier/user/${user.id}/history`);
                                 const items = resp.data || [];
                                 // sort descending by date/createdAt if present
                                 items.sort((a: any, b: any) => {

@@ -122,8 +122,8 @@ const ListeDemandesImmobilier = () => {
             setLoading(true);
             try {
                 // load all demandes for now (show every visit request)
-                // const resp = await api.get(`/immobilier/demandes/all`);
-                const resp = await api.get(`/immobilier/demandes/owner/${user.id}`);
+                // const resp = await api.get(`/demandes/immobilier/all`);
+                const resp = await api.get(`/demandes/immobilier/owner/${user.id}`);
 
                 setDemandes(resp.data || []);
 
@@ -154,7 +154,7 @@ const ListeDemandesImmobilier = () => {
                     toastRef?.dismiss?.();
                     setUpdatingIds((s) => [...s, id]);
                     try {
-                        await api.patch(`/immobilier/demandes/${id}/status`, { action });
+                        await api.patch(`/demandes/immobilier/${id}/status`, { action });
                         const newStatus = action === 'validate' ? 'Validée' : 'Refusée';
                         setDemandes((prev) => prev.map(d => d.id === id ? { ...d, statut: newStatus } : d));
                         try {
@@ -183,7 +183,7 @@ const ListeDemandesImmobilier = () => {
                     toastRef?.dismiss?.();
                     setUpdatingIds((s) => [...s, id]);
                     try {
-                        await api.delete(`/immobilier/demandes/${id}`);
+                        await api.delete(`/demandes/immobilier/${id}`);
                         setDemandes((prev) => prev.filter(d => d.id !== id));
                         toast({ title: 'Supprimé', description: 'La demande a été supprimée.' });
                     } catch (err) {
@@ -243,7 +243,7 @@ const ListeDemandesImmobilier = () => {
 
                         <div className="mt-4 flex items-center justify-center gap-3">
                             <button onClick={() => { setDebugVisible(v => !v); }} className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200">{debugVisible ? 'Masquer debug' : 'Afficher debug'}</button>
-                            <button onClick={() => { setLoading(true); setDemandes([]); setProperties([]); (async () => { try { const resp = await api.get(`/immobilier/demandes/owner/${user.id}`); setDemandes(resp.data || []); const props = await api.get('/properties', { params: { userId: user.id } }); setProperties(props.data || []); } catch (e) { console.error(e) } finally { setLoading(false) } })() }} className="px-4 py-2 rounded-md bg-blue-600 text-white">Réessayer</button>
+                            <button onClick={() => { setLoading(true); setDemandes([]); setProperties([]); (async () => { try { const resp = await api.get(`/demandes/immobilier/owner/${user.id}`); setDemandes(resp.data || []); const props = await api.get('/properties', { params: { userId: user.id } }); setProperties(props.data || []); } catch (e) { console.error(e) } finally { setLoading(false) } })() }} className="px-4 py-2 rounded-md bg-blue-600 text-white">Réessayer</button>
                         </div>
 
                         {debugVisible && (

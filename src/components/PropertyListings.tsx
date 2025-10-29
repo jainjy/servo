@@ -325,7 +325,9 @@ const ModalDemandeVisite = ({
         // nombreArtisans, optionAssurance etc left as defaults
       };
 
-  await api.post('/immobilier/demandes', payload);
+
+      await api.post('/demandes/immobilier', payload);
+      console.log(payload)
 
       // Notify parent that a request was sent
       onSuccess?.(String(property.id));
@@ -567,7 +569,7 @@ const PropertyListings = (
     const loadUserDemandes = async () => {
       setDemandesLoading(true);
       try {
-  const resp = await api.get(`/immobilier/demandes/user/${user.id}`);
+  const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
         const demandes = resp.data || [];
         const map: Record<string, boolean> = {};
         demandes.forEach((d: any) => {
