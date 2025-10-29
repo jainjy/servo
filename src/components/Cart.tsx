@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "./contexts/CartContext";
+import api from "@/lib/api"; // Import de votre configuration Axios
 
 const Cart = ({ isOpen, onClose }) => {
     const {
@@ -12,12 +13,15 @@ const Cart = ({ isOpen, onClose }) => {
         updateQuantity,
         removeFromCart,
         clearCart,
-        getCartItemsCount
+        getCartItemsCount,
+        validateCart,
+        isLoading
     } = useCart();
 
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [localCartItems, setLocalCartItems] = useState([]);
     const [imageErrors, setImageErrors] = useState({});
+    const [validationErrors, setValidationErrors] = useState([]);
 
     // Vérifier l'authentification
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,7 +42,7 @@ const Cart = ({ isOpen, onClose }) => {
         try {
             const token = localStorage.getItem('auth-token');
             const userData = localStorage.getItem('user-data');
-            
+
             if (token && token !== 'null' && token !== 'undefined') {
                 setIsAuthenticated(true);
                 if (userData && userData !== 'null' && userData !== 'undefined') {
@@ -99,9 +103,13 @@ const Cart = ({ isOpen, onClose }) => {
     };
 
     // Mettre à jour la quantité
-    const handleUpdateQuantity = (productId, newQuantity) => {
+    const handleUpdateQuantity = async (productId, newQuantity) => {
         if (newQuantity < 1) return;
-        updateQuantity(productId, newQuantity);
+        try {
+            await updateQuantity(productId, newQuantity);
+        } catch (error) {
+            alert(error.message);
+        }
     };
 
     // Supprimer un article
@@ -112,6 +120,7 @@ const Cart = ({ isOpen, onClose }) => {
     // Vider le panier
     const handleClearCart = () => {
         clearCart();
+        setValidationErrors([]);
     };
 
     // Rediriger vers la page de connexion
@@ -120,97 +129,111 @@ const Cart = ({ isOpen, onClose }) => {
         window.location.href = '/login';
     };
 
-    // Générer un numéro de commande aléatoire
-    const generateOrderNumber = () => {
-        return 'CMD-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    // Valider le panier avant commande
+    const validateCartBeforeCheckout = async () => {
+        try {
+            setValidationErrors([]);
+            const validationResult = await validateCart(localCartItems);
+            
+            if (validationResult.errors && validationResult.errors.length > 0) {
+                setValidationErrors(validationResult.errors);
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Erreur validation panier:', error);
+            setValidationErrors([error.message]);
+            return false;
+        }
     };
 
-    // Formater la date
-    const formatOrderDate = () => {
-        return new Date().toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    // Créer une commande
+    const createOrder = async () => {
+        try {
+            const orderData = {
+                items: localCartItems.map(item => ({
+                    productId: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    images: item.images || []
+                })),
+                shippingAddress: user?.shippingAddress || {},
+                paymentMethod: 'card'
+            };
+
+            const response = await api.post('/orders', orderData);
+            return response.data;
+        } catch (error) {
+            console.error('Erreur création commande:', error);
+            throw new Error(
+                error.response?.data?.message || 
+                'Erreur lors de la création de la commande'
+            );
+        }
     };
 
-    // Commander (mode simulation)
+    // Commander
     const handleCheckout = async () => {
         // Re-vérifier l'authentification avant de commander
         checkAuthentication();
-        
+
         if (!isAuthenticated) {
             alert('❌ Veuillez vous connecter pour passer commande');
             redirectToLogin();
             return;
         }
 
+        // Valider le panier d'abord
+        const isValid = await validateCartBeforeCheckout();
+        if (!isValid) {
+            return;
+        }
+
         setIsCheckingOut(true);
-        
-        // Simulation du traitement de commande
-        setTimeout(() => {
-            try {
-                // Générer une commande simulée
-                const orderNumber = generateOrderNumber();
-                const totalAmount = calculateTotal();
-                const orderDate = formatOrderDate();
-                
-                console.log('✅ Commande simulée créée:', {
-                    orderNumber,
-                    totalAmount,
-                    items: localCartItems,
-                    user: user,
-                    date: orderDate
-                });
 
-                // Sauvegarder la commande dans le localStorage pour historique
-                const orderData = {
-                    orderNumber,
-                    totalAmount,
-                    items: localCartItems,
-                    user: user,
-                    date: orderDate,
-                    status: 'confirmed'
-                };
+        try {
+            // Créer la commande réelle
+            const orderResult = await createOrder();
+            
+            console.log('✅ Commande créée:', orderResult);
 
-                // Sauvegarder dans l'historique des commandes
-                const existingOrders = JSON.parse(localStorage.getItem('order-history') || '[]');
-                existingOrders.push(orderData);
-                localStorage.setItem('order-history', JSON.stringify(existingOrders));
+            // Vider le panier
+            handleClearCart();
 
-                // Vider le panier
-                handleClearCart();
+            // Fermer le panier
+            onClose();
 
-                // Fermer le panier
-                onClose();
+            // Afficher le succès
+            const itemsSummary = localCartItems.map(item =>
+                `• ${item.name} x${item.quantity} - €${calculateItemTotal(item).toFixed(2)}`
+            ).join('\n');
 
-                // Afficher le succès avec plus de détails
-                const itemsSummary = localCartItems.map(item => 
-                    `• ${item.name} x${item.quantity} - €${calculateItemTotal(item).toFixed(2)}`
-                ).join('\n');
-
-                alert(`✅ Commande #${orderNumber} passée avec succès !
+            alert(`✅ Commande #${orderResult.order.orderNumber} passée avec succès !
 
 📦 Détails de la commande :
 ${itemsSummary}
-
-💰 Total : €${totalAmount.toFixed(2)}
-📅 Date : ${orderDate}
+💰 Total : €${orderResult.order.totalAmount.toFixed(2)}
+📅 Date : ${new Date(orderResult.order.createdAt).toLocaleDateString('fr-FR')}
 👤 Client : ${user.firstName} ${user.lastName}
-📧 Email : ${user.email}
 
-💡 Cette commande est en mode simulation. 
-Le système de commandes complet sera disponible prochainement.`);
+📧 Vous recevrez un email de confirmation sous peu.`);
 
-            } catch (error) {
-                console.error("💥 Erreur lors de la commande simulée:", error);
-                alert('❌ Erreur lors du traitement de la commande simulée');
-            } finally {
-                setIsCheckingOut(false);
+        } catch (error) {
+            console.error("💥 Erreur lors de la commande:", error);
+            
+            // Gestion spécifique des erreurs de stock
+            if (error.response?.data?.errors) {
+                const stockErrors = error.response.data.errors;
+                setValidationErrors(stockErrors);
+                alert(`❌ Problèmes de stock détectés. Veuillez vérifier votre panier.`);
+            } else {
+                alert(`❌ Erreur lors de la commande: ${error.message}`);
             }
-        }, 1500); // 1.5 secondes de simulation
+        } finally {
+            setIsCheckingOut(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -269,6 +292,28 @@ Le système de commandes complet sera disponible prochainement.`);
                         </div>
                     ) : (
                         <div className="space-y-4">
+                            {/* Messages d'erreur de validation */}
+                            {validationErrors.length > 0 && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <p className="text-red-800 font-semibold mb-2">
+                                        ❌ Problèmes détectés dans votre panier :
+                                    </p>
+                                    <ul className="text-red-700 text-sm list-disc list-inside space-y-1">
+                                        {validationErrors.map((error, index) => (
+                                            <li key={index}>{error}</li>
+                                        ))}
+                                    </ul>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-2 text-red-700 border-red-300 hover:bg-red-100"
+                                        onClick={() => setValidationErrors([])}
+                                    >
+                                        Compris
+                                    </Button>
+                                </div>
+                            )}
+
                             {items.map((item) => (
                                 <Card key={item.id} className="p-4 bg-white shadow-sm">
                                     <div className="flex gap-4">
@@ -372,8 +417,8 @@ Le système de commandes complet sera disponible prochainement.`);
                             <div className="flex items-start gap-2">
                                 <div className="text-blue-600 mt-0.5">💡</div>
                                 <div>
-                                    <p className="text-blue-800 text-sm font-medium">Mode démonstration</p>
-                                    <p className="text-blue-700 text-xs">Le système de commandes fonctionne en simulation</p>
+                                    <p className="text-blue-800 text-sm font-medium">Système de commandes réel</p>
+                                    <p className="text-blue-700 text-xs">Votre commande sera traitée et les stocks mis à jour</p>
                                 </div>
                             </div>
                         </div>
@@ -401,7 +446,7 @@ Le système de commandes complet sera disponible prochainement.`);
                             <Button
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-semibold rounded-lg"
                                 onClick={handleCheckout}
-                                disabled={isCheckingOut || itemsCount === 0 || !isAuthenticated}
+                                disabled={isCheckingOut || itemsCount === 0 || !isAuthenticated || validationErrors.length > 0}
                             >
                                 {isCheckingOut ? (
                                     <div className="flex items-center gap-2">
@@ -410,6 +455,8 @@ Le système de commandes complet sera disponible prochainement.`);
                                     </div>
                                 ) : !isAuthenticated ? (
                                     "Se connecter pour commander"
+                                ) : validationErrors.length > 0 ? (
+                                    "Corrigez les erreurs pour commander"
                                 ) : (
                                     "Passer la commande"
                                 )}
