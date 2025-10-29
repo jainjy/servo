@@ -86,6 +86,7 @@ import ProLogin from "./pages/auth/ProLogin";
 import ParticularLogin from "./pages/auth/ParticularLogin";
 import InvestissementDetail from "./pages/InvestissementDetail";
 import { CartProvider } from "./components/contexts/CartContext";
+import ProOrders from './components/pro/ProOrders';
 import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
 import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
@@ -215,6 +216,7 @@ const App = () => (
                 <Route path="services" element={<ProfessionalServicesPage />} />
                 <Route path="billing" element={<BillingSection />} />
                 <Route path="settings" element={<ParametresPage />} />
+                <Route path="orders" element={<ProOrders />} />
                 <Route
                   path="demandes-immobilier"
                   element={<ListeDemandesImmobilier />}

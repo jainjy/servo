@@ -381,23 +381,26 @@ const Produits = () => {
     return icons[iconName] || Package;
   };
 
-  // Filtrer les catégories basées sur la recherche
+  // Filtrer les catégories basées sur la recherche et exclure celles avec 0 produit
   const filteredEquipment = equipmentCategories.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      getProductCount(category.name) > 0 // EXCLURE LES CATÉGORIES AVEC 0 PRODUIT
   );
 
   const filteredMaterials = materialsCategories.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      getProductCount(category.name) > 0 // EXCLURE LES CATÉGORIES AVEC 0 PRODUIT
   );
 
   const filteredDesign = designCategories.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      getProductCount(category.name) > 0 // EXCLURE LES CATÉGORIES AVEC 0 PRODUIT
   );
 
   return (
@@ -484,217 +487,204 @@ const Produits = () => {
             <div className="mb-12 animate-fade-in">
               <h2 className="text-3xl font-bold mb-6">Résultats pour "{searchQuery}"</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onAddToCart={addToCart}
-                    user={user}
-                  />
-                ))}
+                {products
+                  .filter(product => product.id !== 0)
+                  .map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={addToCart}
+                      user={user}
+                    />
+                  ))}
               </div>
             </div>
           )}
 
           {/* Section Équipement */}
-          <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="equipement">
-            <div
-              className=" flex items-center gap-4 mb-8 animate-slide-from-left"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                <Home className="h-8 w-8 text-white" />
+          {filteredEquipment.length > 0 && (
+            <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="equipement">
+              <div
+                className=" flex items-center gap-4 mb-8 animate-slide-from-left"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <Home className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    Équipement Maison
+                  </h2>
+                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    Tout le matériel et équipement pour aménager et équiper votre intérieur
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                  Équipement Maison
-                </h2>
-                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Tout le matériel et équipement pour aménager et équiper votre intérieur
-                </p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredEquipment.map((category, index) => {
-                const IconComponent = getIconByName(category.iconName);
-                const productCount = getProductCount(category.name);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredEquipment.map((category, index) => {
+                  const IconComponent = getIconByName(category.iconName);
+                  const productCount = getProductCount(category.name);
 
-                return (
-                  <Card
-                    key={category.name}
-                    className=" group p-4 flex flex-col border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                    style={{
-                      animationDelay: `${0.3 + index * 0.1}s`,
-                    }}
-                  >
-                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                      <img src={category.image} alt="" className="w-full h-full object-cover" />
-                      <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                        <Badge>
-                          {productCount} produit{productCount !== 1 ? 's' : ''}
-                        </Badge>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
-                      {category.description}
-                    </p>
-                    <Button
-                      className="w-full bg-[#0052FF]/10 hover:bg-[#0052FF] hover:text-white text-[#0052FF] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                      onClick={() => handleCategoryClick(category, "équipement")}
-                      disabled={productCount === 0}
+                  return (
+                    <Card
+                      key={category.name}
+                      className=" group p-4 flex flex-col border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
+                      style={{
+                        animationDelay: `${0.3 + index * 0.1}s`,
+                      }}
                     >
-                      {productCount > 0 ? (
-                        <>
-                          Explorer
-                          <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                        </>
-                      ) : (
-                        "Bientôt disponible"
-                      )}
-                    </Button>
-                  </Card>
-                );
-              })}
+                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                        <img src={category.image} alt="" className="w-full h-full object-cover" />
+                        <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                          <Badge>
+                            {productCount} produit{productCount !== 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <Button
+                        className="w-full bg-[#0052FF]/10 hover:bg-[#0052FF] hover:text-white text-[#0052FF] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                        onClick={() => handleCategoryClick(category, "équipement")}
+                      >
+                        Explorer
+                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section Matériaux */}
-          <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="materiaux">
-            <div
-              className="flex items-center gap-4 mb-8 animate-slide-from-right"
-              style={{ animationDelay: "0.4s" }}
-            >
-              <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                <Construction className="h-8 w-8 text-white" />
+          {filteredMaterials.length > 0 && (
+            <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="materiaux">
+              <div
+                className="flex items-center gap-4 mb-8 animate-slide-from-right"
+                style={{ animationDelay: "0.4s" }}
+              >
+                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <Construction className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    Matériaux Construction
+                  </h2>
+                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    Matériaux de construction et fournitures pour tous vos projets de rénovation
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                  Matériaux Construction
-                </h2>
-                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Matériaux de construction et fournitures pour tous vos projets de rénovation
-                </p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredMaterials.map((category, index) => {
-                const IconComponent = getIconByName(category.iconName);
-                const productCount = getProductCount(category.name);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredMaterials.map((category, index) => {
+                  const IconComponent = getIconByName(category.iconName);
+                  const productCount = getProductCount(category.name);
 
-                return (
-                  <Card
-                    key={category.name}
-                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
-                    style={{
-                      animationDelay: `${0.5 + index * 0.1}s`,
-                    }}
-                  >
-                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                      <img src={category.image} alt="" className="w-full h-full object-cover" />
-                      <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                        <Badge>
-                          {productCount} produit{productCount !== 1 ? 's' : ''}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                      {category.description}
-                    </p>
-                    <Button
-                      className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                      onClick={() => handleCategoryClick(category, "matériaux")}
-                      disabled={productCount === 0}
+                  return (
+                    <Card
+                      key={category.name}
+                      className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
+                      style={{
+                        animationDelay: `${0.5 + index * 0.1}s`,
+                      }}
                     >
-                      {productCount > 0 ? (
-                        <>
-                          Explorer
-                          <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                        </>
-                      ) : (
-                        "Bientôt disponible"
-                      )}
-                    </Button>
-                  </Card>
-                );
-              })}
+                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                        <img src={category.image} alt="" className="w-full h-full object-cover" />
+                        <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                          <Badge>
+                            {productCount} produit{productCount !== 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <Button
+                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                        onClick={() => handleCategoryClick(category, "matériaux")}
+                      >
+                        Explorer
+                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section Design & Décoration */}
-          <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="design">
-            <div
-              className="flex items-center gap-4 mb-8 animate-scale-up"
-              style={{ animationDelay: "0.6s" }}
-            >
-              <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                <Brush className="h-8 w-8 text-white" />
+          {filteredDesign.length > 0 && (
+            <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="design">
+              <div
+                className="flex items-center gap-4 mb-8 animate-scale-up"
+                style={{ animationDelay: "0.6s" }}
+              >
+                <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <Brush className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    Design & Décoration
+                  </h2>
+                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    Solutions esthétiques pour sublimer votre intérieur
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                  Design & Décoration
-                </h2>
-                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Solutions esthétiques pour sublimer votre intérieur
-                </p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredDesign.map((category, index) => {
-                const IconComponent = getIconByName(category.iconName);
-                const productCount = getProductCount(category.name);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredDesign.map((category, index) => {
+                  const IconComponent = getIconByName(category.iconName);
+                  const productCount = getProductCount(category.name);
 
-                return (
-                  <Card
-                    key={category.name}
-                    className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
-                    style={{
-                      animationDelay: `${0.7 + index * 0.1}s`,
-                    }}
-                  >
-                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                      <img src={category.image} alt="" className="w-full h-full object-cover" />
-                      <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                        <Badge>
-                          {productCount} produit{productCount !== 1 ? 's' : ''}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                      {category.description}
-                    </p>
-                    <Button
-                      className="w-full bg-[#0052FF]/10 hover:bg-[#0052FF] hover:text-white text-[#0052FF] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                      onClick={() => handleCategoryClick(category, "design")}
-                      disabled={productCount === 0}
+                  return (
+                    <Card
+                      key={category.name}
+                      className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
+                      style={{
+                        animationDelay: `${0.7 + index * 0.1}s`,
+                      }}
                     >
-                      {productCount > 0 ? (
-                        <>
-                          Explorer
-                          <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                        </>
-                      ) : (
-                        "Bientôt disponible"
-                      )}
-                    </Button>
-                  </Card>
-                );
-              })}
+                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                        <img src={category.image} alt="" className="w-full h-full object-cover" />
+                        <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                          <Badge>
+                            {productCount} produit{productCount !== 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <Button
+                        className="w-full bg-[#0052FF]/10 hover:bg-[#0052FF] hover:text-white text-[#0052FF] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                        onClick={() => handleCategoryClick(category, "design")}
+                      >
+                        Explorer
+                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section CTA */}
           <div
