@@ -57,214 +57,6 @@ const getIconByName = (iconName) => {
   return icons[iconName] || Package;
 };
 
-// Données statiques pour les produits alimentaires
-const alimentationProducts = {
-  "fruits-frais": [
-    {
-      id: 1,
-      name: "Pommes Golden Bio",
-      description:
-        "Pommes golden biologiques, croquantes et sucrées, cultivées en France",
-      price: 4.5,
-      quantity: 150,
-      images: [
-        "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Verger Bio du Val de Loire" },
-      unit: "kg",
-      origin: "France",
-      bio: true,
-    },
-    {
-      id: 2,
-      name: "Bananes Cavendish",
-      description: "Bananes mûres à point, riches en potassium et énergétiques",
-      price: 2.9,
-      quantity: 200,
-      images: [
-        "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2080&q=80",
-      ],
-      vendor: { companyName: "Fruits Tropiques" },
-      unit: "kg",
-      origin: "Côte d'Ivoire",
-      bio: false,
-    },
-    {
-      id: 3,
-      name: "Fraises Gariguette",
-      description:
-        "Fraises gariguette du Périgord, parfumées et juteuses, cueillies à maturité",
-      price: 8.9,
-      quantity: 75,
-      images: [
-        "https://images.unsplash.com/photo-1464454709131-ffd692591ee5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Berry Farm" },
-      unit: "barquette 500g",
-      origin: "France",
-      bio: true,
-    },
-    {
-      id: 4,
-      name: "Oranges Valencia",
-      description:
-        "Oranges juteuses et sucrées, parfaites pour les jus pressés",
-      price: 3.2,
-      quantity: 120,
-      images: [
-        "https://images.unsplash.com/photo-1547514701-42782101795e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Agrumes du Sud" },
-      unit: "kg",
-      origin: "Espagne",
-      bio: false,
-    },
-  ],
-  "fruits-exotiques": [
-    {
-      id: 5,
-      name: "Mangues Alphonso",
-      description:
-        "Mangues alphonso indiennes, la reine des mangues, chair fondante et parfumée",
-      price: 12.9,
-      quantity: 45,
-      images: [
-        "https://images.unsplash.com/photo-1553279768-865429fa0078?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Exotic Fruits Import" },
-      unit: "pièce",
-      origin: "Inde",
-      bio: false,
-    },
-    {
-      id: 6,
-      name: "Ananas Victoria",
-      description:
-        "Ananas victoria de La Réunion, sucré et peu acide, parfum exceptionnel",
-      price: 6.5,
-      quantity: 60,
-      images: [
-        "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Tropical Delight" },
-      unit: "pièce",
-      origin: "La Réunion",
-      bio: true,
-    },
-  ],
-  "legumes-frais": [
-    {
-      id: 7,
-      name: "Carottes Nantaises",
-      description:
-        "Carottes nantaises bio, croquantes et sucrées, parfaites crues ou cuites",
-      price: 2.8,
-      quantity: 180,
-      images: [
-        "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Potager Bio de l'Ouest" },
-      unit: "kg",
-      origin: "France",
-      bio: true,
-    },
-    {
-      id: 8,
-      name: "Tomates Anciennes",
-      description:
-        "Assortiment de tomates anciennes, cœur de bœuf, noire de crimée, green zebra",
-      price: 7.9,
-      quantity: 90,
-      images: [
-        "https://images.unsplash.com/photo-1561136594-7f68413baa99?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Jardins d'Antan" },
-      unit: "kg",
-      origin: "France",
-      bio: true,
-    },
-    {
-      id: 9,
-      name: "Courgettes Bio",
-      description:
-        "Courgettes biologiques, fermes et brillantes, idéales pour ratatouille ou grillées",
-      price: 3.4,
-      quantity: 110,
-      images: [
-        "https://images.unsplash.com/photo-1620293533253-18db8fde67a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Maraîcher Bio Provençal" },
-      unit: "kg",
-      origin: "France",
-      bio: true,
-    },
-  ],
-  "produits-laitiers": [
-    {
-      id: 10,
-      name: "Lait Entier Bio",
-      description:
-        "Lait entier biologique pasteurisé, riche en calcium et protéines",
-      price: 1.8,
-      quantity: 200,
-      images: [
-        "https://images.unsplash.com/photo-1563636619-e9143da7973b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Ferme Bio Lactée" },
-      unit: "litre",
-      origin: "France",
-      bio: true,
-    },
-    {
-      id: 11,
-      name: "Fromage de Chèvre Frais",
-      description:
-        "Fromage de chèvre frais au lait cru, onctueux et légèrement acidulé",
-      price: 4.2,
-      quantity: 85,
-      images: [
-        "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Fromagerie du Val" },
-      unit: "150g",
-      origin: "France",
-      bio: true,
-    },
-  ],
-  boucherie: [
-    {
-      id: 12,
-      name: "Filet de Bœuf",
-      description:
-        "Filet de bœuf charolais, tendre et persillé, idéal pour rôtis ou grillade",
-      price: 32.9,
-      quantity: 25,
-      images: [
-        "https://images.unsplash.com/photo-1594046243099-15a5c0566c1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Boucherie Tradition" },
-      unit: "kg",
-      origin: "France",
-      bio: false,
-    },
-    {
-      id: 13,
-      name: "Poulet Fermier",
-      description:
-        "Poulet fermier élevé en plein air, chair ferme et savoureuse",
-      price: 14.9,
-      quantity: 40,
-      images: [
-        "https://images.unsplash.com/photo-1604503468506-a8da13d82791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      ],
-      vendor: { companyName: "Élevage des Prés Verts" },
-      unit: "pièce",
-      origin: "France",
-      bio: true,
-    },
-  ],
-};
-
 const AlimentationCategorie = () => {
   const { categoryName } = useParams();
   const location = useLocation();
@@ -292,15 +84,11 @@ const AlimentationCategorie = () => {
     try {
       setIsLoading(true);
 
-      // Simulation d'un appel API avec les données statiques
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const normalizedCategoryName = categoryName
-        .toLowerCase()
-        .replace(/\s+/g, "-");
-      const categoryProducts =
-        alimentationProducts[normalizedCategoryName] || [];
-      setProducts(categoryProducts);
+      // Utiliser l'API aliments avec le paramètre de catégorie
+      const response = await api.get(
+        `/aliments/category/${encodeURIComponent(categoryName)}`
+      );
+      setProducts(response.data.products);
     } catch (error) {
       console.error(
         "Erreur lors du chargement des produits de la catégorie:",
@@ -451,18 +239,20 @@ const AlimentationCategorie = () => {
                       />
                       {/* Badges sur l'image */}
                       <div className="absolute top-2 left-2 flex gap-2">
-                        {product.bio && (
+                        {product.isOrganic && (
                           <Badge className="bg-green-500 text-white">
                             <Leaf className="h-3 w-3 mr-1" />
                             Bio
                           </Badge>
                         )}
-                        <Badge
-                          variant="secondary"
-                          className="bg-white/90 text-gray-700"
-                        >
-                          {product.origin}
-                        </Badge>
+                        {product.origin && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-white/90 text-gray-700"
+                          >
+                            {product.origin}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -481,7 +271,7 @@ const AlimentationCategorie = () => {
 
                   {/* Informations supplémentaires */}
                   <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
-                    <span>Unité: {product.unit}</span>
+                    <span>Unité: {product.unit || "pièce"}</span>
                     {product.origin && (
                       <span className="flex items-center">
                         <MapPin className="h-3 w-3 mr-1" />
@@ -489,6 +279,24 @@ const AlimentationCategorie = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* Allergènes */}
+                  {product.allergens && product.allergens.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-1">Allergènes:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {product.allergens.map((allergen, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs bg-red-50 text-red-600 border-red-200"
+                          >
+                            {allergen}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -557,8 +365,6 @@ const AlimentationCategorie = () => {
               </Button>
             </div>
           )}
-
-
 
           {/* Section Informations importantes */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
