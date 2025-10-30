@@ -32,6 +32,7 @@ import {
   CheckCheck,
   ListCheck,
   ShoppingCart,
+  Package // Icône pour Mes Commandes
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -464,6 +465,17 @@ const Header = () => {
                     <UserIcon className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Profil</span>
                   </Link>
+
+                  {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
+                  <Link
+                    to="/mes-commandes"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <Package className="h-4 w-4 text-gray-700" />
+                    <span className="text-sm font-medium">Mes Commandes</span>
+                  </Link>
+
                   <Link
                     to="/mon-compte/reservation"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -729,6 +741,7 @@ const Header = () => {
                       {user?.email}
                     </span>
                   </DropdownMenuLabel>
+                  
                   {role != "user" ? (
                     <>
                       <DropdownMenuSeparator />
@@ -736,7 +749,7 @@ const Header = () => {
                         <UserIcon className="mr-2 h-4 w-4" />
                         Tableau de bord
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />{" "}
+                      <DropdownMenuSeparator />
                     </>
                   ) : (
                     <>
@@ -745,21 +758,22 @@ const Header = () => {
                         <UserIcon className="mr-2 h-4 w-4" />
                         Profil
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/demandes")}
-                      >
+                      
+                      {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
+                      <DropdownMenuItem onClick={() => navigate("/mes-commandes")}>
+                        <Package className="mr-2 h-4 w-4" />
+                        Mes Commandes
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
                         <ListCheck className="mr-2 h-4 w-4" />
                         Mes demandes de services
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/reservation")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
                         <Calendar className="mr-2 h-4 w-4" />
                         Réservations
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/payement")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem>

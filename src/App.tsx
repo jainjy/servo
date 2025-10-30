@@ -90,6 +90,8 @@ import ProOrders from './components/pro/ProOrders';
 import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
 import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
+import UserOrders from './components/orders/UserOrders';
+
 
 
 const queryClient = new QueryClient();
@@ -145,6 +147,7 @@ const App = () => (
                 path="/gestion-immobilier"
                 element={<GestionImmobilier />}
               />
+              <Route path="/mes-commandes" element={<UserOrders />} />
               <Route path="/immobilier/:id" element={<PropertyPage />} />
               <Route path="/travaux" element={<Travaux />} />
               <Route path="/produits" element={<Produits />} />

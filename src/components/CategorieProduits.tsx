@@ -107,10 +107,7 @@ const CategorieProduits = () => {
       const totalItems = getCartItemsCount();
       
       // Afficher une confirmation détaillée
-      alert(`✅ ${product.name} ajouté au panier !\n\nQuantité: ${quantity}\nTotal dans le panier: ${totalItems} article(s)`);
-      
-      console.log('Cart after addition:', cartItems);
-      console.log('Total items count:', totalItems);
+      alert(`${product.name} ajouté au panier !`);
       
     } catch (error) {
       console.error('Error adding to cart:', error);
