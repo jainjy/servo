@@ -92,7 +92,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
     setLoading(true);
 
     try {
-  await api.post('/demandes', {
+  await api.post('/api/demandes', {
         ...formData,
         createdById: userId
       });
@@ -555,8 +555,8 @@ const MesDemande = () => {
     try {
       setLoading(true);
       const [demandesResponse, statsResponse] = await Promise.all([
-  api.get(`/demandes/user/${userId}`),
-  api.get(`/demandes/stats/${userId}`)
+  api.get(`/api/demandes/user/${userId}`),
+  api.get(`/api/demandes/stats/${userId}`)
       ]);
 
       setDemandes(demandesResponse.data);

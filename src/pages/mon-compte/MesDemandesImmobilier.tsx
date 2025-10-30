@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
-import { RefreshCw, MapPin, Calendar, ArrowRight, Clock, Trash2 } from 'lucide-react';
+import { RefreshCw, MapPin, Calendar, ArrowRight, Clock, Trash2, Phone, Mail, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -27,6 +27,10 @@ const DemandeImmoCard = ({ demande, onDeleted, onStatusChange, onAddHistory }: a
         return 'Adresse non renseignée';
     };
 
+    const formatHeure = (d: any) => {
+        return demande?.heureSouhaitee || 'Heure non renseignée';
+    };
+
     const statutColor = (statut: string) => {
         switch ((statut || '').toLowerCase()) {
             case 'en attente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -37,46 +41,56 @@ const DemandeImmoCard = ({ demande, onDeleted, onStatusChange, onAddHistory }: a
         }
     };
     // Fonction pour les styles de statut version sombre
-const getStatutStyles = (statut) => {
-  const baseStyles = "backdrop-blur-sm border";
-  
-  switch(statut?.toLowerCase()) {
-    case 'en cours':
-    case 'pending':
-      return `${baseStyles} bg-orange-500/10 text-orange-300 border-orange-500/30`;
-    case 'terminé':
-    case 'completed':
-      return `${baseStyles} bg-green-500/10 text-green-300 border-green-500/30`;
-    case 'annulé':
-    case 'cancelled':
-      return `${baseStyles} bg-red-500/10 text-red-300 border-red-500/30`;
-    case 'confirmé':
-    case 'confirmed':
-      return `${baseStyles} bg-blue-500/10 text-blue-300 border-blue-500/30`;
-    default:
-      return `${baseStyles} bg-gray-500/10 text-gray-300 border-gray-500/30`;
-  }
-};
+    const getStatutStyles = (statut) => {
+        const baseStyles = "backdrop-blur-sm border";
+
+        switch (statut?.toLowerCase()) {
+            case 'en cours':
+            case 'pending':
+                return `${baseStyles} bg-orange-500/10 text-orange-300 border-orange-500/30`;
+            case 'terminé':
+            case 'completed':
+                return `${baseStyles} bg-green-500/10 text-green-300 border-green-500/30`;
+            case 'annulé':
+            case 'cancelled':
+                return `${baseStyles} bg-red-500/10 text-red-300 border-red-500/30`;
+            case 'confirmé':
+            case 'confirmed':
+                return `${baseStyles} bg-blue-500/10 text-blue-300 border-blue-500/30`;
+            default:
+                return `${baseStyles} bg-gray-500/10 text-gray-300 border-gray-500/30`;
+        }
+    };
     return (
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 p-6 hover:border-blue-500/50 hover:shadow-2xl transition-all duration-500 group">
+        <div className=" bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 p-6 hover:border-blue-500/50 hover:shadow-2xl transition-all duration-500 group">
             <div className="flex flex-col space-y-4">
                 {/* Header */}
                 <div className="flex justify-between items-start">
-                    <div className="flex-1 pr-4">
-                        <h3 className="font-bold text-white text-xl group-hover:text-blue-400 transition-colors duration-300">
-                            {demande.titre || 'Demande'}
-                        </h3>
+                    <div className="flex-1 flex gap-2 pr-4">
+                        {demande.property?.images?.length > 0 && (
+                            <img
+                                src={demande.property.images[0]}
+                                alt={demande.property?.title || "Propriété"}
+                                className="w-32 h-24 rounded-lg object-cover"
+                            />
+                        )}
+                        <div className='flex flex-col'>
+                            <h3 className="font-bold text-white text-xl group-hover:text-blue-400 transition-colors duration-300">
+                                {demande.property?.title || 'Demande pour un bien'}
+                            </h3>
 
-                        {/* Localisation */}
-                        <div className="mt-3 flex items-center gap-2 text-gray-300">
-                            <MapPin className="w-4 h-4 text-blue-400" />
-                            <span className="text-sm">{formatLieu()}</span>
+                            {/* Localisation */}
+                            <div className="mt-3 flex items-center gap-2 text-gray-300">
+                                <MapPin className="w-4 h-4 text-blue-400" />
+                                <span className="text-sm">{demande.property?.address || formatLieu()}</span>
+                            </div>
+
+                            {/* Description */}
+                            <p className="text-gray-400 mt-4 mb-3 line-clamp-3 leading-relaxed text-sm">
+                                <span className='underline'>Déscription  </span>: &nbsp;
+                                {demande.property?.description || 'Aucune description fournie.'}
+                            </p>
                         </div>
-
-                        {/* Description */}
-                        <p className="text-gray-400 mt-4 mb-3 line-clamp-3 leading-relaxed text-sm">
-                            {demande.description || 'Aucune description fournie.'}
-                        </p>
                     </div>
 
                     {/* Statut et Date */}
@@ -85,10 +99,14 @@ const getStatutStyles = (statut) => {
                             <Calendar className="w-4 h-4 text-blue-400" />
                             <span>{formatDate(demande)}</span>
                         </div>
-                        <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${statutColor(demande.statut)}`}>
+                        <div className="flex items-center justify-end gap-2 text-gray-400 text-sm mb-3">
+                            <Clock className="w-4 h-4 text-blue-400" />
+                            <span>{formatHeure(demande)}</span>
+                        </div>
+                        {/* <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${statutColor(demande.statut)}`}>
                             <div className="w-2 h-2 rounded-full mr-2 bg-current opacity-80"></div>
                             {demande.statut || '—'}
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
@@ -110,24 +128,79 @@ const getStatutStyles = (statut) => {
                     </div>
 
                     {/* Actions: pending -> allow cancel. If validated or refused -> allow delete. Otherwise show badge */}
-                    <div>
-                        {['en attente', 'en cours', 'En attente', 'En cours'].includes(String(demande.statut)) ? (
-                            <CancelButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
-                        ) : (/refus/i.test(String(demande.statut || '')) || /validée/i.test(String(demande.statut || '')) ? (
-                            <div className="flex items-center gap-2">
-                                <DeleteButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
-                            </div>
-                        ) : (
-                            <div className="px-4 py-2">
-                                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border ${statutColor(demande.statut)}`}>
-                                    {demande.statut}
-                                </span>
-                            </div>
-                        ))}
+                    <div className=''>
+                        {(() => {
+                            const status = String(demande.statut || '').toLowerCase();
+
+                            if (['en attente', 'en cours'].includes(status)) {
+                                return (
+                                    <div className="flex items-center gap-2">
+                                        <CancelButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
+                                        <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-orange-500 text-white">
+                                            En attente
+                                        </span>
+                                    </div>
+                                );
+                            }
+
+                            if (/refus/i.test(status)) {
+                                return (
+                                    <div className="flex items-center gap-2">
+                                        <DeleteButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
+                                        <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-red-500 text-white">
+                                            Refusée
+                                        </span>
+                                    </div>
+                                );
+                            }
+
+                            if (/validée|validee|valide/i.test(status)) {
+                                console.log('Demande:', demande);
+                                console.log('Status:', status);
+                                console.log('Property:', demande.property);
+                                console.log('Owner:', demande.property?.owner);
+                                return (
+                                    <div className="flex items-center gap-2">
+                                        <DeleteButton demande={demande} onDeleted={onDeleted} onAddHistory={onAddHistory} onStatusChange={onStatusChange} />
+                                        <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500 text-white">
+                                            Validée
+                                        </span>
+
+                                        {/* Informations de contact du propriétaire */}
+                                        {demande.property?.owner && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg">
+                                                    <Phone className="w-4 h-4" />
+                                                    <span className="text-sm">{demande.property.owner.phone || 'Non renseigné'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg">
+                                                    <Mail className="w-4 h-4" />
+                                                    <span className="text-sm">{demande.property.owner.email || 'Non renseigné'}</span>
+                                                </div>
+                                                {demande.property.owner.companyName && (
+                                                    <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg">
+                                                        <User className="w-4 h-4" />
+                                                        <span className="text-sm">{demande.property.owner.companyName}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div className="px-4  py-2">
+                                    <span className={`grid grid-cols-2 items-center px-3 py-1.5 rounded-full text-sm font-semibold ${getStatutStyles(demande.statut)}`}>
+                                        {demande.statut}
+                                    </span>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>
-            
+
         </div>
     );
 };
@@ -146,7 +219,7 @@ const ResendButton = ({ demande, onStatusChange }: any) => {
                         toastRef?.dismiss?.();
                         setSending(true);
                         try {
-                            await api.patch(`/demandes/immobilier/${demande.id}/statut`, { statut: 'en attente' });
+                            await api.patch(`/demandes/${demande.id}/statut`, { statut: 'en attente' });
                             onStatusChange?.(demande.id, 'en attente');
                             toast({ title: 'Demande renvoyée', description: 'Votre demande est de nouveau en attente.' });
                         } catch (err) {
@@ -193,7 +266,7 @@ const CancelButton = ({ demande, onDeleted, onAddHistory, onStatusChange }: any)
                         };
                         try { onAddHistory?.(entry); } catch (e) { /* ignore */ }
 
-                        await api.patch(`/demandes/immobilier/${demande.id}/statut`, { statut: 'annulée' });
+                        await api.patch(`/demandes/${demande.id}/statut`, { statut: 'annulée' });
                         onStatusChange?.(demande.id, 'annulée');
                         toast({ title: 'Demande annulée' });
                     } catch (err) {
@@ -241,9 +314,14 @@ const DeleteButton = ({ demande, onDeleted, onAddHistory, onStatusChange }: any)
                         };
                         try { onAddHistory?.(entry); } catch (e) { /* ignore */ }
 
-                        await api.delete(`/demandes/immobilier/${demande.id}`);
-                        onDeleted?.(demande.id);
-                        toast({ title: 'Supprimé', description: 'La demande a été supprimée.' });
+                        // Pour l'utilisateur, on fait une vraie suppression avec le paramètre hardDelete
+                        const response = await api.delete(`/demandes/immobilier/${demande.id}?hardDelete=true`);
+                        if (response.data.message === 'Demande supprimée définitivement') {
+                            onDeleted?.(demande.id);
+                            toast({ title: 'Supprimé', description: 'La demande a été supprimée définitivement.' });
+                        } else {
+                            toast({ title: 'Erreur', description: 'Une erreur est survenue lors de la suppression.' });
+                        }
                     } catch (err) {
                         console.error('Erreur lors de la suppression de la demande', err);
                         toast({ title: 'Erreur', description: 'Impossible de supprimer la demande pour le moment.' });
@@ -270,6 +348,26 @@ const MesDemandesImmobilier = () => {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyItems, setHistoryItems] = useState<any[]>([]);
     const [activeDemande, setActiveDemande] = useState<any | null>(null);
+    const [activeTab, setActiveTab] = useState<string>("all");
+
+    const filteredDemandes = React.useMemo(() => {
+        if (activeTab === "all") return demandes;
+        return demandes.filter(demande => {
+            const status = (demande.statut || "").toLowerCase();
+            switch (activeTab) {
+                case "en_attente":
+                    return status === "en attente";
+                case "validees":
+                    return status === "validée" || status === "validee" || status === "valide";
+                case "refusees":
+                    return status === "refusée" || status === "refusee" || status === "refus";
+                case "archivees":
+                    return demande.archived || status === "archivée" || status === "archivee";
+                default:
+                    return true;
+            }
+        });
+    }, [demandes, activeTab]);
 
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
@@ -279,7 +377,10 @@ const MesDemandesImmobilier = () => {
             try {
                 const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
                 const all = resp.data || [];
-                setDemandes(all); // Affiche toutes les demandes, sans filtrer sur propertyId
+                setDemandes(all);
+
+                // Émettre un événement pour recharger les notifications
+                window.dispatchEvent(new CustomEvent('notifications:reload'));
             } catch (err) {
                 console.error('Erreur en chargeant demandes immobilières', err);
             } finally {
@@ -287,9 +388,7 @@ const MesDemandesImmobilier = () => {
             }
         };
 
-        load();
-
-        const handler = (e: any) => {
+        load(); const handler = (e: any) => {
             const detail = e?.detail || {};
             // support both shapes: { id, statut } and { demandeId, status }
             const id = detail.id || detail.demandeId;
@@ -315,7 +414,7 @@ const MesDemandesImmobilier = () => {
             // try to persist on server
             (async () => {
                 try {
-                    const resp = await api.post(`/demandes/immobilier/${entry.demandeId}/history`, { entry });
+                    const resp = await api.post(`/demandes/${entry.demandeId}/history`, { entry });
                     const serverHistory = resp.data?.history || [];
                     // replace optimistic entries for that demande with server data
                     setDemandes((prev) => prev.map(d => d.id === entry.demandeId ? ({ ...d, history: serverHistory }) : d));
@@ -394,11 +493,15 @@ const MesDemandesImmobilier = () => {
     }
 
     return (
-        <div className="min-h-screen mt-12 bg-gray-50 p-6">
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold text-gray-900">Mes demandes immobilières</h1>
-                    <button title="Historique global" onClick={async () => {
+        <div className="min-h-screen mt-12">
+            <div className="flex flex-col gap-6 mb-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex relative overflow-hidden h-44 w-full items-center gap-3">
+                       <img 
+                       className='absolute -z-0 w-full opacity-45 object-cover object-center'
+                        src='https://i.pinimg.com/1200x/23/26/d5/2326d5fc9fdbff00492a8f7c6390a88c.jpg' />
+                        <h1 className="text-5xl tracking-wider font-serif font-bold text-slate-900 z-10">Mes demandes immobilières</h1>
+                        {/* <button title="Historique global" onClick={async () => {
                         // aggregate local histories from demandes and open modal (do NOT call backend automatically to avoid 404s)
                         setHistoryLoading(true);
                         setHistoryItems([]);
@@ -421,84 +524,152 @@ const MesDemandesImmobilier = () => {
                         }
                     }} className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700">
                         <Clock className="w-5 h-5" />
-                    </button>
-                    <p className="text-gray-600 mt-2">Toutes les demandes de visite et demandes liées à vos biens</p>
+                    </button> */}
+                        {/* <p className="text-gray-600 mt-2">Toutes les demandes de visite et demandes liées à vos biens</p> */}
+                    </div>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                {demandes.length > 0 ? (
-                    demandes.map((d) => <DemandeImmoCard key={d.id} demande={d} onDeleted={handleDeleted} onStatusChange={handleStatusChange} onAddHistory={handleAddHistory} />)
-                ) : (
-                    <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-                        <h4 className="text-gray-700 text-lg font-medium mb-2">Aucune demande immobilière</h4>
-                        <p className="text-gray-500 text-sm mb-6">Vous n'avez pas encore envoyé de demande liée à un bien.</p>
-                    </div>
-                )}
-            </div>
-            {/* Global History modal (Sheet) - moved to parent so a single modal shows aggregated histories */}
-            <Sheet open={historyOpen} onOpenChange={(open) => { setHistoryOpen(open); if (!open) { setActiveDemande(null); setHistoryItems([]); } }}>
-                <SheetTrigger asChild>
-                    {/* hidden trigger: we open programmatically from the button in the header */}
-                    <span style={{ display: 'none' }} />
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[420px] p-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-lg font-semibold">Historique</h4>
+                <div className="flex flex-col space-y-4 p-6">
+                    {/* Tabs de filtrage */}
+                    <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-start">
+                        <button
+                            onClick={() => setActiveTab("all")}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "all"
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                        >
+                            Toutes
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("en_attente")}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "en_attente"
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                        >
+                            En attente
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("validees")}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "validees"
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                        >
+                            Validées
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("refusees")}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "refusees"
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                        >
+                            Refusées
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("archivees")}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "archivees"
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                        >
+                            Archivées
+                        </button>
                     </div>
 
-                    <div className="mb-3 flex items-center justify-end gap-2">
-                        <button className="text-sm text-blue-600 underline" onClick={async () => {
-                            // call the backend aggregated history endpoint for the current user
-                            if (!user?.id) {
-                                toast({ title: 'Erreur', description: "Utilisateur non authentifié." });
-                                return;
-                            }
-                            setHistoryLoading(true);
-                            try {
-                                const resp = await api.get(`/demandes/immobilier/user/${user.id}/history`);
-                                const items = resp.data || [];
-                                // sort descending by date/createdAt if present
-                                items.sort((a: any, b: any) => {
-                                    const da = new Date(a.date || a.createdAt || 0).getTime();
-                                    const db = new Date(b.date || b.createdAt || 0).getTime();
-                                    return db - da;
-                                });
-                                setHistoryItems(items.map((it: any) => ({ ...it })));
-                            } catch (e) {
-                                console.error('Erreur fetching aggregated histories', e);
-                                toast({ title: 'Erreur', description: "Impossible de charger l'historique depuis le serveur." });
-                                setHistoryItems([]);
-                            } finally {
-                                setHistoryLoading(false);
-                            }
-                        }}>Charger depuis le serveur</button>
+                    {/* Liste des demandes filtrées */}
+                    <div className="grid grid-cols-1 gap-4">
+                        {filteredDemandes.length > 0 ? (
+                            filteredDemandes.map((d) => (
+                                <DemandeImmoCard
+                                    key={d.id}
+                                    demande={d}
+                                    onDeleted={handleDeleted}
+                                    onStatusChange={handleStatusChange}
+                                    onAddHistory={handleAddHistory}
+                                />
+                            ))
+                        ) : (
+                            <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+                                <h4 className="text-gray-700 text-lg font-medium mb-2">
+                                    Aucune demande {activeTab !== "all" ? "dans cette catégorie" : "immobilière"}
+                                </h4>
+                                <p className="text-gray-500 text-sm mb-6">
+                                    {activeTab !== "all"
+                                        ? "Essayez de sélectionner une autre catégorie"
+                                        : "Vous n'avez pas encore envoyé de demande liée à un bien."}
+                                </p>
+                            </div>
+                        )}
                     </div>
-
-                    {historyLoading ? (
-                        <div className="text-center text-sm text-gray-500">Chargement...</div>
-                    ) : historyItems && historyItems.length > 0 ? (
-                        <div className="space-y-3 overflow-auto max-h-[70vh]">
-                            {historyItems.map((h: any, idx: number) => (
-                                <div key={idx} className="p-3 bg-white rounded-lg border">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <div className="text-sm font-medium text-gray-800">{h.title || h.action || h.type || 'Événement'}</div>
-                                            <div className="text-xs text-gray-500 mt-1">{h.message || h.note || h.description || ''}</div>
-                                            {h._sourceTitre && <div className="text-xs text-gray-400 mt-1">Source: {h._sourceTitre}</div>}
-                                        </div>
-                                        <div className="text-xs text-gray-400">{h.date ? new Date(h.date).toLocaleString('fr-FR') : (h.createdAt ? new Date(h.createdAt).toLocaleString('fr-FR') : '')}</div>
-                                    </div>
-                                </div>
-                            ))}
+                </div>
+                {/* Global History modal (Sheet) - moved to parent so a single modal shows aggregated histories */}
+                <Sheet open={historyOpen} onOpenChange={async (open) => {
+                    setHistoryOpen(open);
+                    if (!open) {
+                        setActiveDemande(null);
+                        setHistoryItems([]);
+                    } else if (user?.id) {
+                        // Charger automatiquement l'historique à l'ouverture
+                        setHistoryLoading(true);
+                        try {
+                            const resp = await api.get(`/demandes/immobilier/user/${user.id}/history`);
+                            const items = resp.data || [];
+                            items.sort((a: any, b: any) => {
+                                const da = new Date(a.date || a.createdAt || 0).getTime();
+                                const db = new Date(b.date || b.createdAt || 0).getTime();
+                                return db - da;
+                            });
+                            setHistoryItems(items.map((it: any) => ({ ...it })));
+                        } catch (e) {
+                            console.error('Erreur chargement historique', e);
+                            setHistoryItems([]);
+                        } finally {
+                            setHistoryLoading(false);
+                        }
+                    }
+                }}>
+                    <SheetTrigger asChild>
+                        {/* hidden trigger: we open programmatically from the button in the header */}
+                        <span style={{ display: 'none' }} />
+                    </SheetTrigger>
+                    <SheetContent side="right" className="w-[420px] p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-lg font-semibold">Historique</h4>
                         </div>
-                    ) : (
-                        <div className="text-center text-sm text-gray-500">Aucun historique disponible.</div>
-                    )}
-                </SheetContent>
-            </Sheet>
+
+                        {/* Chargement automatique de l'historique lors de l'ouverture */}
+                        <div className="mb-3 flex items-center justify-end gap-2">
+                            {historyLoading && <div className="text-sm text-gray-500">Chargement...</div>}
+                        </div>
+
+                        {historyLoading ? (
+                            <div className="text-center text-sm text-gray-500">Chargement...</div>
+                        ) : historyItems && historyItems.length > 0 ? (
+                            <div className="space-y-3 overflow-auto max-h-[70vh]">
+                                {historyItems.map((h: any, idx: number) => (
+                                    <div key={idx} className="p-3 bg-white rounded-lg border">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-800">{h.title || h.action || h.type || 'Événement'}</div>
+                                                <div className="text-xs text-gray-500 mt-1">{h.message || h.note || h.description || ''}</div>
+                                                {h._sourceTitre && <div className="text-xs text-gray-400 mt-1">Source: {h._sourceTitre}</div>}
+                                            </div>
+                                            <div className="text-xs text-gray-400">{h.date ? new Date(h.date).toLocaleString('fr-FR') : (h.createdAt ? new Date(h.createdAt).toLocaleString('fr-FR') : '')}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center text-sm text-gray-500">Aucun historique disponible.</div>
+                        )}
+                    </SheetContent>
+                </Sheet>
+            </div>
         </div>
     );
-};
+}
 
 export default MesDemandesImmobilier;

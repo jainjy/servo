@@ -32,6 +32,11 @@ import {
   CheckCheck,
   ListCheck,
   ShoppingCart,
+  Bell,
+  BookDashed,
+  Eye,
+  EyeOff,
+  Trash2
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -41,8 +46,10 @@ import Cart from "@/components/Cart";
 import AuthService from "@/services/authService";
 import type { User as AuthUser } from "@/types/type";
 
-// Import GSAP
+// Import GSAP and API
 import { gsap } from "gsap";
+import { toast } from "@/hooks/use-toast";
+import  api  from "@/lib/api.js";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -230,6 +237,107 @@ const Header = () => {
   // Animation GSAP pour le texte du popover
   const popoverContentRef = useRef<HTMLDivElement>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<any>>([]);
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  // Écouter les événements de rechargement des notifications
+  useEffect(() => {
+    const handler = () => {
+      if (user?.id) {
+        loadNotifications();
+      }
+    };
+    window.addEventListener('notifications:reload', handler);
+    return () => window.removeEventListener('notifications:reload', handler);
+  }, [user?.id]);
+
+  const loadNotifications = async () => {
+    if (!user?.id) return;
+    
+    setNotifLoading(true);
+    try {
+      const response = await api.get(`/notifications/user/${user.id}`);
+      const { notifications = [], unreadCount = 0 } = response.data || {};
+      setNotifications(notifications);
+      setNotifCount(unreadCount);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les notifications"
+      });
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
+      loadNotifications(); // Recharger les notifications
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer comme lu"
+      });
+    }
+  };
+
+  const handleMarkAsUnread = async (notificationId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
+      loadNotifications(); // Recharger les notifications
+    } catch (error) {
+      console.error('Error marking notification as unread:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer comme non lu"
+      });
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (!user?.id) return;
+    
+    try {
+      await api.post(`/notifications/user/${user.id}/read-all`);
+      loadNotifications(); // Recharger les notifications
+      toast({
+        description: "Toutes les notifications ont été marquées comme lues"
+      });
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de tout marquer comme lu"
+      });
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!user?.id) return;
+    
+    try {
+      await api.post(`/notifications/user/${user.id}/clear-all`);
+      loadNotifications(); // Recharger les notifications
+      toast({
+        description: "Toutes les notifications ont été supprimées"
+      });
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer les notifications"
+      });
+    }
+  };
 
   // Utiliser useEffect pour déclencher l'animation quand le popover s'ouvre
   useEffect(() => {
@@ -697,6 +805,92 @@ const Header = () => {
                 )}
               </Button>
             )}
+            {/* notification icon for users — opens a modal (Sheet) with notifications */}
+              {role === 'user' && (
+                <>
+                  <Sheet open={notifOpen} onOpenChange={(open) => { setNotifOpen(open); if (open) loadNotifications(); }}>
+                    <SheetTrigger asChild>
+                      <button className="relative mr-3 hidden lg:flex items-center">
+                        <Bell className="w-5 h-5 text-gray-700" />
+                        {notifCount > 0 && (
+                          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{notifCount}</span>
+                        )}
+                      </button>
+                    </SheetTrigger>
+
+                    <SheetContent side="right" className="w-[380px] p-4">
+                      <div className="flex flex-col gap-4 mb-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <h4 id="notifications-title" className="text-lg font-semibold">Notifications</h4>
+                          </div>
+                        </div>
+                        {notifications.length > 0 && (
+                          <div className="flex items-center gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleMarkAllAsRead}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="hidden sm:inline">Tout marquer comme lu</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleClearAll}
+                              className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="hidden sm:inline">Vider</span>
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {notifLoading ? (
+                        <div className="text-center text-sm text-gray-500">Chargement...</div>
+                      ) : notifications.length === 0 ? (
+                        <div className="text-center text-sm text-gray-500">Aucune notification.</div>
+                      ) : (
+                        <div className="space-y-3">
+                          {notifications.map((n) => (
+                            <div key={n.id} className={`p-3 rounded-lg border transition-colors ${n.isRead ? 'bg-gray-50' : 'bg-white'}`}>
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-800">{n.titre || 'Nouvelle notification'}</div>
+                                  <div className="text-xs text-gray-500 mt-1">{n.statut} — {n.propertyId ? 'Bien lié' : 'Général'}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => n.isRead ? handleMarkAsUnread(n.id) : handleMarkAsRead(n.id)}
+                                  >
+                                    {n.isRead ? (
+                                      <EyeOff className="h-4 w-4 text-gray-500" />
+                                    ) : (
+                                      <Eye className="h-4 w-4 text-blue-500" />
+                                    )}
+                                  </Button>
+                                  <div className="text-xs text-gray-400">{n.createdAt ? new Date(n.createdAt).toLocaleDateString('fr-FR') : ''}</div>
+                                </div>
+                              </div>
+                              {n.propertyId && (
+                                <div className="mt-3">
+                                  <a href={`/immobilier/${n.propertyId}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">Voir le bien</a>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </SheetContent>
+                  </Sheet>
+                </>
+              )}
 
             {!isAuthenticated ? (
               <div className="flex items-center gap-2">
@@ -719,7 +913,7 @@ const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 z-[1050] shadow-lg"
+                  className="w-64 z-[1050] shadow-lg"
                 >
                   <DropdownMenuLabel className="flex flex-col">
                     <span className="text-sm font-medium">
@@ -752,6 +946,12 @@ const Header = () => {
                         Mes demandes de services
                       </DropdownMenuItem>
                       <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/demandes-immobilier")}
+                      >
+                        <BookDashed className="mr-2 h-4 w-4" />
+                        Mes demandes immobilieres
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/reservation")}
                       >
                         <Calendar className="mr-2 h-4 w-4" />
@@ -779,6 +979,7 @@ const Header = () => {
       </header>
 
       {/* Composant Cart */}
+
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
