@@ -86,13 +86,11 @@ import ProLogin from "./pages/auth/ProLogin";
 import ParticularLogin from "./pages/auth/ParticularLogin";
 import InvestissementDetail from "./pages/InvestissementDetail";
 import { CartProvider } from "./components/contexts/CartContext";
-import ProOrders from './components/pro/ProOrders';
+import ProOrders from "./components/pro/ProOrders";
 import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
 import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
-import UserOrders from './components/orders/UserOrders';
-
-
+import UserOrders from "./components/orders/UserOrders";
 
 const queryClient = new QueryClient();
 
