@@ -207,7 +207,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
       const response = await api.post("/demandes/immobilier", demandeData);
 
       if (response.status === 201) {
-        toast("Votre demande a été créée avec succès !");
+        alert("Votre demande a été créée avec succès !");
         onClose();
       }
     } catch (error) {
