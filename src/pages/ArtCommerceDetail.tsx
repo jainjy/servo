@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Phone, Globe, Truck, Star, Mail, Heart, Share2, Eye, X, Calendar, Clock, Shield, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ArtCommerceDetail = () => {
   const { id } = useParams();
@@ -96,9 +97,9 @@ const ArtCommerceDetail = () => {
     
     // Optionnel: Afficher une notification
     if (!isFavorite) {
-      alert('✅ Commerce ajouté à vos favoris !');
+      toast.info("✅ Commerce ajouté à vos favoris !");
     } else {
-      alert('❌ Commerce retiré de vos favoris');
+      toast.error("❌ Commerce retiré de vos favoris");
     }
   };
 
@@ -125,12 +126,12 @@ const ArtCommerceDetail = () => {
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href)
       .then(() => {
-        alert('✅ Lien copié dans le presse-papier !');
+        toast.info("✅ Lien copié dans le presse-papier !");
         setShowShareOptions(false);
       })
       .catch(err => {
         console.error('Erreur lors de la copie:', err);
-        alert('❌ Erreur lors de la copie du lien');
+        toast.error("❌ Erreur lors de la copie du lien");
       });
   };
 

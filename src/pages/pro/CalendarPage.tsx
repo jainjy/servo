@@ -38,6 +38,7 @@ import {
   Save,
   Trash2
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Types de rendez-vous
 const STATUT_RENDEZ_VOUS = {
@@ -641,9 +642,9 @@ const CalendarPage = () => {
             const data = JSON.parse(event.target.result);
             if (data.rendezVous) setRendezVous(data.rendezVous);
             if (data.creneauxRecurrents) setCreneauxRecurrents(data.creneauxRecurrents);
-            alert('Calendrier importé avec succès !');
+            toast.info("Calendrier importé avec succès !");
           } catch (error) {
-            alert('Erreur lors de l\'import du fichier');
+            toast.error("Erreur lors de l'import du fichier");
           }
         };
         reader.readAsText(file);

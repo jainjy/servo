@@ -24,6 +24,7 @@ import {
   Calendar,
   Euro
 } from "lucide-react";
+import { toast } from "sonner";
 
 const GestionImmobilier = () => {
   const [activeService, setActiveService] = useState("gestion");
@@ -150,7 +151,9 @@ const GestionImmobilier = () => {
     e.preventDefault();
     // Simulation d'envoi
     console.log("Formulaire soumis:", { ...formData, service: selectedService });
-    alert("Votre demande a été envoyée avec succès ! Nous vous recontacterons dans les 24h.");
+    toast.info(
+      "Votre demande a été envoyée avec succès ! Nous vous recontacterons dans les 24h."
+    );
     setIsModalOpen(false);
     setFormData({
       nom: "",
@@ -167,7 +170,9 @@ const GestionImmobilier = () => {
     e.preventDefault();
     // Simulation d'envoi
     console.log("Formulaire contact soumis:", contactFormData);
-    alert("Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.");
+    toast.info(
+      "Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."
+    );
     setIsContactModalOpen(false);
     setContactFormData({
       nom: "",

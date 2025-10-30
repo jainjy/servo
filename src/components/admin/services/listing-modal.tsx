@@ -19,6 +19,7 @@ import {
   Loader2
 } from "lucide-react"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -248,9 +249,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
     } catch (error: any) {
       console.error("Error submitting form:", error);
       if (error.response?.data?.error) {
-        alert(error.response.data.error);
+        toast.error(error.response.data.error);
       } else {
-        alert("Une erreur est survenue");
+        toast.error("Une erreur est survenue");
       }
     } finally {
       setLoading(false);

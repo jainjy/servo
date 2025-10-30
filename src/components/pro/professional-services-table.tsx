@@ -13,6 +13,7 @@ import {
   Clock
 } from "lucide-react"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 interface Service {
   id: string
@@ -79,7 +80,9 @@ export function ProfessionalServicesTable({
       await fetchServices() // Recharger la liste
     } catch (error: any) {
       console.error('Erreur lors de l\'association:', error)
-      alert(error.response?.data?.error || 'Erreur lors de l\'association')
+      toast.error(
+        error.response?.data?.error || "Erreur lors de l'association"
+      );
     } finally {
       setActionLoading(null)
     }
@@ -97,7 +100,9 @@ export function ProfessionalServicesTable({
       await fetchServices() // Recharger la liste
     } catch (error: any) {
       console.error('Erreur lors de la désassociation:', error)
-      alert(error.response?.data?.error || 'Erreur lors de la désassociation')
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la désassociation"
+      );
     } finally {
       setActionLoading(null)
     }

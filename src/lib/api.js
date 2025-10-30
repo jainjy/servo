@@ -30,6 +30,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Rediriger vers la page de login si non authentifié
       window.location.href = '/login';
+      console.log("erreur",error)
     }
     return Promise.reject(error);
   }

@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -113,12 +114,12 @@ const RegisterPage = () => {
 
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
-      alert("Les mots de passe ne correspondent pas");
+      toast.error("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (!formData.acceptTerms) {
-      alert("Veuillez accepter les conditions d'utilisation");
+      toast.error("Veuillez accepter les conditions d'utilisation");
       return;
     }
 
@@ -153,7 +154,7 @@ const RegisterPage = () => {
       navigate(route);
     } catch (error: any) {
       console.error("Registration failed:", error);
-      alert(
+      toast.error(
         error.message || "Erreur lors de l'inscription. Veuillez réessayer."
       );
     } finally {

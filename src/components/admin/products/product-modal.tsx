@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 interface ProductModalProps {
   open: boolean
@@ -138,7 +139,7 @@ export function ProductModal({ open, onOpenChange, product, mode, onSuccess }: P
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du produit:', error)
-      alert('Erreur lors de la sauvegarde du produit')
+      toast.error('Erreur lors de la sauvegarde du produit')
     } finally {
       setLoading(false)
     }

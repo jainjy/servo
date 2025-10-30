@@ -954,7 +954,7 @@ const Header = () => {
                       </DropdownMenuItem>
                       
                       {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
-                      <DropdownMenuItem onClick={() => navigate("/mes-commandes")}>
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/mes-commandes")}>
                         <Package className="mr-2 h-4 w-4" />
                         Mes Commandes
                       </DropdownMenuItem>

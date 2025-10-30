@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import  AuthService  from "@/services/authService";
+import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,17 +48,17 @@ export default function ResetPasswordPage() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert('Les mots de passe ne correspondent pas');
+      toast.error('Les mots de passe ne correspondent pas');
       return;
     }
 
     if (password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
+      toast.error('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
     if (!token) {
-      alert('Token manquant');
+      toast.error('Token manquant');
       return;
     }
 
@@ -74,7 +75,7 @@ export default function ResetPasswordPage() {
 
     } catch (error) {
       console.error('Reset failed:', error);
-      alert(error instanceof Error ? error.message : 'Erreur lors de la réinitialisation');
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la réinitialisation');
     } finally {
       setIsLoading(false);
     }

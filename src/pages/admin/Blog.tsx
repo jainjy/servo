@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import  AuthService  from "@/services/authService";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 // Interface
 interface BlogArticle {
@@ -89,7 +90,11 @@ const GestionBlog = () => {
       setArticles(response.data);
     } catch (error: any) {
       console.error('Erreur lors du chargement des articles:', error);
-      alert(`Erreur lors du chargement des articles: ${error.response?.data?.error || error.message}`);
+      toast.error(
+        `Erreur lors du chargement des articles: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -126,7 +131,11 @@ const GestionBlog = () => {
       }
     } catch (error: any) {
       console.error('Erreur upload:', error);
-      alert(`Erreur lors de l'upload de l'image: ${error.response?.data?.error || error.message}`);
+      toast.error(
+        `Erreur lors de l'upload de l'image: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     } finally {
       setUploading(false);
     }
@@ -178,7 +187,11 @@ const GestionBlog = () => {
       setCurrentArticle(null);
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error);
-      alert(`Erreur lors de la suppression: ${error.response?.data?.error || error.message}`);
+      toast.error(
+        `Erreur lors de la suppression: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     }
   };
 
@@ -201,7 +214,11 @@ const GestionBlog = () => {
       setCurrentArticle(null);
     } catch (error: any) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert(`Erreur lors de la sauvegarde: ${error.response?.data?.error || error.message}`);
+      toast.error(
+        `Erreur lors de la sauvegarde: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     }
   };
 
@@ -218,7 +235,11 @@ const GestionBlog = () => {
       await fetchArticles();
     } catch (error: any) {
       console.error('Erreur lors du changement de statut:', error);
-      alert(`Erreur lors du changement de statut: ${error.response?.data?.error || error.message}`);
+      toast.error(
+        `Erreur lors du changement de statut: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     }
   };
 

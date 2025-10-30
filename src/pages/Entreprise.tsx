@@ -7,6 +7,7 @@ import { MapPin, Star, ChevronRight, Users, Building2, MessageCircle, X, Send, N
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Footer from "@/components/layout/Footer";
+import { toast } from "sonner";
 
 const colors = {
   primary: "#0f172a", // slate-900
@@ -282,7 +283,7 @@ const Entreprise = () => {
       });
       setSelectedPartenaire(null);
       setSelectedService(null);
-      alert("Message envoyé avec succès !");
+      toast.info("Message envoyé avec succès !");
     }, 2000);
   };
 
@@ -343,7 +344,7 @@ const Entreprise = () => {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`
+            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`,
           }}
         />
 
@@ -358,8 +359,8 @@ const Entreprise = () => {
               Solutions <span className="text-blue-400">Professionnelles</span>
             </h1>
             <p className="text-sm lg:text-xl text-slate-200 mb-10 leading-relaxed">
-              Des services sur mesure pour répondre aux besoins spécifiques de votre entreprise.
-              Accompagnement personnalisé de A à Z.
+              Des services sur mesure pour répondre aux besoins spécifiques de
+              votre entreprise. Accompagnement personnalisé de A à Z.
             </p>
 
             <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
@@ -401,12 +402,16 @@ const Entreprise = () => {
         variants={containerVariants}
         id="services"
       >
-        <motion.div variants={itemVariants} className="text-center mb-0 lg:mb-16">
+        <motion.div
+          variants={itemVariants}
+          className="text-center mb-0 lg:mb-16"
+        >
           <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
             Services <span className="text-slate-900">d'Entreprise</span>
           </h1>
           <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto mb-8">
-            Tous les services essentiels pour le développement et la gestion de votre entreprise
+            Tous les services essentiels pour le développement et la gestion de
+            votre entreprise
           </p>
         </motion.div>
 
@@ -426,13 +431,8 @@ const Entreprise = () => {
             />
             <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
           </div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              className="rounded-xl px-8 py-3 text-white font-semibold bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
-            >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button className="rounded-xl px-8 py-3 text-white font-semibold bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300">
               Rechercher
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
@@ -449,13 +449,21 @@ const Entreprise = () => {
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
-                  variant={activeServiceCategory === category.value ? "default" : "outline"}
-                  className={`rounded-xl font-semibold px-4 lg:px-6 py-3 ${activeServiceCategory === category.value
-                    ? "text-white"
-                    : "border-2 border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900"
-                    }`}
+                  variant={
+                    activeServiceCategory === category.value
+                      ? "default"
+                      : "outline"
+                  }
+                  className={`rounded-xl font-semibold px-4 lg:px-6 py-3 ${
+                    activeServiceCategory === category.value
+                      ? "text-white"
+                      : "border-2 border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900"
+                  }`}
                   style={{
-                    backgroundColor: activeServiceCategory === category.value ? colors.primary : 'transparent',
+                    backgroundColor:
+                      activeServiceCategory === category.value
+                        ? colors.primary
+                        : "transparent",
                   }}
                   onClick={() => setActiveServiceCategory(category.value)}
                 >
@@ -478,10 +486,7 @@ const Entreprise = () => {
               whileHover="hover"
               initial="initial"
             >
-              <motion.div
-                variants={cardHoverVariants}
-                className="h-full"
-              >
+              <motion.div variants={cardHoverVariants} className="h-full">
                 <Card
                   className="p-8 h-full border border-slate-200 rounded-2xl bg-white cursor-pointer hover:shadow-2xl transition-all duration-500 group"
                   onClick={() => handleServiceClick(service)}
@@ -491,9 +496,7 @@ const Entreprise = () => {
                     className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center bg-slate-100 group-hover:bg-slate-900 transition-colors duration-300"
                     whileHover={{ scale: 1.1 }}
                   >
-                    <service.icon
-                      className="h-8 w-8 text-slate-600  group-hover:text-white transition-colors duration-300"
-                    />
+                    <service.icon className="h-8 w-8 text-slate-600  group-hover:text-white transition-colors duration-300" />
                   </motion.div>
 
                   {/* Contenu */}
@@ -534,7 +537,9 @@ const Entreprise = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <p className="text-slate-500 text-lg">Aucun service trouvé pour votre recherche.</p>
+            <p className="text-slate-500 text-lg">
+              Aucun service trouvé pour votre recherche.
+            </p>
           </motion.div>
         )}
       </motion.section>
@@ -548,7 +553,10 @@ const Entreprise = () => {
         id="partenaire"
       >
         <div className="container mx-auto px-4">
-          <motion.div variants={itemVariants} className="text-center mb-4 lg:mb-16">
+          <motion.div
+            variants={itemVariants}
+            className="text-center mb-4 lg:mb-16"
+          >
             <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
               Devenir <span className="text-slate-900">Partenaire</span>
             </h1>
@@ -570,10 +578,14 @@ const Entreprise = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Select onValueChange={(value) => alert(`Filtre ${filter.label} sélectionné: ${value}`)}>
-                    <SelectTrigger
-                      className="w-[240px] border-2 border-slate-300 rounded-xl bg-white focus:border-slate-900"
-                    >
+                  <Select
+                    onValueChange={(value) =>
+                      toast.info(
+                        `Filtre ${filter.label} sélectionné: ${value}`
+                      )
+                    }
+                  >
+                    <SelectTrigger className="w-[240px] border-2 border-slate-300 rounded-xl bg-white focus:border-slate-900">
                       <SelectValue placeholder={filter.label} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -612,13 +624,8 @@ const Entreprise = () => {
               whileHover="hover"
               initial="initial"
             >
-              <motion.div
-                variants={cardHoverVariants}
-                className="h-full"
-              >
-                <Card
-                  className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group"
-                >
+              <motion.div variants={cardHoverVariants} className="h-full">
+                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
                   {/* Badge */}
                   <motion.div
                     className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
@@ -675,9 +682,7 @@ const Entreprise = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">
-                            127 projets
-                          </span>
+                          <span className="text-slate-600">127 projets</span>
                         </div>
                       </div>
                     </div>
@@ -706,13 +711,8 @@ const Entreprise = () => {
               whileHover="hover"
               initial="initial"
             >
-              <motion.div
-                variants={cardHoverVariants}
-                className="h-full"
-              >
-                <Card
-                  className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group"
-                >
+              <motion.div variants={cardHoverVariants} className="h-full">
+                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
                   {/* Badge */}
                   <motion.div
                     className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
@@ -769,9 +769,7 @@ const Entreprise = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">
-                            89 projets
-                          </span>
+                          <span className="text-slate-600">89 projets</span>
                         </div>
                       </div>
                     </div>
@@ -800,13 +798,8 @@ const Entreprise = () => {
               whileHover="hover"
               initial="initial"
             >
-              <motion.div
-                variants={cardHoverVariants}
-                className="h-full"
-              >
-                <Card
-                  className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group"
-                >
+              <motion.div variants={cardHoverVariants} className="h-full">
+                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
                   {/* Badge */}
                   <motion.div
                     className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
@@ -863,9 +856,7 @@ const Entreprise = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">
-                            203 projets
-                          </span>
+                          <span className="text-slate-600">203 projets</span>
                         </div>
                       </div>
                     </div>
@@ -894,13 +885,8 @@ const Entreprise = () => {
               whileHover="hover"
               initial="initial"
             >
-              <motion.div
-                variants={cardHoverVariants}
-                className="h-full"
-              >
-                <Card
-                  className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group"
-                >
+              <motion.div variants={cardHoverVariants} className="h-full">
+                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
                   {/* Badge */}
                   <motion.div
                     className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
@@ -957,9 +943,7 @@ const Entreprise = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">
-                            156 projets
-                          </span>
+                          <span className="text-slate-600">156 projets</span>
                         </div>
                       </div>
                     </div>
@@ -1008,9 +992,12 @@ const Entreprise = () => {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">Visibilité accrue</h3>
+                <h3 className="text-xl font-bold mb-3 text-slate-900">
+                  Visibilité accrue
+                </h3>
                 <p className="text-slate-600">
-                  Bénéficiez d'une exposition privilégiée auprès de notre communauté
+                  Bénéficiez d'une exposition privilégiée auprès de notre
+                  communauté
                 </p>
               </motion.div>
 
@@ -1027,9 +1014,12 @@ const Entreprise = () => {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">Opportunités business</h3>
+                <h3 className="text-xl font-bold mb-3 text-slate-900">
+                  Opportunités business
+                </h3>
                 <p className="text-slate-600">
-                  Accédez à de nouveaux marchés et développez votre chiffre d'affaires
+                  Accédez à de nouveaux marchés et développez votre chiffre
+                  d'affaires
                 </p>
               </motion.div>
 
@@ -1046,7 +1036,9 @@ const Entreprise = () => {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">Support dédié</h3>
+                <h3 className="text-xl font-bold mb-3 text-slate-900">
+                  Support dédié
+                </h3>
                 <p className="text-slate-600">
                   Un accompagnement personnalisé pour maximiser votre réussite
                 </p>
@@ -1061,10 +1053,7 @@ const Entreprise = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-12 py-6 text-lg font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
                 onClick={() => setShowMessageModal(true)}
@@ -1089,12 +1078,10 @@ const Entreprise = () => {
               Prêt à développer votre entreprise ?
             </h2>
             <p className="text-sm lg:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Nos experts sont à votre écoute pour vous accompagner dans tous vos projets d'entreprise
+              Nos experts sont à votre écoute pour vous accompagner dans tous
+              vos projets d'entreprise
             </p>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
                 onClick={() => setShowMessageModal(true)}
@@ -1120,7 +1107,9 @@ const Entreprise = () => {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-900">
-                {selectedLocation ? `Localisation - ${selectedLocation.address}` : "Carte des partenaires"}
+                {selectedLocation
+                  ? `Localisation - ${selectedLocation.address}`
+                  : "Carte des partenaires"}
               </h2>
               <Button
                 variant="ghost"
@@ -1174,8 +1163,7 @@ const Entreprise = () => {
                 <MapPin className="h-4 w-4 text-slate-600" />
                 {selectedLocation
                   ? "Cliquez sur les marqueurs pour voir les détails des partenaires"
-                  : "Cliquez sur un partenaire pour voir sa localisation précise"
-                }
+                  : "Cliquez sur un partenaire pour voir sa localisation précise"}
               </p>
             </div>
           </motion.div>
@@ -1198,8 +1186,8 @@ const Entreprise = () => {
                 {selectedPartenaire
                   ? `Contacter ${selectedPartenaire.nom}`
                   : selectedService
-                    ? `Demander ${selectedService.nom}`
-                    : "Envoyer un message"}
+                  ? `Demander ${selectedService.nom}`
+                  : "Envoyer un message"}
               </h2>
               <Button
                 variant="ghost"
@@ -1273,8 +1261,8 @@ const Entreprise = () => {
                     selectedService
                       ? `Je souhaite en savoir plus sur ${selectedService.nom}...`
                       : selectedPartenaire
-                        ? `Je souhaite rejoindre ${selectedPartenaire.nom}...`
-                        : "Votre message..."
+                      ? `Je souhaite rejoindre ${selectedPartenaire.nom}...`
+                      : "Votre message..."
                   }
                 />
               </div>
@@ -1287,13 +1275,19 @@ const Entreprise = () => {
                 {isLoading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    {selectedService ? "DEMANDER LE SERVICE" : "ENVOYER LE MESSAGE"}
+                    {selectedService
+                      ? "DEMANDER LE SERVICE"
+                      : "ENVOYER LE MESSAGE"}
                   </>
                 )}
               </Button>

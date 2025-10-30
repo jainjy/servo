@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 interface UserModalProps {
   open: boolean
@@ -152,7 +153,7 @@ export function UserModal({ open, onOpenChange, user, mode, onSuccess }: UserMod
       }
     } catch (error: any) {
       console.error("Error submitting form:", error)
-      alert(error.response?.data?.error || "Une erreur est survenue")
+      toast.error(error.response?.data?.error || "Une erreur est survenue");
     } finally {
       setLoading(false)
     }
@@ -174,7 +175,7 @@ export function UserModal({ open, onOpenChange, user, mode, onSuccess }: UserMod
       }
     } catch (error: any) {
       console.error("Error deleting user:", error)
-      alert(error.response?.data?.error || "Une erreur est survenue lors de la suppression")
+      toast.error(error.response?.data?.error || "Une erreur est survenue lors de la suppression")
     } finally {
       setLoading(false)
     }

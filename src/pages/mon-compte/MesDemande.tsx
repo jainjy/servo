@@ -26,6 +26,7 @@ import {
 import api from "@/lib/api";
 import {useAuth} from "@/hooks/useAuth"
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 // Modal de publication d'une demande connecté à la base de données
 const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
@@ -92,7 +93,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
     setLoading(true);
 
     try {
-  await api.post('/api/demandes', {
+  await api.post('/demandes', {
         ...formData,
         createdById: userId
       });
@@ -119,7 +120,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
       setSelectedMetier('');
     } catch (error) {
       console.error('Erreur lors de la création de la demande:', error);
-      alert('Erreur lors de la création de la demande');
+      toast.error("Erreur lors de la création de la demande");
     } finally {
       setLoading(false);
     }
@@ -555,8 +556,8 @@ const MesDemande = () => {
     try {
       setLoading(true);
       const [demandesResponse, statsResponse] = await Promise.all([
-  api.get(`/api/demandes/user/${userId}`),
-  api.get(`/api/demandes/stats/${userId}`)
+  api.get(`/demandes/user/${userId}`),
+  api.get(`/demandes/stats/${userId}`)
       ]);
 
       setDemandes(demandesResponse.data);

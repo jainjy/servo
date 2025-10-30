@@ -34,6 +34,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "./contexts/CartContext";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 // Fonction pour obtenir l'icône par nom
 const getIconByName = (iconName) => {
@@ -88,7 +89,9 @@ const CategorieProduits = () => {
 
   const handleAddToCart = async (product) => {
     if (!user) {
-      alert("Veuillez vous connecter pour ajouter des articles au panier");
+      toast.warning(
+        "Veuillez vous connecter pour ajouter des articles au panier"
+      );
       return;
     }
     
@@ -107,25 +110,16 @@ const CategorieProduits = () => {
       const totalItems = getCartItemsCount();
       
       // Afficher une confirmation détaillée
-      alert(`${product.name} ajouté au panier !`);
+      toast.info(`${product.name} ajouté au panier !`);
       
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert("Erreur lors de l'ajout au panier");
+      toast.error("Erreur lors de l'ajout au panier");
     } finally {
       setAddingProductId(null);
     }
   };
 
-  const handleCallClick = () => {
-    if (typeof window !== "undefined") {
-      window.open("tel:+33123456789");
-    }
-  };
-
-  const handleAppointmentClick = () => {
-    alert("Fonctionnalité de rendez-vous à implémenter");
-  };
 
   if (isLoading) {
     return (

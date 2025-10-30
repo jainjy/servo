@@ -107,7 +107,7 @@ export function UsersTable() {
       fetchUsers(); // Recharger la liste
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Une erreur est survenue lors de la suppression");
+      toast.error("Une erreur est survenue lors de la suppression");
     }
   };
 

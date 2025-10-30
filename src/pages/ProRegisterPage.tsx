@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const ProRegisterPage = () => {
   const navigate = useNavigate();
@@ -114,12 +115,12 @@ const ProRegisterPage = () => {
 
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
-      alert("Les mots de passe ne correspondent pas");
+      toast.error("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (!formData.acceptTerms) {
-      alert("Veuillez accepter les conditions d'utilisation");
+      toast.error("Veuillez accepter les conditions d'utilisation");
       return;
     }
 

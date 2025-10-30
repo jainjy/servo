@@ -67,7 +67,9 @@ export function AvailableServicesModal({ open, onOpenChange, onServiceAssociated
       setServices(prev => prev.filter(s => s.id !== serviceId))
     } catch (error: any) {
       console.error('Erreur lors de l\'association:', error)
-      alert(error.response?.data?.error || 'Erreur lors de l\'association')
+      toast.error(
+        error.response?.data?.error || "Erreur lors de l'association"
+      );
     } finally {
       setActionLoading(null)
     }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { saveDemande, loadDemandes, updateDemandeStatus, updateDemande, getDemandeById } from '@/lib/requestStore'
 import { Send, Calendar, MapPin, Wrench, Zap, ChevronLeft, MoreVertical, User, MessageCircle, AlertCircle, Clock, CheckCircle } from "lucide-react"
 import { useLocation, useParams } from "react-router-dom"
+import { toast } from "sonner";
 
 export default function MessagesPage({ artisanView }: { artisanView?: boolean } = {}) {
   const { id } = useParams();
@@ -317,7 +318,7 @@ export default function MessagesPage({ artisanView }: { artisanView?: boolean } 
   }
 
   function handleRefuse() {
-    alert("Demande refusée.")
+    toast.info("Demande refusée.");
   }
 
   function handleSign() {

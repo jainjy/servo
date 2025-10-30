@@ -20,6 +20,7 @@ import {
   X,
   Smile
 } from "lucide-react"
+import { toast } from "sonner"
 
 interface Message {
   id: string
@@ -174,7 +175,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       }
     } catch (error) {
       console.error("Erreur lors de l'envoi des fichiers:", error)
-      alert("Erreur lors de l'envoi des fichiers")
+      toast.error("Erreur lors de l'envoi des fichiers");
     } finally {
       setSelectedFiles([])
       setIsUploading(false)
@@ -204,7 +205,7 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
       setSelectedFiles(prev => [...prev, ...imageFiles])
       setShowFileMenu(false)
     } else {
-      alert("Veuillez sélectionner une image valide")
+      toast.error("Veuillez sélectionner une image valide");
     }
   }
 
@@ -231,19 +232,19 @@ export function ChatInterface({ conversationId, onBack }: ChatInterfaceProps) {
 
   const handleReport = () => {
     setShowMenu(false)
-    alert("Signalement envoyé au support")
+    toast.info("Signalement envoyé au support");
   }
 
   const handleBlockUser = () => {
     setShowMenu(false)
     if (confirm("Êtes-vous sûr de vouloir bloquer cet utilisateur ?")) {
-      alert("Utilisateur bloqué")
+      toast.info("Utilisateur bloqué");
     }
   }
 
   const handleConversationDetails = () => {
     setShowMenu(false)
-    alert("Détails de la conversation")
+    toast.info("Détails de la conversation");
   }
 
   const toggleMenu = () => {

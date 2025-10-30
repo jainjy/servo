@@ -18,6 +18,7 @@ import {
   Sofa,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 
 const ProfessionalSubscriptionPage = () => {
   const navigate = useNavigate();
@@ -163,7 +164,7 @@ const ProfessionalSubscriptionPage = () => {
 
   const handleContinue = async () => {
     if (!selectedPlan) {
-      alert("Veuillez sélectionner un abonnement");
+      toast.warning("Veuillez sélectionner un abonnement");
       return;
     }
 

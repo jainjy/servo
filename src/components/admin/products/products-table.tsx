@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ProductModal } from "./product-modal"
 import { Search, Filter, Edit, Trash2 } from "lucide-react"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 export function ProductsTable() {
   const [products, setProducts] = useState([])
@@ -46,7 +47,7 @@ export function ProductsTable() {
       fetchProducts() // Recharger la liste
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
-      alert('Erreur lors de la suppression du produit')
+      toast.error('Erreur lors de la suppression du produit')
     }
   }
 

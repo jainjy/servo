@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { ImagePlus, X, Upload } from "lucide-react"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 interface ServiceModalProps {
   open: boolean
@@ -93,13 +94,13 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
 
     // Vérifier le type de fichier
     if (!file.type.startsWith('image/')) {
-      alert('Veuillez sélectionner une image valide')
+      toast.warning("Veuillez sélectionner une image valide");
       return
     }
 
     // Vérifier la taille (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('L\'image ne doit pas dépasser 5MB')
+      toast.warning("L'image ne doit pas dépasser 5MB");
       return
     }
 
@@ -122,7 +123,9 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
       }
     } catch (error: any) {
       console.error('Erreur lors de l\'upload:', error)
-      alert(error.response?.data?.error || 'Erreur lors de l\'upload de l\'image')
+      toast.error(
+        error.response?.data?.error || "Erreur lors de l'upload de l'image"
+      );
     } finally {
       setUploading(false)
       // Réinitialiser l'input file
@@ -173,7 +176,7 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
       onOpenChange(false)
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du service:', error)
-      alert('Erreur lors de la sauvegarde du service')
+      toast.error("Erreur lors de la sauvegarde du service");
     } finally {
       setLoading(false)
     }

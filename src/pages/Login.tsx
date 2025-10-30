@@ -15,6 +15,7 @@ import AuthService from "@/services/authService";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useRedirectPath } from "@/hooks/useRedirectPath";
+import { toast } from "sonner";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Identifiants invalides. Veuillez réessayer.");
+      toast.error("Identifiants invalides. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }

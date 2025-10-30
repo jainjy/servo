@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, TrendingUp, Shield, Users, Target, Download, Mail } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Types et données (inchangés)
 interface InvestmentType {
@@ -275,7 +276,9 @@ const ContactModal = ({ isOpen, onClose, investmentType }) => {
     e.preventDefault();
     // Simulation d'envoi de formulaire
     console.log('Formulaire soumis:', { ...formData, investmentType });
-    alert('Votre demande a été envoyée ! Un conseiller vous contactera dans les 24h.');
+    toast.info(
+      "Votre demande a été envoyée ! Un conseiller vous contactera dans les 24h."
+    );
     onClose();
     setFormData({ name: '', email: '', phone: '', message: '', investmentAmount: '', timeline: '' });
   };

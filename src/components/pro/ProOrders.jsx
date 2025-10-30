@@ -105,11 +105,11 @@ const ProOrders = () => {
         triggerNotificationsUpdate();
       } else {
         console.error('❌ Erreur API lors de la mise à jour:', response.data);
-        alert('Erreur lors de la mise à jour du statut: ' + response.data.message);
+        toast.error('Erreur lors de la mise à jour du statut: ' + response.data.message);
       }
     } catch (error) {
       console.error('❌ Erreur mise à jour statut:', error);
-      alert('Erreur lors de la mise à jour du statut: ' + (error.response?.data?.message || error.message));
+      toast.error('Erreur lors de la mise à jour du statut: ' + (error.response?.data?.message || error.message));
     }
   };
 

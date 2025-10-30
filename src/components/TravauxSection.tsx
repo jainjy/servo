@@ -28,6 +28,7 @@ import {
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -215,12 +216,12 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
       const response = await api.post("/demandes/immobilier", demandeData);
 
       if (response.status === 201) {
-        alert("Votre demande a été créée avec succès !");
+        toast.info("Votre demande a été créée avec succès !");
         onClose();
       }
     } catch (error) {
       console.error("Erreur création demande:", error);
-      alert("Erreur lors de la création de la demande");
+      toast.error("Erreur lors de la création de la demande");
     } finally {
       // Fin de la soumission
       setIsSubmitting(false); 
@@ -561,7 +562,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
   const openDevisModal = (prestation) => {
     if (!isAuthenticated) {
-      alert("Vous devez être connecté pour faire une demande de devis.");
+      toast.error("Vous devez être connecté pour faire une demande de devis.");
       // Optionnel : rediriger vers la page de connexion
       // window.location.href = "/login/particular";
       return;

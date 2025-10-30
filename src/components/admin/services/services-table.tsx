@@ -7,6 +7,7 @@ import { ServiceModal } from "./service-modal"
 import { ServiceDetailsModal } from "./service-details-modal"
 import { Search, Eye, Edit, Trash2, Star, Image as ImageIcon } from "lucide-react"
 import api from "@/lib/api"
+import { toast } from "sonner"
 
 interface Service {
   id: string
@@ -86,7 +87,9 @@ export function ServicesTable() {
       await fetchServices() // Recharger la liste
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error)
-      alert(error.response?.data?.error || 'Erreur lors de la suppression')
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la suppression"
+      );
     }
   }
 

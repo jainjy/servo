@@ -25,6 +25,7 @@ import {
   X,
   ArrowRight
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Données des partenaires financement
 const partenairesFinancement = [
@@ -416,7 +417,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
       });
     } else {
       console.log("Formulaire envoyé:", formData);
-      alert("Votre demande a été envoyée avec succès !");
+      toast.info("Votre demande a été envoyée avec succès !");
       onClose();
     }
   };

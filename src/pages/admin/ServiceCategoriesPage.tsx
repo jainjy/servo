@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { CategoryModal } from "@/components/admin/services/category-modal";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 interface Category {
   id: number;
@@ -72,7 +73,9 @@ export default function ServiceCategoriesPage() {
       await fetchCategories(); // Recharger la liste
     } catch (error: any) {
       console.error("Erreur lors de la suppression:", error);
-      alert(error.response?.data?.error || "Erreur lors de la suppression");
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la suppression"
+      );
     }
   };
 

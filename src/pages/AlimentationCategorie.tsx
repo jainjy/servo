@@ -33,6 +33,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 import { useCart } from "@/components/contexts/CartContext";
+import { toast } from "sonner";
 
 // Fonction pour obtenir l'icône par nom
 const getIconByName = (iconName) => {
@@ -103,7 +104,9 @@ const AlimentationCategorie = () => {
 
   const handleAddToCart = async (product) => {
     if (!user) {
-      alert("Veuillez vous connecter pour ajouter des articles au panier");
+      toast.warning(
+        "Veuillez vous connecter pour ajouter des articles au panier"
+      );
       return;
     }
 
@@ -122,7 +125,7 @@ const AlimentationCategorie = () => {
       const totalItems = getCartItemsCount();
 
       // Afficher une confirmation détaillée
-      alert(
+      toast.info(
         `✅ ${product.name} ajouté au panier !\n\nQuantité: ${quantity}\nTotal dans le panier: ${totalItems} article(s)`
       );
 
@@ -130,7 +133,7 @@ const AlimentationCategorie = () => {
       console.log("Total items count:", totalItems);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Erreur lors de l'ajout au panier");
+      toast.error("Erreur lors de l'ajout au panier");
     } finally {
       setAddingProductId(null);
     }

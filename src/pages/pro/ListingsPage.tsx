@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import  AuthService  from "@/services/authService";
+import { toast } from "sonner";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -188,7 +189,7 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
       onClose();
     } catch (error) {
       console.error('Error saving property:', error);
-      alert('Erreur lors de la sauvegarde');
+      toast.error("Erreur lors de la sauvegarde");
     } finally {
       setLoading(false);
     }
@@ -771,7 +772,7 @@ const ListingsPage = () => {
       fetchStats(user?.id);
     } catch (error) {
       console.error('Error deleting property:', error);
-      alert('Erreur lors de la suppression');
+      toast.error("Erreur lors de la suppression");
     }
   };
 
@@ -785,7 +786,7 @@ const ListingsPage = () => {
       await fetchStats(user?.id);
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('Erreur lors du changement de statut');
+      toast.error("Erreur lors du changement de statut");
     }
   };
 

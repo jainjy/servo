@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 interface CategoryModalProps {
   open: boolean;
@@ -41,7 +42,7 @@ export function CategoryModal({
     e.preventDefault();
 
     if (!name.trim()) {
-      alert("Le nom de la catégorie est requis");
+      toast.error("Le nom de la catégorie est requis");
       return;
     }
 
@@ -58,7 +59,9 @@ export function CategoryModal({
       onOpenChange(false);
     } catch (error: any) {
       console.error("Erreur lors de la sauvegarde:", error);
-      alert(error.response?.data?.error || "Erreur lors de la sauvegarde");
+      toast.error(
+        error.response?.data?.error || "Erreur lors de la sauvegarde"
+      );
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import {
   Map, Phone, Mail, Shield, Clock, CheckCircle, X, Plus, Minus,
   Edit, Trash2, Eye, PlusCircle, Building, Bath, Square
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Types basés sur le modèle de données
 interface TourismListing {
@@ -318,7 +319,9 @@ export default function TourismPage() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setLoading(false);
     setShowBookingModal(false);
-    alert('Réservation confirmée ! Un email de confirmation vous a été envoyé.');
+    toast.info(
+      "Réservation confirmée ! Un email de confirmation vous a été envoyé."
+    );
   };
 
   const nextImage = (listingId: string, totalImages: number) => {

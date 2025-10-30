@@ -35,6 +35,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // Define the client type for better type safety
 interface Client {
@@ -136,7 +137,7 @@ export default function ClientSection() {
 
   const handleSaveClient = () => {
     if (!newClient.name || !newClient.email) {
-      alert("Le nom et l'email sont obligatoires !");
+      toast.error("Le nom et l'email sont obligatoires !");
       return;
     }
 

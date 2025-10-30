@@ -22,6 +22,7 @@ import {
   MapPin,
 } from "lucide-react";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 interface Transaction {
   id: string;
@@ -168,7 +169,7 @@ export function PaymentsTable() {
       setTransactions(response.data);
     } catch (err) {
       console.error("Erreur lors du remboursement:", err);
-      alert("Erreur lors du remboursement");
+      toast.error("Erreur lors du remboursement");
     }
   };
 

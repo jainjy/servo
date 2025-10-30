@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 // Données pour la section 1 - Cours à domicile
 const services = [
@@ -143,7 +144,7 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Formulaire soumis:", formData);
-    alert("Rendez-vous confirmé ! Nous vous contacterons rapidement.");
+    toast.info("Rendez-vous confirmé ! Nous vous contacterons rapidement.");
     onClose();
   };
 

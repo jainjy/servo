@@ -5,6 +5,7 @@ import {
   Building, Warehouse, Hotel, Users, FileText, HelpCircle,
   Phone, Star, Shield, Clock, ArrowRight, Eye, MessageCircle
 } from "lucide-react";
+import { toast } from "sonner";
 
 const ServicesPartnersPage = () => { 
   const navigate = useNavigate();
@@ -103,7 +104,7 @@ const ServicesPartnersPage = () => {
     setShowMessageCard(false);
     setEmail('');
     setMessage('');
-    alert("Message envoyé avec succès!");
+    toast.info("Message envoyé avec succès!");
   };
 
   const statuses = [

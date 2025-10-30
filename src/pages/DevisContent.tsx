@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import services from '@/lib/services';
 import Header from '@/components/layout/Header';
+import { toast } from "sonner";
 
 export default function DevisContent() {
   // Initialise les paramètres de recherche depuis l'URL uniquement côté client
@@ -35,7 +36,7 @@ export default function DevisContent() {
           <div>
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
               <h2 className="font-semibold text-xl mb-6 text-gray-800">Vos informations</h2>
-              <form onSubmit={(e) => { e.preventDefault(); alert('Devis envoyé (demo)'); }}>
+              <form onSubmit={(e) => { e.preventDefault(); toast.info("Devis envoyé (demo)"); }}>
                 <div className="flex flex-col gap-4">
                   <input
                     name="name"

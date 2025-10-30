@@ -145,7 +145,6 @@ const App = () => (
                 path="/gestion-immobilier"
                 element={<GestionImmobilier />}
               />
-              <Route path="/mes-commandes" element={<UserOrders />} />
               <Route path="/immobilier/:id" element={<PropertyPage />} />
               <Route path="/travaux" element={<Travaux />} />
               <Route path="/produits" element={<Produits />} />
@@ -242,6 +241,7 @@ const App = () => (
                   path="demandes-immobilier"
                   element={<MesDemandesImmobilier />}
                 />
+                <Route path="mes-commandes" element={<UserOrders />} />
               </Route>
               {/* Section Admin Routes */}
               <Route path="/admin" element={<AdminLayout />}>
