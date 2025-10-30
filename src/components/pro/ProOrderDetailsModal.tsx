@@ -167,8 +167,8 @@ const ProOrderDetailsModal = ({ order, isOpen, onClose, onStatusUpdate }) => {
           <Button variant="outline" onClick={onClose}>
             Fermer
           </Button>
-          <Button>
-            Imprimer le bon de commande
+          <Button onClick={window.print}>
+            Imprimer la commande
           </Button>
         </div>
       </div>

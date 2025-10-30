@@ -1,10 +1,8 @@
+// components/pro/ProSidebar.jsx
 import React, { useState } from "react";
-// Remplacement du Link de Next.js par le Link de React Router DOM
 import { Link, useLocation } from "react-router-dom";
-// Remplacement de Image de Next.js par la balise <img>
 import logo from "../../assets/logo.png";
-// Les imports d'icônes Lucide et d'utilitaires restent les mêmes (assurez-vous d'avoir les dépendances)
-import { cn } from "@/lib/utils"; // Assurez-vous que cette utilité existe et fonctionne
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Building2,
@@ -14,18 +12,15 @@ import {
   Users,
   FileText,
   Star,
-  CreditCard,
-  BarChart3,
   Settings,
-  Plus,
-  Package,
   Menu,
   X,
   ShoppingBag,
   Leaf,
   ShoppingCart,
 } from "lucide-react";
-// Données de navigation (Mise à jour avec la gestion des commandes)
+import { useOrderNotifications } from '@/hooks/useOrderNotifications';
+
 const navigation = [
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
@@ -37,7 +32,11 @@ const navigation = [
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
-  { name: "Mes Commandes", href: "/pro/orders", icon: ShoppingCart }, // NOUVEAU : Gestion des commandes
+  { 
+    name: "Mes Commandes", 
+    href: "/pro/orders", 
+    icon: ShoppingCart,
+  },
   { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
   { name: "Liste demande immobilier", href: "/pro/demandes-immobilier", icon: Building2 },
   { name: "Avis", href: "/pro/reviews", icon: Star },
@@ -47,24 +46,51 @@ const navigation = [
 export function ProSidebar() {
   const location = useLocation();
   const pathname = location.pathname;
-
   const [menuOpen, setMenuOpen] = useState(false);
+  const { notifications, loading } = useOrderNotifications();
 
-  // Définir la logique d'activité du lien
   const getIsActive = (href: string) => {
-    // Pour les chemins exacts
     if (pathname === href) return true;
     if (href !== "/pro" && pathname.startsWith(href + "/")) return true;
     return false;
   };
 
-  // Le contenu de la barre latérale pour le bureau et le mobile
+  const getNotificationCount = (itemName: string) => {
+    switch (itemName) {
+      case "Mes Commandes":
+        return notifications.pendingOrders;
+      case "Messages":
+        return notifications.messages;
+      case "Réservations":
+        return notifications.reservations;
+      default:
+        return 0;
+    }
+  };
+
+  const shouldShowNotification = (itemName: string) => {
+    const count = getNotificationCount(itemName);
+    return count > 0;
+  };
+
+  const getNotificationColor = (itemName: string) => {
+    switch (itemName) {
+      case "Mes Commandes":
+        return "bg-orange-500 text-white";
+      case "Messages":
+        return "bg-red-500 text-white";
+      case "Réservations":
+        return "bg-blue-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+
   const sidebarContent = (
     <>
       {/* Logo & header */}
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
         <div className="p-1 rounded-full bg-white border-black border-2">
-          {/* Remplacement de <Image> par <img> */}
           <img
             src={logo}
             alt="Servo Logo"
@@ -82,16 +108,18 @@ export function ProSidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-4">
         {navigation.map((item) => {
-          // Utilisation de la nouvelle fonction pour l'état actif
           const isActive = getIsActive(item.href);
+          const notificationCount = getNotificationCount(item.name);
+          const showNotification = shouldShowNotification(item.name);
+          const notificationColor = getNotificationColor(item.name);
 
           return (
             <Link
               key={item.name}
-              to={item.href} // Remplacement de 'href' par 'to'
-              onClick={() => setMenuOpen(false)} // Fermer le menu après la navigation mobile
+              to={item.href}
+              onClick={() => setMenuOpen(false)}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors group",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors group relative",
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
                   : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
@@ -105,23 +133,16 @@ export function ProSidebar() {
                     : "text-muted-foreground"
                 )}
               />
-              {item.name}
-              {/* Notifications pour les commandes */}
-              {item.name === "Mes Commandes" && (
-                <span className="ml-auto bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  2
-                </span>
-              )}
-              {/* Notifications pour les messages */}
-              {item.name === "Messages" && (
-                <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              )}
-              {/* Notifications pour les réservations */}
-              {item.name === "Réservations" && (
-                <span className="ml-auto bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  5
+              <span className="flex-1">{item.name}</span>
+              
+              {/* Notifications dynamiques */}
+              {showNotification && (
+                <span className={cn(
+                  "ml-auto text-xs rounded-full h-5 min-w-5 flex items-center justify-center px-1 font-medium",
+                  notificationColor,
+                  notificationCount > 99 ? "text-[10px]" : "text-xs"
+                )}>
+                  {notificationCount > 99 ? '99+' : notificationCount}
                 </span>
               )}
             </Link>
@@ -155,6 +176,13 @@ export function ProSidebar() {
             <p className="text-xs text-muted-foreground">Espace Pro</p>
           </div>
         </div>
+
+        {/* Badge de notification mobile */}
+        {notifications.pendingOrders > 0 && (
+          <div className="ml-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+            {notifications.pendingOrders > 99 ? '99+' : notifications.pendingOrders}
+          </div>
+        )}
 
         {/* Bouton menu mobile */}
         <button
