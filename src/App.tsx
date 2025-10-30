@@ -141,7 +141,7 @@ const App = () => (
             <Route path="/actualites" element={<Actualites />} />
             <Route path="/tourisme" element={<TourismSection />} />
             <Route path="/service" element={<ServicesPartnersPage />} />
-            <Route path="/publicite" element={<Publicite />} />
+            {/* <Route path="/publicite" element={<Publicite />} /> */}
             <Route path="/estimations" element={<EstimationImmobilierPage />} />
             <Route path="/messages/:id" element={<MessagesLayout />} />
             {/* singular routes for legacy links */}
