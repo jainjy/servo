@@ -89,6 +89,7 @@ const AlimentationCategorie = () => {
         `/aliments/category/${encodeURIComponent(categoryName)}`
       );
       setProducts(response.data.products);
+      console.log(response.data)
     } catch (error) {
       console.error(
         "Erreur lors du chargement des produits de la catégorie:",
@@ -133,18 +134,6 @@ const AlimentationCategorie = () => {
     } finally {
       setAddingProductId(null);
     }
-  };
-
-  const handleCallClick = () => {
-    if (typeof window !== "undefined") {
-      window.open("tel:+33123456789");
-    }
-  };
-
-  const handleAppointmentClick = () => {
-    alert(
-      "Fonctionnalité de rendez-vous avec notre nutritionniste à implémenter"
-    );
   };
 
   // Fonction pour formater le nom de la catégorie
