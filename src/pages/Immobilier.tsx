@@ -27,7 +27,11 @@ const Immobilier = () => {
   }
 
   return (
-    <div className="min-h-screen mt-10 bg-background">
+    <div className="min-h-screen mt-10 ">
+      <div className='fixed -z-10 overflow-hidden bg-black w-full h-64'>
+        <img src="https://i.pinimg.com/1200x/c1/df/87/c1df875d53d18c0e8cd9ac21a20c035c.jpg"
+          className='opacity-45 object-cover w-full' alt="" />
+      </div>
       <section className="container mx-auto px-1 py-8">
         <Suspense fallback={
           <div className="space-y-4">
@@ -36,10 +40,15 @@ const Immobilier = () => {
             ))}
           </div>
         }>
+          <div className='  absolute top-28 w-full h-full flex flex-col '>
+            <span className='text-5xl text-white text-center tracking-wider font-serif font-semibold'>Vente et location</span>
+            <span className='text-center text-xs pt-5 text-white/60 '>Vendre ou louer vos biens</span>
+          </div>
+
           <PropertyListings />
         </Suspense>
       </section>
-      
+
     </div>
   );
 };

@@ -364,11 +364,11 @@ const ModalDemandeVisite = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* En-tête du modal */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6">
+        <div className="bg-slate-800 px-6 py-2">
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-white text-xl font-bold">Demander une visite</h2>
-              <p className="text-blue-100 text-sm mt-1">
+              <p className="text-white/50 text-xs mt-1">
                 Pour le bien : {property?.title}
               </p>
             </div>
@@ -386,8 +386,8 @@ const ModalDemandeVisite = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Informations de contact */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-600" />
+              <div className="flex -mt-2 text-xl justify-center items-center gap-2">
+                <User className="w-6 h-6 text-gray-700" />
                 <span className="text-gray-700 font-medium">Vos coordonnées</span>
               </div>
 
@@ -433,7 +433,7 @@ const ModalDemandeVisite = ({
             {/* Date et heure souhaitées */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-600" />
+                <Calendar className="w-4 h-4 text-gray-600" />
                 <span className="text-gray-700 font-medium">Disponibilités</span>
               </div>
 
@@ -504,7 +504,7 @@ const ModalDemandeVisite = ({
               type="submit"
               onClick={handleSubmit}
               disabled={loadingSubmit || !!isAlreadySent}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-60"
+              className="flex-1 bg-slate-800 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <Calendar className="w-4 h-4" />
               {loadingSubmit ? 'Envoi...' : isAlreadySent ? 'Demande déjà envoyée' : 'Demander la visite'}
@@ -889,7 +889,11 @@ const PropertyListings = (
                           {/* Boutons d'action */}
                           <div className="flex gap-1">
                             <button
-                              className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition disabled:opacity-60"
+                              className={`w-full px-4 py-2 rounded-lg font-semibold transition ${
+                              sentRequests?.[property?.id] 
+                                ? 'bg-orange-500 text-white cursor-not-allowed' 
+                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            }`}
                               onClick={(e) => handleDemanderVisite(property, e)}
                               disabled={!!sentRequests?.[property?.id]}
                             >
@@ -932,7 +936,7 @@ const PropertyListings = (
   }
 
   return (
-    <section className="w-full">
+    <section className="bg-white rounded-lg z-50 mt-44 w-full">
       <div className=" container mx-auto px-4 py-6">
         {/* Barre d'onglets + CTA */}
         <div className="sticky top-16 z-30 bg-white flex flex-col lg:flex-row gap-4 items-center justify-between rounded-2xl border border-border/50 p-4">
@@ -1417,7 +1421,7 @@ const PropertyListings = (
                             onClick={(e) => handleDemanderVisite(property, e)}
                             disabled={!!sentRequests?.[property?.id]}
                           >
-                            {sentRequests?.[property?.id] ? 'En attente' : 'Demander visite'}
+                            {sentRequests?.[property?.id] ? 'Demande déjà envoyée' : 'Demander visite'}
                           </button>
                           <button
                             className="border-2 p-2 rounded-md"

@@ -2,93 +2,184 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
-import { MapPin, Calendar, Eye, CheckCircle, XCircle, RefreshCw, Trash2 } from 'lucide-react';
+import { MapPin, Calendar, Eye, CheckCircle, XCircle, RefreshCw, Trash2, User, Mail, Phone, Clock, MessageCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const DemandeCard = ({ demande, onValidate, onRefuse, onRemove }: any) => {
+    const formatMessage = (message: string) => {
+        if (!message) return '—';
+        // Enlever la partie automatique du message
+        const parts = message.split('.');
+        const userMessage = parts.find(part => !part.includes('Demande visite pour le bien'));
+        return userMessage ? userMessage.trim() : '—';
+    };
+
     return (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
-            <div className="flex justify-between items-start mb-4">
-                <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
-                        <HomeIcon />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
-                            {demande.titre}
-                        </h3>
-                        <p className="text-gray-600 text-sm mt-1 flex items-center gap-2">
-                            <span className="flex items-center gap-1 text-gray-500">
-                                <MapPin className="w-3 h-3" />
-                                {formatAddress(demande)}
-                            </span>
-                        </p>
-                    </div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 hover:border-blue-200 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
+    {/* Effet de fond subtil au survol */}
+    <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-blue-50/0 group-hover:from-blue-50/30 group-hover:to-blue-50/10 transition-all duration-500 rounded-2xl"></div>
+    
+    <div className="flex justify-between items-start mb-6 relative z-10">
+        <div className="flex items-start gap-6">
+            {/* Image avec effet de zoom */}
+            {demande.property?.images?.length > 0 ? (
+                <div className="relative overflow-hidden rounded-xl">
+                    <img 
+                        src={demande.property.images[0]} 
+                        alt={demande.property?.title || "Propriété"} 
+                        className="w-36 h-28 object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300 rounded-xl"></div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(demande.statut)}`}>
-                        {demande.statut}
+            ) : (
+                <div className="w-36 h-28 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                    <HomeIcon className="w-8 h-8" />
+                </div>
+            )}
+
+            <div className="space-y-2">
+                <h3 className="font-bold text-gray-900 text-xl group-hover:text-blue-700 transition-colors duration-300 leading-tight">
+                    {demande.property?.title || "Demande de visite"}
+                </h3>
+                <p className="text-gray-600 text-sm flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                        <MapPin className="w-4 h-4" />
+                        {formatAddress(demande)}
                     </span>
-                </div>
+                </p>
             </div>
+        </div>
+        
+        <div className="flex flex-col items-end gap-3">
+            <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 backdrop-blur-sm ${getStatusColor(demande.statut)} shadow-sm`}>
+                {demande.statut}
+            </span>
+        </div>
+    </div>
 
-            <p className="text-gray-700 mb-4 line-clamp-2 leading-relaxed">{demande.description || '—'}</p>
-
-            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-4 text-gray-500 text-sm">
-                    <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {demande.date ? new Date(demande.date).toLocaleDateString('fr-FR') : '—'}
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="text-sm font-medium">{demande.createdBy?.firstName || ''} {demande.createdBy?.lastName || ''}</span>
+    {/* Grille améliorée avec séparateurs */}
+    <div className="grid grid-cols-2 gap-8 mb-6 relative z-10">
+        <div className="space-y-4">
+            <div className="flex items-center gap-2">
+                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Informations du demandeur</h4>
+            </div>
+            <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                    <User className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">
+                        <span className="font-medium text-gray-800">{demande.contactPrenom} {demande.contactNom}</span>
                     </span>
                 </div>
-
-                <div className="flex gap-2 items-center">
-                    <Link to={`/immobilier/${demande.propertyId}`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
-                        <Eye className="w-4 h-4" />
-                        Voir bien
-                    </Link>
-                    {/* show action buttons only when demande is pending or en cours */}
-                            {['en attente', 'en cours', 'En attente', 'En cours'].includes(String(demande.statut)) ? (
-                        <>
-                            <button onClick={() => onValidate(demande.id)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4" />
-                                Valider
-                            </button>
-
-                            <button onClick={() => onRefuse(demande.id)} className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
-                                <XCircle className="w-4 h-4" />
-                                Refuser
-                            </button>
-                        </>
-                            ) : (/refus/i.test(String(demande.statut || '')) ? (
-                                <div className="flex items-center gap-2">
-                                    <span className={`px-3 py-2 rounded-full text-sm font-semibold border ${getStatusColor(demande.statut)}`}>{demande.statut}</span>
-                                    <button onClick={() => onRemove?.(demande.id)} title="Supprimer" className="p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ) : (
-                                <span className={`px-3 py-2 rounded-full text-sm font-semibold border ${getStatusColor(demande.statut)}`}>{demande.statut}</span>
-                            ))}
+                <div className="flex items-center gap-3">
+                    <Mail className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">{demande.contactEmail}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Phone className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">{demande.contactTel}</span>
                 </div>
             </div>
         </div>
+        
+        <div className="space-y-4">
+            <div className="flex items-center gap-2">
+                <div className="w-1 h-4 bg-green-500 rounded-full"></div>
+                <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Détails de la visite</h4>
+            </div>
+            <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">
+                        <span className="font-medium text-gray-800">
+                            {new Date(demande.dateSouhaitee).toLocaleDateString('fr-FR', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}
+                        </span>
+                    </span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-600">{demande.heureSouhaitee}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                    <MessageCircle className="w-4 h-4 text-gray-400 mt-1" />
+                    <span className="text-gray-600 leading-relaxed">{formatMessage(demande.description)}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {/* Pied de carte avec bordure élégante */}
+    <div className="flex justify-between items-center pt-6 border-t border-gray-100 relative z-10">
+        <div className="flex items-center gap-4 text-gray-500 text-sm">
+            <span className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
+                <Calendar className="w-4 h-4" />
+                {demande.date ? new Date(demande.date).toLocaleDateString('fr-FR') : '—'}
+            </span>
+        </div>
+
+        <div className="flex gap-3 items-center">
+            <Link 
+                to={`/immobilier/${demande.propertyId}`} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105"
+            >
+                <Eye className="w-4 h-4" />
+                Voir le bien
+            </Link>
+            
+            {['en attente', 'en cours', 'En attente', 'En cours'].includes(String(demande.statut)) ? (
+                <div className="flex gap-3">
+                    <button 
+                        onClick={() => onValidate(demande.id)} 
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105"
+                    >
+                        <CheckCircle className="w-4 h-4" />
+                        Valider
+                    </button>
+
+                    <button 
+                        onClick={() => onRefuse(demande.id)} 
+                        className="bg-white hover:bg-red-50 text-red-600 border-2 border-red-200 px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105"
+                    >
+                        <XCircle className="w-4 h-4" />
+                        Refuser
+                    </button>
+                </div>
+            ) : (/refus/i.test(String(demande.statut || '')) ? (
+                <div className="flex items-center gap-3">
+                    <span className={`px-4 py-2.5 rounded-full text-sm font-bold border-2 ${getStatusColor(demande.statut)} shadow-sm`}>
+                        {demande.statut}
+                    </span>
+                    <button 
+                        onClick={() => onRemove?.(demande.id)} 
+                        title="Supprimer" 
+                        className="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition-all duration-300 hover:scale-110 shadow-sm"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
+            ) : (
+                <span className={`px-4 py-2.5 rounded-full text-sm font-bold border-2 ${getStatusColor(demande.statut)} shadow-sm`}>
+                    {demande.statut}
+                </span>
+            ))}
+        </div>
+    </div>
+</div>
     );
 };
 
 const formatAddress = (demande: any) => {
-    // prefer property address
     if (demande.property && (demande.property.address || demande.property.city)) {
         const parts = [demande.property.address, demande.property.city].filter(Boolean);
         return parts.join(', ');
     }
-    // then composed lieu fields
     const parts = [demande.lieuAdresse, demande.lieuAdresseVille, demande.lieuAdresseCp].filter(Boolean);
     if (parts.length) return parts.join(', ');
-    // fallback to contact address
     const contactParts = [demande.contactAdresse, demande.lieuAdresseVille].filter(Boolean);
     if (contactParts.length) return contactParts.join(', ');
     return 'Adresse non renseignée';
@@ -108,6 +199,8 @@ const getStatusColor = (status: string) => {
     }
 }
 
+// ... Reste du composant inchangé ...
+
 const ListeDemandesImmobilier = () => {
     const { user, isAuthenticated } = useAuth();
     const [demandes, setDemandes] = useState<any[]>([]);
@@ -115,19 +208,36 @@ const ListeDemandesImmobilier = () => {
     const [updatingIds, setUpdatingIds] = useState<number[]>([]);
     const [properties, setProperties] = useState<any[]>([]);
     const [debugVisible, setDebugVisible] = useState(false);
+    const [activeTab, setActiveTab] = useState<string>("all");
+
+    // Filter demandes based on active tab
+    const filteredDemandes = React.useMemo(() => {
+        if (activeTab === "all") return demandes;
+        return demandes.filter(demande => {
+            const status = (demande.statut || "").toLowerCase();
+            switch(activeTab) {
+                case "en_attente":
+                    return status === "en attente" || status === "en cours";
+                case "validees":
+                    return status === "validée" || status === "validee" || status === "valide";
+                case "refusees":
+                    return status === "refusée" || status === "refusee" || status === "refus";
+                case "archivees":
+                    return demande.archived || status === "archivée" || status === "archivee";
+                default:
+                    return true;
+            }
+        });
+    }, [demandes, activeTab]);
 
     useEffect(() => {
         if (!isAuthenticated || !user?.id) return;
         const load = async () => {
             setLoading(true);
             try {
-                // load all demandes for now (show every visit request)
-                // const resp = await api.get(`/demandes/immobilier/all`);
                 const resp = await api.get(`/demandes/immobilier/owner/${user.id}`);
-
                 setDemandes(resp.data || []);
 
-                // also fetch properties for this owner to help diagnose empty lists
                 try {
                     const props = await api.get('/properties', { params: { userId: user.id } });
                     setProperties(props.data || []);
@@ -154,13 +264,15 @@ const ListeDemandesImmobilier = () => {
                     toastRef?.dismiss?.();
                     setUpdatingIds((s) => [...s, id]);
                     try {
-                        await api.patch(`/demandes/immobilier/${id}/status`, { action });
-                        const newStatus = action === 'validate' ? 'Validée' : 'Refusée';
+                        await api.patch(`/demandes/immobilier/${id}/statut`, {
+                            statut: action === 'validate' ? 'validée' : 'refusée'
+                        });
+                        const newStatus = action === 'validate' ? 'validée' : 'refusée';
                         setDemandes((prev) => prev.map(d => d.id === id ? { ...d, statut: newStatus } : d));
                         try {
                             window.dispatchEvent(new CustomEvent('demande:statusChanged', { detail: { demandeId: id, status: newStatus } }));
                         } catch (e) { console.debug('Could not dispatch demande:statusChanged event', e); }
-                        toast({ title: 'Succès', description: `Demande ${newStatus.toLowerCase()}` });
+                        toast({ title: 'Succès', description: `Demande ${newStatus}` });
                     } catch (err) {
                         console.error('Erreur action demande', err);
                         const msg = err?.response?.data?.error || err?.message || 'Impossible de traiter la demande pour le moment.';
@@ -213,7 +325,7 @@ const ListeDemandesImmobilier = () => {
     )
 
     return (
-        <div className="min-h-screen mt-12 bg-gray-50 p-6">
+        <div className="min-h-screen  bg-gray-50 p-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Liste des demandes immobilières</h1>
@@ -222,8 +334,62 @@ const ListeDemandesImmobilier = () => {
                 </div>
             </div>
 
+            {/* Tabs de filtrage */}
+            <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-start mb-4">
+                <button
+                    onClick={() => setActiveTab("all")}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activeTab === "all"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                >
+                    Toutes
+                </button>
+                <button
+                    onClick={() => setActiveTab("en_attente")}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activeTab === "en_attente"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                >
+                    En attente
+                </button>
+                <button
+                    onClick={() => setActiveTab("validees")}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activeTab === "validees"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                >
+                    Validées
+                </button>
+                <button
+                    onClick={() => setActiveTab("refusees")}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activeTab === "refusees"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                >
+                    Refusées
+                </button>
+                <button
+                    onClick={() => setActiveTab("archivees")}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activeTab === "archivees"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                >
+                    Archivées
+                </button>
+            </div>
+
             <div className="grid grid-cols-1 gap-4">
-                {demandes.length > 0 ? demandes.map(d => (
+                {filteredDemandes.length > 0 ? filteredDemandes.map(d => (
                     <DemandeCard
                         key={d.id}
                         demande={d}
@@ -233,31 +399,22 @@ const ListeDemandesImmobilier = () => {
                     />
                 )) : (
                     <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-                        <h4 className="text-gray-700 text-lg font-medium mb-2">Aucune demande immobilière</h4>
-                        <p className="text-gray-500 text-sm mb-6">Aucune demande de visite liée à vos biens pour le moment.</p>
-                        {properties.length === 0 ? (
-                            <p className="text-sm text-gray-500">Vous n'avez pas encore de biens publiés. Ajoutez un bien pour recevoir des demandes de visite.</p>
+                        <h4 className="text-gray-700 text-lg font-medium mb-2">
+                            Aucune demande {activeTab !== "all" ? "dans cette catégorie" : "immobilière"}
+                        </h4>
+                        {activeTab !== "all" ? (
+                            <p className="text-gray-500 text-sm mb-6">
+                                Essayez de sélectionner une autre catégorie
+                            </p>
                         ) : (
-                            <p className="text-sm text-gray-500">Vos biens sont listés ({properties.length}). Il n'y a actuellement aucune demande de visite pour ces biens.</p>
-                        )}
-
-                        <div className="mt-4 flex items-center justify-center gap-3">
-                            <button onClick={() => { setDebugVisible(v => !v); }} className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200">{debugVisible ? 'Masquer debug' : 'Afficher debug'}</button>
-                            <button onClick={() => { setLoading(true); setDemandes([]); setProperties([]); (async () => { try { const resp = await api.get(`/demandes/immobilier/owner/${user.id}`); setDemandes(resp.data || []); const props = await api.get('/properties', { params: { userId: user.id } }); setProperties(props.data || []); } catch (e) { console.error(e) } finally { setLoading(false) } })() }} className="px-4 py-2 rounded-md bg-blue-600 text-white">Réessayer</button>
-                        </div>
-
-                        {debugVisible && (
-                            <div className="mt-6 text-left bg-gray-50 p-4 rounded border border-gray-100">
-                                <h5 className="font-semibold mb-2">Debug — Réponses brutes</h5>
-                                <div className="text-xs text-gray-700 mb-2">
-                                    <strong>Demandes (count):</strong> {demandes.length}
-                                </div>
-                                <pre className="text-xs overflow-auto max-h-48 bg-white p-2 rounded border">{JSON.stringify(demandes, null, 2)}</pre>
-                                <div className="text-xs text-gray-700 mt-3 mb-2">
-                                    <strong>Propriétés (count):</strong> {properties.length}
-                                </div>
-                                <pre className="text-xs overflow-auto max-h-48 bg-white p-2 rounded border">{JSON.stringify(properties, null, 2)}</pre>
-                            </div>
+                            <>
+                                <p className="text-gray-500 text-sm mb-6">Aucune demande de visite liée à vos biens pour le moment.</p>
+                                {properties.length === 0 ? (
+                                    <p className="text-sm text-gray-500">Vous n'avez pas encore de biens publiés. Ajoutez un bien pour recevoir des demandes de visite.</p>
+                                ) : (
+                                    <p className="text-sm text-gray-500">Vos biens sont listés ({properties.length}). Il n'y a actuellement aucune demande de visite pour ces biens.</p>
+                                )}
+                            </>
                         )}
                     </div>
                 )}
