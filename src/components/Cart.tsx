@@ -134,12 +134,12 @@ const Cart = ({ isOpen, onClose }) => {
         try {
             setValidationErrors([]);
             const validationResult = await validateCart(localCartItems);
-            
+
             if (validationResult.errors && validationResult.errors.length > 0) {
                 setValidationErrors(validationResult.errors);
                 return false;
             }
-            
+
             return true;
         } catch (error) {
             console.error('Erreur validation panier:', error);
@@ -168,7 +168,7 @@ const Cart = ({ isOpen, onClose }) => {
         } catch (error) {
             console.error('Erreur création commande:', error);
             throw new Error(
-                error.response?.data?.message || 
+                error.response?.data?.message ||
                 'Erreur lors de la création de la commande'
             );
         }
@@ -196,7 +196,7 @@ const Cart = ({ isOpen, onClose }) => {
         try {
             // Créer la commande réelle
             const orderResult = await createOrder();
-            
+
             console.log('✅ Commande créée:', orderResult);
 
             // Vider le panier
@@ -209,20 +209,10 @@ const Cart = ({ isOpen, onClose }) => {
             const itemsSummary = localCartItems.map(item =>
                 `• ${item.name} x${item.quantity} - €${calculateItemTotal(item).toFixed(2)}`
             ).join('\n');
-
-            alert(`✅ Commande #${orderResult.order.orderNumber} passée avec succès !
-
-📦 Détails de la commande :
-${itemsSummary}
-💰 Total : €${orderResult.order.totalAmount.toFixed(2)}
-📅 Date : ${new Date(orderResult.order.createdAt).toLocaleDateString('fr-FR')}
-👤 Client : ${user.firstName} ${user.lastName}
-
-📧 Vous recevrez un email de confirmation sous peu.`);
-
+            alert(`✅ Commande #${orderResult.order.orderNumber} passée avec succès !`)
         } catch (error) {
             console.error("💥 Erreur lors de la commande:", error);
-            
+
             // Gestion spécifique des erreurs de stock
             if (error.response?.data?.errors) {
                 const stockErrors = error.response.data.errors;
@@ -412,35 +402,14 @@ ${itemsSummary}
                             </div>
                         </div>
 
-                        {/* Note d'information */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <div className="flex items-start gap-2">
-                                <div className="text-blue-600 mt-0.5">💡</div>
-                                <div>
-                                    <p className="text-blue-800 text-sm font-medium">Système de commandes réel</p>
-                                    <p className="text-blue-700 text-xs">Votre commande sera traitée et les stocks mis à jour</p>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Indication de connexion */}
                         {!isAuthenticated && (
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                                 <p className="text-yellow-800 text-sm text-center">
-                                    🔐 Connectez-vous pour passer commande
+                                     Connectez-vous pour passer commande
                                 </p>
                             </div>
                         )}
-
-                        {/* Informations utilisateur */}
-                        {isAuthenticated && user && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                <p className="text-green-800 text-sm text-center">
-                                    ✅ Connecté en tant que <strong>{user.firstName} {user.lastName}</strong>
-                                </p>
-                            </div>
-                        )}
-
                         {/* Actions */}
                         <div className="space-y-3">
                             <Button
