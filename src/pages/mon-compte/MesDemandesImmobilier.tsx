@@ -497,11 +497,17 @@ const MesDemandesImmobilier = () => {
             <div className="flex flex-col gap-6 mb-6">
                 <div className="flex items-center justify-between">
                     <div className="flex relative overflow-hidden h-44 w-full items-center gap-3">
-                       <img 
-                       className='absolute -z-0 w-full opacity-45 object-cover object-center'
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40 backdrop-blur-[1px]"></div>
+                        {/* Effet de lumière */}
+                        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+                        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl transform translate-x-1/3 translate-y-1/3"></div>
+                    
+                    <img
+                        className='absolute -z-0 w-full opacity-45 object-cover object-center'
                         src='https://i.pinimg.com/1200x/23/26/d5/2326d5fc9fdbff00492a8f7c6390a88c.jpg' />
-                        <h1 className="text-5xl tracking-wider font-serif font-bold text-slate-900 z-10">Mes demandes immobilières</h1>
-                        {/* <button title="Historique global" onClick={async () => {
+                    <h1 className="text-5xl tracking-wider font-serif font-bold text-slate-100 z-10">Mes demandes immobilières</h1>
+                </div>
+                {/* <button title="Historique global" onClick={async () => {
                         // aggregate local histories from demandes and open modal (do NOT call backend automatically to avoid 404s)
                         setHistoryLoading(true);
                         setHistoryItems([]);
@@ -525,150 +531,150 @@ const MesDemandesImmobilier = () => {
                     }} className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700">
                         <Clock className="w-5 h-5" />
                     </button> */}
-                        {/* <p className="text-gray-600 mt-2">Toutes les demandes de visite et demandes liées à vos biens</p> */}
-                    </div>
-                </div>
+                {/* <p className="text-gray-600 mt-2">Toutes les demandes de visite et demandes liées à vos biens</p> */}
 
-                <div className="flex flex-col space-y-4 p-6">
-                    {/* Tabs de filtrage */}
-                    <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-start">
-                        <button
-                            onClick={() => setActiveTab("all")}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "all"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 hover:bg-gray-100"
-                                }`}
-                        >
-                            Toutes
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("en_attente")}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "en_attente"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 hover:bg-gray-100"
-                                }`}
-                        >
-                            En attente
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("validees")}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "validees"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 hover:bg-gray-100"
-                                }`}
-                        >
-                            Validées
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("refusees")}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "refusees"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 hover:bg-gray-100"
-                                }`}
-                        >
-                            Refusées
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("archivees")}
-                            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "archivees"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 hover:bg-gray-100"
-                                }`}
-                        >
-                            Archivées
-                        </button>
-                    </div>
-
-                    {/* Liste des demandes filtrées */}
-                    <div className="grid grid-cols-1 gap-4">
-                        {filteredDemandes.length > 0 ? (
-                            filteredDemandes.map((d) => (
-                                <DemandeImmoCard
-                                    key={d.id}
-                                    demande={d}
-                                    onDeleted={handleDeleted}
-                                    onStatusChange={handleStatusChange}
-                                    onAddHistory={handleAddHistory}
-                                />
-                            ))
-                        ) : (
-                            <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-                                <h4 className="text-gray-700 text-lg font-medium mb-2">
-                                    Aucune demande {activeTab !== "all" ? "dans cette catégorie" : "immobilière"}
-                                </h4>
-                                <p className="text-gray-500 text-sm mb-6">
-                                    {activeTab !== "all"
-                                        ? "Essayez de sélectionner une autre catégorie"
-                                        : "Vous n'avez pas encore envoyé de demande liée à un bien."}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                {/* Global History modal (Sheet) - moved to parent so a single modal shows aggregated histories */}
-                <Sheet open={historyOpen} onOpenChange={async (open) => {
-                    setHistoryOpen(open);
-                    if (!open) {
-                        setActiveDemande(null);
-                        setHistoryItems([]);
-                    } else if (user?.id) {
-                        // Charger automatiquement l'historique à l'ouverture
-                        setHistoryLoading(true);
-                        try {
-                            const resp = await api.get(`/demandes/immobilier/user/${user.id}/history`);
-                            const items = resp.data || [];
-                            items.sort((a: any, b: any) => {
-                                const da = new Date(a.date || a.createdAt || 0).getTime();
-                                const db = new Date(b.date || b.createdAt || 0).getTime();
-                                return db - da;
-                            });
-                            setHistoryItems(items.map((it: any) => ({ ...it })));
-                        } catch (e) {
-                            console.error('Erreur chargement historique', e);
-                            setHistoryItems([]);
-                        } finally {
-                            setHistoryLoading(false);
-                        }
-                    }
-                }}>
-                    <SheetTrigger asChild>
-                        {/* hidden trigger: we open programmatically from the button in the header */}
-                        <span style={{ display: 'none' }} />
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-[420px] p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-lg font-semibold">Historique</h4>
-                        </div>
-
-                        {/* Chargement automatique de l'historique lors de l'ouverture */}
-                        <div className="mb-3 flex items-center justify-end gap-2">
-                            {historyLoading && <div className="text-sm text-gray-500">Chargement...</div>}
-                        </div>
-
-                        {historyLoading ? (
-                            <div className="text-center text-sm text-gray-500">Chargement...</div>
-                        ) : historyItems && historyItems.length > 0 ? (
-                            <div className="space-y-3 overflow-auto max-h-[70vh]">
-                                {historyItems.map((h: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-white rounded-lg border">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-800">{h.title || h.action || h.type || 'Événement'}</div>
-                                                <div className="text-xs text-gray-500 mt-1">{h.message || h.note || h.description || ''}</div>
-                                                {h._sourceTitre && <div className="text-xs text-gray-400 mt-1">Source: {h._sourceTitre}</div>}
-                                            </div>
-                                            <div className="text-xs text-gray-400">{h.date ? new Date(h.date).toLocaleString('fr-FR') : (h.createdAt ? new Date(h.createdAt).toLocaleString('fr-FR') : '')}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center text-sm text-gray-500">Aucun historique disponible.</div>
-                        )}
-                    </SheetContent>
-                </Sheet>
             </div>
+
+            <div className="flex flex-col space-y-4 px-6 py-2">
+                {/* Tabs de filtrage */}
+                <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-start">
+                    <button
+                        onClick={() => setActiveTab("all")}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "all"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                    >
+                        Toutes
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("en_attente")}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "en_attente"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                    >
+                        En attente
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("validees")}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "validees"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                    >
+                        Validées
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("refusees")}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "refusees"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                    >
+                        Refusées
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("archivees")}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "archivees"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                    >
+                        Archivées
+                    </button>
+                </div>
+
+                {/* Liste des demandes filtrées */}
+                <div className="grid grid-cols-1 gap-4">
+                    {filteredDemandes.length > 0 ? (
+                        filteredDemandes.map((d) => (
+                            <DemandeImmoCard
+                                key={d.id}
+                                demande={d}
+                                onDeleted={handleDeleted}
+                                onStatusChange={handleStatusChange}
+                                onAddHistory={handleAddHistory}
+                            />
+                        ))
+                    ) : (
+                        <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+                            <h4 className="text-gray-700 text-lg font-medium mb-2">
+                                Aucune demande {activeTab !== "all" ? "dans cette catégorie" : "immobilière"}
+                            </h4>
+                            <p className="text-gray-500 text-sm mb-6">
+                                {activeTab !== "all"
+                                    ? "Essayez de sélectionner une autre catégorie"
+                                    : "Vous n'avez pas encore envoyé de demande liée à un bien."}
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {/* Global History modal (Sheet) - moved to parent so a single modal shows aggregated histories */}
+            <Sheet open={historyOpen} onOpenChange={async (open) => {
+                setHistoryOpen(open);
+                if (!open) {
+                    setActiveDemande(null);
+                    setHistoryItems([]);
+                } else if (user?.id) {
+                    // Charger automatiquement l'historique à l'ouverture
+                    setHistoryLoading(true);
+                    try {
+                        const resp = await api.get(`/demandes/immobilier/user/${user.id}/history`);
+                        const items = resp.data || [];
+                        items.sort((a: any, b: any) => {
+                            const da = new Date(a.date || a.createdAt || 0).getTime();
+                            const db = new Date(b.date || b.createdAt || 0).getTime();
+                            return db - da;
+                        });
+                        setHistoryItems(items.map((it: any) => ({ ...it })));
+                    } catch (e) {
+                        console.error('Erreur chargement historique', e);
+                        setHistoryItems([]);
+                    } finally {
+                        setHistoryLoading(false);
+                    }
+                }
+            }}>
+                <SheetTrigger asChild>
+                    {/* hidden trigger: we open programmatically from the button in the header */}
+                    <span style={{ display: 'none' }} />
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[420px] p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold">Historique</h4>
+                    </div>
+
+                    {/* Chargement automatique de l'historique lors de l'ouverture */}
+                    <div className="mb-3 flex items-center justify-end gap-2">
+                        {historyLoading && <div className="text-sm text-gray-500">Chargement...</div>}
+                    </div>
+
+                    {historyLoading ? (
+                        <div className="text-center text-sm text-gray-500">Chargement...</div>
+                    ) : historyItems && historyItems.length > 0 ? (
+                        <div className="space-y-3 overflow-auto max-h-[70vh]">
+                            {historyItems.map((h: any, idx: number) => (
+                                <div key={idx} className="p-3 bg-white rounded-lg border">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <div className="text-sm font-medium text-gray-800">{h.title || h.action || h.type || 'Événement'}</div>
+                                            <div className="text-xs text-gray-500 mt-1">{h.message || h.note || h.description || ''}</div>
+                                            {h._sourceTitre && <div className="text-xs text-gray-400 mt-1">Source: {h._sourceTitre}</div>}
+                                        </div>
+                                        <div className="text-xs text-gray-400">{h.date ? new Date(h.date).toLocaleString('fr-FR') : (h.createdAt ? new Date(h.createdAt).toLocaleString('fr-FR') : '')}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center text-sm text-gray-500">Aucun historique disponible.</div>
+                    )}
+                </SheetContent>
+            </Sheet>
         </div>
+        </div >
     );
 }
 
