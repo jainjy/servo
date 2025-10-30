@@ -164,7 +164,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
     dateSouhaitee: "",
     budget: "",
   });
-  const {user}=useAuth();
+  const { user } = useAuth();
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -186,7 +186,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
     e.preventDefault();
 
     try {
-      const userId=user.id;
+      const userId = user.id;
 
       const demandeData = {
         contactNom: formData.nom,
@@ -424,6 +424,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     isOpen: false,
     prestation: null,
   });
+  const { user, isAuthenticated } = useAuth();
 
   const sections = [
     { id: "interieurs", label: "Intérieur", icon: HomeIcon },
@@ -523,6 +524,12 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   };
 
   const openDevisModal = (prestation) => {
+    if (!isAuthenticated) {
+      alert("Vous devez être connecté pour faire une demande de devis.");
+      // Optionnel : rediriger vers la page de connexion
+      // window.location.href = "/login/particular";
+      return;
+    }
     setDevisModal({ isOpen: true, prestation });
   };
 
