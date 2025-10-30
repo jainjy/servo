@@ -98,17 +98,22 @@ class AuthService {
         utilisateur: userData,
         amount,
       });
-      
+
       return response.data;
     } catch (error) {
-      throw this.handleError(error, "Erreur lors de l'inscription professionnelle");
+      throw this.handleError(
+        error,
+        "Erreur lors de l'inscription professionnelle"
+      );
     }
   }
 
   // Confirmation du paiement
   static async confirmPayment(paymentIntentId) {
     try {
-      const response = await api.post("/auth/confirm-payment", { paymentIntentId });
+      const response = await api.post("/auth/confirm-payment", {
+        paymentIntentId,
+      });
       const { user, token } = response.data;
 
       if (user && token) {
@@ -118,7 +123,10 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      throw this.handleError(error, "Erreur lors de la confirmation du paiement");
+      throw this.handleError(
+        error,
+        "Erreur lors de la confirmation du paiement"
+      );
     }
   }
 
@@ -304,35 +312,44 @@ class AuthService {
       return new Error("Accès non autorisé");
     }
 
-    return this.handleError(error, "Une erreur est survenue lors de l'authentification");
+    return this.handleError(
+      error,
+      "Une erreur est survenue lors de l'authentification"
+    );
   }
 
-// Dans AuthService, ajoutez cette fonction :
+  // Dans AuthService, ajoutez cette fonction :
 
-static canAccess(pathname) {
-  if (!this.isAuthenticated()) return false;
-  
-  const user = this.getCurrentUser();
-  if (!user) return false;
+  static canAccess(pathname) {
+    if (!this.isAuthenticated()) return false;
 
-  // Les admins ont accès à tout
-  if (user.role === UserRole.ADMIN) return true;
+    const user = this.getCurrentUser();
+    if (!user) return false;
 
-  // Vérifications basées sur le chemin
-  if (pathname.startsWith('/admin') && user.role !== UserRole.ADMIN) {
-    return false;
+    // Les admins ont accès à tout
+    if (user.role === UserRole.ADMIN) return true;
+
+    // Vérifications basées sur le chemin
+    if (pathname.startsWith("/admin") && user.role !== UserRole.ADMIN) {
+      return false;
+    }
+
+    if (
+      pathname.startsWith("/pro") &&
+      !["admin", "professional"].includes(user.role)
+    ) {
+      return false;
+    }
+
+    if (
+      pathname.startsWith("/mon-compte") &&
+      !["admin", "professional", "user"].includes(user.role)
+    ) {
+      return false;
+    }
+
+    return true;
   }
-
-  if (pathname.startsWith('/pro') && !['admin', 'professional'].includes(user.role)) {
-    return false;
-  }
-
-  if (pathname.startsWith('/mon-compte') && !['admin', 'professional', 'user'].includes(user.role)) {
-    return false;
-  }
-
-  return true;
-}
 
   // Mettre à jour les données utilisateur
   static updateUserData(updatedUser) {
@@ -341,6 +358,62 @@ static canAccess(pathname) {
       this.setAuthData(updatedUser, currentToken);
     }
   }
+
+  // Dans AuthService, ajoutez ces méthodes :
+
+  // Mettre à jour le profil utilisateur
+  static async updateProfile(userData) {
+    try {
+      const response = await api.put("/users/profile", userData);
+      const updatedUser = response.data;
+
+      // Mettre à jour les données locales
+      const currentToken = this.getToken();
+      if (currentToken) {
+        this.setAuthData(updatedUser, currentToken);
+      }
+
+      return updatedUser;
+    } catch (error) {
+      console.log(error)
+      throw this.handleError(error, "Erreur lors de la mise à jour du profil");
+    }
+  }
+
+  // Changer le mot de passe
+  static async changePassword(currentPassword, newPassword) {
+    try {
+      const response = await api.put("/users/change-password", {
+        currentPassword,
+        newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(
+        error,
+        "Erreur lors du changement de mot de passe"
+      );
+    }
+  }
+
+  // Upload d'avatar
+  static async uploadAvatar(file) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post("/upload/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error, "Erreur lors de l'upload de l'avatar");
+    }
+  }
 }
+
 
 export default AuthService;

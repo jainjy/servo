@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Eye, EyeOff, Mail, Lock, Trees, Car, Home } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Trees, Car, Home, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -129,6 +130,13 @@ const LoginPage = () => {
         <div className=" flex items-center justify-center bg-white overflow-auto rounded-lg py-6 px-6 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-white">
+              <Link 
+                to="/" 
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 mx-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Retour à l'accueil</span>
+              </Link>
               <CardHeader className="space-y-0">
                 <div className="flex justify-center mb-4 lg:hidden">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">

@@ -22,6 +22,8 @@ import {
   TreePalm,
   Building,
   BookCheck,
+  // Ajout de Loader2 pour le spinner
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -164,7 +166,10 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
     dateSouhaitee: "",
     budget: "",
   });
+  // NOUVEL ÉTAT POUR LA SOUMISSION
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const { user } = useAuth();
+  
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -184,6 +189,9 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Début de la soumission
+    setIsSubmitting(true); 
 
     try {
       const userId = user.id;
@@ -198,7 +206,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
         lieuAdresseVille: "Paris", // À adapter avec un système de géocodage
         optionAssurance: false,
         description: formData.message,
-        devis: `Budget estimé: ${formData.budget}, Date souhaitée: ${formData.dateSouhaitee}`, // Utilisation du nouveau champ
+        devis: `Budget estimé: ${formData.budget}, Date souhaitée: ${formData.dateSouhaitee}`,
         serviceId: prestation.id,
         nombreArtisans: "UNIQUE",
         createdById: userId,
@@ -213,6 +221,9 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
     } catch (error) {
       console.error("Erreur création demande:", error);
       alert("Erreur lors de la création de la demande");
+    } finally {
+      // Fin de la soumission
+      setIsSubmitting(false); 
     }
   };
 
@@ -245,6 +256,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
             size="icon"
             onClick={onClose}
             className="absolute lg:relative right-2 top-2 h-8 w-8 bg-red-600 text-white font-bold rounded-full hover:bg-gray-100"
+            disabled={isSubmitting} // Désactiver la fermeture pendant la soumission
           >
             <X className="h-5 w-5" />
           </Button>
@@ -264,6 +276,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="Votre nom"
                 required
                 className="w-full"
+                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
               />
             </div>
             <div>
@@ -278,6 +291,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="Votre prénom"
                 required
                 className="w-full"
+                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
               />
             </div>
           </div>
@@ -296,6 +310,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="votre@email.com"
                 required
                 className="w-full"
+                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
               />
             </div>
             <div>
@@ -310,6 +325,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="06 12 34 56 78"
                 required
                 className="w-full"
+                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
               />
             </div>
           </div>
@@ -325,6 +341,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
               onChange={handleChange}
               placeholder="Adresse complète du projet"
               className="w-full"
+              disabled={isSubmitting} // Désactiver les inputs pendant la soumission
             />
           </div>
 
@@ -337,9 +354,11 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
               <Input
                 name="dateSouhaitee"
                 type="date"
+                min={new Date().toISOString().split("T")[0]}
                 value={formData.dateSouhaitee}
                 onChange={handleChange}
                 className="w-full"
+                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
               />
             </div>
             <div>
@@ -352,6 +371,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 onChange={handleChange}
                 className="w-full rounded-lg border border-gray-300 p-3"
                 required
+                disabled={isSubmitting} // Désactiver le select pendant la soumission
               >
                 <option value="">Sélectionnez un budget</option>
                 <option value="0-5000">0 - 5 000 €</option>
@@ -373,6 +393,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
               placeholder="Décrivez votre projet en détail..."
               rows={4}
               className="w-full"
+              disabled={isSubmitting} // Désactiver la textarea pendant la soumission
             />
           </div>
 
@@ -385,18 +406,25 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
           </div>
 
           <div className="grid lg:flex gap-3 pt-4 border-t">
+            {/* BOUTON DE SOUMISSION AVEC SPINNER ET DÉSACTIVATION */}
             <Button
               type="submit"
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isSubmitting}
             >
-              <FileText className="h-4 w-4 mr-2" />
-              Envoyer la demande
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
+              {isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               className="flex-1"
+              disabled={isSubmitting}
             >
               Annuler
             </Button>
@@ -424,6 +452,9 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     isOpen: false,
     prestation: null,
   });
+  // NOUVEL ÉTAT POUR LE CHARGEMENT DES SERVICES
+  const [isLoadingServices, setIsLoadingServices] = useState(false); 
+
   const { user, isAuthenticated } = useAuth();
 
   const sections = [
@@ -435,6 +466,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   const currentCategory = categories[categorie];
 
   const fetchServicesCategorie = async (cat) => {
+    // Début du chargement
+    setIsLoadingServices(true); 
     try {
       const response = await api.get(`/categories/name/${cat}/services`);
       console.log("Catégories de services:", response.data);
@@ -451,6 +484,9 @@ const IntelligibleSection = ({ showAllPrestations }) => {
         "Erreur lors de la récupération des catégories de services:",
         error
       );
+    } finally {
+      // Fin du chargement
+      setIsLoadingServices(false); 
     }
   };
 
@@ -579,6 +615,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                         className="pl-12 rounded-2xl border-2 text-center border-gray-200 focus:border-blue-500 transition-all duration-300 p-4 bg-white shadow-sm"
                         value={searchFilter}
                         onChange={search}
+                        disabled={isLoadingServices} // Désactiver la recherche pendant le chargement
                       />
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     </div>
@@ -599,6 +636,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                     : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
                 }`}
                 onClick={() => setSelectedType("TOUS")}
+                disabled={isLoadingServices} // Désactiver les filtres pendant le chargement
               >
                 TOUS
               </button>
@@ -611,6 +649,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
                   }`}
                   onClick={() => setSelectedType(type.libelle)}
+                  disabled={isLoadingServices} // Désactiver les filtres pendant le chargement
                 >
                   {type.libelle}
                 </button>
@@ -618,102 +657,112 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {displayedPrestations.map((prestation) => {
-              const currentImageIndex = currentImageIndexes[prestation.id] || 0;
-              const totalImages = prestation.images?.length || 0;
-              const currentImage =
-                prestation.images?.[currentImageIndex] ||
-                "/placeholder-image.jpg";
+          {/* AFFICHAGE CONDITIONNEL : SPINNER OU GRILLE DES PRESTATIONS */}
+          {isLoadingServices ? (
+            <div className="text-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
+              <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto" />
+              <p className="mt-4 text-xl font-semibold text-gray-700">
+                Chargement des prestations...
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+              {displayedPrestations.map((prestation) => {
+                const currentImageIndex = currentImageIndexes[prestation.id] || 0;
+                const totalImages = prestation.images?.length || 0;
+                const currentImage =
+                  prestation.images?.[currentImageIndex] ||
+                  "/placeholder-image.jpg";
 
-              return (
-                <Card
-                  key={prestation.id}
-                  className="group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
-                >
-                  <div className="relative">
-                    <div
-                      className="relative h-56 overflow-hidden rounded-t-3xl cursor-pointer"
-                      onClick={() => openPhotosModal(prestation)}
-                    >
-                      <img
-                        src={currentImage}
-                        alt={prestation.libelle}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
+                return (
+                  <Card
+                    key={prestation.id}
+                    className="group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
+                  >
+                    <div className="relative">
+                      <div
+                        className="relative h-56 overflow-hidden rounded-t-3xl cursor-pointer"
+                        onClick={() => openPhotosModal(prestation)}
+                      >
+                        <img
+                          src={currentImage}
+                          alt={prestation.libelle}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg">
-                        {prestation.libelle}
+                        <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-bold text-gray-800 shadow-lg">
+                          {prestation.libelle}
+                        </div>
+
+                        {totalImages > 1 && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
+                              onClick={(e) =>
+                                prevImage(prestation.id, totalImages, e)
+                              }
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
+                              onClick={(e) =>
+                                nextImage(prestation.id, totalImages, e)
+                              }
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+
+                            <div className="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                              {currentImageIndex + 1}/{totalImages}
+                            </div>
+                          </>
+                        )}
                       </div>
 
-                      {totalImages > 1 && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
-                            onClick={(e) =>
-                              prevImage(prestation.id, totalImages, e)
-                            }
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-9 w-9 rounded-full bg-white/95 backdrop-blur-sm hover:bg-white shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
-                            onClick={(e) =>
-                              nextImage(prestation.id, totalImages, e)
-                            }
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
+                      <div className="p-6">
+                        <h3 className="font-semibold text-gray-900 mb-2">
+                          {prestation.libelle}
+                        </h3>
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          {prestation.description}
+                        </p>
 
-                          <div className="absolute bottom-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-                            {currentImageIndex + 1}/{totalImages}
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-2">
-                        {prestation.libelle}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {prestation.description}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex gap-2">
-                          {totalImages > 0 && (
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-2">
+                            {totalImages > 0 && (
+                              <Button
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
+                                onClick={() => openPhotosModal(prestation)}
+                              >
+                                <Camera className="h-3.5 w-3.5 mr-1.5" />
+                                Photos ({totalImages})
+                              </Button>
+                            )}
                             <Button
-                              className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-md"
-                              onClick={() => openPhotosModal(prestation)}
+                              className="text-white font-semibold bg-slate-900 py-2.5 px-4 rounded-xl text-xs hover:bg-black transition-all duration-300 hover:shadow-lg"
+                              onClick={() => openDevisModal(prestation)}
                             >
-                              <Camera className="h-3.5 w-3.5 mr-1.5" />
-                              Photos ({totalImages})
+                              <FileText className="h-3.5 w-3.5 mr-1.5" />
+                              FAIRE UN DEVIS
                             </Button>
-                          )}
-                          <Button
-                            className="text-white font-semibold bg-slate-900 py-2.5 px-4 rounded-xl text-xs hover:bg-black transition-all duration-300 hover:shadow-lg"
-                            onClick={() => openDevisModal(prestation)}
-                          >
-                            <FileText className="h-3.5 w-3.5 mr-1.5" />
-                            FAIRE UN DEVIS
-                          </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
-          {displayedPrestations.length === 0 && (
+          {displayedPrestations.length === 0 && !isLoadingServices && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 Aucune prestation trouvée pour votre recherche.
