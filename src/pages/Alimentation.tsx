@@ -36,6 +36,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
 
 // Composant Contact Modal
@@ -133,6 +134,7 @@ const Alimentation = () => {
   const [contactModalType, setContactModalType] = useState("contact");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [categoryCounts, setCategoryCounts] = useState({});
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -155,10 +157,13 @@ const Alimentation = () => {
         params.search = searchQuery;
       }
 
-      const response = await api.get("/products", { params });
+      const response = await api.get("/aliments", { params });
       setProducts(response.data.products);
     } catch (error) {
-      console.error("Erreur lors du chargement des produits:", error);
+      console.error(
+        "Erreur lors du chargement des produits alimentaires:",
+        error
+      );
     } finally {
       setIsLoading(false);
     }
@@ -166,10 +171,20 @@ const Alimentation = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get("/products/categories");
+      const response = await api.get("/aliments/categories");
       setCategories(response.data);
+
+      // Créer un objet avec les comptes par catégorie pour un accès facile
+      const counts = {};
+      response.data.forEach((cat) => {
+        counts[cat.name] = cat.count;
+      });
+      setCategoryCounts(counts);
     } catch (error) {
-      console.error("Erreur lors du chargement des catégories:", error);
+      console.error(
+        "Erreur lors du chargement des catégories alimentaires:",
+        error
+      );
     }
   };
 
@@ -196,6 +211,11 @@ const Alimentation = () => {
     setIsContactModalOpen(true);
   };
 
+  // Fonction pour obtenir le nombre de produits pour une catégorie
+  const getProductCount = (categoryName) => {
+    return categoryCounts[categoryName] || 0;
+  };
+
   // Données statiques pour les catégories alimentaires
   const fruitsCategories = [
     {
@@ -204,7 +224,6 @@ const Alimentation = () => {
       description: "Fruits de saison bio et locaux",
       image:
         "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 45,
     },
     {
       name: "Fruits Exotiques",
@@ -212,7 +231,6 @@ const Alimentation = () => {
       description: "Mangues, ananas, fruits de la passion",
       image:
         "https://images.unsplash.com/photo-1550253006-0754c2af5a4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 28,
     },
     {
       name: "Fruits Rouges",
@@ -220,7 +238,6 @@ const Alimentation = () => {
       description: "Fraises, framboises, myrtilles",
       image:
         "https://images.unsplash.com/photo-1577069861033-55d04ce4b9c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 32,
     },
     {
       name: "Agrumes",
@@ -228,7 +245,6 @@ const Alimentation = () => {
       description: "Oranges, citrons, pamplemousses",
       image:
         "https://images.unsplash.com/photo-1547514701-42782101795e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 25,
     },
   ];
 
@@ -239,7 +255,6 @@ const Alimentation = () => {
       description: "Légumes de saison bio et locaux",
       image:
         "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 52,
     },
     {
       name: "Légumes Racines",
@@ -247,7 +262,6 @@ const Alimentation = () => {
       description: "Carottes, pommes de terre, betteraves",
       image:
         "https://images.unsplash.com/photo-1598171707953-eb0be8d8b8e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 38,
     },
     {
       name: "Salades & Herbes",
@@ -255,7 +269,6 @@ const Alimentation = () => {
       description: "Laitues, basilic, persil, coriandre",
       image:
         "https://images.unsplash.com/photo-1595535873420-a5991951dbeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 41,
     },
     {
       name: "Légumes Anciens",
@@ -263,7 +276,6 @@ const Alimentation = () => {
       description: "Variétés rares et oubliées",
       image:
         "https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 19,
     },
   ];
 
@@ -274,7 +286,6 @@ const Alimentation = () => {
       description: "Lait, fromages, yaourts bio",
       image:
         "https://images.unsplash.com/photo-1566772940196-0e2e789813d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 67,
     },
     {
       name: "Boucherie",
@@ -282,7 +293,6 @@ const Alimentation = () => {
       description: "Viandes fraîches et volailles",
       image:
         "https://images.unsplash.com/photo-1604503468506-a8da13d82791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 48,
     },
     {
       name: "Poissonnerie",
@@ -290,7 +300,6 @@ const Alimentation = () => {
       description: "Poissons et fruits de mer frais",
       image:
         "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 35,
     },
     {
       name: "Épicerie Bio",
@@ -298,7 +307,6 @@ const Alimentation = () => {
       description: "Pâtes, riz, céréales bio",
       image:
         "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 89,
     },
     {
       name: "Boulangerie",
@@ -306,7 +314,6 @@ const Alimentation = () => {
       description: "Pains artisanaux et viennoiseries",
       image:
         "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 42,
     },
     {
       name: "Boissons",
@@ -314,7 +321,6 @@ const Alimentation = () => {
       description: "Jus, vins, boissons healthy",
       image:
         "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      count: 76,
     },
   ];
 
@@ -338,23 +344,32 @@ const Alimentation = () => {
     return icons[iconName] || Apple;
   };
 
-  // Filtrer les catégories basées sur la recherche
+  // Filtrer les catégories basées sur la recherche et exclure celles avec 0 produit
   const filteredFruits = fruitsCategories.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) &&
+      getProductCount(category.name) > 0
   );
 
   const filteredLegumes = legumesCategories.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) &&
+      getProductCount(category.name) > 0
   );
 
   const filteredAutres = autresCategories.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) &&
+      getProductCount(category.name) > 0
   );
 
   return (
@@ -460,211 +475,235 @@ const Alimentation = () => {
             </div>
           </div>
 
-          {/* Section Fruits */}
-          <div
-            className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-            id="fruits"
-          >
-            <div
-              className="flex items-center gap-4 mb-8 animate-slide-from-left"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                <Apple className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                  Fruits Frais
-                </h2>
-                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Sélection des meilleurs fruits de saison, bio et locaux
-                </p>
+          {/* Affichage des résultats de recherche */}
+          {searchQuery && products.length > 0 && (
+            <div className="mb-12 animate-fade-in">
+              <h2 className="text-3xl font-bold mb-6">
+                Résultats pour "{searchQuery}"
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products
+                  .filter((product) => product.id !== 0)
+                  .map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={addToCart}
+                      user={user}
+                    />
+                  ))}
               </div>
             </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredFruits.map((category, index) => {
-                const IconComponent = getIconByName(category.iconName);
+          {/* Section Fruits */}
+          {filteredFruits.length > 0 && (
+            <div
+              className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
+              id="fruits"
+            >
+              <div
+                className="flex items-center gap-4 mb-8 animate-slide-from-left"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <Apple className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    Fruits Frais
+                  </h2>
+                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    Sélection des meilleurs fruits de saison, bio et locaux
+                  </p>
+                </div>
+              </div>
 
-                return (
-                  <Card
-                    key={category.name}
-                    className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                    style={{
-                      animationDelay: `${0.3 + index * 0.1}s`,
-                    }}
-                  >
-                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                        <Badge className="bg-[#00C2A8] text-white">
-                          {category.count} produit
-                          {category.count !== 1 ? "s" : ""}
-                        </Badge>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
-                      {category.description}
-                    </p>
-                    <Button
-                      className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                      onClick={() => handleCategoryClick(category, "fruits")}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredFruits.map((category, index) => {
+                  const IconComponent = getIconByName(category.iconName);
+                  const productCount = getProductCount(category.name);
+
+                  return (
+                    <Card
+                      key={category.name}
+                      className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
+                      style={{
+                        animationDelay: `${0.3 + index * 0.1}s`,
+                      }}
                     >
-                      <>
+                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
+                          <Badge className="bg-[#00C2A8] text-white">
+                            {productCount} produit
+                            {productCount !== 1 ? "s" : ""}
+                          </Badge>
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <Button
+                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                        onClick={() => handleCategoryClick(category, "fruits")}
+                      >
                         Explorer
                         <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </>
-                    </Button>
-                  </Card>
-                );
-              })}
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section Légumes */}
-          <div
-            className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-            id="legumes"
-          >
+          {filteredLegumes.length > 0 && (
             <div
-              className="flex items-center gap-4 mb-8 animate-slide-from-right"
-              style={{ animationDelay: "0.4s" }}
+              className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
+              id="legumes"
             >
-              <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                <Carrot className="h-8 w-8 text-white" />
+              <div
+                className="flex items-center gap-4 mb-8 animate-slide-from-right"
+                style={{ animationDelay: "0.4s" }}
+              >
+                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <Carrot className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    Légumes & Herbes
+                  </h2>
+                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    Légumes frais, herbes aromatiques et produits du potager
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                  Légumes & Herbes
-                </h2>
-                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Légumes frais, herbes aromatiques et produits du potager
-                </p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredLegumes.map((category, index) => {
-                const IconComponent = getIconByName(category.iconName);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredLegumes.map((category, index) => {
+                  const IconComponent = getIconByName(category.iconName);
+                  const productCount = getProductCount(category.name);
 
-                return (
-                  <Card
-                    key={category.name}
-                    className="group p-6 border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
-                    style={{
-                      animationDelay: `${0.5 + index * 0.1}s`,
-                    }}
-                  >
-                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                        <Badge className="bg-[#00C2A8] text-white">
-                          {category.count} produit
-                          {category.count !== 1 ? "s" : ""}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                      {category.description}
-                    </p>
-                    <Button
-                      className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                      onClick={() => handleCategoryClick(category, "légumes")}
+                  return (
+                    <Card
+                      key={category.name}
+                      className="group p-6 border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
+                      style={{
+                        animationDelay: `${0.5 + index * 0.1}s`,
+                      }}
                     >
-                      <>
+                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
+                          <Badge className="bg-[#00C2A8] text-white">
+                            {productCount} produit
+                            {productCount !== 1 ? "s" : ""}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <Button
+                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                        onClick={() => handleCategoryClick(category, "légumes")}
+                      >
                         Explorer
                         <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </>
-                    </Button>
-                  </Card>
-                );
-              })}
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section Autres Produits */}
-          <div
-            className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-            id="autres"
-          >
+          {filteredAutres.length > 0 && (
             <div
-              className="flex items-center gap-4 mb-8 animate-scale-up"
-              style={{ animationDelay: "0.6s" }}
+              className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
+              id="autres"
             >
-              <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                <ShoppingCart className="h-8 w-8 text-white" />
+              <div
+                className="flex items-center gap-4 mb-8 animate-scale-up"
+                style={{ animationDelay: "0.6s" }}
+              >
+                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <ShoppingCart className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    Épicerie & Autres
+                  </h2>
+                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    Produits laitiers, boucherie, poissonnerie et épicerie fine
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                  Épicerie & Autres
-                </h2>
-                <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                  Produits laitiers, boucherie, poissonnerie et épicerie fine
-                </p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAutres.map((category, index) => {
-                const IconComponent = getIconByName(category.iconName);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredAutres.map((category, index) => {
+                  const IconComponent = getIconByName(category.iconName);
+                  const productCount = getProductCount(category.name);
 
-                return (
-                  <Card
-                    key={category.name}
-                    className="group p-6 border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
-                    style={{
-                      animationDelay: `${0.7 + index * 0.1}s`,
-                    }}
-                  >
-                    <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                        <Badge className="bg-[#00C2A8] text-white">
-                          {category.count} produit
-                          {category.count !== 1 ? "s" : ""}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                      {category.description}
-                    </p>
-                    <Button
-                      className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                      onClick={() => handleCategoryClick(category, "autres")}
+                  return (
+                    <Card
+                      key={category.name}
+                      className="group p-6 border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
+                      style={{
+                        animationDelay: `${0.7 + index * 0.1}s`,
+                      }}
                     >
-                      <>
+                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
+                          <Badge className="bg-[#00C2A8] text-white">
+                            {productCount} produit
+                            {productCount !== 1 ? "s" : ""}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <Button
+                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                        onClick={() => handleCategoryClick(category, "autres")}
+                      >
                         Explorer
                         <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </>
-                    </Button>
-                  </Card>
-                );
-              })}
+                      </Button>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section CTA */}
           <div
