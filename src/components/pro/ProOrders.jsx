@@ -19,7 +19,9 @@ import {
   Tag,
   BarChart3,
   Utensils,
-  Box
+  Box,
+  RefreshCw,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +30,12 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import api from '@/lib/api';
 import ProOrderDetailsModal from './ProOrderDetailsModal';
 
@@ -40,6 +48,7 @@ const ProOrders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [productTypeStats, setProductTypeStats] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   
   const [stats, setStats] = useState({
     total: 0,
@@ -53,6 +62,56 @@ const ProOrders = () => {
     monthlyRevenue: 0,
     thisWeek: 0
   });
+
+  // Ordre des statuts (workflow)
+  const STATUS_WORKFLOW = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+  const STATUS_CANCELLED = 'cancelled';
+
+  // Configuration des statuts
+  const STATUS_CONFIG = {
+    pending: { 
+      label: 'En attente', 
+      variant: 'secondary', 
+      icon: Clock,
+      nextLabel: 'Confirmer',
+      nextStatus: 'confirmed'
+    },
+    confirmed: { 
+      label: 'Confirmée', 
+      variant: 'default', 
+      icon: CheckCircle,
+      nextLabel: 'Commencer le traitement',
+      nextStatus: 'processing'
+    },
+    processing: { 
+      label: 'En traitement', 
+      variant: 'default', 
+      icon: Package,
+      nextLabel: 'Expédier',
+      nextStatus: 'shipped'
+    },
+    shipped: { 
+      label: 'Expédiée', 
+      variant: 'default', 
+      icon: Truck,
+      nextLabel: 'Marquer comme livrée',
+      nextStatus: 'delivered'
+    },
+    delivered: { 
+      label: 'Livrée', 
+      variant: 'success', 
+      icon: CheckCircle,
+      nextLabel: null,
+      nextStatus: null
+    },
+    cancelled: { 
+      label: 'Annulée', 
+      variant: 'destructive', 
+      icon: XCircle,
+      nextLabel: null,
+      nextStatus: null
+    }
+  };
 
   // Fonction pour déclencher la mise à jour des notifications
   const triggerNotificationsUpdate = () => {
@@ -86,13 +145,18 @@ const ProOrders = () => {
   };
 
   // CORRIGÉ : Charger les commandes du pro avec une seule route
-  const fetchOrders = async (productType = 'all') => {
+  const fetchOrders = async (productType = 'all', status = 'all') => {
     try {
       setLoading(true);
-      console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${statusFilter})...`);
+      console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${status})...`);
       
-      // Utiliser une seule route avec paramètres productType et status
-      const response = await api.get(`/orders/pro?productType=${productType}&status=${statusFilter}`);
+      // Construire les paramètres de requête
+      const params = new URLSearchParams();
+      if (productType !== 'all') params.append('productType', productType);
+      if (status !== 'all') params.append('status', status);
+      
+      // Utiliser une seule route avec paramètres
+      const response = await api.get(`/orders/pro?${params.toString()}`);
       
       console.log('✅ Commandes reçues:', response.data);
       
@@ -100,7 +164,7 @@ const ProOrders = () => {
         setOrders(response.data.orders || []);
         
         // Charger les stats seulement pour l'onglet "all"
-        if (productType === 'all') {
+        if (productType === 'all' && status === 'all') {
           await fetchStats();
         }
         
@@ -117,17 +181,25 @@ const ProOrders = () => {
       setOrders([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  // Chargement initial
   useEffect(() => {
-    fetchOrders();
+    fetchOrders('all', 'all');
   }, []);
 
   // Recharger les commandes quand les filtres changent
   useEffect(() => {
-    fetchOrders(activeTab);
+    fetchOrders(activeTab, statusFilter);
   }, [activeTab, statusFilter]);
+
+  // Fonction de rafraîchissement manuel
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchOrders(activeTab, statusFilter);
+  };
 
   // Mettre à jour le statut d'une commande
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -138,8 +210,8 @@ const ProOrders = () => {
       
       if (response.data.success) {
         console.log('✅ Statut mis à jour avec succès');
-        // Recharger les commandes selon l'onglet actif
-        fetchOrders(activeTab);
+        // Recharger les données actuelles sans changer les filtres
+        fetchOrders(activeTab, statusFilter);
         
         // Déclencher la mise à jour des notifications
         triggerNotificationsUpdate();
@@ -151,7 +223,78 @@ const ProOrders = () => {
     }
   };
 
-  // Filtrer les commandes (pour la recherche)
+  // CORRIGÉ : Obtenir les actions disponibles selon le statut actuel
+  const getAvailableActions = (order) => {
+    if (!order || order.status === STATUS_CANCELLED || order.status === 'delivered') {
+      return []; // Aucune action possible si annulé ou livré
+    }
+
+    const currentStatusConfig = STATUS_CONFIG[order.status];
+    const actions = [];
+
+    // Toujours permettre l'annulation sauf pour les commandes livrées
+    if (order.status !== 'delivered') {
+      actions.push({
+        label: 'Annuler la commande',
+        action: () => updateOrderStatus(order.id, STATUS_CANCELLED),
+        variant: 'destructive',
+        type: 'cancel',
+        icon: XCircle
+      });
+    }
+
+    // Ajouter l'action suivante dans le workflow
+    if (currentStatusConfig.nextStatus) {
+      actions.push({
+        label: currentStatusConfig.nextLabel,
+        action: () => updateOrderStatus(order.id, currentStatusConfig.nextStatus),
+        variant: 'default',
+        type: 'next',
+        icon: CheckCircle
+      });
+    }
+
+    return actions;
+  };
+
+  // Obtenir tous les statuts disponibles pour le dropdown (inclut l'annulation)
+  const getAvailableStatuses = (order) => {
+    if (!order) return [];
+
+    const currentStatus = order.status;
+    const currentIndex = STATUS_WORKFLOW.indexOf(currentStatus);
+    const statuses = [];
+
+    // Si la commande est annulée ou livrée, aucun changement possible
+    if (currentStatus === STATUS_CANCELLED || currentStatus === 'delivered') {
+      return [];
+    }
+
+    // Ajouter les statuts suivants dans le workflow
+    for (let i = currentIndex + 1; i < STATUS_WORKFLOW.length; i++) {
+      const status = STATUS_WORKFLOW[i];
+      const config = STATUS_CONFIG[status];
+      statuses.push({
+        value: status,
+        label: `Marquer comme ${config.label.toLowerCase()}`,
+        description: `Passer la commande au statut "${config.label}"`,
+        icon: config.icon
+      });
+    }
+
+    // Toujours permettre l'annulation
+    statuses.push({
+      value: STATUS_CANCELLED,
+      label: 'Annuler la commande',
+      description: 'Annuler définitivement cette commande',
+      icon: XCircle,
+      destructive: true
+    });
+
+    return statuses;
+  };
+
+  // Filtrer les commandes (pour la recherche côté client)
   const filteredOrders = orders.filter(order => {
     if (!order) return false;
     
@@ -166,16 +309,7 @@ const ProOrders = () => {
 
   // Obtenir la couleur du badge selon le statut
   const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { label: 'En attente', variant: 'secondary', icon: Clock },
-      confirmed: { label: 'Confirmée', variant: 'default', icon: CheckCircle },
-      processing: { label: 'En traitement', variant: 'default', icon: Package },
-      shipped: { label: 'Expédiée', variant: 'default', icon: Truck },
-      delivered: { label: 'Livrée', variant: 'success', icon: CheckCircle },
-      cancelled: { label: 'Annulée', variant: 'destructive', icon: XCircle }
-    };
-    
-    const config = statusConfig[status] || { label: status, variant: 'secondary', icon: Clock };
+    const config = STATUS_CONFIG[status] || { label: status, variant: 'secondary', icon: Clock };
     const IconComponent = config.icon;
     
     return (
@@ -222,63 +356,9 @@ const ProOrders = () => {
   const getProductTypeLabel = (productType) => {
     const labels = {
       'food': 'Alimentation',
-      'general': 'Materiaux Générales'
+      'general': 'Materiaux Généraux'
     };
     return labels[productType] || productType;
-  };
-
-  // Actions rapides selon le statut
-  const getQuickActions = (order) => {
-    if (!order) return [];
-    
-    const actions = [];
-    
-    if (order.status === 'pending') {
-      actions.push(
-        {
-          label: 'Confirmer',
-          action: () => updateOrderStatus(order.id, 'confirmed'),
-          variant: 'default'
-        },
-        {
-          label: 'Annuler',
-          action: () => updateOrderStatus(order.id, 'cancelled'),
-          variant: 'destructive'
-        }
-      );
-    }
-    
-    if (order.status === 'confirmed') {
-      actions.push(
-        {
-          label: 'Commencer traitement',
-          action: () => updateOrderStatus(order.id, 'processing'),
-          variant: 'default'
-        }
-      );
-    }
-    
-    if (order.status === 'processing') {
-      actions.push(
-        {
-          label: 'Expédier',
-          action: () => updateOrderStatus(order.id, 'shipped'),
-          variant: 'default'
-        }
-      );
-    }
-    
-    if (order.status === 'shipped') {
-      actions.push(
-        {
-          label: 'Marquer livrée',
-          action: () => updateOrderStatus(order.id, 'delivered'),
-          variant: 'success'
-        }
-      );
-    }
-
-    return actions;
   };
 
   // Ouvrir les détails d'une commande
@@ -312,9 +392,71 @@ const ProOrders = () => {
     return `Il y a ${Math.floor(diffInHours / 168)}sem`;
   };
 
+  // Gérer le changement d'onglet
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Réinitialiser le filtre de statut quand on change d'onglet
+    setStatusFilter('all');
+  };
+
+  // Composant Dropdown pour les statuts
+  const StatusDropdown = ({ order }) => {
+    const availableStatuses = getAvailableStatuses(order);
+    const currentStatusConfig = STATUS_CONFIG[order.status];
+
+    if (availableStatuses.length === 0) {
+      return (
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <currentStatusConfig.icon className="h-4 w-4" />
+          {currentStatusConfig.label}
+        </div>
+      );
+    }
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <span>Changer le statut</span>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64">
+          <div className="p-2 border-b">
+            <div className="text-sm font-medium">Statut actuel</div>
+            <div className="flex items-center gap-2 mt-1">
+              <currentStatusConfig.icon className="h-4 w-4" />
+              <span className="text-sm">{currentStatusConfig.label}</span>
+            </div>
+          </div>
+          {availableStatuses.map((status, index) => {
+            const IconComponent = status.icon;
+            return (
+              <DropdownMenuItem
+                key={index}
+                onClick={() => updateOrderStatus(order.id, status.value)}
+                className={`flex items-center gap-3 p-3 cursor-pointer ${
+                  status.destructive 
+                    ? 'text-red-600 hover:bg-red-50 hover:text-red-700' 
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <IconComponent className="h-4 w-4" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{status.label}</span>
+                  <span className="text-xs text-gray-500">{status.description}</span>
+                </div>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   // Composant Carte pour mobile
   const OrderCard = ({ order }) => {
-    const quickActions = getQuickActions(order);
+    const availableActions = getAvailableActions(order);
     const dateInfo = formatDate(order.createdAt);
     const statusBorderColor = getStatusBorderColor(order.status);
 
@@ -416,27 +558,10 @@ const ProOrders = () => {
               Détails
             </Button>
             
-            {/* Actions rapides */}
-            {quickActions.length > 0 && (
-              <Select
-                value={order.status}
-                onValueChange={(newStatus) => updateOrderStatus(order.id, newStatus)}
-              >
-                <SelectTrigger className="flex-1 text-xs h-9">
-                  <SelectValue placeholder="Action" />
-                </SelectTrigger>
-                <SelectContent>
-                  {quickActions.map((action, index) => (
-                    <SelectItem key={index} value={action.variant === 'destructive' ? 'cancelled' : 
-                      action.label.includes('Confirmer') ? 'confirmed' :
-                      action.label.includes('traitement') ? 'processing' :
-                      action.label.includes('Expédier') ? 'shipped' : 'delivered'}>
-                      {action.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            {/* Dropdown pour changer le statut */}
+            <div className="flex-1">
+              <StatusDropdown order={order} />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -465,8 +590,15 @@ const ProOrders = () => {
             Gérez et suivez toutes les commandes de votre boutique
           </p>
         </div>
-        <Button onClick={() => fetchOrders(activeTab)} variant="outline" size="sm" className="w-full sm:w-auto">
-          Actualiser
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline" 
+          size="sm" 
+          className="w-full sm:w-auto"
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Actualisation...' : 'Actualiser'}
         </Button>
       </div>
 
@@ -571,7 +703,7 @@ const ProOrders = () => {
       {/* Navigation par types de produits */}
       <Card>
         <CardContent className="p-4 lg:p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mb-4">
               <TabsTrigger value="all" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
@@ -658,7 +790,7 @@ const ProOrders = () => {
               <p className="text-gray-600 mb-4">
                 {loading ? 'Chargement en cours...' : 'Aucune commande n\'a été trouvée dans la base de données.'}
               </p>
-              <Button onClick={() => fetchOrders(activeTab)} variant="outline">
+              <Button onClick={handleRefresh} variant="outline">
                 Réessayer
               </Button>
             </div>
@@ -688,7 +820,6 @@ const ProOrders = () => {
                       </TableRow>
                     ) : (
                       filteredOrders.map((order) => {
-                        const quickActions = getQuickActions(order);
                         const dateInfo = formatDate(order.createdAt);
                         const productTypes = [...new Set(order.items?.map(item => item.productType).filter(Boolean))];
                         
@@ -738,26 +869,7 @@ const ProOrders = () => {
                               €{(order.totalAmount || 0).toFixed(2)}
                             </TableCell>
                             <TableCell>
-                              <Select
-                                value={order.status || 'pending'}
-                                onValueChange={(newStatus) => 
-                                  updateOrderStatus(order.id, newStatus)
-                                }
-                              >
-                                <SelectTrigger className="w-36">
-                                  <SelectValue>
-                                    {getStatusBadge(order.status)}
-                                  </SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">En attente</SelectItem>
-                                  <SelectItem value="confirmed">Confirmée</SelectItem>
-                                  <SelectItem value="processing">En traitement</SelectItem>
-                                  <SelectItem value="shipped">Expédiée</SelectItem>
-                                  <SelectItem value="delivered">Livrée</SelectItem>
-                                  <SelectItem value="cancelled">Annulée</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              {getStatusBadge(order.status)}
                             </TableCell>
                             <TableCell className="text-sm">
                               {order.createdAt ? (
@@ -783,22 +895,8 @@ const ProOrders = () => {
                                   Détails
                                 </Button>
                                 
-                                {/* Actions rapides */}
-                                {quickActions.length > 0 && (
-                                  <div className="flex flex-col gap-1">
-                                    {quickActions.map((action, index) => (
-                                      <Button
-                                        key={index}
-                                        variant={action.variant}
-                                        size="sm"
-                                        onClick={action.action}
-                                        className="text-xs h-7"
-                                      >
-                                        {action.label}
-                                      </Button>
-                                    ))}
-                                  </div>
-                                )}
+                                {/* Dropdown pour changer le statut */}
+                                <StatusDropdown order={order} />
                               </div>
                             </TableCell>
                           </TableRow>
