@@ -35,7 +35,10 @@ const Cart = ({ isOpen, onClose }) => {
 
   // Vérifier l'authentification quand le panier s'ouvre
   useEffect(() => {
-    checkAuthentication();
+    if (isOpen) {
+      console.log("🛒 [CART] - Ouverture du panier, vérification auth...");
+      checkAuthentication();
+    }
   }, [isOpen]);
 
   // Fonction pour vérifier l'authentification
@@ -44,23 +47,35 @@ const Cart = ({ isOpen, onClose }) => {
       const token = localStorage.getItem("auth-token");
       const userData = localStorage.getItem("user-data");
 
+      console.log("🔍 [CART AUTH] - Vérification détaillée:");
+      console.log("📍 Token:", token);
+      console.log("📍 UserData:", userData);
+      console.log("📍 Panier items:", cartItems?.length || 0);
+
       if (token && token !== "null" && token !== "undefined") {
         setIsAuthenticated(true);
+        console.log("✅ [CART AUTH] - Utilisateur authentifié");
+
         if (userData && userData !== "null" && userData !== "undefined") {
           try {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
+            console.log("👤 [CART AUTH] - Données utilisateur:", parsedUser);
           } catch (error) {
+            console.error("❌ [CART AUTH] - Erreur parsing user data:", error);
             setUser({ firstName: "Utilisateur", lastName: "" });
           }
         } else {
+          console.log("⚠️ [CART AUTH] - Données utilisateur manquantes");
           setUser({ firstName: "Utilisateur", lastName: "" });
         }
       } else {
+        console.log("❌ [CART AUTH] - Aucun token valide - Utilisateur non authentifié");
         setIsAuthenticated(false);
         setUser(null);
       }
     } catch (error) {
+      console.error("💥 [CART AUTH] - Erreur lors de la vérification auth:", error);
       setIsAuthenticated(false);
       setUser(null);
     }
@@ -126,6 +141,7 @@ const Cart = ({ isOpen, onClose }) => {
 
   // Rediriger vers la page de connexion
   const redirectToLogin = () => {
+    console.log("🔐 [CART] - Redirection vers login");
     onClose();
     window.location.href = "/login";
   };
@@ -134,16 +150,19 @@ const Cart = ({ isOpen, onClose }) => {
   const validateCartBeforeCheckout = async () => {
     try {
       setValidationErrors([]);
+      console.log("🛒 [CART VALIDATION] - Validation du panier...");
       const validationResult = await validateCart(localCartItems);
 
       if (validationResult.errors && validationResult.errors.length > 0) {
+        console.log("❌ [CART VALIDATION] - Erreurs de validation:", validationResult.errors);
         setValidationErrors(validationResult.errors);
         return false;
       }
 
+      console.log("✅ [CART VALIDATION] - Panier valide");
       return true;
     } catch (error) {
-      console.error("Erreur validation panier:", error);
+      console.error("💥 [CART VALIDATION] - Erreur validation panier:", error);
       setValidationErrors([error.message]);
       return false;
     }
@@ -152,6 +171,8 @@ const Cart = ({ isOpen, onClose }) => {
   // Créer une commande
   const createOrder = async () => {
     try {
+      console.log("📦 [CART ORDER] - Création de commande...");
+      
       const orderData = {
         items: localCartItems.map((item) => ({
           productId: item.id,
@@ -164,10 +185,22 @@ const Cart = ({ isOpen, onClose }) => {
         paymentMethod: "card",
       };
 
+      console.log("📦 [CART ORDER] - Données de commande:", {
+        itemsCount: orderData.items.length,
+        total: calculateTotal(),
+        userAuthenticated: isAuthenticated,
+        user: user
+      });
+
       const response = await api.post("/orders", orderData);
+      console.log("✅ [CART ORDER] - Commande créée avec succès:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Erreur création commande:", error);
+      console.error("💥 [CART ORDER] - Erreur création commande:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       throw new Error(
         error.response?.data?.message ||
           "Erreur lors de la création de la commande"
@@ -177,28 +210,40 @@ const Cart = ({ isOpen, onClose }) => {
 
   // Commander
   const handleCheckout = async () => {
+    console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
+    console.log("🔐 [CART CHECKOUT] - Statut auth avant vérification:", isAuthenticated);
+    console.log("👤 [CART CHECKOUT] - Utilisateur avant vérification:", user);
+
     // Re-vérifier l'authentification avant de commander
     checkAuthentication();
 
+    console.log("🔐 [CART CHECKOUT] - Statut auth après vérification:", isAuthenticated);
+    console.log("👤 [CART CHECKOUT] - Utilisateur après vérification:", user);
+
     if (!isAuthenticated) {
+      console.log("❌ [CART CHECKOUT] - Utilisateur non authentifié, redirection vers login");
       toast.error("❌ Veuillez vous connecter pour passer commande");
       redirectToLogin();
       return;
     }
 
+    console.log("✅ [CART CHECKOUT] - Utilisateur authentifié, validation du panier...");
+
     // Valider le panier d'abord
     const isValid = await validateCartBeforeCheckout();
     if (!isValid) {
+      console.log("❌ [CART CHECKOUT] - Panier invalide, arrêt du processus");
       return;
     }
 
+    console.log("✅ [CART CHECKOUT] - Panier valide, création de commande...");
     setIsCheckingOut(true);
 
     try {
       // Créer la commande réelle
       const orderResult = await createOrder();
 
-      console.log("✅ Commande créée:", orderResult);
+      console.log("✅ [CART CHECKOUT] - Commande créée avec succès:", orderResult);
 
       // Vider le panier
       handleClearCart();
@@ -215,11 +260,15 @@ const Cart = ({ isOpen, onClose }) => {
             ).toFixed(2)}`
         )
         .join("\n");
+      
       toast.info(
         `Commande #${orderResult.order.orderNumber} passée avec succès !`
       );
+      
+      console.log("🎉 [CART CHECKOUT] - Processus de commande terminé avec succès");
+
     } catch (error) {
-      console.error("💥 Erreur lors de la commande:", error);
+      console.error("💥 [CART CHECKOUT] - Erreur lors de la commande:", error);
 
       // Gestion spécifique des erreurs de stock
       if (error.response?.data?.errors) {
@@ -234,6 +283,30 @@ const Cart = ({ isOpen, onClose }) => {
     } finally {
       setIsCheckingOut(false);
     }
+  };
+
+  // Test manuel d'authentification
+  const testAuthManually = () => {
+    console.log("=== 🧪 TEST MANUEL AUTHENTIFICATION ===");
+    const token = localStorage.getItem("auth-token");
+    const userData = localStorage.getItem("user-data");
+    
+    console.log("🔑 Token:", token);
+    console.log("👤 UserData:", userData);
+    console.log("✅ isAuthenticated:", isAuthenticated);
+    console.log("👤 User state:", user);
+    console.log("📍 Cart items:", localCartItems.length);
+    
+    // Test API direct
+    api.get("/orders/test/auth")
+      .then(response => {
+        console.log("✅ Test API Auth réussi:", response.data);
+        toast.success("Test API Auth réussi - voir console");
+      })
+      .catch(error => {
+        console.error("❌ Test API Auth échoué:", error);
+        toast.error("Test API Auth échoué - voir console");
+      });
   };
 
   if (!isOpen) return null;
@@ -312,6 +385,23 @@ const Cart = ({ isOpen, onClose }) => {
                   </Button>
                 </div>
               )}
+
+              {/* Indication de statut d'authentification */}
+              <div className={`p-3 rounded-lg text-sm ${
+                isAuthenticated 
+                  ? 'bg-green-50 border border-green-200 text-green-800' 
+                  : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+              }`}>
+                {isAuthenticated ? (
+                  <div>
+                    <strong>✅ Connecté en tant que:</strong> {user?.firstName} {user?.lastName}
+                  </div>
+                ) : (
+                  <div>
+                    <strong>⚠️ Non connecté:</strong> Veuillez vous connecter pour commander
+                  </div>
+                )}
+              </div>
 
               {items.map((item) => (
                 <Card key={item.id} className="p-4 bg-white shadow-sm">
@@ -430,14 +520,15 @@ const Cart = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Indication de connexion */}
-            {!isAuthenticated && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-yellow-800 text-sm text-center">
-                  Connectez-vous pour passer commande
-                </p>
-              </div>
-            )}
+            {/* Bouton de test debug */}
+            <Button
+              variant="outline"
+              className="w-full border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
+              onClick={testAuthManually}
+            >
+              🧪 Tester l'Authentification
+            </Button>
+
             {/* Actions */}
             <div className="space-y-3">
               <Button
