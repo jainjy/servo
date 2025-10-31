@@ -47,20 +47,16 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className='flex px-10 justify-between mt-10'>
-       <div className=" text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
-        </div>
-       {/* {<button>
-          <Link to={"/publicite"}>
-            <span className='text-sm font-bold underline text-slate-600'>
-              Publicité
-            </span>
+      <div className="text-center text-gray-500 text-sm">
+      &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
+      <Link
+       to="/cookies"
+       className="ml-4 underline text-slate-400 hover:text-white transition"
+       >
+       Cookies
+      </Link>
+</div>
 
-          </Link>
-        </button>} */}
-        
-      </div>
 
 
     </footer>
