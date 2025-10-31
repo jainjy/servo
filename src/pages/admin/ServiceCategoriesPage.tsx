@@ -5,10 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ArrowLeft, List, Tag } from "lucide-react";
 import { CategoryModal } from "@/components/admin/services/category-modal";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { AssignCategoryModal } from "./assign-category-modal";
 
 interface Category {
   id: number;
@@ -18,18 +19,35 @@ interface Category {
   };
 }
 
+interface Service {
+  id: number;
+  libelle: string;
+  categoryId: number | null;
+  description?: string;
+  _count?: {
+    metiers: number;
+    users: number;
+  };
+}
+
 export default function ServiceCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [servicesWithoutCategory, setServicesWithoutCategory] = useState<
+    Service[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
     Category | undefined
   >();
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [loading, setLoading] = useState(true);
+  const [servicesLoading, setServicesLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
+    fetchServicesWithoutCategory();
   }, []);
 
   const fetchCategories = async () => {
@@ -40,6 +58,21 @@ export default function ServiceCategoriesPage() {
       console.error("Erreur lors du chargement des catégories:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchServicesWithoutCategory = async () => {
+    try {
+      setServicesLoading(true);
+      const response = await api.get("/services/without-category");
+      setServicesWithoutCategory(response.data);
+    } catch (error) {
+      console.error(
+        "Erreur lors du chargement des services sans catégorie:",
+        error
+      );
+    } finally {
+      setServicesLoading(false);
     }
   };
 
@@ -70,7 +103,9 @@ export default function ServiceCategoriesPage() {
 
     try {
       await api.delete(`/categories/${category.id}`);
-      await fetchCategories(); // Recharger la liste
+      await fetchCategories();
+      await fetchServicesWithoutCategory();
+      toast.success("Catégorie supprimée avec succès");
     } catch (error: any) {
       console.error("Erreur lors de la suppression:", error);
       toast.error(
@@ -81,7 +116,14 @@ export default function ServiceCategoriesPage() {
 
   const handleCategoryUpdated = () => {
     fetchCategories();
+    fetchServicesWithoutCategory();
     setIsModalOpen(false);
+  };
+
+  const handleCategoryAssigned = () => {
+    fetchCategories();
+    fetchServicesWithoutCategory();
+    setIsAssignModalOpen(false);
   };
 
   if (loading) {
@@ -127,15 +169,86 @@ export default function ServiceCategoriesPage() {
           </div>
         </div>
 
-        <Button
-          onClick={handleCreate}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle catégorie
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsAssignModalOpen(true)}
+            variant="outline"
+            className="border-border hover:bg-accent"
+          >
+            <Tag className="mr-2 h-4 w-4" />
+            Assigner des catégories
+          </Button>
+          <Button
+            onClick={handleCreate}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle catégorie
+          </Button>
+        </div>
       </div>
 
+      {/* Section Services sans catégorie */}
+      {servicesWithoutCategory.length > 0 && (
+        <Card className="bg-card border-border border-yellow-200">
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Tag className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  Services sans catégorie
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {servicesWithoutCategory.length} service(s) n'ont pas encore
+                  de catégorie assignée
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {servicesWithoutCategory.slice(0, 6).map((service) => (
+                <div
+                  key={service.id}
+                  className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200"
+                >
+                  <span className="text-sm font-medium text-yellow-800">
+                    {service.libelle}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-100 text-yellow-800 border-yellow-300"
+                  >
+                    Sans catégorie
+                  </Badge>
+                </div>
+              ))}
+              {servicesWithoutCategory.length > 6 && (
+                <div className="p-3 text-center">
+                  <span className="text-sm text-muted-foreground">
+                    + {servicesWithoutCategory.length - 6} autre(s) service(s)
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <Button
+                onClick={() => setIsAssignModalOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+              >
+                <Tag className="mr-2 h-4 w-4" />
+                Assigner les catégories
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Recherche et liste des catégories */}
       <Card className="bg-card border-border">
         <div className="p-6">
           <div className="flex items-center gap-4">
@@ -210,12 +323,21 @@ export default function ServiceCategoriesPage() {
         </div>
       </Card>
 
+      {/* Modales */}
       <CategoryModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         category={selectedCategory}
         mode={modalMode}
         onCategoryUpdated={handleCategoryUpdated}
+      />
+
+      <AssignCategoryModal
+        open={isAssignModalOpen}
+        onOpenChange={setIsAssignModalOpen}
+        categories={categories}
+        servicesWithoutCategory={servicesWithoutCategory}
+        onCategoryAssigned={handleCategoryAssigned}
       />
     </div>
   );

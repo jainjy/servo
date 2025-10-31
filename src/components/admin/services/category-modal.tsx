@@ -56,6 +56,11 @@ export function CategoryModal({
       }
 
       onCategoryUpdated();
+      toast.success(
+        mode === "create"
+          ? "Catégorie créée avec succès"
+          : "Catégorie modifiée avec succès"
+      );
       onOpenChange(false);
     } catch (error: any) {
       console.error("Erreur lors de la sauvegarde:", error);

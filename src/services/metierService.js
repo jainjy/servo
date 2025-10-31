@@ -1,14 +1,17 @@
-// src/services/metierService.js
-import api from '../lib/api';
+// src/services/metierService.js (updated)
+import api from "../lib/api";
 
 class MetierService {
   // Récupérer tous les métiers
   async getAllMetiers() {
     try {
-      const response = await api.get('/metiers');
+      const response = await api.get("/metiers");
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la récupération des métiers');
+      throw new Error(
+        error.response?.data?.message ||
+          "Erreur lors de la récupération des métiers"
+      );
     }
   }
 
@@ -18,17 +21,22 @@ class MetierService {
       const response = await api.get(`/metiers/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la récupération du métier');
+      throw new Error(
+        error.response?.data?.message ||
+          "Erreur lors de la récupération du métier"
+      );
     }
   }
 
   // Créer un nouveau métier
   async createMetier(metierData) {
     try {
-      const response = await api.post('/metiers', metierData);
+      const response = await api.post("/metiers", metierData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la création du métier');
+      throw new Error(
+        error.response?.data?.message || "Erreur lors de la création du métier"
+      );
     }
   }
 
@@ -38,7 +46,10 @@ class MetierService {
       const response = await api.put(`/metiers/${id}`, metierData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la mise à jour du métier');
+      throw new Error(
+        error.response?.data?.message ||
+          "Erreur lors de la mise à jour du métier"
+      );
     }
   }
 
@@ -48,17 +59,23 @@ class MetierService {
       const response = await api.delete(`/metiers/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la suppression du métier');
+      throw new Error(
+        error.response?.data?.message ||
+          "Erreur lors de la suppression du métier"
+      );
     }
   }
 
   // Récupérer les statistiques des métiers
   async getMetiersStats() {
     try {
-      const response = await api.get('/metiers/stats');
+      const response = await api.get("/metiers/stats");
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Erreur lors de la récupération des statistiques');
+      throw new Error(
+        error.response?.data?.message ||
+          "Erreur lors de la récupération des statistiques"
+      );
     }
   }
 }

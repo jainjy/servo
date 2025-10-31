@@ -9,6 +9,7 @@ import {
   MessageCircle,
   FileCheck,
   Ruler,
+  Tag,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
@@ -19,13 +20,18 @@ const navigation = [
   // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Services", href: "/admin/services", icon: Wrench },
+  {
+    name: "categorie de services",
+    href: "/admin/service-categories",
+    icon: Tag,
+  },
   { name: "blog", href: "/admin/blog", icon: Newspaper },
   { name: "Réservations", href: "/admin/bookings", icon: Calendar },
   { name: "Produits", href: "/admin/products", icon: ShoppingBag },
   { name: "Tourisme", href: "/admin/tourism", icon: Plane },
   { name: "Paiements", href: "/admin/payments", icon: CreditCard },
-  { name: "Demandes", href: "/admin/demandes", icon: FileCheck, },
-  { name: "Métiers", href: "/admin/metiers", icon: Ruler, },
+  { name: "Demandes", href: "/admin/demandes", icon: FileCheck },
+  { name: "Métiers", href: "/admin/metiers", icon: Ruler },
   { name: "Paramètres", href: "/admin/settings", icon: Settings },
 ];
 

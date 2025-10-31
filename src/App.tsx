@@ -259,6 +259,7 @@ const App = () => (
                 <Route path="users" element={<Users />} />
                 <Route path="vendors" element={<Vendors />} />
                 <Route path="demandes" element={<ListeDemande />} />
+
                 <Route
                   path="service-categories"
                   element={<ServiceCategoriesPage />}
