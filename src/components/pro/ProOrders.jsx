@@ -222,7 +222,7 @@ const ProOrders = () => {
   const getProductTypeLabel = (productType) => {
     const labels = {
       'food': 'Alimentation',
-      'general': 'Général'
+      'general': 'Materiaux Générales'
     };
     return labels[productType] || productType;
   };
@@ -589,7 +589,7 @@ const ProOrders = () => {
               </TabsTrigger>
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Box className="h-4 w-4" />
-                <span className="hidden sm:inline">Général</span>
+                <span className="hidden sm:inline">Materiaux Généraux</span>
                 <Badge variant="secondary" className="text-xs">
                   {productTypeStats.find(stat => stat.productType === 'general')?.ordersCount || 0}
                 </Badge>

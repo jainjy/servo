@@ -386,22 +386,6 @@ const Cart = ({ isOpen, onClose }) => {
                 </div>
               )}
 
-              {/* Indication de statut d'authentification */}
-              <div className={`p-3 rounded-lg text-sm ${
-                isAuthenticated 
-                  ? 'bg-green-50 border border-green-200 text-green-800' 
-                  : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-              }`}>
-                {isAuthenticated ? (
-                  <div>
-                    <strong>✅ Connecté en tant que:</strong> {user?.firstName} {user?.lastName}
-                  </div>
-                ) : (
-                  <div>
-                    <strong>⚠️ Non connecté:</strong> Veuillez vous connecter pour commander
-                  </div>
-                )}
-              </div>
 
               {items.map((item) => (
                 <Card key={item.id} className="p-4 bg-white shadow-sm">
@@ -519,16 +503,6 @@ const Cart = ({ isOpen, onClose }) => {
                 </div>
               </div>
             </div>
-
-            {/* Bouton de test debug */}
-            <Button
-              variant="outline"
-              className="w-full border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
-              onClick={testAuthManually}
-            >
-              🧪 Tester l'Authentification
-            </Button>
-
             {/* Actions */}
             <div className="space-y-3">
               <Button
