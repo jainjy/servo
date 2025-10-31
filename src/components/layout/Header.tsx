@@ -50,7 +50,7 @@ import type { User as AuthUser } from "@/types/type";
 // Import GSAP and API
 import { gsap } from "gsap";
 import { toast } from "@/hooks/use-toast";
-import  api  from "@/lib/api.js";
+import api from "@/lib/api.js";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -215,24 +215,24 @@ const Header = () => {
     role === "admin"
       ? "/admin"
       : role === "professional"
-      ? "/pro"
-      : "/mon-compte/profil";
+        ? "/pro"
+        : "/mon-compte/profil";
 
   const initials = user
     ? (() => {
-        let base = "";
-        if (user.firstName && user.firstName.trim().length > 0) {
-          base = user.firstName.trim();
-        } else if (user.email) {
-          base = user.email.split("@")[0];
-        }
-        base = base.replace(/[^A-Za-z0-9]/g, "");
-        const two = base.slice(0, 2).toUpperCase();
-        if (two && two.length === 2) return two;
-        if (!two && user.lastName)
-          return user.lastName.slice(0, 2).toUpperCase();
-        return two || "US";
-      })()
+      let base = "";
+      if (user.firstName && user.firstName.trim().length > 0) {
+        base = user.firstName.trim();
+      } else if (user.email) {
+        base = user.email.split("@")[0];
+      }
+      base = base.replace(/[^A-Za-z0-9]/g, "");
+      const two = base.slice(0, 2).toUpperCase();
+      if (two && two.length === 2) return two;
+      if (!two && user.lastName)
+        return user.lastName.slice(0, 2).toUpperCase();
+      return two || "US";
+    })()
     : "";
 
   // Animation GSAP pour le texte du popover
@@ -256,7 +256,7 @@ const Header = () => {
 
   const loadNotifications = async () => {
     if (!user?.id) return;
-    
+
     setNotifLoading(true);
     try {
       const response = await api.get(`/notifications/user/${user.id}`);
@@ -276,7 +276,7 @@ const Header = () => {
 
   const handleMarkAsRead = async (notificationId: string) => {
     if (!user?.id) return;
-    
+
     try {
       await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
       loadNotifications(); // Recharger les notifications
@@ -291,7 +291,7 @@ const Header = () => {
 
   const handleMarkAsUnread = async (notificationId: string) => {
     if (!user?.id) return;
-    
+
     try {
       await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
       loadNotifications(); // Recharger les notifications
@@ -306,7 +306,7 @@ const Header = () => {
 
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
-    
+
     try {
       await api.post(`/notifications/user/${user.id}/read-all`);
       loadNotifications(); // Recharger les notifications
@@ -324,7 +324,7 @@ const Header = () => {
 
   const handleClearAll = async () => {
     if (!user?.id) return;
-    
+
     try {
       await api.post(`/notifications/user/${user.id}/clear-all`);
       loadNotifications(); // Recharger les notifications
@@ -469,9 +469,8 @@ const Header = () => {
                             {section.title}
                           </span>
                           <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              openSubmenu === section.title ? "rotate-180" : ""
-                            }`}
+                            className={`w-4 h-4 transition-transform duration-200 ${openSubmenu === section.title ? "rotate-180" : ""
+                              }`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -486,11 +485,10 @@ const Header = () => {
                         </button>
 
                         <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            openSubmenu === section.title
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${openSubmenu === section.title
                               ? "max-h-96 opacity-100"
                               : "max-h-0 opacity-0"
-                          }`}
+                            }`}
                         >
                           <div className="pb-3 px-4 space-y-2">
                             {section.items.map((item, itemIndex) => (
@@ -738,7 +736,7 @@ const Header = () => {
                         SERVO
                       </div>
                     </div>
-                    <div className="flex flex-row-reverse justify-between gap-10">
+                    <div className="flex justify-between gap-10">
                       {/* Sections avec items */}
                       <div className="grid grid-cols-4 place-content-center gap-10">
                         {sectionsWithItems.map((section, i) => (
@@ -768,23 +766,24 @@ const Header = () => {
                             ))}
                           </div>
                         ))}
+                        {/* Sections sans items */}
+                        {sectionsNoItems.length > 0 && (
+                          <div className="grid grid-cols-3 gap-5 w-[1000px] pl-3">
+                            {sectionsNoItems.map((s, si) => (
+                              <Link
+                                key={si}
+                                to={s.href}
+                                onClick={() => setIsPopoverOpen(false)}
+                                className="text-sm font-medium text-white hover:underline animated-text"
+                              >
+                                {s.title}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Sections sans items */}
-                      {sectionsNoItems.length > 0 && (
-                        <div className="flex flex-col gap-5 min-w-[180px]">
-                          {sectionsNoItems.map((s, si) => (
-                            <Link
-                              key={si}
-                              to={s.href}
-                              onClick={() => setIsPopoverOpen(false)}
-                              className="text-sm font-medium text-white hover:underline animated-text"
-                            >
-                              {s.title}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
+
                     </div>
                     <div className="flex flex-col justify-between w-full gap-1">
                       <Link
@@ -818,91 +817,91 @@ const Header = () => {
               </Button>
             )}
             {/* notification icon for users — opens a modal (Sheet) with notifications */}
-              {role === 'user' && (
-                <>
-                  <Sheet open={notifOpen} onOpenChange={(open) => { setNotifOpen(open); if (open) loadNotifications(); }}>
-                    <SheetTrigger asChild>
-                      <button className="relative mr-3 hidden lg:flex items-center">
-                        <Bell className="w-5 h-5 text-gray-700" />
-                        {notifCount > 0 && (
-                          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{notifCount}</span>
-                        )}
-                      </button>
-                    </SheetTrigger>
+            {role === 'user' && (
+              <>
+                <Sheet open={notifOpen} onOpenChange={(open) => { setNotifOpen(open); if (open) loadNotifications(); }}>
+                  <SheetTrigger asChild>
+                    <button className="relative mr-3 hidden lg:flex items-center">
+                      <Bell className="w-5 h-5 text-gray-700" />
+                      {notifCount > 0 && (
+                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{notifCount}</span>
+                      )}
+                    </button>
+                  </SheetTrigger>
 
-                    <SheetContent side="right" className="w-[380px] p-4">
-                      <div className="flex flex-col gap-4 mb-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <h4 id="notifications-title" className="text-lg font-semibold">Notifications</h4>
-                          </div>
+                  <SheetContent side="right" className="w-[380px] p-4">
+                    <div className="flex flex-col gap-4 mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <h4 id="notifications-title" className="text-lg font-semibold">Notifications</h4>
                         </div>
-                        {notifications.length > 0 && (
-                          <div className="flex items-center gap-2 justify-end">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleMarkAllAsRead}
-                              className="flex items-center gap-2 text-sm"
-                            >
-                              <Eye className="h-4 w-4" />
-                              <span className="hidden sm:inline">Tout marquer comme lu</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleClearAll}
-                              className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="hidden sm:inline">Vider</span>
-                            </Button>
-                          </div>
-                        )}
                       </div>
-
-                      {notifLoading ? (
-                        <div className="text-center text-sm text-gray-500">Chargement...</div>
-                      ) : notifications.length === 0 ? (
-                        <div className="text-center text-sm text-gray-500">Aucune notification.</div>
-                      ) : (
-                        <div className="space-y-3">
-                          {notifications.map((n) => (
-                            <div key={n.id} className={`p-3 rounded-lg border transition-colors ${n.isRead ? 'bg-gray-50' : 'bg-white'}`}>
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="text-sm font-medium text-gray-800">{n.titre || 'Nouvelle notification'}</div>
-                                  <div className="text-xs text-gray-500 mt-1">{n.statut} — {n.propertyId ? 'Bien lié' : 'Général'}</div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => n.isRead ? handleMarkAsUnread(n.id) : handleMarkAsRead(n.id)}
-                                  >
-                                    {n.isRead ? (
-                                      <EyeOff className="h-4 w-4 text-gray-500" />
-                                    ) : (
-                                      <Eye className="h-4 w-4 text-blue-500" />
-                                    )}
-                                  </Button>
-                                  <div className="text-xs text-gray-400">{n.createdAt ? new Date(n.createdAt).toLocaleDateString('fr-FR') : ''}</div>
-                                </div>
-                              </div>
-                              {n.propertyId && (
-                                <div className="mt-3">
-                                  <a href={`/immobilier/${n.propertyId}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">Voir le bien</a>
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                      {notifications.length > 0 && (
+                        <div className="flex items-center gap-2 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleMarkAllAsRead}
+                            className="flex items-center gap-2 text-sm"
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="hidden sm:inline">Tout marquer comme lu</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearAll}
+                            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="hidden sm:inline">Vider</span>
+                          </Button>
                         </div>
                       )}
-                    </SheetContent>
-                  </Sheet>
-                </>
-              )}
+                    </div>
+
+                    {notifLoading ? (
+                      <div className="text-center text-sm text-gray-500">Chargement...</div>
+                    ) : notifications.length === 0 ? (
+                      <div className="text-center text-sm text-gray-500">Aucune notification.</div>
+                    ) : (
+                      <div className="space-y-3">
+                        {notifications.map((n) => (
+                          <div key={n.id} className={`p-3 rounded-lg border transition-colors ${n.isRead ? 'bg-gray-50' : 'bg-white'}`}>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-800">{n.titre || 'Nouvelle notification'}</div>
+                                <div className="text-xs text-gray-500 mt-1">{n.statut} — {n.propertyId ? 'Bien lié' : 'Général'}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => n.isRead ? handleMarkAsUnread(n.id) : handleMarkAsRead(n.id)}
+                                >
+                                  {n.isRead ? (
+                                    <EyeOff className="h-4 w-4 text-gray-500" />
+                                  ) : (
+                                    <Eye className="h-4 w-4 text-blue-500" />
+                                  )}
+                                </Button>
+                                <div className="text-xs text-gray-400">{n.createdAt ? new Date(n.createdAt).toLocaleDateString('fr-FR') : ''}</div>
+                              </div>
+                            </div>
+                            {n.propertyId && (
+                              <div className="mt-3">
+                                <a href={`/immobilier/${n.propertyId}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">Voir le bien</a>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </SheetContent>
+                </Sheet>
+              </>
+            )}
 
             {!isAuthenticated ? (
               <div className="flex items-center gap-2">
@@ -935,7 +934,7 @@ const Header = () => {
                       {user?.email}
                     </span>
                   </DropdownMenuLabel>
-                  
+
                   {role != "user" ? (
                     <>
                       <DropdownMenuSeparator />
@@ -952,13 +951,13 @@ const Header = () => {
                         <UserIcon className="mr-2 h-4 w-4" />
                         Profil
                       </DropdownMenuItem>
-                      
+
                       {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
                       <DropdownMenuItem onClick={() => navigate("/mes-commandes")}>
                         <Package className="mr-2 h-4 w-4" />
                         Mes Commandes
                       </DropdownMenuItem>
-                      
+
                       <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
                         <ListCheck className="mr-2 h-4 w-4" />
                         Mes demandes de services
