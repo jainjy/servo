@@ -158,7 +158,7 @@ const GestionImmobilier = () => {
     
     // Debug logs
     console.log("État de l'authentification:", { user, isAuthenticated: Boolean(user) });
-    console.log("Token stocké:", localStorage.getItem('token'));
+    console.log("Token stocké:", localStorage.getItem('auth-token'));
     
     if (!user || !isAuthenticated) {
       console.error('Utilisateur non authentifié:', { user, isAuthenticated });
@@ -171,7 +171,7 @@ const GestionImmobilier = () => {
     }
 
     // Vérifier le token
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth-token');
     if (!token) {
       console.error('Token manquant');
       toast({
@@ -184,15 +184,13 @@ const GestionImmobilier = () => {
 
     try {
       const demandeData = {
-        serviceId: selectedService,
+        serviceId: parseInt(selectedService), // Assurons-nous que c'est un nombre
         description: formData.message,
-        dateSouhaitee: formData.dateSouhaitee,
-        lieuAdresse: formData.adresse,
-        contactNom: formData.nom,
-        contactPrenom: "", // À ajouter dans le formulaire si nécessaire
-        contactEmail: formData.email,
-        contactTel: formData.telephone,
-        contactAdresse: formData.adresse
+        dateSouhaitee: formData.dateSouhaitee ? new Date(formData.dateSouhaitee).toISOString() : null,
+        montantHT: 0, // Sera défini par le prestataire
+        tva: 20, // Taux par défaut
+        conditions: formData.typeBien ? `Type de bien: ${formData.typeBien}\nAdresse: ${formData.adresse}` : undefined,
+        clientId: user.id // Important : identifiant du client
       };
 
       const response = await demandeDevisAPI.creerDemande(demandeData);
@@ -259,10 +257,10 @@ const GestionImmobilier = () => {
         <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Gestion Immobilière <span className=" text-blue-400">Professionnelle</span>  
+              Gestion Immobilière <span className=" text-blue-400">Professionnelle</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
-              Des solutions complètes pour propriétaires bailleurs. 
+              Des solutions complètes pour propriétaires bailleurs.
               Confiez-nous la gestion de votre patrimoine en toute sérénité.
             </p>
             

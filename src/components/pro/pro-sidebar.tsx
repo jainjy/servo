@@ -39,6 +39,7 @@ const navigation = [
   },
   { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
   { name: "Liste demande immobilier", href: "/pro/demandes-immobilier", icon: Building2 },
+  { name: "Les demandes de devis", href: "/pro/demandes-devis", icon: FileText },
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
 ];
