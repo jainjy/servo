@@ -1,7 +1,8 @@
 // lib/api.js
 import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-// Configuration de base d'Axios
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -12,7 +13,7 @@ const api = axios.create({
 // Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth-token'); // ou depuis votre système d'auth
+    const token = localStorage.getItem('auth-token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,12 +29,25 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Rediriger vers la page de login si non authentifié
       window.location.href = '/login';
       console.log("erreur",error)
     }
     return Promise.reject(error);
   }
 );
+
+// Services pour le financement
+export const financementAPI = {
+  // Routes publiques
+  getPartenaires: () => api.get('/financement/partenaires'),
+  getAssurances: () => api.get('/financement/assurances'),
+  submitDemande: (data) => api.post('/financement/demande', data),
+  getUserDemandes: (userId) => api.get(`/financement/demandes/${userId}`),
+  
+  // NOUVELLES ROUTES ADMIN
+  getAllDemandes: (params = {}) => api.get('/financement/admin/demandes', { params }),
+  updateDemandeStatus: (id, status) => api.put(`/financement/admin/demandes/${id}/status`, { status }),
+  deleteDemande: (id) => api.delete(`/financement/admin/demandes/${id}`),
+};
 
 export default api;

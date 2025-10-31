@@ -94,6 +94,7 @@ import UserOrders from "./components/orders/UserOrders";
 import ListeDemandesDevis from "./pages/pro/ListeDemandesDevis";
 import CookieConsent from "./components/CookieConsent";
 import CookiesPolicy from "./pages/CookiesPolicy";
+import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 
 const queryClient = new QueryClient();
 
@@ -264,6 +265,7 @@ const App = () => (
                 <Route path="tourism" element={<Tourism />} />
                 <Route path="users" element={<Users />} />
                 <Route path="vendors" element={<Vendors />} />
+                
                 <Route path="demandes" element={<ListeDemande />} />
 
                 <Route
@@ -272,6 +274,9 @@ const App = () => (
                 />
                 <Route path="metiers" element={<AdminMetiers />} />
                 
+                
+                {/* NOUVELLE ROUTE FINANCEMENT DEMANDES */}
+                <Route path="financement-demandes" element={<FinancementDemandes />} />
               </Route>
               {/* Section not found Routes */}
               <Route path="*" element={<NotFound />} />
