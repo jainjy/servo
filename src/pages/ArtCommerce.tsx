@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import api from "@/lib/api"
 interface Category {
   id: string;
   name: string;
@@ -37,9 +37,10 @@ const ArtCommerce: React.FC = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/oeuvre");
-        const data = await res.json();
+        const res = await api.get("/oeuvre");
+        const data = await res.data
         setServices(data || []);
+        console.log(data)
       } catch (err) {
         console.error("Erreur de chargement des services :", err);
       }

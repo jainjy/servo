@@ -13,8 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 
-
-
+import api from "@/lib/api"
 
 
 
@@ -36,7 +35,7 @@ const ArtCommerceDetail = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-// Filtrer les œuvres selon la catégorie du listing
+  // Filtrer les œuvres selon la catégorie du listing
 
 
 
@@ -119,47 +118,47 @@ const ArtCommerceDetail = () => {
 
 
   //ouvre
-const mainCategoryNames = [
-  "art",
-  "commerce",
-  "peinture",
-  "sculptures",
-  "artisanat",
-  "boutique",
-];
+  const mainCategoryNames = [
+    "art",
+    "commerce",
+    "peinture",
+    "sculptures",
+    "artisanat",
+    "boutique",
+  ];
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // Récupérer toutes les œuvres
-      const resOeuvres = await fetch("http://localhost:3001/api/oeuvre");
-      const dataOeuvres = await resOeuvres.json();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Récupérer toutes les œuvres
+        const resOeuvres = await api("/oeuvre");
+        const dataOeuvres = await resOeuvres.data;
 
-      // Récupérer toutes les catégories
-      const resCategories = await fetch("http://localhost:3001/api/categorie");
-      const dataCategories = await resCategories.json();
+        // Récupérer toutes les catégories
+        const resCategories = await api("/categories");
+        const dataCategories = await resCategories.data;
 
-      // Filtrer uniquement les œuvres dont la catégorie est dans mainCategoryNames
-      const filteredOeuvres = Array.isArray(dataOeuvres)
-        ? dataOeuvres.filter(
+        // Filtrer uniquement les œuvres dont la catégorie est dans mainCategoryNames
+        const filteredOeuvres = Array.isArray(dataOeuvres)
+          ? dataOeuvres.filter(
             (artwork) =>
               artwork.category &&
               mainCategoryNames.includes(artwork.category.name.toLowerCase())
           )
-        : [];
+          : [];
 
-      // Mettre à jour les états
-      setOeuvres(filteredOeuvres);
-      setCategories(Array.isArray(dataCategories) ? dataCategories : []);
-    } catch (err) {
-      console.error("Erreur lors du chargement des œuvres :", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        // Mettre à jour les états
+        setOeuvres(filteredOeuvres);
+        setCategories(Array.isArray(dataCategories) ? dataCategories : []);
+      } catch (err) {
+        console.error("Erreur lors du chargement des œuvres :", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
 
 
@@ -249,7 +248,7 @@ useEffect(() => {
       setFeedback("");
 
       try {
-        const res = await fetch("http://localhost:3001/api/mail", {
+        const res = await fetch("/mail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -425,12 +424,13 @@ useEffect(() => {
 
   const ArtworkModal = ({ artwork, onClose }) => {
     const { addToCart } = useCart();
-
+    console.log(artwork)
     const handleAddToCart = () => {
       console.log("👉 handleAddToCart appelé !");
+      artwork.name=artwork.libelle
       addToCart(artwork);
 
-      toast.success(`${artwork.title} a été ajouté au panier !`, {
+      toast.success(`${artwork.libelle} a été ajouté au panier !`, {
         position: "bottom-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -446,7 +446,7 @@ useEffect(() => {
           <div className="p-6">
             {/* Titre + bouton fermer */}
             <div className="flex justify-between items-start mb-6">
-              <h3 className="text-2xl font-bold text-slate-900">{artwork.title}</h3>
+              <h3 className="text-2xl font-bold text-slate-900">{artwork.libelle}</h3>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-gray-500 hover:text-gray-700"
@@ -454,77 +454,75 @@ useEffect(() => {
                 <X size={24} />
               </button>
             </div>
+      
 
-          
-          
-          
             {/* Contenu principal */}
-     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-  {/* Image */}
-  <div className="rounded-xl overflow-hidden bg-gray-100 h-80">
-    <img
-      src={artwork.images && artwork.images.length > 0 ? artwork.images[0] : "/placeholder.png"}
-      alt={artwork.title || "Artwork"}
-      className="w-full h-full object-cover"
-    />
-  </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Image */}
+              <div className="rounded-xl overflow-hidden bg-gray-100 h-80">
+                <img
+                  src={artwork.images && artwork.images.length > 0 ? artwork.images[0] : "/placeholder.png"}
+                  alt={artwork.libelle || "Artwork"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-  {/* Infos détaillées */}
-  <div className="space-y-6">
-    {/* Nom et catégorie */}
-    <div>
-      <h2 className="text-2xl font-bold text-slate-900">{artwork.title || "Nom non défini"}</h2>
-      <p className="text-slate-500">
-        {artwork.category?.name || "Catégorie non définie"} | {artwork.duration ? `${artwork.duration} min` : "Durée non précisée"}
-      </p>
-    </div>
+              {/* Infos détaillées */}
+              <div className="space-y-6">
+                {/* Nom et catégorie */}
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">{artwork.libelle || "Nom non défini"}</h2>
+                  <p className="text-slate-500">
+                    {artwork.category?.name || "Catégorie non définie"} | {artwork.duration ? `${artwork.duration} min` : "Durée non précisée"}
+                  </p>
+                </div>
 
-    {/* Description */}
-    <div className="bg-blue-50 p-4 rounded-lg">
-      <h4 className="text-lg font-semibold text-slate-900 mb-2">Description</h4>
-      <p className="text-slate-600 leading-relaxed">{artwork.description || "Aucune description disponible"}</p>
-    </div>
+                {/* Description */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-2">Description</h4>
+                  <p className="text-slate-600 leading-relaxed">{artwork.description || "Aucune description disponible"}</p>
+                </div>
 
-    {/* Informations principales */}
-    <div className="grid grid-cols-2 gap-4">
-      <div className="bg-blue-50 p-3 rounded-lg">
-        <span className="text-slate-500 text-sm block">Artiste</span>
-        <p className="text-slate-900 font-medium">{artwork.artist || "Non précisé"}</p>
-      </div>
-      <div className="bg-blue-50 p-3 rounded-lg">
-        <span className="text-slate-500 text-sm block">Technique</span>
-        <p className="text-slate-900 font-medium">{artwork.technique || "Non précisée"}</p>
-      </div>
-      <div className="bg-blue-50 p-3 rounded-lg">
-        <span className="text-slate-500 text-sm block">Dimensions</span>
-        <p className="text-slate-900 font-medium">{artwork.dimensions || "Non précisées"}</p>
-      </div>
-      <div className="bg-blue-50 p-3 rounded-lg">
-        <span className="text-slate-500 text-sm block">Année</span>
-        <p className="text-slate-900 font-medium">{artwork.year || "Non précisée"}</p>
-      </div>
-    </div>
+                {/* Informations principales */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Artiste</span>
+                    <p className="text-slate-900 font-medium">{artwork.artist || "Non précisé"}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Technique</span>
+                    <p className="text-slate-900 font-medium">{artwork.technique || "Non précisée"}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Dimensions</span>
+                    <p className="text-slate-900 font-medium">{artwork.dimensions || "Non précisées"}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Année</span>
+                    <p className="text-slate-900 font-medium">{artwork.year || "Non précisée"}</p>
+                  </div>
+                </div>
 
-    {/* Prix et bouton d’achat */}
-    <div className="pt-4 border-t border-gray-200">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-blue-600">{artwork.price ? `${artwork.price}€` : "Prix non défini"}</span>
-          {artwork.available && (
-            <span className="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full">Disponible</span>
-          )}
-        </div>
+                {/* Prix et bouton d’achat */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-blue-600">{artwork.price ? `${artwork.price}€` : "Prix non défini"}</span>
+                      {artwork.available && (
+                        <span className="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full">Disponible</span>
+                      )}
+                    </div>
 
-        <button
-          onClick={handleAddToCart}
-          className="bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition-all duration-200 font-semibold shadow-lg"
-        >
-          Acheter maintenant
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+                    <button
+                      onClick={handleAddToCart}
+                      className="bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition-all duration-200 font-semibold shadow-lg"
+                    >
+                      Acheter maintenant
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
 
           </div>
@@ -687,88 +685,88 @@ useEffect(() => {
                 </div>
 
                 {/* Artworks Section */}
-               <div className="mb-8">
-  <div className="flex justify-between items-center mb-6">
-    <h3 className="text-2xl font-bold text-slate-900">Œuvres disponibles</h3>
-    <span className="text-slate-500">{oeuvres.length} œuvres</span>
-  </div>
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-bold text-slate-900">Œuvres disponibles</h3>
+                    <span className="text-slate-500">{oeuvres.length} œuvres</span>
+                  </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {loading ? (
-      <div className="col-span-full text-center py-16 text-gray-500">
-        Chargement...
-      </div>
-    ) : oeuvres.length > 0 ? (
-      oeuvres.map((artwork) => {
-        // ✅ Trouver le nom de la catégorie correspondante
-        const cat =
-          artwork.category?.name ||
-          categories.find((c) => c.id === artwork.categoryId)?.name ||
-          "—";
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {loading ? (
+                      <div className="col-span-full text-center py-16 text-gray-500">
+                        Chargement...
+                      </div>
+                    ) : oeuvres.length > 0 ? (
+                      oeuvres.map((artwork) => {
+                        // ✅ Trouver le nom de la catégorie correspondante
+                        const cat =
+                          artwork.category?.name ||
+                          categories.find((c) => c.id === artwork.categoryId)?.name ||
+                          "—";
 
-        // ✅ Gérer les images (string ou tableau)
-        let imageSrc = "";
-        if (Array.isArray(artwork.images)) {
-          imageSrc = artwork.images[0];
-        } else if (typeof artwork.images === "string") {
-          imageSrc = artwork.images.split(",")[0];
-        } else if (artwork.image) {
-          imageSrc = artwork.image;
-        }
+                        // ✅ Gérer les images (string ou tableau)
+                        let imageSrc = "";
+                        if (Array.isArray(artwork.images)) {
+                          imageSrc = artwork.images[0];
+                        } else if (typeof artwork.images === "string") {
+                          imageSrc = artwork.images.split(",")[0];
+                        } else if (artwork.image) {
+                          imageSrc = artwork.image;
+                        }
 
-        return (
-          <div
-            key={artwork.id}
-            className="bg-white rounded-xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 hover:border-blue-300"
-            onClick={() => setSelectedArtwork(artwork)}
-          >
-            {/* ✅ Image */}
-            <div className="rounded-lg h-40 mb-3 overflow-hidden flex justify-center items-center bg-gray-50">
-              {imageSrc ? (
-                <img
-                  src={imageSrc}
-                  alt={artwork.libelle || artwork.title || "Œuvre"}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <span className="text-gray-400 text-sm">Aucune image</span>
-              )}
-            </div>
+                        return (
+                          <div
+                            key={artwork.id}
+                            className="bg-white rounded-xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 hover:border-blue-300"
+                            onClick={() => setSelectedArtwork(artwork)}
+                          >
+                            {/* ✅ Image */}
+                            <div className="rounded-lg h-40 mb-3 overflow-hidden flex justify-center items-center bg-gray-50">
+                              {imageSrc ? (
+                                <img
+                                  src={imageSrc}
+                                  alt={artwork.libelle || artwork.title || "Œuvre"}
+                                  className="object-cover w-full h-full"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-sm">Aucune image</span>
+                              )}
+                            </div>
 
-            {/* ✅ Titre */}
-            <h4 className="font-semibold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
-              {artwork.libelle || artwork.title || "Sans titre"}
-            </h4>
+                            {/* ✅ Titre */}
+                            <h4 className="font-semibold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                              {artwork.libelle || artwork.title || "Sans titre"}
+                            </h4>
 
-            {/* ✅ Description */}
-            <p className="text-slate-500 text-sm mb-2 line-clamp-2">
-              {artwork.description || "Aucune description disponible"}
-            </p>
+                            {/* ✅ Description */}
+                            <p className="text-slate-500 text-sm mb-2 line-clamp-2">
+                              {artwork.description || "Aucune description disponible"}
+                            </p>
 
-            {/* ✅ Artiste */}
-            <p className="text-slate-400 text-sm mb-2">
-              {artwork.artist || "Auteur inconnu"}
-            </p>
+                            {/* ✅ Artiste */}
+                            <p className="text-slate-400 text-sm mb-2">
+                              {artwork.artist || "Auteur inconnu"}
+                            </p>
 
-            {/* ✅ Prix + Catégorie */}
-            <div className="flex justify-between items-center">
-              <span className="text-blue-600 font-bold">
-                {artwork.price ? `${artwork.price} €` : "Prix non défini"}
-              </span>
-              <span className="text-slate-400 text-sm bg-slate-100 px-2 py-1 rounded-full">
-                {cat}
-              </span>
-            </div>
-          </div>
-        );
-      })
-    ) : (
-      <div className="col-span-full text-center py-16 text-gray-500">
-        Aucune œuvre disponible
-      </div>
-    )}
-  </div>
-</div>
+                            {/* ✅ Prix + Catégorie */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-blue-600 font-bold">
+                                {artwork.price ? `${artwork.price} €` : "Prix non défini"}
+                              </span>
+                              <span className="text-slate-400 text-sm bg-slate-100 px-2 py-1 rounded-full">
+                                {cat}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="col-span-full text-center py-16 text-gray-500">
+                        Aucune œuvre disponible
+                      </div>
+                    )}
+                  </div>
+                </div>
 
               </div>
 
