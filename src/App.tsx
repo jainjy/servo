@@ -163,13 +163,13 @@ const App = () => (
               <Route path="/actualites" element={<Actualites />} />
               <Route path="/tourisme" element={<TourismSection />} />
               <Route path="/service" element={<ServicesPartnersPage />} />
-              <Route path="/publicite" element={<Publicite />} />
+              
               <Route
                 path="/estimations"
                 element={<EstimationImmobilierPage />}
               />
               <Route path="/messages/:id" element={<MessagesLayout />} />
-              {/* singular routes for legacy links */}
+              {/* singular routes for legacy links <Route path="/publicite" element={<Publicite />} />*/}
               <Route path="/message" element={<MessagesLayout />} />
               <Route path="/message/:id" element={<MessagesLayout />} />
               <Route path="/login" element={<LoginRoleSelectionPage />} />
