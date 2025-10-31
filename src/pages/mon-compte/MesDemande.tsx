@@ -653,13 +653,6 @@ const MesDemande = () => {
             }`}
           >
             {filter.label}
-            <span className={`text-xs px-2 py-1 rounded-full ${
-              activeFilter === filter.key 
-                ? "bg-blue-200 text-blue-800" 
-                : "bg-gray-100 text-gray-600"
-            }`}>
-              {filteredDemandes.length}
-            </span>
           </button>
         ))}
       </div>
