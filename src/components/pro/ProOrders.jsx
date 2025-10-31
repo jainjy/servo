@@ -1,12 +1,33 @@
 // components/pro/ProOrders.jsx
 import { useState, useEffect } from 'react';
-import { Search, Download, Eye, Package, Truck, CheckCircle, Clock, XCircle, Users, Euro, MapPin, Calendar, Mail, Phone } from 'lucide-react';
+import { 
+  Search, 
+  Download, 
+  Eye, 
+  Package, 
+  Truck, 
+  CheckCircle, 
+  Clock, 
+  XCircle, 
+  Users, 
+  Euro, 
+  MapPin, 
+  Calendar, 
+  Mail, 
+  Phone,
+  Filter,
+  Tag,
+  BarChart3,
+  Utensils,
+  Box
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import api from '@/lib/api';
 import ProOrderDetailsModal from './ProOrderDetailsModal';
 
@@ -17,6 +38,9 @@ const ProOrders = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [productTypeStats, setProductTypeStats] = useState([]);
+  
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -47,18 +71,40 @@ const ProOrders = () => {
     }
   };
 
-  // Charger les commandes du pro
-  const fetchOrders = async () => {
+  // Charger les statistiques par type de produit
+  const fetchProductTypeStats = async () => {
+    try {
+      console.log('📈 Chargement des statistiques par type de produit...');
+      const response = await api.get('/orders/pro/product-types');
+      if (response.data.success) {
+        console.log('✅ Statistiques types produits reçues:', response.data.productTypes);
+        setProductTypeStats(response.data.productTypes);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement statistiques types produits:', error);
+    }
+  };
+
+  // CORRIGÉ : Charger les commandes du pro avec une seule route
+  const fetchOrders = async (productType = 'all') => {
     try {
       setLoading(true);
-      console.log('🔄 Chargement des commandes...');
+      console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${statusFilter})...`);
       
-      const response = await api.get('/orders/pro');
+      // Utiliser une seule route avec paramètres productType et status
+      const response = await api.get(`/orders/pro?productType=${productType}&status=${statusFilter}`);
+      
       console.log('✅ Commandes reçues:', response.data);
       
       if (response.data.success) {
         setOrders(response.data.orders || []);
-        await fetchStats(); // Charger les stats en même temps
+        
+        // Charger les stats seulement pour l'onglet "all"
+        if (productType === 'all') {
+          await fetchStats();
+        }
+        
+        await fetchProductTypeStats();
         
         // Déclencher la mise à jour des notifications
         triggerNotificationsUpdate();
@@ -68,19 +114,7 @@ const ProOrders = () => {
       }
     } catch (error) {
       console.error('❌ Erreur chargement commandes:', error);
-      
-      // En cas d'erreur, essayer la route de test
-      try {
-        console.log('🔄 Essai de la route de test...');
-        const testResponse = await api.get('/orders/test-data');
-        if (testResponse.data.success) {
-          console.log('✅ Données de test reçues:', testResponse.data.orders?.length);
-          setOrders(testResponse.data.orders || []);
-          triggerNotificationsUpdate();
-        }
-      } catch (testError) {
-        console.error('❌ Erreur même avec route test:', testError);
-      }
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -89,6 +123,11 @@ const ProOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Recharger les commandes quand les filtres changent
+  useEffect(() => {
+    fetchOrders(activeTab);
+  }, [activeTab, statusFilter]);
 
   // Mettre à jour le statut d'une commande
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -99,21 +138,20 @@ const ProOrders = () => {
       
       if (response.data.success) {
         console.log('✅ Statut mis à jour avec succès');
-        await fetchOrders(); // Recharger les données
+        // Recharger les commandes selon l'onglet actif
+        fetchOrders(activeTab);
         
         // Déclencher la mise à jour des notifications
         triggerNotificationsUpdate();
       } else {
         console.error('❌ Erreur API lors de la mise à jour:', response.data);
-        toast.error('Erreur lors de la mise à jour du statut: ' + response.data.message);
       }
     } catch (error) {
       console.error('❌ Erreur mise à jour statut:', error);
-      toast.error('Erreur lors de la mise à jour du statut: ' + (error.response?.data?.message || error.message));
     }
   };
 
-  // Filtrer les commandes
+  // Filtrer les commandes (pour la recherche)
   const filteredOrders = orders.filter(order => {
     if (!order) return false;
     
@@ -123,9 +161,7 @@ const ProOrders = () => {
       order.user?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   // Obtenir la couleur du badge selon le statut
@@ -161,6 +197,34 @@ const ProOrders = () => {
       cancelled: 'border-l-red-500'
     };
     return colors[status] || 'border-l-gray-500';
+  };
+
+  // Obtenir la couleur pour les types de produits
+  const getProductTypeColor = (productType) => {
+    const colors = {
+      'food': 'bg-green-100 text-green-800 border-green-200',
+      'general': 'bg-blue-100 text-blue-800 border-blue-200',
+      'default': 'bg-gray-100 text-gray-800 border-gray-200'
+    };
+    return colors[productType] || colors.default;
+  };
+
+  // Obtenir l'icône pour le type de produit
+  const getProductTypeIcon = (productType) => {
+    const icons = {
+      'food': Utensils,
+      'general': Box
+    };
+    return icons[productType] || Package;
+  };
+
+  // Obtenir le label pour le type de produit
+  const getProductTypeLabel = (productType) => {
+    const labels = {
+      'food': 'Alimentation',
+      'general': 'Materiaux Générales'
+    };
+    return labels[productType] || productType;
   };
 
   // Actions rapides selon le statut
@@ -254,6 +318,9 @@ const ProOrders = () => {
     const dateInfo = formatDate(order.createdAt);
     const statusBorderColor = getStatusBorderColor(order.status);
 
+    // Obtenir les types de produits uniques dans la commande
+    const productTypes = [...new Set(order.items?.map(item => item.productType).filter(Boolean))];
+
     return (
       <Card className={`border-l-4 ${statusBorderColor} hover:shadow-md transition-shadow`}>
         <CardContent className="p-4">
@@ -287,14 +354,31 @@ const ProOrders = () => {
             )}
           </div>
 
-          {/* Articles */}
+          {/* Articles et types de produits */}
           <div className="mb-3">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               <Package className="h-3 w-3 text-gray-400" />
               <span className="text-sm font-medium">
                 {(order.items?.length || 0)} article(s)
               </span>
             </div>
+            
+            {/* Affichage des types de produits */}
+            {productTypes.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {productTypes.map((productType, index) => {
+                  const IconComponent = getProductTypeIcon(productType);
+                  return (
+                    <Badge key={index} variant="outline" className={`text-xs ${getProductTypeColor(productType)}`}>
+                      <IconComponent className="h-2 w-2 mr-1" />
+                      {getProductTypeLabel(productType)}
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* Liste des articles */}
             {order.items && order.items.length > 0 && (
               <div className="text-xs text-gray-600 pl-5">
                 {order.items.slice(0, 2).map((item, index) => (
@@ -381,7 +465,7 @@ const ProOrders = () => {
             Gérez et suivez toutes les commandes de votre boutique
           </p>
         </div>
-        <Button onClick={fetchOrders} variant="outline" size="sm" className="w-full sm:w-auto">
+        <Button onClick={() => fetchOrders(activeTab)} variant="outline" size="sm" className="w-full sm:w-auto">
           Actualiser
         </Button>
       </div>
@@ -445,12 +529,85 @@ const ProOrders = () => {
         </Card>
       </div>
 
+      {/* Statistiques par type de produit */}
+      {productTypeStats.length > 0 && (
+        <Card>
+          <CardHeader className="p-4 lg:p-6">
+            <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Performance par Type de Produit
+            </CardTitle>
+            <CardDescription>
+              Répartition des ventes par type de produits
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 lg:p-6 pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {productTypeStats.slice(0, 6).map((productType, index) => {
+                const IconComponent = getProductTypeIcon(productType.productType);
+                return (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-full ${getProductTypeColor(productType.productType)}`}>
+                        <IconComponent className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{getProductTypeLabel(productType.productType)}</div>
+                        <div className="text-xs text-gray-600">{productType.itemsCount} articles</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-green-600">€{productType.revenue}</div>
+                      <div className="text-xs text-gray-500">{productType.percentage}%</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Navigation par types de produits */}
+      <Card>
+        <CardContent className="p-4 lg:p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mb-4">
+              <TabsTrigger value="all" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                <span className="hidden sm:inline">Toutes</span>
+                <Badge variant="secondary" className="text-xs">
+                  {stats.total || 0}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="food" className="flex items-center gap-2">
+                <Utensils className="h-4 w-4" />
+                <span className="hidden sm:inline">Alimentation</span>
+                <Badge variant="secondary" className="text-xs">
+                  {productTypeStats.find(stat => stat.productType === 'food')?.ordersCount || 0}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="general" className="flex items-center gap-2">
+                <Box className="h-4 w-4" />
+                <span className="hidden sm:inline">Materiaux Généraux</span>
+                <Badge variant="secondary" className="text-xs">
+                  {productTypeStats.find(stat => stat.productType === 'general')?.ordersCount || 0}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardContent>
+      </Card>
+
       {/* Filtres et recherche */}
       <Card>
         <CardHeader className="p-4 lg:p-6">
-          <CardTitle className="text-lg lg:text-xl">Filtrer les Commandes</CardTitle>
+          <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtrer les Commandes
+          </CardTitle>
           <CardDescription>
-            {orders.length} commande(s) au total dans la base de données
+            {orders.length} commande(s) {activeTab !== 'all' ? `de type "${getProductTypeLabel(activeTab)}"` : 'au total'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 lg:p-6 pt-0">
@@ -486,7 +643,9 @@ const ProOrders = () => {
       {/* Tableau desktop et Cartes mobile */}
       <Card>
         <CardHeader className="p-4 lg:p-6">
-          <CardTitle className="text-lg lg:text-xl">Toutes les Commandes</CardTitle>
+          <CardTitle className="text-lg lg:text-xl">
+            {activeTab === 'all' ? 'Toutes les Commandes' : `Commandes - ${getProductTypeLabel(activeTab)}`}
+          </CardTitle>
           <CardDescription>
             {filteredOrders.length} commande(s) trouvée(s) après filtrage
           </CardDescription>
@@ -499,7 +658,7 @@ const ProOrders = () => {
               <p className="text-gray-600 mb-4">
                 {loading ? 'Chargement en cours...' : 'Aucune commande n\'a été trouvée dans la base de données.'}
               </p>
-              <Button onClick={fetchOrders} variant="outline">
+              <Button onClick={() => fetchOrders(activeTab)} variant="outline">
                 Réessayer
               </Button>
             </div>
@@ -513,6 +672,7 @@ const ProOrders = () => {
                       <TableHead>Numéro</TableHead>
                       <TableHead>Client</TableHead>
                       <TableHead>Articles</TableHead>
+                      <TableHead>Types</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Date</TableHead>
@@ -522,7 +682,7 @@ const ProOrders = () => {
                   <TableBody>
                     {filteredOrders.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                           Aucune commande ne correspond aux filtres
                         </TableCell>
                       </TableRow>
@@ -530,6 +690,7 @@ const ProOrders = () => {
                       filteredOrders.map((order) => {
                         const quickActions = getQuickActions(order);
                         const dateInfo = formatDate(order.createdAt);
+                        const productTypes = [...new Set(order.items?.map(item => item.productType).filter(Boolean))];
                         
                         return (
                           <TableRow key={order.id} className="hover:bg-gray-50">
@@ -558,6 +719,19 @@ const ProOrders = () => {
                                     {order.items.length > 2 && '...'}
                                   </div>
                                 )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {productTypes.map((productType, index) => {
+                                  const IconComponent = getProductTypeIcon(productType);
+                                  return (
+                                    <Badge key={index} variant="outline" className={`text-xs ${getProductTypeColor(productType)}`}>
+                                      <IconComponent className="h-2 w-2 mr-1" />
+                                      {getProductTypeLabel(productType)}
+                                    </Badge>
+                                  );
+                                })}
                               </div>
                             </TableCell>
                             <TableCell className="font-bold text-green-600">
@@ -649,52 +823,6 @@ const ProOrders = () => {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Légende des statuts */}
-      <Card>
-        <CardHeader className="p-4 lg:p-6">
-          <CardTitle className="text-sm lg:text-base">Légende des Statuts</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 lg:p-6 pt-0">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-3 lg:gap-4">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">
-                <Clock className="h-3 w-3" />
-                En attente
-              </Badge>
-              <span className="text-sm text-gray-600">- Nouvelle commande</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">
-                <CheckCircle className="h-3 w-3" />
-                Confirmée
-              </Badge>
-              <span className="text-sm text-gray-600">- Commande acceptée</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">
-                <Package className="h-3 w-3" />
-                En traitement
-              </Badge>
-              <span className="text-sm text-gray-600">- En préparation</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">
-                <Truck className="h-3 w-3" />
-                Expédiée
-              </Badge>
-              <span className="text-sm text-gray-600">- Envoyée au client</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="success">
-                <CheckCircle className="h-3 w-3" />
-                Livrée
-              </Badge>
-              <span className="text-sm text-gray-600">- Commande terminée</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
