@@ -2,16 +2,30 @@ import { useState } from "react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { demandeDevisAPI } from "@/services/demandeDevis";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { 
-  Home, 
-  FileText, 
-  ClipboardList, 
-  TrendingUp, 
-  CheckCircle, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Home,
+  FileText,
+  ClipboardList,
+  TrendingUp,
+  CheckCircle,
   Shield,
   Clock,
   Users,
@@ -22,9 +36,8 @@ import {
   Mail,
   MapPin,
   Calendar,
-  Euro
+  Euro,
 } from "lucide-react";
-import { toast } from "sonner";
 
 const GestionImmobilier = () => {
   const [activeService, setActiveService] = useState("gestion");
@@ -33,12 +46,13 @@ const GestionImmobilier = () => {
   const [selectedService, setSelectedService] = useState("");
   const [formData, setFormData] = useState({
     nom: "",
+    prenom: "",
     email: "",
     telephone: "",
     adresse: "",
     typeBien: "",
     message: "",
-    dateSouhaitee: ""
+    dateSouhaitee: "",
   });
 
   const [contactFormData, setContactFormData] = useState({
@@ -46,24 +60,25 @@ const GestionImmobilier = () => {
     email: "",
     telephone: "",
     sujet: "",
-    message: ""
+    message: "",
   });
 
   const services = [
     {
       id: "gestion",
       title: "Mise en Gestion de Votre Bien",
-      description: "Confiez la gestion complète de votre bien immobilier à nos experts",
+      description:
+        "Confiez la gestion complète de votre bien immobilier à nos experts",
       icon: Home,
       features: [
         "Recherche et sélection de locataires",
         "Gestion des loyers et charges",
         "Entretien et maintenance",
         "Relation locative complète",
-        "Suivi administratif et juridique"
+        "Suivi administratif et juridique",
       ],
       price: "À partir de 6% du loyer HT",
-      duration: "Engagement 3 ans"
+      duration: "Engagement 3 ans",
     },
     {
       id: "bail",
@@ -75,10 +90,10 @@ const GestionImmobilier = () => {
         "Conforme à la loi ALUR",
         "Clauses spécifiques adaptées",
         "Double exemplaire certifié",
-        "Conseils juridiques inclus"
+        "Conseils juridiques inclus",
       ],
       price: "190€ TTC",
-      duration: "Délai 48h"
+      duration: "Délai 48h",
     },
     {
       id: "etat-lieux",
@@ -90,10 +105,10 @@ const GestionImmobilier = () => {
         "Photos haute définition",
         "Description détaillée du bien",
         "Signature électronique",
-        "Archivage sécurisé 10 ans"
+        "Archivage sécurisé 10 ans",
       ],
       price: "150€ TTC",
-      duration: "2 heures en moyenne"
+      duration: "2 heures en moyenne",
     },
     {
       id: "revenu",
@@ -105,18 +120,18 @@ const GestionImmobilier = () => {
         "Optimisation fiscale",
         "Simulation d'investissement",
         "Conseils en défiscalisation",
-        "Suivi performance patrimoniale"
+        "Suivi performance patrimoniale",
       ],
       price: "À partir de 300€",
-      duration: "Étude personnalisée"
-    }
+      duration: "Étude personnalisée",
+    },
   ];
 
   const stats = [
     { number: "500+", label: "Biens gérés" },
     { number: "98%", label: "Taux de satisfaction" },
     { number: "24h", label: "Temps de réponse moyen" },
-    { number: "15+", label: "Années d'expérience" }
+    { number: "15+", label: "Années d'expérience" },
   ];
 
   const sujetsContact = [
@@ -125,7 +140,7 @@ const GestionImmobilier = () => {
     "Support technique",
     "Réclamation",
     "Partenariat",
-    "Autre"
+    "Autre",
   ];
 
   const handleServiceClick = (serviceId) => {
@@ -136,41 +151,100 @@ const GestionImmobilier = () => {
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleContactInputChange = (e) => {
     setContactFormData({
       ...contactFormData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulation d'envoi
-    console.log("Formulaire soumis:", { ...formData, service: selectedService });
-    toast.info(
-      "Votre demande a été envoyée avec succès ! Nous vous recontacterons dans les 24h."
-    );
-    setIsModalOpen(false);
-    setFormData({
-      nom: "",
-      email: "",
-      telephone: "",
-      adresse: "",
-      typeBien: "",
-      message: "",
-      dateSouhaitee: ""
+
+    // Debug logs
+    console.log("État de l'authentification:", {
+      user,
+      isAuthenticated: Boolean(user),
     });
+    console.log("Token stocké:", localStorage.getItem("token"));
+
+    if (!user || !isAuthenticated) {
+      console.error("Utilisateur non authentifié:", { user, isAuthenticated });
+      toast({
+        title: "Erreur d'authentification",
+        description: "Vous devez être connecté pour faire une demande de devis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Vérifier le token
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("Token manquant");
+      toast({
+        title: "Erreur de session",
+        description: "Votre session a expiré, veuillez vous reconnecter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const demandeData = {
+        serviceId: selectedService,
+        description: formData.message,
+        dateSouhaitee: formData.dateSouhaitee,
+        lieuAdresse: formData.adresse,
+        contactNom: formData.nom,
+        contactPrenom: "", // À ajouter dans le formulaire si nécessaire
+        contactEmail: formData.email,
+        contactTel: formData.telephone,
+        contactAdresse: formData.adresse,
+      };
+
+      const response = await demandeDevisAPI.creerDemande(demandeData);
+
+      toast({
+        title: "Succès",
+        description: "Votre demande de devis a été envoyée avec succès !",
+        variant: "default",
+      });
+
+      setIsModalOpen(false);
+      setFormData({
+        nom: "",
+        prenom: "",
+        email: "",
+        telephone: "",
+        adresse: "",
+        typeBien: "",
+        message: "",
+        dateSouhaitee: "",
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de la demande:", error);
+      toast({
+        title: "Erreur",
+        description:
+          "Une erreur est survenue lors de l'envoi de votre demande. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
     // Simulation d'envoi
     console.log("Formulaire contact soumis:", contactFormData);
-    toast.info(
+    alert(
       "Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."
     );
     setIsContactModalOpen(false);
@@ -179,47 +253,54 @@ const GestionImmobilier = () => {
       email: "",
       telephone: "",
       sujet: "",
-      message: ""
+      message: "",
     });
   };
 
-  const currentService = services.find(service => service.id === activeService);
+  const currentService = services.find(
+    (service) => service.id === activeService
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Header />
-      
+
       {/* Hero Section Améliorée */}
-      <section className="relative py-16 bg-slate-900 overflow-hidden">   
+      <section className="relative py-16 bg-slate-900 overflow-hidden">
         {/* Image de fond avec opacité */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center z-0 opacity-70"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
+            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
           }}
         />
-        
+
         {/* Contenu */}
         <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Gestion Immobilière <span className=" text-blue-400">Professionnelle</span>  
+              Gestion Immobilière{" "}
+              <span className=" text-blue-400">Professionnelle</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
-              Des solutions complètes pour propriétaires bailleurs. 
-              Confiez-nous la gestion de votre patrimoine en toute sérénité.
+              Des solutions complètes pour propriétaires bailleurs. Confiez-nous
+              la gestion de votre patrimoine en toute sérénité.
             </p>
-            
+
             <div className="flex flex-wrap gap-3 pt-4 justify-center">
-              <Button 
+              <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base rounded-lg transition-all duration-300"
-                onClick={() => document.getElementById('services').scrollIntoView({ behavior: 'smooth' })}
+                onClick={() =>
+                  document
+                    .getElementById("services")
+                    .scrollIntoView({ behavior: "smooth" })
+                }
               >
                 Découvrir nos services
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button  
-                className="border-white text-white bg-white text-slate-900 hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
+              <Button
+                className="border-white text-white bg-white hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
                 onClick={() => setIsModalOpen(true)}
               >
                 Demander un devis
@@ -255,7 +336,8 @@ const GestionImmobilier = () => {
               Nos Services de Gestion
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Une gamme complète de services pour optimiser la gestion de votre bien immobilier
+              Une gamme complète de services pour optimiser la gestion de votre
+              bien immobilier
             </p>
           </div>
 
@@ -266,14 +348,14 @@ const GestionImmobilier = () => {
                 key={service.id}
                 variant={activeService === service.id ? "default" : "outline"}
                 className={`rounded-lg px-4 py-2 text-sm font-semibold ${
-                  activeService === service.id 
-                    ? "bg-slate-900 text-white" 
+                  activeService === service.id
+                    ? "bg-slate-900 text-white"
                     : "text-slate-700 border-slate-300 hover:bg-slate-100"
                 }`}
                 onClick={() => setActiveService(service.id)}
               >
                 <service.icon className="h-3 w-3 mr-2" />
-                {service.title.split(' ')[0]}
+                {service.title.split(" ")[0]}
               </Button>
             ))}
           </div>
@@ -302,7 +384,9 @@ const GestionImmobilier = () => {
                     {currentService.features.map((feature, index) => (
                       <div key={index} className="flex items-center">
                         <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                        <span className="text-slate-700 text-sm">{feature}</span>
+                        <span className="text-slate-700 text-sm">
+                          {feature}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -317,7 +401,7 @@ const GestionImmobilier = () => {
                         {currentService.duration}
                       </div>
                     </div>
-                    <Button 
+                    <Button
                       className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm px-4 py-2"
                       onClick={() => handleServiceClick(currentService.id)}
                     >
@@ -336,7 +420,8 @@ const GestionImmobilier = () => {
                       Garantie Satisfaction
                     </h4>
                     <p className="text-slate-600 text-sm">
-                      Service professionnel avec accompagnement personnalisé et suivi rigoureux
+                      Service professionnel avec accompagnement personnalisé et
+                      suivi rigoureux
                     </p>
                   </div>
                 </div>
@@ -347,7 +432,7 @@ const GestionImmobilier = () => {
           {/* Additional Services Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {services.map((service) => (
-              <Card 
+              <Card
                 key={service.id}
                 className="p-5 border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
                 onClick={() => setActiveService(service.id)}
@@ -378,17 +463,18 @@ const GestionImmobilier = () => {
               Prêt à optimiser votre patrimoine ?
             </h2>
             <p className="text-lg text-slate-600 mb-6 max-w-2xl mx-auto">
-              Rejoignez les centaines de propriétaires qui nous font confiance pour la gestion de leur bien immobilier
+              Rejoignez les centaines de propriétaires qui nous font confiance
+              pour la gestion de leur bien immobilier
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button 
+              <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base rounded-lg"
                 onClick={() => setIsModalOpen(true)}
               >
                 <Phone className="h-4 w-4 mr-2" />
                 Demander un audit gratuit
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 className="border-slate-300 text-slate-700 hover:bg-slate-100 px-6 py-3 text-base rounded-lg"
                 onClick={() => setIsContactModalOpen(true)}
@@ -416,8 +502,8 @@ const GestionImmobilier = () => {
               <label className="block text-sm font-medium text-slate-700 mb-3">
                 Service souhaité *
               </label>
-              <Select 
-                value={selectedService} 
+              <Select
+                value={selectedService}
                 onValueChange={setSelectedService}
                 required
               >
@@ -441,7 +527,7 @@ const GestionImmobilier = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Nom complet *
+                  Nom *
                 </label>
                 <Input
                   name="nom"
@@ -449,6 +535,18 @@ const GestionImmobilier = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Votre nom"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Prénom *
+                </label>
+                <Input
+                  name="prenom"
+                  value={formData.prenom}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Votre prénom"
                 />
               </div>
               <div>
@@ -485,10 +583,12 @@ const GestionImmobilier = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Type de bien
                 </label>
-                <Select 
+                <Select
                   name="typeBien"
-                  value={formData.typeBien} 
-                  onValueChange={(value) => setFormData({...formData, typeBien: value})}
+                  value={formData.typeBien}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, typeBien: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Type de bien" />
@@ -497,7 +597,9 @@ const GestionImmobilier = () => {
                     <SelectItem value="appartement">Appartement</SelectItem>
                     <SelectItem value="maison">Maison</SelectItem>
                     <SelectItem value="studio">Studio</SelectItem>
-                    <SelectItem value="local-commercial">Local commercial</SelectItem>
+                    <SelectItem value="local-commercial">
+                      Local commercial
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -539,8 +641,8 @@ const GestionImmobilier = () => {
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-base font-semibold"
               disabled={!selectedService}
             >
@@ -548,7 +650,8 @@ const GestionImmobilier = () => {
             </Button>
 
             <p className="text-xs text-slate-500 text-center">
-              * Champs obligatoires. Nous vous recontacterons dans les 24 heures ouvrables.
+              * Champs obligatoires. Nous vous recontacterons dans les 24 heures
+              ouvrables.
             </p>
           </form>
         </DialogContent>
@@ -612,9 +715,11 @@ const GestionImmobilier = () => {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Sujet *
               </label>
-              <Select 
-                value={contactFormData.sujet} 
-                onValueChange={(value) => setContactFormData({...contactFormData, sujet: value})}
+              <Select
+                value={contactFormData.sujet}
+                onValueChange={(value) =>
+                  setContactFormData({ ...contactFormData, sujet: value })
+                }
                 required
               >
                 <SelectTrigger className="w-full">
@@ -652,14 +757,16 @@ const GestionImmobilier = () => {
                     Besoin d'une réponse rapide ?
                   </p>
                   <p className="text-xs text-blue-600">
-                    Appelez-nous au <span className="font-semibold">01 23 45 67 89</span> du lundi au vendredi de 9h à 18h
+                    Appelez-nous au{" "}
+                    <span className="font-semibold">01 23 45 67 89</span> du
+                    lundi au vendredi de 9h à 18h
                   </p>
                 </div>
               </div>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-base font-semibold"
             >
               <Mail className="h-4 w-4 mr-2" />
@@ -667,7 +774,8 @@ const GestionImmobilier = () => {
             </Button>
 
             <p className="text-xs text-slate-500 text-center">
-              * Champs obligatoires. Nous vous répondrons dans les plus brefs délais.
+              * Champs obligatoires. Nous vous répondrons dans les plus brefs
+              délais.
             </p>
           </form>
         </DialogContent>
