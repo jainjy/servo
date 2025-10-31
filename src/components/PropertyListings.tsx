@@ -462,11 +462,11 @@ const ModalDemandeVisite = ({
                       className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none hover:bg-white"
                     >
                       <option value="">Sélectionnez un créneau</option>
-                      <option value="08:00-10:00">Matin : 08h00 - 10h00</option>
-                      <option value="10:00-12:00">Matin : 10h00 - 12h00</option>
-                      <option value="14:00-16:00">Après-midi : 14h00 - 16h00</option>
-                      <option value="16:00-18:00">Après-midi : 16h00 - 18h00</option>
-                      <option value="18:00-20:00">Soir : 18h00 - 20h00</option>
+                      <option value="08:00">Matin : 08h00</option>
+                      <option value="10:00">Matin : 10h00</option>
+                      <option value="14:00">Après-midi : 14h00</option>
+                      <option value="16:00">Après-midi : 16h00</option>
+                      <option value="18:00">Soir : 18h00</option>
                     </select>
                   </div>
                 </div>

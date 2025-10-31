@@ -235,7 +235,7 @@ const ListeDemandesImmobilier = () => {
         const load = async () => {
             setLoading(true);
             try {
-                const resp = await api.get(`/demandes/immobilier/owner/${user.id}`);
+                const resp = await api.get(`/demandes/immobilier/owner/${user.id}`);  // Cette URL va devenir http://localhost:3001/api/demandes/immobilier/owner/{userId}
                 setDemandes(resp.data || []);
 
                 try {

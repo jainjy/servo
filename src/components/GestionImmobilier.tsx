@@ -2,6 +2,9 @@ import { useState } from "react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { demandeDevisAPI } from "@/services/demandeDevis";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,6 +35,7 @@ const GestionImmobilier = () => {
   const [selectedService, setSelectedService] = useState("");
   const [formData, setFormData] = useState({
     nom: "",
+    prenom: "",
     email: "",
     telephone: "",
     adresse: "",
@@ -146,21 +150,78 @@ const GestionImmobilier = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulation d'envoi
-    console.log("Formulaire soumis:", { ...formData, service: selectedService });
-    alert("Votre demande a été envoyée avec succès ! Nous vous recontacterons dans les 24h.");
-    setIsModalOpen(false);
-    setFormData({
-      nom: "",
-      email: "",
-      telephone: "",
-      adresse: "",
-      typeBien: "",
-      message: "",
-      dateSouhaitee: ""
-    });
+    
+    // Debug logs
+    console.log("État de l'authentification:", { user, isAuthenticated: Boolean(user) });
+    console.log("Token stocké:", localStorage.getItem('token'));
+    
+    if (!user || !isAuthenticated) {
+      console.error('Utilisateur non authentifié:', { user, isAuthenticated });
+      toast({
+        title: "Erreur d'authentification",
+        description: "Vous devez être connecté pour faire une demande de devis",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Vérifier le token
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Token manquant');
+      toast({
+        title: "Erreur de session",
+        description: "Votre session a expiré, veuillez vous reconnecter",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const demandeData = {
+        serviceId: selectedService,
+        description: formData.message,
+        dateSouhaitee: formData.dateSouhaitee,
+        lieuAdresse: formData.adresse,
+        contactNom: formData.nom,
+        contactPrenom: "", // À ajouter dans le formulaire si nécessaire
+        contactEmail: formData.email,
+        contactTel: formData.telephone,
+        contactAdresse: formData.adresse
+      };
+
+      const response = await demandeDevisAPI.creerDemande(demandeData);
+
+      toast({
+        title: "Succès",
+        description: "Votre demande de devis a été envoyée avec succès !",
+        variant: "default"
+      });
+
+      setIsModalOpen(false);
+      setFormData({
+        nom: "",
+        prenom: "",
+        email: "",
+        telephone: "",
+        adresse: "",
+        typeBien: "",
+        message: "",
+        dateSouhaitee: ""
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de la demande:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi de votre demande. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleContactSubmit = (e) => {
@@ -214,7 +275,7 @@ const GestionImmobilier = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button  
-                className="border-white text-white bg-white text-slate-900 hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
+                className="border-white text-white bg-white hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
                 onClick={() => setIsModalOpen(true)}
               >
                 Demander un devis
@@ -436,7 +497,7 @@ const GestionImmobilier = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Nom complet *
+                  Nom *
                 </label>
                 <Input
                   name="nom"
@@ -444,6 +505,18 @@ const GestionImmobilier = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Votre nom"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Prénom *
+                </label>
+                <Input
+                  name="prenom"
+                  value={formData.prenom}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Votre prénom"
                 />
               </div>
               <div>
