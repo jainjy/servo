@@ -576,7 +576,7 @@ const Header = () => {
 
                   {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
                   <Link
-                    to="/mes-commandes"
+                    to="/mon-compte/mes-commandes"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
                   >

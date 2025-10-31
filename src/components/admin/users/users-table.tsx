@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { UserModal } from "./user-modal"
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { 
   Search, 
   Mail, 
@@ -141,7 +142,7 @@ export function UsersTable() {
         </div>
         <div className="p-6">
           {loading ? (
-            <div className="text-center py-8">Chargement des utilisateurs...</div>
+            <LoadingSpinner text="Chargement des utilisateurs..." />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredUsers.map((user) => (

@@ -14,7 +14,7 @@ class UserService {
   // Mettre à jour le profil
   static async updateProfile(userData) {
     try {
-      const response = await api.put('/users/profile', userData);
+      const response = await api.put("/users/update/profile", userData);
       return response.data;
     } catch (error) {
       throw this.handleError(error, 'Erreur lors de la mise à jour du profil');

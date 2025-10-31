@@ -44,6 +44,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
     optionAssurance: false,
     description: '',
     serviceId: '',
+    metierId: '',
     nombreArtisans: 'UNIQUE'
   });
   const [metiers, setMetiers] = useState([]);
@@ -93,6 +94,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
     setLoading(true);
 
     try {
+      formData.metierId=selectedMetier
   await api.post('/demandes', {
         ...formData,
         createdById: userId
@@ -102,20 +104,21 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
       onClose();
       // Réinitialiser le formulaire
       setFormData({
-        contactNom: '',
-        contactPrenom: '',
-        contactEmail: '',
-        contactTel: '',
-        contactAdresse: '',
-        contactAdresseCp: '',
-        contactAdresseVille: '',
-        lieuAdresse: '',
-        lieuAdresseCp: '',
-        lieuAdresseVille: '',
+        contactNom: "",
+        contactPrenom: "",
+        contactEmail: "",
+        contactTel: "",
+        contactAdresse: "",
+        contactAdresseCp: "",
+        contactAdresseVille: "",
+        lieuAdresse: "",
+        lieuAdresseCp: "",
+        lieuAdresseVille: "",
         optionAssurance: false,
-        description: '',
-        serviceId: '',
-        nombreArtisans: 'UNIQUE'
+        description: "",
+        serviceId: "",
+        nombreArtisans: "UNIQUE",
+        metierId: "",
       });
       setSelectedMetier('');
     } catch (error) {
@@ -277,7 +280,9 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
               <div className="relative">
                 <select 
                   value={selectedMetier}
-                  onChange={(e) => setSelectedMetier(e.target.value)}
+                  onChange={(e) =>{ setSelectedMetier(e.target.value)
+                    console.log(e.target.value)
+                  }}
                   className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition-all duration-200"
                 >
                   <option value="">Sélectionnez un métier</option>

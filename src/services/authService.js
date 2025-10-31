@@ -309,6 +309,7 @@ class AuthService {
     }
 
     if (error.response?.status === 403) {
+      console.error("Accès non autorisé détecté",error);
       return new Error("Accès non autorisé");
     }
 
@@ -364,7 +365,7 @@ class AuthService {
   // Mettre à jour le profil utilisateur
   static async updateProfile(userData) {
     try {
-      const response = await api.put("/users/profile", userData);
+      const response = await api.put("/users/update/profile", userData);
       const updatedUser = response.data;
 
       // Mettre à jour les données locales
@@ -383,7 +384,7 @@ class AuthService {
   // Changer le mot de passe
   static async changePassword(currentPassword, newPassword) {
     try {
-      const response = await api.put("/users/change-password", {
+      const response = await api.put("/users/update/change-password", {
         currentPassword,
         newPassword,
       });
