@@ -90,7 +90,10 @@ import ProOrders from './components/pro/ProOrders';
 import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
 import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
+import CookieConsent from "./components/CookieConsent";
+import CookiesPolicy from "./pages/CookiesPolicy";
 
+  
 
 const queryClient = new QueryClient();
 
@@ -138,6 +141,7 @@ const App = () => (
               {/* Section publiques Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/bien-etre" element={<BienEtre />} />
+              <Route path="/cookies" element={<CookiesPolicy />} />
               <Route path="/podcasts" element={<Podcast />} />
               <Route path="/immobilier" element={<Immobilier />} />
               <Route path="/droitFamille" element={<DroitFamille />} />
@@ -263,15 +267,18 @@ const App = () => (
                   element={<ServiceCategoriesPage />}
                 />
                 <Route path="metiers" element={<AdminMetiers />} />
+                
               </Route>
               {/* Section not found Routes */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <CookieConsent />
           </Layout>
         </BrowserRouter>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
