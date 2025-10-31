@@ -1,10 +1,12 @@
+/* CORRECT : @import doit être en premier */
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import "slick-carousel/slick/slick.css";
-@import "slick-carousel/slick/slick-theme.css";
-
+/* ... reste de votre CSS */
 
 @layer base {
   :root {

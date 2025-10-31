@@ -90,7 +90,7 @@ import ProOrders from './components/pro/ProOrders';
 import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
 import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
-
+import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 
 const queryClient = new QueryClient();
 
@@ -257,12 +257,16 @@ const App = () => (
                 <Route path="tourism" element={<Tourism />} />
                 <Route path="users" element={<Users />} />
                 <Route path="vendors" element={<Vendors />} />
+                
                 <Route path="demandes" element={<ListeDemande />} />
                 <Route
                   path="service-categories"
                   element={<ServiceCategoriesPage />}
                 />
                 <Route path="metiers" element={<AdminMetiers />} />
+                
+                {/* NOUVELLE ROUTE FINANCEMENT DEMANDES */}
+                <Route path="financement-demandes" element={<FinancementDemandes />} />
               </Route>
               {/* Section not found Routes */}
               <Route path="*" element={<NotFound />} />

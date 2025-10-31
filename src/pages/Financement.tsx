@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { motion } from "framer-motion";
+import { financementAPI } from "@/lib/api";
 import { 
   Building2, 
   Users, 
@@ -23,11 +24,48 @@ import {
   Clock,
   Heart,
   X,
-  ArrowRight
+  ArrowRight,
+  LucideIcon
 } from "lucide-react";
 
-// Données des partenaires financement
-const partenairesFinancement = [
+// Types
+interface FinancementPartenaire {
+  id: number;
+  nom: string;
+  description: string;
+  rating: number;
+  avantages: string[];
+  icon?: LucideIcon;
+  type: string;
+}
+
+interface AssuranceService {
+  id: number;
+  nom: string;
+  description: string;
+  details: string;
+  icon?: LucideIcon;
+  obligatoire: boolean;
+  public: string;
+}
+
+interface ModalData {
+  selectedAssurance: AssuranceService | null;
+  selectedPartenaire: FinancementPartenaire | null;
+  simulationData: any;
+}
+
+interface FormData {
+  nom: string;
+  email: string;
+  telephone: string;
+  message: string;
+  montant: string;
+  duree: string;
+}
+
+// Données de fallback en cas d'erreur API
+const partenairesFinancementFallback: FinancementPartenaire[] = [
   {
     id: 1,
     nom: "Crédit Agricole",
@@ -57,8 +95,7 @@ const partenairesFinancement = [
   }
 ];
 
-// Données des assurances
-const servicesAssurance = [
+const servicesAssuranceFallback: AssuranceService[] = [
   {
     id: 1,
     nom: "Assurance Décennale",
@@ -116,14 +153,46 @@ const servicesAssurance = [
 ];
 
 export default function Financement() {
-  const [activeModal, setActiveModal] = useState(null);
-  const [modalData, setModalData] = useState({
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [modalData, setModalData] = useState<ModalData>({
     selectedAssurance: null,
     selectedPartenaire: null,
     simulationData: null
   });
+  const [partenairesFinancement, setPartenairesFinancement] = useState<FinancementPartenaire[]>([]);
+  const [servicesAssurance, setServicesAssurance] = useState<AssuranceService[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const openModal = (modalType, data = {}) => {
+  // Charger les données depuis l'API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const [partenairesResponse, assurancesResponse] = await Promise.all([
+          financementAPI.getPartenaires(),
+          financementAPI.getAssurances()
+        ]);
+        
+        setPartenairesFinancement(partenairesResponse.data);
+        setServicesAssurance(assurancesResponse.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+        setError('Impossible de charger les données. Affichage des données de démonstration.');
+        // Fallback sur les données statiques
+        setPartenairesFinancement(partenairesFinancementFallback);
+        setServicesAssurance(servicesAssuranceFallback);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const openModal = (modalType: string, data: Partial<ModalData> = {}) => {
     setActiveModal(modalType);
     setModalData(prev => ({ ...prev, ...data }));
   };
@@ -137,24 +206,72 @@ export default function Financement() {
     });
   };
 
-  const handleAssuranceClick = (assurance) => {
+  const handleAssuranceClick = (assurance: AssuranceService) => {
     openModal('contact', { selectedAssurance: assurance });
   };
 
-  const handlePartenaireClick = (partenaire) => {
+  const handlePartenaireClick = (partenaire: FinancementPartenaire) => {
     openModal('contact', { selectedPartenaire: partenaire });
   };
 
-  const handleSimulationSubmit = (simulationData) => {
-    openModal('contact', { 
-      simulationData,
-      message: `Bonjour, je suis intéressé par une simulation de financement. Montant: ${simulationData.montant}€, Durée: ${simulationData.duree} ans. Estimation: ${simulationData.estimation}€/mois.`
-    });
+  const handleSimulationSubmit = async (simulationData: any) => {
+    try {
+      // Préparer les données pour l'API
+      const demandeData = {
+        nom: simulationData.nom,
+        email: simulationData.email,
+        telephone: simulationData.telephone,
+        message: `Bonjour, je suis intéressé par une simulation de financement. Montant: ${simulationData.montant}€, Durée: ${simulationData.duree} ans. Estimation: ${simulationData.estimation}€/mois.`,
+        type: 'simulation',
+        montant: parseFloat(simulationData.montant),
+        duree: parseInt(simulationData.duree),
+        estimation: simulationData.estimation
+      };
+
+      // Envoyer à l'API
+      const response = await financementAPI.submitDemande(demandeData);
+
+      if (response.data.success) {
+        alert("Votre demande a été envoyée avec succès !");
+        closeModal();
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de la demande:', error);
+      alert("Erreur lors de l'envoi de la demande. Veuillez réessayer.");
+    }
   };
+
+  // Afficher le loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
+            <p className="text-slate-600">Chargement des données...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
       <Header />
+      
+      {/* Message d'erreur */}
+      {error && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mx-4 mt-4">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {error}
+          </div>
+        </div>
+      )}
       
       {/* Hero Section avec background image */}
       <section className="relative py-24 overflow-hidden">
@@ -240,7 +357,11 @@ export default function Financement() {
                 <Card className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group">
                   <div className="flex items-center mb-6">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mr-5 group-hover:bg-slate-900 transition-colors duration-300">
-                      <partenaire.icon className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
+                      {partenaire.icon ? (
+                        <partenaire.icon className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
+                      ) : (
+                        <Building2 className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
+                      )}
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-slate-900">{partenaire.nom}</h3>
@@ -254,7 +375,7 @@ export default function Financement() {
                   <p className="text-slate-600 mb-6 leading-relaxed">{partenaire.description}</p>
                   
                   <div className="space-y-3 mb-8">
-                    {partenaire.avantages.map((avantage, idx) => (
+                    {partenaire.avantages && partenaire.avantages.map((avantage, idx) => (
                       <div key={idx} className="flex items-center text-sm">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
                         <span className="text-slate-700">{avantage}</span>
@@ -308,7 +429,11 @@ export default function Financement() {
                 >
                   <div className="flex items-start justify-between mb-6">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-slate-900 transition-colors duration-300">
-                      <assurance.icon className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
+                      {assurance.icon ? (
+                        <assurance.icon className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
+                      ) : (
+                        <Shield className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
+                      )}
                     </div>
                     {assurance.obligatoire && (
                       <span className="px-3 py-1.5 bg-orange-100 text-orange-800 text-sm font-medium rounded-full border border-orange-200">
@@ -374,13 +499,22 @@ export default function Financement() {
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
+
+      <Footer />
     </div>
   );
 }
 
 // ----------- Modal Universel -----------
-function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
-  const [formData, setFormData] = useState({
+interface UniversalModalProps {
+  type: string;
+  data: ModalData;
+  onClose: () => void;
+  onSimulationSubmit: (data: any) => void;
+}
+
+function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalModalProps) {
+  const [formData, setFormData] = useState<FormData>({
     nom: "",
     email: "",
     telephone: "",
@@ -388,10 +522,10 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
     montant: "",
     duree: ""
   });
+  const [estimation, setEstimation] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [estimation, setEstimation] = useState(null);
-
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
@@ -405,19 +539,69 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
     
-    if (type === 'simulation' && estimation) {
-      onSimulationSubmit({
-        montant: formData.montant,
-        duree: formData.duree,
-        estimation: estimation
-      });
-    } else {
-      console.log("Formulaire envoyé:", formData);
-      alert("Votre demande a été envoyée avec succès !");
-      onClose();
+    if ((name === 'montant' || name === 'duree') && formData.montant && formData.duree) {
+      const montant = name === 'montant' ? value : formData.montant;
+      const duree = name === 'duree' ? value : formData.duree;
+      if (montant && duree) {
+        const mensualite = Math.round((parseInt(montant) / (parseInt(duree) * 12)) * 100) / 100;
+        setEstimation(mensualite);
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      let demandeData: any = {
+        nom: formData.nom,
+        email: formData.email,
+        telephone: formData.telephone,
+        message: formData.message || getDefaultMessage(),
+        type: type === 'simulation' ? 'simulation' : 'contact'
+      };
+
+      // Ajouter les données spécifiques
+      if (type === 'simulation' && estimation) {
+        demandeData.montant = parseFloat(formData.montant);
+        demandeData.duree = parseInt(formData.duree);
+        demandeData.estimation = estimation;
+      }
+
+      if (data.selectedAssurance) {
+        demandeData.assuranceId = data.selectedAssurance.id;
+      }
+
+      if (data.selectedPartenaire) {
+        demandeData.partenaireId = data.selectedPartenaire.id;
+      }
+
+      // Envoyer à l'API
+      const response = await financementAPI.submitDemande(demandeData);
+
+      if (response.data.success) {
+        alert("Votre demande a été envoyée avec succès !");
+        onClose();
+        // Réinitialiser le formulaire
+        setFormData({
+          nom: "",
+          email: "",
+          telephone: "",
+          message: "",
+          montant: "",
+          duree: ""
+        });
+        setEstimation(null);
+      }
+    } catch (error) {
+      console.error('Erreur envoi demande:', error);
+      alert("Erreur lors de l'envoi de la demande. Veuillez réessayer.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -445,7 +629,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
       return `Bonjour, je souhaite contacter ${data.selectedPartenaire.nom} pour discuter de financement.`;
     }
     if (data.simulationData) {
-      return data.message;
+      return data.simulationData.message;
     }
     return "Bonjour, je souhaite obtenir des informations sur vos services de financement et assurance.";
   };
@@ -511,6 +695,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
             value={formData.montant}
             onChange={handleInputChange}
             className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            required={type === 'simulation'}
           />
         </div>
 
@@ -519,9 +704,8 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
             Durée du prêt
           </label>
           <Select 
-            name="duree" 
             value={formData.duree} 
-            onValueChange={(value) => handleInputChange({ target: { name: 'duree', value } })}
+            onValueChange={(value) => handleSelectChange('duree', value)}
           >
             <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
               <SelectValue placeholder="Sélectionnez la durée" />
@@ -559,6 +743,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
             onChange={handleInputChange}
             required
             className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            disabled={submitting}
           />
         </div>
         <div>
@@ -570,6 +755,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
             onChange={handleInputChange}
             required
             className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            disabled={submitting}
           />
         </div>
       </div>
@@ -582,6 +768,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
         onChange={handleInputChange}
         required
         className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+        disabled={submitting}
       />
 
       <div>
@@ -593,6 +780,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
           onChange={handleInputChange}
           className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 resize-none"
           required
+          disabled={submitting}
         />
       </div>
 
@@ -600,8 +788,14 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
         <Button 
           type="submit" 
           className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
+          disabled={submitting}
         >
-          {type === 'simulation' ? (
+          {submitting ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+              Envoi en cours...
+            </>
+          ) : type === 'simulation' ? (
             <>
               <Calculator className="h-5 w-5 mr-3" />
               Obtenir un devis précis
@@ -618,6 +812,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
           onClick={onClose}
           variant="outline" 
           className="flex-1 rounded-xl py-4 text-base font-semibold border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
+          disabled={submitting}
         >
           Annuler
         </Button>
@@ -649,6 +844,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
               size="sm"
               onClick={onClose}
               className="h-10 w-10 p-0 hover:bg-slate-100 rounded-xl text-slate-600 hover:text-slate-800"
+              disabled={submitting}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -665,7 +861,16 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }) {
           {type === 'service' && (
             <div className="flex gap-4 mt-8">
               <Button 
-                onClick={() => openModal('contact')}
+                onClick={() => {
+                  // Utilisez une fonction pour ouvrir le modal contact
+                  const openContactModal = () => {
+                    const event = new CustomEvent('openModal', { 
+                      detail: { type: 'contact' } 
+                    });
+                    window.dispatchEvent(event);
+                  };
+                  openContactModal();
+                }}
                 className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
               >
                 <Phone className="h-5 w-5 mr-3" />
