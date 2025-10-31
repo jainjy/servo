@@ -1,25 +1,25 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card } from "@/components/ui/card"
-import { 
-  X, 
-  Save, 
-  ChevronLeft, 
-  ChevronRight, 
-  Upload, 
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import {
+  X,
+  Save,
+  ChevronLeft,
+  ChevronRight,
+  Upload,
   CheckCircle,
   Euro,
   Ruler,
   MapPin,
-  Home,
-  Loader2
-} from "lucide-react"
-import api from "@/lib/api"
-import { toast } from "sonner"
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import api from "@/lib/api";
+import { toast } from "sonner";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -27,7 +27,7 @@ const STATUT_ANNONCE = {
   for_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
   for_rent: { label: "À louer", color: "bg-purple-100 text-purple-800" },
   sold: { label: "Vendu", color: "bg-gray-100 text-gray-800" },
-  rented: { label: "Loué", color: "bg-gray-100 text-gray-800" }
+  rented: { label: "Loué", color: "bg-gray-100 text-gray-800" },
 };
 
 const TYPE_BIEN = {
@@ -35,38 +35,38 @@ const TYPE_BIEN = {
   apartment: "Appartement",
   villa: "Villa",
   land: "Terrain",
-  studio: "Studio"
+  studio: "Studio",
 };
 
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
-  both: "Les deux"
+  both: "Les deux",
 };
 
 interface ListingModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   listing?: {
-    id: string
-    title: string
-    type: string
-    price: number
-    address: string
-    city: string
-    surface: number
-    rooms: number
-    bedrooms: number
-    bathrooms: number
-    description: string
-    status: string
-    images: string[]
-    features: string[]
-    listingType: string
-    ownerId: string
-  }
-  mode: "create" | "edit"
-  onSuccess?: () => void
+    id: string;
+    title: string;
+    type: string;
+    price: number;
+    address: string;
+    city: string;
+    surface: number;
+    rooms: number;
+    bedrooms: number;
+    bathrooms: number;
+    description: string;
+    status: string;
+    images: string[];
+    features: string[];
+    listingType: string;
+    ownerId: string;
+  };
+  mode: "create" | "edit";
+  onSuccess?: () => void;
 }
 
 // Composant Modal
@@ -77,12 +77,14 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
     sm: "max-w-md",
     md: "max-w-2xl",
     lg: "max-w-4xl",
-    xl: "max-w-6xl"
+    xl: "max-w-6xl",
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fadeIn">
-      <div className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-scaleIn ${sizeClasses[size]}`}>
+      <div
+        className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-scaleIn ${sizeClasses[size]}`}
+      >
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold">{title}</h2>
           <button
@@ -92,17 +94,33 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
             <X size={24} />
           </button>
         </div>
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );
 };
 
-export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: ListingModalProps) {
+// Interface pour les images temporaires
+interface TemporaryImage {
+  file: File;
+  previewUrl: string;
+  id: string;
+}
+
+export function ListingModal({
+  open,
+  onOpenChange,
+  listing,
+  mode,
+  onSuccess,
+}: ListingModalProps) {
   const [etape, setEtape] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [temporaryImages, setTemporaryImages] = useState<TemporaryImage[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
   const [formData, setFormData] = useState({
     // Étape 1 - Informations générales
     title: "",
@@ -122,7 +140,7 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
     // Étape 4 - Médias
     images: [],
     // Étape 5 - Publication
-    status: "draft"
+    status: "draft",
   });
 
   const etapes = [
@@ -130,7 +148,7 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
     { numero: 2, titre: "Caractéristiques" },
     { numero: 3, titre: "Options" },
     { numero: 4, titre: "Médias" },
-    { numero: 5, titre: "Publication" }
+    { numero: 5, titre: "Publication" },
   ];
 
   useEffect(() => {
@@ -149,8 +167,11 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
         listingType: listing.listingType || "sale",
         features: listing.features || [],
         images: listing.images || [],
-        status: listing.status || "draft"
+        status: listing.status || "draft",
       });
+      setExistingImages(listing.images || []);
+      setTemporaryImages([]);
+      setImagesToDelete([]);
     } else if (!open && mode === "create") {
       setFormData({
         title: "",
@@ -166,51 +187,90 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
         listingType: "sale",
         features: [],
         images: [],
-        status: "draft"
+        status: "draft",
       });
+      setExistingImages([]);
+      setTemporaryImages([]);
+      setImagesToDelete([]);
       setEtape(1);
     }
   }, [open, listing, mode]);
 
+  // Nettoyer les URLs temporaires
+  useEffect(() => {
+    return () => {
+      temporaryImages.forEach((image) => {
+        URL.revokeObjectURL(image.previewUrl);
+      });
+    };
+  }, [temporaryImages]);
+
   const handleImageUpload = async (files: File[]): Promise<string[]> => {
     const uploadedUrls: string[] = [];
-    
+
     for (const file of files) {
       const formData = new FormData();
-      formData.append('file', file);
-      
+      formData.append("file", file);
+
       try {
-        const response = await api.post('/upload/property-image', formData, {
+        const response = await api.post("/upload/property-image", formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
-        
+
         if (response.data.url) {
           uploadedUrls.push(response.data.url);
         }
       } catch (error) {
         console.error("Error uploading image:", error);
+        throw new Error("Erreur lors de l'upload des images");
       }
     }
-    
+
     return uploadedUrls;
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      const newImages = await handleImageUpload(files);
-      setFormData({
-        ...formData,
-        images: [...formData.images, ...newImages]
-      });
+      const newTemporaryImages: TemporaryImage[] = files.map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+        id: Math.random().toString(36).substr(2, 9),
+      }));
+
+      setTemporaryImages((prev) => [...prev, ...newTemporaryImages]);
+
+      // Réinitialiser l'input file
+      e.target.value = "";
     }
   };
 
-  const removeImage = (index: number) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
-    setFormData({ ...formData, images: newImages });
+  const removeTemporaryImage = (id: string) => {
+    const imageToRemove = temporaryImages.find((img) => img.id === id);
+    if (imageToRemove) {
+      URL.revokeObjectURL(imageToRemove.previewUrl);
+    }
+    setTemporaryImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const removeExistingImage = (imageUrl: string) => {
+    setExistingImages((prev) => prev.filter((img) => img !== imageUrl));
+    setImagesToDelete((prev) => [...prev, imageUrl]);
+  };
+
+  const uploadAllImages = async (): Promise<string[]> => {
+    if (temporaryImages.length === 0) return [];
+
+    setUploadingImages(true);
+    try {
+      const files = temporaryImages.map((img) => img.file);
+      const uploadedUrls = await handleImageUpload(files);
+      return uploadedUrls;
+    } finally {
+      setUploadingImages(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -218,6 +278,15 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
     setLoading(true);
 
     try {
+      // Uploader toutes les nouvelles images
+      const newImageUrls = await uploadAllImages();
+
+      // Combiner les images existantes (sans celles supprimées) avec les nouvelles
+      const finalImages = [
+        ...existingImages.filter((img) => !imagesToDelete.includes(img)),
+        ...newImageUrls,
+      ];
+
       const payload = {
         ...formData,
         price: formData.price ? parseFloat(formData.price) : null,
@@ -225,15 +294,18 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
         rooms: formData.rooms ? parseInt(formData.rooms) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
-        ownerId: listing?.ownerId || 'default-owner-id' // Pour l'admin, on peut utiliser un ID par défaut
+        images: finalImages,
+        ownerId: listing?.ownerId || "default-owner-id",
       };
 
       if (mode === "create") {
-        await api.post('/properties', payload);
+        await api.post("/properties", payload);
+        toast.success("Annonce créée avec succès");
       } else {
         await api.put(`/properties/${listing?.id}`, payload);
+        toast.success("Annonce modifiée avec succès");
       }
-      
+
       onOpenChange(false);
       if (onSuccess) {
         onSuccess();
@@ -243,7 +315,7 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
       if (error.response?.data?.error) {
         toast.error(error.response.data.error);
       } else {
-        toast.error("Une erreur est survenue");
+        toast.error("Une erreur est survenue lors de la sauvegarde");
       }
     } finally {
       setLoading(false);
@@ -259,35 +331,64 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
   };
 
   const equipementsDisponibles = [
-    "pool", "garden", "parking", "terrace", "balcony",
-    "elevator", "fireplace", "air_conditioning", "fiber_optic"
+    "pool",
+    "garden",
+    "parking",
+    "terrace",
+    "balcony",
+    "elevator",
+    "fireplace",
+    "air_conditioning",
+    "fiber_optic",
+  ];
+
+  const allImages = [
+    ...existingImages.map((url) => ({
+      type: "existing" as const,
+      url,
+      id: url,
+    })),
+    ...temporaryImages.map((img) => ({
+      type: "temporary" as const,
+      url: img.previewUrl,
+      id: img.id,
+    })),
   ];
 
   return (
-    <Modal isOpen={open} onClose={() => onOpenChange(false)} title={mode === "create" ? "Nouvelle annonce" : "Modifier l'annonce"} size="xl">
+    <Modal
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      title={mode === "create" ? "Nouvelle annonce" : "Modifier l'annonce"}
+      size="xl"
+    >
       <form onSubmit={handleSubmit}>
         {/* Barre de progression */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             {etapes.map((step, index) => (
               <div key={step.numero} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  etape >= step.numero 
-                    ? 'bg-blue-600 border-blue-600 text-white' 
-                    : 'border-gray-300 text-gray-500'
-                }`}>
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    etape >= step.numero
+                      ? "bg-blue-600 border-blue-600 text-white"
+                      : "border-gray-300 text-gray-500"
+                  }`}
+                >
                   {step.numero}
                 </div>
                 {index < etapes.length - 1 && (
-                  <div className={`w-12 h-1 mx-2 ${
-                    etape > step.numero ? 'bg-blue-600' : 'bg-gray-300'
-                  }`} />
+                  <div
+                    className={`w-12 h-1 mx-2 ${
+                      etape > step.numero ? "bg-blue-600" : "bg-gray-300"
+                    }`}
+                  />
                 )}
               </div>
             ))}
           </div>
           <div className="text-center font-medium">
-            {etapes.find(s => s.numero === etape)?.titre}
+            {etapes.find((s) => s.numero === etape)?.titre}
           </div>
         </div>
 
@@ -299,7 +400,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
               <Input
                 required
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 placeholder="Ex: Superbe appartement vue panoramique..."
               />
             </div>
@@ -310,11 +413,15 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                 <select
                   className="w-full p-3 border rounded-lg"
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: e.target.value })
+                  }
                   required
                 >
                   {Object.entries(TYPE_BIEN).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -326,11 +433,16 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                     type="number"
                     required
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
                     placeholder="Ex: 450000"
                     className="pl-8"
                   />
-                  <Euro className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <Euro
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                 </div>
               </div>
             </div>
@@ -341,7 +453,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                 required
                 rows={6}
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Décrivez votre bien en détail..."
               />
             </div>
@@ -359,11 +473,16 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                     type="number"
                     required
                     value={formData.surface}
-                    onChange={(e) => setFormData({ ...formData, surface: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, surface: e.target.value })
+                    }
                     placeholder="Ex: 75"
                     className="pl-8"
                   />
-                  <Ruler className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <Ruler
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                 </div>
               </div>
 
@@ -373,7 +492,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                   type="number"
                   required
                   value={formData.rooms}
-                  onChange={(e) => setFormData({ ...formData, rooms: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, rooms: e.target.value })
+                  }
                   placeholder="Ex: 3"
                 />
               </div>
@@ -384,7 +505,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                   type="number"
                   required
                   value={formData.bedrooms}
-                  onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bedrooms: e.target.value })
+                  }
                   placeholder="Ex: 2"
                 />
               </div>
@@ -396,7 +519,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                 <Input
                   type="number"
                   value={formData.bathrooms}
-                  onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bathrooms: e.target.value })
+                  }
                   placeholder="Ex: 1"
                 />
               </div>
@@ -409,11 +534,16 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                   <Input
                     required
                     value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
                     placeholder="Ex: 123 Avenue des Champs-Élysées"
                     className="pl-8"
                   />
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <MapPin
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                 </div>
               </div>
 
@@ -422,7 +552,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                 <Input
                   required
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
                   placeholder="Ex: Paris"
                 />
               </div>
@@ -438,11 +570,15 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.listingType}
-                onChange={(e) => setFormData({ ...formData, listingType: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, listingType: e.target.value })
+                }
                 required
               >
                 {Object.entries(LISTING_TYPE).map(([key, value]) => (
-                  <option key={key} value={key}>{value}</option>
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
                 ))}
               </select>
             </div>
@@ -460,17 +596,21 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                         if (e.target.checked) {
                           setFormData({
                             ...formData,
-                            features: [...formData.features, equipement]
+                            features: [...formData.features, equipement],
                           });
                         } else {
                           setFormData({
                             ...formData,
-                            features: formData.features.filter(e => e !== equipement)
+                            features: formData.features.filter(
+                              (e) => e !== equipement
+                            ),
                           });
                         }
                       }}
                     />
-                    <Label className="text-sm capitalize">{equipement.replace('_', ' ')}</Label>
+                    <Label className="text-sm capitalize">
+                      {equipement.replace("_", " ")}
+                    </Label>
                   </div>
                 ))}
               </div>
@@ -499,7 +639,7 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                   className="hidden"
                   id="property-images"
                 />
-                <Label 
+                <Label
                   htmlFor="property-images"
                   className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                 >
@@ -509,24 +649,45 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
               </div>
             </div>
 
-            {formData.images.length > 0 && (
+            {allImages.length > 0 && (
               <div>
-                <Label className="block mb-2">Images sélectionnées</Label>
+                <Label className="block mb-2">
+                  Images{" "}
+                  {mode === "edit"
+                    ? "existantes et nouvelles"
+                    : "sélectionnées"}
+                  {temporaryImages.length > 0 && (
+                    <span className="text-sm font-normal text-gray-500 ml-2">
+                      ({temporaryImages.length} nouvelle(s) image(s) à uploader)
+                    </span>
+                  )}
+                </Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img 
-                        src={image} 
-                        alt={`Image ${index + 1}`}
+                  {allImages.map((image) => (
+                    <div key={image.id} className="relative group">
+                      <img
+                        src={image.url}
+                        alt={`Image ${image.id}`}
                         className="w-full h-32 object-cover rounded-lg"
                       />
                       <button
                         type="button"
                         className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
+                        onClick={() => {
+                          if (image.type === "temporary") {
+                            removeTemporaryImage(image.id);
+                          } else {
+                            removeExistingImage(image.url);
+                          }
+                        }}
                       >
-                        <X size={14} />
+                        <Trash2 size={14} />
                       </button>
+                      {image.type === "temporary" && (
+                        <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          Nouvelle
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -543,10 +704,14 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
               >
                 {Object.entries(STATUT_ANNONCE).map(([key, statut]) => (
-                  <option key={key} value={key}>{statut.label}</option>
+                  <option key={key} value={key}>
+                    {statut.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -563,7 +728,9 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Type:</span>
-                  <span className="font-medium">{TYPE_BIEN[formData.type]}</span>
+                  <span className="font-medium">
+                    {TYPE_BIEN[formData.type]}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Prix:</span>
@@ -575,7 +742,17 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Type d'annonce:</span>
-                  <span className="font-medium">{LISTING_TYPE[formData.listingType]}</span>
+                  <span className="font-medium">
+                    {LISTING_TYPE[formData.listingType]}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Images:</span>
+                  <span className="font-medium">
+                    {allImages.length} image(s)
+                    {temporaryImages.length > 0 &&
+                      ` (dont ${temporaryImages.length} nouvelle(s))`}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -608,14 +785,15 @@ export function ListingModal({ open, onOpenChange, listing, mode, onSuccess }: L
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={loading}
+              disabled={loading || uploadingImages}
             >
-              {loading ? (
+              {loading || uploadingImages ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Save className="mr-2" size={16} />
               )}
-              {mode === "create" ? 'Créer' : 'Enregistrer'} l'annonce
+              {mode === "create" ? "Créer" : "Enregistrer"} l'annonce
+              {uploadingImages && " (upload des images...)"}
             </Button>
           )}
         </div>

@@ -36,6 +36,9 @@ export default function MonComptePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [pendingAvatar, setPendingAvatar] = useState<
+    { file: File; preview: string } | null
+  >(null);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -216,18 +219,23 @@ export default function MonComptePage() {
       return;
     }
 
+    // Créer une URL temporaire pour la prévisualisation
+    const preview = URL.createObjectURL(file);
+    setPendingAvatar({ file, preview });
+  };
+
+  const handleConfirmAvatar = async () => {
+    if (!pendingAvatar || !user) return;
+
     try {
       setUploadingAvatar(true);
-
-      // Upload de l'avatar
-      const uploadResult = await AuthService.uploadAvatar(file);
-
-      // Mettre à jour le profil avec la nouvelle URL d'avatar
+      const uploadResult = await AuthService.uploadAvatar(pendingAvatar.file);
       const updatedUser = await AuthService.updateProfile({
         avatar: uploadResult.url,
       });
 
       setUser(updatedUser);
+      setPendingAvatar(null);
 
       toast({
         title: "Avatar mis à jour",
@@ -245,6 +253,16 @@ export default function MonComptePage() {
       });
     } finally {
       setUploadingAvatar(false);
+    }
+  };
+
+  const handleCancelAvatar = () => {
+    if (pendingAvatar) {
+      URL.revokeObjectURL(pendingAvatar.preview);
+      setPendingAvatar(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -349,11 +367,15 @@ export default function MonComptePage() {
                         className="w-20 h-20 md:w-24 md:h-24 cursor-pointer"
                         onClick={handleAvatarClick}
                       >
-                        {user.avatar && (
-                          <AvatarImage
-                            src={user.avatar}
-                            alt={`${user.firstName} ${user.lastName}`}
-                          />
+                        {pendingAvatar ? (
+                          <AvatarImage src={pendingAvatar.preview} alt="Prévisualisation" />
+                        ) : (
+                          user.avatar && (
+                            <AvatarImage
+                              src={user.avatar}
+                              alt={`${user.firstName} ${user.lastName}`}
+                            />
+                          )
                         )}
                         <AvatarFallback className="bg-white/20 text-white text-xl font-semibold">
                           {uploadingAvatar ? (
@@ -364,13 +386,32 @@ export default function MonComptePage() {
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <button
-                      onClick={handleAvatarClick}
-                      disabled={uploadingAvatar}
-                      className="absolute -bottom-2 -right-2 bg-white text-gray-900 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
-                    >
-                      <Camera className="w-4 h-4" />
-                    </button>
+                    {pendingAvatar ? (
+                      <div className="absolute -bottom-2 -right-2 flex gap-1">
+                        <button
+                          onClick={handleConfirmAvatar}
+                          disabled={uploadingAvatar}
+                          className="bg-green-500 text-white rounded-full p-2 shadow-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={handleCancelAvatar}
+                          disabled={uploadingAvatar}
+                          className="bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleAvatarClick}
+                        disabled={uploadingAvatar}
+                        className="absolute -bottom-2 -right-2 bg-white text-gray-900 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </button>
+                    )}
                     <input
                       type="file"
                       ref={fileInputRef}
