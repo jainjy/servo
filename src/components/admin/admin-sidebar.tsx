@@ -9,6 +9,7 @@ import {
   MessageCircle,
   FileCheck,
   Ruler,
+  FileText,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
@@ -24,8 +25,9 @@ const navigation = [
   { name: "Produits", href: "/admin/products", icon: ShoppingBag },
   { name: "Tourisme", href: "/admin/tourism", icon: Plane },
   { name: "Paiements", href: "/admin/payments", icon: CreditCard },
-  { name: "Demandes", href: "/admin/demandes", icon: FileCheck, },
-  { name: "Métiers", href: "/admin/metiers", icon: Ruler, },
+  { name: "Demandes", href: "/admin/demandes", icon: FileCheck },
+  { name: "Financements", href: "/admin/financement-demandes", icon: FileText },
+  { name: "Métiers", href: "/admin/metiers", icon: Ruler },
   { name: "Paramètres", href: "/admin/settings", icon: Settings },
 ];
 
@@ -84,8 +86,6 @@ export function AdminSidebar() {
           showAll ? "grid-cols-4 sm:grid-cols-4" : "grid-cols-4"
         )}>
 
-
-
           {/* Les 3 premières icônes principales */}
           {mainIcons.map((item, i) => {
             const isActive = pathname === item.href
@@ -107,7 +107,6 @@ export function AdminSidebar() {
               </Link>
             )
           })}
-
 
           <button
             aria-label={showAll ? "Réduire" : "Voir plus"}

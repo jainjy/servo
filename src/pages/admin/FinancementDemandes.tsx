@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { financementAPI } from "@/lib/api";
-
+import { financementAPI } from '../../lib/api';
 
 interface User {
   id: string;
@@ -52,6 +51,14 @@ interface Filters {
   type: string;
 }
 
+interface Stats {
+  total: number;
+  pending: number;
+  processing: number;
+  approved: number;
+  rejected: number;
+}
+
 const FinancementDemandes: React.FC = () => {
   const [demandes, setDemandes] = useState<FinancementDemande[]>([]);
   const [selectedDemande, setSelectedDemande] = useState<FinancementDemande | null>(null);
@@ -72,6 +79,14 @@ const FinancementDemandes: React.FC = () => {
     type: ''
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    pending: 0,
+    processing: 0,
+    approved: 0,
+    rejected: 0
+  });
 
   const fetchDemandes = async (page: number = 1): Promise<void> => {
     setLoading(true);
@@ -88,6 +103,9 @@ const FinancementDemandes: React.FC = () => {
       
       setDemandes(data.demandes);
       setPagination(data.pagination);
+      
+      // Calcul des statistiques
+      calculateStats(data.demandes);
     } catch (error: any) {
       console.error('Erreur:', error);
       const errorMessage = error.response?.data?.error || 'Erreur lors du chargement des demandes';
@@ -95,6 +113,17 @@ const FinancementDemandes: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateStats = (demandesList: FinancementDemande[]) => {
+    const newStats: Stats = {
+      total: demandesList.length,
+      pending: demandesList.filter(d => d.status === 'pending').length,
+      processing: demandesList.filter(d => d.status === 'processing').length,
+      approved: demandesList.filter(d => d.status === 'approved').length,
+      rejected: demandesList.filter(d => d.status === 'rejected').length
+    };
+    setStats(newStats);
   };
 
   useEffect(() => {
@@ -136,15 +165,33 @@ const FinancementDemandes: React.FC = () => {
 
   const getStatusColor = (status: string): string => {
     const colors = {
-      pending: '#ff9800',
-      approved: '#4caf50',
-      rejected: '#f44336',
-      processing: '#2196f3'
+      pending: '#f59e0b',
+      processing: '#3b82f6',
+      approved: '#10b981',
+      rejected: '#ef4444'
     };
-    return colors[status as keyof typeof colors] || '#666';
+    return colors[status as keyof typeof colors] || '#6b7280';
+  };
+
+  const getStatusText = (status: string): string => {
+    const texts = {
+      pending: 'En attente',
+      processing: 'En traitement',
+      approved: 'Approuvé',
+      rejected: 'Rejeté'
+    };
+    return texts[status as keyof typeof texts] || status;
   };
 
   const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatDateTime = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
@@ -175,228 +222,482 @@ const FinancementDemandes: React.FC = () => {
     setSelectedDemande(null);
   };
 
-  return (
-    <div style={{ padding: '20px' }}>
-      <h1>Gestion des Demandes de Financement</h1>
+  const filteredDemandes = demandes.filter(demande =>
+    demande.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    demande.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    demande.telephone.includes(searchTerm)
+  );
 
+  return (
+    <div style={{ padding: '24px', backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
       {/* Notification */}
       {notification.show && (
         <div style={{
-          padding: '12px 16px',
-          marginBottom: '20px',
-          borderRadius: '4px',
-          backgroundColor: notification.type === 'success' ? '#4caf50' : '#f44336',
-          color: 'white'
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          padding: '16px 20px',
+          backgroundColor: notification.type === 'success' ? '#10b981' : '#ef4444',
+          color: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 1001,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '14px',
+          fontWeight: '500'
         }}>
-          {notification.message}
+          {notification.type === 'success' ? '✓' : '✗'} {notification.message}
         </div>
       )}
 
-      {/* Filtres */}
+      {/* En-tête principal */}
       <div style={{ 
-        backgroundColor: 'white', 
-        padding: '20px', 
-        marginBottom: '20px', 
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        backgroundColor: 'white',
+        padding: '24px',
+        borderRadius: '12px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        marginBottom: '24px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        <h3 style={{ marginTop: 0 }}>Filtres</h3>
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Statut</label>
+        <div>
+          <h1 style={{ 
+            fontSize: '24px', 
+            fontWeight: '700', 
+            color: '#2c3e50',
+            marginBottom: '8px'
+          }}>
+            Demandes de financement
+          </h1>
+          <div style={{ 
+            fontSize: '14px', 
+            color: '#64748b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <span>Gestion de toutes les demandes clients</span>
+            <span style={{
+              backgroundColor: '#3498db',
+              color: 'white',
+              borderRadius: '12px',
+              padding: '4px 8px',
+              fontSize: '12px',
+              fontWeight: '600'
+            }}>
+              {stats.total} demande{stats.total !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Cartes de statistiques */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '16px',
+        marginBottom: '24px'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Total</div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#2c3e50' }}>{stats.total}</div>
+        </div>
+        
+        <div style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>En attente</div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#f59e0b' }}>{stats.pending}</div>
+        </div>
+        
+        <div style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>En traitement</div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#3b82f6' }}>{stats.processing}</div>
+        </div>
+        
+        <div style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Traitées</div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#10b981' }}>{stats.approved + stats.rejected}</div>
+        </div>
+      </div>
+
+      {/* Barre de recherche et filtres */}
+      <div style={{ 
+        backgroundColor: 'white',
+        padding: '20px',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid #e2e8f0',
+        marginBottom: '24px'
+      }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Barre de recherche */}
+          <div style={{ flex: '1', minWidth: '300px' }}>
+            <input
+              type="text"
+              placeholder="Rechercher par nom, email ou téléphone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+            />
+          </div>
+
+          {/* Filtres */}
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <select 
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
               style={{ 
-                padding: '8px 12px', 
-                borderRadius: '4px', 
-                border: '1px solid #ddd',
-                minWidth: '120px'
+                padding: '12px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                backgroundColor: 'white',
+                outline: 'none',
+                minWidth: '160px'
               }}
             >
-              <option value="">Tous</option>
+              <option value="">Tous les statuts</option>
               <option value="pending">En attente</option>
               <option value="processing">En traitement</option>
               <option value="approved">Approuvé</option>
               <option value="rejected">Rejeté</option>
             </select>
-          </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Type</label>
             <select 
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
               style={{ 
-                padding: '8px 12px', 
-                borderRadius: '4px', 
-                border: '1px solid #ddd',
-                minWidth: '120px'
+                padding: '12px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                backgroundColor: 'white',
+                outline: 'none',
+                minWidth: '140px'
               }}
             >
-              <option value="">Tous</option>
+              <option value="">Tous types</option>
               <option value="contact">Contact</option>
+              <option value="simulation">Simulation</option>
               <option value="financement">Financement</option>
-              <option value="assurance">Assurance</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Tableau */}
+      {/* Tableau des demandes */}
       <div style={{ 
-        backgroundColor: 'white', 
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        border: '1px solid #e2e8f0',
         overflow: 'hidden'
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Date</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Nom</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Email</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Téléphone</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Type</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Montant</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Partenaire</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Statut</th>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={9} style={{ padding: '40px', textAlign: 'center' }}>
-                  <div>Chargement des demandes...</div>
-                </td>
-              </tr>
-            ) : demandes.length === 0 ? (
-              <tr>
-                <td colSpan={9} style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-                  Aucune demande trouvée
-                </td>
-              </tr>
-            ) : (
-              demandes.map((demande) => (
-                <tr key={demande.id} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '12px' }}>{formatDate(demande.createdAt)}</td>
-                  <td style={{ padding: '12px' }}>
-                    {demande.nom}
-                    {demande.user && (
-                      <div style={{ fontSize: '12px', color: '#666' }}>
-                        {demande.user.firstName} {demande.user.lastName}
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px' }}>{demande.email}</td>
-                  <td style={{ padding: '12px' }}>{demande.telephone}</td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      border: '1px solid #2196f3',
-                      color: '#2196f3',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
-                    }}>
-                      {demande.type}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    {demande.montant ? `${demande.montant} €` : 'N/A'}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    {demande.partenaire?.nom || 'Aucun'}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      backgroundColor: getStatusColor(demande.status),
-                      color: 'white',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
-                    }}>
-                      {demande.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <button 
-                        style={{
-                          padding: '6px 12px',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          backgroundColor: 'white',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                        onClick={() => viewDetails(demande)}
-                      >
-                        Détails
-                      </button>
-                      
-                      <select
-                        value={demande.status}
-                        onChange={(e) => handleStatusChange(demande.id, e.target.value)}
-                        style={{
-                          padding: '6px',
-                          borderRadius: '4px',
-                          border: '1px solid #ddd',
-                          fontSize: '12px'
-                        }}
-                      >
-                        <option value="pending">En attente</option>
-                        <option value="processing">En traitement</option>
-                        <option value="approved">Approuvé</option>
-                        <option value="rejected">Rejeté</option>
-                      </select>
+        {/* En-tête du tableau */}
+        <div style={{
+          padding: '20px 24px',
+          borderBottom: '1px solid #e2e8f0',
+          backgroundColor: '#f8fafc'
+        }}>
+          <h3 style={{ 
+            fontSize: '18px', 
+            fontWeight: '600', 
+            color: '#2c3e50',
+            margin: 0
+          }}>
+            Liste des demandes ({filteredDemandes.length})
+          </h3>
+        </div>
 
-                      <button 
-                        style={{
-                          padding: '6px 12px',
-                          border: '1px solid #f44336',
-                          borderRadius: '4px',
-                          backgroundColor: 'white',
-                          color: '#f44336',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                        onClick={() => handleDelete(demande.id)}
-                      >
-                        Supprimer
-                      </button>
+        {/* Corps du tableau */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ 
+            width: '100%', 
+            borderCollapse: 'collapse',
+            minWidth: '1000px'
+          }}>
+            <thead>
+              <tr style={{ backgroundColor: '#f8fafc' }}>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Client</th>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Contact</th>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Type</th>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Montant</th>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Date</th>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Statut</th>
+                <th style={{ 
+                  padding: '16px 20px', 
+                  textAlign: 'left', 
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569'
+                }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} style={{ padding: '48px', textAlign: 'center' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '3px solid #e2e8f0',
+                        borderTop: '3px solid #3b82f6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}></div>
+                      <div style={{ color: '#64748b', fontSize: '14px' }}>
+                        Chargement des demandes...
+                      </div>
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : filteredDemandes.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ 
+                    padding: '48px', 
+                    textAlign: 'center', 
+                    color: '#64748b',
+                    fontSize: '14px'
+                  }}>
+                    Aucune demande trouvée
+                  </td>
+                </tr>
+              ) : (
+                filteredDemandes.map((demande) => (
+                  <tr key={demande.id} style={{ 
+                    borderBottom: '1px solid #f1f5f9',
+                    transition: 'background-color 0.2s'
+                  }} onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f8fafc';
+                  }} onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }}>
+                    <td style={{ padding: '16px 20px' }}>
+                      <div style={{ fontWeight: '600', color: '#2c3e50', fontSize: '14px' }}>
+                        {demande.nom}
+                      </div>
+                      {demande.user && (
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                          {demande.user.firstName} {demande.user.lastName}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '16px 20px' }}>
+                      <div style={{ color: '#3498db', fontSize: '14px', fontWeight: '500' }}>{demande.email}</div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                        {demande.telephone}
+                      </div>
+                    </td>
+                    <td style={{ padding: '16px 20px' }}>
+                      <span style={{
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        backgroundColor: '#e8f4fd',
+                        color: '#2980b9',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        border: '1px solid #d6eaf8'
+                      }}>
+                        {demande.type}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 20px', color: '#27ae60', fontWeight: '600', fontSize: '14px' }}>
+                      {demande.montant ? `${demande.montant} €` : 'N/A'}
+                    </td>
+                    <td style={{ padding: '16px 20px', color: '#7f8c8d', fontSize: '14px' }}>
+                      {formatDate(demande.createdAt)}
+                    </td>
+                    <td style={{ padding: '16px 20px' }}>
+                      <span style={{
+                        color: getStatusColor(demande.status),
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        display: 'inline-block',
+                        textAlign: 'center'
+                      }}>
+                        {getStatusText(demande.status)}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 20px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', minWidth: '120px' }}>
+                        {/* Bouton Voir - en haut */}
+                        <button 
+                          onClick={() => viewDetails(demande)}
+                          style={{
+                            padding: '6px 12px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            backgroundColor: '#3498db',
+                            color: 'white',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            width: '100%',
+                            textAlign: 'center'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#2980b9';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#3498db';
+                          }}
+                        >
+                          Voir
+                        </button>
+                        
+                        {/* Sélecteur de statut - au milieu */}
+                        <select
+                          value={demande.status}
+                          onChange={(e) => handleStatusChange(demande.id, e.target.value)}
+                          style={{
+                            padding: '6px 8px',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            backgroundColor: 'white',
+                            outline: 'none',
+                            width: '100%',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <option value="pending">En attente</option>
+                          <option value="processing">En traitement</option>
+                          <option value="approved">Approuvé</option>
+                          <option value="rejected">Rejeté</option>
+                        </select>
+
+                        {/* Bouton Supprimer - en bas */}
+                        <button 
+                          onClick={() => handleDelete(demande.id)}
+                          style={{
+                            padding: '6px 12px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            width: '100%',
+                            textAlign: 'center'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#c0392b';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#e74c3c';
+                          }}
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Pagination */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '8px' }}>
-        {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            style={{
-              padding: '8px 12px',
-              border: page === pagination.currentPage ? '1px solid #2196f3' : '1px solid #ddd',
-              backgroundColor: page === pagination.currentPage ? '#2196f3' : 'white',
-              color: page === pagination.currentPage ? 'white' : '#333',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      {/* Styles pour l'animation de chargement */}
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
 
-      {/* Modal de détail */}
+      {/* Modal de détail (conservé de votre code original) */}
       {detailOpen && selectedDemande && (
         <div style={{
           position: 'fixed',
@@ -404,92 +705,113 @@ const FinancementDemandes: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '20px'
         }}>
+          {/* Votre modal de détail existant */}
           <div style={{
             backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '8px',
-            maxWidth: '600px',
-            width: '90%',
-            maxHeight: '80vh',
+            borderRadius: '12px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            maxWidth: '800px',
+            width: '100%',
+            maxHeight: '90vh',
             overflow: 'auto'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0 }}>Détail de la demande</h2>
-              <button 
-                onClick={closeDetails}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  color: '#666'
-                }}
-              >
-                ×
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '10px' }}>Informations personnelles</h3>
-              <p><strong>Nom:</strong> {selectedDemande.nom}</p>
-              <p><strong>Email:</strong> {selectedDemande.email}</p>
-              <p><strong>Téléphone:</strong> {selectedDemande.telephone}</p>
-              {selectedDemande.user && (
-                <>
-                  <p><strong>Utilisateur enregistré:</strong> {selectedDemande.user.firstName} {selectedDemande.user.lastName}</p>
-                  <p><strong>Email utilisateur:</strong> {selectedDemande.user.email}</p>
-                </>
-              )}
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '10px' }}>Détails de la demande</h3>
-              <p><strong>Type:</strong> {selectedDemande.type}</p>
-              <p><strong>Montant:</strong> {selectedDemande.montant || 'N/A'}</p>
-              <p><strong>Durée:</strong> {selectedDemande.duree || 'N/A'}</p>
-              <p><strong>Estimation:</strong> {selectedDemande.estimation || 'N/A'}</p>
-              <p><strong>Partenaire:</strong> {selectedDemande.partenaire?.nom || 'Aucun'}</p>
-              <p><strong>Assurance:</strong> {selectedDemande.assurance?.nom || 'Aucune'}</p>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '10px' }}>Message</h3>
-              <div style={{ 
-                padding: '12px', 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: '4px',
-                border: '1px solid #ddd'
-              }}>
-                {selectedDemande.message}
+            {/* Contenu du modal */}
+            <div style={{ padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#2c3e50' }}>
+                  Détails de la demande
+                </h2>
+                <button 
+                  onClick={closeDetails}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    color: '#7f8c8d'
+                  }}
+                >
+                  ×
+                </button>
               </div>
-            </div>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50', marginBottom: '12px' }}>
+                  Informations client
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '4px' }}>Nom</div>
+                    <div style={{ fontSize: '14px', color: '#2c3e50', fontWeight: '500' }}>{selectedDemande.nom}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '4px' }}>Email</div>
+                    <div style={{ fontSize: '14px', color: '#3498db' }}>{selectedDemande.email}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '4px' }}>Téléphone</div>
+                    <div style={{ fontSize: '14px', color: '#2c3e50' }}>{selectedDemande.telephone}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#7f8c8d', marginBottom: '4px' }}>Type</div>
+                    <div style={{ fontSize: '14px', color: '#2c3e50' }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        backgroundColor: '#e8f4fd',
+                        color: '#2980b9',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}>
+                        {selectedDemande.type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <h3 style={{ marginBottom: '10px' }}>Dates</h3>
-              <p><strong>Créée le:</strong> {formatDate(selectedDemande.createdAt)}</p>
-              <p><strong>Modifiée le:</strong> {formatDate(selectedDemande.updatedAt)}</p>
-            </div>
+              {selectedDemande.message && (
+                <div style={{ marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50', marginBottom: '12px' }}>
+                    Message
+                  </h3>
+                  <div style={{
+                    padding: '12px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    color: '#2c3e50',
+                    lineHeight: '1.5'
+                  }}>
+                    {selectedDemande.message}
+                  </div>
+                </div>
+              )}
 
-            <div style={{ marginTop: '20px', textAlign: 'right' }}>
-              <button 
-                onClick={closeDetails}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#2196f3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Fermer
-              </button>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button 
+                  onClick={closeDetails}
+                  style={{
+                    padding: '10px 20px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
           </div>
         </div>
