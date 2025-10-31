@@ -10,7 +10,7 @@ export const api = axios.create({
 
 // Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('auth-token');
   console.log('Intercepteur - Token trouvé:', token ? 'Oui' : 'Non');
   
   if (token) {

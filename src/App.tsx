@@ -91,6 +91,7 @@ import Alimentation from "./pages/Alimentation";
 import AlimentationCategorie from "./pages/AlimentationCategorie";
 import ServiceCategoriesPage from "./pages/admin/ServiceCategoriesPage";
 import UserOrders from "./components/orders/UserOrders";
+import ListeDemandesDevis from "./pages/pro/ListeDemandesDevis";
 
 const queryClient = new QueryClient();
 
@@ -228,6 +229,7 @@ const App = () => (
                 <Route path="profile" element={<Profile />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="harmonie" element={<HarmoniePage />} />
+                <Route path="demandes-devis" element={<ListeDemandesDevis />} />
               </Route>
               {/* Section Mon Compte Routes */}
               <Route path="/mon-compte">

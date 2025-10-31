@@ -4,25 +4,12 @@ export const demandeDevisAPI = {
   // Créer une nouvelle demande de devis
   creerDemande: async (data) => {
     try {
-      // Vérifier le token avant l'envoi
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Token non trouvé');
-      }
-
-      console.log('Envoi de la demande avec token:', token);
       console.log('Données envoyées:', data);
-
       const response = await api.post('/demande-devis', data);
       console.log('Réponse reçue:', response.data);
-      
       return response.data;
     } catch (error) {
-      console.error('Erreur détaillée:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
+      console.error('Erreur de la requête:', error.response?.data || error.message);
       throw error;
     }
   },
