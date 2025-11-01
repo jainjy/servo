@@ -65,7 +65,7 @@ export default function ArtCommerceService() {
       </Card>
       {/* Modal global pour le composant */}
       {isAvailableModalOpen && (
-        <OeuvreModal onClose={() => setIsAvailableModalOpen(false)} />
+        <OeuvreModal onClose={() => setIsAvailableModalOpen(false)} token={""} />
       )}
     </div>
   );

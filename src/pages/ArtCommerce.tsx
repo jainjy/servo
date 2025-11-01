@@ -140,47 +140,62 @@ const ArtCommerce: React.FC = () => {
       </div>
 
       {/* Grille des services */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
-        {filteredServices.length > 0 ? (
-          filteredServices.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col"
-            >
-              <div
-                className="h-48 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url(${item.images?.[0] || ""})`,
-                }}
-              ></div>
-              <div className="p-4 flex flex-col flex-1 justify-between">
-                <h3 className="font-bold text-lg">{item.libelle}</h3>
-                <p className="text-sm text-slate-600 line-clamp-2">
-                  {item.description}
-                </p>
-                <div className="flex justify-between mt-3">
-                  <span className="font-bold">
-                    {item.price ? `${item.price}€` : "—"}
-                  </span>
-                  <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">
-                    {item.category?.name || "—"}
-                  </span>
-                </div>
-                <button
-                  onClick={() => navigate(`/art-commerce/${item.id}`)}
-                  className="mt-3 bg-slate-900 text-white py-2 rounded-xl hover:bg-slate-800 font-semibold transition"
-                >
-                  Voir les détails
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-16 text-gray-500">
-            Aucun résultat trouvé
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-10 bg-gray-50">
+  {filteredServices.length > 0 ? (
+    filteredServices.map((item) => (
+      <div
+        key={item.id}
+        className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col border border-gray-100 hover:-translate-y-1"
+      >
+        {/* Image */}
+        <div
+          className="h-40 bg-cover bg-center relative"
+          style={{
+            backgroundImage: `url(${item.images?.[0] || ""})`,
+          }}
+        >
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300"></div>
+        </div>
+
+        {/* Contenu */}
+        <div className="p-4 flex flex-col flex-1 justify-between">
+          <h3 className="font-semibold text-base text-gray-800 group-hover:text-slate-900 transition">
+            {item.libelle}
+          </h3>
+
+          <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+            {item.description}
+          </p>
+
+          <div className="flex justify-between items-center mt-3">
+            <span className="text-sm font-semibold text-slate-800">
+              {item.price ? `${item.price}€` : "—"}
+            </span>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+              {item.category?.name || "—"}
+            </span>
           </div>
-        )}
+
+          <button
+            onClick={() => navigate(`/art-commerce/${item.id}`)}
+            className="mt-3 bg-slate-900 text-white text-sm py-2 rounded-lg hover:bg-slate-800 transition font-medium"
+          >
+            Voir les détails
+          </button>
+        </div>
       </div>
+    ))
+  ) : (
+    <div className="col-span-full text-center py-20 text-gray-500">
+      <p className="text-base font-medium">Aucun résultat trouvé</p>
+      <p className="text-sm mt-2 text-gray-400">
+        Essaie avec un autre mot-clé ou une autre catégorie.
+      </p>
+    </div>
+  )}
+</div>
+
+
     </div>
   );
 };
