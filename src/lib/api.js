@@ -24,17 +24,17 @@ api.interceptors.request.use(
   }
 );
 
-// Intercepteur pour gérer les erreurs globales
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      window.location.href = '/login';
-      console.log("erreur",error)
-    }
-    return Promise.reject(error);
-  }
-);
+// // Intercepteur pour gérer les erreurs globales
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       //window.location.href = '/login';
+//       console.log("erreur",error)
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 // Services pour le financement
 export const financementAPI = {
