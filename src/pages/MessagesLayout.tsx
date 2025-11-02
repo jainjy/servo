@@ -5,7 +5,7 @@ import { ProSidebar } from "@/components/pro/pro-sidebar";
 import { AuthHeader } from "@/components/layout/AuthHeader";
 import Header from "@/components/layout/Header";
 import { UserRoute } from "@/components/protected-route";
-import MessagesPage from "./Messages";
+import MessagesPage from "./AdminDiscussions";
 
 
 export default function MessagesLayout() {

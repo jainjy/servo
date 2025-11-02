@@ -29,7 +29,9 @@ export default function MessagesPage({
   const { id } = useParams();
   const location = useLocation();
   const demande = (location.state as any)?.demande;
-
+  useEffect(()=>{
+    console.log("demandes ",demande)
+  },[demande])
   const getUrgencyBg = (urgency) => {
     switch (urgency) {
       case "Urgent":
@@ -783,6 +785,16 @@ export default function MessagesPage({
                   </p>
                 </div>
               </div>
+              {(demande.statut == "En attente" || demande.nouvelle) && (
+                <div className="m-auto">
+                  <button className=" bg-green-500 p-2 mx-2 rounded-xl">
+                    ACCEPTER
+                  </button>
+                  <button className="bg-red-600 p-2 mx-2 rounded-xl">
+                    REFUSER
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
