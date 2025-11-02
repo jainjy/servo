@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-
+import api from "@/lib/api"
 export default function MessagesPage({
   artisanView,
 }: { artisanView?: boolean } = {}) {
@@ -57,7 +57,11 @@ export default function MessagesPage({
         return <Clock className="w-4 h-4" />;
     }
   };
-
+  const validate=async(valeur)=>{
+    const response = await api.put(`admin/demandes/${demande.id}/validate`,{validate:valeur});
+    console.log(response)
+    toast.info(response.data.message);
+  }
   const defaultIntro =
     demande?.description ||
     "Besoin de réparer le chauffe-eau et changer le compteur";
@@ -787,10 +791,10 @@ export default function MessagesPage({
               </div>
               {(demande.statut == "En attente" || demande.nouvelle) && (
                 <div className="m-auto">
-                  <button className=" bg-green-500 p-2 mx-2 rounded-xl">
+                  <button className=" bg-green-500 p-2 mx-2 rounded-xl" onClick={()=>validate(true)}>
                     ACCEPTER
                   </button>
-                  <button className="bg-red-600 p-2 mx-2 rounded-xl">
+                  <button className="bg-red-600 p-2 mx-2 rounded-xl" onClick={()=>validate(false)}>
                     REFUSER
                   </button>
                 </div>
