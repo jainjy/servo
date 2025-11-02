@@ -16,27 +16,27 @@ import {
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useSocket } from "@/contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
+import { useSocket } from "@/Contexts/SocketContext";
 
 export default function AdminDiscussions() {
   const { id } = useParams();
   const location = useLocation();
   const [demande, setDemande] = useState(null);
-  const [conversation, setConversation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [uploadingFile, setUploadingFile] = useState(false);
 
-  const { socket } = useSocket();
+  const { socket, isConnected } = useSocket();
   const {
     messages,
+    conversation,
     loading: messagesLoading,
     sendMessage,
     sending,
-  } = useMessaging(conversation?.id);
+  } = useMessaging(id);
 
   const getUrgencyBg = (urgency) => {
     switch (urgency) {
@@ -77,47 +77,24 @@ export default function AdminDiscussions() {
     }
   };
 
-  // Charger la demande et la conversation
+  // Charger la demande
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDemande = async () => {
       try {
         setLoading(true);
-
-        // Charger la demande
         if (id) {
-          const demandeResponse = await api.get(`/demandes/${id}`);
-          const demandeData = demandeResponse.data;
-          setDemande(demandeData);
-
-          // Chercher ou créer une conversation pour cette demande
-          let conversationResponse;
-          try {
-            conversationResponse = await api.get(
-              `/conversations/demande/${demandeData.id}`
-            );
-          } catch (error) {
-            // Si pas de conversation, en créer une
-            if (error.response?.status === 404) {
-              conversationResponse = await api.post("/conversations", {
-                titre: `Demande ${demandeData.id}`,
-                demandeId: demandeData.id,
-              });
-            } else {
-              throw error;
-            }
-          }
-
-          setConversation(conversationResponse.data.conversation);
+          const response = await api.get(`/demandes/${id}`);
+          setDemande(response.data);
         }
       } catch (error) {
-        console.error("Erreur chargement données:", error);
-        toast.error("Erreur lors du chargement des données");
+        console.error("Erreur chargement demande:", error);
+        toast.error("Erreur lors du chargement de la demande");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchDemande();
   }, [id]);
 
   const handleSend = async () => {
@@ -143,7 +120,7 @@ export default function AdminDiscussions() {
       formData.append("file", file);
 
       const uploadResponse = await api.post(
-        "/api/upload/message-file",
+        "/upload/message-file",
         formData,
         {
           headers: {
@@ -184,6 +161,22 @@ export default function AdminDiscussions() {
     });
   };
 
+  const getSenderName = (message) => {
+    if (message.expediteur) {
+      return (
+        message.expediteur.companyName ||
+        `${message.expediteur.firstName} ${message.expediteur.lastName}`
+      );
+    }
+    return "Utilisateur";
+  };
+
+  const isCurrentUser = (message) => {
+    // Cette logique dépend de comment vous gérez l'utilisateur connecté
+    // Vous devrez peut-être l'adapter selon votre système d'authentification
+    return message.expediteurId === demande?.createdById;
+  };
+
   if (loading) {
     return <LoadingSpinner text="Chargement des données en cours..." />;
   }
@@ -206,6 +199,26 @@ export default function AdminDiscussions() {
               <p className="text-sm text-gray-600 mt-1">
                 {demande.contactNom} {demande.contactPrenom}
               </p>
+
+              {/* Statut de la demande */}
+              <div className="flex items-center gap-2 mt-2">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    demande.statut === "validée"
+                      ? "bg-green-100 text-green-800"
+                      : demande.statut === "refusée"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {demande.statut || "En attente"}
+                </span>
+                {!isConnected && (
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    Hors ligne
+                  </span>
+                )}
+              </div>
 
               {/* Date */}
               <div className="flex items-center gap-5 mt-4">
@@ -287,6 +300,29 @@ export default function AdminDiscussions() {
               </div>
             </div>
 
+            {/* Informations de contact */}
+            <div className="mt-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Contact</h3>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Nom</p>
+                    <p className="font-semibold">
+                      {demande.contactNom} {demande.contactPrenom}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Téléphone</p>
+                    <p className="font-semibold">{demande.contactTel}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="font-semibold">{demande.contactEmail}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Actions de validation */}
             {demande.statut !== "validée" && !demande.demandeAcceptee && (
               <div className="mt-6 flex justify-center gap-4">
@@ -311,11 +347,24 @@ export default function AdminDiscussions() {
         <div className="w-1/2 flex flex-col bg-white">
           {/* Header discussion */}
           <div className="border-b border-gray-200 px-6 py-3">
-            <div className="flex items-center gap-3">
-              <MessageCircle className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">
-                Discussion {conversation && `(#${conversation.id.slice(0, 8)})`}
-              </h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MessageCircle className="w-5 h-5 text-blue-600" />
+                <h2 className="text-xl font-bold text-gray-900">
+                  Discussion{" "}
+                  {conversation && `(#${conversation.id.slice(0, 8)})`}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
+                ></div>
+                <span className="text-sm text-gray-500">
+                  {isConnected ? "En ligne" : "Hors ligne"}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -331,12 +380,10 @@ export default function AdminDiscussions() {
                   <div
                     key={message.id}
                     className={`flex gap-4 ${
-                      message.expediteurId === demande.createdById
-                        ? "justify-end"
-                        : ""
+                      isCurrentUser(message) ? "justify-end" : ""
                     }`}
                   >
-                    {message.expediteurId !== demande.createdById && (
+                    {!isCurrentUser(message) && (
                       <div className="flex flex-col items-center">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
                           <User className="w-4 h-4 text-blue-600" />
@@ -349,14 +396,19 @@ export default function AdminDiscussions() {
 
                     <div
                       className={`max-w-[70%] ${
-                        message.expediteurId === demande.createdById
-                          ? "order-first"
-                          : ""
+                        isCurrentUser(message) ? "order-first" : ""
                       }`}
                     >
+                      {/* Nom de l'expéditeur pour les messages des autres */}
+                      {!isCurrentUser(message) && (
+                        <div className="text-xs font-medium text-gray-600 mb-1">
+                          {getSenderName(message)}
+                        </div>
+                      )}
+
                       <div
                         className={`rounded-2xl p-4 ${
-                          message.expediteurId === demande.createdById
+                          isCurrentUser(message)
                             ? "bg-blue-600 text-white rounded-br-none"
                             : "bg-gray-100 text-gray-900 rounded-bl-none"
                         }`}
@@ -368,7 +420,11 @@ export default function AdminDiscussions() {
                               href={message.urlFichier}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-sm underline"
+                              className={`flex items-center gap-2 text-sm underline ${
+                                isCurrentUser(message)
+                                  ? "text-blue-200"
+                                  : "text-blue-600"
+                              }`}
                             >
                               <FileText className="w-4 h-4" />
                               {message.nomFichier}
@@ -381,18 +437,19 @@ export default function AdminDiscussions() {
                         </p>
                       </div>
                       <div
-                        className={`text-xs mt-1 ${
-                          message.expediteurId === demande.createdById
+                        className={`text-xs mt-1 flex items-center gap-1 ${
+                          isCurrentUser(message)
                             ? "text-gray-500 text-right"
                             : "text-gray-400"
                         }`}
                       >
                         {formatMessageTime(message.createdAt)}
                         {message.lu && " • Lu"}
+                        {message.type === "SYSTEM" && " • Système"}
                       </div>
                     </div>
 
-                    {message.expediteurId === demande.createdById && (
+                    {isCurrentUser(message) && (
                       <div className="flex flex-col items-center">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-100">
                           <User className="w-4 h-4 text-purple-600" />
@@ -405,9 +462,13 @@ export default function AdminDiscussions() {
                   </div>
                 ))}
 
-                {messages.length === 0 && (
+                {messages.length === 0 && !messagesLoading && (
                   <div className="text-center text-gray-500 py-8">
-                    Aucun message dans cette conversation
+                    <MessageCircle className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                    <p>Aucun message dans cette conversation</p>
+                    <p className="text-sm">
+                      Soyez le premier à envoyer un message !
+                    </p>
                   </div>
                 )}
               </div>
@@ -430,7 +491,7 @@ export default function AdminDiscussions() {
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploadingFile}
+                  disabled={uploadingFile || sending}
                 />
               </label>
 
@@ -446,13 +507,13 @@ export default function AdminDiscussions() {
                     handleSend();
                   }
                 }}
-                disabled={sending}
+                disabled={sending || uploadingFile}
               />
 
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
-                disabled={sending || !input.trim()}
+                disabled={sending || uploadingFile || !input.trim()}
               >
                 {sending ? (
                   <LoadingSpinner size="small" />

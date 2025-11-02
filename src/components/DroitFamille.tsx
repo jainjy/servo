@@ -1,197 +1,357 @@
 import { useState } from "react";
-import '@/styles/font.css'
+import { Scale, Heart, Users, Home, Shield, FileText, X, ArrowRight, Sparkles, Calendar, Clock, CheckCircle } from 'lucide-react';
 
 export default function DroitFamille() {
     const [openModal, setOpenModal] = useState(null);
 
     const closeModal = () => setOpenModal(null);
 
+    const interventionDomains = [
+        {
+            icon: <Heart className="w-6 h-6" />,
+            title: "Divorce et séparation",
+            description: "Accompagnement personnalisé dans toutes les procédures de divorce et séparation.",
+            features: ["Consentement mutuel", "Divorce contentieux", "Garde des enfants", "Pension alimentaire"]
+        },
+        {
+            icon: <Users className="w-6 h-6" />,
+            title: "Succession et héritage",
+            description: "Gestion complète des successions et transmission du patrimoine familial.",
+            features: ["Testament", "Donation", "Partage successoral", "Règlement de succession"]
+        },
+        {
+            icon: <Shield className="w-6 h-6" />,
+            title: "Protection du patrimoine",
+            description: "Stratégies de protection et transmission de votre patrimoine familial.",
+            features: ["SCI familiale", "Assurance-vie", "Démembrement", "Protection du conjoint"]
+        }
+    ];
+
+    const services = [
+        {
+            id: "conseil-notaire",
+            title: "Consultation avec un notaire",
+            description: "Conseil personnalisé pour la protection de votre famille",
+            icon: <Scale className="w-5 h-5" />,
+            color: "blue"
+        },
+        {
+            id: "avocat-divorce",
+            title: "Accompagnement par un avocat pour divorce",
+            description: "Expertise juridique pour toutes les procédures de divorce",
+            icon: <FileText className="w-5 h-5" />,
+            color: "purple"
+        },
+        {
+            id: "huissier",
+            title: "Intervention d'un commissaire de justice",
+            description: "Actes d'huissier pour la mise en œuvre des décisions",
+            icon: <Users className="w-5 h-5" />,
+            color: "green"
+        },
+        {
+            id: "succession",
+            title: "Ouverture et gestion de succession",
+            description: "Gestion complète des démarches successorales",
+            icon: <Home className="w-5 h-5" />,
+            color: "orange"
+        },
+        {
+            id: "societe-familiale",
+            title: "Création de société familiale",
+            description: "SCI ou SARL pour organiser votre patrimoine",
+            icon: <Shield className="w-5 h-5" />,
+            color: "red"
+        },
+        {
+            id: "protection-patrimoine",
+            title: "Protection du patrimoine familial",
+            description: "Stratégies de protection sur mesure",
+            icon: <Heart className="w-5 h-5" />,
+            color: "indigo"
+        }
+    ];
+
+    const getServiceColor = (color: string) => {
+        const colors = {
+            blue: 'from-blue-500 to-cyan-500',
+            purple: 'from-purple-500 to-pink-500',
+            green: 'from-green-500 to-emerald-500',
+            orange: 'from-orange-500 to-red-500',
+            red: 'from-red-500 to-pink-500',
+            indigo: 'from-indigo-500 to-blue-500'
+        };
+        return colors[color as keyof typeof colors] || 'from-gray-500 to-gray-600';
+    };
+
     return (
-        <div className="min-h-screen bg-slate-50 text-gray-100 mt-12 flex flex-col">
-            {/* HEADER */}
-            <header
-                style={{ backgroundImage: 'url("/fam.jfif")', backgroundSize: 'cover' }}
-                className="relative border-b py-8 bg-black overflow-hidden h-60 text-center">
-                <div className="absolute bg-black/75 backdrop-blur-sm top-0 left-0 w-full h-full"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
-                    <h1 className="text-5xl font-semibold text-slate-100 azonix tracking-widest">Droit de la famille</h1>
-                    <p className="text-gray-400 text-sm mt-5">Accompagnement juridique et notarial complet</p>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 text-gray-900">
+            {/* HEADER HERO */}
+            <div
+                className="relative h-80 bg-black/50 overflow-hidden"
+            >
+                <div className="absolute inset-0 bg-black/90"></div>
+                <div className="absolute inset-0 bg-[url('/fam.jfif')] bg-cover bg-center mix-blend-overlay"></div>
+
+                <div className="relative z-10 h-full flex items-center justify-center text-center px-4">
+                    <div className="max-w-4xl">
+                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+                            Droit de la Famille
+                        </h1>
+                        <p className="text-md text-blue-100 max-w-2xl mx-auto leading-relaxed">
+                            Accompagnement juridique et notarial complet pour protéger votre famille
+                            et organiser la transmission de votre patrimoine en toute sérénité.
+                        </p>
+                    </div>
                 </div>
-            </header>
+            </div>
 
             {/* MAIN CONTENT */}
-            <main className="flex-1 max-w-5xl mx-auto px-6 py-12 space-y-16">
-                {/* Section 1 */}
+            <main className="max-w-6xl mx-auto px-4 py-8 space-y-20">
+                {/* Section Domaines d'intervention */}
                 <section>
-                    <h2 className="text-2xl text-slate-900 font-semibold mb-6 border-l-4 border-slate-500 pl-3">
-                        Nos domaines d’intervention
-                    </h2>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {["Divorce", "Succession", "Donation"].map((item) => (
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl md:text-4xl font-bold  text-slate-900 mb-4">
+                            Nos Domaines d'Intervention
+                        </h2>
+                        <p className="text-md text-gray-600 max-w-2xl mx-auto">
+                            Une expertise complète pour accompagner votre famille à chaque étape de la vie
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {interventionDomains.map((domain, index) => (
                             <div
-                                key={item}
-                                className="bg-gray-800 hover:bg-gray-700 transition rounded-xl p-6 shadow-lg"
+                                key={index}
+                                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 group p-6"
                             >
-                                <h3 className="text-lg font-semibold mb-2">{item}</h3>
-                                <p className="text-sm text-gray-400">
-                                    Nous vous accompagnons dans vos démarches de {item.toLowerCase()} avec écoute et expertise notariale.
+                                <div className="flex items-center mb-4">
+                                    <div className="p-3 bg-blue-100 rounded-xl text-blue-600 mr-4 group-hover:scale-110 transition-transform">
+                                        {domain.icon}
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">{domain.title}</h3>
+                                </div>
+                                <p className="text-gray-600 mb-4 leading-relaxed">
+                                    {domain.description}
                                 </p>
+                                <ul className="space-y-2">
+                                    {domain.features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-center text-sm text-gray-700">
+                                            <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                {/* Section 2 */}
+                {/* Section Services principaux */}
                 <section>
-                    <h2 className="text-2xl text-slate-900 font-semibold mb-6 border-l-4 border-slate-500 pl-3">
-                        Nos services personnalisés
-                    </h2>
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                            Services Spécialisés
+                        </h2>
+                        <p className="text-md text-gray-600 max-w-2xl mx-auto">
+                            Des solutions sur mesure adaptées à chaque situation familiale
+                        </p>
+                    </div>
 
-                    <div className="space-y-4">
-                        <button
-                            onClick={() => setOpenModal("estimation")}
-                            className="w-full text-left bg-slate-800 hover:bg-slate-700 transition p-4 rounded-lg font-medium"
-                        >
-                            Demande une estimation
-                        </button>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {services.map((service) => (
+                            <button
+                                key={service.id}
+                                onClick={() => setOpenModal(service.id)}
+                                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 p-6 text-left group hover:scale-105"
+                            >
+                                <div className={`w-12 h-12 bg-gradient-to-r ${getServiceColor(service.color)} rounded-lg flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
+                                    {service.icon}
+                                </div>
+                                <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                    {service.title}
+                                </h3>
+                                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                                    {service.description}
+                                </p>
+                                <div className="flex items-center text-blue-600 font-semibold text-sm">
+                                    En savoir plus
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </section>
 
-                        <button
-                            onClick={() => setOpenModal("notaire")}
-                            className="w-full text-left bg-slate-700 hover:bg-slate-600 transition p-4 rounded-lg font-medium"
-                        >
-                            Accompagnement via un notaire (prise de RDV + envoi de pièces)
-                        </button>
-
-                        <button
-                            onClick={() => setOpenModal("defiscalisation")}
-                            className="w-full text-left bg-slate-800 hover:bg-slate-700 transition p-4 rounded-lg font-medium"
-                        >
-                            Défiscalisation (programmes neufs, promoteurs)
-                        </button>
-
-                        <button
-                            onClick={() => setOpenModal("credit")}
-                            className="w-full text-left bg-slate-700 hover:bg-slate-600 transition p-4 rounded-lg font-medium"
-                        >
-                            Aide au montage de dossier crédit d’impôts (Article 244 Quater W)
-                        </button>
+                {/* Section Avantages */}
+                <section className="bg-white rounded-2xl shadow-lg py-4 px-8">
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="flex gap-2">
+                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-4">
+                                <Clock className="w-8 h-8" />
+                            </div>
+                            <div className="flex flex-col">
+                                <h3 className="font-bold text-lg text-gray-900 mb-2">Réactivité</h3>
+                                <p className="text-gray-600 text-xs">
+                                    Réponse sous 24h pour les situations urgentes
+                                </p>
+                            </div>
+                        </div>
+                        <div className=" flex">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4">
+                                <Shield className="w-8 h-8" />
+                            </div>
+                            <div className="flex flex-col">
+                                <h3 className="font-bold text-lg text-gray-900 mb-2">Confidentialité</h3>
+                                <p className="text-gray-600 text-xs">
+                                    Secret professionnel et discrétion absolue
+                                </p>
+                            </div>
+                        </div>
+                        <div className=" flex">
+                            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mx-auto mb-4">
+                                <Scale className="w-8 h-8" />
+                            </div>
+                            <div className="flex flex-col">
+                                <h3 className="font-bold text-lg text-gray-900 mb-2">Expertise</h3>
+                                <p className="text-gray-600 text-xs">
+                                    Notaires et avocats spécialisés en droit familial
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>
 
-            {/* MODALES */}
+            {/* MODALES MODERNES */}
             {openModal && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl">
-                        <h3 className="text-xl font-semibold mb-4">
-                            {openModal === "estimation" && "Demande d’estimation"}
-                            {openModal === "notaire" && "Prise de rendez-vous avec un notaire"}
-                            {openModal === "defiscalisation" && "Défiscalisation immobilière"}
-                            {openModal === "credit" && "Aide au dossier crédit d’impôt"}
-                        </h3>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        {/* Header Modal */}
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-2xl p-6 text-white">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-xl font-bold">
+                                    {services.find(s => s.id === openModal)?.title}
+                                </h3>
+                                <button
+                                    onClick={closeModal}
+                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <p className="text-blue-100 text-sm">
+                                {services.find(s => s.id === openModal)?.description}
+                            </p>
+                        </div>
 
-                        {/* FORMULAIRES */}
-                        {openModal === "estimation" && (
+                        {/* Formulaire */}
+                        <div className="p-6">
                             <form className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="Nom complet"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Adresse e-mail"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                                <textarea
-                                    placeholder="Détails du bien ou de la situation"
-                                    rows={4}
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                ></textarea>
-                                <button className="bg-blue-600 hover:bg-blue-500 rounded-lg w-full py-2 font-semibold">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Nom complet
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Votre nom et prénom"
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Adresse e-mail
+                                    </label>
+                                    <input
+                                        type="email"
+                                        placeholder="votre@email.com"
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Téléphone
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        placeholder="+33 1 23 45 67 89"
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                {/* Champs spécifiques selon le service */}
+                                {openModal === "conseil-notaire" && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Type de conseil
+                                        </label>
+                                        <select className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Sélectionnez le type de conseil</option>
+                                            <option value="patrimoine">Protection patrimoniale</option>
+                                            <option value="succession">Succession et donation</option>
+                                            <option value="contrat">Contrat de mariage</option>
+                                            <option value="autre">Autre</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {openModal === "avocat-divorce" && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Type de divorce
+                                        </label>
+                                        <select className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Type de divorce</option>
+                                            <option value="consentement">Divorce par consentement mutuel</option>
+                                            <option value="contentieux">Divorce contentieux</option>
+                                            <option value="acceptation">Divorce accepté</option>
+                                            <option value="alteration">Divorce pour altération du lien conjugal</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {openModal === "huissier" && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Type d'intervention
+                                        </label>
+                                        <select className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Type d'intervention</option>
+                                            <option value="signification">Signification d'acte</option>
+                                            <option value="paiement">Sommation de payer</option>
+                                            <option value="injonction">Injonction de faire</option>
+                                            <option value="constat">Constat d'huissier</option>
+                                            <option value="expulsion">Expulsion</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Description de votre situation
+                                    </label>
+                                    <textarea
+                                        placeholder="Décrivez votre situation et vos questions..."
+                                        rows={4}
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                                >
                                     Envoyer la demande
                                 </button>
                             </form>
-                        )}
 
-                        {openModal === "notaire" && (
-                            <form className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="Nom complet"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Adresse e-mail"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <input
-                                    type="date"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <input
-                                    type="file"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-500"
-                                />
-                                <button className="bg-blue-600 hover:bg-blue-500 rounded-lg w-full py-2 font-semibold">
-                                    Prendre rendez-vous
-                                </button>
-                            </form>
-                        )}
-
-                        {openModal === "defiscalisation" && (
-                            <form className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="Nom complet"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Adresse e-mail"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <textarea
-                                    placeholder="Projet immobilier ou investissement"
-                                    rows={4}
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                ></textarea>
-                                <button className="bg-blue-600 hover:bg-blue-500 rounded-lg w-full py-2 font-semibold">
-                                    Demander un accompagnement
-                                </button>
-                            </form>
-                        )}
-
-                        {openModal === "credit" && (
-                            <form className="space-y-4">
-                                <input
-                                    type="text"
-                                    placeholder="Nom complet"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Adresse e-mail"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                />
-                                <textarea
-                                    placeholder="Détails de votre demande (type de travaux, dépenses, etc.)"
-                                    rows={4}
-                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm"
-                                ></textarea>
-                                <button className="bg-blue-600 hover:bg-blue-500 rounded-lg w-full py-2 font-semibold">
-                                    Soumettre la demande
-                                </button>
-                            </form>
-                        )}
-
-                        <button
-                            onClick={closeModal}
-                            className="mt-6 w-full text-gray-400 hover:text-gray-200 text-sm"
-                        >
-                            Fermer
-                        </button>
+                            <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Réponse sous 24 heures
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,4 +1,3 @@
-// src/pages/admin/ServiceCategoriesPage.tsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -31,6 +30,7 @@ interface Service {
 }
 
 export default function ServiceCategoriesPage() {
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [servicesWithoutCategory, setServicesWithoutCategory] = useState<
     Service[]

@@ -18,7 +18,7 @@ export const SocketProvider = ({ children, userId }) => {
 
   useEffect(() => {
     const newSocket = io(
-      process.env.REACT_APP_API_URL || "http://localhost:3001",
+      import.meta.env.VITE_API_URL || "http://localhost:3001",
       {
         query: {
           userId: userId,
