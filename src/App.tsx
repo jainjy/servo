@@ -111,6 +111,7 @@ import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 // Import des composants domicile
 import DomicileLayout from "./pages/domicile/DomicileLayout";
 import ImmobilierSections from "./components/ImmobilierSections";
+import StripeConnectButton from "./pages/CreateStripeAccount";
 
 const queryClient = new QueryClient();
 
@@ -236,6 +237,7 @@ const App = () => {
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
+                  <Route path="/stripe-create" element={<StripeConnectButton user={user} />} />
                   <Route path="/alimentation" element={<Alimentation />} />
                   <Route
                     path="/alimentation/categorie/:categoryName"
