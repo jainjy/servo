@@ -26,7 +26,7 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/categories", {
+        const res = await fetch("http://localhost:3001/api/categories/art", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

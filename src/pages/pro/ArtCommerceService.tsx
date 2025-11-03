@@ -61,6 +61,7 @@ export default function ArtCommerceService() {
           searchQuery={searchQuery}
           onServiceUpdated={handleServiceUpdated}
         />
+        
       </Card>
       {/* Modal global pour le composant */}
       {isAvailableModalOpen && (
