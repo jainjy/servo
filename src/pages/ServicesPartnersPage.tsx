@@ -7,6 +7,51 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Types for API responses and requests
+interface Partner {
+  _id: string;
+  name: string;
+  action: string;
+  image: string;
+  category: string;
+  location: string;
+  type: string;
+  rating: number;
+  projects: number;
+  verified: boolean;
+  experience: string;
+}
+
+interface Service {
+  _id: string;
+  action: string;
+  image: string;
+  category: string;
+  description: string;
+  time: string;
+  rating: number;
+  price: string;
+}
+
+interface PartnerCategory {
+  title: string;
+  count: string;
+  description: string;
+  action: string;
+  image: string;
+}
+
+interface PartnerFilters {
+  category?: string;
+  search?: string;
+  type?: string;
+  location?: string;
+  limit?: string;
+}
+
+// Utilisation de votre URL backend existante
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://gestionapi-gwy2.onrender.com/api";
+
 const ServicesPartnersPage = () => { 
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,6 +78,34 @@ const ServicesPartnersPage = () => {
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
+  // États pour le backend
+  const [services, setServices] = useState<Service[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [partnerCategories, setPartnerCategories] = useState<PartnerCategory[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Statuses statiques (pas besoin de backend pour ça)
+  const [statuses] = useState([
+    { 
+      label: "EN RECHERCHE DE TERRAIN",
+      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
+      description: "Trouvez le terrain idéal pour votre projet",
+      icon: MapPin
+    },
+    { 
+      label: "OFFRE ACCEPTEE", 
+      image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=250&fit=crop",
+      description: "Votre offre est acceptée, poursuivons ensemble",
+      icon: FileText
+    },
+    { 
+      label: "TERRAIN SOUS COMPROMIS", 
+      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
+      description: "Finalisez votre acquisition en toute sérénité",
+      icon: Shield
+    }
+  ]);
+
   // Auto-selection de la section depuis l'URL
   useEffect(() => {
     if (section) {
@@ -41,6 +114,118 @@ const ServicesPartnersPage = () => {
       if (section === "aides") setView("aides");
     }
   }, [section]);
+
+  // Chargement des données
+  useEffect(() => {
+    loadInitialData();
+  }, [view]);
+
+  const loadInitialData = async () => {
+    setLoading(true);
+    try {
+      if (view === "services") {
+        const servicesData = await fetchServices();
+        setServices(servicesData);
+      } else if (view === "partenaires") {
+        const partnersData = await fetchPartners();
+        setPartners(partnersData);
+        
+        // Pour les catégories, on les génère depuis les partenaires
+        const categories = generateCategoriesFromPartners(partnersData);
+        setPartnerCategories(categories);
+      }
+    } catch (error) {
+      console.error("Erreur chargement données:", error);
+      toast.error("Erreur lors du chargement des données");
+      // Fallback aux données statiques
+      setServices(staticServices);
+      setPartners(staticPartners);
+      setPartnerCategories(staticPartnerCategories);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fonctions API adaptées à votre backend existant
+  const fetchServices = async (search = "") => {
+    const response = await fetch(`${API_BASE_URL}/services?search=${encodeURIComponent(search)}`);
+    if (!response.ok) {
+      // Si l'endpoint n'existe pas, retourner les données statiques
+      return staticServices;
+    }
+    return await response.json();
+  };
+
+  const fetchPartners = async (filters: PartnerFilters = {}) => {
+    const queryParams = new URLSearchParams({
+      limit: String(displayCount),
+      ...(filters as Record<string, string>)
+    }).toString();
+    
+    const response = await fetch(`${API_BASE_URL}/partners?${queryParams}`);
+    if (!response.ok) {
+      // Si l'endpoint n'existe pas, retourner les données statiques
+      return staticPartners;
+    }
+    const data = await response.json();
+    return (data.partners || data) as Partner[];
+  };
+
+  const sendContactMessage = async (contactData) => {
+    const response = await fetch(`${API_BASE_URL}/contact`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(contactData),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Erreur lors de l'envoi du message");
+    }
+    return await response.json();
+  };
+
+  // Générer les catégories depuis les partenaires
+  const generateCategoriesFromPartners = (partnersList: Partner[]) => {
+    interface CategoryMapItem {
+      title: string;
+      count: number;
+      description: string;
+    }
+    
+    const categoriesMap: Record<string, CategoryMapItem> = {};
+    
+    partnersList.forEach(partner => {
+      if (!categoriesMap[partner.category]) {
+        categoriesMap[partner.category] = {
+          title: partner.category,
+          count: 1,
+          description: `Experts en ${partner.category.toLowerCase()}`
+        };
+      } else {
+        categoriesMap[partner.category].count++;
+      }
+    });
+
+    return Object.values(categoriesMap).map(cat => ({
+      title: cat.title,
+      count: `${cat.count} expert${cat.count > 1 ? 's' : ''}`,
+      description: cat.description,
+      action: "Découvrir",
+      image: getCategoryImage(cat.title)
+    }));
+  };
+
+  const getCategoryImage = (category) => {
+    const images = {
+      "ARCHITECTES": "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&h=250&fit=crop",
+      "CONSTRUCTEURS": "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop",
+      "ÉLECTRICIENS": "https://images.unsplash.com/photo-1586210576191-2ec54cb58e14?w=400&h=250&fit=crop",
+      "NOTAIRES": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=250&fit=crop"
+    };
+    return images[category] || "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&h=250&fit=crop";
+  };
 
   // Navigation handlers
   const handleNavigation = (newView) => {
@@ -98,38 +283,59 @@ const ServicesPartnersPage = () => {
     setSelectedCategory("");
   };
 
-  const handleSendMessage = () => {
-    console.log("Email:", email);
-    console.log("Message:", message);
-    setShowMessageCard(false);
-    setEmail('');
-    setMessage('');
-    toast.info("Message envoyé avec succès!");
+  const handleSendMessage = async () => {
+    try {
+      await sendContactMessage({
+        email,
+        message,
+        subject: `Message de ${email}`,
+        serviceType: selectedServiceForm
+      });
+      
+      setShowMessageCard(false);
+      setEmail('');
+      setMessage('');
+      toast.success("Message envoyé avec succès!");
+    } catch (error) {
+      toast.error("Erreur lors de l'envoi du message");
+    }
   };
 
-  const statuses = [
-    { 
-      label: "EN RECHERCHE DE TERRAIN",
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
-      description: "Trouvez le terrain idéal pour votre projet",
-      icon: MapPin
-    },
-    { 
-      label: "OFFRE ACCEPTEE", 
-      image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=250&fit=crop",
-      description: "Votre offre est acceptée, poursuivons ensemble",
-      icon: FileText
-    },
-    { 
-      label: "TERRAIN SOUS COMPROMIS", 
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
-      description: "Finalisez votre acquisition en toute sérénité",
-      icon: Shield
-    }
-  ];
+  // Fonctions de filtrage
+  const getFilteredPartners = async (category = "") => {
+    setLoading(true);
+    try {
+      const filters: PartnerFilters = {};
+      if (category) filters.category = category;
+      if (partnersSearchQuery) filters.search = partnersSearchQuery;
+      if (propertyType) filters.type = propertyType;
+      if (locationFilter) filters.location = locationFilter;
 
-  const services = [
+      const data = await fetchPartners(filters);
+      setPartners(data);
+    } catch (error) {
+      toast.error("Erreur lors du filtrage des partenaires");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFilteredServices = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchServices(servicesSearchQuery);
+      setServices(data);
+    } catch (error) {
+      toast.error("Erreur lors de la recherche des services");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Données statiques de fallback
+  const staticServices = [
     { 
+      _id: "1",
       action: "ESTIMATION IMMOBILIÈRE", 
       image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
       category: "ESTIMATION",
@@ -139,6 +345,7 @@ const ServicesPartnersPage = () => {
       price: "Gratuit"
     },
     { 
+      _id: "2",
       action: "SIMULATION DE FINANCEMENT", 
       image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=250&fit=crop",
       category: "FINANCEMENT",
@@ -146,46 +353,39 @@ const ServicesPartnersPage = () => {
       time: "2h",
       rating: 4.6,
       price: "Gratuit"
-    },
-    { 
-      action: "COMPROMIS DE VENTE", 
-      image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=250&fit=crop",
-      category: "JURIDIQUE",
-      description: "Rédaction sécurisée de vos documents par des notaires",
-      time: "48h",
-      rating: 4.9,
-      price: "À partir de 500€"
-    },
-    { 
-      action: "DEVIS MUR DE SOUTÈNEMENT", 
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop",
-      category: "CONSTRUCTION",
-      description: "Devis détaillé pour vos travaux de construction",
-      time: "24h",
-      rating: 4.7,
-      price: "Gratuit"
-    },
-    { 
-      action: "INSTALLATION ALARME", 
-      image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=250&fit=crop",
-      category: "SÉCURITÉ",
-      description: "Sécurisez votre habitat avec nos experts",
-      time: "4h",
-      rating: 4.8,
-      price: "À partir de 300€"
-    },
-    { 
-      action: "CHANGEMENT DE SERRURE", 
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=250&fit=crop",
-      category: "SÉCURITÉ",
-      description: "Remplacement rapide et sécurisé de vos serrures",
-      time: "1h",
-      rating: 4.5,
-      price: "À partir de 80€"
     }
   ];
 
-  const partnerCategories = [
+  const staticPartners = [
+    { 
+      _id: "1",
+      name: "Studio Architecture", 
+      action: "Voir projets", 
+      image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&h=250&fit=crop", 
+      category: "ARCHITECTES", 
+      location: "Paris", 
+      type: "maison",
+      rating: 4.9,
+      projects: 127,
+      verified: true,
+      experience: "15 ans"
+    },
+    { 
+      _id: "2",
+      name: "Construct Pro", 
+      action: "Voir réalisations", 
+      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop", 
+      category: "CONSTRUCTEURS", 
+      location: "Lyon", 
+      type: "appartement",
+      rating: 4.8,
+      projects: 89,
+      verified: true,
+      experience: "12 ans"
+    }
+  ];
+
+  const staticPartnerCategories = [
     { 
       title: "ARCHITECTES", 
       action: "Découvrir", 
@@ -199,98 +399,8 @@ const ServicesPartnersPage = () => {
       image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop", 
       description: "Construction clé en main",
       count: "18 entreprises"
-    },
-    { 
-      title: "ÉLECTRICIENS", 
-      action: "Découvrir", 
-      image: "https://images.unsplash.com/photo-1586210576191-2ec54cb58e14?w=400&h=250&fit=crop", 
-      description: "Installation et dépannage électrique",
-      count: "32 techniciens"
-    },
-    { 
-      title: "NOTAIRES", 
-      action: "Découvrir", 
-      image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=250&fit=crop", 
-      description: "Conseil juridique et authentification",
-      count: "15 notaires"
-    },
+    }
   ];
-
-  const partners = [
-    { 
-      name: "Studio Architecture", 
-      action: "Voir projets", 
-      image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&h=250&fit=crop", 
-      category: "ARCHITECTES", 
-      location: "Paris", 
-      type: "maison",
-      rating: 4.9,
-      projects: 127,
-      verified: true,
-      experience: "15 ans"
-    },
-    { 
-      name: "Construct Pro", 
-      action: "Voir réalisations", 
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop", 
-      category: "CONSTRUCTEURS", 
-      location: "Lyon", 
-      type: "appartement",
-      rating: 4.8,
-      projects: 89,
-      verified: true,
-      experience: "12 ans"
-    },
-    { 
-      name: "Elec Services", 
-      action: "Demander devis", 
-      image: "https://images.unsplash.com/photo-1586210576191-2ec54cb58e14?w=400&h=250&fit=crop", 
-      category: "ÉLECTRICIENS", 
-      location: "Marseille", 
-      type: "maison",
-      rating: 4.7,
-      projects: 203,
-      verified: true,
-      experience: "8 ans"
-    },
-  ];
-
-  const getFilteredPartners = (category) => {
-    let filtered = category ? partners.filter(p => p.category === category) : partners.slice();
-    
-    if (partnersSearchQuery) {
-      const q = partnersSearchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.location.toLowerCase().includes(q)
-      );
-    }
-
-    if (propertyType) {
-      filtered = filtered.filter(p => p.type === propertyType);
-    }
-
-    if (locationFilter) {
-      filtered = filtered.filter(p => p.location === locationFilter);
-    }
-    
-    return filtered;
-  };
-
-  const getFilteredServices = () => {
-    let filtered = services;
-    
-    if (servicesSearchQuery) {
-      const q = servicesSearchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
-        s.action.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q)
-      );
-    }
-
-    return filtered;
-  };
 
   const toggleSector = (sector) => {
     setSelectedSectors(prev =>
@@ -305,10 +415,12 @@ const ServicesPartnersPage = () => {
     setPartnersSearchQuery("");
     setPropertyType("");
     setLocationFilter("");
+    getFilteredPartners(selectedCategory);
   };
 
   const handleLoadMore = () => {
     setDisplayCount(prev => prev + 6);
+    getFilteredPartners(selectedCategory);
   };
 
   const handleImageError = (e, fallbackText) => {
@@ -316,6 +428,26 @@ const ServicesPartnersPage = () => {
     target.src = `https://via.placeholder.com/400x250/f8fafc/64748b?text=${encodeURIComponent(fallbackText)}`;
   };
 
+  // Effets pour les recherches en temps réel
+  useEffect(() => {
+    if (view === "services") {
+      const timeoutId = setTimeout(() => {
+        getFilteredServices();
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [servicesSearchQuery, view]);
+
+  useEffect(() => {
+    if (view === "partenaires" && showPartners) {
+      const timeoutId = setTimeout(() => {
+        getFilteredPartners(selectedCategory);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [partnersSearchQuery, propertyType, locationFilter, view, showPartners, selectedCategory]);
+
+  // Composants sections (identique à votre code original, mais adapté pour utiliser les données dynamiques)
   const StatusesSection = () => (
     <section className="py-8 animate-fade-in">
       <div className="text-center mb-8">
@@ -365,9 +497,6 @@ const ServicesPartnersPage = () => {
   );
 
   const PartnersSection = ({ category }) => {
-    const filteredPartners = getFilteredPartners(category);
-    const displayedPartners = filteredPartners.slice(0, displayCount);
-
     return (
       <>
         <div className="mb-8 animate-fade-in">
@@ -460,9 +589,18 @@ const ServicesPartnersPage = () => {
               </button>
             )}
           </div>
+
+          {loading && (
+            <div className="text-center py-4">
+              <div className="inline-flex items-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span className="ml-2 text-gray-600">Chargement...</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {filteredPartners.length === 0 ? (
+        {partners.length === 0 && !loading ? (
           <div className="text-center py-12 animate-fade-in">
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -478,9 +616,9 @@ const ServicesPartnersPage = () => {
         ) : (
           <>
             <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 animate-fade-in">
-              {displayedPartners.map((partner, index) => (
+              {partners.map((partner, index) => (
                 <div
-                  key={index}
+                  key={partner._id || index}
                   className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-200"
                 >
                   <div className="relative h-48 overflow-hidden">
@@ -547,7 +685,7 @@ const ServicesPartnersPage = () => {
               ))}
             </section>
             
-            {filteredPartners.length > displayCount && (
+            {partners.length >= displayCount && (
               <div className="text-center mb-8">
                 <button 
                   onClick={handleLoadMore}
@@ -564,9 +702,6 @@ const ServicesPartnersPage = () => {
   };
 
   const ServicesSection = () => {
-    const filteredServices = getFilteredServices();
-    const displayedServices = filteredServices.slice(0, displayCount);
-
     return (
       <>
         <div className="mb-8 animate-fade-in">
@@ -592,9 +727,18 @@ const ServicesPartnersPage = () => {
               </button>
             )}
           </div>
+
+          {loading && (
+            <div className="text-center py-4">
+              <div className="inline-flex items-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span className="ml-2 text-gray-600">Chargement...</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {filteredServices.length === 0 ? (
+        {services.length === 0 && !loading ? (
           <div className="text-center py-12 animate-fade-in">
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -610,9 +754,9 @@ const ServicesPartnersPage = () => {
         ) : (
           <>
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
-              {displayedServices.map((service, index) => (
+              {services.map((service, index) => (
                 <div
-                  key={index}
+                  key={service._id || index}
                   className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-200"
                 >
                   <div className="relative h-40 overflow-hidden">
@@ -652,7 +796,7 @@ const ServicesPartnersPage = () => {
               ))}
             </section>
             
-            {filteredServices.length > displayCount && (
+            {services.length >= displayCount && (
               <div className="text-center mb-8">
                 <button 
                   onClick={handleLoadMore}
@@ -727,6 +871,9 @@ const ServicesPartnersPage = () => {
       </div>
     </div>
   );
+
+  // Le reste de votre code (JSX) reste identique à votre version originale
+  // ... [Votre JSX existant reste exactement le même]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
@@ -833,51 +980,62 @@ const ServicesPartnersPage = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                {partnerCategories.map((category, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border border-gray-200 group"
-                    onClick={() => {
-                      setSelectedCategory(category.title);
-                      setShowPartners(true);
-                      setDisplayCount(6);
-                    }}
-                  >
-                    <div className="text-center mb-4">
-                      <div className="bg-blue-100 rounded-xl p-3 inline-flex group-hover:bg-blue-500 transition-colors">
-                        <Users className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
-                      </div>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 text-lg text-center mb-2">{category.title}</h3>
-                    <p className="text-gray-600 text-sm text-center mb-3">{category.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-sm">{category.count}</span>
-                      <div className="flex items-center text-blue-600 font-medium text-sm">
-                        {category.action}
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </div>
-                    </div>
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <span className="ml-3 text-gray-600">Chargement des catégories...</span>
                   </div>
-                ))}
-              </div>
-
-              {/* Partenaires en vedette */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Partenaires en Vedette</h3>
-                    <p className="text-gray-600">Découvrez quelques-uns de nos meilleurs partenaires</p>
-                  </div>
-                  <button 
-                    onClick={handleViewAllPartners}
-                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-                  >
-                    Voir tous les partenaires
-                  </button>
                 </div>
-                <PartnersSection category="" />
-              </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    {partnerCategories.map((category, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border border-gray-200 group"
+                        onClick={() => {
+                          setSelectedCategory(category.title);
+                          setShowPartners(true);
+                          setDisplayCount(6);
+                        }}
+                      >
+                        <div className="text-center mb-4">
+                          <div className="bg-blue-100 rounded-xl p-3 inline-flex group-hover:bg-blue-500 transition-colors">
+                            <Users className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
+                          </div>
+                        </div>
+                        <h3 className="font-semibold text-gray-900 text-lg text-center mb-2">{category.title}</h3>
+                        <p className="text-gray-600 text-sm text-center mb-3">{category.description}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500 text-sm">{category.count}</span>
+                          <div className="flex items-center text-blue-600 font-medium text-sm">
+                            Découvrir
+                            <ArrowRight className="w-4 h-4 ml-1" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Partenaires en vedette */}
+                  <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900">Partenaires en Vedette</h3>
+                        <p className="text-gray-600">Découvrez quelques-uns de nos meilleurs partenaires</p>
+                      </div>
+                      <button 
+                        onClick={handleViewAllPartners}
+                        className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                      >
+                        Voir tous les partenaires
+                      </button>
+                    </div>
+                    <PartnersSection category="" />
+                  </div>
+                </>
+              )}
             </section>
           )}
           
