@@ -3,7 +3,7 @@ import {
   Search, MapPin, Calendar, Users, Star, Filter, ChevronLeft, ChevronRight,
   Heart, Share2, Bed, Wifi, Car, Utensils, Snowflake, Dumbbell, Tv,
   Map, Phone, Mail, Shield, Clock, CheckCircle, X, Plus, Minus,
-  Lightbulb, Navigation, TrendingUp, Zap
+  Lightbulb, Navigation, TrendingUp, Zap, CreditCard
 } from 'lucide-react';
 import api from '../lib/api'; // Import de l'API configurée
 import '../styles/animationSlider.css'
@@ -63,10 +63,22 @@ interface BookingForm {
   paymentMethod: string;
 }
 
+interface BookingResponse {
+  success: boolean;
+  data: {
+    id: string;
+    confirmationNumber: string;
+    totalAmount: number;
+    status: string;
+  };
+  message: string;
+}
+
 export const TourismSection = () => {
   const [listings, setListings] = useState<TourismListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<TourismListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
     destination: '',
     checkIn: '',
@@ -98,6 +110,8 @@ export const TourismSection = () => {
     specialRequests: '',
     paymentMethod: 'card'
   });
+  const [bookingSuccess, setBookingSuccess] = useState<BookingResponse | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string>('');
   const sliderRef = useRef<HTMLDivElement>(null);
 
   // Amenities disponibles avec icônes
@@ -260,7 +274,7 @@ export const TourismSection = () => {
     }
   };
 
-  const handleBooking = (listing: TourismListing) => {
+  const handleBooking = async (listing: TourismListing) => {
     setSelectedListing(listing);
     setBookingForm(prev => ({
       ...prev,
@@ -272,22 +286,84 @@ export const TourismSection = () => {
       checkIn: filters.checkIn,
       checkOut: filters.checkOut
     }));
+    
+    // Vérifier la disponibilité avant d'ouvrir le modal
+    if (filters.checkIn && filters.checkOut) {
+      try {
+        const availabilityResponse = await api.get(
+          `/tourisme-bookings/listing/${listing.id}/availability`,
+          {
+            params: {
+              checkIn: filters.checkIn,
+              checkOut: filters.checkOut
+            }
+          }
+        );
+
+        if (availabilityResponse.data.success && !availabilityResponse.data.data.available) {
+          setAvailabilityError('Cet hébergement n\'est pas disponible pour les dates sélectionnées');
+          return;
+        }
+      } catch (error) {
+        console.error('Erreur vérification disponibilité:', error);
+      }
+    }
+
+    setAvailabilityError('');
     setShowBookingModal(true);
   };
 
   const confirmBooking = async () => {
-    setLoading(true);
+    setBookingLoading(true);
     try {
       // Utilisation de l'API pour la réservation
-     // await api.post("/bookings", bookingForm);
-      alert('Réservation confirmée ! Un email de confirmation vous a été envoyé.');
-      setShowBookingModal(false);
-    } catch (error) {
+      const response = await api.post("/tourisme-bookings", bookingForm);
+      
+      if (response.data.success) {
+        setBookingSuccess(response.data);
+        // Réinitialiser le formulaire
+        setBookingForm({
+          listingId: '',
+          checkIn: '',
+          checkOut: '',
+          guests: 2,
+          adults: 2,
+          children: 0,
+          infants: 0,
+          specialRequests: '',
+          paymentMethod: 'card'
+        });
+      } else {
+        throw new Error(response.data.error);
+      }
+    } catch (error: any) {
       console.error("Erreur lors de la réservation :", error);
-      alert('Erreur lors de la réservation. Veuillez réessayer.');
+      alert(error.response?.data?.error || 'Erreur lors de la réservation. Veuillez réessayer.');
     } finally {
-      setLoading(false);
+      setBookingLoading(false);
     }
+  };
+
+  const closeBookingModal = () => {
+    setShowBookingModal(false);
+    setBookingSuccess(null);
+    setAvailabilityError('');
+  };
+
+  const calculateTotalNights = () => {
+    if (!bookingForm.checkIn || !bookingForm.checkOut) return 0;
+    const checkIn = new Date(bookingForm.checkIn);
+    const checkOut = new Date(bookingForm.checkOut);
+    const timeDiff = checkOut.getTime() - checkIn.getTime();
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+  };
+
+  const calculateTotalAmount = () => {
+    if (!selectedListing) return 0;
+    const nights = calculateTotalNights();
+    const baseAmount = selectedListing.price * nights;
+    const serviceFee = 15.00;
+    return baseAmount + serviceFee;
   };
 
   const nextImage = (listingId: string, totalImages: number) => {
@@ -356,6 +432,13 @@ export const TourismSection = () => {
 
       return newValues;
     });
+
+    // Mettre à jour aussi le formulaire de réservation
+    setBookingForm(prev => ({
+      ...prev,
+      [type]: Math.max(0, prev[type as keyof BookingForm] as number + delta),
+      guests: prev.adults + prev.children + prev.infants
+    }));
   };
 
   const getAmenityIcon = (amenityId: string) => {
@@ -425,6 +508,14 @@ export const TourismSection = () => {
                   className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
                   value={filters.checkIn}
                   onChange={(e) => setFilters({ ...filters, checkIn: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+                <input
+                  type="date"
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
+                  value={filters.checkOut}
+                  onChange={(e) => setFilters({ ...filters, checkOut: e.target.value })}
+                  min={filters.checkIn || new Date().toISOString().split('T')[0]}
                 />
               </div>
             </div>
@@ -865,9 +956,10 @@ export const TourismSection = () => {
 
                       <button
                         onClick={() => handleBooking(listing)}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        disabled={!listing.available}
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {listing.instantBook ? 'Réserver' : 'Vérifier disponibilité'}
+                        {!listing.available ? 'Indisponible' : listing.instantBook ? 'Réserver' : 'Vérifier disponibilité'}
                       </button>
                     </div>
                   </div>
@@ -886,9 +978,11 @@ export const TourismSection = () => {
             >
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-bold text-gray-900">Finaliser votre réservation</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {bookingSuccess ? 'Réservation Confirmée' : 'Finaliser votre réservation'}
+                  </h3>
                   <button
-                    onClick={() => setShowBookingModal(false)}
+                    onClick={closeBookingModal}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
                     <X className="w-6 h-6" />
@@ -897,162 +991,247 @@ export const TourismSection = () => {
               </div>
 
               <div className="p-6">
-                <div className="flex items-start space-x-4 mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0">
-                    {selectedListing.images[0] ? 
-                      <img src={selectedListing.images[0]} alt="" className="w-full h-full object-cover rounded-xl" /> 
-                      : <div className="w-full h-full flex items-center justify-center text-white text-xs">Image non disponible</div>
-                    }
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900">{selectedListing.title}</h4>
-                    <p className="text-gray-600 flex items-center">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {selectedListing.city}
+                {bookingSuccess ? (
+                  // Confirmation de réservation
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="w-10 h-10 text-green-600" />
+                    </div>
+                    <h4 className="text-2xl font-bold text-gray-900 mb-2">Réservation Confirmée !</h4>
+                    <p className="text-gray-600 mb-4">
+                      Votre réservation a été confirmée avec succès.
                     </p>
-                    <div className="flex items-center text-sm text-gray-600 mt-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                      {selectedListing.rating} ({selectedListing.reviewCount} avis)
+                    <div className="bg-green-50 p-4 rounded-xl mb-6">
+                      <div className="text-sm font-semibold text-green-800 mb-2">
+                        Numéro de confirmation:
+                      </div>
+                      <div className="text-2xl font-bold text-green-900">
+                        {bookingSuccess.data.confirmationNumber}
+                      </div>
+                      <div className="text-sm text-green-700 mt-2">
+                        Montant total: {bookingSuccess.data.totalAmount}€
+                      </div>
                     </div>
+                    <button
+                      onClick={closeBookingModal}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 transform hover:scale-105"
+                    >
+                      Fermer
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  // Formulaire de réservation
+                  <>
+                    {availabilityError && (
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-center text-red-800">
+                          <X className="w-5 h-5 mr-2" />
+                          {availabilityError}
+                        </div>
+                      </div>
+                    )}
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Arrivée</label>
-                    <input
-                      type="date"
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={bookingForm.checkIn}
-                      onChange={(e) => setBookingForm(prev => ({ ...prev, checkIn: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Départ</label>
-                    <input
-                      type="date"
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={bookingForm.checkOut}
-                      onChange={(e) => setBookingForm(prev => ({ ...prev, checkOut: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Voyageurs</label>
-                  <div className="bg-gray-50 p-4 rounded-xl">
-                    <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-start space-x-4 mb-6">
+                      <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0">
+                        {selectedListing.images[0] ? 
+                          <img src={selectedListing.images[0]} alt="" className="w-full h-full object-cover rounded-xl" /> 
+                          : <div className="w-full h-full flex items-center justify-center text-white text-xs">Image non disponible</div>
+                        }
+                      </div>
                       <div>
-                        <div className="font-medium">Adultes</div>
-                        <div className="text-sm text-gray-500">13 ans et plus</div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => updateGuestCount('adults', -1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center font-medium">{bookingForm.adults}</span>
-                        <button
-                          onClick={() => updateGuestCount('adults', 1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
+                        <h4 className="font-bold text-lg text-gray-900">{selectedListing.title}</h4>
+                        <p className="text-gray-600 flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {selectedListing.city}
+                        </p>
+                        <div className="flex items-center text-sm text-gray-600 mt-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+                          {selectedListing.rating} ({selectedListing.reviewCount} avis)
+                        </div>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center mb-3">
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
                       <div>
-                        <div className="font-medium">Enfants</div>
-                        <div className="text-sm text-gray-500">2-12 ans</div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Arrivée</label>
+                        <input
+                          type="date"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          value={bookingForm.checkIn}
+                          onChange={(e) => setBookingForm(prev => ({ ...prev, checkIn: e.target.value }))}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
+                        />
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => updateGuestCount('children', -1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center font-medium">{bookingForm.children}</span>
-                        <button
-                          onClick={() => updateGuestCount('children', 1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
                       <div>
-                        <div className="font-medium">Bébés</div>
-                        <div className="text-sm text-gray-500">Moins de 2 ans</div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => updateGuestCount('infants', -1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center font-medium">{bookingForm.infants}</span>
-                        <button
-                          onClick={() => updateGuestCount('infants', 1)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Départ</label>
+                        <input
+                          type="date"
+                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          value={bookingForm.checkOut}
+                          onChange={(e) => setBookingForm(prev => ({ ...prev, checkOut: e.target.value }))}
+                          min={bookingForm.checkIn || new Date().toISOString().split('T')[0]}
+                          required
+                        />
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Demandes spéciales</label>
-                  <textarea
-                    rows={3}
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Informations supplémentaires..."
-                    value={bookingForm.specialRequests}
-                    onChange={(e) => setBookingForm(prev => ({ ...prev, specialRequests: e.target.value }))}
-                  />
-                </div>
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Voyageurs</label>
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <div className="font-medium">Adultes</div>
+                            <div className="text-sm text-gray-500">13 ans et plus</div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <button
+                              type="button"
+                              onClick={() => updateGuestCount('adults', -1)}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center font-medium">{bookingForm.adults}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateGuestCount('adults', 1)}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <div className="font-medium">Enfants</div>
+                            <div className="text-sm text-gray-500">2-12 ans</div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <button
+                              type="button"
+                              onClick={() => updateGuestCount('children', -1)}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center font-medium">{bookingForm.children}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateGuestCount('children', 1)}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">Bébés</div>
+                            <div className="text-sm text-gray-500">Moins de 2 ans</div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <button
+                              type="button"
+                              onClick={() => updateGuestCount('infants', -1)}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center font-medium">{bookingForm.infants}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateGuestCount('infants', 1)}
+                              className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="bg-blue-50 p-4 rounded-xl mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-700">Prix par nuit</span>
-                    <span className="font-semibold">{selectedListing.price}€</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-700">Frais de service</span>
-                    <span className="font-semibold">15€</span>
-                  </div>
-                  <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-blue-200">
-                    <span>Total</span>
-                    <span>{selectedListing.price + 15}€</span>
-                  </div>
-                </div>
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Demandes spéciales</label>
+                      <textarea
+                        rows={3}
+                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Informations supplémentaires..."
+                        value={bookingForm.specialRequests}
+                        onChange={(e) => setBookingForm(prev => ({ ...prev, specialRequests: e.target.value }))}
+                      />
+                    </div>
 
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => setShowBookingModal(false)}
-                    className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={confirmBooking}
-                    disabled={loading}
-                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Traitement...' : 'Confirmer la réservation'}
-                  </button>
-                </div>
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Méthode de paiement</label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-colors">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value="card"
+                            checked={bookingForm.paymentMethod === 'card'}
+                            onChange={(e) => setBookingForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                            className="text-blue-600 focus:ring-blue-500"
+                          />
+                          <CreditCard className="w-5 h-5 ml-2 mr-3" />
+                          <span>Carte bancaire</span>
+                        </label>
+                        <label className="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-colors">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value="paypal"
+                            checked={bookingForm.paymentMethod === 'paypal'}
+                            onChange={(e) => setBookingForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                            className="text-blue-600 focus:ring-blue-500"
+                          />
+                          <span>PayPal</span>
+                        </label>
+                      </div>
+                    </div>
 
-                <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Paiement sécurisé • Annulation gratuite sous conditions
-                </div>
+                    <div className="bg-blue-50 p-4 rounded-xl mb-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">Prix par nuit</span>
+                        <span className="font-semibold">{selectedListing.price}€</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">Nombre de nuits</span>
+                        <span className="font-semibold">{calculateTotalNights()}</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">Frais de service</span>
+                        <span className="font-semibold">15€</span>
+                      </div>
+                      <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-blue-200">
+                        <span>Total</span>
+                        <span>{calculateTotalAmount()}€</span>
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={closeBookingModal}
+                        className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={confirmBooking}
+                        disabled={bookingLoading || !bookingForm.checkIn || !bookingForm.checkOut}
+                        className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {bookingLoading ? 'Traitement...' : 'Confirmer la réservation'}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Paiement sécurisé • Annulation gratuite sous conditions
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
