@@ -4,7 +4,6 @@ import {
   loadDemandes,
   updateDemandeStatus,
   updateDemande,
-  getDemandeById,
 } from "@/lib/requestStore";
 import {
   Send,
@@ -12,8 +11,6 @@ import {
   MapPin,
   Wrench,
   Zap,
-  ChevronLeft,
-  MoreVertical,
   User,
   MessageCircle,
   AlertCircle,
@@ -21,17 +18,14 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
-import { toast } from "sonner";
 
-export default function UserDiscussions({
-  artisanView,
-}: { artisanView?: boolean } = {}) {
+export default function UserDiscussions() {
   const { id } = useParams();
   const location = useLocation();
   const demande = (location.state as any)?.demande;
-  useEffect(()=>{
-    console.log("demandes ",demande)
-  },[demande])
+  useEffect(() => {
+    console.log("demandes ", demande);
+  }, [demande]);
   const getUrgencyBg = (urgency) => {
     switch (urgency) {
       case "Urgent":
@@ -84,7 +78,6 @@ export default function UserDiscussions({
   const [activeStoredDemande, setActiveStoredDemande] = useState<any | null>(
     null
   );
-  const [isArtisanView, setIsArtisanView] = useState(false);
   const [meetingDate, setMeetingDate] = useState<string>("");
   const [meetingTime, setMeetingTime] = useState<string>("");
   const [devisText, setDevisText] = useState<string>("");
@@ -116,14 +109,6 @@ export default function UserDiscussions({
   const [reviewTextInput, setReviewTextInput] = useState<string>("");
 
   useEffect(() => {
-    // If caller forces artisan view via prop, prioritize that
-    if (artisanView) {
-      setIsArtisanView(true);
-    } else {
-      // If URL has ?as=artisan, treat this view as artisan
-      const params = new URLSearchParams(location.search);
-      if (params.get("as") === "artisan") setIsArtisanView(true);
-    }
     // If there is an id param in route, try to load stored demande
     if (id) {
       const stored = loadDemandes();
@@ -179,11 +164,7 @@ export default function UserDiscussions({
 
   const isClientPath =
     location.pathname && location.pathname.includes("/mon-compte");
-  const isClientView =
-    !isArtisanView && isClientPath && (demande || activeStoredDemande);
-
-  const isAdminView = !isArtisanView && !isClientView;
-
+  const isClientView = true;
   const clientStatusRaw = (
     activeStoredDemande?.status ||
     activeStoredDemande?.statut ||
@@ -231,16 +212,6 @@ export default function UserDiscussions({
       (activeStoredDemande?.client ? activeStoredDemande.client : "Client");
     switch (event) {
       case "demande_sent":
-        if (isAdminView)
-          appendMessage(
-            "Vous",
-            `Demande envoyée à ${payload.toName || artisanName}.`
-          );
-        if (isArtisanView)
-          appendMessage(
-            "System",
-            `Nouvelle demande reçue de ${payload.clientName || clientName}.`
-          );
         if (isClientView)
           appendMessage(
             "System",
@@ -248,32 +219,20 @@ export default function UserDiscussions({
           );
         break;
       case "artisan_accepted":
-        if (isArtisanView)
-          appendMessage("Vous", `Vous avez accepté la demande.`);
         if (isClientView)
           appendMessage(
             "Artisan",
             `${payload.artisanName || artisanName} a accepté votre demande.`
           );
-        if (isAdminView)
-          appendMessage(
-            "Artisan",
-            `${payload.artisanName || artisanName} a accepté la demande.`
-          );
+
         break;
       case "artisan_refused":
-        if (isArtisanView)
-          appendMessage("Vous", `Vous avez refusé la demande.`);
         if (isClientView)
           appendMessage(
             "Artisan",
             `${payload.artisanName || artisanName} a refusé votre demande.`
           );
-        if (isAdminView)
-          appendMessage(
-            "Artisan",
-            `${payload.artisanName || artisanName} a refusé la demande.`
-          );
+
         break;
       case "proposal_meeting":
         appendMessage(
@@ -297,8 +256,7 @@ export default function UserDiscussions({
               ? "Document signé envoyé (scan)."
               : "Devis signé numériquement."
           );
-        if (isArtisanView)
-          appendMessage("System", `Le client a signé le devis.`);
+
         break;
       case "appointment_set":
         appendMessage(
@@ -354,18 +312,6 @@ export default function UserDiscussions({
       return;
     }
 
-    if (isArtisanView) {
-      setMessages([
-        { sender: "Client", text: base, time: "" },
-        {
-          sender: "System",
-          text: "Nouvelle demande: acceptez ou refusez, puis proposez rendez-vous et devis.",
-          time: "",
-        },
-      ]);
-      return;
-    }
-
     if (isClientView) {
       setMessages([
         { sender: "Vous", text: base, time: "" },
@@ -386,7 +332,7 @@ export default function UserDiscussions({
         time: "",
       },
     ]);
-  }, [isArtisanView, isClientView, isFinished, defaultIntro]);
+  }, [isClientView, isFinished, defaultIntro]);
 
   function handleClientSign() {
     if (!activeStoredDemande) return;
@@ -435,52 +381,6 @@ export default function UserDiscussions({
     appendEvent("client_signed", { method: signChoice });
   }
 
-  // Artisan actions after client signed: set appointment and send invoice
-  function handleSetAppointment() {
-    if (!activeStoredDemande) return;
-    if (!meetingDate && !meetingTime) return;
-    const updates: any = {
-      appointmentDate: meetingDate,
-      appointmentTime: meetingTime,
-    };
-    updateDemande(activeStoredDemande.id, updates);
-    setActiveStoredDemande((prev) => (prev ? { ...prev, ...updates } : prev));
-    appendEvent("appointment_set", { date: meetingDate, time: meetingTime });
-  }
-
-  function handleFactureFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setFactureFile({ name: file.name, dataUrl });
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function handleSendFacture() {
-    if (!activeStoredDemande) return;
-    if (!factureFile) return;
-    const updates: any = {
-      factureFile,
-      factureSentAt: new Date().toISOString(),
-    };
-    updateDemande(activeStoredDemande.id, updates);
-    setActiveStoredDemande((prev) => (prev ? { ...prev, ...updates } : prev));
-    appendEvent("facture_sent");
-    // If appointment already set, mark as finished
-    const appointmentSet = activeStoredDemande?.appointmentDate || meetingDate;
-    if (appointmentSet) {
-      updateDemandeStatus(activeStoredDemande.id, "finished");
-      updateDemande(activeStoredDemande.id, { status: "finished" });
-      setActiveStoredDemande((prev) =>
-        prev ? { ...prev, status: "finished" } : prev
-      );
-      appendEvent("travaux_finished");
-    }
-  }
-
   // Submit a client review once travaux finished
   function submitReview() {
     if (!activeStoredDemande) return;
@@ -508,16 +408,6 @@ export default function UserDiscussions({
     appendEvent("generic", { sender: "Vous", text: input });
     setInput("");
   }
-
-  function handleRefuse() {
-    toast.info("Demande refusée.");
-  }
-
-  function handleSign() {
-    // Open modal to choose artisan to send the validated demande
-    setIsModalOpen(true);
-  }
-
   function handleSendToArtisan() {
     if (!selectedArtisan) return;
     const artisan = artisans.find((a) => a.id === selectedArtisan);
@@ -551,99 +441,6 @@ export default function UserDiscussions({
     setSelectedArtisan(null);
   }
 
-  // Simulate artisan response (for demo/testing)
-  function simulateAccept() {
-    if (!sentToArtisanId) return;
-    const artisan = artisans.find((a) => a.id === sentToArtisanId);
-    const name = artisan ? artisan.name : "artisan";
-    setValidationState("accepted");
-    appendEvent("artisan_accepted", { artisanName: name });
-  }
-
-  function simulateRefuse() {
-    if (!sentToArtisanId) return;
-    const artisan = artisans.find((a) => a.id === sentToArtisanId);
-    const name = artisan ? artisan.name : "artisan";
-    setValidationState("refused");
-    appendEvent("artisan_refused", { artisanName: name });
-  }
-
-  // Artisan actions when viewing the demande
-  function handleArtisanAccept() {
-    if (!activeStoredDemande) return;
-    // persist status
-    updateDemandeStatus(activeStoredDemande.id, "accepted");
-    // update local validation and stored demande so UI updates instantly
-    setValidationState("accepted");
-    setActiveStoredDemande((prev) =>
-      prev ? { ...prev, status: "accepted" } : prev
-    );
-    const artisan = artisans.find(
-      (a) => a.id === activeStoredDemande.artisanId
-    );
-    const name = artisan ? artisan.name : "Artisan";
-    appendEvent("artisan_accepted", { artisanName: name });
-    // Show scheduling inputs by setting local state and default meeting date/time to next day
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setMeetingDate(tomorrow.toISOString().slice(0, 10));
-    setMeetingTime("09:00");
-  }
-
-  function handleArtisanRefuse() {
-    if (!activeStoredDemande) return;
-    updateDemandeStatus(activeStoredDemande.id, "refused");
-    setValidationState("refused");
-    setActiveStoredDemande((prev) =>
-      prev ? { ...prev, status: "refused" } : prev
-    );
-    const artisan = artisans.find(
-      (a) => a.id === activeStoredDemande.artisanId
-    );
-    const name = artisan ? artisan.name : "Artisan";
-    appendEvent("artisan_refused", { artisanName: name });
-  }
-
-  // Artisan proposes a meeting and/or a devis
-  function sendMeetingAndDevis() {
-    if (!activeStoredDemande) return;
-    const updates: any = {};
-    if (meetingDate) updates.date = meetingDate;
-    if (meetingTime) updates["time"] = meetingTime;
-    if (devisText) updates["devis"] = devisText;
-    if (devisFile) updates["devisFile"] = devisFile;
-    // mark when the proposal was sent
-    if (meetingDate || meetingTime || devisText)
-      updates.proposalAt = new Date().toISOString();
-    updateDemande(activeStoredDemande.id, updates);
-    const artisan = artisans.find(
-      (a) => a.id === activeStoredDemande.artisanId
-    );
-    const name = artisan ? artisan.name : "Artisan";
-    if (meetingDate || meetingTime) {
-      appendEvent("proposal_meeting", {
-        date: meetingDate,
-        time: meetingTime,
-        artisanName: name,
-      });
-    }
-    if (devisText) {
-      appendEvent("proposal_devis", { devisText, artisanName: name });
-    }
-    // refresh local stored demande state
-    const refreshed = loadDemandes().find(
-      (d) => d.id === activeStoredDemande.id
-    );
-    setActiveStoredDemande(refreshed || activeStoredDemande);
-    // mark proposal as sent so inputs get disabled
-    setProposalSent(true);
-    // record timestamp for UI badge
-    setProposalTimestamp(updates.proposalAt || new Date().toISOString());
-  }
-
-  // derive whether a proposal was already sent from the stored demande
-  // NOTE: we consider a proposal sent only when `proposalAt` is present. This avoids
-  // immediately disabling inputs right after the artisan clicks 'ACCEPTER'.
   useEffect(() => {
     if (!activeStoredDemande) {
       setProposalSent(false);
@@ -751,17 +548,9 @@ export default function UserDiscussions({
                     </div>
                     <div className="grid grid-cols-2 gap-6 pl-9">
                       <div>
-                        <p className="text-md text-gray-500 mb-2">
-                          Code postal
-                        </p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          97400
-                        </p>
-                      </div>
-                      <div>
                         <p className="text-md text-gray-500 mb-2">Ville</p>
                         <p className="text-lg font-semibold text-gray-900">
-                          Saint-Denis
+                          {demande.lieuAdresseVille}
                         </p>
                       </div>
                     </div>
@@ -820,299 +609,6 @@ export default function UserDiscussions({
                     {/* Boutons SIGNER/REFUSER collés en bas du message */}
                     <div className="flex gap-3 mt-4 items-center">
                       {/* If this view is the artisan opening the demande, show Accept/Refuse controls */}
-                      {isArtisanView && activeStoredDemande && !isFinished && (
-                        <>
-                          {activeStoredDemande.status === "sent" && (
-                            <>
-                              <button
-                                onClick={handleArtisanAccept}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-95"
-                              >
-                                ACCEPTER
-                              </button>
-                              <button
-                                onClick={handleArtisanRefuse}
-                                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-95"
-                              >
-                                REFUSER
-                              </button>
-                            </>
-                          )}
-                          {activeStoredDemande.status === "accepted" && (
-                            <div className="flex-1 flex items-center gap-3">
-                              <div className="w-full">
-                                <div className="flex items-center gap-3 mb-3">
-                                  <div className="px-4 py-2 rounded-xl bg-green-600 text-white font-semibold">
-                                    Validée
-                                  </div>
-                                  <div className="text-sm text-gray-600">
-                                    Vous avez accepté cette demande. Proposez un
-                                    rendez-vous et un devis :
-                                  </div>
-                                </div>
-                                {/* If the client already signed the devis, show post-sign controls for the artisan */}
-                                {clientSigned && !isFinished && (
-                                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                    <h4 className="font-semibold text-gray-900 mb-2">
-                                      Devis signé et transmis
-                                    </h4>
-                                    <p className="text-sm text-gray-600 mb-3">
-                                      Le client a signé le devis. Fixez le
-                                      rendez-vous et envoyez la facture pour
-                                      clore le dossier.
-                                    </p>
-
-                                    <div className="grid grid-cols-2 gap-3 mb-3">
-                                      <div>
-                                        <label className="block text-sm text-gray-600 mb-1">
-                                          Date du rendez-vous
-                                        </label>
-                                        <input
-                                          type="date"
-                                          value={meetingDate}
-                                          onChange={(e) =>
-                                            setMeetingDate(e.target.value)
-                                          }
-                                          className="w-full px-3 py-2 border rounded-xl"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="block text-sm text-gray-600 mb-1">
-                                          Heure
-                                        </label>
-                                        <input
-                                          type="time"
-                                          value={meetingTime}
-                                          onChange={(e) =>
-                                            setMeetingTime(e.target.value)
-                                          }
-                                          className="w-full px-3 py-2 border rounded-xl"
-                                        />
-                                      </div>
-                                    </div>
-
-                                    <div className="mb-3">
-                                      <label className="block text-sm text-gray-600 mb-1">
-                                        Joindre la facture (PDF)
-                                      </label>
-                                      <input
-                                        type="file"
-                                        accept="application/pdf"
-                                        onChange={handleFactureFileChange}
-                                        className="w-full"
-                                      />
-                                      {factureFile && (
-                                        <div className="mt-2 text-sm text-gray-600">
-                                          Fichier prêt:{" "}
-                                          <span className="font-medium">
-                                            {factureFile.name}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div className="flex items-center gap-3 justify-end">
-                                      <button
-                                        onClick={handleSetAppointment}
-                                        disabled={!meetingDate && !meetingTime}
-                                        className={`px-4 py-2 rounded-xl text-white ${
-                                          !meetingDate && !meetingTime
-                                            ? "bg-gray-300 cursor-not-allowed"
-                                            : "bg-blue-600 hover:bg-blue-700"
-                                        }`}
-                                      >
-                                        Fixer le rendez-vous
-                                      </button>
-                                      <button
-                                        onClick={handleSendFacture}
-                                        disabled={!factureFile}
-                                        className={`px-4 py-2 rounded-xl text-white ${
-                                          !factureFile
-                                            ? "bg-gray-300 cursor-not-allowed"
-                                            : "bg-indigo-600 hover:bg-indigo-700"
-                                        }`}
-                                      >
-                                        Envoyer la facture
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                                {!clientSigned && (
-                                  <>
-                                    {/* If a proposal was already sent, show a readable summary instead of inputs */}
-                                    {proposalSent ? (
-                                      <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                        <h4 className="font-semibold text-gray-900 mb-2">
-                                          Proposition envoyée
-                                        </h4>
-                                        <div className="text-sm text-gray-700 mb-2">
-                                          Rendez-vous proposé:{" "}
-                                          <span className="font-medium">
-                                            {meetingDate || "-"} à{" "}
-                                            {meetingTime || "-"}
-                                          </span>
-                                        </div>
-                                        <div className="text-sm text-gray-700 mb-2">
-                                          Devis:{" "}
-                                          <span className="font-medium">
-                                            {devisText || "-"}
-                                          </span>
-                                        </div>
-                                        {activeStoredDemande?.devisFile ||
-                                        devisFile ? (
-                                          <div className="mt-2">
-                                            <a
-                                              className="text-sm text-blue-600 underline"
-                                              href={
-                                                activeStoredDemande?.devisFile
-                                                  ?.dataUrl ||
-                                                devisFile?.dataUrl
-                                              }
-                                              target="_blank"
-                                              rel="noreferrer"
-                                            >
-                                              Télécharger le PDF du devis
-                                            </a>
-                                          </div>
-                                        ) : null}
-                                        {proposalTimestamp && (
-                                          <div className="text-xs text-gray-500">
-                                            Envoyé le{" "}
-                                            {new Date(
-                                              proposalTimestamp
-                                            ).toLocaleString()}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <div>
-                                        <div className="grid grid-cols-2 gap-3 mb-3">
-                                          <div>
-                                            <label className="block text-sm text-gray-600 mb-1">
-                                              Date du rendez-vous
-                                            </label>
-                                            <input
-                                              type="date"
-                                              value={meetingDate}
-                                              onChange={(e) =>
-                                                setMeetingDate(e.target.value)
-                                              }
-                                              className="w-full px-3 py-2 border rounded-xl"
-                                            />
-                                          </div>
-                                          <div>
-                                            <label className="block text-sm text-gray-600 mb-1">
-                                              Heure
-                                            </label>
-                                            <input
-                                              type="time"
-                                              value={meetingTime}
-                                              onChange={(e) =>
-                                                setMeetingTime(e.target.value)
-                                              }
-                                              className="w-full px-3 py-2 border rounded-xl"
-                                            />
-                                          </div>
-                                        </div>
-
-                                        <div className="mb-3">
-                                          <label className="block text-sm text-gray-600 mb-1">
-                                            Joindre un fichier PDF
-                                          </label>
-                                          <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={async (e) => {
-                                              const file = e.target.files?.[0];
-                                              if (!file) return;
-                                              const reader = new FileReader();
-                                              reader.onload = () => {
-                                                const dataUrl =
-                                                  reader.result as string;
-                                                setDevisFile({
-                                                  name: file.name,
-                                                  dataUrl,
-                                                });
-                                              };
-                                              reader.readAsDataURL(file);
-                                            }}
-                                            className="w-full"
-                                          />
-                                          {devisFile && (
-                                            <div className="mt-2 text-sm text-gray-600">
-                                              Fichier prêt:{" "}
-                                              <span className="font-medium">
-                                                {devisFile.name}
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
-
-                                        <div className="flex items-center gap-4 justify-end">
-                                          <div className="flex-shrink-0">
-                                            <button
-                                              onClick={sendMeetingAndDevis}
-                                              disabled={
-                                                !meetingDate &&
-                                                !meetingTime &&
-                                                !devisText
-                                              }
-                                              className={`px-4 py-2 rounded-xl text-white ${
-                                                !meetingDate &&
-                                                !meetingTime &&
-                                                !devisText
-                                                  ? "bg-gray-300 cursor-not-allowed"
-                                                  : "bg-blue-600 hover:bg-blue-700"
-                                              }`}
-                                            >
-                                              Envoyer proposition
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {activeStoredDemande.status === "refused" && (
-                            <div className="flex-1 flex items-center gap-3">
-                              <div className="px-4 py-2 rounded-xl bg-red-600 text-white font-semibold">
-                                Refusée
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                Vous avez refusé cette demande.
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* Admin view: original VALIDER/REFUSER (hidden when in-progress/finished) */}
-                      {!isArtisanView &&
-                        !isInProgress &&
-                        !isFinished &&
-                        validationState === "idle" && (
-                          <>
-                            {!clientSigned && (
-                              <>
-                                <button
-                                  onClick={handleSign}
-                                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-95"
-                                >
-                                  VALIDER
-                                </button>
-                                <button
-                                  onClick={handleRefuse}
-                                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-95"
-                                >
-                                  REFUSER
-                                </button>
-                              </>
-                            )}
-                          </>
-                        )}
 
                       {/* Client view: when the demander opens their demande */}
                       {isClientView && activeStoredDemande && !isFinished && (

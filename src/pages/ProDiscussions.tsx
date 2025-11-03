@@ -4,7 +4,6 @@ import {
   loadDemandes,
   updateDemandeStatus,
   updateDemande,
-  getDemandeById,
 } from "@/lib/requestStore";
 import {
   Send,
@@ -12,8 +11,6 @@ import {
   MapPin,
   Wrench,
   Zap,
-  ChevronLeft,
-  MoreVertical,
   User,
   MessageCircle,
   AlertCircle,
@@ -761,7 +758,7 @@ export default function ProDiscussions({
                       <div>
                         <p className="text-md text-gray-500 mb-2">Ville</p>
                         <p className="text-lg font-semibold text-gray-900">
-                          Saint-Denis
+                          {demande.lieuAdresseVille}
                         </p>
                       </div>
                     </div>
@@ -814,7 +811,7 @@ export default function ProDiscussions({
                       <p className="text-sm font-semibold">{defaultIntro}</p>
                     </div>
                     <div className="text-xs mt-2 text-gray-400 mb-2">
-                      Le 18/03 à 9:00
+                    {demande.createdAt}
                     </div>
 
                     {/* Boutons SIGNER/REFUSER collés en bas du message */}
