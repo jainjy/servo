@@ -23,15 +23,22 @@ import {
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import api from "@/lib/api"
+import { set } from "date-fns";
 export default function MessagesPage({
   artisanView,
 }: { artisanView?: boolean } = {}) {
   const { id } = useParams();
   const location = useLocation();
-  const demande = (location.state as any)?.demande;
+  const [demande, setDemande] = useState<any>(null);
   useEffect(()=>{
+    const fetchDemande = async () => {
+      if (id) {
+        const response = await api.get(`/demandes/${id}`);
+        setDemande(response.data);
+      }
+    }
     console.log("demandes ",demande)
-  },[demande])
+  },[demande,id])
   const getUrgencyBg = (urgency) => {
     switch (urgency) {
       case "Urgent":

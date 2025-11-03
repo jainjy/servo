@@ -27,7 +27,7 @@ import {
   ArrowRight,
   LucideIcon
 } from "lucide-react";
-
+import {useAuth} from "@/hooks/useAuth";
 // Types
 interface FinancementPartenaire {
   id: number;
@@ -159,6 +159,8 @@ export default function Financement() {
     selectedPartenaire: null,
     simulationData: null
   });
+   
+  const { isAuthenticated } = useAuth();
   const [partenairesFinancement, setPartenairesFinancement] = useState<FinancementPartenaire[]>([]);
   const [servicesAssurance, setServicesAssurance] = useState<AssuranceService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +213,11 @@ export default function Financement() {
   };
 
   const handlePartenaireClick = (partenaire: FinancementPartenaire) => {
-    openModal('contact', { selectedPartenaire: partenaire });
+    if (isAuthenticated){
+      openModal("contact", { selectedPartenaire: partenaire });
+    }else{
+      alert("veuiller vous connecter ou vous inscrire pour contacter un partenaire.")
+    }
   };
 
   const handleSimulationSubmit = async (simulationData: any) => {
@@ -522,6 +528,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
     montant: "",
     duree: ""
   });
+  const { isAuthenticated } = useAuth();
   const [estimation, setEstimation] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -554,6 +561,10 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(!isAuthenticated){
+      alert("Veuillez vous connecter ou vous inscrire pour envoyer une demande.");
+      return;
+    }
     setSubmitting(true);
 
     try {
