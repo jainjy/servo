@@ -25,6 +25,7 @@ const navigation = [
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
+  { name: "Art et commerce Services", href: "/pro/Art-commerce-services", icon: Wrench },
   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },

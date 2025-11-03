@@ -1,6 +1,6 @@
 import '@/styles/font.css'
 import Video from './Video';
-import vids from '@/../public/Home.mp4'
+import vids from '/Home.mp4'
 
 export default function EmplacementPub() {
     return (

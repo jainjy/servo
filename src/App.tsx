@@ -96,6 +96,7 @@ import CookieConsent from "./components/CookieConsent";
 import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 import { ToastContainer } from "react-toastify";
+import ArtCommerceService from "./pages/pro/ArtCommerceService";
 
 
 
@@ -137,7 +138,7 @@ const App = () => (
     <TooltipProvider>
       <CartProvider>
         <Toaster />
-           <ToastContainer /> 
+        <ToastContainer />
         <Sonner />
         <BrowserRouter>
           <ScrollToHash />
@@ -172,7 +173,7 @@ const App = () => (
               <Route path="/actualites" element={<Actualites />} />
               <Route path="/tourisme" element={<TourismSection />} />
               <Route path="/service" element={<ServicesPartnersPage />} />
-              
+
               <Route path="/publicite" element={<Publicite />} />
               <Route
                 path="/estimations"
@@ -225,8 +226,16 @@ const App = () => (
                 <Route path="reviews" element={<ReviewsPage />} />
                 <Route path="tourisme" element={<TourismPage />} />
                 <Route path="services" element={<ProfessionalServicesPage />} />
+                <Route
+                  path="Art-commerce-services"
+                  element={<ArtCommerceService />}
+                />
                 <Route path="billing" element={<BillingSection />} />
                 <Route path="settings" element={<ParametresPage />} />
+                <Route
+                  path="Art-commerce-services"
+                  element={<ParametresPage />}
+                />
                 <Route path="orders" element={<ProOrders />} />
                 <Route
                   path="demandes-immobilier"
@@ -270,7 +279,7 @@ const App = () => (
                 <Route path="tourism" element={<Tourism />} />
                 <Route path="users" element={<Users />} />
                 <Route path="vendors" element={<Vendors />} />
-                
+
                 <Route path="demandes" element={<ListeDemande />} />
 
                 <Route
@@ -278,10 +287,12 @@ const App = () => (
                   element={<ServiceCategoriesPage />}
                 />
                 <Route path="metiers" element={<AdminMetiers />} />
-                
-                
+
                 {/* NOUVELLE ROUTE FINANCEMENT DEMANDES */}
-                <Route path="financement-demandes" element={<FinancementDemandes />} />
+                <Route
+                  path="financement-demandes"
+                  element={<FinancementDemandes />}
+                />
               </Route>
               {/* Section not found Routes */}
               <Route path="*" element={<NotFound />} />
