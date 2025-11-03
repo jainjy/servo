@@ -95,6 +95,10 @@ import ListeDemandesDevis from "./pages/pro/ListeDemandesDevis";
 import CookieConsent from "./components/CookieConsent";
 import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
+import { ToastContainer } from "react-toastify";
+
+
+
 
 const queryClient = new QueryClient();
 
@@ -133,6 +137,7 @@ const App = () => (
     <TooltipProvider>
       <CartProvider>
         <Toaster />
+           <ToastContainer /> 
         <Sonner />
         <BrowserRouter>
           <ScrollToHash />

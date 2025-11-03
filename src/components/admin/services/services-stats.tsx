@@ -1,35 +1,35 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import api from "@/lib/api"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import api from "@/lib/api";
 
 interface Stats {
-  totalServices: number
-  totalCategories: number
-  totalMetiers: number
+  totalServices: number;
+  totalCategories: number;
+  totalMetiers: number;
   servicesByCategory: Array<{
-    category: string
-    count: number
-  }>
+    category: string;
+    count: number;
+  }>;
 }
 
 export function ServicesStats() {
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, []);
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/services/stats')
-      setStats(response.data)
+      const response = await api.get("/services/stats");
+      setStats(response.data);
     } catch (error) {
-      console.error('Erreur lors du chargement des statistiques:', error)
+      console.error("Erreur lors du chargement des statistiques:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -45,11 +45,11 @@ export function ServicesStats() {
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   if (!stats) {
-    return null
+    return null;
   }
 
   return (

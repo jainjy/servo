@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Phone, Globe, Truck, Star, Mail, Heart, Share2, Eye, X, Calendar, Clock, Shield, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { getEmailClient } from "@/components/utils/UserUtils";
+import { useCart } from '@/components/contexts/CartContext';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
+
+
+
+
+
+
+import api from "@/lib/api"
+
+
 
 const ArtCommerceDetail = () => {
   const { id } = useParams();
@@ -11,6 +25,19 @@ const ArtCommerceDetail = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const isAuthenticated = !!localStorage.getItem('auth-token') && !!localStorage.getItem('user-data');
+
+
+
+  //oeuvre 
+
+  const [oeuvres, setOeuvres] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filtrer les œuvres selon la catégorie du listing
+
+
 
   const listing = {
     id: 1,
@@ -26,7 +53,7 @@ const ArtCommerceDetail = () => {
     ],
     contact: {
       phone: '+262 692 123 456',
-      email: 'contact@galerietropical.re',
+      email: 'jinxramamonjisoa@gmail.com',
       website: 'www.galerietropical.re'
     },
     features: ['Livraison disponible', 'Paiement en ligne', 'Site web', 'Artistes locaux', 'Certificat d\'authenticité', 'Installation sur mesure'],
@@ -89,12 +116,64 @@ const ArtCommerceDetail = () => {
     ]
   };
 
+
+  //ouvre
+  const mainCategoryNames = [
+    "art",
+    "commerce",
+    "peinture",
+    "sculptures",
+    "artisanat",
+    "boutique",
+  ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Récupérer toutes les œuvres
+        const resOeuvres = await api("/oeuvre");
+        const dataOeuvres = await resOeuvres.data;
+
+        // Récupérer toutes les catégories
+        const resCategories = await api("/categories");
+        const dataCategories = await resCategories.data;
+
+        // Filtrer uniquement les œuvres dont la catégorie est dans mainCategoryNames
+        const filteredOeuvres = Array.isArray(dataOeuvres)
+          ? dataOeuvres.filter(
+            (artwork) =>
+              artwork.category &&
+              mainCategoryNames.includes(artwork.category.name.toLowerCase())
+          )
+          : [];
+
+        // Mettre à jour les états
+        setOeuvres(filteredOeuvres);
+        setCategories(Array.isArray(dataCategories) ? dataCategories : []);
+      } catch (err) {
+        console.error("Erreur lors du chargement des œuvres :", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+
+
+
+
+
+
+
   // Fonction pour gérer les favoris
   const handleFavoriteClick = () => {
     setIsFavorite(!isFavorite);
     // Simulation d'enregistrement en base de données
     console.log(`Commerce ${isFavorite ? 'retiré des' : 'ajouté aux'} favoris`);
-    
+
     // Optionnel: Afficher une notification
     if (!isFavorite) {
       toast.info("✅ Commerce ajouté à vos favoris !");
@@ -141,60 +220,134 @@ const ArtCommerceDetail = () => {
     setShowShareOptions(false);
   };
 
-  const ContactForm = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl border border-gray-200 relative">
-        <button
-          onClick={() => setShowContactForm(false)}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-gray-500 hover:text-gray-700"
-        >
-          <X size={20} />
-        </button>
-        
-        <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center pr-8">
-          <Mail className="h-5 w-5 mr-2 text-blue-600" />
-          Contacter {listing.title}
-        </h3>
-        
-        <div className="space-y-3 mb-6">
-          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <Phone size={20} className="text-blue-600" />
-            <span className="text-slate-700 font-medium">{listing.contact.phone}</span>
+
+
+
+
+
+
+  //mandefa mail ilay client connecté
+
+
+
+
+
+  const ContactForm = ({ listing, setShowContactForm }) => {
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [feedback, setFeedback] = useState("");
+
+    const emailClient = getEmailClient(); // email du client connecté
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!emailClient) return setFeedback("Vous devez être connecté.");
+      if (!message.trim()) return setFeedback("Le message ne peut pas être vide.");
+
+      setLoading(true);
+      setFeedback("");
+
+      try {
+        const res = await fetch("/mail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: emailClient,
+            subject: `Contact via site - ${listing.title}`,
+            message,
+          }),
+        });
+
+        const data = await res.json();
+        console.log("Réponse backend:", data);
+
+        if (res.ok) {
+          setFeedback("Message envoyé avec succès !");
+          setMessage("");
+        } else {
+          setFeedback(data.error || "Erreur lors de l'envoi.");
+        }
+      } catch (err) {
+        console.error(err);
+        setFeedback("Impossible d'envoyer le message.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl border border-gray-200 relative">
+          <button
+            onClick={() => setShowContactForm(false)}
+            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-gray-500 hover:text-gray-700"
+          >
+            <X size={20} />
+          </button>
+
+          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center pr-8">
+            <Mail className="h-5 w-5 mr-2 text-blue-600" />
+            Contacter {listing.title}
+          </h3>
+
+          <div className="space-y-3 mb-6">
+            {/* Email du destinataire */}
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <Mail size={20} className="text-blue-600" />
+              <span className="text-slate-700 font-medium">{listing.contact.email}</span>
+            </div>
+
+            {/* Email du client connecté */}
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <Mail size={20} className="text-green-600" />
+              <span className="text-slate-700 font-medium">{emailClient || "Non connecté"}</span>
+            </div>
+
+            {/* Téléphone du destinataire */}
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <Phone size={20} className="text-blue-600" />
+              <span className="text-slate-700 font-medium">{listing.contact.phone}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <Mail size={20} className="text-blue-600" />
-            <span className="text-slate-700 font-medium">{listing.contact.email}</span>
-          </div>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-slate-700 text-sm font-medium mb-2">
+                Votre message
+              </label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Bonjour, je suis intéressé par..."
+                className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                rows={4}
+              />
+            </div>
+
+            {feedback && <p className="text-sm text-red-500">{feedback}</p>}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowContactForm(false)}
+                className="flex-1 bg-gray-200 text-slate-700 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-slate-900 text-white py-2 rounded-lg hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg disabled:opacity-50"
+              >
+                {loading ? "Envoi..." : "Envoyer"}
+              </button>
+            </div>
+          </form>
         </div>
-        
-        <form className="space-y-4">
-          <div>
-            <label className="block text-slate-700 text-sm font-medium mb-2">Votre message</label>
-            <textarea 
-              rows="4" 
-              placeholder="Bonjour, je suis intéressé par..."
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            ></textarea>
-          </div>
-          <div className="flex gap-3">
-            <button 
-              type="button"
-              onClick={() => setShowContactForm(false)}
-              className="flex-1 bg-gray-200 text-slate-700 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
-            >
-              Annuler
-            </button>
-            <button 
-              type="submit"
-              className="flex-1 bg-slate-900 text-white py-2 rounded-lg hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg"
-            >
-              Envoyer
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
-  );
+    );
+  };
 
   const DeliveryForm = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -205,13 +358,13 @@ const ArtCommerceDetail = () => {
         >
           <X size={20} />
         </button>
-        
+
         <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center">
           <Truck className="h-5 w-5 mr-2 text-blue-600" />
           Demander une livraison
         </h3>
         <p className="text-slate-600 mb-4">Choisissez votre option de livraison :</p>
-        
+
         <div className="space-y-3 mb-6">
           {listing.deliveryOptions.map((option, index) => (
             <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-blue-50 cursor-pointer border border-gray-200 hover:border-blue-200 transition-all">
@@ -228,21 +381,21 @@ const ArtCommerceDetail = () => {
         <form className="space-y-4">
           <div>
             <label className="block text-slate-700 text-sm font-medium mb-2">Adresse de livraison</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Votre adresse complète"
               className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               type="button"
               onClick={() => setShowDeliveryForm(false)}
               className="flex-1 bg-gray-200 text-slate-700 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
             >
               Annuler
             </button>
-            <button 
+            <button
               type="submit"
               className="flex-1 bg-slate-900 text-white py-2 rounded-lg hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg"
             >
@@ -254,73 +407,125 @@ const ArtCommerceDetail = () => {
     </div>
   );
 
-  const ArtworkModal = ({ artwork, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-4xl w-full border border-gray-200 max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-2xl font-bold text-slate-900">{artwork.title}</h3>
-            <button 
-              onClick={onClose} 
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-gray-500 hover:text-gray-700"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="rounded-xl overflow-hidden bg-gray-100 h-80">
-              <img 
-                src={artwork.image} 
-                alt={artwork.title}
-                className="w-full h-full object-cover"
-              />
+
+
+
+
+  //ouvre panier
+
+
+  const ArtworkModal = ({ artwork, onClose }) => {
+    const { addToCart } = useCart();
+    console.log(artwork)
+    const handleAddToCart = () => {
+      console.log("👉 handleAddToCart appelé !");
+      artwork.name=artwork.libelle
+      addToCart(artwork);
+
+      toast.success(`${artwork.libelle} a été ajouté au panier !`, {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+    };
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-4xl w-full border border-gray-200 max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="p-6">
+            {/* Titre + bouton fermer */}
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-2xl font-bold text-slate-900">{artwork.libelle}</h3>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
             </div>
-            
-            <div className="space-y-6">
-              <div>
-                <h4 className="text-lg font-semibold text-slate-900 mb-3">Description</h4>
-                <p className="text-slate-600 leading-relaxed">{artwork.description}</p>
+
+
+            {/* Contenu principal */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Image */}
+              <div className="rounded-xl overflow-hidden bg-gray-100 h-80">
+                <img
+                  src={artwork.images && artwork.images.length > 0 ? artwork.images[0] : "/placeholder.png"}
+                  alt={artwork.libelle || "Artwork"}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <span className="text-slate-500 text-sm block">Artiste</span>
-                  <p className="text-slate-900 font-medium">{artwork.artist}</p>
+
+              {/* Infos détaillées */}
+              <div className="space-y-6">
+                {/* Nom et catégorie */}
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">{artwork.libelle || "Nom non défini"}</h2>
+                  <p className="text-slate-500">
+                    {artwork.category?.name || "Catégorie non définie"} | {artwork.duration ? `${artwork.duration} min` : "Durée non précisée"}
+                  </p>
                 </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <span className="text-slate-500 text-sm block">Technique</span>
-                  <p className="text-slate-900 font-medium">{artwork.technique}</p>
+
+                {/* Description */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-2">Description</h4>
+                  <p className="text-slate-600 leading-relaxed">{artwork.description || "Aucune description disponible"}</p>
                 </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <span className="text-slate-500 text-sm block">Dimensions</span>
-                  <p className="text-slate-900 font-medium">{artwork.dimensions}</p>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <span className="text-slate-500 text-sm block">Année</span>
-                  <p className="text-slate-900 font-medium">{artwork.year}</p>
-                </div>
-              </div>
-              
-              <div className="pt-4 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-2xl font-bold text-blue-600">{artwork.price}€</span>
-                    {artwork.available && (
-                      <span className="ml-2 bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full">Disponible</span>
-                    )}
+
+                {/* Informations principales */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Artiste</span>
+                    <p className="text-slate-900 font-medium">{artwork.artist || "Non précisé"}</p>
                   </div>
-                  <button className="bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition-all duration-200 font-semibold shadow-lg">
-                    Acheter maintenant
-                  </button>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Technique</span>
+                    <p className="text-slate-900 font-medium">{artwork.technique || "Non précisée"}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Dimensions</span>
+                    <p className="text-slate-900 font-medium">{artwork.dimensions || "Non précisées"}</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <span className="text-slate-500 text-sm block">Année</span>
+                    <p className="text-slate-900 font-medium">{artwork.year || "Non précisée"}</p>
+                  </div>
+                </div>
+
+                {/* Prix et bouton d’achat */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-blue-600">{artwork.price ? `${artwork.price}€` : "Prix non défini"}</span>
+                      {artwork.available && (
+                        <span className="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full">Disponible</span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={handleAddToCart}
+                      className="bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition-all duration-200 font-semibold shadow-lg"
+                    >
+                      Acheter maintenant
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+
+
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br my-12 from-slate-50 via-white to-blue-50">
@@ -332,7 +537,7 @@ const ArtCommerceDetail = () => {
             <div className="h-96 bg-cover bg-center relative" style={{ backgroundImage: `url(${listing.images[activeImage]})` }}>
               <div className="absolute inset-0 bg-black/20"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-              
+
               {/* Bouton de retour dans l'image principale */}
               <div className="absolute top-4 left-4">
                 <Link to="/art-commerce" className="inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm text-slate-700 px-4 py-3 rounded-xl hover:bg-white transition-all duration-200 font-medium shadow-lg border border-white/20 hover:border-white/40 group">
@@ -341,16 +546,15 @@ const ArtCommerceDetail = () => {
                 </Link>
               </div>
             </div>
-            
+
             {/* Image Thumbnails */}
             <div className="absolute bottom-4 left-4 right-4 flex gap-2 overflow-x-auto">
               {listing.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImage(index)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-lg border-2 ${
-                    activeImage === index ? 'border-blue-500' : 'border-white'
-                  } overflow-hidden`}
+                  className={`flex-shrink-0 w-16 h-16 rounded-lg border-2 ${activeImage === index ? 'border-blue-500' : 'border-white'
+                    } overflow-hidden`}
                 >
                   <img src={image} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -360,21 +564,20 @@ const ArtCommerceDetail = () => {
             {/* Action Buttons avec fonctionnalités */}
             <div className="absolute top-4 right-4 flex gap-2">
               {/* Bouton Favoris */}
-              <button 
+              <button
                 onClick={handleFavoriteClick}
-                className={`bg-white/90 backdrop-blur-sm p-3 rounded-xl hover:bg-white transition-all duration-200 shadow-lg ${
-                  isFavorite ? 'text-red-500' : 'text-slate-700'
-                }`}
+                className={`bg-white/90 backdrop-blur-sm p-3 rounded-xl hover:bg-white transition-all duration-200 shadow-lg ${isFavorite ? 'text-red-500' : 'text-slate-700'
+                  }`}
               >
-                <Heart 
-                  size={20} 
-                  className={isFavorite ? 'fill-current' : ''} 
+                <Heart
+                  size={20}
+                  className={isFavorite ? 'fill-current' : ''}
                 />
               </button>
 
               {/* Bouton Partage avec menu déroulant */}
               <div className="relative">
-                <button 
+                <button
                   onClick={handleShareClick}
                   className="bg-white/90 backdrop-blur-sm text-slate-700 p-3 rounded-xl hover:bg-white transition-all duration-200 shadow-lg"
                 >
@@ -394,7 +597,7 @@ const ArtCommerceDetail = () => {
                         </div>
                         <span>Partager sur Facebook</span>
                       </button>
-                      
+
                       <button
                         onClick={shareOnTwitter}
                         className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors text-slate-700"
@@ -404,7 +607,7 @@ const ArtCommerceDetail = () => {
                         </div>
                         <span>Partager sur Twitter</span>
                       </button>
-                      
+
                       <button
                         onClick={shareOnWhatsApp}
                         className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-green-50 transition-colors text-slate-700"
@@ -414,7 +617,7 @@ const ArtCommerceDetail = () => {
                         </div>
                         <span>Partager sur WhatsApp</span>
                       </button>
-                      
+
                       <button
                         onClick={copyLink}
                         className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-slate-700"
@@ -453,12 +656,7 @@ const ArtCommerceDetail = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-left lg:text-right">
-                    <div className="text-2xl md:text-3xl font-bold text-blue-600">
-                      {listing.price}
-                    </div>
-                    <div className="text-sm text-slate-500">abonnement mensuel</div>
-                  </div>
+
                 </div>
 
                 <p className="text-slate-600 mb-8 leading-relaxed text-lg">
@@ -482,39 +680,93 @@ const ArtCommerceDetail = () => {
                 <div className="mb-8">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-2xl font-bold text-slate-900">Œuvres disponibles</h3>
-                    <span className="text-slate-500">{listing.artworks.length} œuvres</span>
+                    <span className="text-slate-500">{oeuvres.length} œuvres</span>
                   </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {listing.artworks.map((artwork) => (
-                      <div 
-                        key={artwork.id}
-                        className="bg-white rounded-xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 hover:border-blue-300"
-                        onClick={() => setSelectedArtwork(artwork)}
-                      >
-                        <div className="rounded-lg h-40 mb-3 overflow-hidden">
-                          <img 
-                            src={artwork.image} 
-                            alt={artwork.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <h4 className="font-semibold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{artwork.title}</h4>
-                        <p className="text-slate-500 text-sm mb-2">{artwork.artist}</p>
-                        <div className="flex justify-between items-center">
-                          <span className="text-blue-600 font-bold">{artwork.price}€</span>
-                          <span className="text-slate-400 text-sm bg-slate-100 px-2 py-1 rounded-full">{artwork.category}</span>
-                        </div>
+                    {loading ? (
+                      <div className="col-span-full text-center py-16 text-gray-500">
+                        Chargement...
                       </div>
-                    ))}
+                    ) : oeuvres.length > 0 ? (
+                      oeuvres.map((artwork) => {
+                        // ✅ Trouver le nom de la catégorie correspondante
+                        const cat =
+                          artwork.category?.name ||
+                          categories.find((c) => c.id === artwork.categoryId)?.name ||
+                          "—";
+
+                        // ✅ Gérer les images (string ou tableau)
+                        let imageSrc = "";
+                        if (Array.isArray(artwork.images)) {
+                          imageSrc = artwork.images[0];
+                        } else if (typeof artwork.images === "string") {
+                          imageSrc = artwork.images.split(",")[0];
+                        } else if (artwork.image) {
+                          imageSrc = artwork.image;
+                        }
+
+                        return (
+                          <div
+                            key={artwork.id}
+                            className="bg-white rounded-xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-200 hover:border-blue-300"
+                            onClick={() => setSelectedArtwork(artwork)}
+                          >
+                            {/* ✅ Image */}
+                            <div className="rounded-lg h-40 mb-3 overflow-hidden flex justify-center items-center bg-gray-50">
+                              {imageSrc ? (
+                                <img
+                                  src={imageSrc}
+                                  alt={artwork.libelle || artwork.title || "Œuvre"}
+                                  className="object-cover w-full h-full"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-sm">Aucune image</span>
+                              )}
+                            </div>
+
+                            {/* ✅ Titre */}
+                            <h4 className="font-semibold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                              {artwork.libelle || artwork.title || "Sans titre"}
+                            </h4>
+
+                            {/* ✅ Description */}
+                            <p className="text-slate-500 text-sm mb-2 line-clamp-2">
+                              {artwork.description || "Aucune description disponible"}
+                            </p>
+
+                            {/* ✅ Artiste */}
+                            <p className="text-slate-400 text-sm mb-2">
+                              {artwork.artist || "Auteur inconnu"}
+                            </p>
+
+                            {/* ✅ Prix + Catégorie */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-blue-600 font-bold">
+                                {artwork.price ? `${artwork.price} €` : "Prix non défini"}
+                              </span>
+                              <span className="text-slate-400 text-sm bg-slate-100 px-2 py-1 rounded-full">
+                                {cat}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="col-span-full text-center py-16 text-gray-500">
+                        Aucune œuvre disponible
+                      </div>
+                    )}
                   </div>
                 </div>
+
               </div>
 
               {/* Contact & Actions */}
               <div className="lg:w-1/3">
                 <div className="bg-white rounded-xl p-6 sticky top-6 border border-gray-200 shadow-lg">
                   <h3 className="text-lg font-semibold mb-6 text-slate-900">Contact & Actions</h3>
-                  
+
                   <div className="space-y-4 mb-8">
                     <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <Phone size={20} className="text-blue-600" />
@@ -546,26 +798,50 @@ const ArtCommerceDetail = () => {
                     </div>
                   </div>
 
+
                   <div className="space-y-3">
-                    <button 
-                      onClick={() => setShowContactForm(true)}
-                      className="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+                    <button
+                      onClick={() => isAuthenticated ? setShowContactForm(true) : alert('⚠️ Veuillez vous connecter pour contacter')}
+                      disabled={!isAuthenticated}
+                      className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl
+                                            ${isAuthenticated
+                          ? 'bg-slate-900 text-white hover:bg-slate-800'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                                          `}
                     >
                       Contacter le commerçant
                     </button>
-                    <button 
-                      onClick={() => setSelectedArtwork(listing.artworks[0])}
-                      className="w-full border-2 border-slate-900 text-slate-900 py-3 rounded-xl hover:bg-slate-900 hover:text-white transition-all duration-200 font-semibold"
+
+                    <button
+                      onClick={() => isAuthenticated ? setSelectedArtwork(listing.artworks[0]) : alert('⚠️ Veuillez vous connecter pour voir les œuvres')}
+                      disabled={!isAuthenticated}
+                      className={`w-full py-3 rounded-xl font-semibold border-2 transition-all duration-200
+                                            ${isAuthenticated
+                          ? 'border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white'
+                          : 'border-gray-300 text-gray-400 cursor-not-allowed'}
+                                          `}
                     >
                       Voir les œuvres
                     </button>
-                    <button 
-                      onClick={() => setShowDeliveryForm(true)}
-                      className="w-full border border-gray-300 text-slate-700 py-3 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center justify-center gap-2"
+
+
+
+                    <button
+                      onClick={() => isAuthenticated ? setShowDeliveryForm(true) : alert('⚠️ Veuillez vous connecter pour demander une livraison')}
+                      disabled={!isAuthenticated}
+                      className={`w-full flex justify-center items-center gap-2 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg
+                                                    ${isAuthenticated
+                          ? 'bg-slate-900 text-white hover:bg-slate-800'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                                  `}
                     >
                       <Truck size={20} />
-                      Demander une livraison
+                      Demander un rendez-vous
                     </button>
+
+
+
+
                   </div>
                 </div>
               </div>
@@ -573,14 +849,20 @@ const ArtCommerceDetail = () => {
           </div>
         </div>
       </div>
-
       {/* Modals */}
-      {showContactForm && <ContactForm />}
+      {showContactForm && (
+        <ContactForm
+          listing={listing} // ✅ maintenant React connaît "listing"
+          setShowContactForm={setShowContactForm}
+        />
+
+      )}
+
       {showDeliveryForm && <DeliveryForm />}
       {selectedArtwork && (
-        <ArtworkModal 
-          artwork={selectedArtwork} 
-          onClose={() => setSelectedArtwork(null)} 
+        <ArtworkModal
+          artwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
         />
       )}
     </div>

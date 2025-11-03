@@ -51,7 +51,12 @@ export function ProfessionalServicesStats() {
     return null
   }
 
+  function setShowAddArtworkModal(arg0: boolean): void {
+    throw new Error("Function not implemented.")
+  }
+
   return (
+    
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -100,6 +105,7 @@ export function ProfessionalServicesStats() {
           <p className="text-xs text-muted-foreground">Demandes reçues</p>
         </CardContent>
       </Card>
+  
     </div>
   )
 }
