@@ -131,11 +131,11 @@ const ArtCommerceDetail = () => {
     const fetchData = async () => {
       try {
         // Récupérer toutes les œuvres
-        const resOeuvres = await api("/oeuvre");
+        const resOeuvres = await api("/oeuvre/all");
         const dataOeuvres = await resOeuvres.data;
 
         // Récupérer toutes les catégories
-        const resCategories = await api("/categories");
+        const resCategories = await api("/oeuvre/categories");
         const dataCategories = await resCategories.data;
 
         // Filtrer uniquement les œuvres dont la catégorie est dans mainCategoryNames
