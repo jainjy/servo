@@ -26,13 +26,9 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/categories/art", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!res.ok) throw new Error("Erreur de chargement des catégories");
-        const data = await res.json();
+        const res = await api("/oeuvre/categories")
+        if (!res.data) throw new Error("Erreur de chargement des catégories");
+        const data = await res.data;
         setCategories(data);
       } catch (err) {
         console.error(err);

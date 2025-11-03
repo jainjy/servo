@@ -52,7 +52,7 @@ export function ArtProfessionalServicesTable({
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/professional/services");
+      const response = await api.get("/oeuvre");
       setServices(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des services:", error);
@@ -60,32 +60,6 @@ export function ArtProfessionalServicesTable({
       setLoading(false);
     }
   };
-
-  const handleDisassociateService = async (serviceId: number) => {
-    if (!confirm("Êtes-vous sûr de vouloir retirer ce service ?")) return;
-    try {
-      setActionLoading(serviceId);
-      await api.delete(`/professional/services/${serviceId}/disassociate`);
-      onServiceUpdated();
-      await fetchServices();
-    } catch (error: any) {
-      console.error("Erreur lors de la désassociation:", error);
-      alert(error.response?.data?.error || "Erreur lors de la désassociation");
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const filteredServices = services.filter(
-    (service) =>
-      service.libelle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.category?.name
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      service.metiers.some((metier) =>
-        metier.libelle.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-  );
 
   if (loading) {
     return (
@@ -105,7 +79,7 @@ export function ArtProfessionalServicesTable({
     );
   }
 
-  if (filteredServices.length === 0) {
+  if (services.length === 0) {
     return (
       <div className="text-center py-12">
         <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -121,7 +95,7 @@ export function ArtProfessionalServicesTable({
 
   return (
     <div className="space-y-4">
-      {filteredServices.map((service) => (
+      {services.map((service) => (
         <Card
           key={service.id}
           className="border-border bg-card p-6 hover:shadow-md transition-shadow"
@@ -161,55 +135,6 @@ export function ArtProfessionalServicesTable({
                   Actif
                 </Badge>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                {service.metiers.slice(0, 2).map((metier) => (
-                  <Badge
-                    key={metier.id}
-                    variant="secondary"
-                    className="text-xs"
-                  >
-                    <Briefcase className="h-3 w-3 mr-1" />
-                    {metier.libelle}
-                  </Badge>
-                ))}
-                {service.metiers.length > 2 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{service.metiers.length - 2} autres
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>{service.users.length} prestataire(s)</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-2 min-w-[200px]">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-border hover:bg-accent"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Voir les demandes
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDisassociateService(service.id)}
-                disabled={actionLoading === service.id}
-              >
-                {actionLoading === service.id ? (
-                  <Clock className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <XCircle className="h-4 w-4 mr-2" />
-                )}
-                Retirer
-              </Button>
             </div>
           </div>
         </Card>

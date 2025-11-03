@@ -21,7 +21,7 @@ export function ArtProfessionalServicesStats() {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get("/professional/services/stats");
+      const response = await api.get("/oeuvre/stats");
       setStats(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des statistiques:", error);
