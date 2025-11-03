@@ -191,7 +191,7 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
             </>
           )} */}
           <Link
-            to={`/messages/${demande.id}`}
+            to={`/admin/messages/${demande.id}`}
             state={{ demande }}
             className="bg-gray-800 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 group/btn"
           >

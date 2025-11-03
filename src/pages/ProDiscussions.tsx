@@ -23,7 +23,7 @@ import {
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-export default function MessagesPage({
+export default function ProDiscussions({
   artisanView,
 }: { artisanView?: boolean } = {}) {
   const { id } = useParams();
@@ -785,16 +785,6 @@ export default function MessagesPage({
                   </p>
                 </div>
               </div>
-              {(demande.statut == "En attente" || demande.nouvelle) && (
-                <div className="m-auto">
-                  <button className=" bg-green-500 p-2 mx-2 rounded-xl">
-                    ACCEPTER
-                  </button>
-                  <button className="bg-red-600 p-2 mx-2 rounded-xl">
-                    REFUSER
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 

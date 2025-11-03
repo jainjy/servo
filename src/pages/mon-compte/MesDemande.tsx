@@ -498,7 +498,7 @@ const DemandeCard = ({ demande, onVoirDetails }) => {
           )}
         </div>
         <Link
-          to={`/mon-compte/demandes/message`}
+          to={`/mon-compte/demandes/messages/${demande.id}`}
           state={{ demande }}
           className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 group/btn border border-blue-200"
         >

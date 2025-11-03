@@ -55,14 +55,11 @@ import AdminMetiers from "./pages/admin/AdminMetiers";
 import ListeDemande from "./pages/admin/ListeDemande";
 import MonComptePage from "./pages/mon-compte/MonComptePage";
 import PaiementPage from "./pages/mon-compte/PaiementPage";
-import ProfilPage from "./pages/mon-compte/ProfilPage";
 import ReservationPage from "./pages/mon-compte/ReservationPage";
 import MesDemande from "./pages/mon-compte/MesDemande";
-import DemandeMessage from "./pages/mon-compte/DemandeMessage";
 import MesDemandesImmobilier from "./pages/mon-compte/MesDemandesImmobilier";
 import PropertyPage from "./pages/PropertyPage";
 import MessagesLayout from "./pages/MessagesLayout";
-import ProMessage from "./pages/pro/ProMessage";
 import { useEffect } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import ScrollToTop from "./ScrollToTop";
@@ -97,9 +94,6 @@ import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
-
-
-
 
 const queryClient = new QueryClient();
 
@@ -179,10 +173,7 @@ const App = () => (
                 path="/estimations"
                 element={<EstimationImmobilierPage />}
               />
-              <Route path="/messages/:id" element={<MessagesLayout />} />
               {/* singular routes for legacy links <Route path="/publicite" element={<Publicite />} />*/}
-              <Route path="/message" element={<MessagesLayout />} />
-              <Route path="/message/:id" element={<MessagesLayout />} />
               <Route path="/login" element={<LoginRoleSelectionPage />} />
               <Route path="/login/professional" element={<ProLogin />} />
               <Route path="/login/particular" element={<ParticularLogin />} />
@@ -243,8 +234,7 @@ const App = () => (
                 />
                 <Route path="products" element={<Products />} />
                 <Route path="demandes" element={<ArtisanDemandesPage />} />
-                <Route path="message" element={<ProMessage />} />
-                <Route path="message/:id" element={<ProMessage />} />
+                <Route path="messages/:id" element={<MessagesLayout />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="harmonie" element={<HarmoniePage />} />
@@ -257,7 +247,7 @@ const App = () => (
                 <Route path="profil" element={<MonComptePage />} />
                 <Route path="reservation" element={<ReservationPage />} />
                 <Route path="demandes" element={<MesDemande />} />
-                <Route path="demandes/message" element={<DemandeMessage />} />
+                <Route path="demandes/messages/:id" element={<MessagesLayout />} />
                 <Route
                   path="demandes-immobilier"
                   element={<MesDemandesImmobilier />}
@@ -279,6 +269,7 @@ const App = () => (
                 <Route path="tourism" element={<Tourism />} />
                 <Route path="users" element={<Users />} />
                 <Route path="vendors" element={<Vendors />} />
+                <Route path="messages/:id" element={<MessagesLayout />} />
 
                 <Route path="demandes" element={<ListeDemande />} />
 
@@ -304,6 +295,5 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 
 export default App;

@@ -24,7 +24,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import api from "@/lib/api"
 import { set } from "date-fns";
-export default function MessagesPage({
+export default function AdminDiscussions({
   artisanView,
 }: { artisanView?: boolean } = {}) {
   const { id } = useParams();
