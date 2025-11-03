@@ -91,24 +91,28 @@ const Header = () => {
       title: "IMMOBILIER",
       items: [
         {
-          title: "Vente et location",
-          description: "Vendre ou louer vos biens",
+          title: "Annonces et transactions",
+          description: "Vente et location de biens",
           href: "/immobilier",
         },
         {
-          title: "Droit de la famille",
+          title: "Droit et formation immobilière",
           description: "Divorce, succession, donation, . . .",
           href: "/droitFamille",
         },
         {
-          title: "Gestion immobilière",
+          title: "Gestion et services immobiliers",
           description: "Gestion locative et syndic",
           href: "/gestion-immobilier",
-        },
+        },{
+          title: "Audit patrimonial et finance",
+          description: "Gestion locative et syndic",
+          href: "/",
+        }
       ],
     },
     {
-      title: "TRAVAUX & CONSTRUCTION",
+      title: "TRAVAUX & CONSTRUCTION ",
       items: [
         {
           title: "Prestation Intérieur",
