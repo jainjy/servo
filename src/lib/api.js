@@ -49,5 +49,40 @@ export const financementAPI = {
   updateDemandeStatus: (id, status) => api.put(`/financement/admin/demandes/${id}/status`, { status }),
   deleteDemande: (id) => api.delete(`/financement/admin/demandes/${id}`),
 };
+// Services pour le tourisme
+export const tourismeAPI = {
+  // Routes admin
+  getListings: (params = {}) => api.get('/admin/tourisme', { params }),
+  getStats: () => api.get('/admin/tourisme/stats'),
+  createListing: (data) => api.post('/admin/tourisme', data),
+  updateListing: (id, data) => api.put(`/admin/tourisme/${id}`, data),
+  deleteListing: (id) => api.delete(`/admin/tourisme/${id}`),
+  toggleAvailability: (id) => api.patch(`/admin/tourisme/${id}/toggle-availability`),
+  toggleFeatured: (id) => api.patch(`/admin/tourisme/${id}/toggle-featured`),
+  
+  // Routes publiques (si nécessaire)
+  getPublicListings: (params = {}) => api.get('/tourisme', { params }),
+  getListingById: (id) => api.get(`/tourisme/${id}`),
+};
+
+// Services pour l'upload
+export const uploadAPI = {
+  // Upload d'images pour le tourisme
+  uploadTourismImages: (formData) => api.post('/upload/tourism-multiple', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  
+  // Upload d'image unique
+  uploadImage: (formData) => api.post('/upload/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  
+  // Supprimer une image
+  deleteImage: (path) => api.delete('/upload/image', { data: { path } }),
+};
 
 export default api;
