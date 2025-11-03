@@ -29,16 +29,9 @@ export default function MessagesPage({
 }: { artisanView?: boolean } = {}) {
   const { id } = useParams();
   const location = useLocation();
-  const [demande, setDemande] = useState<any>(null);
-  useEffect(()=>{
-    const fetchDemande = async () => {
-      if (id) {
-        const response = await api.get(`/demandes/${id}`);
-        setDemande(response.data);
-      }
-    }
-    console.log("demandes ",demande)
-  },[demande,id])
+  const demande = (location.state as any)?.demande;
+  const [demandes,setDemandes]=useState([]);
+
   const getUrgencyBg = (urgency) => {
     switch (urgency) {
       case "Urgent":
@@ -187,7 +180,16 @@ export default function MessagesPage({
       setSentToArtisanId(demande.artisanId || null);
     }
   }, [id, location.search, demande]);
-
+  useEffect(() => {
+    const fetchDemande = async () => {
+      if (id) {
+        const response = await api.get(`/demandes/${id}`);
+        setDemandes(response.data);
+      }
+    };
+    fetchDemande();
+    console.log("demandes ", demandes, id);
+  }, [demande, id]);
   const isClientPath =
     location.pathname && location.pathname.includes("/mon-compte");
   const isClientView =
@@ -796,7 +798,7 @@ export default function MessagesPage({
                   </p>
                 </div>
               </div>
-              {(demande.statut == "En attente" || demande.nouvelle) && (
+              {(demande.statut ) && (
                 <div className="m-auto">
                   <button className=" bg-green-500 p-2 mx-2 rounded-xl" onClick={()=>validate(true)}>
                     ACCEPTER
