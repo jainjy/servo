@@ -263,33 +263,33 @@ useEffect(() => {
         }, {
           title: "Création & reprise",
           description: "Accompagnement pour entrepreneurs",
-          href: "/entreprise",
+          href: "/entreprise#reprise",
           image: "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg"
 
         },
         {
           title: "Audit & médiation",
           description: "Experts en audit & résolution de conflits",
-          href: "/entreprise",
+          href: "/entreprise#auditMediation",
           image: "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg"
 
         }, {
           title: "Aides & levées de fonds",
           description: " Soutien financier pour entreprises",
-          href: "/entreprise",
+          href: "/entreprise#aideFonds",
           image: "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg"
 
         },
         {
           title: "Juridique & liquidation",
           description: " Services juridiques pour entreprises",
-          href: "/entreprise",
+          href: "/entreprise#juridiqueLiquidation",
           image: "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg"
 
         }, {
           title: "Podcasts & autres services",
           description: " Ressources pour entrepreneurs",
-          href: "/entreprise",
+          href: "/entreprise#podcast_service",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
 
         },
