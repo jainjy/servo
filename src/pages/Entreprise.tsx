@@ -399,7 +399,7 @@ const Entreprise = () => {
 
       {/* Section Services d'entreprise */}
       <motion.section
-        className="container mx-auto px-4 py-8 lg:py-20"
+        className="container mx-auto px-4 py-8 lg:py-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -546,7 +546,7 @@ const Entreprise = () => {
 
       {/* Section Devenir partenaire */}
       <motion.section
-        className="py-0 lg:py-20 bg-slate-50"
+        className="py-0 lg:py-8 bg-slate-50"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
