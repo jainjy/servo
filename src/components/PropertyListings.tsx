@@ -244,7 +244,7 @@ const normalizeAddress = (address: string) => {
 };
 
 // Composant Modal pour la demande de visite
-const ModalDemandeVisite = ({
+export const ModalDemandeVisite = ({
   open,
   onClose,
   property,

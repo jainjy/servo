@@ -97,6 +97,9 @@ import ArtCommerceService from "./pages/pro/ArtCommerceService";
 import { SocketProvider } from "./contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
+import Recherche from "./pages/Recherche";
+
+
 
 const queryClient = new QueryClient();
 
@@ -162,6 +165,8 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
+                  <Route path="/recherche" element={<Recherche />} />
+
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
