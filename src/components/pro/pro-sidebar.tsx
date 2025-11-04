@@ -19,13 +19,17 @@ import {
   Leaf,
   ShoppingCart,
 } from "lucide-react";
-import { useOrderNotifications } from '@/hooks/useOrderNotifications';
+import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
-  { name: "Art et commerce Services", href: "/pro/Art-commerce-services", icon: Wrench },
+  {
+    name: "Art et commerce Services",
+    href: "/pro/Art-commerce-services",
+    icon: Wrench,
+  },
   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
@@ -34,16 +38,22 @@ const navigation = [
   { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
   { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
-
-
-  { 
-    name: "Mes Commandes", 
-    href: "/pro/orders", 
+  {
+    name: "Mes Commandes",
+    href: "/pro/orders",
     icon: ShoppingCart,
   },
-  { name: "Mes Demandes", href: "/pro/demandes", icon: FileText },
-  { name: "Liste demande immobilier", href: "/pro/demandes-immobilier", icon: Building2 },
-  { name: "Les demandes de devis", href: "/pro/demandes-devis", icon: FileText },
+  { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
+  {
+    name: "Liste demande immobilier",
+    href: "/pro/demandes-immobilier",
+    icon: Building2,
+  },
+  {
+    name: "Les demandes de devis",
+    href: "/pro/demandes-devis",
+    icon: FileText,
+  },
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
 ];
@@ -96,11 +106,7 @@ export function ProSidebar() {
       {/* Logo & header */}
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
         <div className="p-1 rounded-full bg-white border-black border-2">
-          <img
-            src={logo}
-            alt="Servo Logo"
-            className="w-10 h-10 rounded-full"
-          />
+          <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
         </div>
         <div>
           <h1 className="text-lg font-semibold text-sidebar-foreground">
@@ -139,15 +145,17 @@ export function ProSidebar() {
                 )}
               />
               <span className="flex-1">{item.name}</span>
-              
+
               {/* Notifications dynamiques */}
               {showNotification && (
-                <span className={cn(
-                  "ml-auto text-xs rounded-full h-5 min-w-5 flex items-center justify-center px-1 font-medium",
-                  notificationColor,
-                  notificationCount > 99 ? "text-[10px]" : "text-xs"
-                )}>
-                  {notificationCount > 99 ? '99+' : notificationCount}
+                <span
+                  className={cn(
+                    "ml-auto text-xs rounded-full h-5 min-w-5 flex items-center justify-center px-1 font-medium",
+                    notificationColor,
+                    notificationCount > 99 ? "text-[10px]" : "text-xs"
+                  )}
+                >
+                  {notificationCount > 99 ? "99+" : notificationCount}
                 </span>
               )}
             </Link>
@@ -168,11 +176,7 @@ export function ProSidebar() {
       <div className="flex md:hidden items-center h-16 border-b border-sidebar-border px-4 bg-sidebar w-screen fixed top-0 left-0 z-40">
         <div className="flex items-center gap-2">
           <div className="p-1 rounded-full bg-white border-black border-2">
-            <img
-              src={logo}
-              alt="Servo Logo"
-              className="w-8 h-8 rounded-full"
-            />
+            <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
           </div>
           <div>
             <h1 className="text-sm font-semibold text-sidebar-foreground">
@@ -185,7 +189,9 @@ export function ProSidebar() {
         {/* Badge de notification mobile */}
         {notifications.pendingOrders > 0 && (
           <div className="ml-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-            {notifications.pendingOrders > 99 ? '99+' : notifications.pendingOrders}
+            {notifications.pendingOrders > 99
+              ? "99+"
+              : notifications.pendingOrders}
           </div>
         )}
 
