@@ -133,7 +133,7 @@ const RegisterPage = () => {
         phone: formData.phone,
         password: formData.password,
         role: formData.role,
-        userType: formData.userType,
+        userType: "CLIENT", // FORCER userType à "CLIENT" pour les particuliers
         demandType: formData.demandType,
         companyName: formData.companyName,
         commercialName: formData.commercialName,
