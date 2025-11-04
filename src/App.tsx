@@ -98,7 +98,7 @@ import { SocketProvider } from "./contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
-
+import TestPage from "./pages/TestPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
