@@ -96,7 +96,7 @@ import CookieConsent from "./components/CookieConsent";
 import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 import { ToastContainer } from "react-toastify";
-
+import Recherche from "./pages/Recherche";
 
 
 
@@ -151,6 +151,9 @@ const App = () => (
               <Route path="/podcasts" element={<Podcast />} />
               <Route path="/immobilier" element={<Immobilier />} />
               <Route path="/droitFamille" element={<DroitFamille />} />
+
+            <Route path="/recherche" element={<Recherche />} />
+
               <Route
                 path="/gestion-immobilier"
                 element={<GestionImmobilier />}
@@ -173,7 +176,7 @@ const App = () => (
               <Route path="/tourisme" element={<TourismSection />} />
               <Route path="/service" element={<ServicesPartnersPage />} />
               
-              <Route path="/publicite" element={<Publicite />} />
+              {/* <Route path="/publicite" element={<Publicite />} /> */}
               <Route
                 path="/estimations"
                 element={<EstimationImmobilierPage />}
