@@ -497,6 +497,7 @@ const DemandeCard = ({ demande, onVoirDetails }) => {
             </span>
           )}
         </div>
+        {demande.statut!=="En attente" &&
         <Link
           to={`/mon-compte/demandes/messages/${demande.id}`}
           state={{ demande }}
@@ -505,6 +506,7 @@ const DemandeCard = ({ demande, onVoirDetails }) => {
           Voir détails
           <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
         </Link>
+}
       </div>
     </div>
   );

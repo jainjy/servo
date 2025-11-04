@@ -166,44 +166,44 @@ const DemandeCard = ({ demande, onAction }) => {
           </button>
         );
 
-      case "Assignée":
-        return (
-          <div className="flex gap-2">
-            <button
-              onClick={handleAccept}
-              disabled={isLoading}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-            >
-              <ThumbsUp className="w-4 h-4" />
-              Accepter
-            </button>
-            <button
-              onClick={handleDecline}
-              disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-            >
-              <ThumbsDown className="w-4 h-4" />
-              Refuser
-            </button>
-          </div>
-        );
+      // case "Assignée":
+      //   return (
+      //     <div className="flex gap-2">
+      //       <button
+      //         onClick={handleAccept}
+      //         disabled={isLoading}
+      //         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+      //       >
+      //         <ThumbsUp className="w-4 h-4" />
+      //         Accepter
+      //       </button>
+      //       <button
+      //         onClick={handleDecline}
+      //         disabled={isLoading}
+      //         className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+      //       >
+      //         <ThumbsDown className="w-4 h-4" />
+      //         Refuser
+      //       </button>
+      //     </div>
+      //   );
 
-      case "Validée":
-        return (
-          <Link
-            to={`/pro/messages/${demande.id}`}
-            state={{ demande }}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            Voir détails
-          </Link>
-        );
+      // case "Validée":
+      //   return (
+      //     <Link
+      //       to={`/pro/messages/${demande.id}`}
+      //       state={{ demande }}
+      //       className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
+      //     >
+      //       <Eye className="w-4 h-4" />
+      //       Voir détails
+      //     </Link>
+      //   );
 
       default:
         return (
           <Link
-            to={`/pro/message/${demande.id}`}
+            to={`/pro/messages/${demande.id}`}
             state={{ demande }}
             className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
           >

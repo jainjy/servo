@@ -18,11 +18,14 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
+import api from "@/lib/api";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 export default function UserDiscussions() {
   const { id } = useParams();
   const location = useLocation();
-  const demande = (location.state as any)?.demande;
+  const [demande, setDemande] = useState<any>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     console.log("demandes ", demande);
   }, [demande]);
@@ -38,7 +41,19 @@ export default function UserDiscussions() {
         return "text-gray-500";
     }
   };
+  useEffect(() => {
+    const fetchDemande = async () => {
+      if (id) {
+        const response = await api.get(`/demandes/${id}`);
+        setDemande(response.data);
+        console.log("demandes ", response.data, id);
+        console.log("demandes state ", demande, id);
+      }
+      setLoading(false);
+    };
 
+    fetchDemande();
+  }, []);
   const getUrgencyIcon = (urgency) => {
     switch (urgency) {
       case "Urgent":
@@ -474,382 +489,390 @@ export default function UserDiscussions() {
   return (
     <>
       <div className="min-h-full">
-        <div className="flex h-[calc(100vh-100px)]">
-          {/* Côté gauche - Informations du projet */}
-          <div className="w-1/2 bg-white rounded-lg shadow-sm border-r border-gray-200 p-8 overflow-y-auto">
-            <div className="max-w-2xl mx-auto">
-              {/* Informations principales */}
-              <div className="relative space-y-1">
-                <h1 className="text-xl font-bold text-gray-900">
-                  {defaultTitle}
-                </h1>
-                <p className="text-sm text-gray-600 mt-1">{defaultClient}</p>
-                <div className="absolute right-0 top-0 flex items-center gap-2">
-                  <span
-                    className={`text-xs font-medium flex items-center gap-1 ${getUrgencyBg(
-                      defaultUrgent
-                    )} p-2 rounded-full text-white`}
-                  >
-                    {getUrgencyIcon(defaultUrgent)}
-                    {defaultUrgent}
-                  </span>
-                  {(clientSigned || activeStoredDemande?.signedAt) && (
-                    <span className="text-xs bg-green-600 text-white px-3 py-1 rounded-full font-semibold">
-                      Signé
+        {loading ? (
+          <LoadingSpinner text="chargement des donnes en cours " />
+        ) : (
+          <div className="flex h-[calc(100vh-100px)]">
+            {/* Côté gauche - Informations du projet */}
+            <div className="w-1/2 bg-white rounded-lg shadow-sm border-r border-gray-200 p-8 overflow-y-auto">
+              <div className="max-w-2xl mx-auto">
+                {/* Informations principales */}
+                <div className="relative space-y-1">
+                  <h1 className="text-xl font-bold text-gray-900">
+                    {defaultTitle}
+                  </h1>
+                  <p className="text-sm text-gray-600 mt-1">{defaultClient}</p>
+                  <div className="absolute right-0 top-0 flex items-center gap-2">
+                    <span
+                      className={`text-xs font-medium flex items-center gap-1 ${getUrgencyBg(
+                        defaultUrgent
+                      )} p-2 rounded-full text-white`}
+                    >
+                      {getUrgencyIcon(defaultUrgent)}
+                      {defaultUrgent}
                     </span>
-                  )}
-                </div>
-                {/* Date */}
-                <div className="flex items-center gap-5">
-                  <h3 className="text-md font-semibold text-gray-500">
-                    Date de la demande :
-                  </h3>
-                  <div className="flex items-center gap-3 text-md font-semibold text-gray-900">
-                    <Calendar className="w-4 h-4 text-blue-600" />
-                    <span>{defaultDate}</span>
+                    {(clientSigned || activeStoredDemande?.signedAt) && (
+                      <span className="text-xs bg-green-600 text-white px-3 py-1 rounded-full font-semibold">
+                        Signé
+                      </span>
+                    )}
+                  </div>
+                  {/* Date */}
+                  <div className="flex items-center gap-5">
+                    <h3 className="text-md font-semibold text-gray-500">
+                      Date de la demande :
+                    </h3>
+                    <div className="flex items-center gap-3 text-md font-semibold text-gray-900">
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                      <span>{defaultDate}</span>
+                    </div>
+                  </div>
+
+                  {/* Artisans */}
+                  <div>
+                    <h3 className="text-md font-semibold text-gray-500 mb-3 underline">
+                      Artisan demandé
+                    </h3>
+                    <div className="flex flex-wrap gap-4">
+                      {defaultMetiers.map((m) => (
+                        <div
+                          key={m}
+                          className={`flex items-center gap-3 ${
+                            m === "Électricien"
+                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : "bg-green-50 text-green-700 border-green-200"
+                          } px-3 py-2 rounded-xl border`}
+                        >
+                          {m === "Électricien" ? (
+                            <Zap className="w-4 h-4" />
+                          ) : (
+                            <Wrench className="w-4 h-4" />
+                          )}
+                          <span className="text-sm font-semibold">{m}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Adresse */}
+                  <div>
+                    <h3 className="text-md underline font-semibold text-gray-500 mb-2">
+                      Adresse du projet
+                    </h3>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm text-gray-900">
+                        <MapPin className="w-4 h-4 text-gray-400" />
+                        <span>{defaultAdresse}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-6 pl-9">
+                        <div>
+                          <p className="text-md text-gray-500 mb-2">Ville</p>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {demande.lieuAdresseVille}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Artisans */}
+                {/* Séparateur */}
+                <div className="border-t border-gray-200 my-4"></div>
+
+                {/* Description */}
                 <div>
-                  <h3 className="text-md font-semibold text-gray-500 mb-3 underline">
-                    Artisan demandé
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Description
                   </h3>
-                  <div className="flex flex-wrap gap-4">
-                    {defaultMetiers.map((m) => (
-                      <div
-                        key={m}
-                        className={`flex items-center gap-3 ${
-                          m === "Électricien"
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
-                            : "bg-green-50 text-green-700 border-green-200"
-                        } px-3 py-2 rounded-xl border`}
-                      >
-                        {m === "Électricien" ? (
-                          <Zap className="w-4 h-4" />
-                        ) : (
-                          <Wrench className="w-4 h-4" />
+
+                  {/* Description principale */}
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <p className="text-md text-gray-700 leading-relaxed">
+                      {defaultIntro}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Côté droit - Discussion */}
+            <div className="w-1/2 flex flex-col bg-white">
+              {/* Header discussion */}
+              <div className="border-b border-gray-200 px-6 py-3">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-5 h-5 text-blue-600" />
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Discussion
+                  </h2>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {/* Premier message avec boutons collés en bas */}
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-8  h-8 rounded-full flex items-center justify-center bg-blue-100">
+                        <User className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                    </div>
+                    <div className="max-w-[70%] flex-1">
+                      <div className="bg-gray-100 text-gray-900 rounded-2xl px-4 py-2 rounded-bl-none">
+                        <p className="text-sm font-semibold">{defaultIntro}</p>
+                      </div>
+                      <div className="text-xs mt-2 text-gray-400 mb-2">
+                        Le 18/03 à 9:00
+                      </div>
+
+                      {/* Boutons SIGNER/REFUSER collés en bas du message */}
+                      <div className="flex gap-3 mt-4 items-center">
+                        {/* If this view is the artisan opening the demande, show Accept/Refuse controls */}
+
+                        {/* Client view: when the demander opens their demande */}
+                        {isClientView && activeStoredDemande && !isFinished && (
+                          <>
+                            {clientIsWaiting && (
+                              <div className="flex-1 flex flex-col items-start gap-3">
+                                <div className="p-2 text-xs rounded-xl bg-yellow-100 text-yellow-800 font-semibold border border-yellow-200">
+                                  En attente
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  Votre demande a été envoyée aux artisans. Vous
+                                  serez notifié lors de la réception d'une
+                                  proposition.
+                                </div>
+                              </div>
+                            )}
+
+                            {(clientHasProposal ||
+                              activeStoredDemande.proposalAt) && (
+                              <div className="w-full">
+                                {/* show proposal summary (we already prepare meetingDate, meetingTime, devisText, devisFile) */}
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-3">
+                                  <h4 className="font-semibold text-gray-900 mb-2">
+                                    Proposition reçue
+                                  </h4>
+                                  <div className="text-sm text-gray-700 mb-2">
+                                    Rendez-vous proposé:{" "}
+                                    <span className="font-medium">
+                                      {activeStoredDemande?.date ||
+                                        meetingDate ||
+                                        "-"}{" "}
+                                      à{" "}
+                                      {activeStoredDemande?.time ||
+                                        meetingTime ||
+                                        "-"}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-gray-700 mb-2">
+                                    Devis:{" "}
+                                    <span className="font-medium">
+                                      {activeStoredDemande?.devis ||
+                                        devisText ||
+                                        "-"}
+                                    </span>
+                                  </div>
+                                  {activeStoredDemande?.devisFile ? (
+                                    <div className="mt-2">
+                                      <a
+                                        className="text-sm text-blue-600 underline"
+                                        href={
+                                          activeStoredDemande.devisFile.dataUrl
+                                        }
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        Télécharger le PDF du devis
+                                      </a>
+                                    </div>
+                                  ) : (
+                                    <div className="text-sm text-gray-500 mt-2">
+                                      Aucun fichier PDF attaché.
+                                    </div>
+                                  )}
+                                  {proposalTimestamp && (
+                                    <div className="text-xs text-gray-500 mt-2">
+                                      Envoyé le{" "}
+                                      {new Date(
+                                        proposalTimestamp
+                                      ).toLocaleString()}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* hide client controls when signed or finished */}
+                                {!clientSigned && !isFinished && (
+                                  <div className="flex gap-3">
+                                    <button
+                                      onClick={handleClientSign}
+                                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200"
+                                    >
+                                      SIGNER
+                                    </button>
+                                    <button
+                                      onClick={handleClientRefuse}
+                                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200"
+                                    >
+                                      REFUSER
+                                    </button>
+                                  </div>
+                                )}
+                                {/* show signed badge / file if signed */}
+                                {(clientSigned ||
+                                  activeStoredDemande?.signedAt) && (
+                                  <div className="mt-3 text-sm text-green-700">
+                                    Document signé{" "}
+                                    {activeStoredDemande?.signedAt
+                                      ? `le ${new Date(
+                                          activeStoredDemande.signedAt
+                                        ).toLocaleString()}`
+                                      : ""}{" "}
+                                    {activeStoredDemande?.signedFile ? (
+                                      <a
+                                        className="underline text-blue-600 ml-2"
+                                        href={
+                                          activeStoredDemande.signedFile.dataUrl
+                                        }
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        Voir document
+                                      </a>
+                                    ) : null}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </>
                         )}
-                        <span className="text-sm font-semibold">{m}</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Adresse */}
-                <div>
-                  <h3 className="text-md underline font-semibold text-gray-500 mb-2">
-                    Adresse du projet
-                  </h3>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm text-gray-900">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span>{defaultAdresse}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-6 pl-9">
-                      <div>
-                        <p className="text-md text-gray-500 mb-2">Ville</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {demande.lieuAdresseVille}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Séparateur */}
-              <div className="border-t border-gray-200 my-4"></div>
-
-              {/* Description */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Description
-                </h3>
-
-                {/* Description principale */}
-                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                  <p className="text-md text-gray-700 leading-relaxed">
-                    {defaultIntro}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Côté droit - Discussion */}
-          <div className="w-1/2 flex flex-col bg-white">
-            {/* Header discussion */}
-            <div className="border-b border-gray-200 px-6 py-3">
-              <div className="flex items-center gap-3">
-                <MessageCircle className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-bold text-gray-900">Discussion</h2>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-6">
-                {/* Premier message avec boutons collés en bas */}
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8  h-8 rounded-full flex items-center justify-center bg-blue-100">
-                      <User className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                  </div>
-                  <div className="max-w-[70%] flex-1">
-                    <div className="bg-gray-100 text-gray-900 rounded-2xl px-4 py-2 rounded-bl-none">
-                      <p className="text-sm font-semibold">{defaultIntro}</p>
-                    </div>
-                    <div className="text-xs mt-2 text-gray-400 mb-2">
-                      Le 18/03 à 9:00
-                    </div>
-
-                    {/* Boutons SIGNER/REFUSER collés en bas du message */}
-                    <div className="flex gap-3 mt-4 items-center">
-                      {/* If this view is the artisan opening the demande, show Accept/Refuse controls */}
-
-                      {/* Client view: when the demander opens their demande */}
-                      {isClientView && activeStoredDemande && !isFinished && (
-                        <>
-                          {clientIsWaiting && (
-                            <div className="flex-1 flex flex-col items-start gap-3">
-                              <div className="p-2 text-xs rounded-xl bg-yellow-100 text-yellow-800 font-semibold border border-yellow-200">
-                                En attente
-                              </div>
-                              <div className="text-xs text-gray-600">
-                                Votre demande a été envoyée aux artisans. Vous
-                                serez notifié lors de la réception d'une
-                                proposition.
-                              </div>
-                            </div>
-                          )}
-
-                          {(clientHasProposal ||
-                            activeStoredDemande.proposalAt) && (
-                            <div className="w-full">
-                              {/* show proposal summary (we already prepare meetingDate, meetingTime, devisText, devisFile) */}
-                              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-3">
-                                <h4 className="font-semibold text-gray-900 mb-2">
-                                  Proposition reçue
-                                </h4>
-                                <div className="text-sm text-gray-700 mb-2">
-                                  Rendez-vous proposé:{" "}
-                                  <span className="font-medium">
-                                    {activeStoredDemande?.date ||
-                                      meetingDate ||
-                                      "-"}{" "}
-                                    à{" "}
-                                    {activeStoredDemande?.time ||
-                                      meetingTime ||
-                                      "-"}
-                                  </span>
-                                </div>
-                                <div className="text-sm text-gray-700 mb-2">
-                                  Devis:{" "}
-                                  <span className="font-medium">
-                                    {activeStoredDemande?.devis ||
-                                      devisText ||
-                                      "-"}
-                                  </span>
-                                </div>
-                                {activeStoredDemande?.devisFile ? (
-                                  <div className="mt-2">
-                                    <a
-                                      className="text-sm text-blue-600 underline"
-                                      href={
-                                        activeStoredDemande.devisFile.dataUrl
-                                      }
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      Télécharger le PDF du devis
-                                    </a>
-                                  </div>
-                                ) : (
-                                  <div className="text-sm text-gray-500 mt-2">
-                                    Aucun fichier PDF attaché.
-                                  </div>
-                                )}
-                                {proposalTimestamp && (
-                                  <div className="text-xs text-gray-500 mt-2">
-                                    Envoyé le{" "}
-                                    {new Date(
-                                      proposalTimestamp
-                                    ).toLocaleString()}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* hide client controls when signed or finished */}
-                              {!clientSigned && !isFinished && (
-                                <div className="flex gap-3">
-                                  <button
-                                    onClick={handleClientSign}
-                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200"
-                                  >
-                                    SIGNER
-                                  </button>
-                                  <button
-                                    onClick={handleClientRefuse}
-                                    className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200"
-                                  >
-                                    REFUSER
-                                  </button>
-                                </div>
-                              )}
-                              {/* show signed badge / file if signed */}
-                              {(clientSigned ||
-                                activeStoredDemande?.signedAt) && (
-                                <div className="mt-3 text-sm text-green-700">
-                                  Document signé{" "}
-                                  {activeStoredDemande?.signedAt
-                                    ? `le ${new Date(
-                                        activeStoredDemande.signedAt
-                                      ).toLocaleString()}`
-                                    : ""}{" "}
-                                  {activeStoredDemande?.signedFile ? (
-                                    <a
-                                      className="underline text-blue-600 ml-2"
-                                      href={
-                                        activeStoredDemande.signedFile.dataUrl
-                                      }
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      Voir document
-                                    </a>
-                                  ) : null}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </>
+                      {/* Status marker under the main message */}
+                      {validationState !== "idle" && (
+                        <div className="mt-3 pl-[3.25rem]">
+                          {/* left padding to align under the message content */}
+                          <div className="inline-flex items-center gap-2 text-sm">
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                validationState === "sent"
+                                  ? "bg-yellow-400"
+                                  : validationState === "accepted"
+                                  ? "bg-green-500"
+                                  : "bg-red-500"
+                              }`}
+                            ></span>
+                            <span className="text-gray-600">
+                              {validationState === "sent" &&
+                                "En attente de la réponse de l'artisan"}
+                              {validationState === "accepted" &&
+                                "Artisan a accepté la demande"}
+                              {validationState === "refused" &&
+                                "Artisan a refusé la demande"}
+                            </span>
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {/* Status marker under the main message */}
-                    {validationState !== "idle" && (
-                      <div className="mt-3 pl-[3.25rem]">
-                        {/* left padding to align under the message content */}
-                        <div className="inline-flex items-center gap-2 text-sm">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              validationState === "sent"
-                                ? "bg-yellow-400"
-                                : validationState === "accepted"
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                            }`}
-                          ></span>
-                          <span className="text-gray-600">
-                            {validationState === "sent" &&
-                              "En attente de la réponse de l'artisan"}
-                            {validationState === "accepted" &&
-                              "Artisan a accepté la demande"}
-                            {validationState === "refused" &&
-                              "Artisan a refusé la demande"}
-                          </span>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </div>
 
-                {/* Autres messages */}
-                {messages.slice(1).map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex gap-4 ${
-                      msg.sender === "Vous" ? "justify-end" : ""
-                    }`}
-                  >
-                    {msg.sender !== "Vous" && (
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            msg.sender === "GH" ? "bg-blue-100" : "bg-green-100"
-                          }`}
-                        >
-                          <User
-                            className={`w-4 h-4 ${
-                              msg.sender === "GH"
-                                ? "text-blue-600"
-                                : "text-green-600"
-                            }`}
-                          />
-                        </div>
-                        {i < messages.slice(1).length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                        )}
-                      </div>
-                    )}
+                  {/* Autres messages */}
+                  {messages.slice(1).map((msg, i) => (
                     <div
-                      className={`max-w-[70%] ${
-                        msg.sender === "Vous" ? "order-first" : ""
+                      key={i}
+                      className={`flex gap-4 ${
+                        msg.sender === "Vous" ? "justify-end" : ""
                       }`}
                     >
-                      <div
-                        className={`rounded-2xl p-4 ${
-                          msg.sender === "Vous"
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-gray-100 text-gray-900 rounded-bl-none"
-                        }`}
-                      >
-                        <p className="text-sm font-semibold text-black/90">
-                          {msg.text}
-                        </p>
-                      </div>
-                      <div
-                        className={`text-xs mt-2 ${
-                          msg.sender === "Vous"
-                            ? "text-gray-500 text-right"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {msg.time}
-                      </div>
-                    </div>
-                    {msg.sender === "Vous" && (
-                      <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                          <User className="w-6 h-6 text-purple-600" />
+                      {msg.sender !== "Vous" && (
+                        <div className="flex flex-col items-center">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              msg.sender === "GH"
+                                ? "bg-blue-100"
+                                : "bg-green-100"
+                            }`}
+                          >
+                            <User
+                              className={`w-4 h-4 ${
+                                msg.sender === "GH"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
+                              }`}
+                            />
+                          </div>
+                          {i < messages.slice(1).length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          )}
                         </div>
-                        {i < messages.slice(1).length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                        )}
+                      )}
+                      <div
+                        className={`max-w-[70%] ${
+                          msg.sender === "Vous" ? "order-first" : ""
+                        }`}
+                      >
+                        <div
+                          className={`rounded-2xl p-4 ${
+                            msg.sender === "Vous"
+                              ? "bg-blue-600 text-white rounded-br-none"
+                              : "bg-gray-100 text-gray-900 rounded-bl-none"
+                          }`}
+                        >
+                          <p className="text-sm font-semibold text-black/90">
+                            {msg.text}
+                          </p>
+                        </div>
+                        <div
+                          className={`text-xs mt-2 ${
+                            msg.sender === "Vous"
+                              ? "text-gray-500 text-right"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {msg.time}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {msg.sender === "Vous" && (
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                            <User className="w-6 h-6 text-purple-600" />
+                          </div>
+                          {i < messages.slice(1).length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Zone d'envoi de message en bas */}
-            <div className="border-t border-gray-200 px-6 py-3 bg-gray-50">
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder="Tapez votre message ici..."
-                  className="flex-1 px-6 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSend();
-                  }}
-                />
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3"
-                  onClick={handleSend}
-                >
-                  <Send className="w-4 h-4" />
-                  Envoyer
-                </button>
+              {/* Zone d'envoi de message en bas */}
+              <div className="border-t border-gray-200 px-6 py-3 bg-gray-50">
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Tapez votre message ici..."
+                    className="flex-1 px-6 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSend();
+                    }}
+                  />
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3"
+                    onClick={handleSend}
+                  >
+                    <Send className="w-4 h-4" />
+                    Envoyer
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal overlay */}
