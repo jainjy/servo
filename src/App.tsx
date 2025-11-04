@@ -95,6 +95,7 @@ import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOU
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
+import AdvertisementManager from "./components/admin/AdvertisementManager";
 
 const queryClient = new QueryClient();
 
@@ -273,7 +274,10 @@ const App = () => (
                 <Route path="vendors" element={<Vendors />} />
                 <Route path="messages/:id" element={<MessagesLayout />} />
 
+                <Route path="publicite" element={<AdvertisementManager />} />
+
                 <Route path="demandes" element={<ListeDemande />} />
+          
 
                 <Route
                   path="service-categories"

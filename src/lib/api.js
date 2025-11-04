@@ -84,5 +84,37 @@ export const uploadAPI = {
   // Supprimer une image
   deleteImage: (path) => api.delete('/upload/image', { data: { path } }),
 };
-
+// Services pour les publicités
+export const advertisementsAPI = {
+  // Récupérer toutes les publicités (Admin)
+  getAdvertisements: (params = {}) => api.get('/advertisements', { params }),
+  
+  // Récupérer les publicités actives (Publique)
+  getActiveAdvertisements: (position) => api.get('/advertisements/active', { 
+    params: position ? { position } : {} 
+  }),
+  
+  // Créer une publicité
+  createAdvertisement: (formData) => api.post('/advertisements', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  
+  // Modifier une publicité
+  updateAdvertisement: (id, formData) => api.put(`/advertisements/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  
+  // Supprimer une publicité
+  deleteAdvertisement: (id) => api.delete(`/advertisements/${id}`),
+  
+  // Enregistrer un clic
+  trackClick: (id) => api.post(`/advertisements/${id}/click`),
+  
+  // Statistiques
+  getStats: () => api.get('/advertisements/stats/overview'),
+};
 export default api;
