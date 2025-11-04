@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
-import { useSocket } from "@/contexts/SocketContext";
+import { useSocket } from "@/Contexts/SocketContext";
 
 export default function AdminDiscussions() {
   const { id } = useParams();

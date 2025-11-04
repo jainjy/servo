@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useSocket } from "@/contexts/SocketContext";
+import {useSocket} from "@/Contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";

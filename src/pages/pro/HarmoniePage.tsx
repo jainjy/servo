@@ -4,16 +4,16 @@ import { Leaf, List } from 'lucide-react';
 import { useState } from 'react';
 
 const HarmonieApp = () => {
-
-    // ServicesCard
-    // VideoCard
-    // StatCard
-    // FilterButtons
-
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [refreshKey, setRefreshKey] = useState(0);
+    
     const handleServiceUpdated = () => {
         setRefreshKey((prev) => prev + 1); // Force le rechargement des composants
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        handleServiceUpdated(); // Actualise les données après fermeture
     };
 
     return (
@@ -53,19 +53,21 @@ const HarmonieApp = () => {
                         >
                             Ajouter
                             <span>+</span>
-
                         </button>
-
                     </div>
 
-                    <ServicesCard />
+                    {/* Passez la refreshKey et la fonction de callback */}
+                    <ServicesCard 
+                        key={refreshKey} 
+                        onServiceUpdated={handleServiceUpdated}
+                    />
 
                 </div>
 
             </div>
 
             {/* Modal de création de service */}
-            < ServiceModalPro
+            <ServiceModalPro
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
                 mode="create"

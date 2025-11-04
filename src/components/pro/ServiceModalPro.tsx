@@ -36,11 +36,13 @@ interface Metier {
 }
 
 interface UserData {
-  id: number;
+  id: string; // UUID string
   nom: string;
+  email: string;
 }
 
 export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUpdated }: ServiceModalProProps) {
+  const métiersCibles = ["Thérapeute", "Masseur", "Formateur", "Podcasteur"];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -59,18 +61,59 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
   const [uploading, setUploading] = useState(false)
   const [users, setUsers] = useState<UserData[]>([]);
 
+  // Fonction pour récupérer et mettre à jour les utilisateurs
+  const fetchAndUpdateUsers = () => {
+    const storedUsers = localStorage.getItem("user-data");
+    console.log("🔄 Actualisation des utilisateurs depuis localStorage:", storedUsers);
+
+    if (storedUsers) {
+      try {
+        const parsedUsers = JSON.parse(storedUsers);
+        const usersArray = Array.isArray(parsedUsers) ? parsedUsers : [parsedUsers];
+
+        const formattedUsers = usersArray.map((u: any) => ({
+          id: u.id, // Garder l'ID original (UUID string)
+          nom: `${u.firstName} ${u.lastName}`,
+          email: u.email
+        }));
+
+        setUsers(formattedUsers);
+        console.log("✅ Utilisateurs chargés depuis localStorage :", formattedUsers);
+
+        // Pré-remplir automatiquement le champ utilisateur
+        if (formattedUsers.length === 1) {
+          setFormData(prev => ({
+            ...prev,
+            users: formattedUsers[0].nom
+          }));
+        } else if (formattedUsers.length > 1) {
+          // Si plusieurs utilisateurs, afficher le premier par défaut
+          setFormData(prev => ({
+            ...prev,
+            users: formattedUsers[0].nom
+          }));
+        }
+      } catch (err) {
+        console.error("❌ Erreur parsing user-data", err);
+      }
+    } else {
+      console.warn("⚠️ Aucun utilisateur trouvé dans localStorage");
+      setUsers([]);
+    }
+  };
+
   useEffect(() => {
     if (service && mode === "edit") {
       setFormData({
         name: service.libelle || "",
         description: service.description || "",
         images: service.images || [],
-        price: service.price || "",
-        duration: service.price || "",
+        price: service.price?.toString() || "",
+        duration: service.duration?.toString() || "",
         categoryId: service.categoryId?.toString() || "",
         metierIds:
           service.metiers
-            ?.map((m: any) => m?.id?.toString())
+            ?.map((m: any) => m.metier?.id?.toString())
             .filter((id: string | undefined) => id !== undefined) || [],
         users: service.users || "",
       })
@@ -90,56 +133,31 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
   useEffect(() => {
     if (open) {
-      fetchFormData()
+      console.log("🎯 Modal ouvert - Actualisation des données...");
+      fetchFormData();
+      fetchAndUpdateUsers(); // Actualisation automatique à l'ouverture
     }
   }, [open])
 
-  // Fecth users
-  useEffect(() => {
-    const storedUsers = localStorage.getItem("user-data");
-    console.log("Données brutes dans localStorage:", storedUsers);
-
-    if (storedUsers) {
-      try {
-        const parsedUsers = JSON.parse(storedUsers);
-        const usersArray = Array.isArray(parsedUsers) ? parsedUsers : [parsedUsers];
-
-        const formattedUsers = usersArray.map((u: any) => ({
-          id: u.id,
-          nom: `${u.firstName} ${u.lastName}`,
-          email: u.email
-        }));
-
-        setUsers(formattedUsers);
-        console.log("Users chargés depuis localStorage :", formattedUsers);
-
-        // 🟢 Si tu veux pré-remplir automatiquement le champ utilisateur :
-        if (formattedUsers.length === 1) {
-          setFormData(prev => ({
-            ...prev,
-            users: formattedUsers[0].nom // ou formattedUsers[0].email
-          }));
-        }
-      } catch (err) {
-        console.error("Erreur parsing user-data", err);
-      }
-    }
-  }, []);
-
+  // Ancien useEffect pour les users - REMPLACÉ par fetchAndUpdateUsers()
+  // useEffect(() => {
+  //   const storedUsers = localStorage.getItem("user-data");
+  //   // ... ancien code
+  // }, []);
 
   const fetchFormData = async () => {
-
     try {
+      console.log("📥 Chargement des catégories et métiers...");
       const [categoriesRes, metiersRes] = await Promise.all([
         api.get('/harmonie/categories'),
         api.get('/harmonie/metiers')
       ])
       setCategories(categoriesRes.data)
       setMetiers(metiersRes.data)
+      console.log("✅ Catégories et métiers chargés avec succès");
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error)
+      console.error('❌ Erreur lors du chargement des données:', error)
     }
-
   }
 
   // Upload Image
@@ -147,13 +165,11 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Vérifier le type de fichier
     if (!file.type.startsWith('image/')) {
       alert('Veuillez sélectionner une image valide')
       return
     }
 
-    // Vérifier la taille (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('L\'image ne doit pas dépasser 5MB')
       return
@@ -181,7 +197,6 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
       alert(error.response?.data?.error || 'Erreur lors de l\'upload de l\'image')
     } finally {
       setUploading(false)
-      // Réinitialiser l'input file
       event.target.value = ''
     }
   }
@@ -191,7 +206,6 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
     const imageUrl = formData.images[index]
 
     try {
-      // Extraire le chemin du fichier de l'URL
       const url = new URL(imageUrl)
       const path = url.pathname.split('/').pop()
 
@@ -207,7 +221,6 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
       }))
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error)
-      // Supprimer quand même de l'interface même si l'upload échoue
       setFormData(prev => ({
         ...prev,
         images: prev.images.filter((_, i) => i !== index)
@@ -217,27 +230,36 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
   // Submit
   const handleSubmit = async (e: React.FormEvent) => {
-
     e.preventDefault();
+
+    // Validation des métiers
+    if (formData.metierIds.length === 0) {
+      alert("Veuillez sélectionner au moins un métier pour que le service soit visible");
+      return;
+    }
+
+    // Vérification qu'un utilisateur est disponible
+    if (users.length === 0) {
+      alert("Aucun utilisateur trouvé. Veuillez vous reconnecter.");
+      return;
+    }
 
     setLoading(true);
 
     try {
       // Mapping des champs frontend → backend
       const payload = {
-        libelle: formData.name,                         // frontend "name" → backend "libelle"
+        libelle: formData.name,
         description: formData.description || null,
         price: formData.price ? parseFloat(formData.price) : null,
         duration: formData.duration ? parseInt(formData.duration) : null,
         categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
-        metierId: formData.metierIds.length > 0
-          ? formData.metierIds.map((id) => parseInt(id))  // tableau d'IDs pour backend
-          : undefined,
-        userId: formData.users ? parseInt(formData.users) : undefined, // userId attendu
+        metierIds: formData.metierIds.map((id) => parseInt(id)),
+        userId: users.length > 0 ? users[0].id : null,
         images: Array.isArray(formData.images) ? formData.images : [],
       };
 
-      console.log("Payload envoyé au backend:", payload);
+      console.log("📤 Payload envoyé au backend:", payload);
 
       if (mode === "create") {
         await api.post("/harmonie/new", payload);
@@ -247,8 +269,8 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
       onServiceUpdated?.();
       onOpenChange(false);
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde du service:", error);
+    } catch (error: any) {
+      console.error("❌ Erreur lors de la sauvegarde du service:", error);
       alert(error.response?.data?.error || "Erreur lors de la sauvegarde du service");
     } finally {
       setLoading(false);
@@ -266,25 +288,18 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-
       <DialogContent className="bg-card border-border sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-
         <DialogHeader>
-
           <DialogTitle className="text-foreground">
             {mode === "create" ? "Nouveau service" : "Modifier le service"}
           </DialogTitle>
-
           <DialogDescription className="text-muted-foreground">
             {mode === "create" ? "Créer un nouveau service" : "Modifier les détails du service"}
           </DialogDescription>
-
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-
           <div className="grid gap-4 py-4">
-
             {/* Libelle */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-foreground">
@@ -315,14 +330,10 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
             {/* Images */}
             <div className="space-y-2">
-
               <Label className="text-foreground">
                 Images du service
               </Label>
-
-              {/* Upload d'image */}
               <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-
                 <input
                   type="file"
                   id="image-upload"
@@ -331,7 +342,6 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
                   className="hidden"
                   disabled={uploading}
                 />
-
                 <label
                   htmlFor="image-upload"
                   className={`cursor-pointer flex flex-col items-center justify-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''
@@ -349,10 +359,8 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
                     PNG, JPG, JPEG jusqu'à 5MB
                   </span>
                 </label>
-
               </div>
 
-              {/* Aperçu des images */}
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 mt-4">
                   {formData.images.map((image, index) => (
@@ -373,7 +381,6 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
                   ))}
                 </div>
               )}
-
             </div>
 
             {/* Prix */}
@@ -383,6 +390,7 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
               </Label>
               <Input
                 id="price"
+                type="number"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 className="bg-background border-input"
@@ -393,10 +401,11 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
             {/* Duration */}
             <div className="space-y-2">
               <Label htmlFor="duration" className="text-foreground">
-                Duration
+                Durée (minutes)
               </Label>
               <Input
                 id="duration"
+                type="number"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                 className="bg-background border-input"
@@ -426,51 +435,64 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
               </Select>
             </div>
 
-            {/* Métier */}
+            {/* Métier - FILTRÉ POUR LES 4 MÉTIERS CIBLES */}
             <div className="space-y-2">
               <Label className="text-foreground">
-                Métiers associés
+                Métiers associés *
               </Label>
               <div className="space-y-2 max-h-32 overflow-y-auto border border-input rounded-md p-3 bg-background">
-                {metiers.map((metier) => (
-                  <div key={metier.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`metier-${metier.id}`}
-                      checked={formData.metierIds.includes(metier.id.toString())}
-                      onCheckedChange={(checked) =>
-                        handleMetierChange(metier.id.toString(), checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor={`metier-${metier.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {metier.libelle}
-                    </label>
-                  </div>
-                ))}
+                {metiers
+                  .filter(metier => métiersCibles.includes(metier.libelle))
+                  .map((metier) => (
+                    <div key={metier.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`metier-${metier.id}`}
+                        checked={formData.metierIds.includes(metier.id.toString())}
+                        onCheckedChange={(checked) =>
+                          handleMetierChange(metier.id.toString(), checked as boolean)
+                        }
+                      />
+                      <label
+                        htmlFor={`metier-${metier.id}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {metier.libelle}
+                      </label>
+                    </div>
+                  ))
+                }
               </div>
             </div>
 
             {/* Users */}
             <div className="space-y-2">
               <Label htmlFor="users" className="text-foreground">
-                Utilisateur
+                Utilisateur associé
               </Label>
               <Input
                 id="users"
                 value={formData.users}
-                onChange={(e) => setFormData({ ...formData, users: e.target.value })}
                 className="bg-background border-input"
-                required
                 readOnly
+                disabled
               />
+              <div className="flex items-center gap-2 mt-1">
+                {users.length === 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchAndUpdateUsers}
+                    className="text-xs h-6"
+                  >
+                    Actualiser
+                  </Button>
+                )}
+              </div>
             </div>
-
           </div>
 
           <DialogFooter>
-
             <Button
               type="button"
               variant="outline"
@@ -480,21 +502,16 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
             >
               Annuler
             </Button>
-
             <Button
               type="submit"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              disabled={loading || uploading}
+              disabled={loading || uploading || users.length === 0}
             >
               {loading ? "Chargement..." : mode === "create" ? "Créer" : "Enregistrer"}
             </Button>
-
           </DialogFooter>
-
         </form>
-
       </DialogContent>
-
     </Dialog>
   )
 }
