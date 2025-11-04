@@ -94,7 +94,7 @@ import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes";
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
-import { SocketProvider } from "./contexts/SocketContext";
+import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
@@ -185,7 +185,7 @@ const App = () => {
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/service" element={<ServicesPartnersPage />} />
 
-                  <Route path="/publicite" element={<Publicite />} />
+                  {/* <Route path="/publicite" element={<Publicite />} /> */}
                   <Route
                     path="/estimations"
                     element={<EstimationImmobilierPage />}
