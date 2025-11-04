@@ -94,6 +94,7 @@ import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
+import AdminBookings from "./components/admin/tourism/AdminBookings";
 
 const queryClient = new QueryClient();
 
@@ -217,6 +218,7 @@ const App = () => (
                 <Route path="reviews" element={<ReviewsPage />} />
                 <Route path="tourisme" element={<TourismPage />} />
                 <Route path="services" element={<ProfessionalServicesPage />} />
+                <Route path="reservations" element={<AdminBookings />} />
                 <Route
                   path="Art-commerce-services"
                   element={<ArtCommerceService />}
