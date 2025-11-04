@@ -161,9 +161,15 @@ useEffect(() => {
       title: "IMMOBILIER",
       items: [
         {
-          title: "Annonces & transactions",
+          title: "Vendre ou louer",
           description: "Vente & location de biens",
           href: "/immobilier",
+          image: "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg"
+        },
+        {
+          title: "Annonces & transactions",
+          description: "Nos annonces et transactions",
+          href: "/immobilier-sections",
           image: "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg"
         },
         {
@@ -180,12 +186,12 @@ useEffect(() => {
         }, {
           title: "Audit patrimonial & finance",
           description: "Gestion locative & syndic",
-          href: "/immobilier",
+          href: "/immobilier-sections",
           image: "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg"
         }, {
           title: "Estimation & expertise",
           description: " Évaluez la valeur de votre bien",
-          href: "/immobilier",
+          href: "/estimation-immobilier",
           image: "https://i.pinimg.com/1200x/2a/33/c7/2a33c7347de60d0c65be83a72c4495be.jpg"
         }
       ],
@@ -312,29 +318,29 @@ useEffect(() => {
         {
           title: "Rénovation & chantiers",
           description: "Experts en rénovation de bâtiments",
-          href: "/",
+          href: "/batiments#renovation-chantiers",
           image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
         },
         {
           title: "Construction & plans",
           description: " De la conception à la réalisation",
-          href: "/",
+          href: "/batiments#construction-plans",
           image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
         }, {
           title: "Matériaux & viabilisations",
           description: " Solutions durables pour vos projets",
-          href: "/",
+          href: "/batiments#materiaux-viabilisations",
           image: "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg"
         },
         {
           title: "Division parcellaire",
           description: " Optimisation de l'espace foncier",
-          href: "/",
+          href: "/batiments#division-parcellaire",
           image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
         }, {
           title: "Formation & podcasts",
-          description: " Optimisation de l'espace foncier",
-          href: "/",
+          description: " Formation continue et actualités",
+          href: "/batiments#formation-podcasts",
           image: "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg"
         },
       ],
@@ -344,34 +350,34 @@ useEffect(() => {
         {
           title: "Produits & commerces",
           description: " Trouvez tout pour votre maison",
-          href: "/",
+          href: "/domicile#produits-commerces",
           image: "https://i.pinimg.com/1200x/e0/6a/9b/e06a9b44678d5ddd2a06c07ed8f1871f.jpg"
         },
         {
           title: "Service maison",
           description: " Services à domicile de qualité",
-          href: "/",
+          href: "/domicile#service-maison",
           image: "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg"
         }, {
           title: "Equipements & livraison",
           description: " Solutions pour un domicile moderne",
-          href: "/",
+          href: "/domicile#equipements-livraison",
           image: "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg"
         },
         {
           title: "Design & décoration (art)",
           description: " Inspirez-vous pour votre intérieur",
-          href: "/",
+          href: "/domicile#design-decoration",
           image: "https://i.pinimg.com/1200x/db/1e/d6/db1ed633dae5dd89cf4610c3f93a8103.jpg"
         }, {
           title: "Cours & formations",
           description: " Apprenez de nouvelles compétences",
-          href: "/",
+          href: "/domicile#cours-formations",
           image: "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg"
         }, {
           title: "Utilities (eau, électricité, internet)",
           description: "Gestion efficace de votre domicile",
-          href: "/",
+          href: "/domicile#utilities",
           image: "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg"
         },
       ],

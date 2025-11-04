@@ -14,7 +14,7 @@ export default function DroitFamille() {
                 className="relative border-b py-8 bg-black overflow-hidden h-60 text-center">
                 <div className="absolute bg-black/75 backdrop-blur-sm top-0 left-0 w-full h-full"></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ">
-                    <h1 className="text-5xl font-semibold text-slate-100 azonix tracking-widest">Droit de la famille</h1>
+                    <h1 className="text-5xl font-semibold text-slate-100 tracking-widest">Droit de la famille</h1>
                     <p className="text-gray-400 text-sm mt-5">Accompagnement juridique et notarial complet</p>
                 </div>
             </header>
