@@ -327,6 +327,7 @@ const Proadcast = () => {
     <div className="min-h-screen bg-gray-50 text-gray-800 py-4 lg:py-12 px-4 sm:px-6 lg:px-8 mt-20">
       {/* En-tête avec bouton de navigation */}
       <div className="container mx-auto">
+        
         <SlideIn direction="up">
           <div className="text-center mb-12 flex  relative">
             {/* Bouton pour basculer vers le bien-être */}
@@ -440,6 +441,7 @@ const Proadcast = () => {
             </div>
           </div>
         </SlideIn>
+        
       </div>
 
       {/* Modal */}

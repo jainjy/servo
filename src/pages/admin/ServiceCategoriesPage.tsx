@@ -1,4 +1,3 @@
-// src/pages/admin/ServiceCategoriesPage.tsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -18,12 +17,11 @@ interface Category {
 }
 
 export default function ServiceCategoriesPage() {
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<
-    Category | undefined
-  >();
+  const [selectedCategory, setSelectedCategory] = useState<Category | undefined>();
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [loading, setLoading] = useState(true);
 

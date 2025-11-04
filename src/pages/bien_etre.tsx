@@ -1,73 +1,35 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/api"
+import { Headphones, Home, Video, MessageCircle, Activity } from "lucide-react";
+import PodcastCard from "@/components/PodcastCard";
 
-// Données pour la section 1 - Cours à domicile
-const services = [
-  {
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2120&q=80",
-    title: "Yoga & Pilates pour renforcer corps et esprit",
-    description: "Pratiques douces alliant postures, respiration et méditation pour équilibrer le corps et l'esprit. Nos instructeurs certifiés adaptent chaque séance à votre niveau et vos objectifs personnels.",
-    price: "65€"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    title: "Sport fitness & relaxation personnalisés",
-    description: "Programmes sur mesure combinant renforcement musculaire, cardio et techniques de relaxation. Un coaching individuel pour atteindre vos objectifs forme et bien-être.",
-    price: "75€"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    title: "Cuisine créole, vegan et étoilée avec nos chefs à domicile",
-    description: "Expériences culinaires exclusives où nos chefs étoilés vous initient aux saveurs créoles, à la gastronomie vegan ou aux techniques de haute cuisine dans votre propre cuisine.",
-    price: "120€"
-  },
-];
-
-// Données pour la section 2 - Massages
-const massages = [
-  {
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    title: "Massage de la tête & cuir chevelu revitalisant",
-    description: "Technique spécialisée pour libérer les tensions du cuir chevelu, stimuler la circulation et favoriser la pousse des cheveux. Une expérience de relaxation profonde unique.",
-    price: "55€"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80",
-    title: "Massage corps complet relaxant ou tonifiant",
-    description: "Soin énergisant ou détendant utilisant des huiles essentielles bio. Adapté à vos besoins : récupération sportive, anti-stress ou simple moment de lâcher-prise.",
-    price: "90€"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
-    title: "Soins capillaires aux huiles naturelles",
-    description: "Traitement 100% naturel à base d'huiles végétales pour nourrir, réparer et redonner brillance et vitalité à votre chevelure. Diagnostic personnalisé inclus.",
-    price: "70€"
+interface Service {
+  id: number
+  libelle: string
+  description: string
+  category: {
+    id: number
+    name: string
   }
-];
-
-// Données pour la section 3 - Visio
-const visioServices = [
-  {
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    title: "Thérapeutes & coachs bien-être",
-    description: "Accompagnement personnalisé par des experts certifiés en nutrition, gestion du stress et développement personnel. Suivi régulier et objectifs mesurables.",
-    price: "60€"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2120&q=80",
-    title: "Chamans et guérisseurs spirituels",
-    description: "Guidance ancestrale pour retrouver l'équilibre intérieur. Séances de soins énergétiques, méditations guidées et conseils spirituels personnalisés.",
-    price: "80€"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1999&q=80",
-    title: "Consultations énergétiques et développement personnel",
-    description: "Approche holistique combinant travail sur les énergies et techniques de développement personnel pour transformer durablement votre qualité de vie.",
-    price: "85€"
-  }
-];
-
-
+  categoryId: number
+  images: string[]
+  metiers: Array<{
+    metier: {
+      id: number
+      libelle: string
+    }
+  }>
+  users: Array<{
+    id: string
+    name: string
+    rating: number
+    bookings: number
+  }>
+  status: string
+  duration: number
+  price: number
+}
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -133,6 +95,8 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
     message: ""
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -140,26 +104,56 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Formulaire soumis:", formData);
-    alert("Rendez-vous confirmé ! Nous vous contacterons rapidement.");
-    onClose();
+    setIsLoading(true);
+
+    try {
+      // Appel à l'API pour créer le rendez-vous
+      const response = await api.post('/harmonie/appointments', {
+        serviceId: service.id, // ID du service sélectionné
+        date: formData.date,
+        time: formData.time,
+        message: formData.message
+        // userId est récupéré automatiquement du token
+      });
+
+      console.log("✅ Rendez-vous créé:", response.data);
+      alert("Rendez-vous confirmé ! Nous vous contacterons rapidement.");
+      onClose();
+
+      // Réinitialiser le formulaire
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        date: "",
+        time: "",
+        message: ""
+      });
+
+    } catch (error) {
+      console.error("❌ Erreur création rendez-vous:", error);
+      alert("Erreur lors de la création du rendez-vous. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-500 ease-out animate-slideUp">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-gray-800">
-              Prendre rendez-vous - {service?.title}
+              Prendre rendez-vous - {service?.libelle}
             </h3>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 transition-colors"
+              disabled={isLoading}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -178,7 +172,8 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
               />
             </div>
 
@@ -192,20 +187,23 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Téléphone
+                Téléphone *
               </label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                required
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
               />
             </div>
 
@@ -220,7 +218,9 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
                   value={formData.date}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  disabled={isLoading}
+                  min={new Date().toISOString().split('T')[0]} // Pas de dates passées
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
                 />
               </div>
 
@@ -234,22 +234,24 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
                   value={formData.time}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  disabled={isLoading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message
+                Message (optionnel)
               </label>
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                placeholder="Informations supplémentaires..."
+                disabled={isLoading}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
+                placeholder="Informations supplémentaires, préférences, etc."
               />
             </div>
 
@@ -257,15 +259,24 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                disabled={isLoading}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                disabled={isLoading}
+                className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Confirmer le rendez-vous
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Création...
+                  </>
+                ) : (
+                  "Confirmer le rendez-vous"
+                )}
               </button>
             </div>
           </form>
@@ -275,115 +286,68 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
   );
 };
 
-// Composant de carte réutilisable
-const ServiceCard = ({ service, index, reverse = false }) => {
-  const [showDetails, setShowDetails] = useState(false);
+// Composant de petite carte moderne
+const ServiceCard = ({ service, index }) => {
   const [showForm, setShowForm] = useState(false);
-
-  // Fonction pour tronquer le texte
-  const truncateDescription = (text, maxLength = 120) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-
-  const isDescriptionLong = service.description.length > 120;
 
   return (
     <>
-      <div className={`relative flex flex-col lg:flex-row ${reverse ? 'lg:flex-row-reverse' : ''} items-center gap-6 lg:gap-8 p-6 lg:p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-400 hover:scale-[1.01] group cursor-pointer border border-gray-200 mb-6 overflow-hidden`}>
+      <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-primary transform hover:-translate-y-2">
 
-        {/* Image avec effet de zoom */}
-        <div className="flex-shrink-0 relative overflow-hidden rounded-2xl w-full lg:w-2/5 z-10">
-          <div className="w-full h-64 lg:h-80 rounded-2xl overflow-hidden shadow-lg">
-            <img
-              src={service.image}
-              alt={service.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-2xl transition-opacity duration-300 group-hover:opacity-0" />
-        </div>
+        {/* Image */}
+        <div className="relative h-56 overflow-hidden">
+          <img
+            src={service.images[0]}
+            alt={service.libelle}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-        {/* Contenu texte */}
-        <div className="flex-1 w-full lg:w-3/5 z-10">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 gap-4">
-            <h3 className="text-xl lg:text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300 pr-4">
-              {service.title}
-            </h3>
-            <span className="text-lg lg:text-xl font-bold text-white bg-slate-900 px-4 py-2 rounded-lg shadow-lg min-w-20 text-center self-start transform group-hover:scale-105 transition-transform duration-300">
-              {service.price}
-            </span>
-          </div>
-
-          <div className="mb-6">
-            {!showDetails && isDescriptionLong ? (
-              <p className="text-gray-600 leading-relaxed line-clamp-2">
-                {truncateDescription(service.description)}
-              </p>
-            ) : (
-              <p className="text-gray-600 leading-relaxed">
-                {service.description}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-slate-900 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2 z-20 relative"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Rendez-vous
-            </button>
-
-            {isDescriptionLong && (
-              <button
-                onClick={() => setShowDetails(!showDetails)}
-                className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-all duration-300 font-medium flex items-center justify-center gap-2 z-20 relative"
-              >
-                {showDetails ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                    Voir moins
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                    En savoir plus
-                  </>
-                )}
-              </button>
-            )}
+          {/* Prix badge */}
+          <div className="absolute top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-full shadow-xl font-bold">
+            {service.price ? `${service.price}€` : "N/A"}
           </div>
         </div>
+
+        {/* Contenu */}
+        <div className="p-6 space-y-4">
+          {/* Titre */}
+          <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-blue-600 dark:group-hover:text-primary transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
+            {service.libelle || "Titre non disponible"}
+          </h3>
+
+          {/* Description */}
+          <p className="text-gray-600 dark:text-muted-foreground text-sm leading-relaxed line-clamp-3 min-h-[4rem]">
+            {service.description || "Description non disponible"}
+          </p>
+
+          {/* Bouton */}
+          <button
+            onClick={() => setShowForm(true)}
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Rendez-vous
+          </button>
+        </div>
+
+        {/* Effet de brillance au survol */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
       </div>
-        <AppointmentForm
-          isOpen={showForm}
-          onClose={() => setShowForm(false)}
-          service={service}
-        />
+
+      <AppointmentForm
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        service={service}
+      />
     </>
   );
 };
 
-
-
-
 const BienEtre = () => {
   const navigate = useNavigate();
-
-  const goToSection = (sectionId: string) => {
-    navigate(`/podcasts#${sectionId}`);
-  };
-
-  /****** */
-
   const section2Ref = useRef(null);
 
   const scrollToSection2 = () => {
@@ -393,12 +357,133 @@ const BienEtre = () => {
     });
   };
 
+  // State pour la tabulation
+  const [activeTab, setActiveTab] = useState('all');
 
-  /****** */
+  // Configuration des tabs avec icônes SVG
+  const tabs = [
+    { 
+      id: 'all', 
+      label: 'Tous les services', 
+      icon: <Home className="w-5 h-5" /> 
+    },
+    { 
+      id: 'Formateur', 
+      label: 'Cours à domicile', 
+      icon: <Activity className="w-5 h-5" /> 
+    },
+    { 
+      id: 'Masseur', 
+      label: 'Massages à domicile', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+        </svg>
+      ) 
+    },
+    { 
+      id: 'Thérapeute', 
+      label: 'Consultation visio', 
+      icon: <Video className="w-5 h-5" /> 
+    },
+    { 
+      id: 'Podcasteur', 
+      label: 'Podcasts & Vidéos', 
+      icon: <MessageCircle className="w-5 h-5" /> 
+    }
+  ];
+
+  const [servicesByCategory, setServicesByCategory] = useState({
+    Formateur: [],
+    Masseur: [],
+    Thérapeute: [],
+    Podcasteur: []
+  });
+
+  const fetchServices = async () => {
+    try {
+      console.log("🔄 DÉBUT DE LA RÉCUPÉRATION DES DONNÉES");
+      const response = await api.get('/harmonie/views');
+
+      console.log("🎯 RÉPONSE COMPLÈTE DE L'API:", response);
+      console.log("📦 DONNÉES BRUTES:", response.data);
+
+      // Debug détaillé de chaque catégorie
+      if (response.data) {
+        console.log("🔍 DÉTAIL PAR CATÉGORIE:");
+        console.log("Formateur:", response.data.Formateur);
+        console.log("Masseur:", response.data.Masseur);
+        console.log("Thérapeute:", response.data.Thérapeute);
+        console.log("Podcasteur:", response.data.Podcasteur);
+
+        // Vérifier la structure des données
+        if (response.data.Formateur && response.data.Formateur.length > 0) {
+          console.log("📝 STRUCTURE DU PREMIER SERVICE Formateur:", response.data.Formateur[0]);
+        }
+        if (response.data.Masseur && response.data.Masseur.length > 0) {
+          console.log("📝 STRUCTURE DU PREMIER SERVICE Masseur:", response.data.Masseur[0]);
+        }
+        if (response.data.Thérapeute && response.data.Thérapeute.length > 0) {
+          console.log("📝 STRUCTURE DU PREMIER SERVICE Thérapeute:", response.data.Thérapeute[0]);
+        }
+        if (response.data.Podcasteur && response.data.Podcasteur.length > 0) {
+          console.log("📝 STRUCTURE DU PREMIER SERVICE Podcasteur:", response.data.Podcasteur[0]);
+        }
+      } else {
+        console.warn("⚠️ AUCUNE DONNÉE DANS LA RÉPONSE");
+      }
+
+      setServicesByCategory(response.data || {
+        Formateur: [],
+        Masseur: [],
+        Thérapeute: [],
+        Podcasteur: []
+      });
+
+    } catch (error) {
+      console.error('❌ ERREUR LORS DU CHARGEMENT DES SERVICES:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  // Ajouter un useEffect pour surveiller les changements de state
+  useEffect(() => {
+    console.log("🔄 SERVICES BY CATEGORY MIS À JOUR:", servicesByCategory);
+  }, [servicesByCategory]);
+
+  // Ajouter un log quand on change d'onglet
+  useEffect(() => {
+    console.log(`📌 ONGLET ACTIF: ${activeTab}`);
+    console.log(`📊 DONNÉES POUR ${activeTab}:`, servicesByCategory[activeTab]);
+    console.log(`🔢 NOMBRE DE SERVICES: ${servicesByCategory[activeTab]?.length || 0}`);
+  }, [activeTab, servicesByCategory]);
+
+  // Fonction pour obtenir tous les services
+  const getAllServices = () => {
+    const allServices = [
+      ...(servicesByCategory.Formateur || []),
+      ...(servicesByCategory.Masseur || []),
+      ...(servicesByCategory.Thérapeute || []),
+      ...(servicesByCategory.Podcasteur || [])
+    ];
+    return allServices;
+  };
+
+  // Fonction pour obtenir les services selon l'onglet actif
+  const getCurrentServices = () => {
+    if (activeTab === 'all') {
+      return getAllServices();
+    }
+    return servicesByCategory[activeTab] || [];
+  };
 
   return (
-    <div className="font-poppins text-gray-800 min-h-screen">
-      {/* Hero Section avec Background Image */}
+    <div className="font-sans text-foreground min-h-screen bg-background">
+
+      {/* HERO */}
       <section
         className="relative h-96 py-20 lg:py-32 text-center text-white overflow-hidden"
         style={{
@@ -424,161 +509,202 @@ const BienEtre = () => {
             <button
               onClick={scrollToSection2}
               className="bg-slate-900 text-white px-8 py-4 rounded-xl hover:bg-slate-800 transition-all duration-300 transform hover:scale-105 shadow-2xl font-semibold text-lg">
-
               Commencer mon voyage
             </button>
           </SlideIn>
         </div>
       </section>
 
-      {/* Contenu principal avec background */}
-      <div ref={section2Ref} className="bg-gray-50 p-4 sm:p-6 lg:p-10">
+      {/* CONTAINER AVEC TABULATION */}
+      <div ref={section2Ref} className="bg-gray-50 dark:bg-background p-4 sm:p-6 lg:p-10">
+        <div className="max-w-7xl mx-auto">
 
-        {/* --- SECTION 1 --- Cours à domicile */}
-        <section className="mb-16 lg:mb-20">
-          <SlideIn direction="left">
-            <div className="mb-8 lg:mb-12">
-              <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 text-left">
-                Cours à domicile
-              </h2>
-              <p className="text-gray-700 mb-6 lg:mb-8 text-base lg:text-lg leading-relaxed text-left max-w-3xl">
-                Des séances personnalisées dans le confort de votre maison. Nos experts se déplacent chez vous avec tout le matériel nécessaire pour des cours sur mesure adaptés à vos objectifs et votre emploi du temps.
-              </p>
-
-              <div className="space-y-6">
-                {services.map((service, index) => (
-                  <ServiceCard
-                    key={index}
-                    service={service}
-                    index={index}
-                    reverse={index % 2 !== 0}
-                  />
-                ))}
-              </div>
+          {/* Menu de tabulation moderne */}
+          <SlideIn direction="down">
+            <div className="bg-white dark:bg-card rounded-2xl shadow-lg p-4 sm:p-6 mb-12 flex flex-wrap justify-center items-center gap-3 sm:gap-4 w-full max-w-6xl mx-auto">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`group relative flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${activeTab === tab.id
+                    ? 'text-white shadow-md scale-105'
+                    : 'text-gray-700 dark:text-foreground hover:bg-gray-100 dark:hover:bg-muted/50'
+                    }`}
+                >
+                  {activeTab === tab.id && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-teal-500 animate-shimmer bg-[length:200%_100%]" />
+                  )}
+                  <span className="relative z-10 group-hover:scale-110 transition-transform duration-300">
+                    {tab.icon}
+                  </span>
+                  <span className="text-sm sm:text-base font-bold relative z-10">
+                    {tab.label}
+                  </span>
+                </button>
+              ))}
             </div>
           </SlideIn>
-        </section>
 
-        {/* --- SECTION 2 --- Massages à domicile */}
-        <section className="mb-16 lg:mb-20">
-          <SlideIn direction="right">
-            <div className="mb-8 lg:mb-12">
-              <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 text-left">
-                Massages à domicile
-              </h2>
-              <p className="text-gray-700 mb-6 lg:mb-8 text-base lg:text-lg leading-relaxed text-left max-w-3xl">
-                Transformez votre espace en véritable spa avec nos thérapeutes certifiés. Installation professionnelle, huiles essentielles bio et ambiance relaxante pour une expérience sensorielle complète sans vous déplacer.
-              </p>
-              <div className="space-y-6">
-                {massages.map((service, index) => (
-                  <ServiceCard
-                    key={index}
-                    service={service}
-                    index={index}
-                    reverse={index % 2 === 0}
-                  />
-                ))}
-              </div>
-            </div>
-          </SlideIn>
-        </section>
+          {/* Contenu des tabs */}
+          <div className="min-h-[500px]">
 
-        {/* --- SECTION 3 --- Consultation en visio */}
-        <section className="mb-16 lg:mb-20">
-          <SlideIn direction="left">
-            <div className="mb-8 lg:mb-12">
-              <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 text-left">
-                Consultation en visio
-              </h2>
-              <p className="text-gray-700 mb-6 lg:mb-8 text-base lg:text-lg leading-relaxed text-left max-w-3xl">
-                Accédez à l'expertise où que vous soyez. Nos consultations à distance maintiennent la qualité d'un accompagnement personnalisé avec une flexibilité totale. Idéal pour un suivi régulier ou des conseils ponctuels.
-              </p>
-              <div className="space-y-6">
-                {visioServices.map((service, index) => (
-                  <ServiceCard
-                    key={index}
-                    service={service}
-                    index={index}
-                    reverse={index % 2 !== 0}
-                  />
-                ))}
-              </div>
-            </div>
-          </SlideIn>
-        </section>
+            {/* TOUS LES SERVICES */}
+            {activeTab === 'all' && (
+              <section className="mb-20">
+                <SlideIn direction="left">
+                  <div className="mb-12">
+                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                      Tous nos services de bien-être
+                    </h2>
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                      Découvrez l'ensemble de nos services pour prendre soin de votre corps et de votre esprit. 
+                      Des cours personnalisés aux massages relaxants, en passant par les consultations en ligne 
+                      et nos contenus inspirants.
+                    </p>
 
-        {/* --- SECTION 4 --- Podcasts & Vidéos */}
-        <section className="mb-16 lg:mb-20">
-          <SlideIn direction="up">
-            <div
-              className="bg-white rounded-2xl p-6 lg:p-10 shadow-2xl transition-all duration-500 hover:shadow-3xl hover:scale-[1.01] border border-gray-200 relative overflow-hidden"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1478737270239-2f02b77fc618?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            >
-              {/* Overlay pour meilleure lisibilité */}
-              <div className="absolute inset-0 bg-white/80 rounded-2xl"></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                      {getCurrentServices().length > 0 ? (
+                        getCurrentServices().map((service, index) => (
+                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                            <ServiceCard service={service} index={index} />
+                          </SlideIn>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                          Aucun service disponible pour le moment
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </SlideIn>
+              </section>
+            )}
 
-              <div className="relative z-10">
-                <h2 className="text-2xl lg:text-3xl mb-4 lg:mb-6 font-bold text-slate-900">
-                  Podcasts & Vidéos Inspirantes
-                </h2>
-                <p className="text-gray-700 mb-6 lg:mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
-                  Visionnez nos entretiens exclusifs avec des personnalités inspirantes et découvrez leurs parcours de vie.
-                  Un projet mené en collaboration avec notre agence de communication partenaire.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-                  <button
-                    onClick={() => goToSection("podcastaudio")}
-                    className="bg-blue-600 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold flex items-center justify-center gap-3 group z-20 relative"
-                  >
-                    Voir nos podcasts
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => goToSection("video")}
-                    className="bg-slate-900 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl hover:bg-slate-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold flex items-center justify-center gap-3 group z-20 relative"
-                  >
-                    Découvrir les vidéos
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </button>
+            {/* FORMATEUR */}
+            {activeTab === 'Formateur' && (
+              <section className="mb-20">
+                <SlideIn direction="left">
+                  <div className="mb-12">
+                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                      Cours à domicile
+                    </h2>
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                      Des séances personnalisées dans le confort de votre maison. Nos experts se déplacent chez vous avec tout le matériel nécessaire pour des cours sur mesure adaptés à vos objectifs et votre emploi du temps.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                      {getCurrentServices().length > 0 ? (
+                        getCurrentServices().map((service, index) => (
+                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                            <ServiceCard service={service} index={index} />
+                          </SlideIn>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                          Aucun service disponible pour cette catégorie
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </SlideIn>
+              </section>
+            )}
+
+            {/* MASSEUR */}
+            {activeTab === 'Masseur' && (
+              <section className="mb-20">
+                <SlideIn direction="right">
+                  <div className="mb-12">
+                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                      Massages à domicile
+                    </h2>
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                      Transformez votre espace en véritable spa avec nos thérapeutes certifiés. Installation professionnelle, huiles essentielles bio et ambiance relaxante pour une expérience sensorielle complète sans vous déplacer.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                      {getCurrentServices().length > 0 ? (
+                        getCurrentServices().map((service, index) => (
+                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                            <ServiceCard service={service} index={index} />
+                          </SlideIn>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                          Aucun service disponible pour cette catégorie
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </SlideIn>
+              </section>
+            )}
+
+            {/* THERAPEUTE */}
+            {activeTab === 'Thérapeute' && (
+              <section className="mb-20">
+                <SlideIn direction="left">
+                  <div className="mb-12">
+                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                      Consultation en visio
+                    </h2>
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                      Accédez à l'expertise où que vous soyez. Nos consultations à distance maintiennent la qualité d'un accompagnement personnalisé avec une flexibilité totale. Idéal pour un suivi régulier ou des conseils ponctuels.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                      {getCurrentServices().length > 0 ? (
+                        getCurrentServices().map((service, index) => (
+                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                            <ServiceCard service={service} index={index} />
+                          </SlideIn>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                          Aucun service disponible pour cette catégorie
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </SlideIn>
+              </section>
+            )}
+
+            {/* PODCASTEUR */}
+            {activeTab === 'Podcasteur' && (
+              <section className="mb-20">
+                <SlideIn direction="left" delay={300}>
+                  <div className="mb-12">
+                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                      Podcasts & Vidéos Inspirantes
+                    </h2>
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                      Visionnez nos entretiens exclusifs avec des personnalités inspirantes et découvrez leurs parcours de vie.
+                      Un projet mené en collaboration avec notre agence de communication partenaire.
+                    </p>
+                  </div>
+                </SlideIn>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                  {getCurrentServices().length > 0 ? (
+                    getCurrentServices().map((podcast, index) => (
+                      <SlideIn key={podcast.id || index} direction="up" delay={index * 100}>
+                        <PodcastCard podcast={podcast} />
+                      </SlideIn>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                      Aucun podcast disponible
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          </SlideIn>
-        </section>
+              </section>
+            )}
 
+          </div>
+        </div>
       </div>
 
-      {/* Styles pour l'animation du formulaire */}
-      <style>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(100px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slideUp {
-          animation: slideUp 0.5s ease-out;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };
