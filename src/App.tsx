@@ -101,6 +101,17 @@ import Recherche from "./pages/Recherche";
 import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 
+// Import des nouveaux composants immobilier
+import AuditPatrimonial from "./pages/immobilier/AuditPatrimonial";
+
+// Import des composants bâtiments
+import BatimentsLayout from "./pages/batiments/BatimentsLayout";
+import RenovationChantiers from "./pages/batiments/RenovationChantiers";
+
+// Import des composants domicile
+import DomicileLayout from "./pages/domicile/DomicileLayout";
+import ImmobilierSections from "./components/ImmobilierSections";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -161,6 +172,61 @@ const App = () => {
                   <Route path="/podcasts" element={<Podcast />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
+                  <Route
+                    path="/immobilier-sections"
+                    element={<ImmobilierSections />}
+                  />
+                  <Route
+                    path="/estimation-immobilier"
+                    element={<EstimationImmobilierPage />}
+                  />
+                  <Route
+                    path="/gestion-immobilier"
+                    element={<GestionImmobilier />}
+                  />
+                  {/* Routes Bâtiments */}
+                  <Route path="/batiments" element={<BatimentsLayout />} />
+                  <Route
+                    path="/renovation-chantiers"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/construction-plans"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/materiaux-viabilisations"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/division-parcellaire"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/formation-podcasts"
+                    element={<BatimentsLayout />}
+                  />
+
+                  {/* Routes Domicile */}
+                  <Route path="/domicile" element={<DomicileLayout />} />
+                  <Route
+                    path="/produits-commerces"
+                    element={<DomicileLayout />}
+                  />
+                  <Route path="/service-maison" element={<DomicileLayout />} />
+                  <Route
+                    path="/equipements-livraison"
+                    element={<DomicileLayout />}
+                  />
+                  <Route
+                    path="/design-decoration"
+                    element={<DomicileLayout />}
+                  />
+                  <Route
+                    path="/cours-formations"
+                    element={<DomicileLayout />}
+                  />
+                  <Route path="/utilities" element={<DomicileLayout />} />
                   <Route
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}

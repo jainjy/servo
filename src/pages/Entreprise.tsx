@@ -8,6 +8,11 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Footer from "@/components/layout/Footer";
 import { toast } from "sonner";
+import CreationReprise from "@/components/components/CreationReprise";
+import AuditMediation from "@/components/components/AuditMediation";
+import AidesLeveesFonds from "@/components/components/AideFonds";
+import JuridiqueLiquidation from "@/components/components/JuridiqueLiquidation";
+import PodcastsServices from "@/components/components/Podcast_services";
 
 const colors = {
   primary: "#0f172a", // slate-900
@@ -365,8 +370,7 @@ const Entreprise = () => {
 
             <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+
               >
                 <Button
                   className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
@@ -378,8 +382,7 @@ const Entreprise = () => {
               </motion.div>
 
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+
               >
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
@@ -396,7 +399,7 @@ const Entreprise = () => {
 
       {/* Section Services d'entreprise */}
       <motion.section
-        className="container mx-auto px-4 py-8 lg:py-20"
+        className="container mx-auto px-4 py-8 lg:py-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -431,7 +434,7 @@ const Entreprise = () => {
             />
             <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
           </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <motion.div >
             <Button className="rounded-xl px-8 py-3 text-white font-semibold bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300">
               Rechercher
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -445,8 +448,7 @@ const Entreprise = () => {
             {serviceCategories.map((category, index) => (
               <motion.div
                 key={index}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+
               >
                 <Button
                   variant={
@@ -454,11 +456,10 @@ const Entreprise = () => {
                       ? "default"
                       : "outline"
                   }
-                  className={`rounded-xl font-semibold px-4 lg:px-6 py-3 ${
-                    activeServiceCategory === category.value
-                      ? "text-white"
-                      : "border-2 border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900"
-                  }`}
+                  className={`rounded-xl font-semibold px-4 lg:px-6 py-3 ${activeServiceCategory === category.value
+                    ? "text-white"
+                    : "border-2 border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900"
+                    }`}
                   style={{
                     backgroundColor:
                       activeServiceCategory === category.value
@@ -494,7 +495,7 @@ const Entreprise = () => {
                   {/* Icône du service */}
                   <motion.div
                     className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center bg-slate-100 group-hover:bg-slate-900 transition-colors duration-300"
-                    whileHover={{ scale: 1.1 }}
+
                   >
                     <service.icon className="h-8 w-8 text-slate-600  group-hover:text-white transition-colors duration-300" />
                   </motion.div>
@@ -514,8 +515,7 @@ const Entreprise = () => {
 
                   {/* Bouton d'action */}
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+
                   >
                     <Button
                       className="w-full font-semibold rounded-xl gap-3 py-4 border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-300"
@@ -546,7 +546,7 @@ const Entreprise = () => {
 
       {/* Section Devenir partenaire */}
       <motion.section
-        className="py-0 lg:py-20 bg-slate-50"
+        className="py-0 lg:py-8 bg-slate-50"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -575,8 +575,7 @@ const Entreprise = () => {
               ].map((filter, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+
                 >
                   <Select
                     onValueChange={(value) =>
@@ -598,8 +597,7 @@ const Entreprise = () => {
               ))}
 
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+
               >
                 <Button
                   variant="outline"
@@ -639,7 +637,7 @@ const Entreprise = () => {
                   {/* Image spécifique pour Architectes */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
+
                   >
                     <img
                       src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -663,7 +661,7 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[0])}
-                      whileHover={{ scale: 1.02 }}
+
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -689,8 +687,7 @@ const Entreprise = () => {
 
                     {/* Bouton de contact */}
                     <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+
                     >
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
@@ -726,7 +723,7 @@ const Entreprise = () => {
                   {/* Image spécifique pour Constructeur */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
+
                   >
                     <img
                       src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -750,7 +747,7 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[1])}
-                      whileHover={{ scale: 1.02 }}
+
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -776,8 +773,7 @@ const Entreprise = () => {
 
                     {/* Bouton de contact */}
                     <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+
                     >
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
@@ -813,7 +809,7 @@ const Entreprise = () => {
                   {/* Image spécifique pour Électricien */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
+
                   >
                     <img
                       src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -837,7 +833,7 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[2])}
-                      whileHover={{ scale: 1.02 }}
+
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -863,8 +859,7 @@ const Entreprise = () => {
 
                     {/* Bouton de contact */}
                     <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+
                     >
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
@@ -900,7 +895,7 @@ const Entreprise = () => {
                   {/* Image spécifique pour Assurance */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                    whileHover={{ scale: 1.05 }}
+
                   >
                     <img
                       src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -924,7 +919,7 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[3])}
-                      whileHover={{ scale: 1.02 }}
+
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -950,8 +945,7 @@ const Entreprise = () => {
 
                     {/* Bouton de contact */}
                     <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+
                     >
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
@@ -1053,7 +1047,7 @@ const Entreprise = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div>
               <Button
                 className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-12 py-6 text-lg font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
                 onClick={() => setShowMessageModal(true)}
@@ -1077,11 +1071,11 @@ const Entreprise = () => {
             <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-900">
               Prêt à développer votre entreprise ?
             </h2>
-            <p className="text-sm lg:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans tous
               vos projets d'entreprise
             </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div>
               <Button
                 className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
                 onClick={() => setShowMessageModal(true)}
@@ -1186,8 +1180,8 @@ const Entreprise = () => {
                 {selectedPartenaire
                   ? `Contacter ${selectedPartenaire.nom}`
                   : selectedService
-                  ? `Demander ${selectedService.nom}`
-                  : "Envoyer un message"}
+                    ? `Demander ${selectedService.nom}`
+                    : "Envoyer un message"}
               </h2>
               <Button
                 variant="ghost"
@@ -1261,8 +1255,8 @@ const Entreprise = () => {
                     selectedService
                       ? `Je souhaite en savoir plus sur ${selectedService.nom}...`
                       : selectedPartenaire
-                      ? `Je souhaite rejoindre ${selectedPartenaire.nom}...`
-                      : "Votre message..."
+                        ? `Je souhaite rejoindre ${selectedPartenaire.nom}...`
+                        : "Votre message..."
                   }
                 />
               </div>
@@ -1295,7 +1289,22 @@ const Entreprise = () => {
           </motion.div>
         </motion.div>
       )}
-    </div>
+      <div id="reprise">
+        <CreationReprise />
+      </div>
+      <div id="auditMediation">
+        <AuditMediation />
+      </div>
+      <div id="aideFonds">
+        <AidesLeveesFonds />
+      </div>
+      <div id="juridiqueLiquidation">
+        <JuridiqueLiquidation />
+      </div>
+      <div id="podcast_service">
+        <PodcastsServices />
+      </div>
+    </div >
   );
 };
 
