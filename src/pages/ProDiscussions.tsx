@@ -16,11 +16,9 @@ import {
   MoreVertical,
   FileDigit,
   DollarSign,
-  Clock3,
-  CheckSquare,
   X,
 } from "lucide-react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useSocket } from "@/contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
