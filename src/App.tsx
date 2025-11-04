@@ -91,15 +91,15 @@ import UserOrders from "./components/orders/UserOrders";
 import ListeDemandesDevis from "./pages/pro/ListeDemandesDevis";
 import CookieConsent from "./components/CookieConsent";
 import CookiesPolicy from "./pages/CookiesPolicy";
-import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
+import FinancementDemandes from "./pages/admin/FinancementDemandes";
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
 import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
-
-
+import TestPage from "./pages/TestPage";
+import AdvertisementManager from "./components/admin/AdvertisementManager";
 
 const queryClient = new QueryClient();
 
@@ -312,6 +312,10 @@ const App = () => {
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
+                    <Route
+                      path="publicite"
+                      element={<AdvertisementManager />}
+                    />
 
                     <Route path="demandes" element={<ListeDemande />} />
 
