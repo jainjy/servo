@@ -29,41 +29,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
-import api from "@/lib/api";
+import { Textarea } from "@/components/ui/textarea";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
+import api from "@/lib/api";
 
 // Types
+interface Service {
+    id: number;
+    libelle: string;
+    price: number;
+    description: string;
+}
+
 interface Booking {
     id: string;
-    code: string;
-    service: string;
+    userId: string;
+    serviceId: number;
+    service: Service;
     date: string;
-    checkIn: string;
-    checkOut: string;
-    status: "confirmee" | "en_attente" | "annulee" | "terminee";
-    amount: number;
-    guests: number;
-    adults: number;
-    children: number;
-    infants: number;
-    specialRequests?: string;
-    paymentMethod: string;
-    paymentStatus: string;
-    listing: {
-        id: string;
-        title: string;
-        type: string;
-        city: string;
-        images: string[];
-        price: number;
-        provider?: string;
-        rating: number;
-        reviewCount: number;
-        amenities: string[];
-    };
+    time: string;
+    message?: string;
+    status: "pending" | "confirmed" | "cancelled" | "completed";
     createdAt: string;
-    cancelledAt?: string;
 }
 
 function formatCurrency(amount: number) {
@@ -73,66 +62,224 @@ function formatCurrency(amount: number) {
     }).format(amount);
 }
 
+function generateBookingCode(id: string): string {
+    return `BK-${id.slice(-4).toUpperCase()}`;
+}
+
 function StatusBadge({ status }: { status: Booking["status"] }) {
     const variant =
-        status === "confirmee"
+        status === "confirmed"
             ? "default"
-            : status === "en_attente"
+            : status === "pending"
                 ? "secondary"
-                : status === "terminee"
+                : status === "completed"
                     ? "outline"
                     : "destructive";
     const label =
-        status === "confirmee"
+        status === "confirmed"
             ? "Confirmée"
-            : status === "en_attente"
+            : status === "pending"
                 ? "En attente"
-                : status === "terminee"
+                : status === "completed"
                     ? "Terminée"
                     : "Annulée";
 
     return <Badge variant={variant as any}>{label}</Badge>;
 }
 
+// Composant pour afficher les détails d'une réservation
+function BookingDetailsDialog({ booking, onClose }: { booking: Booking; onClose: () => void }) {
+    return (
+        <Dialog open={true} onOpenChange={onClose}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Détails de la réservation {generateBookingCode(booking.id)}</DialogTitle>
+                    <DialogDescription>
+                        Informations complètes sur votre réservation
+                    </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label className="font-semibold">Service</Label>
+                            <p className="mt-1">{booking.service.libelle}</p>
+                        </div>
+                        <div>
+                            <Label className="font-semibold">Statut</Label>
+                            <div className="mt-1">
+                                <StatusBadge status={booking.status} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label className="font-semibold">Date</Label>
+                            <p className="mt-1">
+                                {new Date(booking.date).toLocaleDateString("fr-FR", {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                        </div>
+                        <div>
+                            <Label className="font-semibold">Heure</Label>
+                            <p className="mt-1">{booking.time}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <Label className="font-semibold">Prix</Label>
+                        <p className="mt-1 text-lg font-semibold">
+                            {formatCurrency(booking.service.price)}
+                        </p>
+                    </div>
+
+                    {booking.message && (
+                        <div>
+                            <Label className="font-semibold">Message</Label>
+                            <div className="mt-1 p-3 bg-muted rounded-md">
+                                <p className="text-sm">{booking.message}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div>
+                        <Label className="font-semibold">Description du service</Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {booking.service.description}
+                        </p>
+                    </div>
+
+                    <div>
+                        <Label className="font-semibold">Date de création</Label>
+                        <p className="mt-1">
+                            {new Date(booking.createdAt).toLocaleDateString("fr-FR")}
+                        </p>
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button onClick={onClose}>Fermer</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+// Composant pour reprogrammer une réservation
+function RescheduleDialog({ booking, onReschedule }: { booking: Booking; onReschedule: (id: string, newDate: string, newTime: string) => void }) {
+    const [open, setOpen] = useState(false);
+    const [date, setDate] = useState(booking.date.split(' ')[0]);
+    const [time, setTime] = useState(booking.time);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!date || !time) return;
+        
+        onReschedule(booking.id, date, time);
+        setOpen(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm">Reprogrammer</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Reprogrammer {generateBookingCode(booking.id)}</DialogTitle>
+                    <DialogDescription>Choisissez une nouvelle date et heure</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="grid gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="date">Date</Label>
+                        <Input 
+                            id="date" 
+                            type="date" 
+                            required 
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="time">Heure</Label>
+                        <Input 
+                            id="time" 
+                            type="time" 
+                            required 
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button type="submit">Enregistrer</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+// Composant pour annuler une réservation
+function CancelBookingDialog({ booking, onCancel }: { booking: Booking; onCancel: (id: string) => void }) {
+    const [open, setOpen] = useState(false);
+
+    const handleCancel = () => {
+        onCancel(booking.id);
+        setOpen(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="sm">Annuler</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
+                        Annuler la réservation {generateBookingCode(booking.id)} ?
+                    </DialogTitle>
+                    <DialogDescription>
+                        Cette action est irréversible. Êtes-vous sûr de vouloir annuler cette réservation ?
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>
+                        Retour
+                    </Button>
+                    <Button variant="destructive" onClick={handleCancel}>
+                        Confirmer l'annulation
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function ReservationPage() {
     const { toast } = useToast();
-    const { user, isAuthenticated } = useAuth();
-
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<string>("all");
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-    // Charger les réservations
+    // Récupération des données depuis l'API
     useEffect(() => {
-        const fetchBookings = async () => {
-            if (!isAuthenticated || !user) {
-                setLoading(false);
-                return;
-            }
-
+        const fetchAppointments = async () => {
             try {
                 setLoading(true);
-                const response = await api.get("/user/bookings", {
-                    params: {
-                        userId: user.id,
-                        status: filter !== "all" ? filter : undefined
-                    }
-                });
-
-                if (response.data.success) {
-                    setBookings(response.data.data);
-                } else {
-                    toast({
-                        title: "Erreur",
-                        description: "Impossible de charger les réservations",
-                        variant: "destructive"
-                    });
-                }
+                const response = await api.get('/appointment/appointment');
+                setBookings(response.data);
             } catch (error) {
-                console.error("Erreur chargement réservations:", error);
+                console.error("Erreur lors de la récupération des rendez-vous:", error);
                 toast({
                     title: "Erreur",
-                    description: "Erreur lors du chargement des réservations",
+                    description: "Impossible de charger les réservations",
                     variant: "destructive"
                 });
             } finally {
@@ -140,144 +287,102 @@ export default function ReservationPage() {
             }
         };
 
-        fetchBookings();
-    }, [isAuthenticated, user, filter, toast]);
+        fetchAppointments();
+    }, [toast]);
+
+    // Fonction pour mapper les statuts de l'API vers les statuts de l'interface
+    const mapStatus = (status: string): Booking["status"] => {
+        const statusMap: Record<string, Booking["status"]> = {
+            'pending': 'pending',
+            'confirmed': 'confirmed',
+            'cancelled': 'cancelled',
+            'completed': 'completed'
+        };
+        return statusMap[status] || 'pending';
+    };
+
+    // Fonction pour récupérer les détails d'une réservation
+    const fetchBookingDetails = async (id: string) => {
+        try {
+            const response = await api.get(`/appointment/${id}`);
+            setSelectedBooking(response.data);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des détails:", error);
+            toast({
+                title: "Erreur",
+                description: "Impossible de charger les détails de la réservation",
+                variant: "destructive"
+            });
+        }
+    };
 
     const filteredBookings = useMemo(() => {
-        return bookings;
-    }, [bookings]);
+        if (filter === "all") return bookings;
+        return bookings.filter((b) => b.status === filter);
+    }, [bookings, filter]);
 
     const cancelBooking = async (id: string) => {
         try {
-            const response = await api.put(`/user/bookings/${id}/cancel`, {
-                userId: user?.id
+            await api.patch(`/appointment/${id}/cancel`);
+            setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status: 'cancelled' } : b));
+            toast({ 
+                title: "Réservation annulée",
+                description: "Votre réservation a été annulée avec succès"
             });
-
-            if (response.data.success) {
-                setBookings(prev => prev.map(b => 
-                    b.id === id ? { ...b, status: "annulee" as const } : b
-                ));
-                toast({ title: "Réservation annulée", description: response.data.message });
-            }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Erreur annulation:", error);
             toast({
                 title: "Erreur",
-                description: error.response?.data?.error || "Erreur lors de l'annulation",
+                description: "Impossible d'annuler la réservation",
                 variant: "destructive"
             });
         }
     };
 
-    const rescheduleBooking = async (id: string, newDate: string) => {
+    const rescheduleBooking = async (id: string, newDate: string, newTime: string) => {
         try {
-            // Convertir la date en format checkIn/checkOut
-            const checkIn = new Date(newDate);
-            const checkOut = new Date(checkIn);
-            checkOut.setDate(checkOut.getDate() + 1); // +1 jour par défaut
-
-            const response = await api.put(`/user/bookings/${id}/reschedule`, {
-                userId: user?.id,
-                checkIn: checkIn.toISOString(),
-                checkOut: checkOut.toISOString()
+            const response = await api.patch(`/appointment/${id}/reschedule`, { 
+                date: newDate, 
+                time: newTime 
             });
 
-            if (response.data.success) {
-                setBookings(prev => prev.map(b => 
-                    b.id === id ? { 
-                        ...b, 
-                        checkIn: response.data.data.checkIn,
-                        checkOut: response.data.data.checkOut,
-                        amount: response.data.data.totalAmount
-                    } : b
-                ));
-                toast({ 
-                    title: "Réservation reprogrammée", 
-                    description: response.data.message 
-                });
-            }
-        } catch (error: any) {
+            setBookings((prev) =>
+                prev.map((b) =>
+                    b.id === id ? { ...b, date: newDate, time: newTime } : b
+                )
+            );
+
+            toast({
+                title: "Réservation reprogrammée",
+                description: `Nouvelle date: ${new Date(newDate).toLocaleDateString("fr-FR")} à ${newTime}`,
+            });
+        } catch (error) {
             console.error("Erreur reprogrammation:", error);
             toast({
                 title: "Erreur",
-                description: error.response?.data?.error || "Erreur lors de la reprogrammation",
-                variant: "destructive"
+                description: "Impossible de reprogrammer la réservation",
+                variant: "destructive",
             });
         }
     };
 
-    function RescheduleDialog({ booking }: { booking: Booking }) {
-        const [open, setOpen] = useState(false);
-
-        return (
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">Reprogrammer</Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Reprogrammer {booking.code}</DialogTitle>
-                        <DialogDescription>Choisissez une nouvelle date d'arrivée</DialogDescription>
-                    </DialogHeader>
-                    <form
-                        className="grid gap-4"
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const form = new FormData(e.currentTarget);
-                            const date = String(form.get("date") || "");
-                            if (!date) return;
-                            rescheduleBooking(booking.id, date);
-                            setOpen(false);
-                        }}
-                    >
-                        <div className="grid gap-2">
-                            <Label htmlFor="date">Date d'arrivée</Label>
-                            <Input 
-                                id="date" 
-                                name="date" 
-                                type="date" 
-                                required 
-                                min={new Date().toISOString().split('T')[0]}
-                            />
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit">Enregistrer</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
-        );
-    }
-
-    if (!isAuthenticated) {
+    if (loading) {
         return (
             <div className="container mx-auto max-w-6xl py-8 mt-12">
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="text-center py-8">
-                            <h2 className="text-xl font-semibold mb-2">Connectez-vous</h2>
-                            <p className="text-muted-foreground mb-4">
-                                Vous devez être connecté pour voir vos réservations
-                            </p>
-                            <Button asChild>
-                                <Link to="/login">Se connecter</Link>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex justify-center items-center h-64">
+                    <p>Chargement des réservations...</p>
+                </div>
             </div>
         );
     }
 
     return (
         <>
+            <Header />
             <div className="container mx-auto max-w-6xl py-8 mt-12">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold">Mes Réservations</h1>
-                    <p className="text-muted-foreground">
-                        {user?.firstName ? `Bonjour ${user.firstName}, ` : ""}
-                        Consultez et gérez vos réservations.
-                    </p>
+                    <h1 className="text-2xl font-bold">Réservations</h1>
+                    <p className="text-muted-foreground">Consultez et gérez vos réservations.</p>
                 </div>
 
                 <Card>
@@ -285,129 +390,105 @@ export default function ReservationPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle>Mes réservations</CardTitle>
-                                <CardDescription>
-                                    {bookings.length} réservation{bookings.length > 1 ? 's' : ''} trouvée{bookings.length > 1 ? 's' : ''}
-                                </CardDescription>
+                                <CardDescription>Historique et réservations à venir</CardDescription>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Select value={filter} onValueChange={setFilter}>
+                                <Select defaultValue="all" onValueChange={(v) => setFilter(v)}>
                                     <SelectTrigger className="w-48">
                                         <SelectValue placeholder="Filtrer par statut" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">Toutes</SelectItem>
-                                        <SelectItem value="en_attente">En attente</SelectItem>
-                                        <SelectItem value="confirmee">Confirmées</SelectItem>
-                                        <SelectItem value="terminee">Terminées</SelectItem>
-                                        <SelectItem value="annulee">Annulées</SelectItem>
+                                        <SelectItem value="pending">En attente</SelectItem>
+                                        <SelectItem value="confirmed">Confirmées</SelectItem>
+                                        <SelectItem value="completed">Terminées</SelectItem>
+                                        <SelectItem value="cancelled">Annulées</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
                     </CardHeader>
+
                     <CardContent>
-                        {loading ? (
-                            <div className="text-center py-8">
-                                <p>Chargement de vos réservations...</p>
-                            </div>
-                        ) : (
-                            <div className="rounded-md border">
-                                <Table>
-                                    <TableHeader>
+                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Code</TableHead>
+                                        <TableHead>Service</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Heure</TableHead>
+                                        <TableHead>Statut</TableHead>
+                                        <TableHead className="text-right">Montant</TableHead>
+                                        <TableHead className="w-[1%]">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+
+                                <TableBody>
+                                    {filteredBookings.length === 0 ? (
                                         <TableRow>
-                                            <TableHead>Référence</TableHead>
-                                            <TableHead>Hébergement</TableHead>
-                                            <TableHead>Dates</TableHead>
-                                            <TableHead>Voyageurs</TableHead>
-                                            <TableHead>Statut</TableHead>
-                                            <TableHead className="text-right">Montant</TableHead>
-                                            <TableHead className="w-[1%]">Actions</TableHead>
+                                            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                                Aucune réservation trouvée
+                                            </TableCell>
                                         </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredBookings.length === 0 ? (
-                                            <TableRow>
-                                                <TableCell colSpan={7} className="text-center py-8">
-                                                    <div className="text-muted-foreground">
-                                                        Aucune réservation trouvée
+                                    ) : (
+                                        filteredBookings.map((b) => (
+                                            <TableRow key={b.id}>
+                                                <TableCell className="font-medium">
+                                                    {generateBookingCode(b.id)}
+                                                </TableCell>
+                                                <TableCell>{b.service.libelle}</TableCell>
+                                                <TableCell>
+                                                    {new Date(b.date).toLocaleDateString("fr-FR")}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {b.time}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <StatusBadge status={mapStatus(b.status)} />
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {formatCurrency(b.service.price)}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            onClick={() => fetchBookingDetails(b.id)}
+                                                        >
+                                                            Détails
+                                                        </Button>
+                                                        {b.status !== "cancelled" && b.status !== "completed" && (
+                                                            <>
+                                                                <RescheduleDialog 
+                                                                    booking={b} 
+                                                                    onReschedule={rescheduleBooking}
+                                                                />
+                                                                <CancelBookingDialog 
+                                                                    booking={b} 
+                                                                    onCancel={cancelBooking}
+                                                                />
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
-                                        ) : (
-                                            filteredBookings.map((booking) => (
-                                                <TableRow key={booking.id}>
-                                                    <TableCell className="font-medium">{booking.code}</TableCell>
-                                                    <TableCell>
-                                                        <div>
-                                                            <div className="font-medium">{booking.listing.title}</div>
-                                                            <div className="text-sm text-muted-foreground">
-                                                                {booking.listing.city} • {booking.listing.type}
-                                                            </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div>
-                                                            <div>Arrivée: {new Date(booking.checkIn).toLocaleDateString('fr-FR')}</div>
-                                                            <div>Départ: {new Date(booking.checkOut).toLocaleDateString('fr-FR')}</div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {booking.guests} voyageur{booking.guests > 1 ? 's' : ''}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <StatusBadge status={booking.status} />
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        {formatCurrency(booking.amount)}
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <Button variant="outline" size="sm" asChild>
-                                                                <Link to={`/app/mon-compte/reservation/${booking.id}`}>
-                                                                    Détails
-                                                                </Link>
-                                                            </Button>
-                                                            {booking.status !== "annulee" && booking.status !== "terminee" && (
-                                                                <>
-                                                                    <RescheduleDialog booking={booking} />
-                                                                    <Dialog>
-                                                                        <DialogTrigger asChild>
-                                                                            <Button variant="ghost" size="sm">
-                                                                                Annuler
-                                                                            </Button>
-                                                                        </DialogTrigger>
-                                                                        <DialogContent>
-                                                                            <DialogHeader>
-                                                                                <DialogTitle>
-                                                                                    Annuler la réservation {booking.code} ?
-                                                                                </DialogTitle>
-                                                                                <DialogDescription>
-                                                                                    Cette action est irréversible.
-                                                                                </DialogDescription>
-                                                                            </DialogHeader>
-                                                                            <DialogFooter>
-                                                                                <Button
-                                                                                    variant="destructive"
-                                                                                    onClick={() => cancelBooking(booking.id)}
-                                                                                >
-                                                                                    Confirmer l'annulation
-                                                                                </Button>
-                                                                            </DialogFooter>
-                                                                        </DialogContent>
-                                                                    </Dialog>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        )}
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
+
+                {/* Modale des détails */}
+                {selectedBooking && (
+                    <BookingDetailsDialog 
+                        booking={selectedBooking} 
+                        onClose={() => setSelectedBooking(null)} 
+                    />
+                )}
 
                 <div className="mt-6 grid gap-4 md:grid-cols-3">
                     <Card>
@@ -434,17 +515,18 @@ export default function ReservationPage() {
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Nouvelle réservation</CardTitle>
-                            <CardDescription>Parcourez nos hébergements</CardDescription>
+                            <CardTitle>Créer une nouvelle réservation</CardTitle>
+                            <CardDescription>Parcourez nos services</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Button variant="secondary" asChild>
-                                <Link to="/tourisme">Voir les hébergements</Link>
+                                <Link to="/app/services">Voir les services</Link>
                             </Button>
                         </CardContent>
                     </Card>
                 </div>
             </div>
+            <Footer />
         </>
     );
 }
