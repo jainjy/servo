@@ -1,127 +1,81 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import api from "@/lib/api";
+import { CheckCircle } from "lucide-react";
+import axios from "axios";
 
 interface Stats {
-  associatedServices: number;
-  userMetiers: number;
+  activeServicesCount: number;
+  userMetiersCount: number;
   availableServicesCount: number;
   demandesCount: number;
-  totalPotentialServices: number;
 }
 
 export function ArtProfessionalServicesStats() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<Stats>({
+    activeServicesCount: 0,
+    userMetiersCount: 0,
+    availableServicesCount: 0,
+    demandesCount: 0,
+  });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/stats", { // modifié pour /stats
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        console.log("Données reçues :", response.data);
+        setStats(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des stats :", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
-    try {
-      const response = await api.get("/oeuvre/stats");
-      setStats(response.data);
-    } catch (error) {
-      console.error("Erreur lors du chargement des statistiques:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="bg-card border-border">
-            <CardContent className="p-6">
-              <div className="animate-pulse">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-6 bg-muted rounded w-1/2"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return null;
-  }
-
-  function setShowAddArtworkModal(arg0: boolean): void {
-    throw new Error("Function not implemented.");
-  }
+  if (loading) return <p>Chargement des données...</p>;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Services Actifs
-          </CardTitle>
-          <Badge variant="secondary" className="bg-success/20 text-success">
-            ✓
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      
+      {/* Effectif Services */}
+      <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+        <CardHeader className="flex justify-between pb-2">
+          <CardTitle className="text-sm font-semibold text-gray-700">Effectif Services</CardTitle>
+          <Badge className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
+            <CheckCircle className="h-3 w-3" />✓
           </Badge>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.associatedServices}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Services que vous proposez
-          </p>
+          <div className="text-3xl font-bold text-gray-800">{stats.activeServicesCount}</div>
+          <p className="text-xs text-gray-400 mt-1">Services créés ou actifs</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Métiers
-          </CardTitle>
-          <Badge variant="secondary">{stats.userMetiers}</Badge>
+      {/* Métiers */}
+      <Card className="bg-white rounded-2xl shadow-lg border border-gray-100">
+        <CardHeader className="flex justify-between pb-2">
+          <CardTitle className="text-sm font-semibold text-gray-700">Prices</CardTitle>
+          <Badge className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">👔</Badge>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.userMetiers}
-          </div>
-          <p className="text-xs text-muted-foreground">Métiers principaux</p>
+          <div className="text-3xl font-bold text-gray-800">{stats.userMetiersCount}</div>
+     
         </CardContent>
       </Card>
 
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Services Disponibles
-          </CardTitle>
-          <Badge variant="outline">+{stats.availableServicesCount}</Badge>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.availableServicesCount}
-          </div>
-          <p className="text-xs text-muted-foreground">Basés sur vos métiers</p>
-        </CardContent>
-      </Card>
+      {/* Services Disponibles */}
+  
 
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Demandes
-          </CardTitle>
-          <Badge variant="secondary" className="bg-blue-500/20 text-blue-500">
-            {stats.demandesCount}
-          </Badge>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.demandesCount}
-          </div>
-          <p className="text-xs text-muted-foreground">Demandes reçues</p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import OeuvreModal from "./Pro-oeuvre-modal";
+import ProOeuvreModal from "./Pro-oeuvre-modal";
 
 interface Service {
   id: number;
@@ -44,6 +45,9 @@ export function ArtProfessionalServicesTable({
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
+
+  const [selectedService, setSelectedService] = useState(null);
+
 
   useEffect(() => {
     fetchServices();
@@ -93,56 +97,88 @@ export function ArtProfessionalServicesTable({
     );
   }
 
+  function handleDelete(id: number): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
-    <div className="space-y-4">
-      {services.map((service) => (
-        <Card
-          key={service.id}
-          className="border-border bg-card p-6 hover:shadow-md transition-shadow"
-        >
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-            <div className="flex-1 space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-foreground text-lg mb-1">
-                    {service.libelle}
-                  </h3>
-                  <p className="text-muted-foreground text-sm line-clamp-2">
-                    {service.description || "Aucune description disponible"}
-                  </p>
-                  {service.price !== undefined && (
-                    <p className="text-sm text-foreground mt-1">
-                      Prix : {service.price.toLocaleString()} Ar
-                    </p>
-                  )}
-                  {service.duration !== undefined && (
-                    <p className="text-sm text-foreground mt-1">
-                      Durée : {service.duration} min
-                    </p>
-                  )}
-                  {service.category?.name && (
-                    <p className="text-sm text-foreground mt-1">
-                      Catégorie : {service.category.name}
-                    </p>
-                  )}
-                </div>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-8">
+  {services.map((service) => (
+    <Card
+      key={service.id}
+      className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden flex flex-col"
+    >
+      {/* Image principale réduite */}
+      {service.images?.length > 0 && (
+        <div className="relative h-32 w-full overflow-hidden">
+          <img
+            src={service.images[0]}
+            alt={service.libelle}
+            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          />
+          {/* Badge catégorie */}
+          {service.category?.name && (
+            <span className="absolute top-2 left-2 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-md">
+              {service.category.name}
+            </span>
+          )}
+        </div>
+      )}
 
-                <Badge
-                  variant="secondary"
-                  className="bg-success/20 text-success whitespace-nowrap"
-                >
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Actif
-                </Badge>
-              </div>
-            </div>
+      {/* Contenu */}
+      <div className="p-4 flex flex-col flex-1 justify-between">
+        <div className="mb-3">
+          <h3 className="text-md font-semibold text-gray-800 mb-1 line-clamp-1">
+            {service.libelle}
+          </h3>
+          <p className="text-sm text-gray-500 line-clamp-2">
+            {service.description || "Aucune description disponible"}
+          </p>
+
+          <div className="flex flex-wrap gap-2 text-xs text-gray-700 mt-2">
+            {service.price !== undefined && (
+              <span className="flex items-center gap-1">💰 {service.price.toLocaleString()} Ar</span>
+            )}
+            {service.duration !== undefined && (
+              <span className="flex items-center gap-1">⏱ {service.duration} min</span>
+            )}
           </div>
-        </Card>
-      ))}
+        </div>
 
-      {/* Modal global pour le composant */}
-      {showModal && <OeuvreModal onClose={() => setShowModal(false)} />}
-    </div>
+        {/* Footer */}
+        <div className="flex justify-between items-center mt-4">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200 text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1"
+          >
+            <CheckCircle className="h-4 w-4" />
+            Actif
+          </Badge>
+
+          <button
+            onClick={() => {
+              setSelectedService(service);
+              setShowModal(true);
+            }}
+            className="text-xs font-medium px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white hover:scale-105 transition-transform duration-300"
+          >
+            Modifier
+          </button>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showModal && selectedService?.id === service.id && (
+        <ProOeuvreModal
+          service={selectedService}
+          onClose={() => setShowModal(false)}
+          token={""}
+        />
+      )}
+    </Card>
+  ))}
+</div>
+
+
   );
 }
-    

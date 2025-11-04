@@ -477,22 +477,7 @@ const ArtCommerceDetail = () => {
 
                 {/* Informations principales */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <span className="text-slate-500 text-sm block">Artiste</span>
-                    <p className="text-slate-900 font-medium">{artwork.artist || "Non précisé"}</p>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <span className="text-slate-500 text-sm block">Technique</span>
-                    <p className="text-slate-900 font-medium">{artwork.technique || "Non précisée"}</p>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <span className="text-slate-500 text-sm block">Dimensions</span>
-                    <p className="text-slate-900 font-medium">{artwork.dimensions || "Non précisées"}</p>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <span className="text-slate-500 text-sm block">Année</span>
-                    <p className="text-slate-900 font-medium">{artwork.year || "Non précisée"}</p>
-                  </div>
+           
                 </div>
 
                 {/* Prix et bouton d’achat */}
