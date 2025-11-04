@@ -34,6 +34,21 @@ interface SearchItem {
 
 type Stage = "idle" | "loading" | "results";
 
+// SVG pour l'icône de position (remplace l'emoji 📍)
+const PositionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg 
+    className={className}
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path 
+      d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" 
+      fill="currentColor"
+    />
+  </svg>
+);
+
 const Recherche = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -146,6 +161,48 @@ const Recherche = () => {
     }
     
     return "";
+  };
+
+  // NOUVELLE FONCTION : Générer les initiales d'un texte - TAILLE AUGMENTÉE
+  const generateInitials = (text: string): string => {
+    if (!text) return "??";
+    
+    // Supprimer les caractères spéciaux et diviser en mots
+    const words = text.replace(/[^\w\s]/g, '').split(/\s+/);
+    
+    if (words.length === 0) return "??";
+    
+    if (words.length === 1) {
+      // Retourner les 2 premiers caractères du mot unique
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    
+    // Retourner la première lettre des deux premiers mots
+    return words.slice(0, 2).map(word => word.charAt(0).toUpperCase()).join('');
+  };
+
+  // NOUVELLE FONCTION : Obtenir une couleur de fond uni en dark
+  const getBackgroundColor = (item: SearchItem): string => {
+    const colors = [
+      'bg-gray-800', // Gris foncé
+      'bg-blue-800', // Bleu foncé
+      'bg-green-800', // Vert foncé
+      'bg-purple-800', // Violet foncé
+      'bg-indigo-800', // Indigo foncé
+      'bg-teal-800', // Teal foncé
+      'bg-cyan-800', // Cyan foncé
+      'bg-emerald-800', // Émeraude foncé
+    ];
+    
+    // Générer un index basé sur le type ou l'ID pour une couleur cohérente
+    const seed = item.source_table + item.id.toString();
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    
+    return colors[index];
   };
 
   // Gestion de l'historique (garder les fonctions existantes)
@@ -553,72 +610,150 @@ const Recherche = () => {
     }
   };
 
+  // NOUVELLE FONCTION : Rendu de l'image avec fallback aux initiales - MODIFIÉE
+  const renderImageWithFallback = (item: SearchItem) => {
+    const hasValidImage = item.image && isValidImageUrl(item.image);
+    const initials = generateInitials(item.title);
+    const bgColor = getBackgroundColor(item);
+
+    if (hasValidImage && item.source_table !== "Metier") {
+      return (
+        <div className="relative h-48 overflow-hidden rounded-t-xl">
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform hover:scale-105"
+            loading="lazy"
+            onError={(e) => {
+              // Si l'image échoue au chargement, on la remplace par les initiales
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.className = `w-full h-full ${bgColor} flex items-center justify-center text-white`;
+                fallbackDiv.innerHTML = `
+                  <div class="text-center">
+                    <div class="text-4xl font-bold mb-1">${initials}</div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white text-xs p-2 text-center">
+                      ${item.title}
+                    </div>
+                  </div>
+                `;
+                parent.appendChild(fallbackDiv);
+              }
+            }}
+          />
+          <div className="absolute top-2 right-2">
+            <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+              {item.type}
+            </span>
+          </div>
+          {item.similarity && (
+            <div className="absolute top-2 left-2">
+              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                {Math.round(item.similarity)}%
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Afficher les initiales si pas d'image valide ou si c'est un métier
+    return (
+      <div className="relative h-48 overflow-hidden rounded-t-xl">
+        <div className={`w-full h-full ${bgColor} flex items-center justify-center text-white`}>
+          <div className="text-center">
+            {/* TAILLE DE L'INITIALE AUGMENTÉE - text-4xl au lieu de text-3xl */}
+            <div className="text-4xl font-bold mb-1">{initials}</div>
+          </div>
+        </div>
+        <div className="absolute top-2 right-2">
+          <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+            {item.type}
+          </span>
+        </div>
+        {item.similarity && (
+          <div className="absolute top-2 left-2">
+            <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+              {Math.round(item.similarity)}%
+            </span>
+          </div>
+        )}
+        {/* BACKGROUND COLOR UNI EN DARK AU-DESSOUS DE L'ÉCRITURE */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white p-2">
+          <div className="text-xs font-medium truncate">{item.title}</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
       <main className="flex-1 pt-20">
         <div className="container mx-auto px-4 py-6">
-          {/* Barre de recherche fixe */}
-        {/* Barre de recherche normale (non fixe) */}
-<div className="bg-white border border-gray-200 rounded-2xl shadow-lg mb-6">
-  <div className="p-4 flex items-center gap-3">
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => navigate(-1)}
-      className="shrink-0"
-    >
-      <ArrowLeft className="h-5 w-5" />
-    </Button>
-    
-    <div className="relative flex-1">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-      <Input
-        ref={inputRef}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher un bien, service, article..."
-        className="pl-10 h-12 text-lg border-0 bg-transparent focus-visible:ring-0"
-        onKeyPress={(e) => {
-          if (e.key === 'Enter') {
-            handleSearch();
-          }
-        }}
-      />
-    </div>
-    
-    <Button
-      onClick={() => setHistoryOpen(true)}
-      variant="ghost"
-      size="icon"
-      className="shrink-0"
-    >
-      <History className="h-5 w-5" />
-    </Button>
-    
-    <Button 
-      onClick={handleSearch} 
-      disabled={isLoading} 
-      className="h-12 min-w-32 overflow-hidden"
-    >
-      {runnerVisible ? (
-        <span className="inline-flex items-center">
-          <img
-            src={start}
-            alt="recherche"
-            className={`w-10 transition-transform duration-300 ease-out ${
-              runnerExit ? 'translate-x-[200%]' : 'translate-x-0'
-            }`}
-          />
-          {isLoading ? ' Recherche...' : ''}
-        </span>
-      ) : (
-        isLoading ? "Recherche..." : "Rechercher"
-      )}
-    </Button>
-  </div>
-</div>
+          {/* Barre de recherche normale (non fixe) */}
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-lg mb-6">
+            <div className="p-4 flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  ref={inputRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Rechercher un bien, service, article..."
+                  className="pl-10 h-12 text-lg border-0 bg-transparent focus-visible:ring-0"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                />
+              </div>
+              
+              <Button
+                onClick={() => setHistoryOpen(true)}
+                variant="ghost"
+                size="icon"
+                className="shrink-0"
+              >
+                <History className="h-5 w-5" />
+              </Button>
+              
+              <Button 
+                onClick={handleSearch} 
+                disabled={isLoading} 
+                className="h-12 min-w-32 overflow-hidden"
+              >
+                {runnerVisible ? (
+                  <span className="inline-flex items-center">
+                    <img
+                      src={start}
+                      alt="recherche"
+                      className={`w-10 transition-transform duration-300 ease-out ${
+                        runnerExit ? 'translate-x-[200%]' : 'translate-x-0'
+                      }`}
+                    />
+                    {isLoading ? ' Recherche...' : ''}
+                  </span>
+                ) : (
+                  isLoading ? "Recherche..." : "Rechercher"
+                )}
+              </Button>
+            </div>
+          </div>
 
           {/* Historique latéral */}
           {historyOpen && (
@@ -716,50 +851,8 @@ const Recherche = () => {
                             }`}
                             onClick={(e) => toggleItemExpansion(item.id, item.source_table, e)}
                           >
-                            {/* Image - Ne pas afficher pour les métiers */}
-                            {item.image && item.source_table !== "Metier" && (
-                              <div className="relative h-48 overflow-hidden rounded-t-xl">
-                                <img
-                                  src={item.image}
-                                  alt={item.title}
-                                  className="w-full h-full object-cover transition-transform hover:scale-105"
-                                  loading="lazy"
-                                />
-                                <div className="absolute top-2 right-2">
-                                  <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                                    {item.type}
-                                  </span>
-                                </div>
-                                {item.similarity && (
-                                  <div className="absolute top-2 left-2">
-                                    <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                                      {Math.round(item.similarity)}%
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* Pour les métiers, afficher un placeholder */}
-                            {item.source_table === "Metier" && (
-                              <div className="relative h-24 bg-gradient-to-r from-blue-50 to-indigo-100 rounded-t-xl flex items-center justify-center">
-                                <div className="text-center">
-                                  <div className="text-2xl mb-1">👨‍💼</div>
-                                  <div className="absolute top-2 right-2">
-                                    <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                                      {item.type}
-                                    </span>
-                                  </div>
-                                  {item.similarity && (
-                                    <div className="absolute top-2 left-2">
-                                      <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                                        {Math.round(item.similarity)}%
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
+                            {/* Image avec fallback aux initiales */}
+                            {renderImageWithFallback(item)}
                             
                             {/* Contenu */}
                             <div className="p-4 flex-1 flex flex-col">
@@ -776,7 +869,9 @@ const Recherche = () => {
                                   )}
                                   {item.location && (
                                     <div className="text-sm text-gray-600 flex items-center">
-                                      📍 {item.location}
+                                      {/* REMPLACEMENT DE L'EMOJI 📍 PAR LE SVG */}
+                                      <PositionIcon className="w-4 h-4 mr-1" />
+                                      {item.location}
                                     </div>
                                   )}
                                 </div>
