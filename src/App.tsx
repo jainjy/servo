@@ -99,6 +99,8 @@ import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
 import TestPage from "./pages/TestPage";
+import AdvertisementManager from "./components/admin/AdvertisementManager";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -310,6 +312,10 @@ const App = () => {
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
+                    <Route
+                      path="publicite"
+                      element={<AdvertisementManager />}
+                    />
 
                     <Route path="demandes" element={<ListeDemande />} />
 
