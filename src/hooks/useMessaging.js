@@ -22,11 +22,9 @@ export const useMessaging = (demandeId) => {
         `/conversations/demande/${demandeId}/details`
       );
       setConversation(convResponse.data);
-
+      const url = `/conversations/${demandeId}/messages`;
       // Charger les messages
-      const messagesResponse = await api.get(
-        `/conversations/${demandeId}/messages`
-      );
+      const messagesResponse = await api.get(url);
       setMessages(messagesResponse.data || []);
 
       // Rejoindre la conversation via socket
@@ -35,27 +33,12 @@ export const useMessaging = (demandeId) => {
       }
     } catch (error) {
       console.error("Erreur chargement conversation:", error);
-      // Si la conversation n'existe pas, on la créera lors du premier message
+      // Si la conversation n'existe pas, on ne la crée pas automatiquement
+      // Elle sera créée lors du premier message
     } finally {
       setLoading(false);
     }
   }, [demandeId, socket]);
-
-  // Créer une conversation si elle n'existe pas
-  const createConversation = async () => {
-    try {
-      // Pour créer une conversation, on envoie le premier message
-      // La conversation sera créée automatiquement par le backend
-      const response = await api.post(`/conversations/${demandeId}/messages`, {
-        contenu: "Début de la conversation",
-        type: "SYSTEM",
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Erreur création conversation:", error);
-      throw error;
-    }
-  };
 
   // Écouter les nouveaux messages
   useEffect(() => {
@@ -107,11 +90,16 @@ export const useMessaging = (demandeId) => {
           `/conversations/${demandeId}/messages`,
           messageData
         );
+        console.log("Message envoyé avec succès",messageData);
       } catch (error) {
-        // Si la conversation n'existe pas, on essaie de la créer
+        // Si la conversation n'existe pas (404), on essaie de créer un message système d'abord
         if (error.response?.status === 404) {
-          await createConversation();
-          // Réessayer d'envoyer le message
+          // Pour créer la conversation, on envoie d'abord un message système
+          await api.post(`/conversations/${demandeId}/messages`, {
+            contenu: "Début de la conversation",
+            type: "SYSTEM",
+          });
+          // Puis on renvoie le vrai message
           response = await api.post(
             `/conversations/${demandeId}/messages`,
             messageData
@@ -144,18 +132,6 @@ export const useMessaging = (demandeId) => {
     }
   };
 
-  // Marquer les messages comme lus
-  const markAsRead = async (messageIds) => {
-    if (!socket || !messageIds.length || !conversation) return;
-
-    try {
-      // Cette fonctionnalité peut être implémentée si nécessaire
-      // Pour l'instant, les messages sont marqués comme lus automatiquement lors du chargement
-    } catch (error) {
-      console.error("Erreur marquage messages lus:", error);
-    }
-  };
-
   useEffect(() => {
     loadConversation();
   }, [loadConversation]);
@@ -166,7 +142,6 @@ export const useMessaging = (demandeId) => {
     loading,
     sending,
     sendMessage,
-    markAsRead,
     refreshMessages: loadConversation,
   };
 };

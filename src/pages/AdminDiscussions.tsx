@@ -16,10 +16,10 @@ import {
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useSocket } from "@/contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
+import { useSocket } from "@/contexts/SocketContext";
 
 export default function AdminDiscussions() {
   const { id } = useParams();
@@ -120,7 +120,7 @@ export default function AdminDiscussions() {
       formData.append("file", file);
 
       const uploadResponse = await api.post(
-        "/api/upload/message-file",
+        "/upload/message-file",
         formData,
         {
           headers: {
