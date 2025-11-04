@@ -124,10 +124,28 @@ const ProRegisterPage = () => {
       return;
     }
 
-    // Redirection vers la page de paiement avec toutes les données
+    // DÉTERMINER userType BASÉ SUR L'ABONNEMENT EXACT
+    let finalUserType = "CLIENT"; // Valeur par défaut
+    
+    if (subscriptionData) {
+      // Mapping exact basé sur les abonnements de vos images
+      const subscriptionToUserType: { [key: string]: string } = {
+        "Pro Immobilier Complet": "AGENCE",
+        "Prestataires de Services": "PRESTATAIRE", 
+        "Espace Annonceur": "VENDEUR",
+        "Bien-être": "BIEN ETRE"
+      };
+      
+      finalUserType = subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
+    }
+
+    // Redirection vers la page de paiement avec TOUTES les données
     navigate("/register/professional/payment", {
       state: {
-        formData,
+        formData: {
+          ...formData,
+          userType: finalUserType // AJOUT: userType basé sur l'abonnement exact
+        },
         subscriptionData,
       },
     });
@@ -137,7 +155,22 @@ const ProRegisterPage = () => {
   useEffect(() => {
     if (subscriptionData) {
       console.log("Subscription selected:", subscriptionData);
-      // Vous pouvez pré-remplir le userType basé sur subscriptionData.userTypes
+      
+      // Pré-remplir userType basé sur l'abonnement exact
+      const subscriptionToUserType: { [key: string]: string } = {
+        "Pro Immobilier Complet": "AGENCE",
+        "Prestataires de Services": "PRESTATAIRE",
+        "Espace Annonceur": "VENDEUR", 
+        "Bien-être": "BIEN ETRE"
+      };
+      
+      const userTypeFromSubscription = subscriptionToUserType[subscriptionData.name];
+      if (userTypeFromSubscription) {
+        setFormData(prev => ({
+          ...prev,
+          userType: userTypeFromSubscription
+        }));
+      }
     }
   }, [subscriptionData]);
 
@@ -314,7 +347,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
@@ -333,7 +366,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.email}
                             onChange={(e) =>
                               handleInputChange("email", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
@@ -351,7 +384,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.phone}
                             onChange={(e) =>
                               handleInputChange("phone", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
