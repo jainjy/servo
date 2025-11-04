@@ -74,30 +74,69 @@ const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
 useEffect(() => {
-    const letters = "A3$";
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?$%*#";
+    const speed = 20; // <-- vitesse (ms) : plus petit = plus rapide
+    const step = 0.5; // <-- incrément d'itérations (plus grand = plus vite)
+    const activeIntervals = new Map<HTMLElement, number>();
+    const busy = new Set<HTMLElement>(); // empêche le retrigger pendant l'anim
 
-    function scrambleText(el: HTMLElement, text: string) {
+    function scrambleOnce(el: HTMLElement) {
+      const original = el.dataset.original ?? el.textContent ?? "";
+      el.dataset.original = original;
+
+      // si déjà en cours, on ignore
+      if (busy.has(el)) return;
+      busy.add(el);
+
+      // clear s'il y avait un interval pour cet élément
+      const prev = activeIntervals.get(el);
+      if (prev) {
+        clearInterval(prev);
+        activeIntervals.delete(el);
+      }
+
       let iterations = 0;
-
-      const interval = setInterval(() => {
-        el.innerText = text
+      const id = window.setInterval(() => {
+        el.innerText = original
           .split("")
           .map((char, i) => {
-            if (i < iterations) return text[i];
+            if (i < iterations) return original[i];
             return letters[Math.floor(Math.random() * letters.length)];
           })
           .join("");
 
-        iterations += 0.1;
-        if (iterations >= text.length) clearInterval(interval);
-      }, 10);
+        iterations += step;
+        if (iterations >= original.length) {
+          // assure le texte final exact
+          el.innerText = original;
+          clearInterval(id);
+          activeIntervals.delete(el);
+          busy.delete(el);
+        }
+      }, speed);
+
+      activeIntervals.set(el, id);
     }
 
-    document.querySelectorAll(".scramble").forEach((el) => {
-      const original = el.textContent || "";
-      el.addEventListener("mouseenter", () => scrambleText(el as HTMLElement, original));
-    });
-  }, []);
+    // délégation : un seul listener pour tous les .scramble, évite null ou éléments recréés
+    function onPointerOver(e: Event) {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const el = target.closest(".scramble") as HTMLElement | null;
+      if (!el) return;
+      scrambleOnce(el);
+    }
+
+    document.addEventListener("pointerover", onPointerOver);
+
+    // cleanup propre
+    return () => {
+      document.removeEventListener("pointerover", onPointerOver);
+      activeIntervals.forEach((id) => clearInterval(id));
+      activeIntervals.clear();
+      busy.clear();
+    };
+  }, []); 
 
 
   useEffect(() => {
@@ -926,7 +965,7 @@ useEffect(() => {
                                 className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"}`}
                               >
                                 {hasItems ? (
-                                  <button className="scramble w-full text-left text-xs font-semibold text-white">{section.title}</button>
+                                  <button className="scramble  w-full text-left text-xs font-semibold text-white">{section.title}</button>
 
                                 ) : (
                                   <Link to={section.href || '/'} onClick={() => setIsPopoverOpen(false)} className="w-full text-left text-xs font-semibold text-white hover:underline">{section.title}</Link>
