@@ -73,6 +73,33 @@ const Header = () => {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+useEffect(() => {
+    const letters = "A3$";
+
+    function scrambleText(el: HTMLElement, text: string) {
+      let iterations = 0;
+
+      const interval = setInterval(() => {
+        el.innerText = text
+          .split("")
+          .map((char, i) => {
+            if (i < iterations) return text[i];
+            return letters[Math.floor(Math.random() * letters.length)];
+          })
+          .join("");
+
+        iterations += 0.1;
+        if (iterations >= text.length) clearInterval(interval);
+      }, 10);
+    }
+
+    document.querySelectorAll(".scramble").forEach((el) => {
+      const original = el.textContent || "";
+      el.addEventListener("mouseenter", () => scrambleText(el as HTMLElement, original));
+    });
+  }, []);
+
+
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
     setRole(user?.role);
@@ -452,8 +479,7 @@ const Header = () => {
     })()
     : "";
 
-  // Animation GSAP pour le texte du popover
-  const popoverContentRef = useRef<HTMLDivElement>(null);
+  // État pour le popover et la section survolée
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -558,68 +584,6 @@ const Header = () => {
     }
   };
 
-  // Utiliser useEffect pour déclencher l'animation quand le popover s'ouvre
-  useEffect(() => {
-    if (isPopoverOpen) {
-      // Petit délai pour s'assurer que le contenu est rendu
-      const timer = setTimeout(() => {
-        animatePopoverText();
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isPopoverOpen]);
-
-  const animatePopoverText = () => {
-    const characters = "ABCDEFGHIJKstuvwxyz0123456789";
-    const textElements =
-      popoverContentRef.current?.querySelectorAll(".animated-text") || [];
-
-    // Créer une timeline principale
-    const masterTimeline = gsap.timeline();
-
-    textElements.forEach((element, index) => {
-      const finalText = element.textContent || "";
-
-      // Sauvegarder le texte final
-      element.setAttribute("data-final-text", finalText);
-
-      // Ajouter chaque animation à la timeline avec un délai progressif
-      masterTimeline.add(() => {
-        let currentIteration = 0;
-        const totalIterations = 5;
-        const originalText = finalText;
-
-        const scramble = () => {
-          let scrambledText = "";
-
-          for (let i = 0; i < originalText.length; i++) {
-            if (currentIteration === totalIterations) {
-              // Dernière itération - afficher le vrai caractère
-              scrambledText += originalText[i];
-            } else if (Math.random() < 0.7 && originalText[i] !== " ") {
-              // Caractère aléatoire
-              scrambledText +=
-                characters[Math.floor(Math.random() * characters.length)];
-            } else {
-              // Garder le caractère original (ou espace)
-              scrambledText += originalText[i];
-            }
-          }
-
-          element.textContent = scrambledText;
-
-          if (currentIteration < totalIterations) {
-            currentIteration++;
-            setTimeout(scramble, 50);
-          }
-        };
-
-        scramble();
-      }, index * 0.02); // 0.2 seconde entre chaque élément
-    });
-  };
-
   const handlePopoverOpenChange = (open: boolean) => {
     setIsPopoverOpen(open);
     if (open) {
@@ -627,15 +591,6 @@ const Header = () => {
       const firstSectionWithItems = menuSections.find((s) => s.items && s.items.length > 0);
       setHoveredSection(firstSectionWithItems ? firstSectionWithItems.title : null);
     } else {
-      // Réinitialiser le texte quand le popover se ferme
-      const textElements =
-        popoverContentRef.current?.querySelectorAll(".animated-text") || [];
-      textElements.forEach((element) => {
-        const finalText = element.getAttribute("data-final-text");
-        if (finalText) {
-          element.textContent = finalText;
-        }
-      });
       setHoveredSection(null);
     }
   };
@@ -936,7 +891,7 @@ const Header = () => {
                   side="bottom"
                   align="center"
                   className="relative -mt-16 w-screen max-w-full p-0 overflow-hidden z-50 rounded-none shadow-lg bg-black text-white border-none"
-                  ref={popoverContentRef}
+
                 >
                   <button
                     className="absolute text-white text-5xl font-extralight right-10 top-4 z-10"
@@ -967,13 +922,12 @@ const Header = () => {
                                 onMouseEnter={() => hasItems && setHoveredSection(section.title)}
                                 onFocus={() => hasItems && setHoveredSection(section.title)}
                                 onMouseLeave={() => {
-                                  /* keep the last hovered on desktop; you can uncomment to clear on leave */
-                                  // setHoveredSection(null);
                                 }}
                                 className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"}`}
                               >
                                 {hasItems ? (
-                                  <button className="w-full text-left text-xs font-semibold text-white">{section.title}</button>
+                                  <button className="scramble w-full text-left text-xs font-semibold text-white">{section.title}</button>
+
                                 ) : (
                                   <Link to={section.href || '/'} onClick={() => setIsPopoverOpen(false)} className="w-full text-left text-xs font-semibold text-white hover:underline">{section.title}</Link>
                                 )}
