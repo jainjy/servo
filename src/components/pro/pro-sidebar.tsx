@@ -33,6 +33,9 @@ const navigation = [
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
+  { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
+
+
   { 
     name: "Mes Commandes", 
     href: "/pro/orders", 

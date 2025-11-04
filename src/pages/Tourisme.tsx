@@ -3,9 +3,10 @@ import {
   Search, MapPin, Calendar, Users, Star, Filter, ChevronLeft, ChevronRight,
   Heart, Share2, Bed, Wifi, Car, Utensils, Snowflake, Dumbbell, Tv,
   Map, Phone, Mail, Shield, Clock, CheckCircle, X, Plus, Minus,
-  Lightbulb, Navigation, TrendingUp, Zap, CreditCard
+  Lightbulb, Navigation, TrendingUp, Zap, CreditCard, User as UserIcon
 } from 'lucide-react';
 import api from '../lib/api'; // Import de l'API configurée
+import { useAuth } from '../hooks/useAuth'; // Import de votre hook useAuth
 import '../styles/animationSlider.css'
 
 // Types basés sur le modèle de données
@@ -75,6 +76,9 @@ interface BookingResponse {
 }
 
 export const TourismSection = () => {
+  // UTILISATION DE VOTRE HOOK useAuth EXISTANT
+  const { user: currentUser, isAuthenticated, loading: userLoading } = useAuth();
+
   const [listings, setListings] = useState<TourismListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<TourismListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -274,7 +278,14 @@ export const TourismSection = () => {
     }
   };
 
+  // MODIFICATION: Utiliser isAuthenticated du hook useAuth
   const handleBooking = async (listing: TourismListing) => {
+    // Vérifier si l'utilisateur est connecté avec le hook useAuth
+    if (!isAuthenticated) {
+      alert('Veuillez vous connecter pour effectuer une réservation');
+      return;
+    }
+
     setSelectedListing(listing);
     setBookingForm(prev => ({
       ...prev,
@@ -313,11 +324,24 @@ export const TourismSection = () => {
     setShowBookingModal(true);
   };
 
+  // MODIFICATION: Utiliser isAuthenticated et currentUser du hook useAuth
   const confirmBooking = async () => {
     setBookingLoading(true);
     try {
-      // Utilisation de l'API pour la réservation
-      const response = await api.post("/tourisme-bookings", bookingForm);
+      // Vérifier que l'utilisateur est connecté avec le hook useAuth
+      if (!isAuthenticated || !currentUser) {
+        alert('Veuillez vous connecter pour effectuer une réservation');
+        setBookingLoading(false);
+        return;
+      }
+
+      // Inclure l'userId dans les données de réservation
+      const bookingData = {
+        ...bookingForm,
+        userId: currentUser.id
+      };
+
+      const response = await api.post("/tourisme-bookings", bookingData);
       
       if (response.data.success) {
         setBookingSuccess(response.data);
@@ -475,6 +499,20 @@ export const TourismSection = () => {
             Découvrez nos hébergements partenaires et réservez votre séjour en toute simplicité
           </p>
         </div>
+
+        {/* AJOUT: Indicateur de connexion utilisant le hook useAuth */}
+        {!userLoading && (
+          <div className="flex justify-center mb-6" data-aos="fade-up" data-aos-delay="400">
+            <div className={`px-4 py-2 rounded-full flex items-center ${isAuthenticated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+              <UserIcon className="w-4 h-4 mr-2" />
+              {isAuthenticated && currentUser ? (
+                <span>Connecté en tant que {currentUser.firstName} {currentUser.lastName}</span>
+              ) : (
+                <span>Veuillez vous connecter pour réserver</span>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Formulaire de recherche avec animations */}
         <div
@@ -954,12 +992,13 @@ export const TourismSection = () => {
                         )}
                       </div>
 
+                      {/* MODIFICATION: Utiliser isAuthenticated du hook useAuth */}
                       <button
                         onClick={() => handleBooking(listing)}
-                        disabled={!listing.available}
+                        disabled={!listing.available || !isAuthenticated}
                         className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {!listing.available ? 'Indisponible' : listing.instantBook ? 'Réserver' : 'Vérifier disponibilité'}
+                        {!isAuthenticated ? 'Connectez-vous' : !listing.available ? 'Indisponible' : listing.instantBook ? 'Réserver' : 'Vérifier disponibilité'}
                       </button>
                     </div>
                   </div>
@@ -1030,6 +1069,52 @@ export const TourismSection = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* AJOUT: Section informations utilisateur */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Informations du client
+                      </label>
+                      <div className="bg-blue-50 p-4 rounded-xl">
+                        {isAuthenticated && currentUser ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600 mb-1">
+                                Nom complet
+                              </label>
+                              <div className="p-2 bg-white rounded border border-gray-200 flex items-center">
+                                <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
+                                {currentUser.firstName} {currentUser.lastName}
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-600 mb-1">
+                                Email
+                              </label>
+                              <div className="p-2 bg-white rounded border border-gray-200 flex items-center">
+                                <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                                {currentUser.email}
+                              </div>
+                            </div>
+                            {currentUser.phone && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">
+                                  Téléphone
+                                </label>
+                                <div className="p-2 bg-white rounded border border-gray-200 flex items-center">
+                                  <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                                  {currentUser.phone}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center text-gray-600">
+                            <p>Veuillez vous connecter pour effectuer une réservation</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
                     <div className="flex items-start space-x-4 mb-6">
                       <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0">
@@ -1219,7 +1304,7 @@ export const TourismSection = () => {
                       </button>
                       <button
                         onClick={confirmBooking}
-                        disabled={bookingLoading || !bookingForm.checkIn || !bookingForm.checkOut}
+                        disabled={bookingLoading || !bookingForm.checkIn || !bookingForm.checkOut || !isAuthenticated}
                         className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {bookingLoading ? 'Traitement...' : 'Confirmer la réservation'}

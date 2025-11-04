@@ -96,6 +96,8 @@ import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
 import { SocketProvider } from "./contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
+import AdminBookings from "./components/admin/tourism/AdminBookings";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -241,6 +243,7 @@ const App = () => {
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
+                    <Route path="reservations" element={<AdminBookings />} />
                     <Route
                       path="services"
                       element={<ProfessionalServicesPage />}
