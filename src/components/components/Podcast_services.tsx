@@ -31,7 +31,7 @@ interface ResourceItem {
 
 const PodcastsServices: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('tous');
-  
+
   const podcastEpisodes: PodcastEpisode[] = [
     {
       id: 1,
@@ -186,8 +186,8 @@ const PodcastsServices: React.FC = () => {
     { id: 'productivite', label: 'Productivité', count: podcastEpisodes.filter(ep => ep.category === 'productivite').length }
   ];
 
-  const filteredEpisodes = activeCategory === 'tous' 
-    ? podcastEpisodes 
+  const filteredEpisodes = activeCategory === 'tous'
+    ? podcastEpisodes
     : podcastEpisodes.filter(ep => ep.category === activeCategory);
 
   const getCategoryColor = (category: string) => {
@@ -213,35 +213,39 @@ const PodcastsServices: React.FC = () => {
   };
 
   return (
-    <section className="py-8 bg-white mt-2 rounded-lg ">
+    <section className="py-8 mt-12 rounded-lg ">
       <div className="container mx-auto px-4 max-w-7xl">
-        
-        {/* En-tête avec animation */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center bg-white/80 backdrop-blur-sm border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg" alt="" />
+          <div className="absolute left-2 bottom-0 inline-flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-semibold mb-4">
             <Sparkles className="w-4 h-4 mr-2" />
             Ressources & Contenus Exclusifs
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+        </div>
+        {/* En-tête avec animation */}
+        <div className="text-center mb-16">
+
+          <h2 className="text-4xl md:text-5xl font-bold  text-white mb-4">
             Podcasts & Services
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Découvrez nos ressources gratuites et services premium pour booster 
+          <p className="text-sm text-gray-200 max-w-3xl mx-auto leading-relaxed">
+            Découvrez nos ressources gratuites et services premium pour booster
             votre parcours entrepreneurial. De l'inspiration à l'action.
           </p>
         </div>
 
         {/* Podcasts Section */}
-        <div className="mb-20">
+        <div className="mb-20 pt-5">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
                 <Headphones className="w-8 h-8 mr-3 text-blue-600" />
                 Podcast "Entrepreneurial Spirit"
               </h3>
-              <p className="text-gray-600">Des interviews inspirantes et conseils pratiques</p>
+              <p className="text-gray-600 text-sm">Des interviews inspirantes et conseils pratiques</p>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <div className="flex items-center space-x-2 text-xs text-gray-200 bg-gray-950 px-4 py-2 rounded-full">
               <TrendingUp className="w-4 h-4" />
               <span>+15k écoutes mensuelles</span>
             </div>
@@ -253,18 +257,16 @@ const PodcastsServices: React.FC = () => {
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === category.id
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === category.id
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                }`}
+                  }`}
               >
                 {category.label}
-                <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${
-                  activeCategory === category.id
+                <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${activeCategory === category.id
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 text-gray-600'
-                }`}>
+                  }`}>
                   {category.count}
                 </span>
               </button>
@@ -276,9 +278,8 @@ const PodcastsServices: React.FC = () => {
             {filteredEpisodes.map((episode) => (
               <div
                 key={episode.id}
-                className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
-                  episode.featured ? 'border-2 border-blue-500' : 'border-gray-200'
-                }`}
+                className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-blue-500' : 'border-gray-200'
+                  }`}
               >
                 {episode.featured && (
                   <div className="bg-blue-500 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
@@ -295,11 +296,11 @@ const PodcastsServices: React.FC = () => {
                       {episode.duration}
                     </div>
                   </div>
-                  
+
                   <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
                     {episode.title}
                   </h4>
-                  
+
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                     {episode.description}
                   </p>
@@ -423,16 +424,16 @@ const PodcastsServices: React.FC = () => {
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Rejoignez Notre Communauté
             </h3>
-            <p className="text-blue-100 text-lg mb-6 max-w-2xl mx-auto">
-              Accédez à l'ensemble de nos ressources, participez aux événements exclusifs 
+            <p className="text-blue-100 text-sm mb-6 max-w-2xl mx-auto">
+              Accédez à l'ensemble de nos ressources, participez aux événements exclusifs
               et connectez-vous avec une communauté d'entrepreneurs passionnés.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg text-lg flex items-center justify-center">
+              <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg text-sm flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Rejoindre gratuitement
               </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition-colors text-lg flex items-center justify-center">
+              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition-colors text-sm flex items-center justify-center">
                 <Share2 className="w-5 h-5 mr-2" />
                 Découvrir tous les services
               </button>

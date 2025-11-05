@@ -265,7 +265,6 @@ export default function Financement() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-      <Header />
       
       {/* Message d'erreur */}
       {error && (
@@ -288,7 +287,7 @@ export default function Financement() {
           }}
         />
         
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 h-24 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -298,15 +297,13 @@ export default function Financement() {
             <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
               Financement & <span className="text-blue-400">Assurance</span>
             </h1>
-            <p className="text-sm lg:text-xl text-slate-200 mb-4 lg:mb-10 leading-relaxed">
+            <p className="text-sm text-slate-200 mb-4 lg:mb-10 leading-relaxed">
               Des solutions complètes pour financer votre projet et le protéger avec nos partenaires de confiance. 
               Accompagnement personnalisé de A à Z.
             </p>
 
             <div className="flex flex-wrap gap-5 justify-center">
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 <Button
                   className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
@@ -318,8 +315,6 @@ export default function Financement() {
               </motion.div>
 
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
@@ -404,7 +399,7 @@ export default function Financement() {
       </section>
 
       {/* Section Assurance */}
-      <section className="py-8 lg:py-20 bg-slate-50" id="assurances">
+      <section className="py-8 lg:py-8 bg-slate-50" id="assurances">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -477,12 +472,10 @@ export default function Financement() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-900">
               Prêt à concrétiser votre projet ?
             </h2>
-            <p className="text-sm lg:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans votre financement et vos assurances
             </p>
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <Button
                 className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
@@ -506,7 +499,6 @@ export default function Financement() {
         />
       )}
 
-      <Footer />
     </div>
   );
 }

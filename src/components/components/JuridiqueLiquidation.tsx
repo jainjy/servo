@@ -207,26 +207,30 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
   ];
 
   return (
-    <section className={`py-8 mt-2 bg-white rounded-lg ${className}`}>
+    <section className={`py-8 mt-12 rounded-lg ${className}`}>
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* En-tête */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg" alt="" />
+          <div className="absolute left-2 bottom-0 inline-flex items-center bg-violet-100 text-violet-700 px-3 py-2 rounded-full text-xs font-semibold mb-4">
             <Scale className="w-4 h-4 mr-2" />
             Expertise Juridique & Liquidation
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        </div>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
             Juridique & Liquidation
           </h2>
-          <p className="text-md text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-sm text-gray-200 max-w-4xl mx-auto leading-relaxed">
             Services juridiques complets pour entreprises, de la création à la liquidation. 
             Notre expertise vous accompagne dans toutes les étapes de la vie de votre société.
           </p>
         </div>
 
         {/* Services Juridiques */}
-        <div className="mb-16">
+        <div className="mb-16 pt-5">
           <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             Nos Services Juridiques
           </h3>
@@ -338,16 +342,15 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
                 Situation Critique ?
               </h3>
             </div>
-            <p className="text-purple-100 text-lg mb-6 max-w-2xl mx-auto">
+            <p className="text-purple-100 text-sm mb-6 max-w-2xl mx-auto">
               Notre cellule d'urgence juridique est disponible 24h/24 pour les situations 
               de crise nécessitant une intervention immédiate (cessation de paiement, saisie, contrôle).
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-lg flex items-center justify-center">
-                🚨 Urgence Juridique - 24h/24
-                <ArrowRight className="w-5 h-5 ml-2" />
+              <button className="gap-2 bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm flex items-center justify-center">
+                <AlertTriangle /> Urgence Juridique - 24h/24
               </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-purple-600 transition-colors duration-300 text-lg">
+              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-purple-600 transition-colors duration-300 text-sm">
                 Consultation Préventive
               </button>
             </div>

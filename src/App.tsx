@@ -98,7 +98,7 @@ import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
-import TestPage from "./pages/TestPage";
+//import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 
 // Import des nouveaux composants immobilier
@@ -111,6 +111,11 @@ import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 // Import des composants domicile
 import DomicileLayout from "./pages/domicile/DomicileLayout";
 import ImmobilierSections from "./components/ImmobilierSections";
+import CreationReprise from "./components/components/CreationReprise";
+import AuditMediation from "./components/components/AuditMediation";
+import AidesLeveesFonds from "./components/components/AideFonds";
+import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
+import PodcastsServices from "./components/components/Podcast_services";
 
 const queryClient = new QueryClient();
 
@@ -172,6 +177,15 @@ const App = () => {
                   <Route path="/podcasts" element={<Podcast />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
+                  {/* /*entreprise link* */}
+                  <Route path="/reprise" element={<CreationReprise />} />
+                  <Route path="/auditMediation" element={<AuditMediation />} />
+                  <Route path="/aideFonds" element={<AidesLeveesFonds />} />
+                  <Route path="/juridiqueLiquidation" element={<JuridiqueLiquidation />} />
+                  <Route path="/podcast_service" element={<PodcastsServices />} />
+
+                  {/* /*entreprise link* */}
+
                   <Route
                     path="/immobilier-sections"
                     element={<ImmobilierSections />}
@@ -231,7 +245,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  <Route path="/recherche" element={<Recherche />} />
+                  {/* <Route path="/recherche" element={<Recherche />} /> */}
 
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />

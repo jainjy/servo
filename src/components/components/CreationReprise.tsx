@@ -56,14 +56,18 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
   ];
 
   return (
-    <section className={`py-8 bg-white mt-2 rounded-lg ${className}`}>
+    <section className={` py-8 mt-16 rounded-lg ${className}`}>
       <div className="container mx-auto px-4 max-w-7xl">
         {/* En-tête */}
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+            <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" alt="" />
+        </div>
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
             Création & Reprise
           </h2>
-          <p className="text-md text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-md text-gray-200 max-w-3xl mx-auto leading-relaxed">
             Accompagnement personnalisé pour entrepreneurs ambitieux. De l'idée à la réalisation, 
             nous vous guidons à chaque étape de votre aventure entrepreneuriale.
           </p>
