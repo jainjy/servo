@@ -140,60 +140,68 @@ const ArtCommerce: React.FC = () => {
       </div>
 
       {/* Grille des services */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-10 bg-gray-50">
-  {filteredServices.length > 0 ? (
-    filteredServices.map((item) => (
-      <div
-        key={item.id}
-        className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col border border-gray-100 hover:-translate-y-1"
-      >
-        {/* Image */}
+<div className="flex justify-center bg-gradient-to-b from-gray-50 to-white">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 w-full max-w-6xl py-10">
+    {filteredServices.length > 0 ? (
+      filteredServices.map((item) => (
         <div
-          className="h-40 bg-cover bg-center relative"
-          style={{
-            backgroundImage: `url(${item.images?.[0] || ""})`,
-          }}
+          key={item.id}
+          className="group bg-white rounded-3xl shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 overflow-hidden"
         >
-          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300"></div>
-        </div>
-
-        {/* Contenu */}
-        <div className="p-4 flex flex-col flex-1 justify-between">
-          <h3 className="font-semibold text-base text-gray-800 group-hover:text-slate-900 transition">
-            {item.libelle}
-          </h3>
-
-          <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
-            {item.description}
-          </p>
-
-          <div className="flex justify-between items-center mt-3">
-            <span className="text-sm font-semibold text-slate-800">
-              {item.price ? `${item.price}€` : "—"}
-            </span>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-              {item.category?.name || "—"}
-            </span>
+          {/* Image */}
+          <div
+            className="h-52 bg-cover bg-center relative"
+            style={{
+              backgroundImage: `url(${item.images?.[0] || ""})`,
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/40 transition-all duration-300"></div>
           </div>
 
-          <button
-            onClick={() => navigate(`/art-commerce/${item.id}`)}
-            className="mt-3 bg-slate-900 text-white text-sm py-2 rounded-lg hover:bg-slate-800 transition font-medium"
-          >
-            Voir les détails
-          </button>
+          {/* Contenu */}
+          <div className="p-6 flex flex-col justify-between min-h-[190px]">
+            <div>
+              <h3 className="font-semibold text-lg text-gray-800 group-hover:text-gray-900 transition">
+                {item.libelle}
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+
+            <div className="mt-4 flex justify-between items-center">
+              <span className="text-sm font-semibold text-slate-800">
+                {item.price ? `${item.price}€` : "—"}
+              </span>
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                {item.category?.name || "—"}
+              </span>
+            </div>
+
+            {/* Bouton gradient amélioré */}
+            <button
+              onClick={() => navigate(`/art-commerce/${item.id}`)}
+              className="mt-5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white text-sm py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+            >
+              Voir les détails
+            </button>
+          </div>
         </div>
+      ))
+    ) : (
+      <div className="col-span-full text-center py-20 text-gray-500">
+        <p className="text-base font-medium">Aucun résultat trouvé</p>
+        <p className="text-sm mt-2 text-gray-400">
+          Essaie avec un autre mot-clé ou une autre catégorie.
+        </p>
       </div>
-    ))
-  ) : (
-    <div className="col-span-full text-center py-20 text-gray-500">
-      <p className="text-base font-medium">Aucun résultat trouvé</p>
-      <p className="text-sm mt-2 text-gray-400">
-        Essaie avec un autre mot-clé ou une autre catégorie.
-      </p>
-    </div>
-  )}
+    )}
+  </div>
 </div>
+
+
+
 
 
     </div>
