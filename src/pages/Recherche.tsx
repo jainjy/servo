@@ -12,6 +12,7 @@ import { ModalDemandeVisite } from "@/components/PropertyListings";
 // Import du contexte panier  
 import { useCart } from "@/components/contexts/CartContext";
 import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 interface SearchItem {
   id: string | number;
@@ -36,20 +37,20 @@ type Stage = "idle" | "loading" | "results";
 
 // SVG pour l'icône de position (remplace l'emoji 📍)
 const PositionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
-  <svg 
+  <svg
     className={className}
-    viewBox="0 0 24 24" 
-    fill="none" 
+    viewBox="0 0 24 24"
+    fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path 
-      d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" 
+    <path
+      d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"
       fill="currentColor"
     />
   </svg>
 );
 
-const Recherche = () => {
+const Recherche = ({onClick}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [stage, setStage] = useState<Stage>("idle");
@@ -59,7 +60,7 @@ const Recherche = () => {
   const [runnerVisible, setRunnerVisible] = useState(false);
   const [runnerExit, setRunnerExit] = useState(false);
   const prevStageRef = useRef<Stage>("idle");
-  
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [searchHistory, setSearchHistory] = useState<Array<{ q: string; date: number }>>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -114,7 +115,7 @@ const Recherche = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const urlQuery = searchParams.get('q');
-    
+
     if (urlQuery) {
       setQuery(urlQuery);
       setStage('loading');
@@ -141,7 +142,7 @@ const Recherche = () => {
 
   const extractFirstValidImage = (imagesData: any): string => {
     if (!imagesData) return "";
-    
+
     if (Array.isArray(imagesData)) {
       const validImage = imagesData.find(img => {
         if (typeof img === 'string') {
@@ -151,7 +152,7 @@ const Recherche = () => {
       });
       return validImage || "";
     }
-    
+
     if (typeof imagesData === 'string') {
       const cleanString = imagesData.replace(/[{}"]/g, '');
       const urls = cleanString.split(',')
@@ -159,24 +160,24 @@ const Recherche = () => {
         .filter(url => isValidImageUrl(url));
       return urls[0] || "";
     }
-    
+
     return "";
   };
 
   // NOUVELLE FONCTION : Générer les initiales d'un texte - TAILLE AUGMENTÉE
   const generateInitials = (text: string): string => {
     if (!text) return "??";
-    
+
     // Supprimer les caractères spéciaux et diviser en mots
     const words = text.replace(/[^\w\s]/g, '').split(/\s+/);
-    
+
     if (words.length === 0) return "??";
-    
+
     if (words.length === 1) {
       // Retourner les 2 premiers caractères du mot unique
       return words[0].substring(0, 2).toUpperCase();
     }
-    
+
     // Retourner la première lettre des deux premiers mots
     return words.slice(0, 2).map(word => word.charAt(0).toUpperCase()).join('');
   };
@@ -193,7 +194,7 @@ const Recherche = () => {
       'bg-cyan-800', // Cyan foncé
       'bg-emerald-800', // Émeraude foncé
     ];
-    
+
     // Générer un index basé sur le type ou l'ID pour une couleur cohérente
     const seed = item.source_table + item.id.toString();
     let hash = 0;
@@ -201,7 +202,7 @@ const Recherche = () => {
       hash = seed.charCodeAt(i) + ((hash << 5) - hash);
     }
     const index = Math.abs(hash) % colors.length;
-    
+
     return colors[index];
   };
 
@@ -216,13 +217,13 @@ const Recherche = () => {
       return [] as Array<{ q: string; date: number }>;
     }
   };
-  
+
   const saveHistory = (list: Array<{ q: string; date: number }>) => {
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
     } catch { /* empty */ }
   };
-  
+
   const addHistory = (q: string) => {
     if (!q) return;
     setSearchHistory((prev) => {
@@ -333,26 +334,26 @@ const Recherche = () => {
 
   const removeDuplicates = (results: SearchItem[]): SearchItem[] => {
     const seen = new Set();
-    
+
     return results.filter(item => {
       const uniqueKey = `${item.id}-${item.source_table}`;
-      
+
       const titleKey = item.title.toLowerCase().trim();
-      
+
       if (seen.has(uniqueKey)) {
         return false;
       }
-      
+
       for (const existingKey of seen.values()) {
         if (typeof existingKey === 'string' && existingKey.includes('-')) {
           const [existingId, existingType] = existingKey.split('-');
-          if (existingType === item.source_table && 
-              areTitlesSimilar(item.title, existingId)) {
+          if (existingType === item.source_table &&
+            areTitlesSimilar(item.title, existingId)) {
             return false;
           }
         }
       }
-      
+
       seen.add(uniqueKey);
       return true;
     });
@@ -362,22 +363,22 @@ const Recherche = () => {
     const normalize = (str: string) => str.toLowerCase().trim().replace(/\s+/g, ' ');
     const normalized1 = normalize(title1);
     const normalized2 = normalize(title2);
-    
+
     if (normalized1 === normalized2) return true;
-    
+
     const longer = Math.max(normalized1.length, normalized2.length);
     const distance = levenshteinDistance(normalized1, normalized2);
-    
+
     return distance / longer < 0.2;
   };
 
   const levenshteinDistance = (str1: string, str2: string): number => {
-    const matrix = Array(str2.length + 1).fill(null).map(() => 
+    const matrix = Array(str2.length + 1).fill(null).map(() =>
       Array(str1.length + 1).fill(null));
-    
+
     for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
     for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
-    
+
     for (let j = 1; j <= str2.length; j++) {
       for (let i = 1; i <= str1.length; i++) {
         const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
@@ -388,7 +389,7 @@ const Recherche = () => {
         );
       }
     }
-    
+
     return matrix[str2.length][str1.length];
   };
 
@@ -399,7 +400,7 @@ const Recherche = () => {
       }
       return item.similarity;
     });
-    
+
     return removeDuplicates(similarityFiltered);
   };
 
@@ -409,14 +410,14 @@ const Recherche = () => {
     setResults([]);
     setFilteredResults([]);
     setExpandedItems(new Set());
-    
+
     const searchParams = new URLSearchParams();
     searchParams.set('q', q);
     navigate(`/recherche?${searchParams.toString()}`, { replace: true });
-    
+
     try {
       const response = await api.post("/recherche", { prompt: q });
-      
+
       if (response.data.success && Array.isArray(response.data.results)) {
         const normalizedResults = normalizeApiResults(response.data.results);
         setResults(normalizedResults);
@@ -426,7 +427,7 @@ const Recherche = () => {
         setResults([]);
         setFilteredResults([]);
       }
-      
+
       setStage("results");
     } catch (error) {
       console.error("Erreur recherche:", error);
@@ -456,7 +457,7 @@ const Recherche = () => {
   // NOUVELLES FONCTIONS POUR LES ACTIONS AVEC VÉRIFICATION AUTH
   const handleDevis = (item: SearchItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       redirectToLogin();
       return;
@@ -478,7 +479,7 @@ const Recherche = () => {
 
   const handleVisite = (item: SearchItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       redirectToLogin();
       return;
@@ -501,7 +502,7 @@ const Recherche = () => {
 
   const handleAddToCart = async (item: SearchItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       redirectToLogin();
       return;
@@ -520,7 +521,7 @@ const Recherche = () => {
       // Utiliser la fonction addToCart du contexte
       await addToCart(cartItem);
       toast.success("Produit ajouté au panier avec succès");
-      
+
     } catch (error) {
       console.error("Erreur ajout au panier:", error);
       toast.error("Erreur lors de l'ajout au panier");
@@ -580,7 +581,7 @@ const Recherche = () => {
             Faire un devis
           </Button>
         );
-      
+
       case "Property":
         return (
           <Button
@@ -592,7 +593,7 @@ const Recherche = () => {
             Demande visite
           </Button>
         );
-      
+
       case "Product":
         return (
           <Button
@@ -604,7 +605,7 @@ const Recherche = () => {
             Ajouter au panier
           </Button>
         );
-      
+
       default:
         return null;
     }
@@ -690,24 +691,24 @@ const Recherche = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      
-      <main className="flex-1 pt-20">
-        <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+
+      <main className="flex-1 pt-1">
+        <div className="container mx-auto px-4">
           {/* Barre de recherche normale (non fixe) */}
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-lg mb-6">
+
+          <div className="mb-6">
+
             <div className="p-4 flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-                className="shrink-0"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              
-              <div className="relative flex-1">
+              <div className="p-1 rounded-full bg-white border-black border-2">
+                <img
+                  src={logo}
+                  alt="Servo Logo"
+                  className="w-10 h-10 rounded-full"
+                />
+              </div>
+
+              <div className="relative bg-white rounded-lg flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   ref={inputRef}
@@ -722,29 +723,28 @@ const Recherche = () => {
                   }}
                 />
               </div>
-              
+
               <Button
                 onClick={() => setHistoryOpen(true)}
                 variant="ghost"
                 size="icon"
-                className="shrink-0"
+                className="shrink-0 bg-white border-black/60 border"
               >
                 <History className="h-5 w-5" />
               </Button>
-              
-              <Button 
-                onClick={handleSearch} 
-                disabled={isLoading} 
-                className="h-12 min-w-32 overflow-hidden"
+
+              <Button
+                onClick={handleSearch}
+                disabled={isLoading}
+                className="h-12 min-w-32 bg-black/90 hover:bg-black overflow-hidden"
               >
                 {runnerVisible ? (
                   <span className="inline-flex items-center">
                     <img
                       src={start}
                       alt="recherche"
-                      className={`w-10 transition-transform duration-300 ease-out ${
-                        runnerExit ? 'translate-x-[200%]' : 'translate-x-0'
-                      }`}
+                      className={`w-10 transition-transform duration-300 ease-out ${runnerExit ? 'translate-x-[200%]' : 'translate-x-0'
+                        }`}
                     />
                     {isLoading ? ' Recherche...' : ''}
                   </span>
@@ -752,6 +752,12 @@ const Recherche = () => {
                   isLoading ? "Recherche..." : "Rechercher"
                 )}
               </Button>
+              <button onClick={onClick} className="relative w-10 h-10 group transition-all duration-300">
+                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 transition-all duration-500">
+                  <span className="absolute h-0.5 bg-gray-600 group-hover:bg-slate-900 w-11/12 -translate-y-1 group-hover:rotate-45 group-hover:translate-y-0 group-hover:scale-125 transition-all duration-500 origin-center"></span>
+                  <span className="absolute h-0.5 bg-gray-600 group-hover:bg-slate-900 w-1/2 translate-y-1 group-hover:-rotate-45 group-hover:translate-y-0 group-hover:w-11/12 group-hover:scale-125 transition-all duration-500 origin-center"></span>
+                </span>
+              </button>
             </div>
           </div>
 
@@ -759,10 +765,10 @@ const Recherche = () => {
           {historyOpen && (
             <>
               <div
-                className="fixed inset-0 bg-black/50 z-40 mt-20"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 mt-10"
                 onClick={() => setHistoryOpen(false)}
               />
-              <aside className="fixed top-20 left-0 z-50 h-[calc(100vh-5rem)] w-80 bg-white border-r border-gray-200 shadow-xl">
+              <aside className="fixed top-10 left-0 z-50 h-full w-80 bg-white border-r border-gray-200 shadow-xl">
                 <div className="h-full flex flex-col">
                   <div className="px-4 py-3 border-b flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -785,11 +791,11 @@ const Recherche = () => {
                           <li
                             key={idx}
                             className="p-3 hover:bg-gray-50 cursor-pointer"
-                            onClick={() => { 
-                              setQuery(item.q); 
-                              setHistoryOpen(false); 
-                              setStage('loading'); 
-                              runSearch(item.q); 
+                            onClick={() => {
+                              setQuery(item.q);
+                              setHistoryOpen(false);
+                              setStage('loading');
+                              runSearch(item.q);
                             }}
                           >
                             <div className="text-sm font-medium text-gray-900 line-clamp-1">
@@ -813,10 +819,10 @@ const Recherche = () => {
             {stage === "idle" && (
               <div className="text-center py-20">
                 <div className="max-w-2xl mx-auto">
-                  <h1 className="redhawk text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+                  <h1 className="redhawk -tracking-tighter text-3xl md:text-5xl font-bold text-black/90 mb-4">
                     Recherche avancée
                   </h1>
-                  <p className="text-xl text-gray-600 mb-8">
+                  <p className="text-sm text-gray-600 mb-8">
                     Trouvez des biens immobiliers, services, produits et articles
                   </p>
                 </div>
@@ -838,28 +844,27 @@ const Recherche = () => {
                         Résultats de recherche
                       </h2>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {filteredResults.map((item, idx) => {
                         const isExpanded = isItemExpanded(item.id, item.source_table);
-                        
+
                         return (
                           <div
                             key={`${item.id}-${item.source_table}-${idx}`}
-                            className={`flex flex-col bg-white rounded-xl border border-gray-200 cursor-pointer transition-all duration-200 h-full ${
-                              isExpanded ? 'shadow-lg ring-2 ring-blue-500' : 'hover:shadow-md'
-                            }`}
+                            className={`flex flex-col bg-white rounded-xl border border-gray-200 cursor-pointer transition-all duration-200 h-full ${isExpanded ? 'shadow-lg ring-2 ring-blue-500' : 'hover:shadow-md'
+                              }`}
                             onClick={(e) => toggleItemExpansion(item.id, item.source_table, e)}
                           >
                             {/* Image avec fallback aux initiales */}
                             {renderImageWithFallback(item)}
-                            
+
                             {/* Contenu */}
                             <div className="p-4 flex-1 flex flex-col">
                               <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2">
                                 {item.title}
                               </h3>
-                              
+
                               {(item.price || item.location) && (
                                 <div className="mt-auto space-y-1">
                                   {item.price && (
@@ -876,7 +881,7 @@ const Recherche = () => {
                                   )}
                                 </div>
                               )}
-                              
+
                               {!item.price && !item.location && (
                                 <div className="mt-2 text-sm text-gray-500">
                                   {item.source_table === 'Service' && 'Service professionnel'}
@@ -887,7 +892,7 @@ const Recherche = () => {
 
                               {/* Bouton d'action spécifique - affiché seulement si l'élément est étendu */}
                               {isExpanded && renderActionButton(item)}
-                              
+
                               {/* Indicateur d'expansion */}
                               <div className="mt-2 text-center">
                                 <div className="text-xs text-blue-600 font-medium">

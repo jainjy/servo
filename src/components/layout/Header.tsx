@@ -263,33 +263,33 @@ useEffect(() => {
         }, {
           title: "Création & reprise",
           description: "Accompagnement pour entrepreneurs",
-          href: "/entreprise#reprise",
+          href: "/reprise",
           image: "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg"
 
         },
         {
           title: "Audit & médiation",
           description: "Experts en audit & résolution de conflits",
-          href: "/entreprise#auditMediation",
+          href: "/auditMediation",
           image: "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg"
 
         }, {
           title: "Aides & levées de fonds",
           description: " Soutien financier pour entreprises",
-          href: "/entreprise#aideFonds",
+          href: "/aideFonds",
           image: "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg"
 
         },
         {
           title: "Juridique & liquidation",
           description: " Services juridiques pour entreprises",
-          href: "/entreprise#juridiqueLiquidation",
+          href: "/juridiqueLiquidation",
           image: "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg"
 
         }, {
           title: "Podcasts & autres services",
           description: " Ressources pour entrepreneurs",
-          href: "/entreprise#podcast_service",
+          href: "/podcast_service",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
 
         },
@@ -444,18 +444,18 @@ useEffect(() => {
         {
           title: "SCPI & immobilier",
           description: "Investissez dans l'immobilier locatif",
-          href: "/investissement",
+          href: "/investir/scpi",
           image: "https://i.pinimg.com/1200x/20/79/83/207983f864b7c516a64be40bc990df17.jpg"
         },
         {
           title: "Crowdfunding & actions ",
           description: "Investissez dans des projets innovants",
-          href: "/investissement",
+          href: "/investir/crowdfunding",
           image: "https://i.pinimg.com/736x/50/f9/69/50f969a3d27b9d0cb7dfc4bff0b8a80a.jpg"
         }, {
           title: "Obligations & associations",
           description: "Soutenez des causes tout en investissant",
-          href: "/investissement",
+          href: "/investir/isr",
           image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg"
         },
       ],
@@ -468,10 +468,10 @@ useEffect(() => {
     //   title: "CONSULTATIONS/AIDES",
     //   href: "/service",
     // },
-    {
-      title: "ART & COMMERCES",
-      href: "/art-commerce",
-    },
+    // {
+    //   title: "ART & COMMERCES",
+    //   href: "/art-commerce",
+    // },
     {
       title: "TOURISME",
       items: [
@@ -489,7 +489,7 @@ useEffect(() => {
         }, {
           title: "Formations",
           description: "Cours & ateliers locaux",
-          href: "/tourisme",
+          href: "/formationTourisme",
           image: "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg"
         },
       ],

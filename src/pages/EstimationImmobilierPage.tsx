@@ -3,10 +3,10 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Building, 
-  Home, 
-  Castle, 
+import {
+  Building,
+  Home,
+  Castle,
   Store,
   CheckCircle2,
   BarChart3,
@@ -102,7 +102,7 @@ export default function EstimationImmobilierPage() {
 
   const handleEstimationSubmit = async (data: EstimationData) => {
     setEstimationData(data);
-    
+
     await withLoading(
       new Promise<EstimationResult>((resolve) => {
         // Simulation d'appel API
@@ -121,14 +121,14 @@ export default function EstimationImmobilierPage() {
     // Logique d'estimation simplifiée - À remplacer par un vrai algorithme
     const basePricePerM2 = getBasePricePerM2(data.location.city);
     let price = data.surface * basePricePerM2;
-    
+
     // Ajustements
     price *= getConditionMultiplier(data.condition);
     price *= getRoomsMultiplier(data.rooms);
     price += getFeaturesValue(data.features);
-    
+
     const variance = price * 0.1; // ±10%
-    
+
     return {
       priceRange: {
         min: Math.round(price - variance),
@@ -149,25 +149,24 @@ export default function EstimationImmobilierPage() {
 
   return (
     <PageLoader isLoading={isLoading}>
-       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 pt-20">
-        
+
+      <div className="min-h-screen py-8 pt-20">
+
         <div className="container mx-auto px-4 max-w-6xl">
           {/* En-tête */}
+          <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+            <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+            <img src="https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg" alt="" />
+          </div>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="text-center mb-24 pt-10 "
           >
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center">
-                <Target className="w-8 h-8 text-purple-600" />
-              </div>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Estimation Immobilière <span className="text-purple-600">Gratuite</span>
+            <h1 className="text-4xl md:text-4xl font-bold text-gray-100 mb-4">
+              Estimation Immobilière <span className="text-purple-300">Gratuite</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm text-gray-200 max-w-2xl mx-auto">
               Obtenez une estimation précise de votre bien en 2 minutes grâce à notre intelligence artificielle
             </p>
           </motion.div>
@@ -184,7 +183,7 @@ export default function EstimationImmobilierPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                   >
-                    <EstimationWizard 
+                    <EstimationWizard
                       onSubmit={handleEstimationSubmit}
                       propertyTypes={propertyTypes}
                     />
@@ -380,21 +379,21 @@ function generateComparableProperties(data: EstimationData) {
 
 function generateRecommendations(data: EstimationData): string[] {
   const recommendations = [];
-  
+
   if (data.condition === 'needs_renovation') {
     recommendations.push('Une rénovation pourrait augmenter la valeur de 15-20%');
   }
-  
+
   if (!data.features.parking && data.location.city.toLowerCase() === 'paris') {
     recommendations.push('Ajouter une place de parking pourrait augmenter la valeur');
   }
-  
+
   if (data.surface < 30) {
     recommendations.push('Mettre en valeur les espaces de rangement');
   }
-  
+
   recommendations.push('Mettre à jour les photos pour une meilleure présentation');
   recommendations.push('Considérer une expertise complémentaire pour confirmation');
-  
+
   return recommendations;
 }

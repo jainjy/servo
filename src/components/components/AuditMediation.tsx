@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Scale, HeartHandshake, FileCheck, Users, Target } from 'lucide-react';
+import { Shield, Scale, HeartHandshake, FileCheck, Users, Target, Phone } from 'lucide-react';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
@@ -34,10 +34,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, fea
   </div>
 );
 
-const ProcessStep: React.FC<{ number: number; title: string; description: string }> = ({ 
-  number, 
-  title, 
-  description 
+const ProcessStep: React.FC<{ number: number; title: string; description: string }> = ({
+  number,
+  title,
+  description
 }) => (
   <div className="flex items-start">
     <div className="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-4 flex-shrink-0 mt-1">
@@ -136,27 +136,32 @@ const AuditMediation: React.FC<AuditMediationProps> = ({ className = '' }) => {
   ];
 
   return (
-    <section className={`py-8 bg-white mt-2 rounded-lg ${className}`}>
+    <section className={`py-8 mt-12 rounded-lg ${className}`}>
+
       <div className="container mx-auto px-4 max-w-7xl">
-        
         {/* En-tête */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg" alt="" />
+          <div className="absolute left-2 bottom-0 inline-flex items-center bg-red-100 text-red-700 px-3 py-2 rounded-full text-xs font-semibold mb-4">
             <Shield className="w-4 h-4 mr-2" />
             Experts certifiés
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        </div>
+        <div className="text-center mb-16">
+
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
             Audit & Médiation
           </h2>
-          <p className="text-md text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Experts en audit organisationnel et résolution de conflits. Notre approche neutre 
-            et professionnelle vous aide à identifier les dysfonctionnements et à restaurer 
+          <p className="text-md text-gray-200 max-w-4xl mx-auto leading-relaxed">
+            Experts en audit organisationnel et résolution de conflits. Notre approche neutre
+            et professionnelle vous aide à identifier les dysfonctionnements et à restaurer
             un climat de travail sain et productif.
           </p>
         </div>
 
         {/* Services */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+        <div className=" grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
           {services.map((service, index) => (
             <ServiceCard
               key={index}
@@ -170,7 +175,7 @@ const AuditMediation: React.FC<AuditMediationProps> = ({ className = '' }) => {
 
         {/* Processus et Expertise */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          
+
           {/* Processus d'intervention */}
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -205,7 +210,7 @@ const AuditMediation: React.FC<AuditMediationProps> = ({ className = '' }) => {
             </div>
             <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700 text-center">
-                <strong>Confidentialité absolue</strong> - Toutes nos interventions 
+                <strong>Confidentialité absolue</strong> - Toutes nos interventions
                 sont couvertes par le secret professionnel et la confidentialité
               </p>
             </div>
@@ -217,19 +222,19 @@ const AuditMediation: React.FC<AuditMediationProps> = ({ className = '' }) => {
           <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-8 text-white">
             <div className="flex items-center justify-center mb-4">
               <HeartHandshake className="w-8 h-8 mr-3" />
-              <h3 className="text-2xl md:text-3xl font-bold">
+              <h3 className="text-xl md:text-3xl font-bold">
                 Situation urgente ?
               </h3>
             </div>
-            <p className="text-red-100 text-lg mb-6 max-w-2xl mx-auto">
-              Notre cellule d'urgence est disponible pour intervenir rapidement 
+            <p className="text-red-100 text-md mb-6 max-w-2xl mx-auto">
+              Notre cellule d'urgence est disponible pour intervenir rapidement
               dans les situations de crise nécessitant une médiation immédiate.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-red-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-lg">
-                📞 Contact Urgence - 24h/24
+              <button className="flex gap-2 items-center bg-white text-red-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm">
+                <Phone  /> Contact Urgence - 24h/24
               </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-red-600 transition-colors duration-300 text-lg">
+              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-red-600 transition-colors duration-300 text-sm">
                 Demander un Audit
               </button>
             </div>

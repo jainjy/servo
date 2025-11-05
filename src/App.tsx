@@ -98,7 +98,7 @@ import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
-import TestPage from "./pages/TestPage";
+//import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 
 // Import des nouveaux composants immobilier
@@ -119,6 +119,12 @@ import Privacy from "@/pages/Privacy";
 
 
 
+import CreationReprise from "./components/components/CreationReprise";
+import AuditMediation from "./components/components/AuditMediation";
+import AidesLeveesFonds from "./components/components/AideFonds";
+import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
+import PodcastsServices from "./components/components/Podcast_services";
+import FormationsTourisme from "./components/components/ToursimeFormation";
 
 const queryClient = new QueryClient();
 
@@ -177,9 +183,19 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/cookies" element={<CookiesPolicy />} />
-                  <Route path="/podcasts" element={<Podcast />} />
+                  {/* <Route path="/podcasts" element={<Podcast />} /> */}
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
+                  {/* /*entreprise link* */}
+                  <Route path="/reprise" element={<CreationReprise />} />
+                  <Route path="/auditMediation" element={<AuditMediation />} />
+                  <Route path="/aideFonds" element={<AidesLeveesFonds />} />
+                  <Route path="/juridiqueLiquidation" element={<JuridiqueLiquidation />} />
+                  <Route path="/podcast_service" element={<PodcastsServices />} />
+                  <Route path="/formationTourisme" element={<FormationsTourisme />} />
+
+                  {/* /*entreprise link* */}
+
                   <Route
                     path="/immobilier-sections"
                     element={<ImmobilierSections />}
@@ -239,7 +255,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  <Route path="/recherche" element={<Recherche />} />
+                  {/* <Route path="/recherche" element={<Recherche />} /> */}
 
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
