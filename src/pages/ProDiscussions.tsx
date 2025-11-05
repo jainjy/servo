@@ -10,7 +10,6 @@ import {
   MessageCircle,
   AlertCircle,
   Clock,
-  CheckCircle,
   Paperclip,
   FileText,
   MoreVertical,
@@ -18,9 +17,10 @@ import {
   DollarSign,
   X,
 } from "lucide-react";
+import { Edit, Download, CheckCircle, XCircle } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import {useSocket} from "@/Contexts/SocketContext";
+import { useSocket } from "@/Contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
@@ -40,8 +40,12 @@ export default function ProDiscussions({
   const [showFactureModal, setShowFactureModal] = useState(false);
   const [showDevisModal, setShowDevisModal] = useState(false);
 
-
   // États pour les formulaires
+  const [artisanDetails, setArtisanDetails] = useState(null);
+  const [showEditRendezVousModal, setShowEditRendezVousModal] = useState(false);
+  const [showEditDevisModal, setShowEditDevisModal] = useState(false);
+  const [currentRendezVous, setCurrentRendezVous] = useState(null);
+  const [currentDevis, setCurrentDevis] = useState(null);
   const [rendezVousDate, setRendezVousDate] = useState("");
   const [rendezVousHeure, setRendezVousHeure] = useState("");
   const [rendezVousNotes, setRendezVousNotes] = useState("");
@@ -53,7 +57,7 @@ export default function ProDiscussions({
 
   const actionsMenuRef = useRef(null);
 
-  const { socket, isConnected } = useSocket();
+  const { isConnected } = useSocket();
   const {
     messages,
     conversation,
@@ -61,7 +65,202 @@ export default function ProDiscussions({
     sendMessage,
     sending,
   } = useMessaging(id);
+  // Charger les détails de l'artisan
+  useEffect(() => {
+    const fetchArtisanDetails = async () => {
+      try {
+        if (id && artisanView) {
+          const response = await api.get(
+            `/demande-actions/${id}/details-artisan`
+          );
+          setArtisanDetails(response.data);
 
+          // Pré-remplir les formulaires si des données existent
+          if (response.data.rdv) {
+            const rdvDate = new Date(response.data.rdv);
+            setCurrentRendezVous({
+              date: rdvDate.toISOString().split("T")[0],
+              heure: rdvDate.toTimeString().slice(0, 5),
+              notes: response.data.rdvNotes || "",
+            });
+          }
+
+          if (response.data.devis) {
+            setCurrentDevis({
+              montant: response.data.factureMontant || "",
+              description: response.data.devis || "",
+              file: null,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Erreur chargement détails artisan:", error);
+      }
+    };
+
+    fetchArtisanDetails();
+  }, [id, artisanView]);
+
+  // Fonctions pour les actions
+  const handleSubmitRendezVous = async (date, heure, notes) => {
+    try {
+      const response = await api.post(`/demande-actions/${id}/proposer-rdv`, {
+        date,
+        heure,
+        notes,
+      });
+
+      toast.success("Rendez-vous proposé avec succès");
+      setShowRendezVousModal(false);
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur proposition rendez-vous:", error);
+      toast.error("Erreur lors de la proposition du rendez-vous");
+    }
+  };
+
+  const handleSubmitDevis = async (montant, description, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("montant", montant);
+      formData.append("description", description);
+      formData.append("devisFile", file);
+
+      const response = await api.post(
+        `/demande-actions/${id}/envoyer-devis`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Response envoyer devis:", response);
+      toast.success("Devis envoyé avec succès");
+      setShowDevisModal(false);
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur envoi devis:", error);
+      toast.error("Erreur lors de l'envoi du devis");
+    }
+  };
+
+  const handleSubmitFacture = async (montant, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("montant", montant);
+      formData.append("factureFile", file);
+
+      const response = await api.post(
+        `/demande-actions/${id}/envoyer-facture`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Response envoyer facture:", response);
+
+      toast.success("Facture envoyée avec succès");
+      setShowFactureModal(false);
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur envoi facture:", error);
+      toast.error("Erreur lors de l'envoi de la facture");
+    }
+  };
+
+  const handleModifierRendezVous = async (date, heure, notes) => {
+    try {
+      const response = await api.put(`/demande-actions/${id}/modifier-rdv`, {
+        date,
+        heure,
+        notes,
+      });
+
+      toast.success("Rendez-vous modifié avec succès");
+      setShowEditRendezVousModal(false);
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur modification rendez-vous:", error);
+      toast.error("Erreur lors de la modification du rendez-vous");
+    }
+  };
+
+  const handleModifierDevis = async (montant, description, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("montant", montant);
+      formData.append("description", description);
+      if (file) {
+        formData.append("devisFile", file);
+      }
+
+      const response = await api.put(
+        `/demande-actions/${id}/modifier-devis`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Response modifier devis:", response);
+
+      toast.success("Devis modifié avec succès");
+      setShowEditDevisModal(false);
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur modification devis:", error);
+      toast.error("Erreur lors de la modification du devis");
+    }
+  };
+
+  // Fonction pour valider/refuser une facture (admin)
+  const handleValiderFacture = async (artisanId, statut) => {
+    try {
+      const response = await api.put(`/demande-actions/${id}/valider-facture`, {
+        artisanId,
+        statut,
+      });
+
+      const message =
+        statut === "validee" ? "Facture validée" : "Facture refusée";
+      toast.success(`${message} avec succès`);
+
+      // Recharger les données
+      // (Pour l'admin, vous devrez peut-être recharger la liste des artisans)
+    } catch (error) {
+      console.error("Erreur validation facture:", error);
+      toast.error("Erreur lors de la validation de la facture");
+    }
+  };
   // Fermer le menu d'actions en cliquant à l'extérieur
   useEffect(() => {
     function handleClickOutside(event) {
@@ -198,8 +397,6 @@ export default function ProDiscussions({
   const isCurrentUser = (message) => {
     return message.expediteur?.userType === "PRESTATAIRE";
   };
-
-  // Handlers pour les actions
   const handleProposerRendezVous = () => {
     setShowActionsMenu(false);
     setShowRendezVousModal(true);
@@ -215,36 +412,6 @@ export default function ProDiscussions({
     setShowDevisModal(true);
   };
 
-
-  // Soumission des formulaires (simulé)
-  const handleSubmitRendezVous = () => {
-    // Simulation d'envoi
-    toast.success("Rendez-vous proposé avec succès");
-    setShowRendezVousModal(false);
-    // Réinitialiser le formulaire
-    setRendezVousDate("");
-    setRendezVousHeure("");
-    setRendezVousNotes("");
-  };
-
-  const handleSubmitFacture = () => {
-    // Simulation d'envoi
-    toast.success("Facture envoyée avec succès");
-    setShowFactureModal(false);
-    // Réinitialiser le formulaire
-    setFactureMontant("");
-    setFactureFile(null);
-  };
-
-  const handleSubmitDevis = () => {
-    // Simulation d'envoi
-    toast.success("Devis envoyé avec succès");
-    setShowDevisModal(false);
-    // Réinitialiser le formulaire
-    setDevisMontant("");
-    setDevisDescription("");
-    setDevisFile(null);
-  };
 
   const handleFileChange = (setFileFunction) => (event) => {
     const file = event.target.files[0];
@@ -263,6 +430,7 @@ export default function ProDiscussions({
 
   return (
     <div className="min-h-full">
+      
       <div className="flex h-[calc(100vh-100px)]">
         {/* Côté gauche - Informations du projet */}
         <div className="w-1/2 bg-white rounded-lg shadow-sm border-r border-gray-200 p-8 overflow-y-auto">
@@ -630,7 +798,208 @@ export default function ProDiscussions({
           </div>
         </div>
       </div>
+      {/* Modale Édition Rendez-vous */}
+      {showEditRendezVousModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">
+                Modifier le rendez-vous
+              </h3>
+              <button
+                onClick={() => setShowEditRendezVousModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
+            <div className="p-6">
+              {/* Formulaire identique à la modale de création mais pré-rempli */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date du rendez-vous
+                  </label>
+                  <input
+                    type="date"
+                    value={currentRendezVous?.date || ""}
+                    onChange={(e) =>
+                      setCurrentRendezVous((prev) => ({
+                        ...prev,
+                        date: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Heure du rendez-vous
+                  </label>
+                  <input
+                    type="time"
+                    value={currentRendezVous?.heure || ""}
+                    onChange={(e) =>
+                      setCurrentRendezVous((prev) => ({
+                        ...prev,
+                        heure: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Notes supplémentaires
+                  </label>
+                  <textarea
+                    value={currentRendezVous?.notes || ""}
+                    onChange={(e) =>
+                      setCurrentRendezVous((prev) => ({
+                        ...prev,
+                        notes: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Informations complémentaires..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={() => setShowEditRendezVousModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() =>
+                    handleModifierRendezVous(
+                      currentRendezVous.date,
+                      currentRendezVous.heure,
+                      currentRendezVous.notes
+                    )
+                  }
+                  disabled={
+                    !currentRendezVous?.date || !currentRendezVous?.heure
+                  }
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Modifier le rendez-vous
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale Édition Devis */}
+      {showEditDevisModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">
+                Modifier le devis
+              </h3>
+              <button
+                onClick={() => setShowEditDevisModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Montant du devis (€)
+                  </label>
+                  <input
+                    type="number"
+                    value={currentDevis?.montant || ""}
+                    onChange={(e) =>
+                      setCurrentDevis((prev) => ({
+                        ...prev,
+                        montant: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description du devis
+                  </label>
+                  <textarea
+                    value={currentDevis?.description || ""}
+                    onChange={(e) =>
+                      setCurrentDevis((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Détail des prestations..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nouveau fichier de devis (PDF) - Optionnel
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange((file) =>
+                      setCurrentDevis((prev) => ({ ...prev, file }))
+                    )}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {currentDevis?.file && (
+                    <p className="text-sm text-green-600 mt-2">
+                      ✓ {currentDevis.file.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={() => setShowEditDevisModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() =>
+                    handleModifierDevis(
+                      currentDevis.montant,
+                      currentDevis.description,
+                      currentDevis.file
+                    )
+                  }
+                  disabled={
+                    !currentDevis?.montant || !currentDevis?.description
+                  }
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  Modifier le devis
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modale Rendez-vous */}
       {showRendezVousModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -695,7 +1064,7 @@ export default function ProDiscussions({
                   Annuler
                 </button>
                 <button
-                  onClick={handleSubmitRendezVous}
+                  onClick={()=>handleSubmitRendezVous(rendezVousDate,rendezVousHeure,rendezVousNotes)}
                   disabled={!rendezVousDate || !rendezVousHeure}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -706,7 +1075,6 @@ export default function ProDiscussions({
           </div>
         </div>
       )}
-
       {/* Modale Facture */}
       {showFactureModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -765,7 +1133,7 @@ export default function ProDiscussions({
                   Annuler
                 </button>
                 <button
-                  onClick={handleSubmitFacture}
+                  onClick={()=>handleSubmitFacture(factureMontant ,factureFile)}
                   disabled={!factureMontant || !factureFile}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -776,7 +1144,6 @@ export default function ProDiscussions({
           </div>
         </div>
       )}
-
       {/* Modale Devis */}
       {showDevisModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -848,7 +1215,9 @@ export default function ProDiscussions({
                   Annuler
                 </button>
                 <button
-                  onClick={handleSubmitDevis}
+                  onClick={() =>
+                    handleSubmitDevis(devisMontant, devisDescription, devisFile)
+                  }
                   disabled={!devisMontant || !devisDescription || !devisFile}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
