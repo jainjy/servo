@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import '@/assets/styles/all.css'
+import "@/assets/styles/all.css";
 import {
   Card,
   CardContent,
@@ -8,23 +8,67 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  CheckCircle,
-  Star,
-  Building,
-  Users,
-  Wrench,
-  MapPin,
-  Sofa,
-} from "lucide-react";
+import { CheckCircle, Building, Users, Wrench, Sofa } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { subscriptionPlansAPI } from "@/lib/api/subscriptionPlans";
 
 const ProfessionalSubscriptionPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const subscriptionPlans = [
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fonction pour récupérer les plans depuis l'API
+  const fetchSubscriptionPlans = async () => {
+    try {
+      setLoading(true);
+      const response = await subscriptionPlansAPI.getAllPlans();
+
+      if (response.success) {
+        // Mapper les données de l'API avec les icônes appropriées
+        const plansWithIcons = response.data.map((plan) => {
+          let icon;
+          switch (plan.id) {
+            case "real_estate":
+              icon = <Building className="h-16 w-16" />;
+              break;
+            case "services":
+              icon = <Wrench className="h-16 w-16" />;
+              break;
+            case "furniture":
+              icon = <Sofa className="h-16 w-16" />;
+              break;
+            case "wellness":
+              icon = <Users className="h-16 w-16" />;
+              break;
+            default:
+              icon = <Building className="h-16 w-16" />;
+          }
+
+          return {
+            ...plan,
+            icon,
+          };
+        });
+
+        setSubscriptionPlans(plansWithIcons);
+      } else {
+        toast.error("Erreur lors du chargement des plans d'abonnement");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Impossible de charger les plans d'abonnement");
+      // Fallback vers les données statiques en cas d'erreur
+      setSubscriptionPlans(getFallbackPlans());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Données de fallback en cas d'erreur API
+  const getFallbackPlans = () => [
     {
       id: "real_estate",
       title: "Pro Immobilier Complet",
@@ -107,6 +151,10 @@ const ProfessionalSubscriptionPage = () => {
     },
   ];
 
+  useEffect(() => {
+    fetchSubscriptionPlans();
+  }, []);
+
   const getColorClasses = (color: string) => {
     const colors = {
       blue: {
@@ -116,7 +164,7 @@ const ProfessionalSubscriptionPage = () => {
         border: "border-blue-200",
         hoverBorder: "border-blue-500",
         button: "bg-blue-600 hover:bg-blue-700",
-        gradient: "from-red-500 to-red-600",
+        gradient: "from-blue-500 to-blue-600",
       },
       emerald: {
         bg: "bg-emerald-50",
@@ -144,15 +192,6 @@ const ProfessionalSubscriptionPage = () => {
         hoverBorder: "border-pink-500",
         button: "bg-pink-600 hover:bg-pink-700",
         gradient: "from-pink-500 to-pink-600",
-      },
-      orange: {
-        bg: "bg-orange-50",
-        hoverBg: "bg-orange-100",
-        text: "text-orange-600",
-        border: "border-orange-200",
-        hoverBorder: "border-orange-500",
-        button: "bg-orange-600 hover:bg-orange-700",
-        gradient: "from-orange-500 to-orange-600",
       },
     };
     return colors[color as keyof typeof colors] || colors.blue;
@@ -185,15 +224,24 @@ const ProfessionalSubscriptionPage = () => {
       },
     });
   };
+
   const handleBack = () => {
     navigate("/register");
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white text-xl">Chargement des plans...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex overflow-hidden relative">
+      {/* Votre JSX existant reste identique */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
       <div className="absolute inset-0 -z-20">
-        {/* Remplace cette image par un élément img classique */}
         <img
           src="/nature.jpeg"
           alt="Login Illustration"
@@ -203,13 +251,14 @@ const ProfessionalSubscriptionPage = () => {
 
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
+
       <div className="w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center">
-            <div className="w-16 h-16  rounded-full overflow-hidden my-4 flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 rounded-full overflow-hidden my-4 flex items-center justify-center shadow-lg">
               <img
                 src="/logo.png"
-                className="h-ull w-full rounded-lg"
+                className="h-full w-full rounded-lg"
                 alt="Logo SERVO"
               />
             </div>
@@ -239,7 +288,7 @@ const ProfessionalSubscriptionPage = () => {
                 } transition-all duration-500 cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-lg hover:shadow-2xl border-opacity-30 hover:border-opacity-60 group`}
                 onClick={() => handleSubscriptionSelect(plan.id)}
               >
-                {/* Badge populaire amélioré */}
+                {/* Le reste de votre JSX pour afficher les plans */}
                 {plan.popular && (
                   <div className="absolute -top-4 left-2 z-10">
                     <div
@@ -259,7 +308,6 @@ const ProfessionalSubscriptionPage = () => {
                     {plan.icon}
                   </div>
 
-                  {/* Titre et description */}
                   <div className="space-y-2">
                     <h3 className="text-xl font-bold text-white group-hover:scale-105 transition-transform duration-300 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       {plan.title}
@@ -269,7 +317,6 @@ const ProfessionalSubscriptionPage = () => {
                     </p>
                   </div>
 
-                  {/* Prix avec style moderne */}
                   <div className="space-y-2">
                     <div className="text-4xl flex font-semibold text-white">
                       {plan.price} € /
@@ -279,12 +326,11 @@ const ProfessionalSubscriptionPage = () => {
                     </div>
                   </div>
 
-                  {/* Features avec style amélioré */}
                   <ul className="text-xs text-gray-300 gap-5 text-left grid grid-cols-1 lg:grid-cols-2 w-full">
                     {plan.features.map((feature, index) => (
                       <li
                         key={index}
-                        className="flex items-start gap-3 p-0 rounded-xl "
+                        className="flex items-start gap-3 p-0 rounded-xl"
                       >
                         <CheckCircle
                           className={`h-5 w-5 ${color.text} shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300 filter drop-shadow-lg`}
@@ -296,7 +342,6 @@ const ProfessionalSubscriptionPage = () => {
                     ))}
                   </ul>
 
-                  {/* Bouton de sélection amélioré */}
                   <Button
                     className={`w-full font-bold py-3 rounded-xl transition-all duration-500 transform hover:-translate-y-1 border ${
                       isSelected
@@ -348,14 +393,12 @@ const ProfessionalSubscriptionPage = () => {
                   </Button>
                 </div>
 
-                {/* Effet de sélection */}
                 {isSelected && (
                   <div
                     className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-10 -z-10`}
                   ></div>
                 )}
 
-                {/* Effet de bordure au survol */}
                 <div
                   className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-0 group-hover:opacity-15 transition-opacity duration-500 -z-20`}
                 ></div>
@@ -364,7 +407,6 @@ const ProfessionalSubscriptionPage = () => {
           })}
         </div>
 
-        {/* Actions */}
         <div className="flex justify-center gap-4 mt-12">
           <Button
             variant="outline"
@@ -382,7 +424,6 @@ const ProfessionalSubscriptionPage = () => {
           </Button>
         </div>
 
-        {/* Informations supplémentaires */}
         <div className="text-end mt-8 mr-4 space-y-4">
           <div className="text-xs text-gray-500">
             © 2025 SERVO . Tous droits réservés.
