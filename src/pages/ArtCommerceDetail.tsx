@@ -53,7 +53,7 @@ const ArtCommerceDetail = () => {
     ],
     contact: {
       phone: '+262 692 123 456',
-      email: 'jinxramamonjisoa@gmail.com',
+      email: 'mioramh@gmail.com',
       website: 'www.galerietropical.re'
     },
     features: ['Livraison disponible', 'Paiement en ligne', 'Site web', 'Artistes locaux', 'Certificat d\'authenticité', 'Installation sur mesure'],
@@ -241,6 +241,7 @@ const ArtCommerceDetail = () => {
 
     const handleSubmit = async (e) => {
       e.preventDefault();
+
       if (!emailClient) return setFeedback("Vous devez être connecté.");
       if (!message.trim()) return setFeedback("Le message ne peut pas être vide.");
 
@@ -248,27 +249,35 @@ const ArtCommerceDetail = () => {
       setFeedback("");
 
       try {
-        const res = await fetch("/mail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: emailClient,
-            subject: `Contact via site - ${listing.title}`,
-            message,
-          }),
-        });
+        const payload = {
+          email: emailClient,
+          subject: "Contact de la site servo",
+          message,
+        };
 
-        const data = await res.json();
-        console.log("Réponse backend:", data);
+        console.log("Payload:", payload);
 
-        if (res.ok) {
-          setFeedback("Message envoyé avec succès !");
+        const res = await api.post("/mail", payload);
+
+        console.log("Réponse backend:", res.data);
+
+        if (res.status === 200) {
+
+          toast.success(`Message envoyé avec succès !`, {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "colored",
+          });
           setMessage("");
         } else {
-          setFeedback(data.error || "Erreur lors de l'envoi.");
+          setFeedback(res.data.error || "Erreur lors de l'envoi.");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Erreur:", err);
         setFeedback("Impossible d'envoyer le message.");
       } finally {
         setLoading(false);
@@ -312,6 +321,7 @@ const ArtCommerceDetail = () => {
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
+
             <div>
               <label className="block text-slate-700 text-sm font-medium mb-2">
                 Votre message
@@ -328,6 +338,7 @@ const ArtCommerceDetail = () => {
             {feedback && <p className="text-sm text-red-500">{feedback}</p>}
 
             <div className="flex gap-3">
+
               <button
                 type="button"
                 onClick={() => setShowContactForm(false)}
@@ -335,6 +346,7 @@ const ArtCommerceDetail = () => {
               >
                 Annuler
               </button>
+
               <button
                 type="submit"
                 disabled={loading}
@@ -342,8 +354,10 @@ const ArtCommerceDetail = () => {
               >
                 {loading ? "Envoi..." : "Envoyer"}
               </button>
+
             </div>
           </form>
+
         </div>
       </div>
     );
@@ -419,7 +433,7 @@ const ArtCommerceDetail = () => {
     console.log(artwork)
     const handleAddToCart = () => {
       console.log("👉 handleAddToCart appelé !");
-      artwork.name=artwork.libelle
+      artwork.name = artwork.libelle
       addToCart(artwork);
 
       toast.success(`${artwork.libelle} a été ajouté au panier !`, {
@@ -477,7 +491,7 @@ const ArtCommerceDetail = () => {
 
                 {/* Informations principales */}
                 <div className="grid grid-cols-2 gap-4">
-           
+
                 </div>
 
                 {/* Prix et bouton d’achat */}
