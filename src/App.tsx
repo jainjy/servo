@@ -97,6 +97,10 @@ import CookiesPolicy from "./pages/CookiesPolicy";
 import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
+import RGPDInfo from "@/pages/RGPDInfo";
+import ImportInfo from "@/pages/ImportInfo";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
 
 
 
@@ -296,6 +300,10 @@ const App = () => (
               </Route>
               {/* Section not found Routes */}
               <Route path="*" element={<NotFound />} />
+              <Route path="/en-savoir-plus" element={<RGPDInfo />} />
+              <Route path="/import-info" element={<ImportInfo />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
             </Routes>
             <CookieConsent />
           </Layout>
