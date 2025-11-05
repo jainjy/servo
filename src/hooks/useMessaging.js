@@ -1,6 +1,6 @@
 // hooks/useMessaging.js
 import { useState, useEffect, useCallback } from "react";
-import { useSocket } from "@/contexts/SocketContext";
+import {useSocket} from "@/Contexts/SocketContext";
 import api from "@/lib/api";
 
 export const useMessaging = (demandeId) => {

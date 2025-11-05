@@ -275,13 +275,12 @@ const GestionImmobilier = () => {
 
         {/* Contenu */}
         <div className="container mx-auto px-4 py-8 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center h-40">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
               Gestion Immobilière{" "}
               <span className=" text-blue-400">Professionnelle</span>
-              Gestion Immobilière <span className=" text-blue-400">Professionnelle</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
               Des solutions complètes pour propriétaires bailleurs. Confiez-nous
               la gestion de votre patrimoine en toute sérénité.
               Des solutions complètes pour propriétaires bailleurs.
@@ -301,7 +300,7 @@ const GestionImmobilier = () => {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
-                className="border-white text-white bg-white hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
+                className="border-white text-black bg-white hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
                 onClick={() => setIsModalOpen(true)}
               >
                 Demander un devis
@@ -312,11 +311,11 @@ const GestionImmobilier = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 bg-white">
+      <section className="">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="text-center bg-white py-8 rounded-lg shadow-sm">
                 <div className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
                   {stat.number}
                 </div>
@@ -330,13 +329,13 @@ const GestionImmobilier = () => {
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-16">
+      <section id="services" className="py-8 mt-5 rounded-lg bg-white ">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
               Nos Services de Gestion
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-md text-slate-600 max-w-2xl mx-auto">
               Une gamme complète de services pour optimiser la gestion de votre
               bien immobilier
             </p>

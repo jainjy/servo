@@ -91,11 +91,35 @@ import UserOrders from "./components/orders/UserOrders";
 import ListeDemandesDevis from "./pages/pro/ListeDemandesDevis";
 import CookieConsent from "./components/CookieConsent";
 import CookiesPolicy from "./pages/CookiesPolicy";
-import FinancementDemandes from "./pages/admin/FinancementDemandes"; // ← AJOUT IMPORT ICI
+import FinancementDemandes from "./pages/admin/FinancementDemandes";
 import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
-import { SocketProvider } from "./contexts/SocketContext";
+import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
+import AdminBookings from "./components/admin/tourism/AdminBookings";
+import Recherche from "./pages/Recherche";
+import TestPage from "./pages/TestPage";
+import AdvertisementManager from "./components/admin/AdvertisementManager";
+
+// Import des nouveaux composants immobilier
+import AuditPatrimonial from "./pages/immobilier/AuditPatrimonial";
+
+// Import des composants bâtiments
+import BatimentsLayout from "./pages/batiments/BatimentsLayout";
+import RenovationChantiers from "./pages/batiments/RenovationChantiers";
+
+// Import des composants domicile
+import DomicileLayout from "./pages/domicile/DomicileLayout";
+import ImmobilierSections from "./components/ImmobilierSections";
+import StripeConnectButton from "./pages/CreateStripeAccount";
+import RGPDInfo from "@/pages/RGPDInfo";
+import ImportInfo from "@/pages/ImportInfo";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
+
+
+
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -158,12 +182,73 @@ const App = () => {
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   <Route
+                    path="/immobilier-sections"
+                    element={<ImmobilierSections />}
+                  />
+                  <Route
+                    path="/estimation-immobilier"
+                    element={<EstimationImmobilierPage />}
+                  />
+                  <Route
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
+                  {/* Routes Bâtiments */}
+                  <Route path="/batiments" element={<BatimentsLayout />} />
+                  <Route
+                    path="/renovation-chantiers"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/construction-plans"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/materiaux-viabilisations"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/division-parcellaire"
+                    element={<BatimentsLayout />}
+                  />
+                  <Route
+                    path="/formation-podcasts"
+                    element={<BatimentsLayout />}
+                  />
+
+                  {/* Routes Domicile */}
+                  <Route path="/domicile" element={<DomicileLayout />} />
+                  <Route
+                    path="/produits-commerces"
+                    element={<DomicileLayout />}
+                  />
+                  <Route path="/service-maison" element={<DomicileLayout />} />
+                  <Route
+                    path="/equipements-livraison"
+                    element={<DomicileLayout />}
+                  />
+                  <Route
+                    path="/design-decoration"
+                    element={<DomicileLayout />}
+                  />
+                  <Route
+                    path="/cours-formations"
+                    element={<DomicileLayout />}
+                  />
+                  <Route path="/utilities" element={<DomicileLayout />} />
+                  <Route
+                    path="/gestion-immobilier"
+                    element={<GestionImmobilier />}
+                  />
+                  <Route path="/recherche" element={<Recherche />} />
+
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
+                  <Route
+                    path="/stripe-create"
+                    element={<StripeConnectButton user={user} />}
+                  />
                   <Route path="/alimentation" element={<Alimentation />} />
                   <Route
                     path="/alimentation/categorie/:categoryName"
@@ -179,7 +264,7 @@ const App = () => {
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/service" element={<ServicesPartnersPage />} />
 
-                  <Route path="/publicite" element={<Publicite />} />
+                  {/* <Route path="/publicite" element={<Publicite />} /> */}
                   <Route
                     path="/estimations"
                     element={<EstimationImmobilierPage />}
@@ -242,6 +327,7 @@ const App = () => {
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
+                    <Route path="reservations" element={<AdminBookings />} />
                     <Route
                       path="services"
                       element={<ProfessionalServicesPage />}
@@ -305,6 +391,10 @@ const App = () => {
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
+                    <Route
+                      path="publicite"
+                      element={<AdvertisementManager />}
+                    />
 
                     <Route path="demandes" element={<ListeDemande />} />
 
@@ -322,6 +412,10 @@ const App = () => {
                   </Route>
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
+                  <Route path="/en-savoir-plus" element={<RGPDInfo />} />
+                  <Route path="/import-info" element={<ImportInfo />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
                 </Routes>
                 <CookieConsent />
               </Layout>

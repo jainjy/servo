@@ -52,7 +52,7 @@ const ProRegisterPage = () => {
     confirmPassword: "",
 
     // Type d'utilisateur
-    userType: "CLIENT", // PRESTATAIRE | VENDEUR | LOUEUR | CLIENT | ADMIN
+    userType: "CLIENT", // PRESTATAIRE | VENDEUR | CLIENT | ADMIN | AGENCE | BIEN ETRE
     role: "professional", // particular ou professional
     demandType: "", // agence immobilier, particulier ou syndicat
 
@@ -75,6 +75,7 @@ const ProRegisterPage = () => {
     metiers: [] as number[],
 
     acceptTerms: false,
+    dataImported: false,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -124,10 +125,28 @@ const ProRegisterPage = () => {
       return;
     }
 
-    // Redirection vers la page de paiement avec toutes les données
+    // DÉTERMINER userType BASÉ SUR L'ABONNEMENT EXACT
+    let finalUserType = "CLIENT"; // Valeur par défaut
+    
+    if (subscriptionData) {
+      // Mapping exact basé sur les abonnements de vos images
+      const subscriptionToUserType: { [key: string]: string } = {
+        "Pro Immobilier Complet": "AGENCE",
+        "Prestataires de Services": "PRESTATAIRE", 
+        "Espace Annonceur": "VENDEUR",
+        "Bien-être": "BIEN ETRE"
+      };
+      
+      finalUserType = subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
+    }
+
+    // Redirection vers la page de paiement avec TOUTES les données
     navigate("/register/professional/payment", {
       state: {
-        formData,
+        formData: {
+          ...formData,
+          userType: finalUserType // AJOUT: userType basé sur l'abonnement exact
+        },
         subscriptionData,
       },
     });
@@ -137,7 +156,22 @@ const ProRegisterPage = () => {
   useEffect(() => {
     if (subscriptionData) {
       console.log("Subscription selected:", subscriptionData);
-      // Vous pouvez pré-remplir le userType basé sur subscriptionData.userTypes
+      
+      // Pré-remplir userType basé sur l'abonnement exact
+      const subscriptionToUserType: { [key: string]: string } = {
+        "Pro Immobilier Complet": "AGENCE",
+        "Prestataires de Services": "PRESTATAIRE",
+        "Espace Annonceur": "VENDEUR", 
+        "Bien-être": "BIEN ETRE"
+      };
+      
+      const userTypeFromSubscription = subscriptionToUserType[subscriptionData.name];
+      if (userTypeFromSubscription) {
+        setFormData(prev => ({
+          ...prev,
+          userType: userTypeFromSubscription
+        }));
+      }
     }
   }, [subscriptionData]);
 
@@ -314,7 +348,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
@@ -333,7 +367,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.email}
                             onChange={(e) =>
                               handleInputChange("email", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
@@ -351,7 +385,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.phone}
                             onChange={(e) =>
                               handleInputChange("phone", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
@@ -637,43 +671,70 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                         </div>
                       </div>
 
-                      {/* Conditions */}
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="acceptTerms"
-                            checked={formData.acceptTerms}
-                            onCheckedChange={(checked) =>
-                              handleInputChange(
-                                "acceptTerms",
-                                checked as boolean
-                              )
-                            }
-                            required
-                          />
-                          <label
-                            htmlFor="acceptTerms"
-                            className="text-xs text-gray-600 cursor-pointer"
-                          >
-                            J'accepte les{" "}
-                            <a
-                              href="/terms"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
-                            >
-                              conditions d'utilisation
-                            </a>{" "}
-                            et la{" "}
-                            <a
-                              href="/privacy"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
-                            >
-                              politique de confidentialité
-                            </a>
-                          </label>
-                        </div>
-                      </div>
+                      {/* Conditions et importation de données */}
+<div className="space-y-3">
+  {/* Conditions d'utilisation */}
+  <div className="flex items-center space-x-2">
+    <Checkbox
+      id="acceptTerms"
+      checked={formData.acceptTerms}
+      onCheckedChange={(checked) =>
+        handleInputChange("acceptTerms", checked as boolean)
+      }
+      required
+    />
+    <label
+      htmlFor="acceptTerms"
+      className="text-xs text-gray-600 cursor-pointer leading-snug"
+    >
+      J'accepte les{" "}
+      <a
+        href="/terms"
+        className="text-blue-600 hover:text-blue-700 font-medium"
+      >
+        conditions d'utilisation
+      </a>{" "}
+      et la{" "}
+      <a
+        href="/privacy"
+        className="text-blue-600 hover:text-blue-700 font-medium"
+      >
+        politique de confidentialité
+      </a>.
+    </label>
+  </div>
+
+  {/* Importation de données */}
+  <div className="flex items-start space-x-2">
+    <Checkbox
+      id="dataImported"
+      checked={formData.dataImported}
+      onCheckedChange={(checked) =>
+        handleInputChange("dataImported", checked as boolean)
+      }
+    />
+    <label
+      htmlFor="dataImported"
+      className="text-xs text-gray-600 cursor-pointer leading-snug"
+    >
+      Les personnes qui utilisent notre service ont pu importer vos coordonnées
+      sur Servo.{" "}
+      <a
+        href="/import-info"
+        className="text-blue-600 hover:text-blue-700 font-medium"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        En savoir plus
+      </a>
+      .
+    </label>
+  </div>
+</div>
+
                     </>
                   )}
+                  
 
                   {/* Boutons de navigation */}
                   <div className="flex gap-4">
@@ -718,6 +779,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                       Se connecter
                     </a>
                   </div>
+                  
                 </form>
               </CardContent>
             </Card>
