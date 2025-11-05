@@ -52,7 +52,7 @@ const ProRegisterPage = () => {
     confirmPassword: "",
 
     // Type d'utilisateur
-    userType: "CLIENT", // PRESTATAIRE | VENDEUR | LOUEUR | CLIENT | ADMIN
+    userType: "CLIENT", // PRESTATAIRE | VENDEUR | CLIENT | ADMIN | AGENCE | BIEN ETRE
     role: "professional", // particular ou professional
     demandType: "", // agence immobilier, particulier ou syndicat
 

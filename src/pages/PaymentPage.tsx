@@ -20,7 +20,7 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState("");
   const { signupPro, confirmPayment } = useAuth();
-
+  console.log("Subscription Data:", subscriptionData);
   const handlePayment = async () => {
     if (!stripe || !elements) return;
     setIsProcessing(true);
@@ -73,7 +73,7 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
   };
 
   const handleBack = () =>
-    navigate("/register/professional/form", { state: { subscriptionData } });
+    navigate("/register/professional/form", { state: { subscriptionData ,formData} });
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-100 to-blue-200">
@@ -102,7 +102,7 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
             <div className="flex justify-between">
               <span>Prix:</span>
               <span className="font-semibold">
-                {typeof subscriptionData.price === "number"
+                {typeof parseFloat(subscriptionData.price) === "number"
                   ? `${subscriptionData.price} €`
                   : "Prix non disponible"}
               </span>
