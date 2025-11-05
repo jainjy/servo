@@ -98,7 +98,6 @@ import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
-import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 
 // Import des nouveaux composants immobilier
