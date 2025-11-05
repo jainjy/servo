@@ -75,6 +75,7 @@ const ProRegisterPage = () => {
     metiers: [] as number[],
 
     acceptTerms: false,
+    dataImported: false,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -670,43 +671,70 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                         </div>
                       </div>
 
-                      {/* Conditions */}
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="acceptTerms"
-                            checked={formData.acceptTerms}
-                            onCheckedChange={(checked) =>
-                              handleInputChange(
-                                "acceptTerms",
-                                checked as boolean
-                              )
-                            }
-                            required
-                          />
-                          <label
-                            htmlFor="acceptTerms"
-                            className="text-xs text-gray-600 cursor-pointer"
-                          >
-                            J'accepte les{" "}
-                            <a
-                              href="/terms"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
-                            >
-                              conditions d'utilisation
-                            </a>{" "}
-                            et la{" "}
-                            <a
-                              href="/privacy"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
-                            >
-                              politique de confidentialité
-                            </a>
-                          </label>
-                        </div>
-                      </div>
+                      {/* Conditions et importation de données */}
+<div className="space-y-3">
+  {/* Conditions d'utilisation */}
+  <div className="flex items-center space-x-2">
+    <Checkbox
+      id="acceptTerms"
+      checked={formData.acceptTerms}
+      onCheckedChange={(checked) =>
+        handleInputChange("acceptTerms", checked as boolean)
+      }
+      required
+    />
+    <label
+      htmlFor="acceptTerms"
+      className="text-xs text-gray-600 cursor-pointer leading-snug"
+    >
+      J'accepte les{" "}
+      <a
+        href="/terms"
+        className="text-blue-600 hover:text-blue-700 font-medium"
+      >
+        conditions d'utilisation
+      </a>{" "}
+      et la{" "}
+      <a
+        href="/privacy"
+        className="text-blue-600 hover:text-blue-700 font-medium"
+      >
+        politique de confidentialité
+      </a>.
+    </label>
+  </div>
+
+  {/* Importation de données */}
+  <div className="flex items-start space-x-2">
+    <Checkbox
+      id="dataImported"
+      checked={formData.dataImported}
+      onCheckedChange={(checked) =>
+        handleInputChange("dataImported", checked as boolean)
+      }
+    />
+    <label
+      htmlFor="dataImported"
+      className="text-xs text-gray-600 cursor-pointer leading-snug"
+    >
+      Les personnes qui utilisent notre service ont pu importer vos coordonnées
+      sur Servo.{" "}
+      <a
+        href="/import-info"
+        className="text-blue-600 hover:text-blue-700 font-medium"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        En savoir plus
+      </a>
+      .
+    </label>
+  </div>
+</div>
+
                     </>
                   )}
+                  
 
                   {/* Boutons de navigation */}
                   <div className="flex gap-4">
@@ -751,6 +779,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                       Se connecter
                     </a>
                   </div>
+                  
                 </form>
               </CardContent>
             </Card>

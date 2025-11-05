@@ -112,6 +112,13 @@ import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 import DomicileLayout from "./pages/domicile/DomicileLayout";
 import ImmobilierSections from "./components/ImmobilierSections";
 import StripeConnectButton from "./pages/CreateStripeAccount";
+import RGPDInfo from "@/pages/RGPDInfo";
+import ImportInfo from "@/pages/ImportInfo";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
+
+
+
 
 const queryClient = new QueryClient();
 
@@ -237,7 +244,10 @@ const App = () => {
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
-                  <Route path="/stripe-create" element={<StripeConnectButton user={user} />} />
+                  <Route
+                    path="/stripe-create"
+                    element={<StripeConnectButton user={user} />}
+                  />
                   <Route path="/alimentation" element={<Alimentation />} />
                   <Route
                     path="/alimentation/categorie/:categoryName"
@@ -401,6 +411,10 @@ const App = () => {
                   </Route>
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
+                  <Route path="/en-savoir-plus" element={<RGPDInfo />} />
+                  <Route path="/import-info" element={<ImportInfo />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
                 </Routes>
                 <CookieConsent />
               </Layout>

@@ -73,6 +73,7 @@ const RegisterPage = () => {
     metiers: [] as number[],
 
     acceptTerms: false,
+    importedContactsConsent: false,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -103,23 +104,43 @@ const RegisterPage = () => {
     { id: 5, libelle: "Jardinier" },
   ];
 
-  // Dans handleSubmit, après la validation du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 🎯 LOGIQUE DE L'ÉTAPE 1 : Validation de base et passage à l'étape 2
     if (step === 1) {
+      // 1. Vérification des champs de base
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+        toast.error("Veuillez remplir toutes les informations personnelles requises");
+        return;
+      }
+      
+      // 🛑 NOTA BENE : La vérification des conditions (acceptTerms) est maintenant ignorée ici.
+      
+      // 2. Si tout est bon, on passe à l'étape 2
       setStep(2);
       return;
     }
+    
+//     if (step === 1) {
+//   // Vérifie les champs de base
+//   if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+//     toast.error("Veuillez remplir toutes les informations requises");
+//     return;
+//   }
+//   // Passe à l'étape 2 (les conditions RGPD seront ici)
+//   setStep(2);
+//   return;
+// }
+
+// if (!formData.acceptTerms) {
+//   toast.error("Veuillez accepter les conditions d'utilisation et la politique de confidentialité");
+//   return;
+// }
 
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
-      return;
-    }
-
-    if (!formData.acceptTerms) {
-      toast.error("Veuillez accepter les conditions d'utilisation");
       return;
     }
 
@@ -203,7 +224,7 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Background reste identique */}
+      {/* Background */}
       <div className="w-screen h-screen bg-black/80 backdrop-blur-lg -z-10 top-0 absolute"></div>
       <div className="absolute w-screen h-screen top-0 left-0 -z-20 opacity-70">
         <img
@@ -214,8 +235,8 @@ const RegisterPage = () => {
       </div>
 
       <div className="w-[80vw] lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
-        {/* Sidebar reste identique */}
-        <div className="hidden lg:flex lg:flex-1  bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
+        {/* Sidebar */}
+        <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
 
@@ -235,11 +256,11 @@ const RegisterPage = () => {
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
               </p>
               <p className="text-blue-100 text-sm mt-2">
-Des biens immobiliers, ses services additionnels, produits adaptés à vos besoins et vos locations au sein d’une seule plateforme
+                Des biens immobiliers, ses services additionnels, produits adaptés à vos besoins et vos locations au sein d'une seule plateforme
               </p>
             </div>
 
-            <div className="space-y-6 ">
+            <div className="space-y-6">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
@@ -333,7 +354,7 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
-                            }
+                              }
                             required
                           />
                         </div>
@@ -376,7 +397,6 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                         </div>
                       </div>
 
-
                       {/* Type de demande (si particulier) */}
                       {formData.role === "particular" && (
                         <div className="space-y-3">
@@ -402,6 +422,8 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                           </Select>
                         </div>
                       )}
+
+                      
                     </>
                   ) : (
                     <>
@@ -584,9 +606,8 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                           </div>
                         </div>
                       </div>
-
-                      {/* Conditions */}
-                      <div className="space-y-4">
+                      {/* Conditions - Étape 1 */}
+                      <div className="space-y-4 pt-4 border-t border-gray-200">
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="acceptTerms"
@@ -616,6 +637,32 @@ Des biens immobiliers, ses services additionnels, produits adaptés à vos besoi
                               className="text-blue-600 hover:text-blue-700 font-medium"
                             >
                               politique de confidentialité
+                            </a>
+                          </label>
+                        </div>
+
+                        {/* RGPD - Importation des contacts */}
+                        <div className="flex items-start space-x-2">
+                          <Checkbox
+                            id="importedContactsConsent"
+                            checked={formData.importedContactsConsent || false}
+                            onCheckedChange={(checked) =>
+                              handleInputChange("importedContactsConsent", checked as boolean)
+                            }
+                          />
+                          <label
+                            htmlFor="importedContactsConsent"
+                            className="text-xs text-gray-600 leading-snug cursor-pointer"
+                          >
+                            Les personnes qui utilisent notre service ont pu importer vos coordonnées sur{" "}
+                            <span className="font-semibold">Servo</span>.{" "}
+                            <a
+                              href="/en-savoir-plus"
+                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              En savoir plus
                             </a>
                           </label>
                         </div>
