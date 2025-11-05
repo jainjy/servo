@@ -116,6 +116,7 @@ import AuditMediation from "./components/components/AuditMediation";
 import AidesLeveesFonds from "./components/components/AideFonds";
 import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
 import PodcastsServices from "./components/components/Podcast_services";
+import FormationsTourisme from "./components/components/ToursimeFormation";
 
 const queryClient = new QueryClient();
 
@@ -183,6 +184,7 @@ const App = () => {
                   <Route path="/aideFonds" element={<AidesLeveesFonds />} />
                   <Route path="/juridiqueLiquidation" element={<JuridiqueLiquidation />} />
                   <Route path="/podcast_service" element={<PodcastsServices />} />
+                  <Route path="/formationTourisme" element={<FormationsTourisme />} />
 
                   {/* /*entreprise link* */}
 

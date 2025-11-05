@@ -367,7 +367,7 @@ const ContactModal = ({ isOpen, onClose, investmentType }) => {
             <textarea
               value={formData.message}
               onChange={(e) => setFormData({...formData, message: e.target.value})}
-              rows="3"
+              rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="Vos questions ou commentaires..."
             />

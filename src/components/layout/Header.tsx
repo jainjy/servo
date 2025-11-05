@@ -489,7 +489,7 @@ useEffect(() => {
         }, {
           title: "Formations",
           description: "Cours & ateliers locaux",
-          href: "/tourisme",
+          href: "/formationTourisme",
           image: "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg"
         },
       ],
