@@ -14,7 +14,7 @@ const KEY_ACTIONS = [
         text: "Découvrir la Solution",
         type: "SCPI",
         link: "/investir/scpi",
-        description: "Immobilier Géré (SCPI & Ass. Vie)",
+        description: "SCPI & Immobilier",
         iconPath: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
         isModal: false,
     },
@@ -23,25 +23,25 @@ const KEY_ACTIONS = [
         text: "Découvrir la Solution",
         type: "CROWDFUNDING",
         link: "/investir/crowdfunding",
-        description: "Financement Participatif Immobilier",
+        description: "Crowdfunding & Actions",
         iconPath: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20v-2H6.5M5 11.5H9M5 15.5H9m3 4v-4H10",
         isModal: false,
     },
-    {
-        id: 3,
-        text: "Découvrir la Solution",
-        type: "CRYPTO",
-        link: "/investir/crypto",
-        description: "Gestion de Crypto-actifs & Blockchain",
-        iconPath: "M13 10V3L4 14h7v7l9-11h-7z",
-        isModal: false,
-    },
+    // {
+    //     id: 3,
+    //     text: "Découvrir la Solution",
+    //     type: "CRYPTO",
+    //     link: "/investir/crypto",
+    //     description: "Gestion de Crypto-actifs & Blockchain",
+    //     iconPath: "M13 10V3L4 14h7v7l9-11h-7z",
+    //     isModal: false,
+    // },
     {
         id: 4,
         text: "Découvrir la Solution",
         type: "ISR",
         link: "/investir/isr",
-        description: "Fonds à Impact Social et Environnemental (ISR)",
+        description: "Obligaiton & Associations",
         iconPath: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
         isModal: false,
     },
@@ -230,17 +230,16 @@ const Investissement = () => {
                     </div>
                 </header>
             </TransitionWrapper>
-            <div className="max-w-7xl w-full mx-auto">
+            <div className="max-w-7xl mb-12 w-full mx-auto">
                 {/* ZONE 1 : BOUTONS D'ACTION PRINCIPAUX */}
                 <div className="">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 xl:gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
                         {isLoading ?
                             Array(4).fill(0).map((_, index) => <SkeletonButton key={index} />)
                             : buttonsContent}
                     </div>
                 </div>
 
-                <hr className="border-gray-200 mb-24" />
             </div>
         </section>
     );

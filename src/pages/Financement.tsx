@@ -251,14 +251,13 @@ export default function Financement() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-        <Header />
+
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
             <p className="text-slate-600">Chargement des données...</p>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }

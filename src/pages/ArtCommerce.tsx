@@ -79,7 +79,7 @@ const ArtCommerce: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Section de recherche */}
       <section
-        className="relative py-24 text-white overflow-hidden"
+        className="relative py-16 text-white overflow-hidden rounded-lg"
         style={{
           backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(30, 58, 138, 0.8)), url('https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
           backgroundSize: "cover",
@@ -89,10 +89,10 @@ const ArtCommerce: React.FC = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-2xl">
+          <h1 className="text-4xl font-bold mb-6 drop-shadow-2xl">
             Art & Commerces
           </h1>
-          <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-blue-100 font-light">
+          <p className="text-md mb-10 max-w-2xl mx-auto text-blue-100 font-light">
             Découvrez l'art local et les petites boutiques de La Réunion et
             d'ailleurs
           </p>
@@ -115,11 +115,10 @@ const ArtCommerce: React.FC = () => {
       <div className="flex flex-wrap gap-3 justify-center mb-8 mt-6">
         <button
           onClick={() => setSelectedCategory("all")}
-          className={`px-6 py-3 rounded-xl ${
-            selectedCategory === "all"
-              ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+          className={`px-6 py-3 rounded-xl ${selectedCategory === "all"
+              ? "bg-slate-800 text-white shadow-lg"
               : "bg-white text-slate-700 border border-gray-200"
-          }`}
+            }`}
         >
           Tous
         </button>
@@ -128,11 +127,10 @@ const ArtCommerce: React.FC = () => {
           <button
             key={catName}
             onClick={() => setSelectedCategory(catName)}
-            className={`px-6 py-3 rounded-xl ${
-              selectedCategory.toLowerCase() === catName.toLowerCase()
-                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+            className={`px-6 py-3 rounded-xl ${selectedCategory.toLowerCase() === catName.toLowerCase()
+                ? "bg-slate-900 text-white shadow-lg"
                 : "bg-white text-slate-700 border border-gray-200"
-            }`}
+              }`}
           >
             {catName.charAt(0).toUpperCase() + catName.slice(1)}
           </button>
@@ -140,60 +138,60 @@ const ArtCommerce: React.FC = () => {
       </div>
 
       {/* Grille des services */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-10 bg-gray-50">
-  {filteredServices.length > 0 ? (
-    filteredServices.map((item) => (
-      <div
-        key={item.id}
-        className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col border border-gray-100 hover:-translate-y-1"
-      >
-        {/* Image */}
-        <div
-          className="h-40 bg-cover bg-center relative"
-          style={{
-            backgroundImage: `url(${item.images?.[0] || ""})`,
-          }}
-        >
-          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300"></div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-10 bg-gray-50">
+        {filteredServices.length > 0 ? (
+          filteredServices.map((item) => (
+            <div
+              key={item.id}
+              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col border border-gray-100 hover:-translate-y-1"
+            >
+              {/* Image */}
+              <div
+                className="h-40 bg-cover bg-center relative"
+                style={{
+                  backgroundImage: `url(${item.images?.[0] || ""})`,
+                }}
+              >
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300"></div>
+              </div>
 
-        {/* Contenu */}
-        <div className="p-4 flex flex-col flex-1 justify-between">
-          <h3 className="font-semibold text-base text-gray-800 group-hover:text-slate-900 transition">
-            {item.libelle}
-          </h3>
+              {/* Contenu */}
+              <div className="p-4 flex flex-col flex-1 justify-between">
+                <h3 className="font-semibold text-base text-gray-800 group-hover:text-slate-900 transition">
+                  {item.libelle}
+                </h3>
 
-          <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
-            {item.description}
-          </p>
+                <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                  {item.description}
+                </p>
 
-          <div className="flex justify-between items-center mt-3">
-            <span className="text-sm font-semibold text-slate-800">
-              {item.price ? `${item.price}€` : "—"}
-            </span>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-              {item.category?.name || "—"}
-            </span>
+                <div className="flex justify-between items-center mt-3">
+                  <span className="text-sm font-semibold text-slate-800">
+                    {item.price ? `${item.price}€` : "—"}
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                    {item.category?.name || "—"}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => navigate(`/art-commerce/${item.id}`)}
+                  className="mt-3 bg-slate-900 text-white text-sm py-2 rounded-lg hover:bg-slate-800 transition font-medium"
+                >
+                  Voir les détails
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-20 text-gray-500">
+            <p className="text-base font-medium">Aucun résultat trouvé</p>
+            <p className="text-sm mt-2 text-gray-400">
+              Essaie avec un autre mot-clé ou une autre catégorie.
+            </p>
           </div>
-
-          <button
-            onClick={() => navigate(`/art-commerce/${item.id}`)}
-            className="mt-3 bg-slate-900 text-white text-sm py-2 rounded-lg hover:bg-slate-800 transition font-medium"
-          >
-            Voir les détails
-          </button>
-        </div>
+        )}
       </div>
-    ))
-  ) : (
-    <div className="col-span-full text-center py-20 text-gray-500">
-      <p className="text-base font-medium">Aucun résultat trouvé</p>
-      <p className="text-sm mt-2 text-gray-400">
-        Essaie avec un autre mot-clé ou une autre catégorie.
-      </p>
-    </div>
-  )}
-</div>
 
 
     </div>

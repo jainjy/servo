@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import api from "@/lib/api"
 import { Headphones, Home, Video, MessageCircle, Activity } from "lucide-react";
 import PodcastCard from "@/components/PodcastCard";
+import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
+import Podcast from "@/pages/podcast";
+import ArtCommerce from "./ArtCommerce";
 
 interface Service {
   id: number
@@ -362,42 +365,48 @@ const BienEtre = () => {
 
   // Configuration des tabs avec icônes SVG
   const tabs = [
-    { 
-      id: 'all', 
-      label: 'Tous les services', 
-      icon: <Home className="w-5 h-5" /> 
+    {
+      id: 'all',
+      label: 'Tous les services',
+      icon: <Home className="w-5 h-5" />
     },
-    { 
-      id: 'Formateur', 
-      label: 'Cours à domicile', 
-      icon: <Activity className="w-5 h-5" /> 
+    {
+      id: 'Formateur',
+      label: 'Cours à domicile',
+      icon: <Activity className="w-5 h-5" />
     },
-    { 
-      id: 'Masseur', 
-      label: 'Massages à domicile', 
+    {
+      id: 'Masseur',
+      label: 'Massages à domicile',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
         </svg>
-      ) 
+      )
     },
-    { 
-      id: 'Thérapeute', 
-      label: 'Consultation visio', 
-      icon: <Video className="w-5 h-5" /> 
+    {
+      id: 'Thérapeute',
+      label: 'Thérapeutes & soins',
+      icon: <Video className="w-5 h-5" />
     },
-    { 
-      id: 'Podcasteur', 
-      label: 'Podcasts & Vidéos', 
-      icon: <MessageCircle className="w-5 h-5" /> 
-    }
+    {
+      id: 'Podcasteur',
+      label: 'Podcasts & Vidéos',
+      icon: <MessageCircle className="w-5 h-5" />
+    },
+    {
+      id: 'BoutiqueNaturels',
+      label: 'Boutique & produits naturels',
+      icon: <MessageCircle className="w-5 h-5" />
+    },
   ];
 
   const [servicesByCategory, setServicesByCategory] = useState({
     Formateur: [],
     Masseur: [],
     Thérapeute: [],
-    Podcasteur: []
+    Podcasteur: [],
+    BoutiqueNaturels: []
   });
 
   const fetchServices = async () => {
@@ -485,7 +494,7 @@ const BienEtre = () => {
 
       {/* HERO */}
       <section
-        className="relative h-96 py-20 lg:py-32 text-center text-white overflow-hidden"
+        className="relative h-80 py-20 lg:py-32 text-center text-white overflow-hidden"
         style={{
           backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(30, 58, 138, 0.6)), url('https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1999&q=80')`,
           backgroundSize: 'cover',
@@ -496,19 +505,19 @@ const BienEtre = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 to-slate-900/40"></div>
         <div className="container mx-auto px-4 relative z-10">
           <SlideIn direction="up">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl lg:text-4xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
               Bien-Être & Équilibre
             </h1>
           </SlideIn>
           <SlideIn direction="up" delay={200}>
-            <p className="text-lg sm:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed px-4 mb-8 drop-shadow-lg">
+            <p className="text-sm sm:text-sm text-slate-200 max-w-2xl mx-auto leading-relaxed px-4 mb-8 drop-shadow-lg">
               Découvrez nos expériences holistiques à domicile, en visio ou en compagnie de nos experts certifiés.
             </p>
           </SlideIn>
           <SlideIn direction="up" delay={400}>
             <button
               onClick={scrollToSection2}
-              className="bg-slate-900 text-white px-8 py-4 rounded-xl hover:bg-slate-800 transition-all duration-300 transform hover:scale-105 shadow-2xl font-semibold text-lg">
+              className="bg-slate-900 text-white px-8 py-2 rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-2xl font-semibold text-md">
               Commencer mon voyage
             </button>
           </SlideIn>
@@ -516,18 +525,18 @@ const BienEtre = () => {
       </section>
 
       {/* CONTAINER AVEC TABULATION */}
-      <div ref={section2Ref} className="bg-gray-50 dark:bg-background p-4 sm:p-6 lg:p-10">
-        <div className="max-w-7xl mx-auto">
+      <div ref={section2Ref} className="bg-gray-50 dark:bg-background p-4 sm:p-6 lg:p-0">
+        <div className="mx-auto">
 
           {/* Menu de tabulation moderne */}
           <SlideIn direction="down">
-            <div className="bg-white dark:bg-card rounded-2xl shadow-lg p-4 sm:p-6 mb-12 flex flex-wrap justify-center items-center gap-3 sm:gap-4 w-full max-w-6xl mx-auto">
+            <div className="bg-white dark:bg-card rounded-2xl shadow-lg px-2 py-5 mb-12 grid grid-cols-2 lg:grid-cols-6 justify-center items-center w-full mx-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group relative flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${activeTab === tab.id
-                    ? 'text-white shadow-md scale-105'
+                  className={`group relative flex items-center gap-2 sm:gap-3 px-2 sm:px-2 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${activeTab === tab.id
+                    ? 'text-white shadow-md'
                     : 'text-gray-700 dark:text-foreground hover:bg-gray-100 dark:hover:bg-muted/50'
                     }`}
                 >
@@ -537,7 +546,7 @@ const BienEtre = () => {
                   <span className="relative z-10 group-hover:scale-110 transition-transform duration-300">
                     {tab.icon}
                   </span>
-                  <span className="text-sm sm:text-base font-bold relative z-10">
+                  <span className="text-xs sm:text-xs font-bold relative z-10">
                     {tab.label}
                   </span>
                 </button>
@@ -546,7 +555,7 @@ const BienEtre = () => {
           </SlideIn>
 
           {/* Contenu des tabs */}
-          <div className="min-h-[500px]">
+          <div className="px-10 min-h-[500px]">
 
             {/* TOUS LES SERVICES */}
             {activeTab === 'all' && (
@@ -556,9 +565,9 @@ const BienEtre = () => {
                     <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
                       Tous nos services de bien-être
                     </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
-                      Découvrez l'ensemble de nos services pour prendre soin de votre corps et de votre esprit. 
-                      Des cours personnalisés aux massages relaxants, en passant par les consultations en ligne 
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
+                      Découvrez l'ensemble de nos services pour prendre soin de votre corps et de votre esprit.
+                      Des cours personnalisés aux massages relaxants, en passant par les consultations en ligne
                       et nos contenus inspirants.
                     </p>
 
@@ -582,32 +591,35 @@ const BienEtre = () => {
 
             {/* FORMATEUR */}
             {activeTab === 'Formateur' && (
-              <section className="mb-20">
-                <SlideIn direction="left">
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                      Cours à domicile
-                    </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
-                      Des séances personnalisées dans le confort de votre maison. Nos experts se déplacent chez vous avec tout le matériel nécessaire pour des cours sur mesure adaptés à vos objectifs et votre emploi du temps.
-                    </p>
+              <>
+                <section className="mb-20">
+                  <SlideIn direction="left">
+                    <div className="mb-12">
+                      <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                        Cours à domicile
+                      </h2>
+                      <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
+                        Des séances personnalisées dans le confort de votre maison. Nos experts se déplacent chez vous avec tout le matériel nécessaire pour des cours sur mesure adaptés à vos objectifs et votre emploi du temps.
+                      </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                      {getCurrentServices().length > 0 ? (
-                        getCurrentServices().map((service, index) => (
-                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard service={service} index={index} />
-                          </SlideIn>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                          Aucun service disponible pour cette catégorie
-                        </div>
-                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                        {getCurrentServices().length > 0 ? (
+                          getCurrentServices().map((service, index) => (
+                            <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                              <ServiceCard service={service} index={index} />
+                            </SlideIn>
+                          ))
+                        ) : (
+                          <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                            Aucun service disponible pour cette catégorie
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </SlideIn>
-              </section>
+                  </SlideIn>
+                </section>
+                <ArtCommerce />
+              </>
             )}
 
             {/* MASSEUR */}
@@ -618,7 +630,7 @@ const BienEtre = () => {
                     <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
                       Massages à domicile
                     </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
                       Transformez votre espace en véritable spa avec nos thérapeutes certifiés. Installation professionnelle, huiles essentielles bio et ambiance relaxante pour une expérience sensorielle complète sans vous déplacer.
                     </p>
 
@@ -648,7 +660,7 @@ const BienEtre = () => {
                     <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
                       Consultation en visio
                     </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
                       Accédez à l'expertise où que vous soyez. Nos consultations à distance maintiennent la qualité d'un accompagnement personnalisé avec une flexibilité totale. Idéal pour un suivi régulier ou des conseils ponctuels.
                     </p>
 
@@ -672,33 +684,15 @@ const BienEtre = () => {
 
             {/* PODCASTEUR */}
             {activeTab === 'Podcasteur' && (
-              <section className="mb-20">
-                <SlideIn direction="left" delay={300}>
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                      Podcasts & Vidéos Inspirantes
-                    </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-lg leading-relaxed max-w-3xl">
-                      Visionnez nos entretiens exclusifs avec des personnalités inspirantes et découvrez leurs parcours de vie.
-                      Un projet mené en collaboration avec notre agence de communication partenaire.
-                    </p>
-                  </div>
-                </SlideIn>
+              <>
+                <Podcast />
+              </>
+            )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                  {getCurrentServices().length > 0 ? (
-                    getCurrentServices().map((podcast, index) => (
-                      <SlideIn key={podcast.id || index} direction="up" delay={index * 100}>
-                        <PodcastCard podcast={podcast} />
-                      </SlideIn>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                      Aucun podcast disponible
-                    </div>
-                  )}
-                </div>
-              </section>
+            {activeTab === 'BoutiqueNaturels' && (
+              <>
+                <BoutiqueBienEtre />
+              </>
             )}
 
           </div>

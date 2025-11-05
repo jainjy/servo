@@ -444,18 +444,18 @@ useEffect(() => {
         {
           title: "SCPI & immobilier",
           description: "Investissez dans l'immobilier locatif",
-          href: "/investissement",
+          href: "/investir/scpi",
           image: "https://i.pinimg.com/1200x/20/79/83/207983f864b7c516a64be40bc990df17.jpg"
         },
         {
           title: "Crowdfunding & actions ",
           description: "Investissez dans des projets innovants",
-          href: "/investissement",
+          href: "/investir/crowdfunding",
           image: "https://i.pinimg.com/736x/50/f9/69/50f969a3d27b9d0cb7dfc4bff0b8a80a.jpg"
         }, {
           title: "Obligations & associations",
           description: "Soutenez des causes tout en investissant",
-          href: "/investissement",
+          href: "/investir/isr",
           image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg"
         },
       ],
@@ -468,10 +468,10 @@ useEffect(() => {
     //   title: "CONSULTATIONS/AIDES",
     //   href: "/service",
     // },
-    {
-      title: "ART & COMMERCES",
-      href: "/art-commerce",
-    },
+    // {
+    //   title: "ART & COMMERCES",
+    //   href: "/art-commerce",
+    // },
     {
       title: "TOURISME",
       items: [
