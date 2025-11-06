@@ -17,6 +17,8 @@ import {
   CreditCard,
   FileSignature,
   X,
+  Star,
+  ThumbsUp,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -36,10 +38,14 @@ export default function UserDiscussions() {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [selectedArtisan, setSelectedArtisan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewArtisan, setReviewArtisan] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
 
   const actionsMenuRef = useRef(null);
 
-  const { socket, isConnected } = useSocket();
+  const { isConnected } = useSocket();
   const {
     messages,
     conversation,
@@ -255,6 +261,50 @@ export default function UserDiscussions() {
     }
   };
 
+  // Fonction pour noter un artisan
+  const handleNoterArtisan = (artisan) => {
+    setReviewArtisan(artisan);
+    setReviewRating(0);
+    setReviewComment("");
+    setShowReviewModal(true);
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      if (reviewRating === 0) {
+        toast.error("Veuillez sélectionner une note");
+        return;
+      }
+
+      const reviewData = {
+        userId: reviewArtisan.userId,
+        rating: reviewRating,
+        comment: reviewComment,
+        demandeId: parseInt(id),
+      };
+
+      // Si la demande a un service, on l'ajoute
+      if (demande.serviceId) {
+        reviewData.serviceId = demande.serviceId;
+      }
+
+      const response = await api.post("/api/reviews", reviewData);
+
+      toast.success("Avis envoyé avec succès !");
+      setShowReviewModal(false);
+      setReviewArtisan(null);
+      setReviewRating(0);
+      setReviewComment("");
+
+      // Recharger les données pour afficher la nouvelle review
+      const demandeResponse = await api.get(`/demandes/${id}`);
+      setDemande(demandeResponse.data);
+    } catch (error) {
+      console.error("Erreur envoi avis:", error);
+      toast.error("Erreur lors de l'envoi de l'avis");
+    }
+  };
+
   // Vérifier si un artisan a envoyé un devis
   const hasDevis = (artisan) => {
     return artisan.devisFileUrl && artisan.devis;
@@ -263,6 +313,11 @@ export default function UserDiscussions() {
   // Vérifier si un artisan a envoyé une facture
   const hasFacture = (artisan) => {
     return artisan.factureFileUrl && artisan.factureMontant;
+  };
+
+  // Vérifier si un artisan peut être noté (travaux terminés)
+  const canReviewArtisan = (artisan) => {
+    return artisan.recruited && artisan.factureStatus === "validee";
   };
 
   if (loading) {
@@ -470,6 +525,15 @@ export default function UserDiscussions() {
                                       Payer la facture
                                     </button>
                                   )}
+                                {canReviewArtisan(artisan) && (
+                                  <button
+                                    onClick={() => handleNoterArtisan(artisan)}
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-yellow-600 hover:bg-yellow-50 rounded-md"
+                                  >
+                                    <Star className="w-4 h-4" />
+                                    Noter l'artisan
+                                  </button>
+                                )}
                                 {artisan.devisFileUrl && (
                                   <a
                                     href={artisan.devisFileUrl}
@@ -500,7 +564,7 @@ export default function UserDiscussions() {
 
                       {/* Statuts */}
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {artisan.recruited && (
+                        {artisan?.recruited && (
                           <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                             Sélectionné
                           </span>
@@ -526,6 +590,11 @@ export default function UserDiscussions() {
                               : artisan.factureStatus === "refusee"
                               ? "refusée"
                               : "en attente"}
+                          </span>
+                        )}
+                        {canReviewArtisan(artisan) && (
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                            À noter
                           </span>
                         )}
                       </div>
@@ -841,6 +910,127 @@ export default function UserDiscussions() {
                 >
                   <CreditCard className="w-4 h-4" />
                   Simuler le paiement
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale de notation */}
+      {showReviewModal && reviewArtisan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">
+                Noter l'artisan
+              </h3>
+              <button
+                onClick={() => setShowReviewModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <Star className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-gray-900">
+                  {reviewArtisan.user.companyName ||
+                    `${reviewArtisan.user.firstName} ${reviewArtisan.user.lastName}`}
+                </h4>
+                {demande.service && (
+                  <p className="text-gray-600 mt-1">
+                    Service: {demande.service.libelle}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {/* Notation par étoiles */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Votre note *
+                  </label>
+                  <div className="flex justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        className={`p-2 rounded-lg transition-all ${
+                          star <= reviewRating
+                            ? "bg-yellow-100 text-yellow-500"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        }`}
+                      >
+                        <Star
+                          className={`w-6 h-6 ${
+                            star <= reviewRating ? "fill-current" : ""
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-center text-sm text-gray-500 mt-2">
+                    {reviewRating === 0
+                      ? "Sélectionnez une note"
+                      : reviewRating === 1
+                      ? "Très mauvais"
+                      : reviewRating === 2
+                      ? "Mauvais"
+                      : reviewRating === 3
+                      ? "Moyen"
+                      : reviewRating === 4
+                      ? "Bon"
+                      : "Excellent"}
+                  </p>
+                </div>
+
+                {/* Commentaire */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Votre avis (optionnel)
+                  </label>
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    placeholder="Partagez votre expérience avec cet artisan..."
+                  />
+                </div>
+
+                {/* Informations sur ce qui sera noté */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note concernera :</strong>
+                    <br />• L'artisan{" "}
+                    {reviewArtisan.user.companyName ||
+                      `${reviewArtisan.user.firstName} ${reviewArtisan.user.lastName}`}
+                    {demande.service && (
+                      <>
+                        <br />• Le service "{demande.service.libelle}"
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={() => setShowReviewModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSubmitReview}
+                  disabled={reviewRating === 0}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                >
+                  <ThumbsUp className="w-4 h-4" />
+                  Envoyer l'avis
                 </button>
               </div>
             </div>

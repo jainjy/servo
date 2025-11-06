@@ -672,6 +672,29 @@ export default function ProDiscussions({
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
+                        {message.evenementType === "FACTURE_PAYEE" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <p className="text-sm font-medium mb-2">
+                              payement effectues par le client.
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                 console.log("accepeter")
+
+                                }}
+                                className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                              >
+                                Confirmer
+                              </button>
+                              <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+                               onClick={() => {console.log("refuser")}}
+                              >
+                                Refuser
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div
                         className={`text-xs mt-1 flex items-center gap-1 ${
