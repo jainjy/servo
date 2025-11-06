@@ -37,28 +37,6 @@ const Hero = () => {
   };
 
   useEffect(() => {
-    const mm = gsap.matchMedia();
-
-    mm.add("(min-width: 768px)", () => {
-      gsap
-        .timeline()
-        .fromTo(
-          "#hero",
-          { opacity: 0, y: -100 },
-          { y: 0, opacity: 1, delay: 4, duration: 1.5, ease: "power2.out" }
-        )
-        .fromTo(
-          "#hero h1",
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 1, ease: "power2.out" },
-          "-=1"
-        );
-    });
-
-    return () => mm.revert();
-  }, []);
-
-  useEffect(() => {
     requestRef.current = requestAnimationFrame(animate);
     return () => {
       if (requestRef.current) {
@@ -85,47 +63,6 @@ const Hero = () => {
   const handleMouseLeave = () => {
     setTargetRotation({ x: 0, y: 0 });
     setLightPosition({ x: 50, y: 50, opacity: 0 });
-  };
-  const modalVariants: Variants = {
-    hidden: {
-      y: "100%",
-      opacity: 0,
-      scale: 0.9
-    },
-    visible: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        damping: 25,
-        stiffness: 300,
-        duration: 0.4
-      } as any
-    },
-    exit: {
-      y: "100%",
-      opacity: 0,
-      scale: 0.9,
-      transition: {
-        type: "spring",
-        damping: 25,
-        stiffness: 300,
-        duration: 0.3
-      } as any
-    }
-  };
-
-  const overlayVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.3 }
-    },
-    exit: {
-      opacity: 0,
-      transition: { duration: 0.2 }
-    }
   };
 
 
@@ -214,7 +151,7 @@ const Hero = () => {
       {isModalOpen && (
         <div className="fixed z-50 overflow-hidden w-full h-full backdrop-blur-md inset-0">
 
-          <div className="h-[600px] absolute bottom-0 bg-black w-full overflow-hidden">
+          <div className="h-[600px] absolute bottom-0 w-full overflow-hidden">
             <Recherche onClick={closeModal} />
           </div>
         </div>

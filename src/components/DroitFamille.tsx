@@ -226,9 +226,9 @@ export default function DroitFamille() {
             {/* MODALES MODERNES */}
             {openModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" style={{scrollbarWidth: "none"}}>
                         {/* Header Modal */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-2xl p-6 text-white">
+                        <div className="bg-slate-800 rounded-t-2xl px-6 py-4 text-white">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-xl font-bold">
                                     {services.find(s => s.id === openModal)?.title}
@@ -240,14 +240,18 @@ export default function DroitFamille() {
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <p className="text-blue-100 text-sm">
+                            <p className="text-blue-100 text-xs">
                                 {services.find(s => s.id === openModal)?.description}
                             </p>
+                            <div className="absolute right-1 top-12 flex underline items-center justify-center mt-4 text-[10px] text-gray-500">
+                                <Calendar className="w-2.5 h-2.5 mr-1" />
+                                Réponse sous 24 heures
+                            </div>
                         </div>
 
                         {/* Formulaire */}
-                        <div className="p-6">
-                            <form className="space-y-4">
+                        <div className="px-6 py-4">
+                            <form className="space-y-3">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Nom complet
@@ -341,16 +345,11 @@ export default function DroitFamille() {
 
                                 <button
                                     type="button"
-                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                                    className="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
                                 >
                                     Envoyer la demande
                                 </button>
                             </form>
-
-                            <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Réponse sous 24 heures
-                            </div>
                         </div>
                     </div>
                 </div>

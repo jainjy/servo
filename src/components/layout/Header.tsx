@@ -484,7 +484,7 @@ useEffect(() => {
         {
           title: "Activités & loisirs",
           description: "Découvertes & aventures",
-          href: "/tourisme",
+          href: "/activiteLoisirs",
           image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg"
         }, {
           title: "Formations",
@@ -939,7 +939,7 @@ useEffect(() => {
 
                 >
                   <button
-                    className="absolute text-white text-5xl font-extralight right-10 top-4 z-10"
+                    className="absolute z-50 text-white text-5xl font-extralight right-10 top-4 "
                     onClick={() => setIsPopoverOpen(false)}
                     aria-label="Close popover"
                   >

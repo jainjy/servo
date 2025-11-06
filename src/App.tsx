@@ -126,6 +126,7 @@ import AidesLeveesFonds from "./components/components/AideFonds";
 import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
 import PodcastsServices from "./components/components/Podcast_services";
 import FormationsTourisme from "./components/components/ToursimeFormation";
+import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 
 const queryClient = new QueryClient();
 
@@ -194,6 +195,7 @@ const App = () => {
                   <Route path="/juridiqueLiquidation" element={<JuridiqueLiquidation />} />
                   <Route path="/podcast_service" element={<PodcastsServices />} />
                   <Route path="/formationTourisme" element={<FormationsTourisme />} />
+                  <Route path="/activiteLoisirs" element={<ActivitesLoisirsFAQ />} />
 
                   {/* /*entreprise link* */}
 
@@ -256,7 +258,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  {/* <Route path="/recherche" element={<Recherche />} /> */}
+                  <Route path="/recherche" element={<Recherche onClick />} />
 
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />

@@ -8,6 +8,10 @@ export default function Test() {
   const barRef = useRef<HTMLDivElement | null>(null);
 
  useEffect(() => {
+const hasAnimationPlayed = sessionStorage.getItem('VisitAnimation');
+if (!hasAnimationPlayed) {
+  // Marquer l'animation comme jouée pour cet onglet uniquement
+  sessionStorage.setItem('VisitAnimation', 'true');
   const counterObj = { value: 0 };
 
   const mm = gsap.matchMedia();
@@ -82,10 +86,16 @@ export default function Test() {
   });
 
   return () => mm.revert();
+}
 }, []);
 
+  const hasAnimationPlayed = sessionStorage.getItem('VisitAnimation');
+  if (hasAnimationPlayed) {
+    return null; // Ne rien afficher si l'animation a déjà été jouée dans cet onglet
+  }
+
   return (
-    <div className="pointer-events-none flex gap-5 flex-col  items-center justify-center z-[9999] fixed top-0 left-0 w-full h-full overflow-hidden">
+    <div className="pointer-events-none flex gap-5 flex-col items-center justify-center z-[9999] fixed top-0 left-0 w-full h-full overflow-hidden">
       {/* Remplacement du composant Next.js Image par une balise <img> standard */}
       <img
         id="logo"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText } from "lucide-react";
+import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
@@ -50,9 +50,18 @@ const PositionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
-const Recherche = ({onClick}) => {
+const Recherche = ({onClick}: {onClick?: () => void}) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Fonction de fermeture simplifiée qui redirige toujours vers la page d'accueil
+  const handleClose = () => {
+    if (typeof onClick === 'function') {
+      onClick();
+    }
+    // Rediriger vers la page d'accueil
+    navigate('/');
+  };
   const [stage, setStage] = useState<Stage>("idle");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchItem[]>([]);
@@ -691,7 +700,7 @@ const Recherche = ({onClick}) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen absolute z-50 w-full bg-gray-100 flex flex-col">
 
       <main className="flex-1 pt-1">
         <div className="container mx-auto px-4">
@@ -752,7 +761,7 @@ const Recherche = ({onClick}) => {
                   isLoading ? "Recherche..." : "Rechercher"
                 )}
               </Button>
-              <button onClick={onClick} className="relative w-10 h-10 group transition-all duration-300">
+              <button onClick={handleClose} className="relative w-10 h-10 group transition-all duration-300">
                 <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 transition-all duration-500">
                   <span className="absolute h-0.5 bg-gray-600 group-hover:bg-slate-900 w-11/12 -translate-y-1 group-hover:rotate-45 group-hover:translate-y-0 group-hover:scale-125 transition-all duration-500 origin-center"></span>
                   <span className="absolute h-0.5 bg-gray-600 group-hover:bg-slate-900 w-1/2 translate-y-1 group-hover:-rotate-45 group-hover:translate-y-0 group-hover:w-11/12 group-hover:scale-125 transition-all duration-500 origin-center"></span>
@@ -765,51 +774,50 @@ const Recherche = ({onClick}) => {
           {historyOpen && (
             <>
               <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 mt-10"
+                className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40"
                 onClick={() => setHistoryOpen(false)}
               />
-              <aside className="fixed top-10 left-0 z-50 h-full w-80 bg-white border-r border-gray-200 shadow-xl">
-                <div className="h-full flex flex-col">
-                  <div className="px-4 py-3 border-b flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <History className="h-4 w-4 text-gray-700" />
-                      <span className="text-sm font-semibold text-gray-800">Historique</span>
-                    </div>
-                    <button
-                      className="text-xs text-red-600 hover:underline"
-                      onClick={() => { setSearchHistory([]); saveHistory([]); }}
-                    >
-                      Vider
-                    </button>
+              <aside className="absolute z-50 h-96 w-1/2 bg-white border border-gray-200 shadow-2xl rounded-xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">                <div className="h-full flex flex-col">
+                <div className="px-4 py-3 border-b flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <History className="h-4 w-4 text-gray-700" />
+                    <span className="text-sm font-semibold text-gray-800">Historique</span>
                   </div>
-                  <div className="flex-1 overflow-y-auto">
-                    {searchHistory.length === 0 ? (
-                      <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
-                    ) : (
-                      <ul className="divide-y">
-                        {searchHistory.map((item, idx) => (
-                          <li
-                            key={idx}
-                            className="p-3 hover:bg-gray-50 cursor-pointer"
-                            onClick={() => {
-                              setQuery(item.q);
-                              setHistoryOpen(false);
-                              setStage('loading');
-                              runSearch(item.q);
-                            }}
-                          >
-                            <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                              {item.q}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(item.date).toLocaleString()}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                  <button
+                    className="text-xs text-red-600 hover:underline"
+                    onClick={() => { setSearchHistory([]); saveHistory([]); }}
+                  >
+                    Vider
+                  </button>
                 </div>
+                <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
+                  {searchHistory.length === 0 ? (
+                    <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
+                  ) : (
+                    <ul className="divide-y">
+                      {searchHistory.map((item, idx) => (
+                        <li
+                          key={idx}
+                          className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
+                          onClick={() => {
+                            setQuery(item.q);
+                            setHistoryOpen(false);
+                            setStage('loading');
+                            runSearch(item.q);
+                          }}
+                        >
+                          <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                            {item.q}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(item.date).toLocaleString()}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
               </aside>
             </>
           )}
@@ -926,9 +934,39 @@ const Recherche = ({onClick}) => {
                         </div>
                       </>
                     ) : (
-                      <div className="text-2xl font-semibold text-gray-900">
-                        Veuillez saisir un terme de recherche.
+                      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-12">
+                        {/* Message de recherche */}
+                        <div className="text-center space-y-4">
+                          <div className="text-5xl azonix font-semibold text-gray-400">
+                            Veuillez saisir un terme de recherche.
+                          </div>
+                        </div>
+
+                        {/* Section Vidéo Autoloop WebM */}
+                        <div className="w-full max-w-4xl">
+
+                          {/* Conteneur vidéo autoloop WebM */}
+                          <div className="relative rounded-2xl overflow-hidden drop-shadow-lg">
+                            {/* Vidéo WebM en autoloop */}
+                            <video
+                              className="w-52 h-52 mx-auto object-cover"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                              preload="auto"
+                            >
+                              {/* Source WebM - Format optimisé pour le web */}
+                              <source
+                                src="/vids.webm"
+                                type="video/webm"
+                              />
+                            </video>
+
+                          </div>
+                        </div>
                       </div>
+
                     )}
                   </div>
                 )}
