@@ -45,66 +45,85 @@ export function ArtProfessionalServicesStats() {
   if (loading) return <p>Chargement des données...</p>;
   if (error) return <p>{error}</p>;
 
-  return (
-<div className="flex flex-col sm:flex-row justify-center gap-6 mt-6 p-4">
-  {/* Carte Effectif */}
-  <Card
-    className="
-      w-full sm:w-[450px] lg:w-[500px] h-[160px] mb-4 sm:mb-0
-      bg-white rounded-xl shadow-lg border border-gray-100 
-      transition-all duration-300 hover:shadow-xl hover:scale-[1.01]
-    "
-  >
-    <CardHeader className="p-5">
-      <div className="flex justify-between items-start">
-        <CardTitle className="text-sm font-medium text-gray-700 tracking-wide">
-          Effectif
-        </CardTitle>
-        <CheckCircle className="h-6 w-6 text-emerald-500 opacity-80" />
-      </div>
-    </CardHeader>
-    <CardContent className="flex flex-col items-center justify-center pt-2 pb-5">
-      <div className="text-4xl font-bold text-emerald-600 tracking-tight">
-        {stats?.totalGlobal?.totalOeuvres ?? 0}
-      </div>
-      <p className="text-sm font-light text-gray-500 mt-2">
-        Services / Œuvres ajoutés
-      </p>
-    </CardContent>
-  </Card>
+//   return (
+//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-3 py-6">
+//   {/* Carte Effectif total */}
+//   {[1, 2].map((_, index) => (
+//     <Card
+//       key={index}
+//       className="
+//         relative w-full sm:w-[280px] lg:w-[320px] h-[120px]
+//         bg-white/80 backdrop-blur-xl border border-gray-200/50
+//         shadow-md hover:shadow-lg transition-all duration-300
+//         hover:-translate-y-0.5 hover:scale-[1.01] rounded-2xl
+//         flex flex-col justify-between overflow-hidden
+//       "
+//     >
+//       <CardHeader className="px-3 pt-3 pb-2 flex justify-between items-center">
+//         <CardTitle className="text-sm font-medium text-gray-700">
+//           Effectif total
+//         </CardTitle>
+//         <div className="bg-emerald-100 p-1.5 rounded-full">
+//           <CheckCircle className="h-4 w-4 text-emerald-600" />
+//         </div>
+//       </CardHeader>
 
-  {/* Carte Total Prix */}
-  <Card
-    className="
-      w-full sm:w-[450px] lg:w-[500px] h-[160px]
-      bg-white rounded-xl shadow-lg border border-gray-100
-      transition-all duration-300 hover:shadow-xl hover:scale-[1.01]
-    "
-  >
-    <CardHeader className="p-5">
-      <div className="flex justify-between items-start">
-        <CardTitle className="text-sm font-medium text-gray-700 tracking-wide">
-          Total Prix
-        </CardTitle>
-        {/* CORRECTION : Remplacement de DollarSign par Euro */}
-        <Euro className="h-6 w-6 text-orange-500 opacity-80" /> 
-      </div>
-    </CardHeader>
-    <CardContent className="flex flex-col items-center justify-center pt-2 pb-5">
-      <div className="text-4xl font-bold text-orange-600 tracking-tight">
-        {stats?.totalGlobal?.totalPrix?.toLocaleString("fr-FR", {
-          style: "currency",
-          currency: "EUR",
-        }) ?? "0 EUR"}
-      </div>
-      <p className="text-sm font-light text-gray-500 mt-2">
-        Total des prix
-      </p>
-    </CardContent>
-  </Card>
-</div>
+//       <CardContent className="flex flex-col items-center justify-center px-2">
+//         <h2 className="text-2xl font-normal text-emerald-600 tracking-tight">
+//           {stats?.totalGlobal?.totalOeuvres ?? 0}
+//         </h2>
+//         <p className="text-xs text-gray-500 mt-1">
+//           Services / Œuvres ajoutés
+//         </p>
+//       </CardContent>
+
+//       {/* Effet lumineux */}
+//       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-200/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
+//     </Card>
+//   ))}
+
+//   {/* Carte Total Prix */}
+//   <Card
+//     className="
+//       relative w-full sm:w-[280px] lg:w-[320px] h-[120px]
+//       bg-white/80 backdrop-blur-xl border border-gray-200/50
+//       shadow-md hover:shadow-lg transition-all duration-300
+//       hover:-translate-y-0.5 hover:scale-[1.01] rounded-2xl
+//       flex flex-col justify-between overflow-hidden
+//     "
+//   >
+//     <CardHeader className="px-3 pt-3 pb-2 flex justify-between items-center">
+//       <CardTitle className="text-sm font-medium text-gray-700">
+//         Total des Prix
+//       </CardTitle>
+//       <div className="bg-amber-100 p-1.5 rounded-full">
+//         <Euro className="h-4 w-4 text-amber-500" />
+//       </div>
+//     </CardHeader>
+
+//     <CardContent className="flex-grow flex items-center justify-center px-2">
+//       <h2 className="text-2xl font-normal text-gray-800 tracking-tight">
+//         {stats?.totalGlobal?.totalPrix?.toLocaleString("fr-FR", {
+//           style: "currency",
+//           currency: "EUR",
+//         }) ?? "0 €"}
+//       </h2>
+//     </CardContent>
+
+//     <div className="px-3 pb-3 pt-1 border-t border-gray-100/50">
+//       <p className="text-xs text-gray-400 font-light">
+//         Somme totale enregistrée à ce jour (Total Global)
+//       </p>
+//     </div>
+
+//     {/* Effet lumineux */}
+//     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-200/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
+//   </Card>
+// </div>
 
 
+  
 
-  );
+
+  //);
 }
