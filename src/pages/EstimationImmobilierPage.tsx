@@ -1,6 +1,3 @@
-// app/estimation-immobilier/page.tsx
-'use client';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -27,9 +24,10 @@ import MarketInsights from '@/components/estimation/MarketInsights';
 import { useLoading } from '@/hooks/useLoading';
 import PageLoader from '@/components/Loading/PageLoader';
 import Header from '@/components/layout/Header';
+import { estimationAPI } from '@/lib/api';
 
 export interface EstimationData {
-  propertyType: 'apartment' | 'house' | 'villa' | 'commercial';
+  propertyType: 'apartment' | 'house' | 'villa' | 'commercial' | 'studio' | 'loft' | 'duplex';
   surface: number;
   rooms: number;
   bedrooms: number;
@@ -38,7 +36,8 @@ export interface EstimationData {
     address: string;
     city: string;
     postalCode: string;
-    coordinates?: { lat: number; lng: number };
+    lat: number;
+    lng: number;
   };
   condition: 'excellent' | 'good' | 'average' | 'needs_renovation';
   features: {
@@ -56,13 +55,24 @@ export interface EstimationData {
 }
 
 export interface EstimationResult {
+  estimation: number;
+  confidence: number;
+  explanation: string;
   priceRange: {
     min: number;
     max: number;
-    median: number;
   };
+  factors: Array<{
+    factor: string;
+    impact: 'positive' | 'negative' | 'neutral';
+    description: string;
+  }>;
+  timestamp: string;
+  searchTime?: string;
+}
+
+export interface EnhancedEstimationResult extends EstimationResult {
   pricePerSquareMeter: number;
-  confidence: number;
   comparableProperties: Array<{
     id: string;
     price: number;
@@ -83,7 +93,10 @@ const propertyTypes = [
   { value: 'apartment', label: 'Appartement', icon: Building },
   { value: 'house', label: 'Maison', icon: Home },
   { value: 'villa', label: 'Villa', icon: Castle },
-  { value: 'commercial', label: 'Local Commercial', icon: Store }
+  { value: 'commercial', label: 'Local Commercial', icon: Store },
+  { value: 'studio', label: 'Studio', icon: Home },
+  { value: 'loft', label: 'Loft', icon: Building },
+  { value: 'duplex', label: 'Duplex', icon: Building }
 ];
 
 const advantages = [
@@ -97,79 +110,130 @@ const advantages = [
 export default function EstimationImmobilierPage() {
   const [currentStep, setCurrentStep] = useState<'form' | 'results' | 'insights'>('form');
   const [estimationData, setEstimationData] = useState<EstimationData | null>(null);
-  const [estimationResult, setEstimationResult] = useState<EstimationResult | null>(null);
+  const [estimationResult, setEstimationResult] = useState<EnhancedEstimationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { isLoading, withLoading } = useLoading();
 
   const handleEstimationSubmit = async (data: EstimationData) => {
     setEstimationData(data);
+    setError(null);
 
-    await withLoading(
-      new Promise<EstimationResult>((resolve) => {
-        // Simulation d'appel API
-        setTimeout(() => {
-          const result = generateEstimationResult(data);
-          resolve(result);
-        }, 2000);
-      })
-    ).then((result) => {
-      setEstimationResult(result);
+    try {
+      const result = await withLoading(
+        estimationAPI.submitEstimation(data)
+      );
+
+      if (result.data.success) {
+        const enhancedResult = enhanceEstimationResult(result.data, data);
+        setEstimationResult(enhancedResult);
+        setCurrentStep('results');
+        
+        // Sauvegarder l'estimation si l'utilisateur est connecté
+        try {
+          const userId = localStorage.getItem('userId');
+          if (userId) {
+            await estimationAPI.saveEstimation({
+              userId,
+              estimationData: data,
+              result: enhancedResult
+            });
+          }
+        } catch (saveError) {
+          console.warn('⚠️ Erreur sauvegarde estimation:', saveError);
+        }
+      } else {
+        throw new Error(result.data.error || 'Erreur lors de l\'estimation');
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur estimation:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de l\'estimation. Veuillez réessayer.';
+      setError(errorMessage);
+      
+      // Fallback vers l'estimation simulée en cas d'erreur
+      const fallbackResult = generateFallbackEstimation(data);
+      setEstimationResult(fallbackResult);
       setCurrentStep('results');
-    });
+    }
   };
 
-  const generateEstimationResult = (data: EstimationData): EstimationResult => {
-    // Logique d'estimation simplifiée - À remplacer par un vrai algorithme
-    const basePricePerM2 = getBasePricePerM2(data.location.city);
-    let price = data.surface * basePricePerM2;
-
-    // Ajustements
-    price *= getConditionMultiplier(data.condition);
-    price *= getRoomsMultiplier(data.rooms);
-    price += getFeaturesValue(data.features);
-
-    const variance = price * 0.1; // ±10%
-
+  // Améliorer les résultats de l'API avec des données supplémentaires
+  const enhanceEstimationResult = (result: EstimationResult, data: EstimationData): EnhancedEstimationResult => {
+    const pricePerSquareMeter = Math.round(result.estimation / data.surface);
+    
     return {
+      ...result,
+      pricePerSquareMeter,
+      comparableProperties: generateComparableProperties(data, result.estimation),
+      marketTrends: generateMarketTrends(data.location.city),
+      recommendations: generateRecommendations(data, result)
+    };
+  };
+
+  // Estimation de fallback si l'API échoue
+  const generateFallbackEstimation = (data: EstimationData): EnhancedEstimationResult => {
+    const basePrice = calculateFallbackPrice(data);
+    const pricePerSquareMeter = Math.round(basePrice / data.surface);
+    
+    return {
+      estimation: basePrice,
+      confidence: 75,
+      explanation: 'Estimation basée sur les données moyennes du marché français. Pour une analyse plus précise, veuillez réessayer.',
       priceRange: {
-        min: Math.round(price - variance),
-        max: Math.round(price + variance),
-        median: Math.round(price)
+        min: Math.round(basePrice * 0.85),
+        max: Math.round(basePrice * 1.15)
       },
-      pricePerSquareMeter: Math.round(price / data.surface),
-      confidence: 85,
-      comparableProperties: generateComparableProperties(data),
-      marketTrends: {
-        trend: 'up',
-        percentage: 3.2,
-        description: 'Marché en légère hausse dans votre secteur'
-      },
-      recommendations: generateRecommendations(data)
+      factors: generateFallbackFactors(data),
+      timestamp: new Date().toISOString(),
+      pricePerSquareMeter,
+      comparableProperties: generateComparableProperties(data, basePrice),
+      marketTrends: generateMarketTrends(data.location.city),
+      recommendations: generateRecommendations(data, { estimation: basePrice, confidence: 75 } as EstimationResult)
     };
   };
 
   return (
     <PageLoader isLoading={isLoading}>
-
       <div className="min-h-screen py-8 pt-20">
-
         <div className="container mx-auto px-4 max-w-6xl">
           {/* En-tête */}
           <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
             <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-            <img src="https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg" alt="" />
+            <img 
+              src="https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg" 
+              alt="Estimation immobilière" 
+              className="w-full h-full object-cover"
+            />
           </div>
+          
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-24 pt-10 "
+            className="text-center mb-24 pt-10"
           >
             <h1 className="text-4xl md:text-4xl font-bold text-gray-100 mb-4">
-              Estimation Immobilière <span className="text-purple-300">Gratuite</span>
+              Estimation Immobilière <span className="text-purple-300">Intelligente</span>
             </h1>
             <p className="text-sm text-gray-200 max-w-2xl mx-auto">
-              Obtenez une estimation précise de votre bien en 2 minutes grâce à notre intelligence artificielle
+              Obtenez une estimation précise de votre bien grâce à notre intelligence artificielle 
             </p>
           </motion.div>
+
+          {/* Message d'erreur */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4"
+            >
+              <div className="flex items-center">
+                <Shield className="w-5 h-5 text-yellow-600 mr-2" />
+                <div>
+                  <p className="text-yellow-800 font-medium">Estimation de secours</p>
+                  <p className="text-yellow-700 text-sm">{error}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Contenu principal */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -202,6 +266,7 @@ export default function EstimationImmobilierPage() {
                       result={estimationResult}
                       onBack={() => setCurrentStep('form')}
                       onViewInsights={() => setCurrentStep('insights')}
+                      isFallback={!!error}
                     />
                   </motion.div>
                 )}
@@ -259,7 +324,7 @@ export default function EstimationImmobilierPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg p-6 text-white"
+                className="bg-slate-800 rounded-2xl shadow-lg p-6 text-white"
               >
                 <h3 className="font-semibold text-lg mb-4 flex items-center">
                   <Trophy className="w-5 h-5 mr-2" />
@@ -277,7 +342,7 @@ export default function EstimationImmobilierPage() {
                     <div className="text-2xl font-bold">95%</div>
                     <div className="text-sm opacity-90 flex items-center justify-center">
                       <Target className="w-3 h-3 mr-1" />
-                      Précision
+                      Précision IA
                     </div>
                   </div>
                   <div>
@@ -286,35 +351,27 @@ export default function EstimationImmobilierPage() {
                       <MapPin className="w-3 h-3 mr-1" />
                       Villes couvertes
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">24/7</div>
-                    <div className="text-sm opacity-90 flex items-center justify-center">
-                      <Clock className="w-3 h-3 mr-1" />
-                      Disponible
-                    </div>
-                  </div>
+                  </div>                 
                 </div>
               </motion.div>
-
-              {/* CTA Professionnels */}
+              {/* Information API */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-200"
+                transition={{ delay: 0.8 }}
+                className="bg-slate-50 rounded-2xl shadow-lg p-6 border border-slate-200"
               >
                 <h3 className="font-semibold text-lg mb-3 text-gray-900 flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-blue-600" />
-                  Vous êtes professionnel ?
+                  <Sparkles className="w-5 h-5 mr-2 text-slate-600" />
+                  Technologie IA
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Accédez à nos outils d'estimation avancés et à notre réseau d'acheteurs.
+                <p className="text-gray-600 text-sm mb-3">
+                  Notre système utilise l'IA pour analyser votre bien selon les critères du marché immobilier.
                 </p>
-                <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Espace Pro
-                </button>
+                <div className="flex items-center text-xs text-slate-500">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Analyse en temps réel
+                </div>
               </motion.div>
             </div>
           </div>
@@ -324,7 +381,19 @@ export default function EstimationImmobilierPage() {
   );
 }
 
-// Fonctions helpers pour l'estimation
+// Fonctions helpers pour l'estimation de fallback
+function calculateFallbackPrice(data: EstimationData): number {
+  const basePricePerM2 = getBasePricePerM2(data.location.city);
+  let price = data.surface * basePricePerM2;
+
+  // Ajustements
+  price *= getConditionMultiplier(data.condition);
+  price *= getRoomsMultiplier(data.rooms);
+  price += getFeaturesValue(data.features);
+
+  return Math.round(price);
+}
+
 function getBasePricePerM2(city: string): number {
   const prices: { [key: string]: number } = {
     'paris': 10000,
@@ -332,6 +401,11 @@ function getBasePricePerM2(city: string): number {
     'marseille': 4000,
     'bordeaux': 4500,
     'toulouse': 3500,
+    'lille': 3000,
+    'nice': 5000,
+    'nantes': 3800,
+    'strasbourg': 3200,
+    'montpellier': 3600,
     'default': 3000
   };
   return prices[city.toLowerCase()] || prices['default'];
@@ -366,34 +440,88 @@ function getFeaturesValue(features: EstimationData['features']): number {
   return value;
 }
 
-function generateComparableProperties(data: EstimationData) {
+function generateFallbackFactors(data: EstimationData) {
+  const factors = [];
+  
+  factors.push({
+    factor: 'Surface',
+    impact: 'positive',
+    description: `Surface de ${data.surface} m² adaptée pour ce type de bien`
+  });
+
+  factors.push({
+    factor: 'Localisation',
+    impact: 'neutral', 
+    description: `Situation à ${data.location.city}, marché ${getMarketTrend(data.location.city).trend === 'up' ? 'dynamique' : 'stable'}`
+  });
+
+  factors.push({
+    factor: 'État du bien',
+    impact: data.condition === 'excellent' ? 'positive' : data.condition === 'needs_renovation' ? 'negative' : 'neutral',
+    description: `Bien en ${data.condition} nécessitant ${data.condition === 'excellent' ? 'aucune' : 'quelques'} travaux`
+  });
+
+  // Ajouter les équipements
+  const featureCount = Object.values(data.features).filter(Boolean).length;
+  if (featureCount > 0) {
+    factors.push({
+      factor: 'Équipements',
+      impact: 'positive',
+      description: `${featureCount} équipement(s) premium augmentant la valeur`
+    });
+  }
+
+  return factors;
+}
+
+function generateComparableProperties(data: EstimationData, estimatedPrice: number) {
   return Array.from({ length: 3 }, (_, i) => ({
     id: `comp-${i}`,
-    price: Math.round((data.surface * getBasePricePerM2(data.location.city)) * (0.9 + Math.random() * 0.2)),
+    price: Math.round(estimatedPrice * (0.85 + Math.random() * 0.3)),
     surface: data.surface + Math.round((Math.random() - 0.5) * 20),
     address: `${data.location.address.split(' ')[0]} ...`,
     distance: Math.round(Math.random() * 500),
-    similarity: Math.round(80 + Math.random() * 15)
+    similarity: Math.round(75 + Math.random() * 20)
   }));
 }
 
-function generateRecommendations(data: EstimationData): string[] {
+function generateMarketTrends(city: string) {
+  const trends = {
+    'paris': { trend: 'up' as const, percentage: 2.5, description: 'Marché parisien en légère hausse' },
+    'lyon': { trend: 'up' as const, percentage: 3.1, description: 'Dynamique positive à Lyon' },
+    'marseille': { trend: 'stable' as const, percentage: 0.8, description: 'Stabilité du marché marseillais' },
+    'bordeaux': { trend: 'up' as const, percentage: 2.2, description: 'Croissance modérée à Bordeaux' },
+    'default': { trend: 'stable' as const, percentage: 1.2, description: 'Marché national stable' }
+  };
+
+  return trends[city.toLowerCase() as keyof typeof trends] || trends['default'];
+}
+
+function getMarketTrend(city: string) {
+  return generateMarketTrends(city);
+}
+
+function generateRecommendations(data: EstimationData, result: EstimationResult): string[] {
   const recommendations = [];
 
   if (data.condition === 'needs_renovation') {
     recommendations.push('Une rénovation pourrait augmenter la valeur de 15-20%');
   }
 
-  if (!data.features.parking && data.location.city.toLowerCase() === 'paris') {
-    recommendations.push('Ajouter une place de parking pourrait augmenter la valeur');
+  if (!data.features.parking && (data.location.city.toLowerCase() === 'paris' || data.location.city.toLowerCase() === 'lyon')) {
+    recommendations.push('Ajouter une place de parking pourrait augmenter la valeur significativement');
   }
 
-  if (data.surface < 30) {
-    recommendations.push('Mettre en valeur les espaces de rangement');
+  if (data.surface < 30 && data.propertyType === 'apartment') {
+    recommendations.push('Optimiser l\'espace pour maximiser la valeur au m²');
+  }
+
+  if (result.confidence < 80) {
+    recommendations.push('Considérer une expertise complémentaire pour confirmation');
   }
 
   recommendations.push('Mettre à jour les photos pour une meilleure présentation');
-  recommendations.push('Considérer une expertise complémentaire pour confirmation');
+  recommendations.push('Comparer avec les biens similaires récemment vendus dans le secteur');
 
   return recommendations;
 }
