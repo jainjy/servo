@@ -243,8 +243,8 @@ export default function DroitFamille() {
                             <p className="text-blue-100 text-xs">
                                 {services.find(s => s.id === openModal)?.description}
                             </p>
-                            <div className="absolute right-2 top-12 flex underline items-center justify-center mt-4 text-xs text-gray-500">
-                                <Calendar className="w-3 h-3 mr-2" />
+                            <div className="absolute right-1 top-12 flex underline items-center justify-center mt-4 text-[10px] text-gray-500">
+                                <Calendar className="w-2.5 h-2.5 mr-1" />
                                 Réponse sous 24 heures
                             </div>
                         </div>
