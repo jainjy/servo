@@ -156,14 +156,32 @@ const DemandeCard = ({ demande, onAction }) => {
     switch (demande.statut) {
       case "Disponible":
         return (
-          <button
-            onClick={() => setShowApplyModal(true)}
-            disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-          >
-            <Send className="w-4 h-4" />
-            Postuler
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDecline}
+              disabled={isLoading}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            >
+              <ThumbsDown className="w-4 h-4" />
+              Refuser
+            </button>
+            {/* <button
+              onClick={() => setShowApplyModal(true)}
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              Postuler
+            </button> */}
+            <button
+              onClick={handleAccept}
+              disabled={isLoading}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            >
+              <ThumbsUp className="w-4 h-4" />
+              Accepter
+            </button>
+          </div>
         );
 
       // case "Assignée":
@@ -304,9 +322,6 @@ const DemandeCard = ({ demande, onAction }) => {
           </div>
           <div className="flex gap-2">
             {renderActionButtons()}
-            <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all duration-200">
-              <MoreVertical className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </div>

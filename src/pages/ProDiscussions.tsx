@@ -16,8 +16,11 @@ import {
   FileDigit,
   DollarSign,
   X,
+  Edit,
+  Download,
+  CheckCircle,
+  Eye,
 } from "lucide-react";
-import { Edit, Download, CheckCircle, XCircle } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useSocket } from "@/Contexts/SocketContext";
@@ -39,6 +42,7 @@ export default function ProDiscussions({
   const [showRendezVousModal, setShowRendezVousModal] = useState(false);
   const [showFactureModal, setShowFactureModal] = useState(false);
   const [showDevisModal, setShowDevisModal] = useState(false);
+  const [showActionsPanel, setShowActionsPanel] = useState(false);
 
   // États pour les formulaires
   const [artisanDetails, setArtisanDetails] = useState(null);
@@ -65,6 +69,7 @@ export default function ProDiscussions({
     sendMessage,
     sending,
   } = useMessaging(id);
+
   // Charger les détails de l'artisan
   useEffect(() => {
     const fetchArtisanDetails = async () => {
@@ -242,7 +247,7 @@ export default function ProDiscussions({
     }
   };
 
-  // Fonction pour valider/refuser une facture (admin)
+  // Fonction pour valider/refuser une facture
   const handleValiderFacture = async (artisanId, statut) => {
     try {
       const response = await api.put(`/demande-actions/${id}/valider-facture`, {
@@ -261,6 +266,7 @@ export default function ProDiscussions({
       toast.error("Erreur lors de la validation de la facture");
     }
   };
+
   // Fermer le menu d'actions en cliquant à l'extérieur
   useEffect(() => {
     function handleClickOutside(event) {
@@ -397,6 +403,7 @@ export default function ProDiscussions({
   const isCurrentUser = (message) => {
     return message.expediteur?.userType === "PRESTATAIRE";
   };
+
   const handleProposerRendezVous = () => {
     setShowActionsMenu(false);
     setShowRendezVousModal(true);
@@ -412,6 +419,10 @@ export default function ProDiscussions({
     setShowDevisModal(true);
   };
 
+  const handleAfficherActions = () => {
+    setShowActionsMenu(false);
+    setShowActionsPanel(true);
+  };
 
   const handleFileChange = (setFileFunction) => (event) => {
     const file = event.target.files[0];
@@ -430,7 +441,6 @@ export default function ProDiscussions({
 
   return (
     <div className="min-h-full">
-      
       <div className="flex h-[calc(100vh-100px)]">
         {/* Côté gauche - Informations du projet */}
         <div className="w-1/2 bg-white rounded-lg shadow-sm border-r border-gray-200 p-8 overflow-y-auto">
@@ -709,18 +719,19 @@ export default function ProDiscussions({
               <div className="relative" ref={actionsMenuRef}>
                 <button
                   onClick={() => setShowActionsMenu(!showActionsMenu)}
-                  className="flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm"
                 >
                   <MoreVertical className="w-4 h-4 text-gray-600" />
                 </button>
 
                 {/* Menu déroulant des actions */}
                 {showActionsMenu && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-10 overflow-hidden">
                     <div className="p-2">
                       <button
                         onClick={handleProposerRendezVous}
-                        className="flex items-center gap-3 w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors duration-200"
+                        disabled={artisanDetails && artisanDetails.rdv}
                       >
                         <Calendar className="w-4 h-4" />
                         <span>Proposer un rendez-vous</span>
@@ -728,7 +739,7 @@ export default function ProDiscussions({
 
                       <button
                         onClick={handleEnvoyerDevis}
-                        className="flex items-center gap-3 w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors duration-200"
                       >
                         <FileDigit className="w-4 h-4" />
                         <span>Envoyer un devis</span>
@@ -736,13 +747,24 @@ export default function ProDiscussions({
 
                       <button
                         onClick={handleEnvoyerFacture}
-                        className="flex items-center gap-3 w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors duration-200"
                       >
                         <DollarSign className="w-4 h-4" />
                         <span>Envoyer une facture</span>
                       </button>
 
-                      <div className="border-t border-gray-200 my-1"></div>
+                      {artisanView && (
+                        <>
+                          <div className="border-t border-gray-200 my-2"></div>
+                          <button
+                            onClick={handleAfficherActions}
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>Afficher mes actions</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
@@ -750,13 +772,13 @@ export default function ProDiscussions({
 
               {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-300 cursor-pointer bg-white shadow-sm ${
                   uploadingFile
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-100"
                 }`}
               >
-                <Paperclip className="w-4 h-4" />
+                <Paperclip className="w-4 h-4 text-gray-600" />
                 <input
                   type="file"
                   className="hidden"
@@ -768,7 +790,7 @@ export default function ProDiscussions({
               <input
                 type="text"
                 placeholder="Tapez votre message ici..."
-                className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -777,11 +799,13 @@ export default function ProDiscussions({
                     handleSend();
                   }
                 }}
-                disabled={sending || uploadingFile}
+                disabled={
+                  sending || uploadingFile || artisanDetails.recruited == false
+                }
               />
 
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
                 disabled={sending || uploadingFile || !input.trim()}
               >
@@ -798,6 +822,189 @@ export default function ProDiscussions({
           </div>
         </div>
       </div>
+
+      {/* Panneau des actions de l'artisan */}
+      {showActionsPanel && artisanView && artisanDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
+              <h3 className="text-xl font-bold text-gray-900">
+                Mes actions sur cette demande
+              </h3>
+              <button
+                onClick={() => setShowActionsPanel(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Rendez-vous */}
+              <div className="bg-blue-50 rounded-xl border border-blue-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-blue-900 text-lg flex items-center gap-2">
+                    <Calendar className="w-5 h-5" />
+                    Rendez-vous
+                  </h4>
+                  {artisanDetails.rdv && (
+                    <button
+                      onClick={() => {
+                        setShowActionsPanel(false);
+                        setShowEditRendezVousModal(true);
+                      }}
+                      className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-white px-3 py-1 rounded-lg border border-blue-200"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Modifier
+                    </button>
+                  )}
+                </div>
+                {artisanDetails.rdv ? (
+                  <div className="bg-white p-4 rounded-lg border border-blue-100">
+                    <p className="text-sm text-gray-700">
+                      <strong className="text-blue-800">Date:</strong>{" "}
+                      {new Date(artisanDetails.rdv).toLocaleDateString(
+                        "fr-FR",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}{" "}
+                      à{" "}
+                      {new Date(artisanDetails.rdv).toLocaleTimeString(
+                        "fr-FR",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </p>
+                    {artisanDetails.rdvNotes && (
+                      <p className="text-sm mt-2 text-gray-700">
+                        <strong className="text-blue-800">Notes:</strong>{" "}
+                        {artisanDetails.rdvNotes}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-blue-100">
+                    Aucun rendez-vous proposé
+                  </p>
+                )}
+              </div>
+
+              {/* Devis */}
+              <div className="bg-green-50 rounded-xl border border-green-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-green-900 text-lg flex items-center gap-2">
+                    <FileDigit className="w-5 h-5" />
+                    Devis
+                  </h4>
+                  {artisanDetails.devisFileUrl && (
+                    <button
+                      onClick={() => {
+                        setShowActionsPanel(false);
+                        setShowEditDevisModal(true);
+                      }}
+                      className="flex items-center gap-2 text-sm text-green-600 hover:text-green-800 transition-colors bg-white px-3 py-1 rounded-lg border border-green-200"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Modifier
+                    </button>
+                  )}
+                </div>
+                {artisanDetails.devisFileUrl ? (
+                  <div className="bg-white p-4 rounded-lg border border-green-100">
+                    <p className="text-sm text-gray-700">
+                      <strong className="text-green-800">Montant:</strong>{" "}
+                      {artisanDetails.factureMontant}€
+                    </p>
+                    <p className="text-sm text-gray-700 mt-1">
+                      <strong className="text-green-800">Description:</strong>{" "}
+                      {artisanDetails.devis}
+                    </p>
+                    <a
+                      href={artisanDetails.devisFileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-green-600 hover:text-green-800 mt-2 transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Télécharger le devis
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-green-100">
+                    Aucun devis envoyé
+                  </p>
+                )}
+              </div>
+
+              {/* Facture */}
+              <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-purple-900 text-lg flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    Facture
+                  </h4>
+                </div>
+                {artisanDetails.factureFileUrl ? (
+                  <div className="bg-white p-4 rounded-lg border border-purple-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-gray-700">
+                        <strong className="text-purple-800">Montant:</strong>{" "}
+                        {artisanDetails.factureMontant}€
+                      </p>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          artisanDetails.factureStatus === "validee"
+                            ? "bg-green-100 text-green-800"
+                            : artisanDetails.factureStatus === "refusee"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {artisanDetails.factureStatus === "validee"
+                          ? "Validée"
+                          : artisanDetails.factureStatus === "refusee"
+                          ? "Refusée"
+                          : "En attente"}
+                      </span>
+                    </div>
+                    <a
+                      href={artisanDetails.factureFileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 mt-2 transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Télécharger la facture
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-purple-100">
+                    Aucune facture envoyée
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end p-6 border-t border-gray-200 sticky bottom-0 bg-white rounded-b-xl">
+              <button
+                onClick={() => setShowActionsPanel(false)}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modales existantes restent inchangées */}
       {/* Modale Édition Rendez-vous */}
       {showEditRendezVousModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -815,7 +1022,6 @@ export default function ProDiscussions({
             </div>
 
             <div className="p-6">
-              {/* Formulaire identique à la modale de création mais pré-rempli */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1000,6 +1206,7 @@ export default function ProDiscussions({
           </div>
         </div>
       )}
+
       {/* Modale Rendez-vous */}
       {showRendezVousModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -1064,7 +1271,13 @@ export default function ProDiscussions({
                   Annuler
                 </button>
                 <button
-                  onClick={()=>handleSubmitRendezVous(rendezVousDate,rendezVousHeure,rendezVousNotes)}
+                  onClick={() =>
+                    handleSubmitRendezVous(
+                      rendezVousDate,
+                      rendezVousHeure,
+                      rendezVousNotes
+                    )
+                  }
                   disabled={!rendezVousDate || !rendezVousHeure}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -1133,7 +1346,9 @@ export default function ProDiscussions({
                   Annuler
                 </button>
                 <button
-                  onClick={()=>handleSubmitFacture(factureMontant ,factureFile)}
+                  onClick={() =>
+                    handleSubmitFacture(factureMontant, factureFile)
+                  }
                   disabled={!factureMontant || !factureFile}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >

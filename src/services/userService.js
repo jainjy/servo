@@ -41,9 +41,9 @@ class UserService {
   // Changer le mot de passe
   static async changePassword(currentPassword, newPassword) {
     try {
-      const response = await api.put('/users/change-password', {
+      const response = await api.put("/users/update/change-password", {
         currentPassword,
-        newPassword
+        newPassword,
       });
       return response.data;
     } catch (error) {

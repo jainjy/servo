@@ -1,5 +1,5 @@
 // pages/UserDiscussions.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Send,
   Calendar,
@@ -13,10 +13,14 @@ import {
   CheckCircle,
   Paperclip,
   FileText,
+  MoreVertical,
+  CreditCard,
+  FileSignature,
+  X,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import {useSocket} from "@/Contexts/SocketContext";
+import { useSocket } from "@/Contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
@@ -28,6 +32,12 @@ export default function UserDiscussions() {
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [artisans, setArtisans] = useState([]);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [selectedArtisan, setSelectedArtisan] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const actionsMenuRef = useRef(null);
 
   const { socket, isConnected } = useSocket();
   const {
@@ -37,6 +47,44 @@ export default function UserDiscussions() {
     sendMessage,
     sending,
   } = useMessaging(id);
+
+  // Charger les artisans et leurs détails
+  useEffect(() => {
+    const fetchArtisans = async () => {
+      try {
+        if (id) {
+          const response = await api.get(`/demandes/${id}`);
+          setDemande(response.data);
+
+          // Extraire les artisans de la réponse
+          if (response.data.artisans) {
+            setArtisans(response.data.artisans);
+          }
+        }
+      } catch (error) {
+        console.error("Erreur chargement artisans:", error);
+      }
+    };
+
+    fetchArtisans();
+  }, [id]);
+
+  // Fermer le menu d'actions en cliquant à l'extérieur
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        actionsMenuRef.current &&
+        !actionsMenuRef.current.contains(event.target)
+      ) {
+        setShowActionsMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const getUrgencyBg = (urgency) => {
     switch (urgency) {
@@ -102,21 +150,15 @@ export default function UserDiscussions() {
     try {
       setUploadingFile(true);
 
-      // Upload du fichier
       const formData = new FormData();
       formData.append("file", file);
 
-      const uploadResponse = await api.post(
-        "/upload/message-file",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const uploadResponse = await api.post("/upload/message-file", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      // Envoyer le message avec le fichier
       await sendMessage(`Fichier: ${file.name}`, getMessageType(file.type), {
         url: uploadResponse.data.url,
         name: file.name,
@@ -159,12 +201,68 @@ export default function UserDiscussions() {
   };
 
   const isCurrentUser = (message) => {
-    // À adapter selon votre système d'authentification
-    // Pour l'instant, on considère que l'utilisateur courant est le client
     return (
       message.expediteur?.userType === "user" ||
       message.expediteurId === demande?.createdById
     );
+  };
+
+  // Fonction pour signer un devis
+  const handleSignerDevis = async (artisanId) => {
+    try {
+      const response = await api.post(`/demande-actions/${id}/signer-devis`, {
+        artisanId,
+      });
+
+      toast.success("Devis signé avec succès ! L'artisan a été sélectionné.");
+
+      // Recharger les données
+      const demandeResponse = await api.get(`/demandes/${id}`);
+      setDemande(demandeResponse.data);
+    } catch (error) {
+      console.error("Erreur signature devis:", error);
+      toast.error("Erreur lors de la signature du devis");
+    }
+  };
+
+  // Fonction pour payer une facture
+  const handlePayerFacture = async (artisanId) => {
+    try {
+      setSelectedArtisan(artisanId);
+      setShowPaymentModal(true);
+    } catch (error) {
+      console.error("Erreur préparation paiement:", error);
+      toast.error("Erreur lors de la préparation du paiement");
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    try {
+      const response = await api.post(`/demande-actions/${id}/payer-facture`, {
+        artisanId: selectedArtisan,
+      });
+
+      toast.success("Paiement effectué avec succès !");
+      setShowPaymentModal(false);
+      setSelectedArtisan(null);
+
+      // Recharger les données
+      const demandeResponse = await api.get(`/demandes/${id}`);
+      setDemande(demandeResponse.data);
+    } catch (error) {
+      console.error("Erreur paiement:", error);
+      toast.error("Erreur lors du paiement");
+    }
+  };
+
+  // Vérifier si un artisan a envoyé un devis
+  const hasDevis = (artisan) => {
+    return artisan.devisFileUrl && artisan.devis;
+  };
+
+  // Vérifier si un artisan a envoyé une facture
+  const hasFacture = (artisan) => {
+    return artisan.factureFileUrl && artisan.factureMontant;
   };
 
   if (loading) {
@@ -177,7 +275,7 @@ export default function UserDiscussions() {
 
   return (
     <div className="min-h-full">
-      <div className="flex h-[calc(100vh-100px)]">
+      <div className="flex h-[calc(100vh-100px)] mt-20">
         {/* Côté gauche - Informations du projet */}
         <div className="w-1/2 bg-white rounded-lg shadow-sm border-r border-gray-200 p-8 overflow-y-auto">
           <div className="max-w-2xl mx-auto">
@@ -194,7 +292,8 @@ export default function UserDiscussions() {
               <div className="flex items-center gap-2 mt-2">
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    demande.statut === "validée"
+                    demande.statut === "validée" ||
+                    demande.statut === "assignée"
                       ? "bg-green-100 text-green-800"
                       : demande.statut === "refusée"
                       ? "bg-red-100 text-red-800"
@@ -315,17 +414,124 @@ export default function UserDiscussions() {
               </div>
             </div>
 
-            {/* Actions client (gardées statiques pour l'instant) */}
-            {demande.statut === "validée" && (
-              <div className="mt-6 flex justify-center gap-4">
-                <button
-                  className="bg-green-500 text-white px-6 py-2 rounded-xl hover:bg-green-700 transition-colors"
-                  onClick={() =>
-                    toast.info("Fonctionnalité signature à implémenter")
-                  }
-                >
-                  SIGNER LE DEVIS
-                </button>
+            {/* Artisans avec actions */}
+            {artisans.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Artisans intéressés
+                </h3>
+                <div className="space-y-4">
+                  {artisans.map((artisan) => (
+                    <div
+                      key={artisan.userId}
+                      className="bg-white border border-gray-200 rounded-xl p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">
+                            {artisan.user.companyName ||
+                              `${artisan.user.firstName} ${artisan.user.lastName}`}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {artisan.user.phone}
+                          </p>
+                        </div>
+                        <div className="relative" ref={actionsMenuRef}>
+                          <button
+                            onClick={() => setShowActionsMenu(artisan.userId)}
+                            className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+                          >
+                            <MoreVertical className="w-4 h-4 text-gray-600" />
+                          </button>
+
+                          {showActionsMenu === artisan.userId && (
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                              <div className="p-2">
+                                {hasDevis(artisan) && !artisan.recruited && (
+                                  <button
+                                    onClick={() =>
+                                      handleSignerDevis(artisan.userId)
+                                    }
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-green-600 hover:bg-green-50 rounded-md"
+                                  >
+                                    <FileSignature className="w-4 h-4" />
+                                    Signer le devis
+                                  </button>
+                                )}
+                                {hasFacture(artisan) &&
+                                  artisan.factureStatus === "en_attente" && (
+                                    <button
+                                      onClick={() =>
+                                        handlePayerFacture(artisan.userId)
+                                      }
+                                      className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                                    >
+                                      <CreditCard className="w-4 h-4" />
+                                      Payer la facture
+                                    </button>
+                                  )}
+                                {artisan.devisFileUrl && (
+                                  <a
+                                    href={artisan.devisFileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
+                                  >
+                                    <FileText className="w-4 h-4" />
+                                    Voir le devis
+                                  </a>
+                                )}
+                                {artisan.factureFileUrl && (
+                                  <a
+                                    href={artisan.factureFileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
+                                  >
+                                    <FileText className="w-4 h-4" />
+                                    Voir la facture
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Statuts */}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {artisan.recruited && (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            Sélectionné
+                          </span>
+                        )}
+                        {hasDevis(artisan) && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            Devis envoyé
+                          </span>
+                        )}
+                        {hasFacture(artisan) && (
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              artisan.factureStatus === "validee"
+                                ? "bg-green-100 text-green-800"
+                                : artisan.factureStatus === "refusee"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            Facture{" "}
+                            {artisan.factureStatus === "validee"
+                              ? "payée"
+                              : artisan.factureStatus === "refusee"
+                              ? "refusée"
+                              : "en attente"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -424,6 +630,51 @@ export default function UserDiscussions() {
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
+
+                        {/* Actions pour les messages système de devis/facture */}
+                        {message.evenementType === "PROPOSITION_DEVIS" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <p className="text-sm font-medium mb-2">
+                              Nouveau devis reçu
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  const artisan = artisans.find(
+                                    (a) => a.userId === message.expediteurId
+                                  );
+                                  if (artisan)
+                                    handleSignerDevis(artisan.userId);
+                                }}
+                                className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                              >
+                                Signer
+                              </button>
+                              <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+                                Refuser
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {message.evenementType === "FACTURE_ENVOYEE" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <p className="text-sm font-medium mb-2">
+                              Facture reçue
+                            </p>
+                            <button
+                              onClick={() => {
+                                const artisan = artisans.find(
+                                  (a) => a.userId === message.expediteurId
+                                );
+                                if (artisan) handlePayerFacture(artisan.userId);
+                              }}
+                              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                            >
+                              Payer maintenant
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div
                         className={`text-xs mt-1 flex items-center gap-1 ${
@@ -517,6 +768,85 @@ export default function UserDiscussions() {
           </div>
         </div>
       </div>
+
+      {/* Modale de paiement */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">
+                Paiement de la facture
+              </h3>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <CreditCard className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-gray-900">
+                  Simulation de paiement Stripe
+                </h4>
+                <p className="text-gray-600 mt-2">
+                  Cette démonstration simule un paiement sécurisé via Stripe.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Montant à payer:</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {artisans.find((a) => a.userId === selectedArtisan)
+                      ?.factureMontant || 0}
+                    €
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Artisan:</span>
+                  <span className="text-sm text-gray-900">
+                    {artisans.find((a) => a.userId === selectedArtisan)?.user
+                      .companyName ||
+                      artisans.find((a) => a.userId === selectedArtisan)?.user
+                        .firstName +
+                        " " +
+                        artisans.find((a) => a.userId === selectedArtisan)?.user
+                          .lastName}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p className="text-sm text-yellow-800 text-center">
+                    ⚠️ Ceci est une simulation. Aucun vrai paiement ne sera
+                    effectué.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleConfirmPayment}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Simuler le paiement
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
