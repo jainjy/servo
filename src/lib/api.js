@@ -117,4 +117,18 @@ export const advertisementsAPI = {
   // Statistiques
   getStats: () => api.get('/advertisements/stats/overview'),
 };
+
+export const estimationAPI = {
+  // Soumettre les données pour estimation
+  submitEstimation: (data) => api.post('/estimation/estimate', data),
+  
+  // Sauvegarder une estimation
+  saveEstimation: (data) => api.post('/estimation/save', data),
+  
+  // Récupérer l'historique des estimations
+  getEstimationHistory: (userId) => api.get(`/estimation/history/${userId}`),
+  
+  // Informations sur le service
+  getServiceInfo: () => api.get('/estimation/info'),
+};
 export default api;
