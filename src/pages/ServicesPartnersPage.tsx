@@ -740,7 +740,7 @@ const ServicesPartnersPage = () => {
 
       <div className="relative z-10">
         {/* Hero Section avec belle image de fond pour le bleu */}
-        <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 mt-12 overflow-hidden">
+        <section className="relative bg-black  text-white py-16 mt-12 overflow-hidden">
           {/* Image de fond pour la section bleue */}
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
@@ -750,22 +750,22 @@ const ServicesPartnersPage = () => {
           />
           
           {/* Overlay gradient pour améliorer la lisibilité */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-indigo-700/90" />
+          <div className="absolute inset-0 " />
           
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <div className="relative h-36 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-xl md:text-4xl font-bold mb-4">
               {view === "services" && "Services Immobiliers Professionnels"}
               {view === "partenaires" && "Nos Partenaires de Confiance"}
               {view === "aides" && "Centre d'Aide & Support"}
             </h1>
-            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-sm text-blue-100 mb-8 max-w-3xl mx-auto">
               {view === "services" && "Des solutions complètes pour tous vos projets immobiliers, de l'estimation à la réalisation."}
               {view === "partenaires" && "Découvrez notre réseau d'experts immobiliers qualifiés et vérifiés."}
               {view === "aides" && "Notre équipe est là pour vous accompagner à chaque étape de votre projet."}
             </p>
             
             {/* Navigation améliorée */}
-            <nav className="inline-flex gap-1 items-center justify-center rounded-2xl p-1 mt-12 bg-white/20 backdrop-blur-sm border border-white/30">
+            <nav className="inline-flex gap-1 items-center justify-center rounded-2xl p-1 mt-2 bg-white/20 backdrop-blur-sm border border-white/30">
               <button
                 onClick={() => handleNavigation("services")}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${

@@ -7,6 +7,8 @@ import heroImage from "@/assets/hero-house.jpg";
 import "../styles/font.css";
 import gsap from "gsap";
 import SplitText from "gsap/SplitText";
+import Recherche from "@/pages/Recherche";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 gsap.registerPlugin(SplitText);
 
@@ -18,6 +20,11 @@ const Hero = () => {
   const [currentRotation, setCurrentRotation] = useState({ x: 0, y: 0 });
   const [lightPosition, setLightPosition] = useState({ x: 50, y: 50, opacity: 0 });
   const requestRef = useRef<number | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const animate = () => {
     setCurrentRotation((prev) => {
@@ -79,41 +86,83 @@ const Hero = () => {
     setTargetRotation({ x: 0, y: 0 });
     setLightPosition({ x: 50, y: 50, opacity: 0 });
   };
-
-  const openSearchPage = () => {
-    // Rediriger vers la page de recherche avec la query actuelle si elle existe
-    if (heroQuery.trim()) {
-      navigate(`/recherche?q=${encodeURIComponent(heroQuery)}`);
-    } else {
-      navigate('/recherche');
+  const modalVariants: Variants = {
+    hidden: {
+      y: "100%",
+      opacity: 0,
+      scale: 0.9
+    },
+    visible: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 300,
+        duration: 0.4
+      } as any
+    },
+    exit: {
+      y: "100%",
+      opacity: 0,
+      scale: 0.9,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 300,
+        duration: 0.3
+      } as any
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      openSearchPage();
+  const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.2 }
     }
   };
+
+
+  // const openSearchPage = () => {
+  //   // Rediriger vers la page de recherche avec la query actuelle si elle existe
+  //   if (heroQuery.trim()) {
+  //     navigate(`/recherche?q=${encodeURIComponent(heroQuery)}`);
+  //   } else {
+  //     navigate('/recherche');
+  //   }
+  // };
+
+  // const handleKeyPress = (e: React.KeyboardEvent) => {
+  //   if (e.key === 'Enter') {
+  //     openSearchPage();
+  //   }
+  // };
 
   return (
     <>
-      <section 
-        id="hero" 
-        className="relative min-h-[600px] flex items-center justify-center overflow-hidden" 
+      <section
+        id="hero"
+        className="relative min-h-[600px] flex items-center justify-center overflow-hidden"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <div 
-          className="perspective-[500px] w-full h-screen rounded-lg bg-black overflow-hidden absolute" 
+        <div
+          className="perspective-[500px] w-full h-screen rounded-lg bg-black overflow-hidden absolute"
           style={{ transformStyle: "preserve-3d" }}
         >
           <img
             src={heroImage}
             alt="Background"
             className="absolute top-0 left-0 w-full h-full object-cover opacity-70"
-            style={{ 
-              transform: `rotateX(${currentRotation.x}deg) rotateY(${currentRotation.y}deg) scale(1.05)` 
-            }} 
+            style={{
+              transform: `rotateX(${currentRotation.x}deg) rotateY(${currentRotation.y}deg) scale(1.05)`
+            }}
           />
           <div
             className="absolute top-0 left-0 w-full h-full pointer-events-none transition-opacity duration-500"
@@ -123,7 +172,7 @@ const Hero = () => {
             }}
           />
         </div>
-        
+
         <div className="container relative z-10 mx-auto px-4 py-20 text-center">
           <h1 className="mb-6 lg:mt-0 -mt-2 text-2xl md:text-5xl lg:text-7xl tracking-wide font-bold text-white">
             La super-application
@@ -135,26 +184,26 @@ const Hero = () => {
             Immobilier, services et produits — tout en un, guidé par l'IA
           </p>
 
-          <div className="mx-auto max-w-3xl">
-            <div 
-              className="flex flex-col md:flex-row gap-3 bg-white rounded-2xl p-3 shadow-2xl cursor-text" 
-              onClick={openSearchPage}
+          <div className="mx-auto max-w-3xl" onClick={openModal}>
+            <div
+              className="flex flex-col md:flex-row gap-3 bg-white rounded-2xl p-3 shadow-2xl cursor-text"
+            //  onClick={openSearchPage}
             >
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   value={heroQuery}
                   onChange={(e) => setHeroQuery(e.target.value)}
-                  onFocus={openSearchPage}
-                  onKeyPress={handleKeyPress}
+                  // onFocus={openSearchPage}
+                  // onKeyPress={handleKeyPress}
                   placeholder="Cliquez pour lancer une recherche avancée"
                   className="pl-12 h-12 border-0 bg-transparent text-base focus-visible:ring-0 placeholder:text-gray-500 cursor-pointer"
                 />
               </div>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="md:w-auto"
-                onClick={openSearchPage}
+              // onClick={openSearchPage}
               >
                 Rechercher
               </Button>
@@ -162,6 +211,15 @@ const Hero = () => {
           </div>
         </div>
       </section>
+      {isModalOpen && (
+        <div className="fixed z-50 overflow-hidden w-full h-full backdrop-blur-md inset-0">
+
+          <div className="h-[600px] absolute bottom-0 bg-black w-full overflow-hidden">
+            <Recherche onClick={closeModal} />
+          </div>
+        </div>
+
+      )}
     </>
   );
 };

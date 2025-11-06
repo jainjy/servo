@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, TrendingUp, Users, FileText, Target, Award, Clock, CheckCircle } from 'lucide-react';
+import { DollarSign, TrendingUp, Users, FileText, Target, Award, Clock, CheckCircle, LayoutDashboard } from 'lucide-react';
 
 interface FundingCardProps {
   icon: React.ReactNode;
@@ -199,19 +199,24 @@ const AidesLeveesFonds: React.FC<AidesLeveesFondsProps> = ({ className = '' }) =
   ];
 
   return (
-    <section className={`py-8 mt-2 bg-white rounded-lg ${className}`}>
+    <section className={`py-8 mt-12 rounded-lg ${className}`}>
       <div className="container mx-auto px-4 max-w-7xl">
         
         {/* En-tête */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+        
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg" alt="" />
+          <div className="absolute left-2 bottom-0 inline-flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-full text-xs font-semibold mb-4">
             <DollarSign className="w-4 h-4 mr-2" />
             Financement & Croissance
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        </div>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
             Aides & Levées de Fonds
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-md text-gray-200 max-w-4xl mx-auto leading-relaxed">
             Soutien financier complet pour entreprises en croissance. De la recherche de subventions 
             aux levées de fonds ambitieuses, nous vous accompagnons dans tous vos défis financiers.
           </p>
@@ -294,15 +299,15 @@ const AidesLeveesFonds: React.FC<AidesLeveesFondsProps> = ({ className = '' }) =
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Prêt à Financer Votre Croissance ?
             </h3>
-            <p className="text-green-100 text-lg mb-6 max-w-2xl mx-auto">
+            <p className="text-green-100 text-sm mb-6 max-w-2xl mx-auto">
               Évaluez votre éligibilité aux aides et découvrez le potentiel de levée 
               de fonds de votre entreprise avec notre diagnostic gratuit.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-lg">
-                📊 Diagnostic Gratuit
+              <button className="flex items-center gap-2 bg-white text-green-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm">
+                <LayoutDashboard /> Diagnostic Gratuit
               </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-green-600 transition-colors duration-300 text-lg">
+              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-green-600 transition-colors duration-300 text-sm">
                 Rencontrer un Expert
               </button>
             </div>

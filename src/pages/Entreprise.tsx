@@ -13,6 +13,7 @@ import AuditMediation from "@/components/components/AuditMediation";
 import AidesLeveesFonds from "@/components/components/AideFonds";
 import JuridiqueLiquidation from "@/components/components/JuridiqueLiquidation";
 import PodcastsServices from "@/components/components/Podcast_services";
+import { Link } from "react-router-dom";
 
 const colors = {
   primary: "#0f172a", // slate-900
@@ -375,9 +376,12 @@ const Entreprise = () => {
                 <Button
                   className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
                   onClick={() => setActiveServiceCategory("tous")}
+
                 >
                   <FileText className="h-5 w-5 mr-3" />
-                  Découvrir nos services
+                  <a href="#services">
+                    Découvrir nos services
+                  </a>
                 </Button>
               </motion.div>
 
@@ -389,7 +393,9 @@ const Entreprise = () => {
                   onClick={handleOpenMap}
                 >
                   <MapPin className="h-5 w-5 mr-3" />
-                  Voir nos partenaires
+                  <a href="#partenaire">
+                    Voir nos partenaires
+                  </a>
                 </Button>
               </motion.div>
             </div>
@@ -1289,21 +1295,6 @@ const Entreprise = () => {
           </motion.div>
         </motion.div>
       )}
-      <div id="reprise">
-        <CreationReprise />
-      </div>
-      <div id="auditMediation">
-        <AuditMediation />
-      </div>
-      <div id="aideFonds">
-        <AidesLeveesFonds />
-      </div>
-      <div id="juridiqueLiquidation">
-        <JuridiqueLiquidation />
-      </div>
-      <div id="podcast_service">
-        <PodcastsServices />
-      </div>
     </div >
   );
 };

@@ -162,15 +162,15 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token, service }) =>
   };
 
   return (
-     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
       <div
         className="
-          bg-gradient-to-br from-white via-gray-50 to-slate-100
-          rounded-2xl shadow-2xl w-full max-w-lg p-6 relative
-          border border-gray-200 transition-all duration-300
-          transform animate-slideUp
-          overflow-y-auto max-h-[90vh]
-        "
+            bg-gradient-to-br from-white via-gray-50 to-slate-100
+            rounded-2xl shadow-2xl w-full max-w-lg p-6 relative
+            border border-gray-200 transition-all duration-300
+            transform animate-slideUp
+            overflow-y-auto max-h-[90vh]
+          "
       >
         {/* Bouton de fermeture */}
         <button
@@ -188,11 +188,10 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token, service }) =>
         {/* Message succès/erreur */}
         {message && (
           <div
-            className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium text-center shadow-sm transition-all duration-300 ${
-              message.type === "success"
+            className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium text-center shadow-sm transition-all duration-300 ${message.type === "success"
                 ? "bg-green-100 text-green-800 border border-green-200"
                 : "bg-red-100 text-red-800 border border-red-200"
-            }`}
+              }`}
           >
             {message.text}
           </div>
@@ -215,30 +214,63 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token, service }) =>
               placeholder="Description de l'œuvre"
               onChange={handleChange}
               value={formData.description}
-              
+
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition resize-none"
             />
+<div className="w-full">
+  <label
+    htmlFor="images-upload"
+    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all duration-200 text-gray-600 text-center p-4"
+  >
+    <svg
+      className="w-10 h-10 mb-2 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M7 16v-4m0 0V4m0 4h4m-4 0H4m16 8v-4m0 0V4m0 4h-4m4 0h4"
+      />
+    </svg>
+    <span className="text-sm font-medium">
+      Cliquez ou glissez vos images ici
+    </span>
+    <span className="text-xs text-gray-400 mt-1">
+      Formats acceptés: jpg, png, gif
+    </span>
+    <input
+      id="images-upload"
+      type="file"
+      name="images"
+      multiple
+      accept="image/*"
+      onChange={handleChange}
+      className="hidden"
+    />
+  </label>
+</div>
 
-            <input
-              type="file"
-              name="images"
-              multiple
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-            />
           </div>
+
 
           {/* Aperçu des images */}
           {previewImages.length > 0 && (
-            <div className="flex gap-2 flex-wrap mt-2">
-              {previewImages.map((name, i) => (
-                <span
+            <div className="flex gap-3 flex-wrap mt-4">
+              {previewImages.map((img, i) => (
+                <div
                   key={i}
-                  className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs border border-indigo-200 font-medium"
+                  className="relative w-24 h-24 border border-gray-200 rounded-xl overflow-hidden shadow-sm"
                 >
-                  {name}
-                </span>
+                  <img
+                    src={img}
+                    alt={`preview-${i}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ))}
             </div>
           )}

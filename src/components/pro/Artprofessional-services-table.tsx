@@ -113,7 +113,7 @@ const fetchServices = async () => {
             <div className="flex flex-wrap gap-2 text-sm">
               {service.price !== undefined && (
                 <span className="bg-gray-100 text-gray-700 font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                  <span className="text-lg">💰</span> {service.price.toLocaleString()} Ar
+                  <span className="text-lg">💰</span> {service.price.toLocaleString()} £
                 </span>
               )}
               {service.duration !== undefined && (

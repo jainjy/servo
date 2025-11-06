@@ -243,7 +243,7 @@ const RiskBadge = ({ level }: { level: string }) => {
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${styles[level as keyof typeof styles]}`}>
+    <span className={`absolute bottom-2 right-2 px-3 py-1 rounded-full text-sm font-medium border ${styles[level as keyof typeof styles]}`}>
       Risque {level}
     </span>
   );
@@ -257,7 +257,7 @@ const StatCard = ({ label, value, icon }: { label: string; value: string; icon: 
         {icon}
       </div>
     </div>
-    <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <p className="text-xl font-bold text-gray-900">{value}</p>
   </div>
 );
 
@@ -367,7 +367,7 @@ const ContactModal = ({ isOpen, onClose, investmentType }) => {
             <textarea
               value={formData.message}
               onChange={(e) => setFormData({...formData, message: e.target.value})}
-              rows="3"
+              rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="Vos questions ou commentaires..."
             />
@@ -491,7 +491,7 @@ const InvestissementDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
       {/* Header avec image */}
-      <div className="relative h-96 overflow-hidden">
+      <div className="relative h-60 overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-r ${investment.gradient} opacity-90`}></div>
         <img
           src={investment.image}
@@ -502,17 +502,10 @@ const InvestissementDetail = () => {
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-3xl">
-              <button
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center text-white mb-8 hover:text-gray-200 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Retour
-              </button>
-              <h1 className="text-2xl lg:text-5xl font-bold text-white mb-4">
+              <h1 className="text-2xl lg:text-4xl font-bold text-white mb-4">
                 {investment.title}
               </h1>
-              <p className="text-sm lg:text-xl text-gray-200 mb-6">
+              <p className="text-sm lg:text-md text-gray-200 mb-6">
                 {investment.subtitle}
               </p>
               <RiskBadge level={investment.riskLevel} />
@@ -522,14 +515,14 @@ const InvestissementDetail = () => {
       </div>
 
       {/* Contenu principal */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Colonne principale */}
           <div className="lg:col-span-2 space-y-8">
             {/* Description */}
             <section className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Présentation</h2>
-              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+              <p className="text-gray-700 text-md text-justify leading-relaxed mb-6">
                 {investment.longDescription}
               </p>
               
@@ -585,7 +578,7 @@ const InvestissementDetail = () => {
           <div className="space-y-6">
             {/* Stats */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Caractéristiques</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Caractéristiques</h3>
               <div className="space-y-4">
                 <StatCard
                   label="Rendement attendu"
