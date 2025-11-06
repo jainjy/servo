@@ -128,7 +128,51 @@ export default function ProDiscussions({
       toast.error("Erreur lors de la proposition du rendez-vous");
     }
   };
+  // Fonction pour confirmer le paiement
+  const handleConfirmerPaiement = async (confirmer) => {
+    try {
+      const response = await api.post(
+        `/demande-actions/${id}/confirmer-paiement`,
+        {
+          confirmer,
+        }
+      );
 
+      const message = confirmer
+        ? "Paiement confirmé avec succès"
+        : "Paiement refusé";
+      toast.success(message);
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur confirmation paiement:", error);
+      toast.error("Erreur lors de la confirmation du paiement");
+    }
+  };
+
+  // Fonction pour marquer les travaux comme terminés
+  const handleTerminerTravaux = async () => {
+    try {
+      const response = await api.post(
+        `/demande-actions/${id}/terminer-travaux`
+      );
+
+      toast.success("Travaux marqués comme terminés avec succès");
+
+      // Recharger les détails
+      const detailsResponse = await api.get(
+        `/demande-actions/${id}/details-artisan`
+      );
+      setArtisanDetails(detailsResponse.data);
+    } catch (error) {
+      console.error("Erreur fin des travaux:", error);
+      toast.error("Erreur lors du marquage des travaux comme terminés");
+    }
+  };
   const handleSubmitDevis = async (montant, description, file) => {
     try {
       const formData = new FormData();
@@ -672,23 +716,21 @@ export default function ProDiscussions({
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
-                        {message.evenementType === "FACTURE_PAYEE" && (
+                        {message.evenementType =="FACTURE_PAYEE" && (
                           <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                             <p className="text-sm font-medium mb-2">
-                              payement effectues par le client.
+                              Paiement effectué par le client.
                             </p>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => {
-                                 console.log("accepeter")
-
-                                }}
+                                onClick={() => handleConfirmerPaiement(true)}
                                 className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
                               >
                                 Confirmer
                               </button>
-                              <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
-                               onClick={() => {console.log("refuser")}}
+                              <button
+                                onClick={() => handleConfirmerPaiement(false)}
+                                className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
                               >
                                 Refuser
                               </button>
@@ -746,8 +788,8 @@ export default function ProDiscussions({
                 >
                   <MoreVertical className="w-4 h-4 text-gray-600" />
                 </button>
-
                 {/* Menu déroulant des actions */}
+
                 {showActionsMenu && (
                   <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-10 overflow-hidden">
                     <div className="p-2">
@@ -775,6 +817,30 @@ export default function ProDiscussions({
                         <DollarSign className="w-4 h-4" />
                         <span>Envoyer une facture</span>
                       </button>
+
+                      {/* NOUVEAU: Bouton pour confirmer le paiement */}
+                      {artisanDetails?.factureStatus === "validee" &&
+                        !artisanDetails?.factureConfirmee && (
+                          <button
+                            onClick={() => handleConfirmerPaiement(true)}
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Confirmer le paiement</span>
+                          </button>
+                        )}
+
+                      {/* NOUVEAU: Bouton pour terminer les travaux */}
+                      {artisanDetails?.factureConfirmee &&
+                        !artisanDetails?.travauxTermines && (
+                          <button
+                            onClick={handleTerminerTravaux}
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Marquer travaux terminés</span>
+                          </button>
+                        )}
 
                       {artisanView && (
                         <>
@@ -1013,6 +1079,72 @@ export default function ProDiscussions({
                   </p>
                 )}
               </div>
+              {/* Section Confirmation Paiement */}
+              {artisanDetails?.factureStatus === "validee" && (
+                <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-yellow-900 text-lg flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Confirmation Paiement
+                    </h4>
+                  </div>
+                  {artisanDetails.factureConfirmee ? (
+                    <div className="bg-white p-4 rounded-lg border border-yellow-100">
+                      <p className="text-sm text-green-600 font-medium">
+                        ✓ Paiement confirmé
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-white p-4 rounded-lg border border-yellow-100">
+                      <p className="text-sm text-gray-700 mb-3">
+                        Le client a payé la facture. Veuillez confirmer la
+                        réception du paiement.
+                      </p>
+                      <button
+                        onClick={() => handleConfirmerPaiement(true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Confirmer le paiement
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Section Travaux */}
+              {artisanDetails?.factureConfirmee && (
+                <div className="bg-orange-50 rounded-xl border border-orange-200 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-orange-900 text-lg flex items-center gap-2">
+                      <Wrench className="w-5 h-5" />
+                      État des Travaux
+                    </h4>
+                  </div>
+                  {artisanDetails.travauxTermines ? (
+                    <div className="bg-white p-4 rounded-lg border border-orange-100">
+                      <p className="text-sm text-green-600 font-medium">
+                        ✓ Travaux marqués comme terminés
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        En attente de confirmation du client
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-white p-4 rounded-lg border border-orange-100">
+                      <p className="text-sm text-gray-700 mb-3">
+                        Une fois les travaux terminés, vous pouvez les marquer
+                        comme terminés.
+                      </p>
+                      <button
+                        onClick={handleTerminerTravaux}
+                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        Marquer travaux terminés
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end p-6 border-t border-gray-200 sticky bottom-0 bg-white rounded-b-xl">

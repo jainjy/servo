@@ -117,7 +117,29 @@ export default function UserDiscussions() {
         return <Clock className="w-4 h-4" />;
     }
   };
+  // Dans UserDiscussions.jsx, ajoutez cette fonction
+  const handleConfirmerTravauxTermines = async (confirmer) => {
+    try {
+      const response = await api.post(
+        `/demande-actions/${id}/confirmer-travaux-termines`,
+        {
+          confirmer,
+        }
+      );
 
+      const message = confirmer
+        ? "Travaux confirmés comme terminés"
+        : "Confirmation refusée - Contactez l'artisan";
+      toast.success(message);
+
+      // Recharger les données
+      const demandeResponse = await api.get(`/demandes/${id}`);
+      setDemande(demandeResponse.data);
+    } catch (error) {
+      console.error("Erreur confirmation travaux:", error);
+      toast.error("Erreur lors de la confirmation des travaux");
+    }
+  };
   // Charger la demande
   useEffect(() => {
     const fetchDemande = async () => {
@@ -288,7 +310,7 @@ export default function UserDiscussions() {
         reviewData.serviceId = demande.serviceId;
       }
 
-      const response = await api.post("/api/reviews", reviewData);
+      const response = await api.post("/reviews", reviewData);
 
       toast.success("Avis envoyé avec succès !");
       setShowReviewModal(false);
@@ -695,11 +717,9 @@ export default function UserDiscussions() {
                             </a>
                           </div>
                         )}
-
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
-
                         {/* Actions pour les messages système de devis/facture */}
                         {message.evenementType === "PROPOSITION_DEVIS" && (
                           <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
@@ -725,23 +745,59 @@ export default function UserDiscussions() {
                             </div>
                           </div>
                         )}
-
                         {message.evenementType === "FACTURE_ENVOYEE" && (
                           <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            {artisans.find(
+                              (a) => a.userId === message.expediteurId
+                            ).factureStatus != "validee" ? (
+                              <>
+                                <p className="text-sm font-medium mb-2">
+                                  Facture reçue
+                                </p>
+                                <button
+                                  onClick={() => {
+                                    const artisan = artisans.find(
+                                      (a) => a.userId === message.expediteurId
+                                    );
+                                    if (artisan)
+                                      handlePayerFacture(artisan.userId);
+                                  }}
+                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                >
+                                  Payer maintenant
+                                </button>
+                              </>
+                            ) : (
+                              <p className="text-sm font-medium mb-2 bg-green-500 p-4 text-white rounded">
+                                Facture envoyer
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {message.evenementType === "TRAVAUX_TERMINES" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                             <p className="text-sm font-medium mb-2">
-                              Facture reçue
+                              L'artisan a marqué les travaux comme terminés.
                             </p>
-                            <button
-                              onClick={() => {
-                                const artisan = artisans.find(
-                                  (a) => a.userId === message.expediteurId
-                                );
-                                if (artisan) handlePayerFacture(artisan.userId);
-                              }}
-                              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                            >
-                              Payer maintenant
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  handleConfirmerTravauxTermines(true)
+                                }
+                                className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                              >
+                                Confirmer
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleConfirmerTravauxTermines(false)
+                                }
+                                className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                              >
+                                Refuser
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
