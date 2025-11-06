@@ -100,6 +100,7 @@ import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
 //import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
+import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des nouveaux composants immobilier
 import AuditPatrimonial from "./pages/immobilier/AuditPatrimonial";
@@ -432,6 +433,12 @@ const App = () => {
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                 </Routes>
+                {/* -------------------------
+                   Pop-up publicité globale
+                   ------------------------- */}
+                {user && user.role !== "admin" && (
+                  <AdvertisementPopup refreshMinutes={3} />
+                )}
                 <CookieConsent />
               </Layout>
             </BrowserRouter>
