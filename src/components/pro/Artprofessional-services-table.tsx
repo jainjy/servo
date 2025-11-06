@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
   Eye,
@@ -15,6 +13,7 @@ import {
 import api from "@/lib/api";
 import OeuvreModal from "./Pro-oeuvre-modal";
 import ProOeuvreModal from "./Pro-oeuvre-modal";
+import React from "react";
 
 interface Service {
   id: number;
@@ -48,126 +47,110 @@ export function ArtProfessionalServicesTable({
 
   const [selectedService, setSelectedService] = useState(null);
 
-
-  useEffect(() => {
-    fetchServices();
-  }, []);
-
-  const fetchServices = async () => {
+const fetchServices = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/oeuvre");
+      const response = await api.get("/oeuvre", {
+        params: searchQuery ? { search: searchQuery } : {},
+      });
       setServices(response.data);
     } catch (error) {
-      console.error("Erreur lors du chargement des services:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="border-border bg-card p-6 animate-pulse">
-            <div className="flex items-start justify-between">
-              <div className="space-y-2 flex-1">
-                <div className="h-4 bg-muted rounded w-1/4"></div>
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-              </div>
-              <div className="h-8 bg-muted rounded w-24"></div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  // Fetch à chaque changement de searchQuery
+  useEffect(() => {
+    fetchServices();
+  }, [searchQuery]);
 
-  if (services.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-foreground mb-2">
-          Aucun service trouvé
-        </h3>
-        <p className="text-muted-foreground mb-6">
-          Aucun service ne correspond à votre recherche.
-        </p>
-      </div>
-    );
-  }
-
-  function handleDelete(id: number): void {
-    throw new Error("Function not implemented.");
-  }
+  if (loading) return <p>Chargement...</p>;
+  if (services.length === 0) return <p>Aucun service trouvé.</p>;
 
   return (
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 py-8">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 py-8">
   {services.map((service) => (
-    <Card
-      key={service.id}
-      className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden flex flex-col"
-    >
-      {/* Image principale réduite */}
-      {service.images?.length > 0 && (
-        <div className="relative h-32 w-full overflow-hidden">
-          <img
-            src={service.images[0]}
-            alt={service.libelle}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-          />
-          {/* Badge catégorie */}
-          {service.category?.name && (
-            <span className="absolute top-2 left-2 bg-gradient-to-r from-blue-500 to-blue-400 text-white text-[11px] font-semibold px-2 py-1 rounded-full shadow-md">
-              {service.category.name}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Contenu */}
-      <div className="p-4 flex flex-col flex-1 justify-between">
-        <div className="mb-3">
-          <h3 className="text-md font-semibold text-gray-800 mb-1 line-clamp-1">
-            {service.libelle}
-          </h3>
-          <p className="text-sm text-gray-500 line-clamp-2">
-            {service.description || "Aucune description disponible"}
-          </p>
-
-          <div className="flex flex-wrap gap-2 text-xs text-gray-700 mt-2">
-            {service.price !== undefined && (
-              <span className="flex items-center gap-1">💰 {service.price.toLocaleString()} Ar</span>
-            )}
-            {service.duration !== undefined && (
-              <span className="flex items-center gap-1">⏱ {service.duration} min</span>
+    // Utilisez un fragment React (<>...</>) pour contenir la Card ET le Modal pour ce service
+    <React.Fragment key={service.id}>
+      <Card
+        // Changement 1: Carte plus foncée, bord plus doux, ombre plus profonde et moderne
+        className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col transform hover:scale-[1.02] border border-gray-100"
+      >
+        {/* Image principale réduite */}
+        {service.images?.length > 0 && (
+          // Changement 2: Image plus haute (h-40), masque d'ombre subtil au bas de l'image
+          <div className="relative h-40 w-full overflow-hidden">
+            <img
+              src={service.images[0]}
+              alt={service.libelle}
+              // Changement 3: Transition plus douce
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            {/* Badge catégorie - Plus discret et contrasté */}
+            {service.category?.name && (
+              <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-3 py-1.5 rounded-full shadow-lg ring-1 ring-gray-200">
+                {service.category.name}
+              </span>
             )}
           </div>
+        )}
+
+        {/* Contenu */}
+        <div className="p-5 flex flex-col flex-1 justify-between">
+          <div className="mb-4">
+            {/* Changement 4: Typographie plus grande et plus audacieuse */}
+            <h3 className="text-m font-extraregular text-gray-900 mb-1 line-clamp-1">
+              {service.libelle}
+            </h3>
+            {/* Description : Couleurs de texte plus douces */}
+            <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+              {service.description || "Aucune description disponible"}
+            </p>
+
+            {/* Indicateurs : Rendu plus élégant (Puces/Chips) */}
+            <div className="flex flex-wrap gap-2 text-sm">
+              {service.price !== undefined && (
+                <span className="bg-gray-100 text-gray-700 font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                  <span className="text-lg">💰</span> {service.price.toLocaleString()} Ar
+                </span>
+              )}
+              {service.duration !== undefined && (
+                <span className="bg-gray-100 text-gray-700 font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                  <span className="text-lg">⏱</span> {service.duration} min
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
+            {/* Badge Actif : Plus visible et moderne */}
+            <span
+              className="bg-green-50 text-green-700 border border-green-200 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm"
+            >
+              ✅ Actif
+            </span>
+
+
+            <button
+              onClick={() => {
+                // Cette logique est correcte pour ouvrir le modal
+                setSelectedService(service);
+                setShowModal(true);
+              }}
+              // Changement 5: Bouton élégant, couleur accentuée, interaction subtile
+              className="text-sm font-semibold px-4 py-2 rounded-xl bg-purple-600 text-white shadow-lg shadow-purple-500/30 hover:bg-purple-700 transition-all duration-300 transform hover:-translate-y-0.5"
+            >
+              ✏️ Modifier
+            </button>
+          </div>
         </div>
+      </Card>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center mt-4">
-          <Badge
-            variant="outline"
-            className="bg-green-50 text-green-700 border-green-200 text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1"
-          >
-            <CheckCircle className="h-4 w-4" />
-            Actif
-          </Badge>
-
-          <button
-            onClick={() => {
-              setSelectedService(service);
-              setShowModal(true);
-            }}
-            className="text-xs font-medium px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white hover:scale-105 transition-transform duration-300"
-          >
-            Modifier
-          </button>
-        </div>
-      </div>
-
-      {/* Modal */}
+      {/* Rendu du Modal - Positionnement clé ! */}
+      {/* On vérifie si showModal est vrai ET si le service sélectionné est CELUI de cette itération. */}
       {showModal && selectedService?.id === service.id && (
         <ProOeuvreModal
           service={selectedService}
@@ -175,7 +158,7 @@ export function ArtProfessionalServicesTable({
           token={""}
         />
       )}
-    </Card>
+    </React.Fragment> // Fin du Fragment React
   ))}
 </div>
 

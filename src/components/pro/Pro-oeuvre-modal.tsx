@@ -162,46 +162,113 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token, service }) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl relative overflow-y-auto max-h-[90vh]">
-        <button onClick={onClose} className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-lg transition">
-          <X className="h-5 w-5" />
+     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+      <div
+        className="
+          bg-gradient-to-br from-white via-gray-50 to-slate-100
+          rounded-2xl shadow-2xl w-full max-w-lg p-6 relative
+          border border-gray-200 transition-all duration-300
+          transform animate-slideUp
+          overflow-y-auto max-h-[90vh]
+        "
+      >
+        {/* Bouton de fermeture */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-all duration-200"
+        >
+          <X className="h-5 w-5 text-gray-500 hover:text-gray-700" />
         </button>
 
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">
-          {service ? "Modifier l'œuvre" : "Ajouter une œuvre"}
+        {/* Titre */}
+        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+          {service ? "✏️ Modifier l'œuvre" : "🖼️ Ajouter une nouvelle œuvre"}
         </h2>
 
+        {/* Message succès/erreur */}
         {message && (
           <div
-            className={`mb-4 p-2 rounded text-center ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-              }`}
+            className={`mb-4 px-4 py-2 rounded-lg text-sm font-medium text-center shadow-sm transition-all duration-300 ${
+              message.type === "success"
+                ? "bg-green-100 text-green-800 border border-green-200"
+                : "bg-red-100 text-red-800 border border-red-200"
+            }`}
           >
             {message.text}
           </div>
         )}
 
+        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" name="libelle" placeholder="Libellé" onChange={handleChange} value={formData.libelle} className="w-full border rounded-lg px-3 py-2" />
-          <textarea name="description" placeholder="Description" onChange={handleChange} value={formData.description} className="w-full border rounded-lg px-3 py-2" />
-          <input type="file" name="images" multiple accept="image/*" onChange={handleChange} className="w-full border rounded-lg px-3 py-2" />
+          <div className="space-y-3">
+            <input
+              type="text"
+              name="libelle"
+              placeholder="Libellé de l'œuvre"
+              onChange={handleChange}
+              value={formData.libelle}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition"
+            />
+
+            <textarea
+              name="description"
+              placeholder="Description de l'œuvre"
+              onChange={handleChange}
+              value={formData.description}
+              
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition resize-none"
+            />
+
+            <input
+              type="file"
+              name="images"
+              multiple
+              accept="image/*"
+              onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+            />
+          </div>
 
           {/* Aperçu des images */}
-          <div className="flex gap-2 flex-wrap mt-2">
-            {previewImages.map((name, i) => (
-              <span key={i} className="px-2 py-1 bg-gray-100 rounded text-sm border">
-                {name}
-              </span>
-            ))}
-          </div>
+          {previewImages.length > 0 && (
+            <div className="flex gap-2 flex-wrap mt-2">
+              {previewImages.map((name, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs border border-indigo-200 font-medium"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          )}
 
           <div className="flex gap-4">
-            <input type="number" name="price" placeholder="Prix (Ar)" onChange={handleChange} value={formData.price} className="w-full border rounded-lg px-3 py-2" />
-            <input type="number" name="duration" placeholder="Durée (min)" onChange={handleChange} value={formData.duration} className="w-full border rounded-lg px-3 py-2" />
+            <input
+              type="number"
+              name="price"
+              placeholder="💰 Prix (Ar)"
+              onChange={handleChange}
+              value={formData.price}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition"
+            />
+            <input
+              type="number"
+              name="duration"
+              placeholder="⏱️ Durée (min)"
+              onChange={handleChange}
+              value={formData.duration}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition"
+            />
           </div>
 
-          <select name="categoryId" value={formData.categoryId} onChange={handleChange} className="w-full border rounded-lg px-3 py-2">
-            <option value="">Sélectionner une catégorie</option>
+          <select
+            name="categoryId"
+            value={formData.categoryId}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition"
+          >
+            <option value="">🎨 Sélectionner une catégorie</option>
             {categories.map((cat) => (
               <option key={cat.id} value={String(cat.id)}>
                 {cat.name}
@@ -209,14 +276,24 @@ const OeuvreModal: React.FC<OeuvreModalProps> = ({ onClose, token, service }) =>
             ))}
           </select>
 
+          {/* Boutons */}
           <div className="flex justify-between mt-6">
             {service && (
-              <button type="button" onClick={handleDelete} className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-300 text-sm font-medium px-4 py-2 rounded-lg">
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-300 text-sm font-medium px-5 py-2 rounded-lg"
+              >
                 Supprimer
               </button>
             )}
-            <Button type="submit" disabled={loading}>
-              {loading ? "Envoi en cours..." : service ? "Modifier" : "Enregistrer"}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-6 py-2 rounded-xl transition-all duration-300 shadow-md"
+            >
+              {loading ? "⏳ Envoi en cours..." : service ? "💾 Modifier" : "✅ Enregistrer"}
             </Button>
           </div>
         </form>
