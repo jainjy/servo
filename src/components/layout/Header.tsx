@@ -484,7 +484,7 @@ useEffect(() => {
         {
           title: "Activités & loisirs",
           description: "Découvertes & aventures",
-          href: "/tourisme",
+          href: "/activiteLoisirs",
           image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg"
         }, {
           title: "Formations",
