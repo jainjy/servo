@@ -157,7 +157,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             <div className="py-12">
                 <div className='absolute inset-0 h-72 -z-10 w-full overflow-hidden'>
                     <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-                    <img src="https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg" alt="" />
+                    <img src="https://i.pinimg.com/736x/dc/1c/63/dc1c635dc718785a7ef7bc2b05a47792.jpg" alt="" />
                 </div>
                 <div className="max-w-6xl mx-auto px-4 text-center">
                     <h1 className="text-2xl md:text-4xl font-bold mb-4">
