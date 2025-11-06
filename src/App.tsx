@@ -280,7 +280,9 @@ const App = () => {
                   <Route path="/financement" element={<Financement />} />
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
-                  <Route path="/service" element={<ServicesPartnersPage />} />
+                  {/* Add redirect from /service to /services-partners */}
+                  <Route path="/service" element={<Navigate to="/services-partners" replace />} />
+                  <Route path="/services-partners" element={<ServicesPartnersPage />} />
 
                   {/* <Route path="/publicite" element={<Publicite />} /> */}
                   <Route

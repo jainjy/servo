@@ -1,1028 +1,611 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  MapPin, ChevronDown, Search, X, Send, Mail, Home, 
-  Building, Warehouse, Hotel, Users, FileText, HelpCircle,
-  Phone, Star, Shield, Clock, ArrowRight, Eye, MessageCircle
-} from "lucide-react";
-import { toast } from "sonner";
+import { ChevronDown, Camera, Star, Clock, MapPin, Bed, Bath, Ruler, Wrench, Home, Car, Utensils } from "lucide-react";
+import PartnersPage from "./ServicesPartnersPage/PartnersPage";
+import ServicesPage from "./ServicesPartnersPage/ServicesPages";
+import AidesPage from "./ServicesPartnersPage/AidesPage";
 
-const ServicesPartnersPage = () => { 
+
+// Types pour TypeScript
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration?: number;
+  images: string[];
+  metiers?: Array<{ id: string; libelle: string; name?: string }>;
+  rating?: number;
+  type: 'service';
+}
+
+interface Property {
+  id: string;
+  title: string;
+  name?: string;
+  description: string;
+  price: number;
+  address?: string;
+  images: string[];
+  rooms?: number;
+  bathrooms?: number;
+  surface?: number;
+  rating?: number;
+  type: 'property';
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category?: string;
+  rating?: number;
+  type: 'product';
+}
+
+interface Aliment {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category?: string;
+  rating?: number;
+  type: 'aliment';
+}
+
+type Item = Service | Property | Product | Aliment;
+
+const ServicesPartnersPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const section = params.get("section");
 
-  const [view, setView] = useState("services");
-  const [showPartners, setShowPartners] = useState(false);
-  const [showStatuses, setShowStatuses] = useState(false);
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [partnersSearchQuery, setPartnersSearchQuery] = useState("");
-  const [servicesSearchQuery, setServicesSearchQuery] = useState("");
-  const [selectedSectors, setSelectedSectors] = useState([]);
-  const [showCard, setShowCard] = useState(false);
-  const [selectedServiceForm, setSelectedServiceForm] = useState('');
-  const [selectedImage, setSelectedImage] = useState('');
-  const [showMessageCard, setShowMessageCard] = useState(false);
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [displayCount, setDisplayCount] = useState(6);
-  const [propertyType, setPropertyType] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [view, setView] = useState("default");
+  const [services, setServices] = useState<Service[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [aliments, setAliments] = useState<Aliment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Auto-selection de la section depuis l'URL
+  // Fonction utilitaire pour parser les données API
+  const parseApiData = (data: any, defaultKey: string): any[] => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (data[defaultKey] && Array.isArray(data[defaultKey])) return data[defaultKey];
+    if (data.data && Array.isArray(data.data)) return data.data;
+    if (data.items && Array.isArray(data.items)) return data.items;
+    if (data.results && Array.isArray(data.results)) return data.results;
+    return [data];
+  };
+
+  // Fonction pour récupérer toutes les données
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      console.log('🔄 Chargement des données depuis:', API_BASE_URL);
+
+      // Récupérer tous les services en parallèle
+      const requests = [
+        fetch(`${API_BASE_URL}/api/services`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        }),
+        fetch(`${API_BASE_URL}/api/properties`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        }),
+        fetch(`${API_BASE_URL}/api/products`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        }),
+        fetch(`${API_BASE_URL}/api/aliments`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        })
+      ];
+
+      const [servicesRes, propertiesRes, productsRes, alimentsRes] = await Promise.all(requests);
+
+      // Traitement des réponses
+      if (servicesRes.ok) {
+        const servicesData = await servicesRes.json();
+        const parsedServices = parseApiData(servicesData, 'services');
+        console.log('✅ Services chargés:', parsedServices.length);
+        setServices(parsedServices.map((service: any) => ({ ...service, type: 'service' })));
+      } else {
+        console.warn('❌ Erreur services:', servicesRes.status);
+        setServices([]);
+      }
+
+      if (propertiesRes.ok) {
+        const propertiesData = await propertiesRes.json();
+        const parsedProperties = parseApiData(propertiesData, 'properties');
+        console.log('✅ Propriétés chargées:', parsedProperties.length);
+        setProperties(parsedProperties.map((property: any) => ({ ...property, type: 'property' })));
+      } else {
+        console.warn('❌ Erreur propriétés:', propertiesRes.status);
+        setProperties([]);
+      }
+
+      if (productsRes.ok) {
+        const productsData = await productsRes.json();
+        const parsedProducts = parseApiData(productsData, 'products');
+        console.log('✅ Produits chargés:', parsedProducts.length);
+        setProducts(parsedProducts.map((product: any) => ({ ...product, type: 'product' })));
+      } else {
+        console.warn('❌ Erreur produits:', productsRes.status);
+        setProducts([]);
+      }
+
+      if (alimentsRes.ok) {
+        const alimentsData = await alimentsRes.json();
+        const parsedAliments = parseApiData(alimentsData, 'aliments');
+        console.log('✅ Aliments chargés:', parsedAliments.length);
+        setAliments(parsedAliments.map((aliment: any) => ({ ...aliment, type: 'aliment' })));
+      } else {
+        console.warn('❌ Erreur aliments:', alimentsRes.status);
+        setAliments([]);
+      }
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur inconnue est survenue';
+      setError(errorMessage);
+      console.error('💥 Erreur générale:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Récupérer les données au chargement
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  // Gestion de la section URL
   useEffect(() => {
     if (section) {
       if (section === "partenaires") setView("partenaires");
       if (section === "prestations") setView("services");
       if (section === "aides") setView("aides");
+    } else {
+      setView("default");
     }
   }, [section]);
 
-  // Navigation handlers
-  const handleNavigation = (newView) => {
-    setView(newView);
-    setShowPartners(false);
-    setShowStatuses(false);
-    setDisplayCount(6);
-    navigate(`?section=${newView === "services" ? "prestations" : newView}`, { replace: true });
-  };
-
-  const sectors = ["Nord", "Ouest", "Est", "Sud"];
-  
-  const propertyTypes = [
-    { value: "maison", label: "Maison/Villa", icon: Home },
-    { value: "appartement", label: "Appartement", icon: Building },
-    { value: "terrain", label: "Terrain", icon: Warehouse },
-    { value: "hotel", label: "Hôtel/Gîte", icon: Hotel }
-  ];
-
-  const locations = [
-    "Paris", "Lyon", "Marseille", "Bordeaux", 
-    "Toulouse", "Lille", "Nice", "Nantes"
-  ];
-
-  // Handlers pour les actions
-  const handleStatusClick = (statusLabel, statusImage) => {
-    setSelectedServiceForm(statusLabel);
-    setSelectedImage(statusImage);
-    setShowCard(true);
-  };
-
-  const handleContactPartner = (partner) => {
-    setShowMessageCard(true);
-    setMessage(`Bonjour, je suis intéressé(e) par vos services en tant que ${partner.category}. Pouvez-vous me recontacter ?`);
-  };
-
-  const handleRequestQuote = (service) => {
-    setSelectedService(service.action);
-    setShowStatuses(true);
-  };
-
-  const handleCallSupport = () => {
-    window.open('tel:+33123456789');
-  };
-
-  const handleDownloadBrochure = (partner) => {
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = `brochure-${partner.name.toLowerCase().replace(/\s+/g, '-')}.pdf`;
-    link.click();
-  };
-
-  const handleViewAllPartners = () => {
-    setShowPartners(true);
-    setSelectedCategory("");
-  };
-
-  const handleSendMessage = () => {
-    console.log("Email:", email);
-    console.log("Message:", message);
-    setShowMessageCard(false);
-    setEmail('');
-    setMessage('');
-    toast.info("Message envoyé avec succès!");
-  };
-
-  const statuses = [
-    { 
-      label: "EN RECHERCHE DE TERRAIN",
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
-      description: "Trouvez le terrain idéal pour votre projet",
-      icon: MapPin
-    },
-    { 
-      label: "OFFRE ACCEPTEE", 
-      image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=250&fit=crop",
-      description: "Votre offre est acceptée, poursuivons ensemble",
-      icon: FileText
-    },
-    { 
-      label: "TERRAIN SOUS COMPROMIS", 
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
-      description: "Finalisez votre acquisition en toute sérénité",
-      icon: Shield
-    }
-  ];
-
-  const services = [
-    { 
-      action: "ESTIMATION IMMOBILIÈRE", 
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop",
-      category: "ESTIMATION",
-      description: "Évaluation précise de votre bien immobilier par des experts",
-      time: "24h",
-      rating: 4.8,
-      price: "Gratuit"
-    },
-    { 
-      action: "SIMULATION DE FINANCEMENT", 
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=250&fit=crop",
-      category: "FINANCEMENT",
-      description: "Calcul de votre capacité d'emprunt et meilleures offres",
-      time: "2h",
-      rating: 4.6,
-      price: "Gratuit"
-    },
-    { 
-      action: "COMPROMIS DE VENTE", 
-      image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=250&fit=crop",
-      category: "JURIDIQUE",
-      description: "Rédaction sécurisée de vos documents par des notaires",
-      time: "48h",
-      rating: 4.9,
-      price: "À partir de 500€"
-    },
-    { 
-      action: "DEVIS MUR DE SOUTÈNEMENT", 
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop",
-      category: "CONSTRUCTION",
-      description: "Devis détaillé pour vos travaux de construction",
-      time: "24h",
-      rating: 4.7,
-      price: "Gratuit"
-    },
-    { 
-      action: "INSTALLATION ALARME", 
-      image: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=250&fit=crop",
-      category: "SÉCURITÉ",
-      description: "Sécurisez votre habitat avec nos experts",
-      time: "4h",
-      rating: 4.8,
-      price: "À partir de 300€"
-    },
-    { 
-      action: "CHANGEMENT DE SERRURE", 
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=250&fit=crop",
-      category: "SÉCURITÉ",
-      description: "Remplacement rapide et sécurisé de vos serrures",
-      time: "1h",
-      rating: 4.5,
-      price: "À partir de 80€"
-    }
-  ];
-
-  const partnerCategories = [
-    { 
-      title: "ARCHITECTES", 
-      action: "Découvrir", 
-      image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&h=250&fit=crop", 
-      description: "Conception et plans sur mesure",
-      count: "24 experts"
-    },
-    { 
-      title: "CONSTRUCTEURS", 
-      action: "Découvrir", 
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop", 
-      description: "Construction clé en main",
-      count: "18 entreprises"
-    },
-    { 
-      title: "ÉLECTRICIENS", 
-      action: "Découvrir", 
-      image: "https://images.unsplash.com/photo-1586210576191-2ec54cb58e14?w=400&h=250&fit=crop", 
-      description: "Installation et dépannage électrique",
-      count: "32 techniciens"
-    },
-    { 
-      title: "NOTAIRES", 
-      action: "Découvrir", 
-      image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=250&fit=crop", 
-      description: "Conseil juridique et authentification",
-      count: "15 notaires"
-    },
-  ];
-
-  const partners = [
-    { 
-      name: "Studio Architecture", 
-      action: "Voir projets", 
-      image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&h=250&fit=crop", 
-      category: "ARCHITECTES", 
-      location: "Paris", 
-      type: "maison",
-      rating: 4.9,
-      projects: 127,
-      verified: true,
-      experience: "15 ans"
-    },
-    { 
-      name: "Construct Pro", 
-      action: "Voir réalisations", 
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=250&fit=crop", 
-      category: "CONSTRUCTEURS", 
-      location: "Lyon", 
-      type: "appartement",
-      rating: 4.8,
-      projects: 89,
-      verified: true,
-      experience: "12 ans"
-    },
-    { 
-      name: "Elec Services", 
-      action: "Demander devis", 
-      image: "https://images.unsplash.com/photo-1586210576191-2ec54cb58e14?w=400&h=250&fit=crop", 
-      category: "ÉLECTRICIENS", 
-      location: "Marseille", 
-      type: "maison",
-      rating: 4.7,
-      projects: 203,
-      verified: true,
-      experience: "8 ans"
-    },
-  ];
-
-  const getFilteredPartners = (category) => {
-    let filtered = category ? partners.filter(p => p.category === category) : partners.slice();
-    
-    if (partnersSearchQuery) {
-      const q = partnersSearchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.location.toLowerCase().includes(q)
+  // Composant pour afficher tous les services, biens, produits, etc.
+  const AllServicesGridView = () => {
+    if (loading) {
+      return (
+        <div className="py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <span className="ml-3 text-gray-600 mt-4">Chargement des données...</span>
+              <div className="mt-2 text-sm text-gray-500">
+                Services, biens, produits et aliments
+              </div>
+            </div>
+          </div>
+        </div>
       );
     }
 
-    if (propertyType) {
-      filtered = filtered.filter(p => p.type === propertyType);
-    }
-
-    if (locationFilter) {
-      filtered = filtered.filter(p => p.location === locationFilter);
-    }
-    
-    return filtered;
-  };
-
-  const getFilteredServices = () => {
-    let filtered = services;
-    
-    if (servicesSearchQuery) {
-      const q = servicesSearchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
-        s.action.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q)
+    if (error) {
+      return (
+        <div className="py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center py-12">
+              <div className="text-red-500 text-lg mb-4">
+                Erreur lors du chargement
+              </div>
+              <div className="text-gray-600 text-sm mb-4 max-w-md mx-auto">
+                {error}
+              </div>
+              <button
+                onClick={fetchAllData}
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+              >
+                Réessayer
+              </button>
+            </div>
+          </div>
+        </div>
       );
     }
 
-    return filtered;
-  };
+    const allItems: Item[] = [
+      ...services,
+      ...properties,
+      ...products,
+      ...aliments
+    ];
 
-  const toggleSector = (sector) => {
-    setSelectedSectors(prev =>
-      prev.includes(sector)
-        ? prev.filter(s => s !== sector)
-        : [...prev, sector]
-    );
-  };
+    // Statistiques par type
+    const stats = {
+      services: services.length,
+      properties: properties.length,
+      products: products.length,
+      aliments: aliments.length,
+      total: allItems.length
+    };
 
-  const clearFilters = () => {
-    setSelectedSectors([]);
-    setPartnersSearchQuery("");
-    setPropertyType("");
-    setLocationFilter("");
-  };
-
-  const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 6);
-  };
-
-  const handleImageError = (e, fallbackText) => {
-    const target = e.target;
-    target.src = `https://via.placeholder.com/400x250/f8fafc/64748b?text=${encodeURIComponent(fallbackText)}`;
-  };
-
-  const StatusesSection = () => (
-    <section className="py-8 animate-fade-in">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Choisissez votre situation</h2>
-        <p className="text-gray-600">Sélectionnez le service correspondant à votre besoin</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statuses.map((status, index) => {
-          const IconComponent = status.icon;
-          return (
-            <div
-              key={index}
-              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group border border-gray-200"
-              onClick={() => handleStatusClick(status.label, status.image)}
-            >
-              <div className="relative h-40 overflow-hidden">
-                <img
-                  src={status.image}
-                  alt={status.label}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  onError={(e) => handleImageError(e, status.label)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm rounded-full p-2">
-                  <IconComponent className="w-5 h-5 text-white" />
-                </div>
+    if (allItems.length === 0) {
+      return (
+        <div className="py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center py-12">
+              <div className="text-gray-500 text-lg mb-4">Aucune donnée disponible pour le moment</div>
+              <div className="text-gray-400 text-sm mb-6">
+                Les services, biens et produits apparaîtront ici une fois disponibles
               </div>
-              
-              <div className="p-6">
-                <h3 className="font-semibold text-gray-900 mb-2 text-sm leading-tight">
-                  {status.label}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  {status.description}
-                </p>
-                <div className="flex items-center text-blue-600 text-sm font-medium">
-                  <span>Choisir cette option</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-
-  const PartnersSection = ({ category }) => {
-    const filteredPartners = getFilteredPartners(category);
-    const displayedPartners = filteredPartners.slice(0, displayCount);
-
-    return (
-      <>
-        <div className="mb-8 animate-fade-in">
-          <div className="flex flex-wrap items-center gap-4 mb-6">
-            <div className="relative flex-1 min-w-[300px]">
-              <input
-                type="text"
-                placeholder="Rechercher un partenaire..."
-                value={partnersSearchQuery}
-                onChange={(e) => setPartnersSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-500 text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-            
-            <div className="flex flex-wrap gap-3">
-              <div className="relative">
-                <button 
-                  className="flex items-center gap-2 border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition-colors min-w-[160px] justify-between"
-                  onClick={() => setShowPropertyDropdown(!showPropertyDropdown)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Home className="w-4 h-4" />
-                    {propertyType ? propertyTypes.find(p => p.value === propertyType)?.label : "Type de bien"}
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-                
-                {showPropertyDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 animate-slide-down">
-                    {propertyTypes.map((type) => (
-                      <button
-                        key={type.value}
-                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3 ${
-                          propertyType === type.value ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                        }`}
-                        onClick={() => {
-                          setPropertyType(type.value === propertyType ? "" : type.value);
-                          setShowPropertyDropdown(false);
-                        }}
-                      >
-                        <type.icon className="w-4 h-4" />
-                        {type.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <button 
-                  className="flex items-center gap-2 border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition-colors min-w-[160px] justify-between"
-                  onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    {locationFilter || "Localisation"}
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-                
-                {showLocationDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 animate-slide-down max-h-60 overflow-y-auto">
-                    {locations.map((location) => (
-                      <button
-                        key={location}
-                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                          locationFilter === location ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                        }`}
-                        onClick={() => {
-                          setLocationFilter(location === locationFilter ? "" : location);
-                          setShowLocationDropdown(false);
-                        }}
-                      >
-                        {location}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {(partnersSearchQuery || selectedSectors.length > 0 || propertyType || locationFilter) && (
               <button
-                onClick={clearFilters}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                onClick={fetchAllData}
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
               >
-                <X className="w-4 h-4" />
-                Effacer les filtres
+                Actualiser
               </button>
-            )}
+            </div>
           </div>
         </div>
+      );
+    }
 
-        {filteredPartners.length === 0 ? (
-          <div className="text-center py-12 animate-fade-in">
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">Aucun partenaire trouvé avec ces critères.</p>
-              <button 
-                onClick={clearFilters}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-              >
-                Effacer les filtres
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 animate-fade-in">
-              {displayedPartners.map((partner, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-200"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={partner.image} 
-                      alt={partner.name}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      onError={(e) => handleImageError(e, partner.name)}
-                    />
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-sm font-semibold text-gray-900">{partner.rating}</span>
-                    </div>
-                    {partner.verified && (
-                      <div className="absolute top-4 left-4 bg-blue-500 text-white rounded-full p-1">
-                        <Shield className="w-4 h-4" />
-                      </div>
-                    )}
-                  </div>
+    // Composant de carte générique
+    const renderItemCard = (item: Item, index: number) => {
+      // Configuration par type
+      const getTypeConfig = (type: string) => {
+        const configs = {
+          service: { 
+            color: 'blue', 
+            icon: Wrench, 
+            label: 'Service',
+            bgFrom: 'from-blue-50',
+            bgTo: 'to-blue-100',
+            borderColor: 'border-blue-200'
+          },
+          property: { 
+            color: 'green', 
+            icon: Home, 
+            label: 'Bien Immobilier',
+            bgFrom: 'from-green-50',
+            bgTo: 'to-green-100',
+            borderColor: 'border-green-200'
+          },
+          product: { 
+            color: 'purple', 
+            icon: Car, 
+            label: 'Produit',
+            bgFrom: 'from-purple-50',
+            bgTo: 'to-purple-100',
+            borderColor: 'border-purple-200'
+          },
+          aliment: { 
+            color: 'orange', 
+            icon: Utensils, 
+            label: 'Aliment',
+            bgFrom: 'from-orange-50',
+            bgTo: 'to-orange-100',
+            borderColor: 'border-orange-200'
+          }
+        };
+        return configs[type as keyof typeof configs] || configs.service;
+      };
 
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{partner.name}</h3>
-                        <p className="text-gray-600 text-sm mt-1">{partner.location} • {propertyTypes.find(p => p.value === partner.type)?.label}</p>
-                      </div>
-                    </div>
+      const config = getTypeConfig(item.type);
+      const IconComponent = config.icon;
+      const displayName = (item as any).name || (item as any).title || config.label;
+      const displayPrice = (item as any).price;
+      const displayDescription = (item as any).description || 'Aucune description disponible';
+      const images = (item as any).images || [];
 
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <FileText className="w-4 h-4" />
-                          {partner.projects} projets
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {partner.experience}
-                        </span>
-                      </div>
-                      <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-medium">
-                        {partner.category}
-                      </span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors text-center text-sm">
-                        {partner.action}
-                      </button>
-                      <button 
-                        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                        onClick={() => handleContactPartner(partner)}
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                        onClick={() => handleDownloadBrochure(partner)}
-                      >
-                        <FileText className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </section>
-            
-            {filteredPartners.length > displayCount && (
-              <div className="text-center mb-8">
-                <button 
-                  onClick={handleLoadMore}
-                  className="px-8 py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors transform hover:scale-105 shadow-lg"
-                >
-                  Voir plus de partenaires
-                </button>
+      return (
+        <div 
+          key={item.id || `${item.type}-${index}`} 
+          className={`bg-white rounded-xl shadow-lg border ${config.borderColor} overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105`}
+        >
+          {/* Image */}
+          <div className={`aspect-video bg-gradient-to-br ${config.bgFrom} ${config.bgTo} relative`}>
+            {images.length > 0 ? (
+              <img
+                src={images[0]}
+                alt={displayName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <IconComponent className="w-12 h-12 text-gray-300" />
               </div>
             )}
-          </>
-        )}
-      </>
-    );
-  };
-
-  const ServicesSection = () => {
-    const filteredServices = getFilteredServices();
-    const displayedServices = filteredServices.slice(0, displayCount);
-
-    return (
-      <>
-        <div className="mb-8 animate-fade-in">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative flex-1 min-w-[300px]">
-              <input
-                type="text"
-                placeholder="Rechercher un service..."
-                value={servicesSearchQuery}
-                onChange={(e) => setServicesSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-500 text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="absolute top-3 left-3">
+              <span className={`bg-${config.color}-500 text-white px-2 py-1 rounded-full text-xs font-medium`}>
+                {config.label}
+              </span>
             </div>
-
-            {servicesSearchQuery && (
-              <button
-                onClick={() => setServicesSearchQuery("")}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Effacer
-              </button>
+            {displayPrice && (
+              <div className="absolute top-3 right-3 bg-white rounded-lg px-3 py-1 shadow-md">
+                <span className={`font-bold text-${config.color}-600 text-sm`}>
+                  {typeof displayPrice === 'number' ? displayPrice.toLocaleString() : displayPrice} €
+                </span>
+              </div>
             )}
           </div>
-        </div>
 
-        {filteredServices.length === 0 ? (
-          <div className="text-center py-12 animate-fade-in">
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">Aucun service trouvé avec ces critères.</p>
-              <button 
-                onClick={() => setServicesSearchQuery("")}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-              >
-                Effacer les filtres
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fade-in">
-              {displayedServices.map((service, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-200"
-                >
-                  <div className="relative h-40 overflow-hidden">
-                    <img 
-                      src={service.image} 
-                      alt={service.action}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      onError={(e) => handleImageError(e, service.action)}
-                    />
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-sm font-semibold text-gray-900">{service.rating}</span>
-                    </div>
-                    <div className="absolute bottom-4 left-4 bg-blue-500 text-white rounded-full px-3 py-1 text-sm font-medium">
-                      {service.time}
-                    </div>
-                  </div>
+          {/* Contenu */}
+          <div className="p-4">
+            <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1">
+              {displayName}
+            </h3>
 
-                  <div className="p-6">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2">{service.action}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{service.description}</p>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
-                        {service.category}
-                      </span>
-                      <span className="text-sm font-semibold text-green-600">{service.price}</span>
-                    </div>
-                    
-                    <button 
-                      className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors text-center"
-                      onClick={() => handleRequestQuote(service)}
+            {/* Adresse pour les propriétés */}
+            {(item as Property).address && (
+              <div className="flex items-start gap-2 text-gray-600 text-sm mb-3">
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span className="line-clamp-1">{(item as Property).address}</span>
+              </div>
+            )}
+
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              {displayDescription}
+            </p>
+
+            {/* Caractéristiques spécifiques */}
+            <div className="mb-4">
+              {/* Métiers pour les services */}
+              {(item as Service).metiers && Array.isArray((item as Service).metiers) && (item as Service).metiers!.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {(item as Service).metiers!.slice(0, 3).map((metier: any, idx: number) => (
+                    <span
+                      key={metier.id || `metier-${idx}`}
+                      className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs"
                     >
-                      Demander un devis
-                    </button>
-                  </div>
+                      {metier.libelle || metier.name || 'Métier'}
+                    </span>
+                  ))}
                 </div>
-              ))}
-            </section>
-            
-            {filteredServices.length > displayCount && (
-              <div className="text-center mb-8">
-                <button 
-                  onClick={handleLoadMore}
-                  className="px-8 py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors transform hover:scale-105 shadow-lg"
-                >
-                  Voir plus de services
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </>
-    );
-  };
+              )}
 
-  const AidesSection = () => (
-    <div className="max-w-4xl mx-auto py-8 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Centre d'Aide et Support</h2>
-        <p className="text-gray-600 mb-8">Notre équipe est à votre disposition pour vous accompagner</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-blue-500 rounded-full p-2">
-                <Phone className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Contactez-nous</h3>
+              {/* Caractéristiques immobilières */}
+              {((item as Property).rooms || (item as Property).bathrooms || (item as Property).surface) && (
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {(item as Property).rooms && (
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="flex items-center justify-center gap-1 text-gray-700">
+                        <Bed className="w-4 h-4" />
+                        <span className="text-sm font-medium">{(item as Property).rooms}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Chambres</div>
+                    </div>
+                  )}
+                  {(item as Property).bathrooms && (
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="flex items-center justify-center gap-1 text-gray-700">
+                        <Bath className="w-4 h-4" />
+                        <span className="text-sm font-medium">{(item as Property).bathrooms}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Salles</div>
+                    </div>
+                  )}
+                  {(item as Property).surface && (
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="flex items-center justify-center gap-1 text-gray-700">
+                        <Ruler className="w-4 h-4" />
+                        <span className="text-sm font-medium">{(item as Property).surface}m²</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Surface</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Durée pour les services */}
+              {(item as Service).duration && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                  <Clock className="w-4 h-4" />
+                  <span>Durée: {(item as Service).duration}min</span>
+                </div>
+              )}
+
+              {/* Catégorie pour les produits/aliments */}
+              {((item as Product).category || (item as Aliment).category) && (
+                <div className="mb-2">
+                  <span className="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                    {(item as Product).category || (item as Aliment).category}
+                  </span>
+                </div>
+              )}
             </div>
-            <p className="text-gray-600 mb-4">Notre équipe est disponible pour vous aider</p>
-            <button 
-              onClick={handleCallSupport}
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium w-full"
-            >
-              Appeler le support
-            </button>
-          </div>
-          
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-gray-600 rounded-full p-2">
-                <Mail className="w-5 h-5 text-white" />
+
+            {/* Informations supplémentaires */}
+            <div className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-3">
+              <div className="flex items-center gap-4">
+                {displayPrice && (
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-green-600">
+                      {displayPrice}€
+                    </span>
+                  </div>
+                )}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Envoyez-nous un email</h3>
+
+              {/* Note moyenne */}
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                <span className="font-medium">{(item as any).rating || '4.5'}</span>
+              </div>
             </div>
-            <p className="text-gray-600 mb-4">Nous répondons sous 24 heures</p>
-            <button 
-              className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium w-full"
-              onClick={() => setShowMessageCard(true)}
+
+            {/* Bouton d'action */}
+            <button
+              className={`w-full mt-4 bg-${config.color}-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-${config.color}-600 transition-colors duration-300`}
+              onClick={() => {
+                console.log('Détails item:', item);
+                alert(`Détails: ${displayName}\nType: ${config.label}\nPrix: ${displayPrice || 'N/A'}€`);
+              }}
             >
-              Envoyer un email
+              Voir les détails
             </button>
           </div>
         </div>
+      );
+    };
 
-        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Questions fréquentes</h3>
-          <div className="space-y-4">
-            {[
-              "Comment choisir le bon partenaire ?",
-              "Quels documents préparer pour une estimation ?",
-              "Délais moyens pour les prestations",
-              "Comment modifier une demande ?"
-            ].map((question, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                <span className="text-gray-700">{question}</span>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </div>
-            ))}
+    return (
+      <div className="py-12">
+        <div className="max-w-6xl mx-auto">
+          {/* Bannière d'information */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span className="text-blue-800 font-medium">Tous nos services et produits</span>
+            </div>
+            <p className="text-blue-700 text-sm mt-2">
+              Découvrez l'ensemble de nos services, biens immobiliers, produits et aliments disponibles.
+            </p>
+          </div>
+
+          {/* En-tête avec statistiques */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Catalogue complet ({stats.total} éléments)
+            </h2>
+            <div className="flex flex-wrap gap-2 text-sm">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1">
+                <Wrench className="w-3 h-3" />
+                {stats.services} services
+              </span>
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full flex items-center gap-1">
+                <Home className="w-3 h-3" />
+                {stats.properties} biens
+              </span>
+              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full flex items-center gap-1">
+                <Car className="w-3 h-3" />
+                {stats.products} produits
+              </span>
+              <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full flex items-center gap-1">
+                <Utensils className="w-3 h-3" />
+                {stats.aliments} aliments
+              </span>
+            </div>
+          </div>
+
+          {/* Grille de tous les éléments */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allItems.map((item: Item, index: number) => renderItemCard(item, index))}
+          </div>
+
+          {/* Bouton de rafraîchissement */}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={fetchAllData}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Actualiser les données
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  // Header titles
+  const renderHeaderTitles = () => {
+    return (
+      <div className="text-center py-12">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-gray-900">
+            {view === "default" ? "Tous nos services et biens" :
+             view === "partenaires" ? "Nos Partenaires" :
+             view === "services" ? "Demandes de Prestations" : "Aides"}
+          </h1>
+          <p className="text-lg text-gray-600">
+            {view === "default" ? "Découvrez l'ensemble de nos prestations et propriétés disponibles" :
+             view === "partenaires" ? "Trouvez les meilleurs experts pour votre projet" :
+             view === "services" ? "Soumettez vos demandes de services" : "Obtenez de l'aide et des conseils"}
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
-      {/* Image de fond subtile pour toute la page */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-5"
-        style={{
-          backgroundImage: `url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`
-        }}
-      />
+    <div className="min-h-screen bg-white text-gray-900 antialiased mt-15">
+      <header
+        className="relative pt-12 px-8 pb-8 border-b border-gray-200 bg-gradient-to-b from-white to-gray-50"
+      >
+        <div className="max-w-[1200px] mx-auto flex flex-col gap-6 relative z-10">
+          <div className="flex flex-col gap-2">{renderHeaderTitles()}</div>
 
-      <div className="relative z-10">
-        {/* Hero Section avec belle image de fond pour le bleu */}
-        <section className="relative bg-black  text-white py-16 mt-12 overflow-hidden">
-          {/* Image de fond pour la section bleue */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-            style={{
-              backgroundImage: `url("https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80")`
-            }}
-          />
-          
-          {/* Overlay gradient pour améliorer la lisibilité */}
-          <div className="absolute inset-0 " />
-          
-          <div className="relative h-36 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-xl md:text-4xl font-bold mb-4">
-              {view === "services" && "Services Immobiliers Professionnels"}
-              {view === "partenaires" && "Nos Partenaires de Confiance"}
-              {view === "aides" && "Centre d'Aide & Support"}
-            </h1>
-            <p className="text-sm text-blue-100 mb-8 max-w-3xl mx-auto">
-              {view === "services" && "Des solutions complètes pour tous vos projets immobiliers, de l'estimation à la réalisation."}
-              {view === "partenaires" && "Découvrez notre réseau d'experts immobiliers qualifiés et vérifiés."}
-              {view === "aides" && "Notre équipe est là pour vous accompagner à chaque étape de votre projet."}
-            </p>
-            
-            {/* Navigation améliorée */}
-            <nav className="inline-flex gap-1 items-center justify-center rounded-2xl p-1 mt-2 bg-white/20 backdrop-blur-sm border border-white/30">
-              <button
-                onClick={() => handleNavigation("services")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
-                  view === "services"
-                    ? "bg-white text-blue-600 shadow-sm font-semibold"
-                    : "text-blue-100 hover:text-white hover:bg-white/20"
-                }`}
-              >
-                <FileText className="w-5 h-5" />
-                <span>Services</span>
-              </button>
-              
-              <button
-                onClick={() => handleNavigation("partenaires")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
-                  view === "partenaires"
-                    ? "bg-white text-blue-600 shadow-sm font-semibold"
-                    : "text-blue-100 hover:text-white hover:bg-white/20"
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                <span>Partenaires</span>
-              </button>
-              
-              <button
-                onClick={() => handleNavigation("aides")}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 ${
-                  view === "aides"
-                    ? "bg-white text-blue-600 shadow-sm font-semibold"
-                    : "text-blue-100 hover:text-white hover:bg-white/20"
-                }`}
-              >
-                <HelpCircle className="w-5 h-5" />
-                <span>Aide</span>
-              </button>
-            </nav>
-          </div>
-        </section>
-
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Bouton Envoyer un message flottant */}
-          <div className="fixed bottom-6 right-6 z-40 animate-fade-in">
-            <button 
-              className="px-6 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
-              onClick={() => setShowMessageCard(true)}
+          <div className="flex flex-wrap gap-4 justify-center">
+            <button
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
+                view === "default" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
+              } text-sm font-semibold transform hover:scale-105`}
+              onClick={() => navigate('/services-partners')}
             >
-              <Send className="w-4 h-4" />
-              Nous contacter
+              TOUS LES SERVICES
+              <ChevronDown className="w-4 h-4" />
+            </button>
+
+            <button
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
+                view === "partenaires" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
+              } text-sm font-semibold transform hover:scale-105`}
+              onClick={() => navigate('/services-partners?section=partenaires')}
+            >
+              PRÉSENTATION PARTENAIRES
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            
+            <button
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
+                view === "services" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
+              } text-sm font-semibold transform hover:scale-105`}
+              onClick={() => navigate('/services-partners?section=prestations')}
+            >
+              DEMANDES DE PRESTATIONS
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            
+            <button
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
+                view === "aides" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
+              } text-sm font-semibold transform hover:scale-105`}
+              onClick={() => navigate('/services-partners?section=aides')}
+            >
+              AIDES
+              <ChevronDown className="w-4 h-4" />
             </button>
           </div>
-
-          {showStatuses && <StatusesSection />}
-          
-          {view === "services" && !showStatuses && <ServicesSection />}
-          
-          {view === "aides" && <AidesSection />}
-          
-          {view === "partenaires" && !showPartners && !showStatuses && (
-            <section className="py-8">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Nos Catégories de Partenaires</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
-                  Découvrez notre réseau d'experts immobiliers triés sur le volet pour vous accompagner dans tous vos projets
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                {partnerCategories.map((category, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border border-gray-200 group"
-                    onClick={() => {
-                      setSelectedCategory(category.title);
-                      setShowPartners(true);
-                      setDisplayCount(6);
-                    }}
-                  >
-                    <div className="text-center mb-4">
-                      <div className="bg-blue-100 rounded-xl p-3 inline-flex group-hover:bg-blue-500 transition-colors">
-                        <Users className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
-                      </div>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 text-lg text-center mb-2">{category.title}</h3>
-                    <p className="text-gray-600 text-sm text-center mb-3">{category.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-sm">{category.count}</span>
-                      <div className="flex items-center text-blue-600 font-medium text-sm">
-                        {category.action}
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Partenaires en vedette */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Partenaires en Vedette</h3>
-                    <p className="text-gray-600">Découvrez quelques-uns de nos meilleurs partenaires</p>
-                  </div>
-                  <button 
-                    onClick={handleViewAllPartners}
-                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-                  >
-                    Voir tous les partenaires
-                  </button>
-                </div>
-                <PartnersSection category="" />
-              </div>
-            </section>
-          )}
-          
-          {showPartners && !showStatuses && <PartnersSection category={selectedCategory} />}
-        </main>
-      </div>
-
-      {/* Modals */}
-      {showCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-slide-smooth overflow-hidden border border-gray-200">
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 text-center mb-4">
-                {selectedServiceForm}
-              </h2>
-              <p className="text-gray-600 text-center text-sm mb-6">
-                Remplissez les informations nécessaires pour continuer
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date de signature du compromis
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notaires ou Avocats
-                  </label>
-                  <select className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                    <option value="">Choisir un notaire/avocat</option>
-                    <option value="notaire1">Maître Dupont</option>
-                    <option value="notaire2">Maître Martin</option>
-                    <option value="avocat1">Maître Durand</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type du bien que vous souhaitez
-                  </label>
-                  <select className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
-                    <option value="">Sélectionner le type de bien</option>
-                    <option value="maison">Maison</option>
-                    <option value="appartement">Appartement</option>
-                    <option value="terrain">Terrain</option>
-                    <option value="local-commercial">Local commercial</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200"
-                  onClick={() => setShowCard(false)}
-                >
-                  Annuler
-                </button>
-                <button
-                  className="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200 transform hover:scale-105"
-                  onClick={() => setShowCard(false)}
-                >
-                  Valider
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
+      </header>
 
-      {showMessageCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-slide-smooth overflow-hidden border border-gray-200">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <Mail className="w-5 h-5" />
-                  Nous Contacter
-                </h2>
-                <button
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                  onClick={() => setShowMessageCard(false)}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Décrivez votre projet ou votre question..."
-                    rows={6}
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200"
-                  onClick={() => {
-                    setShowMessageCard(false);
-                    setEmail('');
-                    setMessage('');
-                  }}
-                >
-                  Annuler
-                </button>
-                <button
-                  className="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200 transform hover:scale-105 flex items-center gap-2"
-                  onClick={handleSendMessage}
-                >
-                  <Send className="w-4 h-4" />
-                  Envoyer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <main className="max-w-[1200px] mx-auto px-8 pb-20 relative z-10">
+        {view === "default" && <AllServicesGridView />}
+        {view === "partenaires" && <PartnersPage />}
+        {view === "services" && <ServicesPage />}
+        {view === "aides" && <AidesPage />}
+      </main>
     </div>
   );
-}
+};
 
 export default ServicesPartnersPage;
