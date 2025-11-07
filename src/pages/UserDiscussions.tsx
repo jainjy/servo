@@ -19,6 +19,7 @@ import {
   X,
   Star,
   ThumbsUp,
+  Lock,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -45,7 +46,7 @@ export default function UserDiscussions() {
 
   const actionsMenuRef = useRef(null);
 
-  const { isConnected } = useSocket();
+  const isConnected = useSocket();
   const {
     messages,
     conversation,
@@ -303,12 +304,8 @@ export default function UserDiscussions() {
         rating: reviewRating,
         comment: reviewComment,
         demandeId: parseInt(id),
+        serviceId: demande.serviceId ? demande.serviceId : null,
       };
-
-      // Si la demande a un service, on l'ajoute
-      if (demande.serviceId) {
-        reviewData.serviceId = demande.serviceId;
-      }
 
       const response = await api.post("/reviews", reviewData);
 
@@ -836,6 +833,33 @@ export default function UserDiscussions() {
                     </p>
                   </div>
                 )}
+                {/* Affichage si la demande est terminée */}
+                {demande?.statut === "terminée" && (
+                  <div className="mt-8 flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-b from-green-50 to-green-100 rounded-2xl border-2 border-green-300">
+                    <div className="mb-4 p-4 bg-green-500 rounded-full">
+                      <img
+                        src="/Completed.gif"
+                        alt="complete"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                    <h3 className="text-2xl font-bold text-green-900 mb-2">
+                      Travaux Terminés
+                    </h3>
+                    <p className="text-green-700 text-center mb-1">
+                      Les travaux ont été complétés avec succès
+                    </p>
+                    <p className="text-sm text-green-600">
+                      Cette demande est maintenant clôturée
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-green-700">
+                      <Lock className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        Conversation verrouillée
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -881,7 +905,7 @@ export default function UserDiscussions() {
                 disabled={sending || uploadingFile || !input.trim()}
               >
                 {sending ? (
-                  <LoadingSpinner size="small" />
+                  <LoadingSpinner size="sm" />
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
