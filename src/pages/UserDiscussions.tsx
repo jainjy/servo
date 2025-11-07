@@ -896,13 +896,17 @@ export default function UserDiscussions() {
                     handleSend();
                   }
                 }}
-                disabled={sending || uploadingFile}
+                disabled={
+                  sending ||
+                  uploadingFile ||
+                  demande?.statut == "terminée"
+                }
               />
 
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
-                disabled={sending || uploadingFile || !input.trim()}
+                disabled={sending || uploadingFile || !input.trim() || demande?.statut == "terminée"}
               >
                 {sending ? (
                   <LoadingSpinner size="sm" />
