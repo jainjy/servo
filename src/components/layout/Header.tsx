@@ -939,7 +939,7 @@ useEffect(() => {
 
                 >
                   <button
-                    className="absolute z-50 text-white text-5xl font-extralight right-10 top-4 "
+                    className="absolute  z-50 text-white text-5xl font-extralight right-10 top-4 "
                     onClick={() => setIsPopoverOpen(false)}
                     aria-label="Close popover"
                   >
