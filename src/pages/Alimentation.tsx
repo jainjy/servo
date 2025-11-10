@@ -198,7 +198,7 @@ const Alimentation = () => {
   // CORRIGÉ: Fonction pour naviguer vers la catégorie
   const handleCategoryClick = (category) => {
     console.log("🟢 Catégorie cliquée:", category);
-    
+
     const categoryData = {
       name: category.name,
       description: category.description,
@@ -350,12 +350,12 @@ const Alimentation = () => {
       ],
       "restaurant": [
         {
-          name: "Plats Préparés",
-          foodCategory: "plats-prepares",
-          iconName: "ChefHat",
-          description: "Plats frais préparés par nos chefs",
-          image: "https://images.unsplash.com/photo-1559314809-0f1555a8e8a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-        },
+  name: "Plats Préparés",
+  foodCategory: "plats-prepares",
+  iconName: "ChefHat",
+  description: "Plats frais préparés par nos chefs",
+  image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+},
         {
           name: "Sandwichs & Salades",
           foodCategory: "sandwichs",
@@ -409,7 +409,7 @@ const Alimentation = () => {
     const filteredCategories = categories.filter(
       category => getProductCount(category.name) > 0
     );
-    
+
     return {
       ...section,
       categories: filteredCategories
