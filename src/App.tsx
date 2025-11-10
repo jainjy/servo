@@ -269,7 +269,7 @@ const App = () => {
                   />
                   <Route path="/alimentation" element={<Alimentation />} />
                   <Route
-                    path="/alimentation/categorie/:categoryName"
+                    path="/alimentation/food-category/:categoryName"
                     element={<AlimentationCategorie />}
                   />
                   <Route

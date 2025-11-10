@@ -1,5 +1,5 @@
 // components/estimation/EstimationWizard.tsx
-import { useState, useRef } from 'react';
+import { useState, useRef,useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -909,22 +909,39 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   const [showResults, setShowResults] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus automatique sur le champ de recherche
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
+  // Recherche automatique avec debounce
+  useEffect(() => {
+    if (searchQuery.length >= 3) {
+      const timeoutId = setTimeout(() => {
+        handleAddressSearch(searchQuery);
+      }, 800); // Délai de 800ms pour la recherche automatique
+
+      return () => clearTimeout(timeoutId);
+    } else if (searchQuery.length === 0) {
+      setShowResults(false);
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
 
   // Suggestions populaires mondiales
   const popularSuggestions = [
-    // Villes principales
     { type: 'city', name: 'Paris, France', country: 'France', icon: Landmark },
     { type: 'city', name: 'Tokyo, Japon', country: 'Japon', icon: Landmark },
     { type: 'city', name: 'New York, États-Unis', country: 'États-Unis', icon: Landmark },
     { type: 'city', name: 'Londres, Royaume-Uni', country: 'Royaume-Uni', icon: Landmark },
     { type: 'city', name: 'Sydney, Australie', country: 'Australie', icon: Landmark },
-    
-    // Villes africaines
     { type: 'city', name: 'Antananarivo, Madagascar', country: 'Madagascar', icon: Building },
     { type: 'city', name: 'Abidjan, Côte d\'Ivoire', country: 'Côte d\'Ivoire', icon: Building },
     { type: 'city', name: 'Dakar, Sénégal', country: 'Sénégal', icon: Building },
-    { type: 'city', name: 'Casablanca, Maroc', country: 'Maroc', icon: Building },
-    { type: 'city', name: 'Lagos, Nigeria', country: 'Nigeria', icon: Building },
   ];
 
   // Recherche en temps réel avec suggestions
@@ -941,14 +958,6 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     const localSuggestions = generateLocalSuggestions(query);
     setSuggestions(localSuggestions);
     setShowSuggestions(true);
-
-    // Recherche automatique après un délai
-    if (query.length >= 3) {
-      clearTimeout((window as any).searchTimeout);
-      (window as any).searchTimeout = setTimeout(() => {
-        handleAddressSearch(query);
-      }, 500);
-    }
   };
 
   // Génération de suggestions locales
@@ -991,7 +1000,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   // Recherche mondiale avancée
   const handleAddressSearch = async (query?: string) => {
     const searchTerm = query || searchQuery;
-    if (!searchTerm.trim()) return;
+    if (!searchTerm.trim() || searchTerm.length < 3) return;
     
     setIsSearching(true);
     setShowResults(false);
@@ -1021,6 +1030,13 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
       handleLocalSearch(searchTerm);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  // Recherche manuelle avec le bouton
+  const handleManualSearch = () => {
+    if (searchQuery.length >= 2) {
+      handleAddressSearch();
     }
   };
 
@@ -1068,10 +1084,18 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     setShowResults(false);
     setShowSuggestions(false);
     setSearchResults([]);
+    
+    // Remettre le focus sur le champ après sélection
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
   };
 
   const handleSuggestionSelect = (suggestion: any) => {
     setSearchQuery(suggestion.name);
+    setShowSuggestions(false);
     handleAddressSearch(suggestion.name);
   };
 
@@ -1126,6 +1150,13 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     setShowResults(false);
     setShowSuggestions(false);
     onUpdate({ location: null });
+    
+    // Remettre le focus après suppression
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
   };
 
   // Fonction pour obtenir l'icône du résultat
@@ -1143,11 +1174,26 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     }
   };
 
+  // Gérer la fermeture des dropdowns en cliquant à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div>
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Localisation du bien</h2>
-        <p className="text-slate-600">Recherchez n'importe quelle ville, région ou pays dans le monde</p>
+        <p className="text-slate-600">
+          Commencez à taper pour rechercher automatiquement - recherche mondiale en temps réel
+        </p>
       </div>
       
       <div className="space-y-6 mb-8">
@@ -1155,22 +1201,46 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
         <div className="bg-white rounded-xl p-6 border border-slate-200">
           <h3 className="font-semibold text-slate-900 mb-4 flex items-center">
             <Search className="w-5 h-5 mr-2 text-blue-500" />
-            Recherche mondiale
+            Recherche automatique mondiale
+            {isSearching && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="ml-2 flex items-center text-sm text-blue-500"
+              >
+                <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                recherche...
+              </motion.span>
+            )}
           </h3>
           
-          <div className="relative">
+          <div className="relative" ref={searchInputRef}>
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddressSearch()}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                  placeholder="Ex: Paris, Île-de-France, Madagascar, Tokyo..."
+                  onFocus={() => {
+                    if (searchQuery.length >= 2) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && handleManualSearch()}
+                  className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10 transition-all duration-200"
+                  placeholder="Tapez une ville, région ou pays (recherche automatique)..."
                   disabled={isSearching}
+                  autoComplete="off"
                 />
+                {searchQuery && !isSearching && (
+                  <button
+                    onClick={handleClearLocation}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
                 {isSearching && (
                   <div className="absolute right-3 top-3">
                     <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
@@ -1178,7 +1248,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                 )}
               </div>
               <motion.button
-                onClick={() => handleAddressSearch()}
+                onClick={handleManualSearch}
                 disabled={!searchQuery.trim() || isSearching}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -1188,16 +1258,30 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
               </motion.button>
             </div>
             
+            {/* Indicateur de recherche automatique */}
+            {searchQuery.length > 0 && searchQuery.length < 3 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="absolute top-full left-0 right-0 mt-1"
+              >
+                <div className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-lg">
+                  💡 Tapez encore {3 - searchQuery.length} caractère(s) pour la recherche automatique
+                </div>
+              </motion.div>
+            )}
+            
             {/* Suggestions en temps réel */}
             {showSuggestions && suggestions.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-80 overflow-y-auto"
+                className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-xl shadow-xl z-20 max-h-80 overflow-y-auto"
               >
-                <div className="p-2 border-b border-slate-100 bg-slate-50">
-                  <div className="text-sm font-semibold text-slate-700">
-                    Suggestions
+                <div className="p-2 border-b border-slate-100 bg-blue-50 rounded-t-xl">
+                  <div className="text-sm font-semibold text-blue-700 flex items-center">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Suggestions correspondantes
                   </div>
                 </div>
                 {suggestions.map((suggestion, index) => {
@@ -1206,10 +1290,10 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                     <button
                       key={index}
                       onClick={() => handleSuggestionSelect(suggestion)}
-                      className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                      className="w-full text-left p-3 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 transition-colors group"
                     >
                       <div className="flex items-center">
-                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3">
+                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3 group-hover:bg-blue-200 transition-colors">
                           <IconComponent className="w-4 h-4" />
                         </div>
                         <div>
@@ -1221,7 +1305,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                             {suggestion.type === 'city' ? 'Ville' : 
                              suggestion.type === 'region' ? 'Région' : 'Pays'}
                             {suggestion.exactMatch && (
-                              <span className="ml-2 px-1 bg-green-100 text-green-800 text-xs rounded">Exact</span>
+                              <span className="ml-2 px-1 bg-green-100 text-green-800 text-xs rounded">Correspondance exacte</span>
                             )}
                           </div>
                         </div>
@@ -1237,10 +1321,10 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-80 overflow-y-auto"
+                className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-xl shadow-xl z-20 max-h-80 overflow-y-auto"
               >
-                <div className="p-2 border-b border-slate-100 bg-slate-50">
-                  <div className="text-sm font-semibold text-slate-700">
+                <div className="p-2 border-b border-slate-100 bg-blue-50 rounded-t-xl">
+                  <div className="text-sm font-semibold text-blue-700">
                     {searchResults.length} résultat(s) trouvé(s)
                   </div>
                 </div>
@@ -1248,10 +1332,10 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                   <button
                     key={index}
                     onClick={() => handleResultSelect(result)}
-                    className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                    className="w-full text-left p-3 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 transition-colors group"
                   >
                     <div className="flex items-start">
-                      <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3 mt-1">
+                      <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3 mt-1 group-hover:bg-blue-200 transition-colors">
                         {getIconForResult(result)}
                       </div>
                       <div className="flex-1">
@@ -1272,9 +1356,20 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
             )}
           </div>
           
-          <p className="text-xs text-slate-500 mt-2">
-            Tapez le nom d'une ville, région, département, état ou pays
-          </p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs text-slate-500">
+              Recherche automatique activée • Monde entier • Villes, régions, pays
+            </p>
+            {searchQuery.length >= 3 && !isSearching && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xs text-green-600 font-medium"
+              >
+                ✓ Recherche automatique en cours
+              </motion.p>
+            )}
+          </div>
         </div>
 
         {/* Suggestions populaires */}
@@ -1287,10 +1382,11 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
             {popularSuggestions.map((suggestion, index) => {
               const IconComponent = suggestion.icon;
               return (
-                <button
+                <motion.button
                   key={index}
+                  whileHover={{ scale: 1.02, y: -1 }}
                   onClick={() => handleSuggestionSelect(suggestion)}
-                  className="p-3 text-left rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all bg-white"
+                  className="p-3 text-left rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all bg-white shadow-sm"
                 >
                   <div className="flex items-center">
                     <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3">
@@ -1299,12 +1395,11 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                     <div>
                       <div className="font-medium text-slate-900 text-sm">{suggestion.name}</div>
                       <div className="text-xs text-slate-600">
-                        {suggestion.type === 'city' ? 'Ville' : 
-                         suggestion.type === 'region' ? 'Région' : 'Pays'}
+                        {suggestion.type === 'city' ? 'Ville' : 'Pays'}
                       </div>
                     </div>
                   </div>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -1315,13 +1410,13 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="bg-green-50 border border-green-200 rounded-xl p-4"
+            className="bg-green-50 border-2 border-green-200 rounded-xl p-4"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center text-green-800">
                 <CheckCircle2 className="w-5 h-5 mr-2" />
                 <div>
-                  <span className="font-semibold">Localisation confirmée</span>
+                  <span className="font-semibold">Localisation confirmée ✓</span>
                   <p className="text-sm">{data.location.address}</p>
                   <p className="text-xs opacity-75">
                     {data.location.type === 'city' ? 'Ville' : 
@@ -1334,7 +1429,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
               </div>
               <button
                 onClick={handleClearLocation}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-slate-400 hover:text-slate-600 transition-colors p-1 hover:bg-slate-200 rounded"
               >
                 <X className="w-4 h-4" />
               </button>

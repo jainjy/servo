@@ -1,11 +1,11 @@
-// pages/AlimentationCategorie.js
+// pages/AlimentationCategorie.jsx
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
+import { 
+  ArrowLeft, 
   Package,
   Apple,
   Carrot,
@@ -23,16 +23,11 @@ import {
   Truck,
   ShieldCheck,
   Star,
-  Clock,
-  Users,
-  Phone,
-  Calendar,
-  ShoppingCart,
-  MapPin,
+  ShoppingCart
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "../components/contexts/CartContext";
 import api from "@/lib/api";
-import { useCart } from "@/components/contexts/CartContext";
 import { toast } from "sonner";
 
 // Fonction pour obtenir l'icône par nom
@@ -53,7 +48,7 @@ const getIconByName = (iconName) => {
     Flame,
     Truck,
     ShieldCheck,
-    Star,
+    Star
   };
   return icons[iconName] || Package;
 };
@@ -84,13 +79,18 @@ const AlimentationCategorie = () => {
   const fetchCategoryProducts = async () => {
     try {
       setIsLoading(true);
-
-      // Utiliser l'API aliments avec le paramètre de catégorie
+      
+      // Utiliser l'API aliments avec le paramètre foodCategory
       const response = await api.get(
-        `/aliments/category/${encodeURIComponent(categoryName)}`
+        `/aliments/food-category/${encodeURIComponent(categoryName)}`
       );
-      setProducts(response.data.products);
-      console.log(response.data)
+      
+      if (response.data && response.data.products) {
+        setProducts(response.data.products);
+      } else {
+        setProducts([]);
+      }
+      
     } catch (error) {
       console.error(
         "Erreur lors du chargement des produits de la catégorie:",
@@ -109,39 +109,30 @@ const AlimentationCategorie = () => {
       );
       return;
     }
-
+    
     try {
       setAddingProductId(product.id);
-
+      
       // Ajouter le produit au panier
       addToCart(product);
-
+      
       // Petit délai pour laisser le temps à l'état de se mettre à jour
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Trouver l'article dans le panier pour afficher la bonne quantité
-      const cartItem = cartItems.find((item) => item.id === product.id);
+      const cartItem = cartItems.find(item => item.id === product.id);
       const quantity = cartItem ? cartItem.quantity : 1;
       const totalItems = getCartItemsCount();
-
+      
       // Afficher une confirmation détaillée
-      toast.info(
-        `✅ ${product.name} ajouté au panier !\n\nQuantité: ${quantity}\nTotal dans le panier: ${totalItems} article(s)`
-      );
-
-      console.log("Cart after addition:", cartItems);
-      console.log("Total items count:", totalItems);
+      toast.info(`${product.name} ajouté au panier !`);
+      
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      console.error('Error adding to cart:', error);
       toast.error("Erreur lors de l'ajout au panier");
     } finally {
       setAddingProductId(null);
     }
-  };
-
-  // Fonction pour formater le nom de la catégorie
-  const formatCategoryName = (name) => {
-    return decodeURIComponent(name).replace(/-/g, " ");
   };
 
   if (isLoading) {
@@ -162,7 +153,7 @@ const AlimentationCategorie = () => {
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => navigate("/alimentation")}
+            onClick={() => navigate('/alimentation')}
             className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -176,19 +167,16 @@ const AlimentationCategorie = () => {
                   <div className="p-2 rounded-xl bg-[#00C2A8]/10">
                     {(() => {
                       const IconComponent = getIconByName(category.iconName);
-                      return (
-                        <IconComponent className="h-6 w-6 text-[#00C2A8]" />
-                      );
+                      return <IconComponent className="h-6 w-6 text-[#00C2A8]" />;
                     })()}
                   </div>
                 )}
                 <div>
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
-                    {category?.name || formatCategoryName(categoryName)}
+                    {category?.name || decodeURIComponent(categoryName).replace(/-/g, " ")}
                   </h2>
                   <p className="text-[#5A6470]">
-                    {category?.description ||
-                      "Découvrez nos produits frais et de qualité"}
+                    {category?.description || "Découvrez tous nos produits dans cette catégorie"}
                   </p>
                 </div>
               </div>
@@ -219,10 +207,7 @@ const AlimentationCategorie = () => {
           {products && products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
-                <Card
-                  key={product.id}
-                  className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm"
-                >
+                <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
                   {product.images && product.images.length > 0 ? (
                     <div className="relative">
                       <div
@@ -266,7 +251,7 @@ const AlimentationCategorie = () => {
                     <span>Unité: {product.unit || "pièce"}</span>
                     {product.origin && (
                       <span className="flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
+                        <Package className="h-3 w-3 mr-1" />
                         {product.origin}
                       </span>
                     )}
@@ -293,7 +278,7 @@ const AlimentationCategorie = () => {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <span className="text-2xl font-bold text-[#00C2A8]">
-                        €{product.price}
+                        €{typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                       </span>
                       {product.unit && (
                         <span className="text-sm text-gray-500 ml-1">
@@ -319,9 +304,7 @@ const AlimentationCategorie = () => {
                   <Button
                     className="w-full bg-[#00C2A8] hover:bg-[#00A890] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
-                    disabled={
-                      product.quantity === 0 || addingProductId === product.id
-                    }
+                    disabled={product.quantity === 0 || addingProductId === product.id}
                   >
                     {addingProductId === product.id ? (
                       <div className="flex items-center gap-2">
@@ -331,9 +314,7 @@ const AlimentationCategorie = () => {
                     ) : (
                       <>
                         <ShoppingCart className="h-4 w-4 mr-2" />
-                        {product.quantity > 0
-                          ? "Ajouter au panier"
-                          : "Rupture de stock"}
+                        {product.quantity > 0 ? "Ajouter au panier" : "Rupture de stock"}
                       </>
                     )}
                   </Button>
@@ -343,9 +324,7 @@ const AlimentationCategorie = () => {
           ) : (
             <div className="text-center py-12">
               <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">
-                Aucun produit trouvé
-              </h3>
+              <h3 className="text-xl font-semibold mb-2">Aucun produit trouvé</h3>
               <p className="text-muted-foreground">
                 Aucun produit disponible dans cette catégorie pour le moment.
               </p>
