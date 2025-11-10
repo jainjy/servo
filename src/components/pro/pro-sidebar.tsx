@@ -18,6 +18,8 @@ import {
   ShoppingBag,
   Leaf,
   ShoppingCart,
+  Headphones,
+  Video,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -53,6 +55,12 @@ const navigation = [
     name: "Les demandes de devis",
     href: "/pro/demandes-devis",
     icon: FileText,
+  },
+  // 🔥 NOUVEL ITEM : Gestion des Médias
+  {
+    name: "Gestion des Médias",
+    href: "/pro/media",
+    icon: Video,
   },
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },

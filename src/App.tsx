@@ -112,6 +112,9 @@ import DomicileLayout from "./pages/domicile/DomicileLayout";
 import ImmobilierSections from "./components/ImmobilierSections";
 import StripeConnectButton from "./pages/CreateStripeAccount";
 
+// 🔥 IMPORT DE LA NOUVELLE PAGE ADMIN MEDIA
+import AdminMedia from "./pages/pro/adminMedia";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -345,6 +348,8 @@ const App = () => {
                       path="demandes-devis"
                       element={<ListeDemandesDevis />}
                     />
+                    {/* 🔥 NOUVELLE ROUTE ADMIN MEDIA */}
+                    <Route path="media" element={<AdminMedia />} />
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route path="/mon-compte">
