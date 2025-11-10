@@ -196,29 +196,29 @@ useEffect(() => {
         }
       ],
     },
-    {
-      title: "TRAVAUX & CONSTRUCTION ",
-      items: [
-        {
-          title: "Prestation Intérieur",
-          description: "Services pour l'intérieur",
-          href: "/travaux?categorie=interieurs",
-          image: "https://i.pinimg.com/1200x/fe/5c/1a/fe5c1a7e46c506905b0e124d1f9a374d.jpg"
-        },
-        {
-          title: "Prestation Extérieur",
-          description: "Services pour l'extérieur",
-          href: "/travaux?categorie=exterieurs",
-          image: "https://i.pinimg.com/736x/90/49/46/9049462b0f6124398a68da38949985a8.jpg"
-        },
-        {
-          title: "Construction",
-          description: "Travaux de construction",
-          href: "/travaux?categorie=constructions",
-          image: "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg"
-        },
-      ],
-    },
+    // {
+    //   title: "TRAVAUX & CONSTRUCTION ",
+    //   items: [
+    //     {
+    //       title: "Prestation Intérieur",
+    //       description: "Services pour l'intérieur",
+    //       href: "/travaux?categorie=interieurs",
+    //       image: "https://i.pinimg.com/1200x/fe/5c/1a/fe5c1a7e46c506905b0e124d1f9a374d.jpg"
+    //     },
+    //     {
+    //       title: "Prestation Extérieur",
+    //       description: "Services pour l'extérieur",
+    //       href: "/travaux?categorie=exterieurs",
+    //       image: "https://i.pinimg.com/736x/90/49/46/9049462b0f6124398a68da38949985a8.jpg"
+    //     },
+    //     {
+    //       title: "Construction",
+    //       description: "Travaux de construction",
+    //       href: "/travaux?categorie=constructions",
+    //       image: "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg"
+    //     },
+    //   ],
+    // },
     {
       title: "PRODUITS & ACCESSOIRES",
       items: [
@@ -342,6 +342,11 @@ useEffect(() => {
           description: " Formation continue et actualités",
           href: "/batiments#formation-podcasts",
           image: "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg"
+        }, {
+          title: "Travaux & construction",
+          description: " Services de construction professionnels",
+          href: "/travaux",
+          image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
         },
       ],
     }, {

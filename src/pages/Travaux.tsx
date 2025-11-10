@@ -2,7 +2,7 @@ import TravauxSection from "@/components/TravauxSection";
 
 const Travaux = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <TravauxSection showAllPrestations={true} />
     </div>
   );
