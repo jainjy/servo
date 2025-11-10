@@ -380,6 +380,7 @@ const Alimentation = () => {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
+            backgroundAttachment: "fixed"
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -409,10 +410,10 @@ const Alimentation = () => {
           {/* En-tête avec animation */}
           <div className="bg-white/90 py-5 rounded-lg backdrop-blur-sm">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className="azonix text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#00C2A8] bg-clip-text text-transparent">
+              <h1 className=" text-xl tracking-widest lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#00C2A8] bg-clip-text text-transparent">
                 Alimentation & Épicerie
               </h1>
-              <p className="text-sm px-2 lg:text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm px-2 lg:text-md text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
                 Découvrez nos produits frais, bio et locaux pour une
                 alimentation saine et savoureuse
               </p>
@@ -426,17 +427,17 @@ const Alimentation = () => {
               <div className="relative group">
                 <Input
                   type="text"
-                  placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
-                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-lg border-[#00C2A8]/30 bg-white/80 backdrop-blur-md focus:border-[#00C2A8] focus:ring-2 focus:ring-[#00C2A8]/20"
+                  placeholder="Rechercher un produit, une catégorie..."
+                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold tracking-wide transition-all duration-300 border-slate-900/30 bg-white/80 backdrop-blur-md focus:border-[#00C2A8] focus:ring-2 focus:ring-[#00C2A8]/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
-                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-[#00C2A8] transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
+                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-slate-900 transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
 
                 <Button
                   type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-[#00C2A8] hover:bg-[#00A890] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -456,19 +457,19 @@ const Alimentation = () => {
               className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in"
               style={{ animationDelay: "0.3s" }}
             >
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
                 <Leaf className="h-3 w-3 mr-1" />
                 Produits Bio
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
                 <Truck className="h-3 w-3 mr-1" />
                 Livraison 24h
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
                 <ShieldCheck className="h-3 w-3 mr-1" />
                 Qualité Garantie
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
                 <Star className="h-3 w-3 mr-1" />
                 Producteurs Locaux
               </Badge>
@@ -506,11 +507,11 @@ const Alimentation = () => {
                 className="flex items-center gap-4 mb-8 animate-slide-from-left"
                 style={{ animationDelay: "0.2s" }}
               >
-                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
                   <Apple className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                  <h2 className="text-xl lg:text-2xl font-bold text-black/70">
                     Fruits Frais
                   </h2>
                   <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
@@ -575,11 +576,11 @@ const Alimentation = () => {
                 className="flex items-center gap-4 mb-8 animate-slide-from-right"
                 style={{ animationDelay: "0.4s" }}
               >
-                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
                   <Carrot className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                  <h2 className="text-xl lg:text-2xl font-bold text-black/70">
                     Légumes & Herbes
                   </h2>
                   <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
@@ -645,11 +646,11 @@ const Alimentation = () => {
                 className="flex items-center gap-4 mb-8 animate-scale-up"
                 style={{ animationDelay: "0.6s" }}
               >
-                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
                   <ShoppingCart className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                  <h2 className="text-xl lg:text-2xl font-bold text-black/70">
                     Épicerie & Autres
                   </h2>
                   <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
@@ -707,27 +708,27 @@ const Alimentation = () => {
 
           {/* Section CTA */}
           <div
-            className="text-center animate-bounce-in"
+            className="text-center my-4 animate-bounce-in"
             style={{ animationDelay: "0.8s" }}
           >
             <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 lg:p-12 border border-white/20 shadow-2xl">
               <h3 className="text-xl lg:text-3xl font-bold text-gray-700 mb-4">
                 Livraison de produits frais à domicile
               </h3>
-              <p className="text-sm lg:text-xl text-[#5A6470] mb-8 max-w-2xl mx-auto">
+              <p className="text-sm lg:text-md text-[#5A6470] mb-8 max-w-2xl mx-auto">
                 Commandez vos produits alimentaires frais et recevez-les sous
                 24h. Qualité garantie, producteurs locaux et service
                 personnalisé.
               </p>
               <div className="flex gap-4 justify-center flex-wrap">
                 <Button
-                  className="bg-[#00C2A8] hover:bg-[#00A890] text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl animate-pulse-cta"
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 animate-pulse-cta"
                   onClick={() => handleContactClick("contact")}
                 >
                   Commander maintenant
                 </Button>
                 <Button
-                  className="bg-white hover:bg-gray-50 text-[#00C2A8] border-2 border-[#00C2A8] px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  className="bg-white hover:bg-gray-50 text-slate-900 border-2 border-slate-900 px-8 py-3 text-lg rounded-xl transition-all duration-300"
                   onClick={() => handleContactClick("rdv")}
                 >
                   <Users className="h-5 w-5 mr-2" />

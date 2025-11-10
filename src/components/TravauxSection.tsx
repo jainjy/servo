@@ -27,7 +27,7 @@ import {
   Loader2,
   Plus,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -1017,17 +1017,17 @@ const IntelligibleSection = ({ showAllPrestations }) => {
           </div>
         )}
 
-        <div className="text-center">
-          <div className="inline-flex items-center gap-4 bg-slate-950 px-8 py-4 rounded-2xl shadow-2xl">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <Clock className="h-6 w-6 text-white" />
+        <div className="flex justify-end mr-5">
+          <div className="inline-flex items-center gap-3 bg-slate-900 my-5 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg animate-pulse ">
+            <div className="bg-white/10 p-1.5 rounded-lg">
+              <Clock className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-white font-bold text-sm lg:text-lg">
+              <p className="text-white font-semibold text-sm">
                 DEVIS ENVOYÉ DANS LES 48H
               </p>
-              <p className="text-blue-100 text-xs lg:text-sm">
-                Réponse garantie sous 2 jours ouvrés
+              <p className="text-blue-100/80 text-xs">
+                Réponse sous 2 jours ouvrés
               </p>
             </div>
           </div>

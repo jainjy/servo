@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import { useLocation } from 'react-router-dom';
+import EquipementSection from '@/components/produits/EquipementSection';
+import MateriauxSection from '@/components/produits/MateriauxSection';
+import DesignSection from '@/components/produits/DesignSection';
+
+import Modal from '@/components/ui/modal';
+
+interface ItemDetails {
+  title: string;
+  price: string;
+  image: string;
+  description: string;
+}
 
 const DomicileLayout = () => {
   const location = useLocation();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{item: ItemDetails; section: string} | null>(null);
+
+  const handleDetailsClick = (item: ItemDetails, section: string) => {
+    setSelectedItem({ item, section });
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     if (location.hash) {
@@ -101,6 +120,20 @@ const DomicileLayout = () => {
         { title: "Waste Management", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg", description: "Gestion déchets" },
         { title: "Home Battery", price: "4999€ - 9999€", image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg", description: "Stockage énergie" }
       ]
+    },
+    {
+      title: "Matériaux",
+      description: " Fournitures de construction et rénovation",
+      items: [
+        { title: "Électricité", price: "Tarifs variables", image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg", description: "Fournisseurs énergie" },
+        { title: "Eau", price: "Tarifs variables", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Services eau" },
+        { title: "Internet", price: "29€ - 89€/mois", image: "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg", description: "Connexion fibre" },
+        { title: "Gaz", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg", description: "Fournisseurs gaz" },
+        { title: "Smart Meter", price: "199€ - 399€", image: "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg", description: "Compteurs intelligents" },
+        { title: "Solar Energy", price: "Sur devis", image: "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg", description: "Énergie solaire" },
+        { title: "Waste Management", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg", description: "Gestion déchets" },
+        { title: "Home Battery", price: "4999€ - 9999€", image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg", description: "Stockage énergie" }
+      ]
     }
   ];
 
@@ -139,41 +172,89 @@ const DomicileLayout = () => {
               className="bg-white rounded-lg p-6 shadow-lg"
               id={section.title.toLowerCase().replace(/ & | /g, '-').replace(/[()]/g, '')}
             >
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">{section.title}</h2>
-                <p className="text-gray-600">{section.description}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {section.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
-                  >
-                    <div className="relative h-48">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{item.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-600">{item.price}</span>
-                        <button className="text-sm bg-black text-white px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors">
-                          En savoir plus
-                        </button>
-                      </div>
-                    </div>
+              {section.title === "Équipements & Livraison" ? (
+                <EquipementSection searchQuery="" />
+              ) : section.title === "Matériaux" ? (
+                <MateriauxSection searchQuery="" />
+              ) : section.title === "Design & Décoration" ? (
+                <DesignSection searchQuery="" />
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold mb-2">{section.title}</h2>
+                    <p className="text-gray-600">{section.description}</p>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {section.items.map((item, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+                      >
+                        <div className="relative h-48">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                          <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-green-600">{item.price}</span>
+                            <button 
+                              onClick={() => handleDetailsClick(item, section.title)}
+                              className="text-sm bg-black text-white px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors"
+                            >
+                              En savoir plus
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </Tab.Panel>
           ))}
         </Tab.Panels>
       </Tab.Group>
+
+      {/* Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {selectedItem && (
+          <div className='grid h-[500px] grid-cols-2'>
+            <div className="relative h-full rounded-sm overflow-hidden w-full">
+              <img
+                src={selectedItem.item.image}
+                alt={selectedItem.item.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="px-6 py-0">
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold mb-2">{selectedItem.item.title}</h1>
+                <p className="text-gray-600">{selectedItem.section}</p>
+              </div>
+
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2 underline">Description</h2>
+                <p className="text-gray-700">{selectedItem.item.description}</p>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="text-2xl font-bold text-green-600">
+                  <span className='text-gray-800 underline text-md'> Prix : &nbsp;</span>
+                 {selectedItem.item.price}</div>
+                <button className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                  Contacter
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -127,7 +127,7 @@ export default function EstimationImmobilierPage() {
         const enhancedResult = enhanceEstimationResult(result.data, data);
         setEstimationResult(enhancedResult);
         setCurrentStep('results');
-        
+
         // Sauvegarder l'estimation si l'utilisateur est connecté
         try {
           const userId = localStorage.getItem('userId');
@@ -148,7 +148,7 @@ export default function EstimationImmobilierPage() {
       console.error('❌ Erreur estimation:', error);
       const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de l\'estimation. Veuillez réessayer.';
       setError(errorMessage);
-      
+
       // Fallback vers l'estimation simulée en cas d'erreur
       const fallbackResult = generateFallbackEstimation(data);
       setEstimationResult(fallbackResult);
@@ -159,7 +159,7 @@ export default function EstimationImmobilierPage() {
   // Améliorer les résultats de l'API avec des données supplémentaires
   const enhanceEstimationResult = (result: EstimationResult, data: EstimationData): EnhancedEstimationResult => {
     const pricePerSquareMeter = Math.round(result.estimation / data.surface);
-    
+
     return {
       ...result,
       pricePerSquareMeter,
@@ -173,7 +173,7 @@ export default function EstimationImmobilierPage() {
   const generateFallbackEstimation = (data: EstimationData): EnhancedEstimationResult => {
     const basePrice = calculateFallbackPrice(data);
     const pricePerSquareMeter = Math.round(basePrice / data.surface);
-    
+
     return {
       estimation: basePrice,
       confidence: 75,
@@ -198,13 +198,13 @@ export default function EstimationImmobilierPage() {
           {/* En-tête */}
           <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
             <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-            <img 
-              src="https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg" 
-              alt="Estimation immobilière" 
+            <img
+              src="https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg"
+              alt="Estimation immobilière"
               className="w-full h-full object-cover"
             />
           </div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -214,7 +214,7 @@ export default function EstimationImmobilierPage() {
               Estimation Immobilière <span className="text-purple-300">Intelligente</span>
             </h1>
             <p className="text-sm text-gray-200 max-w-2xl mx-auto">
-              Obtenez une estimation précise de votre bien grâce à notre intelligence artificielle 
+              Obtenez une estimation précise de votre bien grâce à notre intelligence artificielle
             </p>
           </motion.div>
 
@@ -236,7 +236,7 @@ export default function EstimationImmobilierPage() {
           )}
 
           {/* Contenu principal */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8">
             {/* Formulaire et résultats */}
             <div className="lg:col-span-2">
               <AnimatePresence mode="wait">
@@ -287,40 +287,40 @@ export default function EstimationImmobilierPage() {
               </AnimatePresence>
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Avantages */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-lg p-6"
-              >
-                <h3 className="font-semibold text-lg mb-4 text-gray-900 flex items-center">
-                  <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
-                  Pourquoi estimer avec SERVO ?
-                </h3>
-                <div className="space-y-3">
-                  {advantages.map((advantage, index) => {
-                    const IconComponent = advantage.icon;
-                    return (
-                      <motion.div
-                        key={advantage.text}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                        className="flex items-center space-x-3"
-                      >
-                        <IconComponent className={`w-5 h-5 ${advantage.color}`} />
-                        <span className="text-gray-600">{advantage.text}</span>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
+          </div>
+          <div className="space-y-6  grid grid-cols-1 lg:grid-cols-2 gap-4 my-5">
+            {/* Avantages */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl shadow-lg p-6"
+            >
+              <h3 className="font-semibold text-lg mb-4 text-gray-900 flex items-center">
+                <BarChart3 className="w-5 h-5 mr-2 text-purple-600" />
+                Pourquoi estimer avec SERVO ?
+              </h3>
+              <div className="space-y-3">
+                {advantages.map((advantage, index) => {
+                  const IconComponent = advantage.icon;
+                  return (
+                    <motion.div
+                      key={advantage.text}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + index * 0.1 }}
+                      className="flex items-center space-x-3"
+                    >
+                      <IconComponent className={`w-5 h-5 ${advantage.color}`} />
+                      <span className="text-gray-600 text-sm">{advantage.text}</span>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
 
-              {/* Statistiques */}
-              <motion.div
+            {/* Statistiques */}
+            {/* <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -353,27 +353,26 @@ export default function EstimationImmobilierPage() {
                     </div>
                   </div>                 
                 </div>
-              </motion.div>
-              {/* Information API */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="bg-slate-50 rounded-2xl shadow-lg p-6 border border-slate-200"
-              >
-                <h3 className="font-semibold text-lg mb-3 text-gray-900 flex items-center">
-                  <Sparkles className="w-5 h-5 mr-2 text-slate-600" />
-                  Technologie IA
-                </h3>
-                <p className="text-gray-600 text-sm mb-3">
-                  Notre système utilise l'IA pour analyser votre bien selon les critères du marché immobilier.
-                </p>
-                <div className="flex items-center text-xs text-slate-500">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Analyse en temps réel
-                </div>
-              </motion.div>
-            </div>
+              </motion.div> */}
+            {/* Information API */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="bg-slate-50 rounded-2xl shadow-lg p-6 border border-slate-200"
+            >
+              <h3 className="font-semibold text-lg mb-3 text-gray-900 flex items-center">
+                <Sparkles className="w-5 h-5 mr-2 text-slate-600" />
+                Technologie IA
+              </h3>
+              <p className="text-gray-600 text-sm mb-3">
+                Notre système utilise l'IA pour analyser votre bien selon les critères du marché immobilier.
+              </p>
+              <div className="flex items-center text-xs text-slate-500">
+                <Clock className="w-3 h-3 mr-1" />
+                Analyse en temps réel
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -442,7 +441,7 @@ function getFeaturesValue(features: EstimationData['features']): number {
 
 function generateFallbackFactors(data: EstimationData) {
   const factors = [];
-  
+
   factors.push({
     factor: 'Surface',
     impact: 'positive',
@@ -451,7 +450,7 @@ function generateFallbackFactors(data: EstimationData) {
 
   factors.push({
     factor: 'Localisation',
-    impact: 'neutral', 
+    impact: 'neutral',
     description: `Situation à ${data.location.city}, marché ${getMarketTrend(data.location.city).trend === 'up' ? 'dynamique' : 'stable'}`
   });
 

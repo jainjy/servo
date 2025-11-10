@@ -219,31 +219,31 @@ useEffect(() => {
     //     },
     //   ],
     // },
-    {
-      title: "PRODUITS & ACCESSOIRES",
-      items: [
-        {
-          title: "Équipements",
-          description: "Matériel & équipements haute performance",
-          href: "/produits#equipement",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
-        },
-        {
-          title: "Matériaux",
-          description: "Matériaux de construction qualité premium",
-          href: "/produits#materiaux",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+    // {
+    //   title: "PRODUITS & ACCESSOIRES",
+    //   items: [
+    //     {
+    //       title: "Équipements",
+    //       description: "Matériel & équipements haute performance",
+    //       href: "/produits#equipement",
+    //       image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+    //     },
+    //     {
+    //       title: "Matériaux",
+    //       description: "Matériaux de construction qualité premium",
+    //       href: "/produits#materiaux",
+    //       image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
 
-        },
-        {
-          title: "Design & Décoration",
-          description: "Solutions esthétiques pour votre intérieur",
-          href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+    //     },
+    //     {
+    //       title: "Design & Décoration",
+    //       description: "Solutions esthétiques pour votre intérieur",
+    //       href: "/produits#design",
+    //       image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
 
-        },
-      ],
-    },
+    //     },
+    //   ],
+    // },
     {
       title: "ENTREPRISE",
       items: [
@@ -384,7 +384,12 @@ useEffect(() => {
           description: "Gestion efficace de votre domicile",
           href: "/domicile#utilities",
           image: "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg"
-        },
+        }, {
+          title: "Matériaux",
+          description: "Matériaux de construction qualité premium",
+          href: "/domicile#utilities",
+          image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
+        }
       ],
     },
     {

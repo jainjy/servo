@@ -669,12 +669,12 @@ function EstimationWizard({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-4xl mx-auto border border-slate-200">
+    <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mx-auto border border-slate-200">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-slate-900">
           Estimation Immobilière
         </h1>
-        <p className="text-slate-600 mt-2">Obtenez une estimation précise de votre bien en 5 minutes</p>
+        <p className="text-slate-600 text-sm mt-2">Obtenez une estimation précise de votre bien en 5 minutes</p>
       </div>
 
       <div className="mb-12">
@@ -836,7 +836,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
     <div>
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Caractéristiques principales</h2>
-        <p className="text-slate-600">Renseignez les informations de base de votre bien</p>
+        <p className="text-slate-600 text-sm">Renseignez les informations de base de votre bien</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -849,7 +849,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-slate-50 rounded-xl p-6 border border-slate-200 hover:border-blue-300 transition-colors"
+              className="bg-slate-50 rounded-xl px-6 py-2 border border-slate-200 hover:border-blue-300 transition-colors"
             >
               <label className="block text-sm font-semibold text-slate-700 mb-3  items-center">
                 <IconComponent className="w-4 h-4 mr-2 text-blue-500" />
@@ -861,7 +861,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
                   type="number"
                   value={input.value || ''}
                   onChange={(e) => input.onChange(parseInt(e.target.value) || 0)}
-                  className="flex-1 px-4 py-3 col-span-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold text-lg"
+                  className="flex-1 px-4 py-2 col-span-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-semibold text-sm"
                   placeholder={input.placeholder}
                   min="0"
                 />
@@ -881,7 +881,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
           onClick={onBack}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 md:flex-none bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center border border-slate-300"
+          className="flex-1 md:flex-none bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-xl transition-all duration-200 flex items-center justify-center border border-slate-300"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
           Retour
@@ -891,7 +891,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
           disabled={!data.surface || !data.rooms}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 md:flex-none bg-blue-500 hover:bg-blue-600 disabled:bg-slate-400 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl disabled:shadow-none"
+          className="flex-1 md:flex-none bg-blue-500 hover:bg-blue-600 disabled:bg-slate-400 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl disabled:shadow-none"
         >
           <span>Continuer</span>
           <ArrowRight className="w-5 h-5 ml-2" />
@@ -1147,7 +1147,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     <div>
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Localisation du bien</h2>
-        <p className="text-slate-600">Recherchez n'importe quelle ville, région ou pays dans le monde</p>
+        <p className="text-slate-600 text-sm">Recherchez n'importe quelle ville, région ou pays dans le monde</p>
       </div>
       
       <div className="space-y-6 mb-8">
