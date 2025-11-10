@@ -98,6 +98,10 @@ import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
+
+//tracking page
+import GlobalTracking from '@/components/GlobalTracking';
+
 //import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 
@@ -175,6 +179,9 @@ const App = () => {
             <ToastContainer />
             <Sonner />
             <BrowserRouter>
+              {/* Intégration du GlobalTracking pour le tracking des pages */}
+              <GlobalTracking />
+              
               <ScrollToHash />
               <ScrollToTop />
               <Layout>
@@ -255,7 +262,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  {/* <Route path="/recherche" element={<Recherche />} /> */}
+                  <Route path="/recherche" element={<Recherche onClick />} />
 
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />

@@ -43,6 +43,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
+import { useProduitsTracking } from '@/hooks/useProduitsTracking';
 
 // Composant Contact Modal
 const ContactModal = ({ isOpen, onClose, type }) => {
@@ -141,6 +142,22 @@ const Produits = () => {
   const [categories, setCategories] = useState([]);
   const [categoryCounts, setCategoryCounts] = useState({});
   
+  // Intégration du hook de tracking
+  const {
+    trackProduitsView,
+    trackProductView,
+    trackProductClick,
+    trackAddToCart,
+    trackProductSearch,
+    trackProductFilter,
+    trackCategoryClick
+  } = useProduitsTracking();
+
+  // Track de la vue de la page produits
+  useEffect(() => {
+    trackProduitsView();
+  }, [trackProduitsView]);
+
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart } = useCart(user);
@@ -157,6 +174,7 @@ const Produits = () => {
       const params = { status: 'active' };
       if (category) {
         params.category = category;
+        trackProductFilter(category);
       }
       if (searchQuery) {
         params.search = searchQuery;
@@ -164,6 +182,11 @@ const Produits = () => {
 
       const response = await api.get('/products', { params });
       setProducts(response.data.products);
+      
+      // Track des vues de produits individuels
+      response.data.products.forEach(product => {
+        trackProductView(product.id, product.name, product.category);
+      });
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
     } finally {
@@ -189,12 +212,13 @@ const Produits = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    trackProductSearch(searchQuery);
     await fetchProducts();
   };
 
-  // CORRECTION : Ne pas passer les composants React dans l'état de navigation
+  // Gestion du clic sur une catégorie avec tracking
   const handleCategoryClick = (category, section) => {
-    // Créer un objet simple sans composants React
+    trackCategoryClick(category.name, section);
     const categoryData = {
       name: category.name,
       description: category.description,
@@ -207,6 +231,19 @@ const Produits = () => {
     });
   };
 
+  // Gestion de l'ajout au panier avec tracking
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    trackAddToCart(product.id, product.name, product.price, product.category);
+  };
+
+  // Gestion du clic sur un produit avec tracking
+  const handleProductClick = (product) => {
+    trackProductClick(product.id, product.name, product.category);
+    // Navigation vers la page détail du produit si nécessaire
+    // navigate(`/produits/${product.id}`);
+  };
+
   const handleContactClick = (type) => {
     setContactModalType(type);
     setIsContactModalOpen(true);
@@ -217,7 +254,7 @@ const Produits = () => {
     return categoryCounts[categoryName] || 0;
   };
 
-  // CORRECTION : Stocker les noms d'icônes au lieu des composants
+  // Stocker les noms d'icônes au lieu des composants
   const equipmentCategories = [
     {
       name: "Équipements de chauffage",
@@ -386,21 +423,21 @@ const Produits = () => {
     (category) =>
       (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0 // EXCLURE LES CATÉGORIES AVEC 0 PRODUIT
+      getProductCount(category.name) > 0
   );
 
   const filteredMaterials = materialsCategories.filter(
     (category) =>
       (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0 // EXCLURE LES CATÉGORIES AVEC 0 PRODUIT
+      getProductCount(category.name) > 0
   );
 
   const filteredDesign = designCategories.filter(
     (category) =>
       (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0 // EXCLURE LES CATÉGORIES AVEC 0 PRODUIT
+      getProductCount(category.name) > 0
   );
 
   return (
@@ -493,7 +530,8 @@ const Produits = () => {
                     <ProductCard
                       key={product.id}
                       product={product}
-                      onAddToCart={addToCart}
+                      onAddToCart={handleAddToCart}
+                      onProductClick={handleProductClick}
                       user={user}
                     />
                   ))}

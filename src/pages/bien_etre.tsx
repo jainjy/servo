@@ -6,6 +6,7 @@ import PodcastCard from "@/components/PodcastCard";
 import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
 import Podcast from "@/pages/podcast";
 import ArtCommerce from "./ArtCommerce";
+import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 
 interface Service {
   id: number
@@ -99,6 +100,7 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const { trackBienEtreServiceBook } = useBienEtreTracking();
 
   const handleChange = (e) => {
     setFormData({
@@ -112,6 +114,9 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
     setIsLoading(true);
 
     try {
+      // Track la réservation
+      trackBienEtreServiceBook(service.id, service.libelle, service.category?.name || 'general');
+
       // Appel à l'API pour créer le rendez-vous
       const response = await api.post('/harmonie/appointments', {
         serviceId: service.id, // ID du service sélectionné
@@ -292,6 +297,12 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
 // Composant de petite carte moderne
 const ServiceCard = ({ service, index }) => {
   const [showForm, setShowForm] = useState(false);
+  const { trackBienEtreServiceClick } = useBienEtreTracking();
+
+  const handleCardClick = () => {
+    trackBienEtreServiceClick(service.id, service.libelle, service.category?.name || 'general');
+    setShowForm(true);
+  };
 
   return (
     <>
@@ -326,7 +337,7 @@ const ServiceCard = ({ service, index }) => {
 
           {/* Bouton */}
           <button
-            onClick={() => setShowForm(true)}
+            onClick={handleCardClick}
             className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,6 +363,20 @@ const ServiceCard = ({ service, index }) => {
 const BienEtre = () => {
   const navigate = useNavigate();
   const section2Ref = useRef(null);
+
+  // Initialisation du tracking
+  const { 
+    trackBienEtreView, 
+    trackBienEtreServiceClick, 
+    trackBienEtreServiceBook,
+    trackBienEtreSearch,
+    trackBienEtreTabChange
+  } = useBienEtreTracking();
+
+  // Track le chargement de la page
+  useEffect(() => {
+    trackBienEtreView();
+  }, []);
 
   const scrollToSection2 = () => {
     section2Ref.current.scrollIntoView({
@@ -408,6 +433,13 @@ const BienEtre = () => {
     Podcasteur: [],
     BoutiqueNaturels: []
   });
+
+  // Track les changements d'onglet
+  useEffect(() => {
+    if (activeTab) {
+      trackBienEtreTabChange(activeTab);
+    }
+  }, [activeTab, trackBienEtreTabChange]);
 
   const fetchServices = async () => {
     try {
@@ -487,6 +519,12 @@ const BienEtre = () => {
       return getAllServices();
     }
     return servicesByCategory[activeTab] || [];
+  };
+
+  // Track la recherche
+  const handleSearch = (query: string) => {
+    trackBienEtreSearch(query);
+    // Implémentez votre logique de recherche ici
   };
 
   return (

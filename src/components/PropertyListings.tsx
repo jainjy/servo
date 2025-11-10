@@ -44,6 +44,7 @@ import {
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
+import { useImmobilierTracking } from '@/hooks/useImmobilierTracking';
 
 const styles = {
   section: {
@@ -250,12 +251,14 @@ export const ModalDemandeVisite = ({
   property,
   onSuccess,
   isAlreadySent,
+  onPropertyContact,
 }: {
   open: boolean;
   onClose: () => void;
   property: any;
   onSuccess?: (propertyId: string) => void;
   isAlreadySent?: boolean;
+  onPropertyContact?: (property: any) => void;
 }) => {
   const [formData, setFormData] = useState({
     nomPrenom: "",
@@ -272,6 +275,12 @@ export const ModalDemandeVisite = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!property) return;
+    
+    // Track contact action
+    if (onPropertyContact) {
+      onPropertyContact(property);
+    }
+    
     if (isAlreadySent) {
       toast({ title: "Demande déjà envoyée", description: "Vous avez déjà envoyé une demande pour ce bien." });
       return;
@@ -325,7 +334,6 @@ export const ModalDemandeVisite = ({
         // nombreArtisans, optionAssurance etc left as defaults
       };
 
-
       await api.post('/demandes/immobilier', payload);
       console.log(payload)
 
@@ -360,7 +368,6 @@ export const ModalDemandeVisite = ({
   if (!open) return null;
 
   return (
-
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* En-tête du modal */}
@@ -514,13 +521,40 @@ export const ModalDemandeVisite = ({
       </div>
     </div>
   );
-
 };
 
-const PropertyListings = (
-  { cardsOnly = false, initialTab, maxItems }: { cardsOnly?: boolean; initialTab?: 'tous' | 'achat' | 'location' | 'saisonniere'; maxItems?: number }
-) => {
+interface PropertyListingsProps {
+  cardsOnly?: boolean;
+  initialTab?: 'tous' | 'achat' | 'location' | 'saisonniere';
+  maxItems?: number;
+  onPropertyView?: (property: any) => void;
+  onPropertyClick?: (property: any) => void;
+  onPropertyContact?: (property: any) => void;
+  onSearch?: (query: string, resultsCount?: number) => void;
+  onFilter?: (filters: any) => void;
+}
+
+const PropertyListings: React.FC<PropertyListingsProps> = ({
+  cardsOnly = false,
+  initialTab,
+  maxItems,
+  onPropertyView,
+  onPropertyClick,
+  onPropertyContact,
+  onSearch,
+  onFilter
+}) => {
   const navigate = useNavigate();
+  
+  // Initialisation du tracking
+  const {
+    trackPropertyView,
+    trackPropertyClick,
+    trackPropertyFilter,
+    trackPropertyContact,
+    trackPropertySearch
+  } = useImmobilierTracking();
+
   const [showCard, setShowCard] = useState(false);
   const [activeTab, setActiveTab] = useState<'achat' | 'location' | 'saisonniere' | 'tous'>(initialTab ?? 'tous');
   const [radiusKm, setRadiusKm] = useState(5);
@@ -561,6 +595,39 @@ const PropertyListings = (
   // Auth (to load user's demandes and mark sent requests)
   const { user, isAuthenticated } = useAuth();
 
+  // Intersection Observer pour le tracking des vues
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const propertyId = entry.target.getAttribute('data-property-id');
+          const property = [...buyProperties, ...rentProperties, ...seasonalProperties]
+            .find(p => p.id === propertyId);
+          
+          if (property) {
+            // Track avec useImmobilierTracking
+            trackPropertyView(property.id, property.type, property.price);
+            
+            // Callback parent si fourni
+            if (onPropertyView) {
+              onPropertyView(property);
+            }
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    // Observer chaque propriété
+    [...buyProperties, ...rentProperties, ...seasonalProperties].forEach(property => {
+      const element = document.querySelector(`[data-property-id="${property.id}"]`);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [buyProperties, rentProperties, seasonalProperties, trackPropertyView, onPropertyView]);
+
   // Load user's demandes to persist "demande déjà envoyée" state
   useEffect(() => {
     if (!isAuthenticated || !user?.id) return;
@@ -569,7 +636,7 @@ const PropertyListings = (
     const loadUserDemandes = async () => {
       setDemandesLoading(true);
       try {
-  const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
+        const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
         const demandes = resp.data || [];
         const map: Record<string, boolean> = {};
         demandes.forEach((d: any) => {
@@ -644,6 +711,74 @@ const PropertyListings = (
     if (property.localImage) return [property.localImage as string];
     return [property1];
   };
+
+  // Handlers pour le tracking
+  const handlePropertyClick = (property: any) => {
+    // Track avec useImmobilierTracking
+    trackPropertyClick(property.id, property.title, property.price);
+    
+    // Callback parent si fourni
+    if (onPropertyClick) {
+      onPropertyClick(property);
+    }
+    
+    // Navigation
+    navigate(`/immobilier/${property.id}`);
+  };
+
+  const handlePropertyContact = (property: any) => {
+    // Track avec useImmobilierTracking
+    trackPropertyContact(property.id, property.title);
+    
+    // Callback parent si fourni
+    if (onPropertyContact) {
+      onPropertyContact(property);
+    }
+  };
+
+  const handleSearch = (query: string) => {
+    setLocalisation(query);
+    
+    // Track avec useImmobilierTracking
+    const resultsCount = displayed.length;
+    trackPropertySearch(query, resultsCount);
+    
+    // Callback parent si fourni
+    if (onSearch) {
+      onSearch(query, resultsCount);
+    }
+  };
+
+  const handleFilterChange = () => {
+    const filters = {
+      type: activeTab === 'achat' ? typeBienAchat : 
+            activeTab === 'location' ? typeBienLocation : 
+            activeTab === 'saisonniere' ? typeBienSaison : undefined,
+      priceMin,
+      priceMax,
+      location: localisation,
+      rooms: pieces,
+      radiusKm,
+      surfaceMin,
+      surfaceMax,
+      chambres,
+      exterieur,
+      extras
+    };
+    
+    // Track avec useImmobilierTracking
+    trackPropertyFilter(filters);
+    
+    // Callback parent si fourni
+    if (onFilter) {
+      onFilter(filters);
+    }
+  };
+
+  // Appeler handleFilterChange quand les filtres changent
+  useEffect(() => {
+    handleFilterChange();
+  }, [activeTab, typeBienAchat, typeBienLocation, typeBienSaison, priceMin, priceMax, localisation, pieces, radiusKm, surfaceMin, surfaceMax, chambres, exterieur, extras]);
 
   const displayed = useMemo(() => {
     const hasFeature = (p: any, token: string) => {
@@ -766,6 +901,10 @@ const PropertyListings = (
 
   const handleDemanderVisite = (property: any, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Track contact action
+    handlePropertyContact(property);
+    
     if (sentRequests?.[property?.id]) {
       toast({ title: "Demande déjà envoyée", description: "Vous avez déjà envoyé une demande pour ce bien." });
       return;
@@ -802,8 +941,9 @@ const PropertyListings = (
                   return (
                     <Card
                       key={property.id}
+                      data-property-id={property.id}
                       className="home-card group cursor-pointer h-full"
-                      onClick={() => navigate(`/immobilier/${property.id}`)}
+                      onClick={() => handlePropertyClick(property)}
                     >
                       <div className="relative">
                         <div className="relative rounded-lg h-52 overflow-hidden">
@@ -901,7 +1041,7 @@ const PropertyListings = (
                             </button>
                             <button
                               className="border-2 p-2 rounded-md"
-                              onClick={() => navigate(`/immobilier/${property.id}`)}
+                              onClick={() => handlePropertyClick(property)}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -930,6 +1070,7 @@ const PropertyListings = (
           property={selectedProperty}
           isAlreadySent={selectedProperty ? !!sentRequests?.[selectedProperty.id] : false}
           onSuccess={(id: string) => setSentRequests(prev => ({ ...prev, [id]: true }))}
+          onPropertyContact={handlePropertyContact}
         />
       </section>
     );
@@ -1077,13 +1218,9 @@ const PropertyListings = (
                       </div>
                     </motion.div>
                   </motion.div>
-
-
                 )}
-
               </AnimatePresence>
             </div>
-
           </div>
         </div>
 
@@ -1194,7 +1331,7 @@ const PropertyListings = (
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={localisation}
-              onChange={(e) => setLocalisation(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               onClick={() => setIsLocationModalOpen(true)}
               placeholder="Cliquez pour choisir sur la carte"
               className="pl-9 h-11 border-2 cursor-pointer bg-white"
@@ -1300,8 +1437,9 @@ const PropertyListings = (
                 return (
                   <Card
                     key={property.id}
+                    data-property-id={property.id}
                     className="overflow-hidden border-0 hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
-                    onClick={() => navigate(`/immobilier/${property.id}`)}
+                    onClick={() => handlePropertyClick(property)}
                   >
                     <div className="relative">
                       {/* Zone image avec navigation */}
@@ -1425,7 +1563,7 @@ const PropertyListings = (
                           </button>
                           <button
                             className="border-2 p-2 rounded-md"
-                            onClick={() => navigate(`/immobilier/${property.id}`)}
+                            onClick={() => handlePropertyClick(property)}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
@@ -1448,6 +1586,7 @@ const PropertyListings = (
         property={selectedProperty}
         isAlreadySent={selectedProperty ? !!sentRequests?.[selectedProperty.id] : false}
         onSuccess={(id: string) => setSentRequests(prev => ({ ...prev, [id]: true }))}
+        onPropertyContact={handlePropertyContact}
       />
 
       {/* Modal de sélection de localisation */}
@@ -1477,7 +1616,6 @@ const PropertyListings = (
         }))}
       />
     </section>
-
   );
 };
 

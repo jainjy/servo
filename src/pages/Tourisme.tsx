@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../lib/api'; // Import de l'API configurée
 import { useAuth } from '../hooks/useAuth'; // Import de votre hook useAuth
+import { useInteractionTracking } from '../hooks/useInteractionTracking'; // Import du hook de tracking
 import '../styles/animationSlider.css'
 
 // Types basés sur le modèle de données
@@ -79,6 +80,9 @@ export const TourismSection = () => {
   // UTILISATION DE VOTRE HOOK useAuth EXISTANT
   const { user: currentUser, isAuthenticated, loading: userLoading } = useAuth();
 
+  // HOOK DE TRACKING DES INTERACTIONS
+  const { trackTourismInteraction } = useInteractionTracking();
+
   const [listings, setListings] = useState<TourismListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<TourismListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,6 +138,19 @@ export const TourismSection = () => {
   const [popularDestinations, setPopularDestinations] = useState<
     { city: string; price: number; image: string }[]
   >([]);
+
+  // TRACKING: Chargement des hébergements
+  useEffect(() => {
+    if (listings.length > 0) {
+      listings.forEach(listing => {
+        trackTourismInteraction(listing.id, listing.title, 'view', {
+          type: listing.type,
+          price: listing.price,
+          city: listing.city
+        });
+      });
+    }
+  }, [listings, trackTourismInteraction]);
 
   useEffect(() => {
     const fetchPopularDestinations = async () => {
@@ -270,6 +287,14 @@ export const TourismSection = () => {
 
       if (response.data.success) {
         setListings(response.data.data);
+        
+        // TRACKING: Recherche effectuée
+        trackTourismInteraction('search', 'Recherche hébergements', 'search', {
+          destination: filters.destination,
+          guests: filters.guests,
+          checkIn: filters.checkIn,
+          checkOut: filters.checkOut
+        });
       }
     } catch (error) {
       console.error("Erreur lors de la recherche :", error);
@@ -278,8 +303,14 @@ export const TourismSection = () => {
     }
   };
 
-  // MODIFICATION: Utiliser isAuthenticated du hook useAuth
   const handleBooking = async (listing: TourismListing) => {
+    // TRACKING: Tentative de réservation
+    await trackTourismInteraction(listing.id, listing.title, 'booking_attempt', {
+      checkIn: filters.checkIn,
+      checkOut: filters.checkOut,
+      guests: filters.guests
+    });
+
     // Vérifier si l'utilisateur est connecté avec le hook useAuth
     if (!isAuthenticated) {
       alert('Veuillez vous connecter pour effectuer une réservation');
@@ -324,7 +355,6 @@ export const TourismSection = () => {
     setShowBookingModal(true);
   };
 
-  // MODIFICATION: Utiliser isAuthenticated et currentUser du hook useAuth
   const confirmBooking = async () => {
     setBookingLoading(true);
     try {
@@ -345,6 +375,15 @@ export const TourismSection = () => {
       
       if (response.data.success) {
         setBookingSuccess(response.data);
+        
+        // TRACKING: Réservation confirmée
+        if (response.data.success && selectedListing) {
+          await trackTourismInteraction(selectedListing.id, selectedListing.title, 'booking_confirmed', {
+            bookingId: response.data.data.id,
+            totalAmount: response.data.data.totalAmount
+          });
+        }
+        
         // Réinitialiser le formulaire
         setBookingForm({
           listingId: '',
@@ -404,7 +443,14 @@ export const TourismSection = () => {
     }));
   };
 
+  // TRACKING: Ajout du tracking aux favoris
   const toggleFavorite = (listingId: string) => {
+    const listing = listings.find(l => l.id === listingId);
+    if (listing) {
+      const action = favorites.has(listingId) ? 'remove_favorite' : 'add_favorite';
+      trackTourismInteraction(listingId, listing.title, action);
+    }
+    
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(listingId)) {

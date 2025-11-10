@@ -9,6 +9,7 @@ const ServiceCards = lazy(() => import("@/components/ServiceCards"));
 const TravauxPreview = lazy(() => import("@/components/TravauxPreview"));
 const PropertyListings = lazy(() => import("@/components/PropertyListings"));
 const Slider = lazy(() => import("@/components/Slider"));
+const RecommendationsSection = lazy(() => import("@/components/RecommendationsSection"));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
@@ -21,15 +22,21 @@ const LoadingFallback = () => (
 
 const Index = () => {
   const [isClient, setIsClient] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Vérifier si l'utilisateur est connecté pour afficher les recommandations
+    const token = localStorage.getItem("auth-token");
+    if (token && token !== "null" && token !== "undefined") {
+      setShowRecommendations(true);
+    }
   }, []);
 
   if (!isClient) {
     return (
       <div className="min-h-screen bg-background">
-       
         <LoadingFallback />
       </div>
     );
@@ -39,20 +46,27 @@ const Index = () => {
     <>
       <Load />
       <div className="min-h-screen bg-background [scrollbar-width:none]">
-   
         <Suspense fallback={<LoadingFallback />}>
           <Hero />
           <ServiceCards />
-          {/* Pass `homeCards` so TravauxPreview renders a homepage-specific card variant */}
           <TravauxPreview homeCards />
 
+          {/* Section de recommandations intelligentes - 4 SEULEMENT */}
+          {showRecommendations && (
+            <RecommendationsSection 
+              title="Nos meilleures suggestions pour vous"
+              limit={4} // Explicitement 4
+              showOnlyIfAuthenticated={true}
+            />
+          )}
+          
           <EmplacementPub />
           
-          {/* Show property listings on the home page in cards-only mode (no filters) */}
+          {/* Section biens immobiliers */}
           <>
-          <h2 className="text-4xl font-bold ml-8 text-gray-700 my-6">Nos biens immobiliers</h2>
-          <PropertyListings cardsOnly maxItems={4} />
-          <Slider />
+            <h2 className="text-4xl font-bold ml-8 text-gray-700 my-6">Nos biens immobiliers</h2>
+            <PropertyListings cardsOnly maxItems={4} />
+            <Slider />
           </>
         </Suspense>
       </div>

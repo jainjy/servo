@@ -1,5 +1,5 @@
-import ImmobilierSections from '@/components/ImmobilierSections';
 import React, { useEffect, useState, Suspense, lazy } from 'react';
+import { useImmobilierTracking } from '@/hooks/useImmobilierTracking';
 
 // Chargement dynamique avec React.lazy
 const Header = lazy(() => import('@/components/layout/Header'));
@@ -16,12 +16,53 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Props pour PropertyListings avec tracking
+interface PropertyListingsWithTrackingProps {
+  onPropertyView: (property: any) => void;
+  onPropertyClick: (property: any) => void;
+  onPropertyContact: (property: any) => void;
+  onSearch: (query: string, resultsCount?: number) => void;
+  onFilter: (filters: any) => void;
+}
+
 const Immobilier = () => {
   const [mounted, setMounted] = useState(false);
 
+  // Initialisation du tracking
+  const {
+    trackImmobilierView,
+    trackPropertyView,
+    trackPropertyClick,
+    trackPropertyFilter,
+    trackPropertyContact,
+    trackPropertySearch
+  } = useImmobilierTracking();
+
   useEffect(() => {
     setMounted(true);
+    trackImmobilierView();
   }, []);
+
+  // Handlers pour le tracking
+  const handlePropertyView = (property: any) => {
+    trackPropertyView(property.id, property.type, property.price);
+  };
+
+  const handlePropertyClick = (property: any) => {
+    trackPropertyClick(property.id, property.title, property.price);
+  };
+
+  const handlePropertyContact = (property: any) => {
+    trackPropertyContact(property.id, property.title);
+  };
+
+  const handlePropertySearch = (query: string, resultsCount?: number) => {
+    trackPropertySearch(query, resultsCount);
+  };
+
+  const handlePropertyFilter = (filters: any) => {
+    trackPropertyFilter(filters);
+  };
 
   if (!mounted) {
     return <LoadingFallback />;
@@ -46,7 +87,14 @@ const Immobilier = () => {
             <span className='text-center text-xs pt-5 text-white/60'>Vendre ou louer vos biens</span>
           </div>
 
-          <PropertyListings />
+          {/* PropertyListings avec props de tracking */}
+          <PropertyListings 
+            onPropertyView={handlePropertyView}
+            onPropertyClick={handlePropertyClick}
+            onPropertyContact={handlePropertyContact}
+            onSearch={handlePropertySearch}
+            onFilter={handlePropertyFilter}
+          />
           
         </Suspense>
       </section>
