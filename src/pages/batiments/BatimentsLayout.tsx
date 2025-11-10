@@ -92,24 +92,23 @@ const BatimentsLayout = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-20">
-       <div className='absolute inset-0 -z-20 overflow-hidden h-80 w-full'>
-           <div className='bg-black/50 absolute w-full h-full backdrop-blur-sm '></div>
-            <img
-            className='h-full w-full object-cover'
-            src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg" alt="" />
-        </div>
+      <div className='absolute inset-0 -z-20 overflow-hidden h-80 w-full'>
+        <div className='bg-black/50 absolute w-full h-full backdrop-blur-sm '></div>
+        <img
+          className='h-full w-full object-cover'
+          src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg" alt="" />
+      </div>
       <h1 className="text-5xl text-white font-bold  text-center">Bâtiments & Construction</h1>
-      
+
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
         <Tab.List className="flex flex-wrap gap-2 mb-4 mt-16">
           {sections.map((section) => (
             <Tab
               key={section.title}
               className={({ selected }) =>
-                `${
-                  selected
-                    ? 'bg-black text-white'
-                    : 'bg-white text-black hover:bg-gray-100'
+                `${selected
+                  ? 'bg-black text-white'
+                  : 'bg-white text-black hover:bg-gray-100'
                 } px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-sm`
               }
             >
