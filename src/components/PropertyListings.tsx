@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { UserPlus, LogIn } from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";

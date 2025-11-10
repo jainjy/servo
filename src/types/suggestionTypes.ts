@@ -21,6 +21,15 @@ export interface UserPreference {
 export interface Recommendation {
   id: string;
   name: string;
+  description?: string;
+  category?: string;
+  price?: number;
+  images?: string[];
+  type: string;
+  sourceType?: string;
+  recommendationSource?: string;
+  personalizationScore?: number;
+  popularityScore?: number;
+  viewCount?: number;
   similarity?: number;
 }
-
