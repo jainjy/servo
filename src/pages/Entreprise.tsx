@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Star, ChevronRight, Users, Building2, MessageCircle, X, Send, Navigation, Clock, Shield, Target, CheckCircle, Plus, TrendingUp, Coins, Handshake, Scale, Heart, FileText, BadgeDollarSign, ClipboardList, Search, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Footer from "@/components/layout/Footer";
 import { toast } from "sonner";
 import CreationReprise from "@/components/components/CreationReprise";
@@ -14,6 +14,7 @@ import AidesLeveesFonds from "@/components/components/AideFonds";
 import JuridiqueLiquidation from "@/components/components/JuridiqueLiquidation";
 import PodcastsServices from "@/components/components/Podcast_services";
 import { Link } from "react-router-dom";
+import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
 const colors = {
   primary: "#0f172a", // slate-900
@@ -230,6 +231,15 @@ const mapModalVariants = {
 };
 
 const Entreprise = () => {
+  const { trackBusinessInteraction } = useInteractionTracking();
+  
+  // Track l'affichage des services
+  useEffect(() => {
+    servicesEntreprise.forEach(service => {
+      trackBusinessInteraction(service.id.toString(), service.nom, 'view');
+    });
+  }, [trackBusinessInteraction]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -247,12 +257,10 @@ const Entreprise = () => {
     typeAvis: "positif"
   });
 
-  const handleContact = (partenaire) => {
-    setSelectedPartenaire(partenaire);
-    setShowMessageModal(true);
-  };
-
   const handleServiceClick = (service) => {
+    trackBusinessInteraction(service.id.toString(), service.nom, 'click', {
+      category: service.category
+    });
     setSelectedService(service);
     setFormData(prev => ({
       ...prev,
@@ -262,11 +270,24 @@ const Entreprise = () => {
     setShowMessageModal(true);
   };
 
+  const handleContact = (partenaire) => {
+    trackBusinessInteraction(partenaire.id.toString(), partenaire.nom, 'contact_request', {
+      type: 'partenaire',
+      rating: partenaire.rating
+    });
+    setSelectedPartenaire(partenaire);
+    setShowMessageModal(true);
+  };
+
   const handleOpenMap = () => {
+    trackBusinessInteraction('map', 'Carte partenaires', 'open');
     setShowMapModal(true);
   };
 
   const handlePartnerLocation = (partenaire) => {
+    trackBusinessInteraction(partenaire.id.toString(), partenaire.nom, 'location_view', {
+      address: partenaire.location.address
+    });
     setSelectedLocation(partenaire.location);
     setShowMapModal(true);
   };
@@ -274,6 +295,29 @@ const Entreprise = () => {
   const handleSubmitMessage = (e) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Tracking de l'envoi du message
+    const trackingData = selectedPartenaire 
+      ? {
+          id: selectedPartenaire.id.toString(),
+          name: selectedPartenaire.nom,
+          action: 'contact_submit',
+          type: 'partenaire'
+        }
+      : selectedService
+      ? {
+          id: selectedService.id.toString(),
+          name: selectedService.nom,
+          action: 'service_request',
+          category: selectedService.category
+        }
+      : {
+          id: 'general_contact',
+          name: 'Contact général',
+          action: 'general_contact'
+        };
+
+    trackBusinessInteraction(trackingData.id, trackingData.name, trackingData.action, trackingData);
 
     // Simulation d'envoi
     setTimeout(() => {
@@ -370,13 +414,13 @@ const Entreprise = () => {
             </p>
 
             <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
-              <motion.div
-
-              >
+              <motion.div>
                 <Button
                   className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
-                  onClick={() => setActiveServiceCategory("tous")}
-
+                  onClick={() => {
+                    trackBusinessInteraction('services_section', 'Services', 'navigate');
+                    setActiveServiceCategory("tous");
+                  }}
                 >
                   <FileText className="h-5 w-5 mr-3" />
                   <a href="#services">
@@ -385,9 +429,7 @@ const Entreprise = () => {
                 </Button>
               </motion.div>
 
-              <motion.div
-
-              >
+              <motion.div>
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
                   onClick={handleOpenMap}
@@ -440,8 +482,16 @@ const Entreprise = () => {
             />
             <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
           </div>
-          <motion.div >
-            <Button className="rounded-xl px-8 py-3 text-white font-semibold bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300">
+          <motion.div>
+            <Button 
+              className="rounded-xl px-8 py-3 text-white font-semibold bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
+              onClick={() => {
+                trackBusinessInteraction('search', 'Recherche services', 'search', {
+                  term: searchTerm,
+                  category: activeServiceCategory
+                });
+              }}
+            >
               Rechercher
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
@@ -452,10 +502,7 @@ const Entreprise = () => {
         <motion.div variants={itemVariants} className="mb-12">
           <div className="grid grid-cols-3 place-items-center lg:flex flex-wrap gap-3 mb-4 lg:mb-8 justify-center">
             {serviceCategories.map((category, index) => (
-              <motion.div
-                key={index}
-
-              >
+              <motion.div key={index}>
                 <Button
                   variant={
                     activeServiceCategory === category.value
@@ -472,7 +519,12 @@ const Entreprise = () => {
                         ? colors.primary
                         : "transparent",
                   }}
-                  onClick={() => setActiveServiceCategory(category.value)}
+                  onClick={() => {
+                    trackBusinessInteraction('filter_category', category.label, 'filter_select', {
+                      category: category.value
+                    });
+                    setActiveServiceCategory(category.value);
+                  }}
                 >
                   {category.label}
                 </Button>
@@ -501,7 +553,6 @@ const Entreprise = () => {
                   {/* Icône du service */}
                   <motion.div
                     className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center bg-slate-100 group-hover:bg-slate-900 transition-colors duration-300"
-
                   >
                     <service.icon className="h-8 w-8 text-slate-600  group-hover:text-white transition-colors duration-300" />
                   </motion.div>
@@ -520,9 +571,7 @@ const Entreprise = () => {
                   </p>
 
                   {/* Bouton d'action */}
-                  <motion.div
-
-                  >
+                  <motion.div>
                     <Button
                       className="w-full font-semibold rounded-xl gap-3 py-4 border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-300"
                       variant="outline"
@@ -579,16 +628,15 @@ const Entreprise = () => {
                 { label: "Demandes de prestations", value: "prestations" },
                 { label: "Aides disponibles", value: "aides" },
               ].map((filter, index) => (
-                <motion.div
-                  key={index}
-
-                >
+                <motion.div key={index}>
                   <Select
-                    onValueChange={(value) =>
-                      toast.info(
-                        `Filtre ${filter.label} sélectionné: ${value}`
-                      )
-                    }
+                    onValueChange={(value) => {
+                      trackBusinessInteraction('partner_filter', filter.label, 'filter_select', {
+                        filter: filter.value,
+                        value: value
+                      });
+                      toast.info(`Filtre ${filter.label} sélectionné: ${value}`);
+                    }}
                   >
                     <SelectTrigger className="w-[240px] border-2 border-slate-300 rounded-xl bg-white focus:border-slate-900">
                       <SelectValue placeholder={filter.label} />
@@ -602,9 +650,7 @@ const Entreprise = () => {
                 </motion.div>
               ))}
 
-              <motion.div
-
-              >
+              <motion.div>
                 <Button
                   variant="outline"
                   className="gap-2 border-2 border-slate-900 text-slate-900 font-semibold rounded-xl bg-white hover:bg-slate-900 hover:text-white transition-all duration-300 px-6 py-3"
@@ -643,7 +689,6 @@ const Entreprise = () => {
                   {/* Image spécifique pour Architectes */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-
                   >
                     <img
                       src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -667,7 +712,6 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[0])}
-
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -692,9 +736,7 @@ const Entreprise = () => {
                     </div>
 
                     {/* Bouton de contact */}
-                    <motion.div
-
-                    >
+                    <motion.div>
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
                         onClick={() => handleContact(partenaires[0])}
@@ -729,7 +771,6 @@ const Entreprise = () => {
                   {/* Image spécifique pour Constructeur */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-
                   >
                     <img
                       src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -753,7 +794,6 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[1])}
-
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -778,9 +818,7 @@ const Entreprise = () => {
                     </div>
 
                     {/* Bouton de contact */}
-                    <motion.div
-
-                    >
+                    <motion.div>
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
                         onClick={() => handleContact(partenaires[1])}
@@ -815,7 +853,6 @@ const Entreprise = () => {
                   {/* Image spécifique pour Électricien */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-
                   >
                     <img
                       src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -839,7 +876,6 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[2])}
-
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -864,9 +900,7 @@ const Entreprise = () => {
                     </div>
 
                     {/* Bouton de contact */}
-                    <motion.div
-
-                    >
+                    <motion.div>
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
                         onClick={() => handleContact(partenaires[2])}
@@ -901,7 +935,6 @@ const Entreprise = () => {
                   {/* Image spécifique pour Assurance */}
                   <motion.div
                     className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-
                   >
                     <img
                       src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
@@ -925,7 +958,6 @@ const Entreprise = () => {
                     <motion.div
                       className="flex items-center gap-2 cursor-pointer group mb-4"
                       onClick={() => handlePartnerLocation(partenaires[3])}
-
                     >
                       <MapPin className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
@@ -950,9 +982,7 @@ const Entreprise = () => {
                     </div>
 
                     {/* Bouton de contact */}
-                    <motion.div
-
-                    >
+                    <motion.div>
                       <Button
                         className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
                         onClick={() => handleContact(partenaires[3])}
@@ -1056,7 +1086,10 @@ const Entreprise = () => {
             <motion.div>
               <Button
                 className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-12 py-6 text-lg font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
-                onClick={() => setShowMessageModal(true)}
+                onClick={() => {
+                  trackBusinessInteraction('become_partner', 'Devenir partenaire', 'cta_click');
+                  setShowMessageModal(true);
+                }}
               >
                 <Handshake className="h-6 w-6 mr-3" />
                 Devenir Partenaire
@@ -1084,7 +1117,10 @@ const Entreprise = () => {
             <motion.div>
               <Button
                 className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
-                onClick={() => setShowMessageModal(true)}
+                onClick={() => {
+                  trackBusinessInteraction('general_contact', 'Contact général', 'cta_click');
+                  setShowMessageModal(true);
+                }}
               >
                 <MessageCircle className="h-5 w-5 mr-3" />
                 Contactez-nous
@@ -1093,6 +1129,7 @@ const Entreprise = () => {
           </motion.div>
         </div>
       </section>
+
       {/* Modals */}
       {showMapModal && (
         <motion.div
@@ -1295,7 +1332,7 @@ const Entreprise = () => {
           </motion.div>
         </motion.div>
       )}
-    </div >
+    </div>
   );
 };
 
