@@ -1,5 +1,5 @@
 // hooks/useMessaging.js
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSocket } from "@/Contexts/SocketContext";
 import api from "@/lib/api";
 
@@ -10,6 +10,17 @@ export const useMessaging = (demandeId) => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [artisansStats, setArtisansStats] = useState([]);
+  const messagesEndRef = useRef(null);
+  const shouldScrollRef = useRef(true);
+
+  // Fonction pour scroller vers le bas
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+    }
+  }, []);
 
   // Charger les statistiques des artisans
   const loadArtisansStats = useCallback(async () => {
@@ -50,12 +61,32 @@ export const useMessaging = (demandeId) => {
       if (socket && convResponse.data.id) {
         socket.emit("join_conversation", convResponse.data.id);
       }
+
+      // Scroller vers le bas après chargement
+      shouldScrollRef.current = true;
     } catch (error) {
       console.error("Erreur chargement conversation:", error);
     } finally {
       setLoading(false);
     }
   }, [demandeId, socket, loadArtisansStats]);
+
+  // Scroller vers le bas quand les messages changent
+  useEffect(() => {
+    if (shouldScrollRef.current) {
+      scrollToBottom();
+      shouldScrollRef.current = false;
+    }
+  }, [messages, scrollToBottom]);
+
+  // Scroller vers le bas au premier chargement
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [loading, messages.length, scrollToBottom]);
 
   // Écouter les nouveaux messages
   useEffect(() => {
@@ -64,6 +95,7 @@ export const useMessaging = (demandeId) => {
     const handleNewMessage = (newMessage) => {
       if (newMessage.conversationId === conversation.id) {
         setMessages((prev) => [...prev, newMessage]);
+        shouldScrollRef.current = true;
 
         // Rafraîchir les stats si c'est un message système (événement important)
         if (newMessage.type === "SYSTEM" || newMessage.evenementType) {
@@ -134,6 +166,7 @@ export const useMessaging = (demandeId) => {
       const newMessage = response.data;
 
       setMessages((prev) => [...prev, newMessage]);
+      shouldScrollRef.current = true;
 
       // Émettre l'événement socket
       if (socket) {
@@ -168,5 +201,7 @@ export const useMessaging = (demandeId) => {
     sendMessage,
     refreshMessages: loadConversation,
     refreshArtisansStats: loadArtisansStats,
+    messagesEndRef,
+    scrollToBottom,
   };
 };

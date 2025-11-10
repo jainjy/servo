@@ -98,7 +98,7 @@ import { SocketProvider } from "./Contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
 import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
-
+import "leaflet/dist/leaflet.css";
 //tracking page
 import GlobalTracking from '@/components/GlobalTracking';
 

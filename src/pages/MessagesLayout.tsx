@@ -20,7 +20,7 @@ export default function MessagesLayout() {
     if (currentUser?.role === "admin") {
       return <AdminDiscussions />;
     } else if (currentUser?.role === "professional") {
-      return <ProDiscussions artisanView={true} />;
+      return <ProDiscussions />;
     } else {
       return <UserDiscussions />;
     }
