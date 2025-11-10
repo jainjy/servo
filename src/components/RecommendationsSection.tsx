@@ -1,22 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { getUserRecommendations, trackUserActivity } from '@/lib/suggestionApi';
+import { getUserRecommendations } from '@/lib/suggestionApi';
 import { Recommendation } from '@/types/suggestionTypes';
 import { useTracking } from '@/hooks/UserTracking';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart, Calendar, FileText, Eye, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { useCart } from '@/components/contexts/CartContext';
+import { toast } from 'sonner';
+import { DevisModal } from "@/components/TravauxSection";
+import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
+
+// Ajouter le type pour la source
+interface EnhancedRecommendation extends Recommendation {
+  sourceType?: string;
+  recommendationSource?: string;
+  entityType?: string;
+  city?: string;
+  address?: string;
+  surface?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  features?: string[];
+}
 
 const RecommendationsSection: React.FC<{ 
   title?: string; 
   limit?: number;
   showOnlyIfAuthenticated?: boolean;
+  onDataLoaded?: (data: EnhancedRecommendation[]) => void;
+  hideIfEmpty?: boolean;
 }> = ({ 
   title = "🔍 Suggestions pour vous", 
-  limit = 4, // Changé de 8 à 4 par défaut
-  showOnlyIfAuthenticated = true
+  limit = 4,
+  showOnlyIfAuthenticated = true,
+  onDataLoaded,
+  hideIfEmpty = false
 }) => {
   const { trackProductInteraction } = useTracking();
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const { addToCart } = useCart();
+  
+  const [recommendations, setRecommendations] = useState<EnhancedRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
+  // États pour les modales
+  const [devisModal, setDevisModal] = useState({
+    isOpen: false,
+    prestation: null as any
+  });
+
+  const [visiteModal, setVisiteModal] = useState({
+    isOpen: false,
+    property: null as any
+  });
+
+  // État pour suivre les demandes déjà envoyées
+  const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     checkAuthentication();
@@ -41,16 +81,18 @@ const RecommendationsSection: React.FC<{
       setLoading(true);
       setError(null);
       
-      // Si non authentifié et on veut seulement montrer aux utilisateurs connectés
       if (showOnlyIfAuthenticated && !isAuthenticated) {
         setLoading(false);
         return;
       }
 
-      // Récupérer plus de recommandations pour pouvoir filtrer
-      const allRecs = await getUserRecommendations(12); // Récupérer plus d'éléments
+      const allRecs = await getUserRecommendations(12) as EnhancedRecommendation[];
       
-      // Trier et limiter à 4 recommandations
+      // Notifier le parent des données chargées
+      if (onDataLoaded) {
+        onDataLoaded(allRecs);
+      }
+      
       const filteredRecs = filterAndSortRecommendations(allRecs).slice(0, limit);
       
       setRecommendations(filteredRecs);
@@ -68,56 +110,166 @@ const RecommendationsSection: React.FC<{
     }
   };
 
-  // Fonction pour filtrer et trier les recommandations
-  const filterAndSortRecommendations = (recs: Recommendation[]): Recommendation[] => {
+  // Fonction pour obtenir la couleur du badge selon le type
+  const getBadgeColor = (sourceType: string = "Produit") => {
+    const colors = {
+      "Produit": "bg-blue-100 text-blue-800 border-blue-200",
+      "Service": "bg-green-100 text-green-800 border-green-200",
+      "Métier": "bg-purple-100 text-purple-800 border-purple-200", 
+      "Immobilier": "bg-orange-100 text-orange-800 border-orange-200",
+      "Autre": "bg-gray-100 text-gray-800 border-gray-200"
+    };
+    
+    return colors[sourceType] || colors["Autre"];
+  };
+
+  const filterAndSortRecommendations = (recs: EnhancedRecommendation[]): EnhancedRecommendation[] => {
     return recs
       .sort((a, b) => {
-        // Priorité 1: Score de personnalisation (si disponible)
         if (a.personalizationScore !== undefined && b.personalizationScore !== undefined) {
           return b.personalizationScore - a.personalizationScore;
         }
         
-        // Priorité 2: Popularité (score de popularité)
         if (a.popularityScore !== undefined && b.popularityScore !== undefined) {
           return b.popularityScore - a.popularityScore;
         }
         
-        // Priorité 3: Nombre de vues/clics
         if (a.viewCount !== undefined && b.viewCount !== undefined) {
           return b.viewCount - a.viewCount;
         }
         
-        // Priorité 4: Produits avec prix (trier par prix décroissant)
         if (a.price !== undefined && b.price !== undefined) {
           return b.price - a.price;
         }
         
-        // Par défaut: ordre aléatoire mais consistant
         return a.name.localeCompare(b.name);
       })
-      .slice(0, limit); // Garder seulement le nombre demandé
+      .slice(0, limit);
   };
 
-  const handleRecommendationClick = async (recommendation: Recommendation) => {
+  // Fonction pour gérer le clic sur une carte
+  const handleCardClick = (recId: string) => {
+    setExpandedCard(expandedCard === recId ? null : recId);
+  };
+
+  // NOUVELLES FONCTIONS POUR LES ACTIONS AVEC VÉRIFICATION AUTH
+  const handleDevis = (item: EnhancedRecommendation, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Veuillez vous connecter pour effectuer cette action");
+      return;
+    }
+
+    // Préparer les données pour la modale devis
+    const prestationData = {
+      id: item.id,
+      libelle: item.name || item.title,
+      description: item.description || "Description non disponible",
+      images: item.images || []
+    };
+
+    setDevisModal({
+      isOpen: true,
+      prestation: prestationData
+    });
+  };
+
+  const handleVisite = (item: EnhancedRecommendation, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Veuillez vous connecter pour effectuer cette action");
+      return;
+    }
+
+    // CORRECTION : Préparer les données spécifiquement pour l'immobilier
+    const propertyData = {
+      id: item.id,
+      title: item.name || item.title,
+      city: item.city,
+      address: item.address,
+      price: item.price,
+      type: item.type || 'Immobilier', // Utiliser le type spécifique
+      status: 'for_sale', // Statut par défaut pour l'immobilier
+      surface: item.surface,
+      bedrooms: item.bedrooms,
+      bathrooms: item.bathrooms,
+      features: item.features || []
+    };
+
+    setVisiteModal({
+      isOpen: true,
+      property: propertyData
+    });
+  };
+
+  const handleAddToCart = async (item: EnhancedRecommendation, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Veuillez vous connecter pour effectuer cette action");
+      return;
+    }
+
     try {
-      if (isAuthenticated) {
+      // Préparer les données pour le panier
+      const cartItem = {
+        id: item.id,
+        name: item.name || item.title,
+        price: item.price || 0,
+        quantity: 1,
+        images: item.images || []
+      };
+
+      // Utiliser la fonction addToCart du contexte
+      await addToCart(cartItem);
+      toast.success("Produit ajouté au panier avec succès");
+
+    } catch (error) {
+      console.error("Erreur ajout au panier:", error);
+      toast.error("Erreur lors de l'ajout au panier");
+    }
+  };
+
+  // Fonctions pour fermer les modales
+  const closeDevisModal = () => {
+    setDevisModal({ isOpen: false, prestation: null });
+  };
+
+  const closeVisiteModal = () => {
+    setVisiteModal({ isOpen: false, property: null });
+  };
+
+  // Fonction pour gérer le succès d'une demande de visite
+  const handleVisiteSuccess = (propertyId: string) => {
+    setSentRequests(prev => ({ ...prev, [propertyId]: true }));
+    toast.success("Votre demande de visite a été envoyée avec succès");
+  };
+
+  const handleRecommendationClick = async (recommendation: EnhancedRecommendation, e: React.MouseEvent) => {
+    const entityType = recommendation.entityType || recommendation.type?.toLowerCase();
+    
+    // CORRECTION : Uniquement pour l'immobilier
+    if (entityType === 'property' || recommendation.sourceType === 'Immobilier') {
+      handleVisite(recommendation, e);
+    }
+    
+    // Tracking si authentifié
+    if (isAuthenticated) {
+      try {
         await trackProductInteraction(
           recommendation.id, 
           "click", 
           recommendation.name, 
           recommendation.category
         );
+      } catch (error) {
+        console.error('Erreur tracking click:', error);
       }
-      
-      // Navigation vers le détail du produit
-      window.location.href = `/products/${recommendation.id}`;
-    } catch (error) {
-      console.error('Erreur tracking click:', error);
-      window.location.href = `/products/${recommendation.id}`;
     }
   };
 
-  // Fonction pour générer les initiales à partir du nom
   const getInitials = (name: string): string => {
     if (!name) return "?";
     
@@ -129,7 +281,6 @@ const RecommendationsSection: React.FC<{
     return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
   };
 
-  // Fonction pour générer une couleur basée sur le nom
   const getColorFromName = (name: string): string => {
     const colors = [
       'from-blue-100 to-blue-200 text-blue-600',
@@ -146,6 +297,17 @@ const RecommendationsSection: React.FC<{
     return colors[Math.abs(hash) % colors.length];
   };
 
+  // Fonction utilitaire pour formater le prix
+  const formatPrice = (price: number | undefined): string => {
+    if (!price) return "Prix sur demande";
+    return `${price.toLocaleString('fr-FR')} €`;
+  };
+
+  // Ne rien afficher si hideIfEmpty est true et pas de recommandations
+  if (hideIfEmpty && recommendations.length === 0 && !loading) {
+    return null;
+  }
+
   // Ne rien afficher si non authentifié et showOnlyIfAuthenticated=true
   if (showOnlyIfAuthenticated && !isAuthenticated && !loading) {
     return null;
@@ -158,7 +320,7 @@ const RecommendationsSection: React.FC<{
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">{title}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => ( // Changé pour 4 éléments
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
                 <div className="bg-gray-200 h-4 rounded mb-2"></div>
@@ -175,20 +337,13 @@ const RecommendationsSection: React.FC<{
     return (
       <section className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <svg className="w-12 h-12 text-yellow-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <p className="text-yellow-800 mb-4">{error}</p>
-            {error.includes("connecter") && (
-              <button
-                onClick={() => window.location.href = '/login'}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                Se connecter
-              </button>
-            )}
-          </div>
+          <div className="text-red-600 mb-4">{error}</div>
+          <button
+            onClick={loadRecommendations}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Réessayer
+          </button>
         </div>
       </section>
     );
@@ -198,26 +353,7 @@ const RecommendationsSection: React.FC<{
     return (
       <section className="bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-8">
-            <svg className="w-16 h-16 text-blue-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">Découvrez nos suggestions</h3>
-            <p className="text-blue-700 mb-4">
-              {isAuthenticated 
-                ? "Interagissez avec notre site pour recevoir des recommandations personnalisées" 
-                : "Connectez-vous pour voir vos recommandations personnalisées"
-              }
-            </p>
-            {!isAuthenticated && (
-              <button
-                onClick={() => window.location.href = '/login'}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
-              >
-                Se connecter
-              </button>
-            )}
-          </div>
+          <p className="text-gray-500">Aucune recommandation disponible pour le moment.</p>
         </div>
       </section>
     );
@@ -238,25 +374,38 @@ const RecommendationsSection: React.FC<{
             const hasImage = rec.images && rec.images.length > 0;
             const initials = getInitials(rec.name);
             const colorClass = getColorFromName(rec.name);
+            const sourceType = rec.sourceType || "Produit";
+            const badgeColor = getBadgeColor(sourceType);
+            const entityType = rec.entityType || rec.type?.toLowerCase();
+            const isExpanded = expandedCard === rec.id;
+            
+            // CORRECTION : Identifier correctement l'immobilier
+            const isProperty = entityType === 'property' || sourceType === 'Immobilier';
+            const isAlreadySent = isProperty ? !!sentRequests[rec.id] : false;
             
             return (
               <div
                 key={rec.id}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group"
-                onClick={() => handleRecommendationClick(rec)}
+                className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform cursor-pointer group relative overflow-hidden ${
+                  isProperty ? 'border-2 border-orange-200' : ''
+                } ${isExpanded ? 'ring-2 ring-blue-500' : ''}`}
+                onClick={() => handleCardClick(rec.id)}
               >
-                {/* Badge "Populaire" ou "Recommandé" pour les premiers éléments */}
-                {index < 2 && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${
-                      index === 0 
-                        ? '' 
-                        : ''
-                    }`}>
-                      {index === 0 ? '' : ''}
-                    </span>
+                {/* Badge de type en haut à droite */}
+               
+                
+                {/* Indicateur d'expansion */}
+                <div className="absolute top-4 left-4 z-10">
+                  <div className={`p-1 rounded-full bg-white/80 backdrop-blur-sm ${
+                    isExpanded ? 'text-blue-600' : 'text-gray-400'
+                  }`}>
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
                   </div>
-                )}
+                </div>
                 
                 <div className="relative overflow-hidden rounded-t-2xl">
                   {hasImage ? (
@@ -297,32 +446,112 @@ const RecommendationsSection: React.FC<{
                   )}
 
                   {rec.description && (
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className={`text-gray-600 text-sm mb-4 transition-all duration-300 ${
+                      isExpanded ? 'line-clamp-none' : 'line-clamp-2'
+                    }`}>
                       {rec.description}
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between">
+                  {/* Localisation pour l'immobilier */}
+                  {isProperty && (rec.city || rec.address) && (
+                    <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
+                      <MapPin className="h-4 w-4" />
+                      <span>{rec.city || rec.address}</span>
+                    </div>
+                  )}
+
+                  {/* Caractéristiques pour l'immobilier */}
+                  {isProperty && (
+                    <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                      {rec.surface && (
+                        <div className="flex items-center gap-1">
+                          <span>{rec.surface} m²</span>
+                        </div>
+                      )}
+                      {rec.bedrooms && (
+                        <div className="flex items-center gap-1">
+                          <span>{rec.bedrooms} ch.</span>
+                        </div>
+                      )}
+                      {rec.bathrooms && (
+                        <div className="flex items-center gap-1">
+                          <span>{rec.bathrooms} sdb</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between mb-3">
                     {rec.price ? (
                       <span className="text-2xl font-bold text-green-600">
-                        €{rec.price.toFixed(2)}
+                        {formatPrice(rec.price)}
                       </span>
                     ) : (
                       <span className="text-sm text-gray-500">Prix sur demande</span>
                     )}
-                    
-                    <button 
-                      className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition-colors group-hover:scale-110"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRecommendationClick(rec);
-                      }}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </button>
                   </div>
+
+                  {/* BOUTONS D'ACTION - AFFICHÉS UNIQUEMENT QUAND LA CARTE EST EXPANDÉE */}
+                  {isExpanded && (
+                    <div className="space-y-2 animate-in fade-in duration-300">
+                      {isProperty ? (
+                        // CORRECTION : Bouton spécifique pour l'immobilier avec ModalDemandeVisite
+                        <Button
+                          size="sm"
+                          className={`w-full ${isAlreadySent ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'} text-white`}
+                          onClick={(e) => handleVisite(rec, e)}
+                          disabled={isAlreadySent}
+                        >
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {isAlreadySent ? 'Demande envoyée' : 'Demander visite'}
+                        </Button>
+                      ) : entityType === 'service' || entityType === 'metier' || sourceType === 'Service' || sourceType === 'Métier' ? (
+                        // BOUTON POUR LES SERVICES/MÉTIERS
+                        <Button
+                          size="sm"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={(e) => handleDevis(rec, e)}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Faire un devis
+                        </Button>
+                      ) : entityType === 'product' || sourceType === 'Produit' ? (
+                        // BOUTON POUR LES PRODUITS
+                        <Button
+                          size="sm"
+                          className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                          onClick={(e) => handleAddToCart(rec, e)}
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Ajouter au panier
+                        </Button>
+                      ) : (
+                        // BOUTON PAR DÉFAUT
+                        <Button
+                          size="sm"
+                          className="w-full bg-gray-600 hover:bg-gray-700 text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.info("Fonctionnalité en développement");
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Voir détails
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Indicateur pour montrer qu'on peut cliquer */}
+                  {!isExpanded && (
+                    <div className="text-center pt-2">
+                      <span className="text-xs text-gray-500 inline-flex items-center gap-1">
+                        <ChevronDown className="h-3 w-3" />
+                        Cliquer pour voir les actions
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -341,6 +570,26 @@ const RecommendationsSection: React.FC<{
           </button>
         </div>
       </div>
+
+      {/* MODALES */}
+      {devisModal.isOpen && (
+        <DevisModal
+          isOpen={devisModal.isOpen}
+          onClose={closeDevisModal}
+          prestation={devisModal.prestation}
+        />
+      )}
+
+      {/* CORRECTION : ModalDemandeVisite spécifique pour l'immobilier */}
+      {visiteModal.isOpen && (
+        <ModalDemandeVisite
+          open={visiteModal.isOpen}
+          onClose={closeVisiteModal}
+          property={visiteModal.property}
+          onSuccess={handleVisiteSuccess}
+          isAlreadySent={visiteModal.property ? !!sentRequests[visiteModal.property.id] : false}
+        />
+      )}
     </section>
   );
 };

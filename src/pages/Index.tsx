@@ -23,16 +23,28 @@ const LoadingFallback = () => (
 const Index = () => {
   const [isClient, setIsClient] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [hasRecommendations, setHasRecommendations] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     
     // Vérifier si l'utilisateur est connecté pour afficher les recommandations
     const token = localStorage.getItem("auth-token");
-    if (token && token !== "null" && token !== "undefined") {
+    const isValidToken = token && token !== "null" && token !== "undefined" && token.trim() !== "";
+    
+    if (isValidToken) {
       setShowRecommendations(true);
+      // Vous pouvez ajouter ici une vérification pour savoir si des recommandations existent
+      // Par exemple, en faisant un appel API ou en vérifiant dans le localStorage
+    } else {
+      setShowRecommendations(false);
     }
   }, []);
+
+  // Fonction pour gérer l'état des recommandations (à passer au composant RecommendationsSection)
+  const handleRecommendationsData = (data) => {
+    setHasRecommendations(data && data.length > 0);
+  };
 
   if (!isClient) {
     return (
@@ -51,12 +63,15 @@ const Index = () => {
           <ServiceCards />
           <TravauxPreview homeCards />
 
-          {/* Section de recommandations intelligentes - 4 SEULEMENT */}
+          {/* Section de recommandations intelligentes - affichée seulement si token valide ET données disponibles */}
           {showRecommendations && (
             <RecommendationsSection 
               title="Nos meilleures suggestions pour vous"
-              limit={4} // Explicitement 4
+              limit={4}
               showOnlyIfAuthenticated={true}
+              onDataLoaded={handleRecommendationsData}
+              // Si votre composant RecommendationsSection a une prop pour gérer les données vides
+              hideIfEmpty={true}
             />
           )}
           

@@ -65,22 +65,6 @@ const Hero = () => {
     setLightPosition({ x: 50, y: 50, opacity: 0 });
   };
 
-
-  // const openSearchPage = () => {
-  //   // Rediriger vers la page de recherche avec la query actuelle si elle existe
-  //   if (heroQuery.trim()) {
-  //     navigate(`/recherche?q=${encodeURIComponent(heroQuery)}`);
-  //   } else {
-  //     navigate('/recherche');
-  //   }
-  // };
-
-  // const handleKeyPress = (e: React.KeyboardEvent) => {
-  //   if (e.key === 'Enter') {
-  //     openSearchPage();
-  //   }
-  // };
-
   return (
     <>
       <section
