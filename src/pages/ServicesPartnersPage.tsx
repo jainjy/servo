@@ -555,15 +555,7 @@ const ServicesPartnersPage = () => {
           <div className="flex flex-col gap-2">{renderHeaderTitles()}</div>
 
           <div className="flex flex-wrap gap-4 justify-center">
-            <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "default" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
-              } text-sm font-semibold transform hover:scale-105`}
-              onClick={() => navigate('/services-partners')}
-            >
-              TOUS LES SERVICES
-              <ChevronDown className="w-4 h-4" />
-            </button>
+            
 
             <button
               className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
