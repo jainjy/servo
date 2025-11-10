@@ -470,10 +470,10 @@ useEffect(() => {
         },
       ],
     },
-    {
-      title: "ACTUALITÉS",
-      href: "/actualites",
-    },
+    // {
+    //   title: "ACTUALITÉS",
+    //   href: "/actualites",
+    // },
     // {
     //   title: "CONSULTATIONS/AIDES",
     //   href: "/service",
