@@ -236,6 +236,35 @@ export default function UserDiscussions() {
     );
   };
 
+  // Fonction pour extraire la note du message AVIS_LAISSE
+  const extractRatingFromMessage = (content) => {
+    const match = content.match(/Note:\s*(\d+)\/5/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Composant pour afficher les étoiles
+  const RatingStars = ({ rating }) => {
+    return (
+      <div className="flex gap-1 mt-2">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <div
+            key={star}
+            className={`p-1 rounded ${
+              star <= rating ? "bg-yellow-400" : "bg-gray-300"
+            }`}
+          >
+            <Star
+              className={`w-5 h-5 ${
+                star <= rating ? "text-yellow-600" : "text-gray-500"
+              }`}
+              fill="currentColor"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // Fonction pour signer un devis
   const handleSignerDevis = async (artisanId) => {
     try {
@@ -797,6 +826,17 @@ export default function UserDiscussions() {
                             </div>
                           </div>
                         )}
+
+                        {message.evenementType === "AVIS_LAISSE" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <p className="text-sm font-medium mb-2">
+                              Avis déposé
+                            </p>
+                            <RatingStars
+                              rating={extractRatingFromMessage(message.contenu)}
+                            />
+                          </div>
+                        )}
                       </div>
                       <div
                         className={`text-xs mt-1 flex items-center gap-1 ${
@@ -897,16 +937,19 @@ export default function UserDiscussions() {
                   }
                 }}
                 disabled={
-                  sending ||
-                  uploadingFile ||
-                  demande?.statut == "terminée"
+                  sending || uploadingFile || demande?.statut == "terminée"
                 }
               />
 
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
-                disabled={sending || uploadingFile || !input.trim() || demande?.statut == "terminée"}
+                disabled={
+                  sending ||
+                  uploadingFile ||
+                  !input.trim() ||
+                  demande?.statut == "terminée"
+                }
               >
                 {sending ? (
                   <LoadingSpinner size="sm" />

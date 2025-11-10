@@ -14,6 +14,13 @@ import {
   Paperclip,
   FileText,
   Lock,
+  Users,
+  FileCheck,
+  Euro,
+  CheckCircle2,
+  XCircle,
+  Clock4,
+  Star,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -29,6 +36,7 @@ export default function AdminDiscussions() {
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [artisansStats, setArtisansStats] = useState([]);
 
   const { socket, isConnected } = useSocket();
   const {
@@ -78,7 +86,7 @@ export default function AdminDiscussions() {
     }
   };
 
-  // Charger la demande
+  // Charger la demande et les statistiques des artisans
   useEffect(() => {
     const fetchDemande = async () => {
       try {
@@ -86,6 +94,9 @@ export default function AdminDiscussions() {
         if (id) {
           const response = await api.get(`/demandes/${id}`);
           setDemande(response.data);
+
+          // Charger les statistiques des artisans
+          await fetchArtisansStats(response.data.id);
         }
       } catch (error) {
         console.error("Erreur chargement demande:", error);
@@ -98,6 +109,42 @@ export default function AdminDiscussions() {
     fetchDemande();
   }, [id]);
 
+  const fetchArtisansStats = async (demandeId) => {
+    try {
+      const response = await api.get(`/demandes/${demandeId}/artisans-stats`);
+      setArtisansStats(response.data);
+    } catch (error) {
+      console.error("Erreur chargement stats artisans:", error);
+    }
+  };
+  // Fonction pour extraire la note du message AVIS_LAISSE
+  const extractRatingFromMessage = (content) => {
+    const match = content.match(/Note:\s*(\d+)\/5/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Composant pour afficher les étoiles
+  const RatingStars = ({ rating }) => {
+    return (
+      <div className="flex gap-1 mt-2">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <div
+            key={star}
+            className={`p-1 rounded ${
+              star <= rating ? "bg-yellow-400" : "bg-gray-300"
+            }`}
+          >
+            <Star
+              className={`w-5 h-5 ${
+                star <= rating ? "text-yellow-600" : "text-gray-500"
+              }`}
+              fill="currentColor"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
   const handleSend = async () => {
     if (input.trim().length === 0) return;
 
@@ -116,7 +163,6 @@ export default function AdminDiscussions() {
     try {
       setUploadingFile(true);
 
-      // Upload du fichier
       const formData = new FormData();
       formData.append("file", file);
 
@@ -126,7 +172,6 @@ export default function AdminDiscussions() {
         },
       });
 
-      // Envoyer le message avec le fichier
       await sendMessage(`Fichier: ${file.name}`, getMessageType(file.type), {
         url: uploadResponse.data.url,
         name: file.name,
@@ -139,7 +184,7 @@ export default function AdminDiscussions() {
       toast.error("Erreur lors de l'envoi du fichier");
     } finally {
       setUploadingFile(false);
-      event.target.value = ""; // Reset input file
+      event.target.value = "";
     }
   };
 
@@ -169,9 +214,75 @@ export default function AdminDiscussions() {
   };
 
   const isCurrentUser = (message) => {
-    // Cette logique dépend de comment vous gérez l'utilisateur connecté
-    // Vous devrez peut-être l'adapter selon votre système d'authentification
     return message.expediteurId === demande?.createdById;
+  };
+
+  const getArtisanStatus = (artisan) => {
+    if (artisan.travauxTermines) return "terminé";
+    if (artisan.factureConfirmee) return "facture confirmée";
+    if (artisan.factureStatus === "validee") return "facture validée";
+    if (artisan.factureStatus === "en_attente") return "facture en attente";
+    if (artisan.factureMontant) return "facture envoyée";
+    if (artisan.recruited) return "recruté";
+    if (artisan.devis) return "devis envoyé";
+    if (artisan.rdv) return "rdv fixé";
+    if (artisan.accepte === true) return "accepté";
+    if (artisan.accepte === false) return "refusé";
+    return "en attente";
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "terminé":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "facture confirmée":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "facture validée":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "facture en attente":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "facture envoyée":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "recruté":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      case "devis envoyé":
+        return "bg-cyan-100 text-cyan-800 border-cyan-200";
+      case "rdv fixé":
+        return "bg-teal-100 text-teal-800 border-teal-200";
+      case "accepté":
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "refusé":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "terminé":
+        return <CheckCircle2 className="w-4 h-4" />;
+      case "facture confirmée":
+        return <Euro className="w-4 h-4" />;
+      case "facture validée":
+        return <FileCheck className="w-4 h-4" />;
+      case "facture en attente":
+        return <Clock4 className="w-4 h-4" />;
+      case "facture envoyée":
+        return <FileCheck className="w-4 h-4" />;
+      case "recruté":
+        return <Users className="w-4 h-4" />;
+      case "devis envoyé":
+        return <FileCheck className="w-4 h-4" />;
+      case "rdv fixé":
+        return <Calendar className="w-4 h-4" />;
+      case "accepté":
+        return <CheckCircle2 className="w-4 h-4" />;
+      case "refusé":
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <Clock4 className="w-4 h-4" />;
+    }
   };
 
   if (loading) {
@@ -340,7 +451,7 @@ export default function AdminDiscussions() {
           </div>
         </div>
 
-        {/* Côté droit - Discussion */}
+        {/* Côté droit - Discussion et Statistiques */}
         <div className="w-1/2 flex flex-col bg-white">
           {/* Header discussion */}
           <div className="border-b border-gray-200 px-6 py-3">
@@ -373,6 +484,94 @@ export default function AdminDiscussions() {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* Section Statistiques des Artisans */}
+                {artisansStats.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Suivi des Artisans
+                      </h3>
+                    </div>
+                    <div className="grid gap-3">
+                      {artisansStats.map((artisan) => {
+                        const status = getArtisanStatus(artisan);
+                        return (
+                          <div
+                            key={artisan.userId}
+                            className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                  <User className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">
+                                    {artisan.user.companyName ||
+                                      `${artisan.user.firstName} ${artisan.user.lastName}`}
+                                  </h4>
+                                  <p className="text-sm text-gray-500">
+                                    {artisan.user.email}
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                                  status
+                                )}`}
+                              >
+                                {getStatusIcon(status)}
+                                <span className="capitalize">{status}</span>
+                              </div>
+                            </div>
+
+                            {/* Détails des actions */}
+                            <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                              {artisan.rdv && (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-blue-500" />
+                                  <span className="text-gray-600">
+                                    RDV:{" "}
+                                    {new Date(artisan.rdv).toLocaleDateString(
+                                      "fr-FR"
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+                              {artisan.devis && (
+                                <div className="flex items-center gap-2">
+                                  <FileCheck className="w-4 h-4 text-green-500" />
+                                  <span className="text-gray-600">
+                                    Devis envoyé
+                                  </span>
+                                </div>
+                              )}
+                              {artisan.factureMontant && (
+                                <div className="flex items-center gap-2">
+                                  <Euro className="w-4 h-4 text-purple-500" />
+                                  <span className="text-gray-600">
+                                    Facture: {artisan.factureMontant}€
+                                  </span>
+                                </div>
+                              )}
+                              {artisan.travauxTermines && (
+                                <div className="flex items-center gap-2 col-span-2">
+                                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                  <span className="text-gray-600 font-medium">
+                                    Travaux terminés
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Messages de la conversation */}
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
@@ -396,7 +595,6 @@ export default function AdminDiscussions() {
                         isCurrentUser(message) ? "order-first" : ""
                       }`}
                     >
-                      {/* Nom de l'expéditeur pour les messages des autres */}
                       {!isCurrentUser(message) && (
                         <div className="text-xs font-medium text-gray-600 mb-1">
                           {getSenderName(message)}
@@ -410,7 +608,6 @@ export default function AdminDiscussions() {
                             : "bg-gray-100 text-gray-900 rounded-bl-none"
                         }`}
                       >
-                        {/* Fichier joint */}
                         {message.urlFichier && (
                           <div className="mb-2">
                             <a
@@ -432,6 +629,13 @@ export default function AdminDiscussions() {
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
+                        {message.evenementType === "AVIS_LAISSE" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <RatingStars
+                              rating={extractRatingFromMessage(message.contenu)}
+                            />
+                          </div>
+                        )}
                       </div>
                       <div
                         className={`text-xs mt-1 flex items-center gap-1 ${
@@ -468,6 +672,7 @@ export default function AdminDiscussions() {
                     </p>
                   </div>
                 )}
+
                 {/* Affichage si la demande est terminée */}
                 {demande?.statut === "terminée" && (
                   <div className="mt-8 flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-b from-green-50 to-green-100 rounded-2xl border-2 border-green-300">
@@ -502,10 +707,9 @@ export default function AdminDiscussions() {
           {/* Zone d'envoi de message */}
           <div className="border-t border-gray-200 px-6 py-3 bg-gray-50">
             <div className="flex gap-3">
-              {/* Bouton d'upload de fichier */}
               <label
                 className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
-                  uploadingFile
+                  uploadingFile || demande?.statut == "terminée"
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-100"
                 }`}
@@ -515,14 +719,16 @@ export default function AdminDiscussions() {
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploadingFile || sending}
+                  disabled={
+                    uploadingFile || sending || demande?.statut == "terminée"
+                  }
                 />
               </label>
 
               <input
                 type="text"
                 placeholder="Tapez votre message ici..."
-                className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="disabled:cursor-not-allowed flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {

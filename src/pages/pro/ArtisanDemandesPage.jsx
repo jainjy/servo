@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -12,35 +12,34 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  MoreVertical,
   ArrowUpDown,
-  Users,
   FileText,
-  TrendingUp,
-  AlertTriangle,
   DollarSign,
   User,
   Bell,
   Star,
   ThumbsUp,
   ThumbsDown,
-  Send,
   Briefcase,
 } from "lucide-react";
 import { proAPI } from "../../lib/proApi";
 
 const getStatusColor = (status) => {
   switch (status) {
-    case "Disponible":
+    case "validée":
       return "bg-green-100 text-green-800 border-green-200";
-    case "Assignée":
+    case "assignée":
       return "bg-blue-100 text-blue-800 border-blue-200";
-    case "Validée":
+    case "en cours":
       return "bg-purple-100 text-purple-800 border-purple-200";
-    case "Refusée":
+    case "refusée":
       return "bg-red-100 text-red-800 border-red-200";
-    case "En attente":
+    case "en attente":
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "terminée":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    case "annulée":
+      return "bg-gray-100 text-gray-800 border-gray-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
   }
@@ -73,7 +72,6 @@ const getUrgencyIcon = (urgency) => {
 };
 
 const getMetierIcon = (metier) => {
-  // Si metier est un objet, extraire le libelle
   const metierName =
     typeof metier === "string" ? metier : metier?.libelle || "";
   const metierLower = metierName.toLowerCase();
@@ -93,34 +91,7 @@ const getMetierIcon = (metier) => {
 };
 
 const DemandeCard = ({ demande, onAction }) => {
-  const [showApplyModal, setShowApplyModal] = useState(false);
-  const [applicationMessage, setApplicationMessage] = useState("");
-  const [devisPrice, setDevisPrice] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleApply = async () => {
-    if (!applicationMessage.trim()) {
-      alert("Veuillez ajouter un message de motivation");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await proAPI.applyToDemande(demande.id, {
-        message: applicationMessage,
-        devis: devisPrice || null,
-      });
-      setShowApplyModal(false);
-      setApplicationMessage("");
-      setDevisPrice("");
-      onAction(); // Rafraîchir la liste
-    } catch (error) {
-      console.error("Erreur lors de la postulation:", error);
-      alert("Erreur lors de la postulation");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleAccept = async () => {
     if (!confirm("Êtes-vous sûr de vouloir accepter cette demande ?")) return;
@@ -153,230 +124,136 @@ const DemandeCard = ({ demande, onAction }) => {
   };
 
   const renderActionButtons = () => {
-    switch (demande.statut) {
-      case "Disponible":
-        return (
-          <div className="flex gap-2">
-            <button
-              onClick={handleDecline}
-              disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-            >
-              <ThumbsDown className="w-4 h-4" />
-              Refuser
-            </button>
-            {/* <button
-              onClick={() => setShowApplyModal(true)}
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-            >
-              <Send className="w-4 h-4" />
-              Postuler
-            </button> */}
-            <button
-              onClick={handleAccept}
-              disabled={isLoading}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-            >
-              <ThumbsUp className="w-4 h-4" />
-              Accepter
-            </button>
-          </div>
-        );
-
-      // case "Assignée":
-      //   return (
-      //     <div className="flex gap-2">
-      //       <button
-      //         onClick={handleAccept}
-      //         disabled={isLoading}
-      //         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-      //       >
-      //         <ThumbsUp className="w-4 h-4" />
-      //         Accepter
-      //       </button>
-      //       <button
-      //         onClick={handleDecline}
-      //         disabled={isLoading}
-      //         className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
-      //       >
-      //         <ThumbsDown className="w-4 h-4" />
-      //         Refuser
-      //       </button>
-      //     </div>
-      //   );
-
-      // case "Validée":
-      //   return (
-      //     <Link
-      //       to={`/pro/messages/${demande.id}`}
-      //       state={{ demande }}
-      //       className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
-      //     >
-      //       <Eye className="w-4 h-4" />
-      //       Voir détails
-      //     </Link>
-      //   );
-
-      default:
-        return (
-          <Link
-            to={`/pro/messages/${demande.id}`}
-            state={{ demande }}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
+    // Afficher les boutons seulement si la demande est en attente et que l'artisan n'a pas encore répondu
+    if (
+      demande.statut === "en attente" &&
+      (!demande.assignment || demande.assignment.accepte === null)
+    ) {
+      return (
+        <div className="flex gap-2">
+          <button
+            onClick={handleDecline}
+            disabled={isLoading}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
           >
-            <Eye className="w-4 h-4" />
-            Voir détails
-          </Link>
-        );
+            <ThumbsDown className="w-4 h-4" />
+            Refuser
+          </button>
+          <button
+            onClick={handleAccept}
+            disabled={isLoading}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+          >
+            <ThumbsUp className="w-4 h-4" />
+            Accepter
+          </button>
+        </div>
+      );
     }
+
+    return (
+      <Link
+        to={`/pro/messages/${demande.id}`}
+        state={{ demande }}
+        className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
+      >
+        <Eye className="w-4 h-4" />
+        Voir détails
+      </Link>
+    );
   };
 
   return (
-    <>
-      <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
-        {/* Badge Nouveau */}
-        {demande.nouvelle && (
-          <div className="absolute -top-2 -left-2">
-            <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-              <Star className="w-3 h-3 fill-current" />
-              NOUVEAU
-            </div>
-          </div>
-        )}
-
-        {/* Badge Urgent */}
-        {demande.urgent && (
-          <div className="absolute -top-2 -right-2">
-            <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg animate-pulse">
-              <AlertCircle className="w-3 h-3" />
-              URGENT
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative">
-              {getMetierIcon(demande.metier)}
-              {demande.nouvelle && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
-                {demande.titre}
-              </h3>
-              <p className="text-gray-600 text-sm mt-1 flex items-center gap-2">
-                <span className="bg-gray-100 px-2 py-1 rounded text-xs border border-gray-200">
-                  {typeof demande.metier === "string"
-                    ? demande.metier
-                    : demande.metier?.libelle}
-                </span>
-                <span className="flex items-center gap-1 text-gray-500">
-                  <MapPin className="w-3 h-3" />
-                  {demande.lieu}
-                </span>
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                demande.statut
-              )}`}
-            >
-              {demande.statut}
-            </span>
-            <span
-              className={`text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
-                demande.urgence
-              )}`}
-            >
-              {getUrgencyIcon(demande.urgence)}
-              {demande.urgence}
-            </span>
-          </div>
-        </div>
-
-        <p className="text-gray-700 mb-4 line-clamp-2 leading-relaxed">
-          {demande.description}
-        </p>
-
-        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-4 text-gray-500 text-sm">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              {demande.date}
-            </span>
-            <span className="flex items-center gap-1">
-              <User className="w-4 h-4" />
-              {demande.client}
-            </span>
-            {demande.budget && (
-              <span className="flex items-center gap-1">
-                <DollarSign className="w-4 h-4" />
-                {demande.budget}
-              </span>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {renderActionButtons()}
-          </div>
-        </div>
-      </div>
-
-      {/* Modal de postulation */}
-      {showApplyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">
-              Postuler à la demande
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Message de motivation
-                </label>
-                <textarea
-                  value={applicationMessage}
-                  onChange={(e) => setApplicationMessage(e.target.value)}
-                  placeholder="Présentez-vous et expliquez pourquoi vous êtes le bon professionnel pour ce travail..."
-                  className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Devis estimatif (optionnel)
-                </label>
-                <input
-                  type="number"
-                  value={devisPrice}
-                  onChange={(e) => setDevisPrice(e.target.value)}
-                  placeholder="Montant en €"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowApplyModal(false)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleApply}
-                disabled={isLoading || !applicationMessage.trim()}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {isLoading ? "Envoi..." : "Postuler"}
-              </button>
-            </div>
+    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
+      {/* Badge Nouveau */}
+      {demande.nouvelle && (
+        <div className="absolute -top-2 -left-2">
+          <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+            <Star className="w-3 h-3 fill-current" />
+            NOUVEAU
           </div>
         </div>
       )}
-    </>
+
+      {/* Badge Urgent */}
+      {demande.urgent && (
+        <div className="absolute -top-2 -right-2">
+          <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg animate-pulse">
+            <AlertCircle className="w-3 h-3" />
+            URGENT
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative">
+            {getMetierIcon(demande.metier)}
+            {demande.nouvelle && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            )}
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
+              {demande.titre}
+            </h3>
+            <p className="text-gray-600 text-sm mt-1 flex items-center gap-2">
+              <span className="bg-gray-100 px-2 py-1 rounded text-xs border border-gray-200">
+                {typeof demande.metier === "string"
+                  ? demande.metier
+                  : demande.metier?.libelle}
+              </span>
+              <span className="flex items-center gap-1 text-gray-500">
+                <MapPin className="w-3 h-3" />
+                {demande.lieu}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+              demande.statut
+            )}`}
+          >
+            {/* AFFICHER LE VRAI STATUT DE LA BASE */}
+            {demande.statut}
+          </span>
+          <span
+            className={`text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
+              demande.urgence
+            )}`}
+          >
+            {getUrgencyIcon(demande.urgence)}
+            {demande.urgence}
+          </span>
+        </div>
+      </div>
+
+      <p className="text-gray-700 mb-4 line-clamp-2 leading-relaxed">
+        {demande.description}
+      </p>
+
+      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-4 text-gray-500 text-sm">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            {demande.date}
+          </span>
+          <span className="flex items-center gap-1">
+            <User className="w-4 h-4" />
+            {demande.client}
+          </span>
+          {demande.budget && (
+            <span className="flex items-center gap-1">
+              <DollarSign className="w-4 h-4" />
+              {demande.budget}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-2">{renderActionButtons()}</div>
+      </div>
+    </div>
   );
 };
 
@@ -472,10 +349,6 @@ const ProDemandesPage = () => {
     loadStats();
   }, [activeFilter, searchQuery]);
 
-  useEffect(() => {
-    loadDemandes(1);
-  }, [activeFilter, searchQuery]);
-
   const handleAction = () => {
     loadDemandes(pagination.page);
     loadStats();
@@ -495,18 +368,20 @@ const ProDemandesPage = () => {
     }
   });
 
+  // FILTRES BASÉS SUR LES VRAIS STATUTS DE LA BASE
   const filters = [
     { key: "Toutes", label: "Toutes les demandes" },
-    { key: "Disponible", label: "Disponibles" },
-    { key: "Assignée", label: "En attente" },
-    { key: "Validée", label: "Validées" },
-    { key: "Refusée", label: "Refusées" },
+    { key: "en attente", label: "En attente" },
+    { key: "en cours", label: "En cours" },
+    { key: "validée", label: "Validées" },
+    { key: "refusée", label: "Refusées" },
+    { key: "terminée", label: "Terminées" },
   ];
 
   const realTimeStats = stats
     ? [
         {
-          number: stats.total.toString(),
+          number: stats.total,
           label: "Demandes totales",
           color: "purple",
           icon: FileText,
@@ -520,19 +395,19 @@ const ProDemandesPage = () => {
               : null,
         },
         {
-          number: stats.disponibles.toString(),
+          number: stats.disponibles,
           label: "Disponibles",
           color: "green",
           icon: Briefcase,
         },
         {
-          number: stats.assignees.toString(),
+          number: stats.assignees,
           label: "En attente",
           color: "orange",
           icon: Clock,
         },
         {
-          number: stats.validees.toString(),
+          number: stats.validees,
           label: "Validées",
           color: "blue",
           icon: CheckCircle,

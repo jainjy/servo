@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Eye,
   Lock,
+  Star,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -173,6 +174,34 @@ export default function ProDiscussions({
       console.error("Erreur fin des travaux:", error);
       toast.error("Erreur lors du marquage des travaux comme terminés");
     }
+  };
+  // Fonction pour extraire la note du message AVIS_LAISSE
+  const extractRatingFromMessage = (content) => {
+    const match = content.match(/Note:\s*(\d+)\/5/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Composant pour afficher les étoiles
+  const RatingStars = ({ rating }) => {
+    return (
+      <div className="flex gap-1 mt-2">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <div
+            key={star}
+            className={`p-1 rounded ${
+              star <= rating ? "bg-yellow-400" : "bg-gray-300"
+            }`}
+          >
+            <Star
+              className={`w-5 h-5 ${
+                star <= rating ? "text-yellow-600" : "text-gray-500"
+              }`}
+              fill="currentColor"
+            />
+          </div>
+        ))}
+      </div>
+    );
   };
   const handleSubmitDevis = async (montant, description, file) => {
     try {
@@ -736,6 +765,13 @@ export default function ProDiscussions({
                                 Refuser
                               </button>
                             </div>
+                          </div>
+                        )}
+                        {message.evenementType === "AVIS_LAISSE" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <RatingStars
+                              rating={extractRatingFromMessage(message.contenu)}
+                            />
                           </div>
                         )}
                       </div>
