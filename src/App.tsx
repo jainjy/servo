@@ -121,9 +121,6 @@ import RGPDInfo from "@/pages/RGPDInfo";
 import ImportInfo from "@/pages/ImportInfo";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
-
-
-
 import CreationReprise from "./components/components/CreationReprise";
 import AuditMediation from "./components/components/AuditMediation";
 import AidesLeveesFonds from "./components/components/AideFonds";
@@ -131,6 +128,7 @@ import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
 import PodcastsServices from "./components/components/Podcast_services";
 import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
+import AdminMedia from "./pages/pro/adminMedia";
 
 const queryClient = new QueryClient();
 
@@ -384,6 +382,7 @@ const App = () => {
                       path="demandes-devis"
                       element={<ListeDemandesDevis />}
                     />
+                    <Route path="media" element={<AdminMedia />} />
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route path="/mon-compte">
