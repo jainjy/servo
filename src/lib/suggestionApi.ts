@@ -1,7 +1,8 @@
 // src/lib/suggestionApi.ts
 import { UserActivity, UserEvent, Recommendation } from '../types/suggestionTypes';
-
-const API_URL = "http://localhost:3001/api/suggestion";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const API_URL = `${API_BASE_URL}/suggestion`;
 
 // Fonction utilitaire pour récupérer le token
 const getAuthToken = (): string | null => {
