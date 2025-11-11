@@ -31,9 +31,7 @@ import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
-export default function ProDiscussions({
-  artisanView,
-}: { artisanView?: boolean } = {}) {
+export default function ProDiscussions() {
   const { id } = useParams();
   const [demande, setDemande] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -80,8 +78,9 @@ export default function ProDiscussions({
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
-    const isAtBottom = 
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
     setShowScrollButton(!isAtBottom);
   };
 
@@ -94,7 +93,7 @@ export default function ProDiscussions({
   useEffect(() => {
     const fetchArtisanDetails = async () => {
       try {
-        if (id && artisanView) {
+        if (id) {
           const response = await api.get(
             `/demande-actions/${id}/details-artisan`
           );
@@ -124,7 +123,7 @@ export default function ProDiscussions({
     };
 
     fetchArtisanDetails();
-  }, [id, artisanView]);
+  }, [id]);
 
   // Fonctions pour les actions
   const handleSubmitRendezVous = async (date, heure, notes) => {
@@ -544,6 +543,7 @@ export default function ProDiscussions({
   const handleAfficherActions = () => {
     setShowActionsMenu(false);
     setShowActionsPanel(true);
+    console.log(artisanDetails)
   };
 
   const handleFileChange = (setFileFunction) => (event) => {
@@ -728,7 +728,7 @@ export default function ProDiscussions({
           </div>
 
           {/* Messages */}
-          <div 
+          <div
             className="flex-1 overflow-y-auto p-6 scroll-smooth relative"
             ref={messagesContainerRef}
             onScroll={handleScroll}
@@ -966,18 +966,16 @@ export default function ProDiscussions({
                           </button>
                         )}
 
-                      {artisanView && (
-                        <>
-                          <div className="border-t border-gray-200 my-2"></div>
-                          <button
-                            onClick={handleAfficherActions}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span>Afficher mes actions</span>
-                          </button>
-                        </>
-                      )}
+                      <>
+                        <div className="border-t border-gray-200 my-2"></div>
+                        <button
+                          onClick={handleAfficherActions}
+                          className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>Afficher mes actions</span>
+                        </button>
+                      </>
                     </div>
                   </div>
                 )}
@@ -1045,7 +1043,7 @@ export default function ProDiscussions({
       </div>
 
       {/* Panneau des actions de l'artisan */}
-      {showActionsPanel && artisanView && artisanDetails && (
+      {showActionsPanel  && artisanDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">

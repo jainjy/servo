@@ -46,10 +46,11 @@ export default function UserDiscussions() {
   const [reviewComment, setReviewComment] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesContainerRef = useRef(null);
-
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const actionsMenuRef = useRef(null);
 
-  const  {isConnected}  = useSocket();
+  const { isConnected } = useSocket();
   const {
     messages,
     conversation,
@@ -58,13 +59,60 @@ export default function UserDiscussions() {
     sending,
     messagesEndRef,
     scrollToBottom,
+    refreshMessages, // Assurez-vous que cette fonction existe dans useMessaging
   } = useMessaging(id);
+  // Indicateur de statut de connexion
+  const getConnectionStatus = () => {
+    if (!isConnected) {
+      return {
+        text: "Hors ligne - Actualisation manuelle",
+        color: "text-red-500",
+        bg: "bg-red-100",
+      };
+    }
+    return {
+      text: "En ligne - Temps réel",
+      color: "text-green-500",
+      bg: "bg-green-100",
+    };
+  };
 
+  const connectionStatus = getConnectionStatus();
+
+  // Fonction pour forcer l'actualisation
+  const handleManualRefresh = async () => {
+    try {
+      await refreshMessages();
+      setLastUpdate(new Date());
+      toast.success("Messages actualisés");
+    } catch (error) {
+      toast.error("Erreur lors de l'actualisation");
+    }
+  };
+
+  // Actualisation automatique si déconnecté
+  useEffect(() => {
+    if (!isConnected && autoRefresh) {
+      const interval = setInterval(() => {
+        refreshMessages();
+      }, 10000); // Toutes les 10 secondes si déconnecté
+
+      return () => clearInterval(interval);
+    }
+  }, [isConnected, autoRefresh, refreshMessages]);
+
+  // Mettre à jour le timestamp à chaque nouveau message
+  useEffect(() => {
+    if (messages.length > 0) {
+      setLastUpdate(new Date());
+    }
+  }, [messages]);
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
-    const isAtBottom = 
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
     setShowScrollButton(!isAtBottom);
   };
 
