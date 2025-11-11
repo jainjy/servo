@@ -17,7 +17,4 @@ export const proAPI = {
 
   // Postuler à une demande
   applyToDemande: (id, data) => api.post(`/pro/demandes/${id}/apply`, data),
-
-  // Récupérer le profil du professionnel
-  getProfile: () => api.get("/pro/profile"),
 };
