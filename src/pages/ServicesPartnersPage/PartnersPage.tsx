@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Users, Tag, Search, Star, Clock, Wrench, FileText, Loader2, X } from "lucide-react";
+import { ArrowLeft, Users, Tag, Search, Star, Clock, Wrench, FileText, Loader2, X, Mail, Phone, Building } from "lucide-react";
 
 // Interfaces
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  companyName?: string;
+  commercialName?: string;
+  userType?: string;
+  address?: string;
+  city?: string;
+  zipCode?: string;
+  rating?: number;
+  experience?: number;
+}
+
 interface Metier {
   id: number;
   libelle: string;
   services: Service[];
-  users: any[];
+  users: User[];
   _count: {
     services: number;
     users: number;
@@ -34,33 +51,23 @@ interface Category {
   name: string;
 }
 
-// Composant Modal pour les détails des services
-const ServiceDetailsModal = ({ isOpen, onClose, service }) => {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isDevisModalOpen, setIsDevisModalOpen] = useState(false);
+// Composant Modal pour les détails des experts
+const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const images = service?.images || [];
 
-  const handleNextImage = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % images.length);
+  const handleContactClick = () => {
+    setIsContactModalOpen(true);
   };
 
-  const handlePrevImage = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const handleDevisClick = () => {
-    setIsDevisModalOpen(true);
-  };
-
-  const handleDevisSubmit = async (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      alert(`Devis pour "${service.libelle || service.name}" envoyé !`);
-      setIsDevisModalOpen(false);
+      alert(`Message envoyé à ${expert.firstName} ${expert.lastName} !`);
+      setIsContactModalOpen(false);
       onClose();
     } catch (error) {
       alert("Erreur lors de l'envoi.");
@@ -69,13 +76,13 @@ const ServiceDetailsModal = ({ isOpen, onClose, service }) => {
     }
   };
 
-  const handleCloseDevisModal = () => {
-    setIsDevisModalOpen(false);
+  const handleCloseContactModal = () => {
+    setIsContactModalOpen(false);
   };
 
-  if (!isOpen || !service) return null;
+  if (!isOpen || !expert) return null;
 
-  const serviceName = service.libelle || service.name;
+  const displayName = expert.commercialName || expert.companyName || `${expert.firstName} ${expert.lastName}`;
 
   return (
     <>
@@ -85,79 +92,82 @@ const ServiceDetailsModal = ({ isOpen, onClose, service }) => {
           <div className="p-6">
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">{serviceName}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{displayName}</h2>
               <button onClick={onClose} className="text-2xl font-bold text-gray-500 hover:text-gray-700">
                 ×
               </button>
             </div>
             
-            {/* Image avec navigation */}
+            {/* Avatar */}
             <div className="mb-4 relative">
-              {images.length > 0 ? (
-                <>
-                  <img
-                    src={images[selectedImageIndex]}
-                    alt={`${serviceName} - Image ${selectedImageIndex + 1}`}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                  
-                  {/* Boutons de navigation */}
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={handlePrevImage}
-                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        onClick={handleNextImage}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors"
-                      >
-                        ›
-                      </button>
-                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                        {selectedImageIndex + 1} / {images.length}
-                      </div>
-                    </>
-                  )}
-                </>
+              {expert.avatar ? (
+                <img
+                  src={expert.avatar}
+                  alt={displayName}
+                  className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-200"
+                />
               ) : (
-                <div className="w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
-                  <Wrench className="w-16 h-16 text-gray-300" />
+                <div className="w-32 h-32 rounded-full mx-auto bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-4 border-blue-200">
+                  <Users className="w-16 h-16 text-blue-400" />
                 </div>
               )}
             </div>
 
             {/* Informations */}
-            <div className="space-y-3 mb-6">
-              {service.price && (
-                <div className="text-2xl font-bold text-green-600">{service.price} €</div>
-              )}
-              <p className="text-gray-600">{service.description}</p>
-              
-              {service.duration && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Clock className="w-4 h-4" />
-                  <span>Durée: {service.duration} minutes</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 text-gray-600">
-                <Star className="w-4 h-4 text-yellow-400" />
-                <span>Note: {service.rating || '4.5'}/5</span>
+            <div className="space-y-4 mb-6">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold text-gray-900">{displayName}</h3>
+                {expert.userType && (
+                  <p className="text-blue-600 font-medium">{expert.userType}</p>
+                )}
               </div>
 
-              {service.metiers && service.metiers.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Spécialités :</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {service.metiers.map((metier, idx) => (
-                      <span key={idx} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                        {metier.libelle || metier.name}
-                      </span>
-                    ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Mail className="w-5 h-5 text-blue-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Email</p>
+                    <p className="font-medium">{expert.email}</p>
                   </div>
+                </div>
+
+                {expert.phone && (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Phone className="w-5 h-5 text-green-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Téléphone</p>
+                      <p className="font-medium">{expert.phone}</p>
+                    </div>
+                  </div>
+                )}
+
+                {expert.companyName && (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Building className="w-5 h-5 text-purple-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Entreprise</p>
+                      <p className="font-medium">{expert.companyName}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Star className="w-5 h-5 text-yellow-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Expérience</p>
+                    <p className="font-medium">{expert.experience || '5+'} ans</p>
+                  </div>
+                </div>
+              </div>
+
+              {(expert.address || expert.city) && (
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Adresse</p>
+                  <p className="font-medium">
+                    {expert.address && `${expert.address}, `}
+                    {expert.zipCode && `${expert.zipCode} `}
+                    {expert.city}
+                  </p>
                 </div>
               )}
             </div>
@@ -167,22 +177,22 @@ const ServiceDetailsModal = ({ isOpen, onClose, service }) => {
               <button onClick={onClose} className="flex-1 bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition-colors">
                 Fermer
               </button>
-              <button onClick={handleDevisClick} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                <FileText className="w-4 h-4" />
-                Faire un Devis
+              <button onClick={handleContactClick} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                <Mail className="w-4 h-4" />
+                Contacter
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal Devis - SÉPARÉE de la modal principale */}
-      {isDevisModalOpen && (
-        <DevisModal 
-          service={service}
-          isOpen={isDevisModalOpen}
-          onClose={handleCloseDevisModal}
-          onSubmit={handleDevisSubmit}
+      {/* Modal Contact */}
+      {isContactModalOpen && (
+        <ContactModal 
+          expert={expert}
+          isOpen={isContactModalOpen}
+          onClose={handleCloseContactModal}
+          onSubmit={handleContactSubmit}
           isSubmitting={isSubmitting}
         />
       )}
@@ -190,16 +200,13 @@ const ServiceDetailsModal = ({ isOpen, onClose, service }) => {
   );
 };
 
-// Composant Modal Devis séparé
-const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
+// Composant Modal Contact
+const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
     email: '',
     telephone: '',
-    adresse: '',
-    dateSouhaitee: '',
-    budget: '',
     message: ''
   });
 
@@ -218,7 +225,7 @@ const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
 
   if (!isOpen) return null;
 
-  const serviceName = service.libelle || service.name;
+  const displayName = expert.commercialName || expert.companyName || `${expert.firstName} ${expert.lastName}`;
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
@@ -226,14 +233,14 @@ const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
         <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-6 w-6 text-blue-600" />
+              <Mail className="h-6 w-6 text-blue-600" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                Demande de Devis
+                Contacter l'expert
               </h2>
               <p className="text-gray-600 text-xs lg:text-sm">
-                {serviceName}
+                {displayName}
               </p>
             </div>
           </div>
@@ -312,62 +319,13 @@ const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Adresse du projet
-            </label>
-            <input 
-              name="adresse" 
-              placeholder="Adresse complète du projet" 
-              value={formData.adresse}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date souhaitée
-              </label>
-              <input 
-                name="dateSouhaitee" 
-                type="date" 
-                min={new Date().toISOString().split("T")[0]}
-                value={formData.dateSouhaitee}
-                onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={isSubmitting}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Budget estimé *
-              </label>
-              <select
-                name="budget"
-                required
-                value={formData.budget}
-                onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={isSubmitting}
-              >
-                <option value="">Sélectionnez un budget</option>
-                <option value="0-5000">0 - 5 000 €</option>
-                <option value="5000-15000">5 000 - 15 000 €</option>
-                <option value="15000-30000">15 000 - 30 000 €</option>
-                <option value="30000+">30 000 € et plus</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Message supplémentaire
+              Message *
             </label>
             <textarea 
               name="message" 
-              placeholder="Décrivez votre projet en détail..." 
+              placeholder="Décrivez votre projet ou votre demande..." 
               rows={4} 
+              required
               value={formData.message}
               onChange={handleChange}
               className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -377,11 +335,11 @@ const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
 
           <div className="bg-blue-50 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">
-              Prestation sélectionnée
+              Expert contacté
             </h3>
-            <p className="text-blue-800 text-sm">{serviceName}</p>
-            {service?.description && (
-              <p className="text-blue-600 text-xs mt-1">{service.description}</p>
+            <p className="text-blue-800 text-sm">{displayName}</p>
+            {expert.userType && (
+              <p className="text-blue-600 text-xs mt-1">{expert.userType}</p>
             )}
           </div>
 
@@ -394,9 +352,9 @@ const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
               {isSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <FileText className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
               )}
-              {isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}
+              {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
             </button>
             <button
               type="button"
@@ -414,71 +372,113 @@ const DevisModal = ({ service, isOpen, onClose, onSubmit, isSubmitting }) => {
 };
 
 const PartnersPage = () => {
-  const [showServices, setShowServices] = useState(false);
+  const [showExperts, setShowExperts] = useState(false);
   const [selectedMetier, setSelectedMetier] = useState<Metier | null>(null);
   const [metiers, setMetiers] = useState<Metier[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedExpert, setSelectedExpert] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // États pour les recherches
   const [metierSearchQuery, setMetierSearchQuery] = useState("");
+  const [expertSearchQuery, setExpertSearchQuery] = useState("");
 
   // Récupérer les métiers depuis l'API
-  useEffect(() => {
-    const fetchMetiers = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('http://localhost:3001/api/metiers');
-        if (!response.ok) {
+ // Récupérer les métiers depuis l'API
+useEffect(() => {
+  const fetchMetiers = async () => {
+    try {
+      setLoading(true);
+      
+      // Vérifier si l'utilisateur est connecté et récupérer le token
+      const token = localStorage.getItem('authToken') || 
+                    sessionStorage.getItem('authToken') ||
+                    localStorage.getItem('token') || 
+                    sessionStorage.getItem('token');
+      
+      // Préparer les headers avec authentification si disponible
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('http://localhost:3001/api/metiers', {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include' // Inclure les cookies si nécessaire
+      });
+      
+      if (response.status === 401) {
+        console.warn('Token invalide ou expiré, chargement sans authentification');
+        // Continuer sans token - faire une nouvelle requête sans auth
+        const retryResponse = await fetch('http://localhost:3001/api/metiers', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!retryResponse.ok) {
           throw new Error('Erreur lors de la récupération des métiers');
         }
-        const data = await response.json();
+        
+        const data = await retryResponse.json();
         setMetiers(data);
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Erreur:', err);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des métiers');
+      }
+      
+      const data = await response.json();
+      setMetiers(data);
+      
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Erreur:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchMetiers();
-  }, []);
+  fetchMetiers();
+}, []);
 
-  // Gérer le clic sur "VOIR" pour afficher les services du métier
-  const handleViewServices = (metier: Metier) => {
+  // Gérer le clic sur "VOIR" pour afficher les experts du métier
+  const handleViewExperts = (metier: Metier) => {
     setSelectedMetier(metier);
-    setShowServices(true);
-    // NE PAS réinitialiser la recherche des services - la recherche reste
+    setShowExperts(true);
   };
 
   // Retour à la liste des métiers
   const handleBackToMetiers = () => {
     setSelectedMetier(null);
-    setShowServices(false);
-    // NE PAS réinitialiser la recherche des métiers - la recherche reste
+    setShowExperts(false);
+    setExpertSearchQuery("");
   };
 
-  // Ouvrir la modal de détails du service
-  const handleOpenServiceModal = (service: Service) => {
-    setSelectedService(service);
+  // Ouvrir la modal de détails de l'expert
+  const handleOpenExpertModal = (expert: User) => {
+    setSelectedExpert(expert);
     setIsModalOpen(true);
   };
 
   // Fermer la modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedService(null);
+    setSelectedExpert(null);
   };
 
   // Fonction utilitaire pour obtenir une image par défaut
-  const getDefaultImage = (metierLibelle: string) => {
+  const getDefaultImage = (libelle: string) => {
     const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500'];
-    const color = colors[metierLibelle.length % colors.length];
-    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="${color.replace('bg-', '')}"><rect width="32" height="32" fill="${color.replace('bg-', '')}"/><text x="16" y="20" text-anchor="middle" fill="white" font-size="12">${metierLibelle.charAt(0)}</text></svg>`;
+    const color = colors[libelle.length % colors.length];
+    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="${color.replace('bg-', '')}"><rect width="32" height="32" fill="${color.replace('bg-', '')}"/><text x="16" y="20" text-anchor="middle" fill="white" font-size="12">${libelle.charAt(0)}</text></svg>`;
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallbackText: string) => {
@@ -493,34 +493,37 @@ const PartnersPage = () => {
     );
   };
 
-  // Filtrer les services selon la recherche
-  const getFilteredServices = (services: Service[]) => {
-    if (!searchQuery) return services;
+  // Filtrer les experts selon la recherche
+  const getFilteredExperts = () => {
+    if (!selectedMetier) return [];
+    if (!expertSearchQuery) return selectedMetier.users;
 
-    return services.filter(service =>
-      service.libelle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.category?.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return selectedMetier.users.filter(expert =>
+      expert.firstName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
+      expert.lastName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
+      expert.companyName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
+      expert.commercialName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
+      expert.email?.toLowerCase().includes(expertSearchQuery.toLowerCase())
     );
   };
 
-  // Composant de carte pour les services
-  const renderServiceCard = (service: Service, index: number) => {
-    const displayName = service.libelle || service.name || 'Service';
-    const displayPrice = service.price;
-    const displayDescription = service.description || 'Aucune description disponible';
-    const images = service.images || [];
-
+  // Composant de carte pour les experts
+  const renderExpertCard = (expert: User, index: number) => {
+    const displayName = expert.commercialName || expert.companyName || 
+                       `${expert.firstName} ${expert.lastName}` || 
+                       'Expert';
+    
     return (
       <div 
-        key={service.id || `service-${index}`} 
-        className="bg-white rounded-xl shadow-lg border border-blue-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105"
+        key={expert.id || `expert-${index}`} 
+        className="bg-white rounded-xl shadow-lg border border-green-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+        onClick={() => handleOpenExpertModal(expert)}
       >
-        {/* Image */}
-        <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 relative">
-          {images.length > 0 ? (
+        {/* Avatar/Image */}
+        <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 relative">
+          {expert.avatar ? (
             <img
-              src={images[0]}
+              src={expert.avatar}
               alt={displayName}
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -529,21 +532,14 @@ const PartnersPage = () => {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Wrench className="w-12 h-12 text-gray-300" />
+              <Users className="w-16 h-16 text-gray-300" />
             </div>
           )}
           <div className="absolute top-3 left-3">
-            <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-              Service
+            <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+              Expert
             </span>
           </div>
-          {displayPrice && (
-            <div className="absolute top-3 right-3 bg-white rounded-lg px-3 py-1 shadow-md">
-              <span className="font-bold text-blue-600 text-sm">
-                {typeof displayPrice === 'number' ? displayPrice.toLocaleString() : displayPrice} €
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Contenu */}
@@ -552,78 +548,60 @@ const PartnersPage = () => {
             {displayName}
           </h3>
 
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {displayDescription}
-          </p>
+          <div className="space-y-2 text-sm text-gray-600 mb-4">
+            {expert.firstName && expert.lastName && (
+              <p className="line-clamp-1">
+                <span className="font-medium">Nom:</span> {expert.firstName} {expert.lastName}
+              </p>
+            )}
+            {expert.userType && (
+              <p className="line-clamp-1">
+                <span className="font-medium">Type:</span> {expert.userType}
+              </p>
+            )}
+            <p className="line-clamp-1">
+              <span className="font-medium">Expérience:</span> {expert.experience || '5+'} ans
+            </p>
+          </div>
 
-          {/* Métiers pour les services */}
-          {service.metiers && Array.isArray(service.metiers) && service.metiers.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
-              {service.metiers.slice(0, 3).map((metier: any, idx: number) => (
-                <span
-                  key={metier.id || `metier-${idx}`}
-                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs"
-                >
-                  {metier.libelle || metier.name || 'Métier'}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Durée pour les services */}
-          {service.duration && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <Clock className="w-4 h-4" />
-              <span>Durée: {service.duration}min</span>
-            </div>
-          )}
-
-          {/* Informations supplémentaires */}
+          {/* Note moyenne */}
           <div className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-3">
-            <div className="flex items-center gap-4">
-              {displayPrice && (
-                <div className="flex items-center gap-1">
-                  <span className="font-bold text-green-600">
-                    {displayPrice}€
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Note moyenne */}
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400" />
-              <span className="font-medium">{service.rating || '4.5'}</span>
+              <span className="font-medium">{expert.rating || '4.5'}/5</span>
             </div>
           </div>
 
           {/* Bouton d'action */}
           <button
-            className="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors duration-300"
-            onClick={() => handleOpenServiceModal(service)}
+            className="w-full mt-4 bg-green-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenExpertModal(expert);
+            }}
           >
-            Voir les Détails
+            Voir le Profil
           </button>
         </div>
       </div>
     );
   };
 
-  // Composant pour afficher les services d'un métier AVEC RECHERCHE SEULEMENT
-  const ServicesSection = ({ metier }: { metier: Metier }) => {
-    const filteredServices = getFilteredServices(metier.services);
+  // Composant pour afficher les experts d'un métier
+  const ExpertsSection = ({ metier }: { metier: Metier }) => {
+    const filteredExperts = getFilteredExperts();
 
     return (
       <div className="space-y-6 animate-fade-in">
         {/* Modal de détails */}
-        <ServiceDetailsModal 
+        <ExpertDetailsModal 
           isOpen={isModalOpen} 
           onClose={handleCloseModal} 
-          service={selectedService} 
+          expert={selectedExpert} 
         />
 
         {/* En-tête avec bouton retour et recherche */}
-        <div className="bg-white rounded-xl shadow-lg border border-blue-200 p-6">
+        <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <button
@@ -634,49 +612,49 @@ const PartnersPage = () => {
                 Tous les Métiers
               </button>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900">{metier.libelle}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">Experts en {metier.libelle}</h1>
                 <p className="text-gray-600 mt-1">
-                  {filteredServices.length} service{filteredServices.length > 1 ? 's' : ''} disponible{filteredServices.length > 1 ? 's' : ''}
-                  {searchQuery && ' (recherche appliquée)'}
+                  {filteredExperts.length} expert{filteredExperts.length > 1 ? 's' : ''} disponible{filteredExperts.length > 1 ? 's' : ''}
+                  {expertSearchQuery && ' (recherche appliquée)'}
                 </p>
               </div>
             </div>
 
-            {/* Barre de recherche seulement pour les services */}
+            {/* Barre de recherche pour les experts */}
             <div className="flex gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher un service..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Rechercher un expert..."
+                  value={expertSearchQuery}
+                  onChange={(e) => setExpertSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Grille des services */}
-        <div className="bg-white rounded-xl shadow-lg border border-blue-200 p-6">
-          {filteredServices.length === 0 ? (
+        {/* Grille des experts */}
+        <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6">
+          {filteredExperts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600">
-                {searchQuery ? "Aucun service trouvé pour votre recherche" : "Aucun service disponible pour ce métier."}
+                {expertSearchQuery ? "Aucun expert trouvé pour votre recherche" : "Aucun expert disponible pour ce métier."}
               </p>
-              {searchQuery && (
+              {expertSearchQuery && (
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="mt-4 text-blue-600 hover:text-blue-700 underline"
+                  onClick={() => setExpertSearchQuery("")}
+                  className="mt-4 text-green-600 hover:text-green-700 underline"
                 >
                   Effacer la recherche
                 </button>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices.map((service, index) => renderServiceCard(service, index))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredExperts.map((expert, index) => renderExpertCard(expert, index))}
             </div>
           )}
         </div>
@@ -689,12 +667,12 @@ const PartnersPage = () => {
     <div
       key={metier.id}
       className="bg-white rounded-xl shadow-lg border border-blue-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-      onClick={() => handleViewServices(metier)}
+      onClick={() => handleViewExperts(metier)}
     >
       {/* Image en haut */}
       <div className="h-48 bg-gray-100">
         <img
-          src={metier.services[0]?.images[0] || getDefaultImage(metier.libelle)}
+          src={metier.users[0]?.avatar || getDefaultImage(metier.libelle)}
           alt={metier.libelle}
           className="w-full h-full object-cover"
           onError={(e) => handleImageError(e, metier.libelle)}
@@ -707,17 +685,13 @@ const PartnersPage = () => {
           {metier.libelle}
         </h3>
         
-        {metier.services[0]?.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {metier.services[0].description}
-          </p>
-        )}
+        
 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-sm text-gray-600">
               <Tag className="w-4 h-4 text-blue-500" />
-              <span>{metier._count.services} services</span>
+              
             </div>
             <div className="flex items-center gap-1 text-sm text-gray-600">
               <Users className="w-4 h-4 text-green-500" />
@@ -730,35 +704,33 @@ const PartnersPage = () => {
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center gap-2"
           onClick={(e) => {
             e.stopPropagation();
-            handleViewServices(metier);
+            handleViewExperts(metier);
           }}
         >
           Voir
-          <ArrowLeft className="w-4 h-4 rotate-180" />
+          <Users className="w-4 h-4" />
         </button>
       </div>
     </div>
   );
 
-  // Affichage principal des métiers AVEC RECHERCHE SEULEMENT
+  // Affichage principal des métiers
   const MetiersGrid = () => {
     const filteredMetiers = getFilteredMetiers();
 
     return (
       <div className="space-y-8">
-        
-
-        {/* Barre de recherche seulement pour les métiers */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Rechercher un métier..."
-                  value={metierSearchQuery}
-                  onChange={(e) => setMetierSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+        {/* Barre de recherche pour les métiers */}
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Rechercher un métier..."
+            value={metierSearchQuery}
+            onChange={(e) => setMetierSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
               
         {filteredMetiers.length === 0 ? (
           <div className="text-center py-12">
@@ -804,8 +776,8 @@ const PartnersPage = () => {
         )}
 
         {/* Affichage conditionnel */}
-        {!showServices && !loading && <MetiersGrid />}
-        {showServices && selectedMetier && <ServicesSection metier={selectedMetier} />}
+        {!showExperts && !loading && <MetiersGrid />}
+        {showExperts && selectedMetier && <ExpertsSection metier={selectedMetier} />}
       </div>
     </div>
   );

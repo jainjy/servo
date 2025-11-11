@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Search, X, Home, Send, Mail, Star, FileText, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/api"; // IMPORTATION DU MÊME CLIENT API
 
 const ServicesPage = () => {
   const [showStatuses, setShowStatuses] = useState(false);
@@ -34,18 +36,11 @@ const ServicesPage = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await api.get("/services");
       
-      const response = await fetch(`${API_BASE_URL}/api/services`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         
-        // Parser les données de l'API
         const parseApiData = (data: any) => {
           if (!data) return [];
           if (Array.isArray(data)) return data;
@@ -99,7 +94,6 @@ const ServicesPage = () => {
           'hotel': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'JURIDIQUE', 'CONSTRUCTION']
         };
         
-        // Adapter cette logique selon la structure de vos données API
         const serviceCategory = s.category || s.type || 'OTHER';
         return typeToCategoryMap[propertyType]?.includes(serviceCategory) || !propertyType;
       });
@@ -131,18 +125,150 @@ const ServicesPage = () => {
     setIsDevisModalOpen(true);
   };
 
+  // FONCTION CORRIGÉE AVEC LE MÊME CLIENT API
   const handleDevisSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Simuler l'envoi du formulaire
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert(`Devis pour "${currentService?.name}" envoyé !`);
-      setIsDevisModalOpen(false);
-      setCurrentService(null);
+      const formData = new FormData(e.target as HTMLFormElement);
+      const data = Object.fromEntries(formData);
+
+      // STRUCTURE EXACTEMENT IDENTIQUE À L'AUTRE COMPOSANT
+      const demandeData = {
+        contactNom: data.nom,
+        contactPrenom: data.prenom,
+        contactEmail: data.email,
+        contactTel: data.telephone,
+        lieuAdresse: data.adresse,
+        lieuAdresseCp: "75000",
+        lieuAdresseVille: "Paris",
+        optionAssurance: false,
+        description: data.message || `Demande de devis pour: ${currentService?.name}`,
+        devis: `Budget: ${data.budget}, Date souhaitée: ${data.dateSouhaitee}`,
+        serviceId: currentService?.id,
+        serviceName: currentService?.name,
+        nombreArtisans: "UNIQUE",
+        createdById: "user-anonymous", // Ou récupérer l'ID utilisateur si connecté
+        status: "pending",
+        type: "devis",
+        source: "services-page"
+      };
+
+      console.log('📤 Envoi demande de devis:', demandeData);
+
+      // UTILISER LE MÊME CLIENT API QUE L'AUTRE COMPOSANT
+      const response = await api.post("/demandes/immobilier", demandeData);
+
+      console.log('✅ Réponse API:', response);
+
+      if (response.status === 201 || response.status === 200) {
+        toast.success("Votre demande a été créée avec succès !");
+        setIsDevisModalOpen(false);
+        setCurrentService(null);
+      } else {
+        throw new Error(`Statut inattendu: ${response.status}`);
+      }
+
     } catch (error) {
-      alert("Erreur lors de l'envoi.");
+      console.error('❌ Erreur détaillée:', error);
+      
+      // Afficher plus de détails sur l'erreur
+      if (error.response) {
+        // Erreur de réponse du serveur
+        console.error('Données erreur:', error.response.data);
+        console.error('Status erreur:', error.response.status);
+        console.error('Headers erreur:', error.response.headers);
+        
+        const errorMessage = error.response.data?.message || 
+                            error.response.data?.error || 
+                            "Erreur lors de la création de la demande";
+        toast.error(errorMessage);
+      } else if (error.request) {
+        // Erreur de réseau
+        console.error('Aucune réponse reçue:', error.request);
+        toast.error("Erreur de connexion au serveur");
+      } else {
+        // Erreur de configuration
+        console.error('Erreur de configuration:', error.message);
+        toast.error("Erreur de configuration de la requête");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // VERSION ALTERNATIVE SI LA PREMIÈRE NE FONCTIONNE PAS
+  const handleDevisSubmitAlternative = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const data = Object.fromEntries(formData);
+
+      // STRUCTURE MINIMALE POUR TEST
+      const demandeData = {
+        contactNom: data.nom,
+        contactPrenom: data.prenom,
+        contactEmail: data.email,
+        contactTel: data.telephone,
+        lieuAdresse: data.adresse,
+        description: data.message || `Devis pour: ${currentService?.name}`,
+        serviceName: currentService?.name,
+        status: "pending"
+      };
+
+      console.log('📤 Envoi demande simplifiée:', demandeData);
+
+      const response = await api.post("/demandes/immobilier", demandeData);
+
+      if (response.status === 201 || response.status === 200) {
+        toast.success("Demande envoyée avec succès !");
+        setIsDevisModalOpen(false);
+        setCurrentService(null);
+      }
+
+    } catch (error) {
+      console.error('Erreur alternative:', error);
+      
+      // Essayer avec fetch directement
+      try {
+        const formData = new FormData(e.target as HTMLFormElement);
+        const data = Object.fromEntries(formData);
+        
+        const demandeData = {
+          contactNom: data.nom,
+          contactPrenom: data.prenom,
+          contactEmail: data.email,
+          contactTel: data.telephone,
+          lieuAdresse: data.adresse,
+          description: data.message,
+          serviceName: currentService?.name,
+          status: "pending"
+        };
+
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const fetchResponse = await fetch(`${API_BASE_URL}/api/demandes/immobilier`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(demandeData),
+        });
+
+        if (fetchResponse.ok) {
+          toast.success("Demande créée avec succès !");
+          setIsDevisModalOpen(false);
+          setCurrentService(null);
+        } else {
+          throw new Error(`HTTP ${fetchResponse.status}`);
+        }
+      } catch (fetchError) {
+        console.error('Erreur fetch:', fetchError);
+        toast.error("Échec de l'envoi de la demande");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -260,7 +386,6 @@ const ServicesPage = () => {
                     animationDelay: `${index * 0.1}s` 
                   }}
                 >
-                  {/* Image avec badge "Photos" comme dans l'exemple */}
                   <div className="relative">
                     <img 
                       src={service.images?.[0] || `https://via.placeholder.com/300x200/E5E7EB/374151?text=${encodeURIComponent(service.name || 'Service')}`} 
@@ -269,12 +394,10 @@ const ServicesPage = () => {
                       onError={(e) => handleImageError(e, service.name || 'Service')}
                     />
                     
-                    {/* Badge Photos comme dans l'image */}
                     <div className="absolute top-3 left-3 bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs font-medium">
                       Photos ({service.images?.length || 1})
                     </div>
                     
-                    {/* Note si disponible */}
                     {service.rating && (
                       <div className="absolute top-3 right-3 bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
@@ -283,20 +406,16 @@ const ServicesPage = () => {
                     )}
                   </div>
 
-                  {/* Contenu de la carte */}
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
-                      {/* Titre du service */}
                       <h3 className="text-sm font-semibold text-gray-900 mb-2 leading-tight">
                         {service.name || 'Service sans nom'}
                       </h3>
                       
-                      {/* Description courte */}
                       <p className="text-xs text-gray-600 mb-3 line-clamp-2">
                         {service.description || 'Description non disponible'}
                       </p>
                       
-                      {/* Catégorie/Métiers */}
                       <div className="flex flex-wrap gap-1 mb-3">
                         {service.metiers?.slice(0, 2).map((metier, idx) => (
                           <span 
@@ -313,7 +432,6 @@ const ServicesPage = () => {
                         )}
                       </div>
                       
-                      {/* Prix et durée */}
                       <div className="flex justify-between items-center text-xs text-gray-500">
                         {service.price && (
                           <span className="font-semibold text-green-600">
@@ -326,7 +444,6 @@ const ServicesPage = () => {
                       </div>
                     </div>
                     
-                    {/* Bouton FAIRE UN DEVIS comme dans l'image */}
                     <div className="mt-4">
                       <button 
                         className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors transform hover:scale-105 shadow-md"
@@ -371,7 +488,7 @@ const ServicesPage = () => {
       {/* Section principale des services */}
       {!showStatuses && <ServicesSection />}
 
-      {/* Modal de devis amélioré */}
+      {/* Modal de devis */}
       {isDevisModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -398,6 +515,7 @@ const ServicesPage = () => {
               </button>
             </div>
 
+            {/* ESSAYER handleDevisSubmitAlternative SI handleDevisSubmit NE FONCTIONNE PAS */}
             <form onSubmit={handleDevisSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
