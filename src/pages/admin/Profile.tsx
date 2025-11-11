@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+
 import {
   User,
   Mail,
@@ -15,6 +16,7 @@ import {
   Eye,
   EyeOff,
   Lock,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,7 +84,11 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-
+  const [pendingAvatar, setPendingAvatar] = useState<{
+    file: File;
+    preview: string;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // États pour la modale de changement de mot de passe
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -192,7 +198,7 @@ const ProfilePage = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !user) return;
 
     if (!file.type.startsWith("image/")) {
       toast.error("Veuillez sélectionner une image valide");
@@ -204,18 +210,45 @@ const ProfilePage = () => {
       return;
     }
 
+    // Créer une URL temporaire pour la prévisualisation
+    const preview = URL.createObjectURL(file);
+    setPendingAvatar({ file, preview });
+  };
+
+  // Nouvelle fonction pour confirmer l'upload
+  const handleConfirmAvatar = async () => {
+    if (!pendingAvatar || !user) return;
+
     setIsUploading(true);
     try {
-      const response = await UserService.uploadAvatar(file);
+      const response = await UserService.uploadAvatar(pendingAvatar.file);
       await UserService.updateProfile({ avatar: response.url });
       await fetchUserProfile(); // Recharger les données
+
+      // Nettoyer l'URL temporaire
+      URL.revokeObjectURL(pendingAvatar.preview);
+      setPendingAvatar(null);
+
       toast.success("Avatar mis à jour avec succès");
     } catch (error: any) {
       console.error("Erreur lors de l'upload:", error);
       toast.error(error.message || "Erreur lors de l'upload de l'avatar");
     } finally {
       setIsUploading(false);
-      event.target.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Fonction pour annuler l'upload
+  const handleCancelAvatar = () => {
+    if (pendingAvatar) {
+      URL.revokeObjectURL(pendingAvatar.preview);
+      setPendingAvatar(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -366,37 +399,78 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col items-center space-y-4">
-                  <Avatar className="h-32 w-32">
-                    <AvatarImage src={user.avatar || ""} />
-                    <AvatarFallback className="text-2xl bg-gradient-to-r from-blue-500 to-purple-600">
-                      {user.firstName?.[0]}
-                      {user.lastName?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar
+                      className="h-32 w-32 cursor-pointer"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {pendingAvatar ? (
+                        <AvatarImage
+                          src={pendingAvatar.preview}
+                          alt="Prévisualisation"
+                        />
+                      ) : (
+                        user.avatar && (
+                          <AvatarImage
+                            src={user.avatar}
+                            alt={`${user.firstName} ${user.lastName}`}
+                          />
+                        )
+                      )}
+                      <AvatarFallback className="text-2xl bg-gradient-to-r from-blue-500 to-purple-600">
+                        {user.firstName?.[0]}
+                        {user.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    {/* Boutons de confirmation/annulation */}
+                    {pendingAvatar ? (
+                      <div className="absolute -bottom-2 -right-2 flex gap-1">
+                        <button
+                          onClick={handleConfirmAvatar}
+                          disabled={isUploading}
+                          className="bg-green-500 text-white rounded-full p-2 shadow-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={handleCancelAvatar}
+                          disabled={isUploading}
+                          className="bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="absolute -bottom-2 -right-2 bg-white text-gray-900 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors disabled:opacity-50 border"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
                   <input
                     type="file"
-                    id="avatar-upload"
+                    ref={fileInputRef}
                     accept="image/*"
                     onChange={handleAvatarUpload}
                     className="hidden"
                     disabled={isUploading}
                   />
-                  <label
-                    htmlFor="avatar-upload"
-                    className={`cursor-pointer w-full ${
-                      isUploading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      disabled={isUploading}
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      {isUploading ? "Upload..." : "Changer la photo"}
-                    </Button>
-                  </label>
+
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      {isUploading
+                        ? "Upload en cours..."
+                        : "Cliquez sur l'avatar pour changer"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, PNG, max 5MB
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -263,7 +263,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  <Route path="/recherche" element={<Recherche onClick />} />
+                  <Route path="/recherche" element={<Recherche  />} />
 
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
