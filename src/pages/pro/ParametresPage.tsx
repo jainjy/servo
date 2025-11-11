@@ -1,6 +1,3 @@
-"use client";
-
-import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,99 +5,159 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
-import { Save, Clock, Calendar, Mail, Phone, Euro, AlertCircle, CheckCircle2, Building, Users, Settings as SettingsIcon } from "lucide-react";
+import {
+  Save,
+  Clock,
+  Calendar,
+  Mail,
+  Phone,
+  Euro,
+  AlertCircle,
+  CheckCircle2,
+  Building,
+  Settings as SettingsIcon,
+} from "lucide-react";
+import { professionalSettingsService } from "@/services/professionalSettings";
+import { useAuth } from "@/hooks/useAuth";
 
 const ParametresPage = () => {
-  const [parametres, setParametres] = useState({
-    // Horaires d'ouverture
-    horaires: {
-      lundi: { ouvert: true, debut: "09:00", fin: "18:00" },
-      mardi: { ouvert: true, debut: "09:00", fin: "18:00" },
-      mercredi: { ouvert: true, debut: "09:00", fin: "18:00" },
-      jeudi: { ouvert: true, debut: "09:00", fin: "18:00" },
-      vendredi: { ouvert: true, debut: "09:00", fin: "17:00" },
-      samedi: { ouvert: false, debut: "10:00", fin: "16:00" },
-      dimanche: { ouvert: false, debut: "", fin: "" }
-    },
-    
-    // Jours fermés exceptionnels
-    joursFermes: [
-      { date: "2024-01-01", label: "Nouvel An" },
-      { date: "2024-12-25", label: "Noël" }
-    ],
-    
-    // Délais de réponse
-    delaisReponse: {
-      email: 24,
-      telephone: 2,
-      urgence: 4
-    },
-    
-    // Politique d'annulation
-    politiqueAnnulation: {
-      delaiGratuit: 48, // Heures
-      fraisAnnulation: 15, // Pourcentage
-      conditions: "Toute annulation intervenant moins de 48 heures avant le rendez-vous pourra être facturée à hauteur de 15% du montant de la prestation."
-    },
-    
-    // Seuil de réservation
-    seuilReservation: {
-      acomptePourcentage: 30,
-      montantMinimum: 100,
-      conditionsPaiement: "Un acompte de 30% est requis pour confirmer toute réservation. Le solde est dû à la signature du contrat."
-    },
-    
-    // Paramètres généraux
-    general: {
-      nomEntreprise: "Immobilier Pro",
-      emailContact: "contact@immobilier-pro.fr",
-      telephone: "01 23 45 67 89",
-      adresse: "123 Avenue des Champs-Élysées, 75008 Paris"
-    }
-  });
-
+  const { user } = useAuth();
+  const [parametres, setParametres] = useState(null);
   const [sauvegardeEnCours, setSauvegardeEnCours] = useState(false);
   const [messageSucces, setMessageSucces] = useState("");
+  const [messageErreur, setMessageErreur] = useState("");
+  const [chargement, setChargement] = useState(true);
 
   const joursSemaine = [
-    { key: "lundi", label: "Lundi" },
-    { key: "mardi", label: "Mardi" },
-    { key: "mercredi", label: "Mercredi" },
-    { key: "jeudi", label: "Jeudi" },
-    { key: "vendredi", label: "Vendredi" },
-    { key: "samedi", label: "Samedi" },
-    { key: "dimanche", label: "Dimanche" }
+    { key: "lundi", label: "Lundi", dbKey: "horairesLundi" },
+    { key: "mardi", label: "Mardi", dbKey: "horairesMardi" },
+    { key: "mercredi", label: "Mercredi", dbKey: "horairesMercredi" },
+    { key: "jeudi", label: "Jeudi", dbKey: "horairesJeudi" },
+    { key: "vendredi", label: "Vendredi", dbKey: "horairesVendredi" },
+    { key: "samedi", label: "Samedi", dbKey: "horairesSamedi" },
+    { key: "dimanche", label: "Dimanche", dbKey: "horairesDimanche" },
   ];
 
+  // Charger les paramètres au montage du composant
+  useEffect(() => {
+    chargerParametres();
+  }, []);
+
+  const chargerParametres = async () => {
+    try {
+      setChargement(true);
+      const settings = await professionalSettingsService.getSettings();
+
+      if (settings) {
+        setParametres(settings);
+      } else {
+        // Créer des paramètres par défaut si aucun n'existe
+        await professionalSettingsService.createDefaultSettings();
+        const newSettings = await professionalSettingsService.getSettings();
+        setParametres(newSettings);
+      }
+    } catch (error) {
+      console.error("Erreur chargement paramètres:", error);
+      setMessageErreur("Erreur lors du chargement des paramètres");
+      setTimeout(() => setMessageErreur(""), 5000);
+    } finally {
+      setChargement(false);
+    }
+  };
+
   const sauvegarderParametres = async () => {
-    setSauvegardeEnCours(true);
-    
-    // Simulation sauvegarde
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setSauvegardeEnCours(false);
-    setMessageSucces("Paramètres sauvegardés avec succès !");
-    
-    setTimeout(() => setMessageSucces(""), 3000);
+    if (!parametres) return;
+
+    try {
+      setSauvegardeEnCours(true);
+      setMessageErreur("");
+
+      await professionalSettingsService.saveSettings(parametres);
+
+      setMessageSucces("Paramètres sauvegardés avec succès !");
+      setTimeout(() => setMessageSucces(""), 3000);
+    } catch (error) {
+      console.error("Erreur sauvegarde paramètres:", error);
+      setMessageErreur("Erreur lors de la sauvegarde des paramètres");
+      setTimeout(() => setMessageErreur(""), 5000);
+    } finally {
+      setSauvegardeEnCours(false);
+    }
+  };
+
+  const mettreAJourHoraire = (jourKey, champ, valeur) => {
+    setParametres((prev) => ({
+      ...prev,
+      [jourKey]: {
+        ...prev[jourKey],
+        [champ]: valeur,
+      },
+    }));
   };
 
   const ajouterJourFerme = () => {
-    const nouvelleDate = new Date().toISOString().split('T')[0];
-    setParametres(prev => ({
+    const nouvelleDate = new Date().toISOString().split("T")[0];
+    setParametres((prev) => ({
       ...prev,
       joursFermes: [
-        ...prev.joursFermes,
-        { date: nouvelleDate, label: "Nouveau jour fermé" }
-      ]
+        ...(prev.joursFermes || []),
+        { date: nouvelleDate, label: "Nouveau jour fermé" },
+      ],
     }));
   };
 
+  const mettreAJourJourFerme = (index, champ, valeur) => {
+    setParametres((prev) => {
+      const nouveauxJours = [...(prev.joursFermes || [])];
+      nouveauxJours[index] = {
+        ...nouveauxJours[index],
+        [champ]: valeur,
+      };
+      return { ...prev, joursFermes: nouveauxJours };
+    });
+  };
+
   const supprimerJourFerme = (index) => {
-    setParametres(prev => ({
+    setParametres((prev) => ({
       ...prev,
-      joursFermes: prev.joursFermes.filter((_, i) => i !== index)
+      joursFermes: (prev.joursFermes || []).filter((_, i) => i !== index),
     }));
   };
+
+  const mettreAJourChamp = (champ, valeur) => {
+    setParametres((prev) => ({
+      ...prev,
+      [champ]: valeur,
+    }));
+  };
+
+  if (chargement) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des paramètres...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!parametres) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Impossible de charger les paramètres
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Une erreur est survenue lors du chargement de vos paramètres.
+          </p>
+          <Button onClick={chargerParametres}>Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,17 +169,24 @@ const ParametresPage = () => {
               <SettingsIcon size={32} />
             </div>
             <div>
-              <h1 className="text-4xl font-bold" style={{ color: '#0A0A0A' }}>
+              <h1 className="text-4xl font-bold text-gray-900">
                 Paramètres Professionnels
               </h1>
-              <p className="text-lg" style={{ color: '#5A6470' }}>
+              <p className="text-lg text-gray-600">
                 Gérez vos horaires, délais et conditions commerciales
               </p>
             </div>
           </div>
         </div>
 
-        {/* Message de succès */}
+        {/* Messages */}
+        {messageErreur && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-fadeIn">
+            <AlertCircle className="text-red-600" size={20} />
+            <span className="text-red-800">{messageErreur}</span>
+          </div>
+        )}
+
         {messageSucces && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 animate-fadeIn">
             <CheckCircle2 className="text-green-600" size={20} />
@@ -137,72 +201,72 @@ const ParametresPage = () => {
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Clock className="text-blue-600" size={24} />
-                <h2 className="text-2xl font-bold" style={{ color: '#0A0A0A' }}>
+                <h2 className="text-2xl font-bold text-gray-900">
                   Horaires d'ouverture
                 </h2>
               </div>
 
               <div className="space-y-4">
-                {joursSemaine.map((jour) => (
-                  <div key={jour.key} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <Switch
-                        checked={parametres.horaires[jour.key].ouvert}
-                        onCheckedChange={(ouvert) => 
-                          setParametres(prev => ({
-                            ...prev,
-                            horaires: {
-                              ...prev.horaires,
-                              [jour.key]: { ...prev.horaires[jour.key], ouvert }
-                            }
-                          }))
-                        }
-                      />
-                      <Label className="font-medium w-24" style={{ color: '#0A0A0A' }}>
-                        {jour.label}
-                      </Label>
-                    </div>
-                    
-                    {parametres.horaires[jour.key].ouvert && (
-                      <div className="flex flex-col md:flex-row items-center gap-3">
-                        <div className="flex items-center gap-2">
-                          <Label>De</Label>
-                          <Input
-                            type="time"
-                            value={parametres.horaires[jour.key].debut}
-                            onChange={(e) => 
-                              setParametres(prev => ({
-                                ...prev,
-                                horaires: {
-                                  ...prev.horaires,
-                                  [jour.key]: { ...prev.horaires[jour.key], debut: e.target.value }
-                                }
-                              }))
-                            }
-                            className="w-24 md:w-32"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label>À</Label>
-                          <Input
-                            type="time"
-                            value={parametres.horaires[jour.key].fin}
-                            onChange={(e) => 
-                              setParametres(prev => ({
-                                ...prev,
-                                horaires: {
-                                  ...prev.horaires,
-                                  [jour.key]: { ...prev.horaires[jour.key], fin: e.target.value }
-                                }
-                              }))
-                            }
-                             className="w-24 md:w-32"
-                          />
-                        </div>
+                {joursSemaine.map((jour) => {
+                  const horaire = parametres[jour.dbKey] || {
+                    ouvert: false,
+                    debut: "",
+                    fin: "",
+                  };
+                  return (
+                    <div
+                      key={jour.key}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Switch
+                          checked={horaire.ouvert || false}
+                          onCheckedChange={(ouvert) =>
+                            mettreAJourHoraire(jour.dbKey, "ouvert", ouvert)
+                          }
+                        />
+                        <Label className="font-medium w-24 text-gray-900">
+                          {jour.label}
+                        </Label>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {horaire.ouvert && (
+                        <div className="flex flex-col md:flex-row items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <Label>De</Label>
+                            <Input
+                              type="time"
+                              value={horaire.debut || ""}
+                              onChange={(e) =>
+                                mettreAJourHoraire(
+                                  jour.dbKey,
+                                  "debut",
+                                  e.target.value
+                                )
+                              }
+                              className="w-24 md:w-32"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label>À</Label>
+                            <Input
+                              type="time"
+                              value={horaire.fin || ""}
+                              onChange={(e) =>
+                                mettreAJourHoraire(
+                                  jour.dbKey,
+                                  "fin",
+                                  e.target.value
+                                )
+                              }
+                              className="w-24 md:w-32"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </Card>
 
@@ -211,7 +275,7 @@ const ParametresPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <Calendar className="text-blue-600" size={24} />
-                  <h2 className="text-2xl font-bold" style={{ color: '#0A0A0A' }}>
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Jours fermés exceptionnels
                   </h2>
                 </div>
@@ -221,27 +285,26 @@ const ParametresPage = () => {
               </div>
 
               <div className="space-y-3">
-                {parametres.joursFermes.map((jour, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                {(parametres.joursFermes || []).map((jour, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center gap-4">
                       <Input
                         type="date"
-                        value={jour.date}
-                        onChange={(e) => {
-                          const nouveauxJours = [...parametres.joursFermes];
-                          nouveauxJours[index].date = e.target.value;
-                          setParametres(prev => ({ ...prev, joursFermes: nouveauxJours }));
-                        }}
+                        value={jour.date || ""}
+                        onChange={(e) =>
+                          mettreAJourJourFerme(index, "date", e.target.value)
+                        }
                         className="w-40"
                       />
                       <Input
                         placeholder="Libellé (ex: Férié, Congés...)"
-                        value={jour.label}
-                        onChange={(e) => {
-                          const nouveauxJours = [...parametres.joursFermes];
-                          nouveauxJours[index].label = e.target.value;
-                          setParametres(prev => ({ ...prev, joursFermes: nouveauxJours }));
-                        }}
+                        value={jour.label || ""}
+                        onChange={(e) =>
+                          mettreAJourJourFerme(index, "label", e.target.value)
+                        }
                         className="flex-1"
                       />
                     </div>
@@ -255,6 +318,11 @@ const ParametresPage = () => {
                     </Button>
                   </div>
                 ))}
+                {(parametres.joursFermes || []).length === 0 && (
+                  <p className="text-gray-500 text-center py-4">
+                    Aucun jour fermé exceptionnel configuré
+                  </p>
+                )}
               </div>
             </Card>
 
@@ -262,14 +330,14 @@ const ParametresPage = () => {
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Mail className="text-blue-600" size={24} />
-                <h2 className="text-2xl font-bold" style={{ color: '#0A0A0A' }}>
+                <h2 className="text-2xl font-bold text-gray-900">
                   Délais de réponse maximum
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     <Mail size={16} className="inline mr-2" />
                     Emails (heures)
                   </Label>
@@ -277,19 +345,19 @@ const ParametresPage = () => {
                     type="number"
                     min="1"
                     max="168"
-                    value={parametres.delaisReponse.email}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        delaisReponse: { ...prev.delaisReponse, email: parseInt(e.target.value) || 0 }
-                      }))
+                    value={parametres.delaiReponseEmail || 24}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "delaiReponseEmail",
+                        parseInt(e.target.value) || 0
+                      )
                     }
                     className="text-lg"
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     <Phone size={16} className="inline mr-2" />
                     Téléphone (heures)
                   </Label>
@@ -297,19 +365,19 @@ const ParametresPage = () => {
                     type="number"
                     min="1"
                     max="24"
-                    value={parametres.delaisReponse.telephone}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        delaisReponse: { ...prev.delaisReponse, telephone: parseInt(e.target.value) || 0 }
-                      }))
+                    value={parametres.delaiReponseTelephone || 2}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "delaiReponseTelephone",
+                        parseInt(e.target.value) || 0
+                      )
                     }
                     className="text-lg"
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     <AlertCircle size={16} className="inline mr-2" />
                     Urgences (heures)
                   </Label>
@@ -317,12 +385,12 @@ const ParametresPage = () => {
                     type="number"
                     min="1"
                     max="12"
-                    value={parametres.delaisReponse.urgence}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        delaisReponse: { ...prev.delaisReponse, urgence: parseInt(e.target.value) || 0 }
-                      }))
+                    value={parametres.delaiReponseUrgence || 4}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "delaiReponseUrgence",
+                        parseInt(e.target.value) || 0
+                      )
                     }
                     className="text-lg"
                   />
@@ -337,68 +405,56 @@ const ParametresPage = () => {
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-6">
                 <AlertCircle className="text-blue-600" size={24} />
-                <h2 className="text-2xl font-bold" style={{ color: '#0A0A0A' }}>
+                <h2 className="text-2xl font-bold text-gray-900">
                   Politique d'annulation
                 </h2>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     Délai d'annulation gratuit (heures)
                   </Label>
                   <Input
                     type="number"
                     min="0"
                     max="720"
-                    value={parametres.politiqueAnnulation.delaiGratuit}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        politiqueAnnulation: { 
-                          ...prev.politiqueAnnulation, 
-                          delaiGratuit: parseInt(e.target.value) || 0 
-                        }
-                      }))
+                    value={parametres.delaiAnnulationGratuit || 48}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "delaiAnnulationGratuit",
+                        parseInt(e.target.value) || 0
+                      )
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     Frais d'annulation (%)
                   </Label>
                   <Input
                     type="number"
                     min="0"
                     max="100"
-                    value={parametres.politiqueAnnulation.fraisAnnulation}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        politiqueAnnulation: { 
-                          ...prev.politiqueAnnulation, 
-                          fraisAnnulation: parseInt(e.target.value) || 0 
-                        }
-                      }))
+                    value={parametres.fraisAnnulationPourcent || 15}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "fraisAnnulationPourcent",
+                        parseInt(e.target.value) || 0
+                      )
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     Conditions d'annulation
                   </Label>
                   <Textarea
-                    value={parametres.politiqueAnnulation.conditions}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        politiqueAnnulation: { 
-                          ...prev.politiqueAnnulation, 
-                          conditions: e.target.value 
-                        }
-                      }))
+                    value={parametres.conditionsAnnulation || ""}
+                    onChange={(e) =>
+                      mettreAJourChamp("conditionsAnnulation", e.target.value)
                     }
                     rows={4}
                     placeholder="Décrivez votre politique d'annulation..."
@@ -411,67 +467,55 @@ const ParametresPage = () => {
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Euro className="text-blue-600" size={24} />
-                <h2 className="text-2xl font-bold" style={{ color: '#0A0A0A' }}>
+                <h2 className="text-2xl font-bold text-gray-900">
                   Seuil de réservation
                 </h2>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     Acompte requis (%)
                   </Label>
                   <Input
                     type="number"
                     min="0"
                     max="100"
-                    value={parametres.seuilReservation.acomptePourcentage}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        seuilReservation: { 
-                          ...prev.seuilReservation, 
-                          acomptePourcentage: parseInt(e.target.value) || 0 
-                        }
-                      }))
+                    value={parametres.acomptePourcentage || 30}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "acomptePourcentage",
+                        parseInt(e.target.value) || 0
+                      )
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     Montant minimum (€)
                   </Label>
                   <Input
                     type="number"
                     min="0"
-                    value={parametres.seuilReservation.montantMinimum}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        seuilReservation: { 
-                          ...prev.seuilReservation, 
-                          montantMinimum: parseInt(e.target.value) || 0 
-                        }
-                      }))
+                    value={parametres.montantMinimum || 100}
+                    onChange={(e) =>
+                      mettreAJourChamp(
+                        "montantMinimum",
+                        parseFloat(e.target.value) || 0
+                      )
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-3 font-medium" style={{ color: '#0A0A0A' }}>
+                  <Label className="block mb-3 font-medium text-gray-900">
                     Conditions de paiement
                   </Label>
                   <Textarea
-                    value={parametres.seuilReservation.conditionsPaiement}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        seuilReservation: { 
-                          ...prev.seuilReservation, 
-                          conditionsPaiement: e.target.value 
-                        }
-                      }))
+                    value={parametres.conditionsPaiement || ""}
+                    onChange={(e) =>
+                      mettreAJourChamp("conditionsPaiement", e.target.value)
                     }
                     rows={3}
                     placeholder="Décrivez vos conditions de paiement..."
@@ -484,61 +528,57 @@ const ParametresPage = () => {
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Building className="text-blue-600" size={24} />
-                <h2 className="text-2xl font-bold" style={{ color: '#0A0A0A' }}>
+                <h2 className="text-2xl font-bold text-gray-900">
                   Informations générales
                 </h2>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label className="block mb-2 text-sm font-medium">Nom de l'entreprise</Label>
+                  <Label className="block mb-2 text-sm font-medium">
+                    Nom de l'entreprise
+                  </Label>
                   <Input
-                    value={parametres.general.nomEntreprise}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        general: { ...prev.general, nomEntreprise: e.target.value }
-                      }))
+                    value={parametres.nomEntreprise || ""}
+                    onChange={(e) =>
+                      mettreAJourChamp("nomEntreprise", e.target.value)
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-2 text-sm font-medium">Email de contact</Label>
+                  <Label className="block mb-2 text-sm font-medium">
+                    Email de contact
+                  </Label>
                   <Input
                     type="email"
-                    value={parametres.general.emailContact}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        general: { ...prev.general, emailContact: e.target.value }
-                      }))
+                    value={parametres.emailContact || ""}
+                    onChange={(e) =>
+                      mettreAJourChamp("emailContact", e.target.value)
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-2 text-sm font-medium">Téléphone</Label>
+                  <Label className="block mb-2 text-sm font-medium">
+                    Téléphone
+                  </Label>
                   <Input
-                    value={parametres.general.telephone}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        general: { ...prev.general, telephone: e.target.value }
-                      }))
+                    value={parametres.telephone || ""}
+                    onChange={(e) =>
+                      mettreAJourChamp("telephone", e.target.value)
                     }
                   />
                 </div>
 
                 <div>
-                  <Label className="block mb-2 text-sm font-medium">Adresse</Label>
+                  <Label className="block mb-2 text-sm font-medium">
+                    Adresse
+                  </Label>
                   <Textarea
-                    value={parametres.general.adresse}
-                    onChange={(e) => 
-                      setParametres(prev => ({
-                        ...prev,
-                        general: { ...prev.general, adresse: e.target.value }
-                      }))
+                    value={parametres.adresse || ""}
+                    onChange={(e) =>
+                      mettreAJourChamp("adresse", e.target.value)
                     }
                     rows={2}
                   />
@@ -552,8 +592,7 @@ const ParametresPage = () => {
                 <Button
                   onClick={sauvegarderParametres}
                   disabled={sauvegardeEnCours}
-                  className="w-full py-3 text-lg font-semibold transition-all duration-300 transform hover:scale-105"
-                  style={{ backgroundColor: '#0052FF', color: 'white' }}
+                  className="w-full py-3 text-lg font-semibold transition-all duration-300 transform hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   {sauvegardeEnCours ? (
                     <>
@@ -567,7 +606,7 @@ const ParametresPage = () => {
                     </>
                   )}
                 </Button>
-                <p className="text-sm mt-3" style={{ color: '#5A6470' }}>
+                <p className="text-sm mt-3 text-gray-600">
                   Tous les changements seront appliqués immédiatement
                 </p>
               </div>
