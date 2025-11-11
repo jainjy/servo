@@ -340,7 +340,7 @@ export default function Financement() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
               Nos <span className="text-slate-900">Partenaires Financement</span>
             </h2>
-            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto">
               Travaillons avec les meilleurs acteurs du marché pour votre projet
             </p>
           </motion.div>

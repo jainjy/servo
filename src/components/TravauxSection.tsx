@@ -147,10 +147,10 @@ export const PhotosModal = ({ isOpen, onClose, prestation }) => {
               <Share2 className="h-4 w-4 mr-2" />
               Partager
             </Button>
-            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+            {/* <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
               <FileText className="h-4 w-4 mr-2" />
               Demander un devis
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

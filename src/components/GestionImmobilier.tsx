@@ -278,7 +278,7 @@ const GestionImmobilier = () => {
           <div className="max-w-4xl mx-auto text-center h-40">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
               Gestion Immobilière{" "}
-              <span className=" text-blue-400">Professionnelle</span>
+              <span className=" text-blue-900">Professionnelle</span>
             </h1>
             <p className="text-sm text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
               Des solutions complètes pour propriétaires bailleurs. Confiez-nous
@@ -289,7 +289,7 @@ const GestionImmobilier = () => {
 
             <div className="flex flex-wrap gap-3 pt-4 justify-center">
               <Button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base rounded-lg transition-all duration-300"
+                className="bg-blue-950 hover:bg-slate-700 text-white px-6 py-3 text-base rounded-lg transition-all duration-300"
                 onClick={() =>
                   document
                     .getElementById("services")
@@ -347,11 +347,10 @@ const GestionImmobilier = () => {
               <Button
                 key={service.id}
                 variant={activeService === service.id ? "default" : "outline"}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold ${
-                  activeService === service.id
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-700 border-slate-300 hover:bg-slate-100"
-                }`}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold ${activeService === service.id
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-700 border-slate-300 hover:bg-slate-100"
+                  }`}
                 onClick={() => setActiveService(service.id)}
               >
                 <service.icon className="h-3 w-3 mr-2" />
@@ -368,7 +367,7 @@ const GestionImmobilier = () => {
                 <div>
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
-                      <currentService.icon className="h-6 w-6 text-blue-600" />
+                      <currentService.icon className="h-6 w-6 text-slate-600" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-slate-900">
@@ -402,7 +401,7 @@ const GestionImmobilier = () => {
                       </div>
                     </div>
                     <Button
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm px-4 py-2"
+                      className="bg-transparent border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 rounded-lg text-sm px-4 py-2"
                       onClick={() => handleServiceClick(currentService.id)}
                     >
                       Choisir ce service
@@ -468,7 +467,7 @@ const GestionImmobilier = () => {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base rounded-lg"
+                className="bg-slate-900 hover:border-2 border-slate-900 hover:bg-transparent text-white hover:text-slate-900 px-6 py-3 text-base rounded-lg"
                 onClick={() => setIsModalOpen(true)}
               >
                 <Phone className="h-4 w-4 mr-2" />
@@ -495,7 +494,7 @@ const GestionImmobilier = () => {
               <span>Demande de Devis</span>
             </DialogTitle>
           </DialogHeader>
-
+          <hr />
           <form onSubmit={handleSubmit} className="space-y-6 p-1">
             {/* Service Selection */}
             <div>
@@ -643,7 +642,7 @@ const GestionImmobilier = () => {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-base font-semibold"
+              className="w-full bg-slate-900 hover:bg-blue-700 text-white py-3 rounded-lg text-base font-semibold"
               disabled={!selectedService}
             >
               Envoyer ma demande
@@ -663,12 +662,13 @@ const GestionImmobilier = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span className="flex items-center">
-                <Mail className="h-5 w-5 mr-2 text-blue-600" />
+                <Mail className="h-5 w-5 mr-2 text-slate-600" />
                 Nous écrire
               </span>
             </DialogTitle>
-          </DialogHeader>
 
+          </DialogHeader>
+          <hr />
           <form onSubmit={handleContactSubmit} className="space-y-6 p-1">
             {/* Informations personnelles */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -767,7 +767,7 @@ const GestionImmobilier = () => {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-base font-semibold"
+              className="w-full bg-slate-900 hover:bg-slate-700 text-white py-3 rounded-lg text-base font-semibold"
             >
               <Mail className="h-4 w-4 mr-2" />
               Envoyer mon message

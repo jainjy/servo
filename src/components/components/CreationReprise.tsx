@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Briefcase, Users, TrendingUp, Target } from 'lucide-react';
-
+import {motion} from 'framer-motion';
 interface ServiceCardProps {
   icon: React.ReactNode;
   title: string;
@@ -14,12 +14,12 @@ interface CreationRepriseProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description }) => (
   <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
     <div className="flex items-center mb-4">
-      <div className="p-2 bg-blue-100 rounded-lg text-blue-600 mr-4">
+      <div className="p-2 bg-blue-100 rounded-lg text-slate-600 mr-4">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
     </div>
-    <p className="text-gray-600 leading-relaxed">{description}</p>
+    <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
   </div>
 );
 
@@ -48,11 +48,41 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     }
   ];
 
+  const AnimatedCounter = ({ value, duration = 2 }) => {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
+    let startTimestamp: number | null = null;
+    
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
+      
+      setCount(Math.floor(progress * numericValue));
+      
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    
+    requestAnimationFrame(step);
+  }, [value, duration]);
+
+  return (
+    <>
+      {value.includes('%') ? `${count}%` : 
+       value.includes('+') ? `${count}+` : 
+       count}
+    </>
+  );
+};
+
   const stats = [
-    { number: "95%", label: "de réussite" },
-    { number: "500+", label: "entreprises accompagnées" },
-    { number: "10", label: "années d'expérience" },
-    { number: "24h", label: "réponse sous" }
+    { number: "95%", label: "Réussite" },
+    { number: "500+", label: "Entreprises accompagnées" },
+    { number: "10", label: "Années d'expérience" },
+    { number: "24h", label: "Réponse sous" }
   ];
 
   return (
@@ -89,31 +119,38 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
-            ))}
+        <motion.div
+          key={index}
+          className="text-center"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+        >
+          <div className="text-3xl md:text-4xl font-bold text-slate-950 mb-2">
+            <AnimatedCounter value={stat.number} duration={2} />
+          </div>
+          <div className="text-gray-600 font-medium">{stat.label}</div>
+        </motion.div>
+      ))}
           </div>
         </div>
 
         {/* CTA */}
         <div className="text-center">
-          <div className="bg-blue-600 rounded-2xl p-8 text-white">
+          <div className="bg-slate-900 rounded-2xl p-8 text-white">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Prêt à concrétiser votre projet ?
             </h3>
-            <p className="text-blue-100 text-lg mb-6 max-w-2xl mx-auto">
+            <p className="text-blue-100 text-sm mb-6 max-w-2xl mx-auto">
               Prenez rendez-vous pour une consultation gratuite et découvrez comment 
               nous pouvons vous aider à réussir votre création ou reprise d'entreprise.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300 shadow-lg">
+              <button className="bg-white text-slate-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300 shadow-lg">
                 Prendre rendez-vous
               </button>
-              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-300">
+              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-slate-600 transition-colors duration-300">
                 Télécharger notre brochure
               </button>
             </div>

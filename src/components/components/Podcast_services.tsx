@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Headphones, Mic, Video, BookOpen, Users, Download, Share2, Clock, Heart, MessageCircle, ArrowRight, Sparkles, TrendingUp, Lightbulb } from 'lucide-react';
+import { Play, Headphones, Mic, Video, BookOpen, Users, Download, Share2, Clock, Heart, MessageCircle, ArrowRight, Sparkles, TrendingUp, Lightbulb, Calendar, Star } from 'lucide-react';
 
 interface PodcastEpisode {
   id: number;
@@ -31,6 +31,8 @@ interface ResourceItem {
 
 const PodcastsServices: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('tous');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEpisode, setSelectedEpisode] = useState<PodcastEpisode | null>(null);
 
   const podcastEpisodes: PodcastEpisode[] = [
     {
@@ -258,14 +260,14 @@ const PodcastsServices: React.FC = () => {
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === category.id
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                   }`}
               >
                 {category.label}
                 <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${activeCategory === category.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-600'
                   }`}>
                   {category.count}
                 </span>
@@ -322,7 +324,13 @@ const PodcastsServices: React.FC = () => {
                       </div>
                       <div>{episode.date}</div>
                     </div>
-                    <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors group/btn">
+                    <button
+                      onClick={() => {
+                        setSelectedEpisode(episode);
+                        setIsModalOpen(true);
+                      }}
+                      className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors group/btn"
+                    >
                       <Play className="w-4 h-4 mr-2" />
                       Écouter
                     </button>
@@ -441,7 +449,135 @@ const PodcastsServices: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
+
+      {/* Modal Podcast */}
+      {isModalOpen && selectedEpisode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  {/* Overlay */}
+  <div
+    className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+    onClick={() => setIsModalOpen(false)}
+  />
+
+  {/* Modal Content */}
+  <div className="relative z-50 w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+    {/* Bouton fermeture */}
+    <button
+      onClick={() => setIsModalOpen(false)}
+      className="absolute top-3 right-3 z-20 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1.5"
+    >
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    {/* Header */}
+    <div className="flex p-4 border-b border-gray-200">
+      {/* Image */}
+      <div className="flex-shrink-0 mr-4">
+        <div className="w-16 h-16 rounded-lg bg-blue-500 flex items-center justify-center">
+          <Headphones className="w-8 h-8 text-white" />
+        </div>
+      </div>
+
+      {/* Informations */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
+            {selectedEpisode.category}
+          </span>
+          {selectedEpisode.featured && (
+            <span className="flex items-center text-yellow-600 text-xs">
+              <Star className="w-3 h-3 mr-1" />
+              Vedette
+            </span>
+          )}
+        </div>
+        
+        <h1 className="text-lg font-semibold text-gray-900 truncate">
+          {selectedEpisode.title}
+        </h1>
+
+        <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+          <span className="flex items-center">
+            <Clock className="w-3 h-3 mr-1" />
+            {selectedEpisode.duration}
+          </span>
+          <span className="flex items-center">
+            <Headphones className="w-3 h-3 mr-1" />
+            {selectedEpisode.listens.toLocaleString()}
+          </span>
+          <span>{selectedEpisode.date}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Content */}
+    <div className="flex-1 overflow-y-auto p-4">
+      {/* Description */}
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">Description</h3>
+        <p className="text-sm text-gray-600 leading-relaxed">
+          {selectedEpisode.description}
+        </p>
+      </div>
+
+      {/* Invités */}
+      {selectedEpisode.guests && selectedEpisode.guests.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">Invités</h3>
+          <div className="space-y-2">
+            {selectedEpisode.guests.map((guest, index) => (
+              <div key={index} className="flex items-center text-sm">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
+                  {guest.split(' ').map(n => n[0]).join('')}
+                </div>
+                {guest}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-3 pt-4 border-t border-gray-200">
+        <button className="flex-1 flex items-center justify-center bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+          <Play className="w-4 h-4 mr-2" />
+          Écouter
+        </button>
+        <button className="flex items-center justify-center border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+          <Download className="w-4 h-4 mr-2" />
+          Télécharger
+        </button>
+        <button className="flex items-center justify-center border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+          <Heart className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      )
+      }
+
+      <style>{`
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+`}</style>
+    </section >
   );
 };
 
