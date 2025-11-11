@@ -946,7 +946,6 @@ useEffect(() => {
                   side="bottom"
                   align="center"
                   className="relative -mt-16 w-screen max-w-full p-0 overflow-hidden z-50 rounded-none shadow-lg bg-black text-white border-none"
-
                 >
                   <button
                     className="absolute  z-50 text-white text-5xl font-extralight right-10 top-4 "
@@ -963,28 +962,47 @@ useEffect(() => {
                       <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="p-1 rounded-full bg-white border-black border-2">
-                            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+                            <img
+                              src={logo}
+                              alt="Servo Logo"
+                              className="w-10 h-10 rounded-full"
+                            />
                           </div>
-                          <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
+                          <div className="azonix text-lg font-bold text-slate-300">
+                            SERVO
+                          </div>
                         </div>
                         <nav className="space-y-1">
                           {menuSections.map((section, si) => {
-                            const hasItems = !!section.items && section.items.length > 0;
+                            const hasItems =
+                              !!section.items && section.items.length > 0;
                             const isActive = hoveredSection === section.title;
                             return (
                               <div
                                 key={si}
-                                onMouseEnter={() => hasItems && setHoveredSection(section.title)}
-                                onFocus={() => hasItems && setHoveredSection(section.title)}
-                                onMouseLeave={() => {
-                                }}
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"}`}
+                                onMouseEnter={() =>
+                                  hasItems && setHoveredSection(section.title)
+                                }
+                                onFocus={() =>
+                                  hasItems && setHoveredSection(section.title)
+                                }
+                                onMouseLeave={() => {}}
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
+                                  isActive ? "bg-white/10" : "hover:bg-white/5"
+                                }`}
                               >
                                 {hasItems ? (
-                                  <button className="scramble  w-full text-left text-xs font-semibold text-white">{section.title}</button>
-
+                                  <button className="scramble  w-full text-left text-xs font-semibold text-white">
+                                    {section.title}
+                                  </button>
                                 ) : (
-                                  <Link to={section.href || '/'} onClick={() => setIsPopoverOpen(false)} className="w-full text-left text-xs font-semibold text-white hover:underline">{section.title}</Link>
+                                  <Link
+                                    to={section.href || "/"}
+                                    onClick={() => setIsPopoverOpen(false)}
+                                    className="w-full text-left text-xs font-semibold text-white hover:underline"
+                                  >
+                                    {section.title}
+                                  </Link>
                                 )}
                               </div>
                             );
@@ -996,20 +1014,27 @@ useEffect(() => {
                       <div className="flex-1 p-6 relative">
                         {hoveredSection ? (
                           (() => {
-                            const current = menuSections.find((s) => s.title === hoveredSection);
+                            const current = menuSections.find(
+                              (s) => s.title === hoveredSection
+                            );
                             if (!current) return null;
                             if (!current.items || current.items.length === 0) {
                               return (
                                 <div className="relative z-10 text-white">
                                   <div className="p-6">
-                                    <Link to={current.href || '/'} onClick={() => setIsPopoverOpen(false)} className="text-lg font-semibold hover:underline">{current.title}</Link>
+                                    <Link
+                                      to={current.href || "/"}
+                                      onClick={() => setIsPopoverOpen(false)}
+                                      className="text-lg font-semibold hover:underline"
+                                    >
+                                      {current.title}
+                                    </Link>
                                   </div>
                                 </div>
                               );
                             }
                             return (
                               <div className="relative">
-
                                 {/* Content Grid */}
                                 <div className="relative z-10 grid grid-cols-3 gap-6 p-6 mt-5">
                                   {current.items.map((item, idx) => (
@@ -1045,12 +1070,20 @@ useEffect(() => {
                             );
                           })()
                         ) : (
-                          <div className="text-slate-300 p-6">Survolez un titre à gauche pour voir les détails</div>
+                          <div className="text-slate-300 p-6">
+                            Survolez un titre à gauche pour voir les détails
+                          </div>
                         )}
                       </div>
                       <div className="absolute bottom-2 right-10 w-96 flex items-center justify-around z-50 gap-5 h-20">
                         <span>
-                          <Link to="/service" onClick={() => setIsPopoverOpen(false)} className="text-sm font-semibold hover:underline">Consultations & aides</Link>
+                          <Link
+                            to="/services-partners?section=partenaires"
+                            onClick={() => setIsPopoverOpen(false)}
+                            className="text-sm font-semibold hover:underline"
+                          >
+                            Consultations & aides
+                          </Link>
                         </span>
                         <Link
                           to="/login"
@@ -1086,14 +1119,22 @@ useEffect(() => {
               </Button>
             )}
             {/* notification icon for users — opens a modal (Sheet) with notifications */}
-            {role === 'user' && (
+            {role === "user" && (
               <>
-                <Sheet open={notifOpen} onOpenChange={(open) => { setNotifOpen(open); if (open) loadNotifications(); }}>
+                <Sheet
+                  open={notifOpen}
+                  onOpenChange={(open) => {
+                    setNotifOpen(open);
+                    if (open) loadNotifications();
+                  }}
+                >
                   <SheetTrigger asChild>
                     <button className="relative mr-3 hidden lg:flex items-center">
                       <Bell className="w-5 h-5 text-gray-700" />
                       {notifCount > 0 && (
-                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{notifCount}</span>
+                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                          {notifCount}
+                        </span>
                       )}
                     </button>
                   </SheetTrigger>
@@ -1102,7 +1143,12 @@ useEffect(() => {
                     <div className="flex flex-col gap-4 mb-4">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                          <h4 id="notifications-title" className="text-lg font-semibold">Notifications</h4>
+                          <h4
+                            id="notifications-title"
+                            className="text-lg font-semibold"
+                          >
+                            Notifications
+                          </h4>
                         </div>
                       </div>
                       {notifications.length > 0 && (
@@ -1114,7 +1160,9 @@ useEffect(() => {
                             className="flex items-center gap-2 text-sm"
                           >
                             <Eye className="h-4 w-4" />
-                            <span className="hidden sm:inline">Tout marquer comme lu</span>
+                            <span className="hidden sm:inline">
+                              Tout marquer comme lu
+                            </span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -1130,24 +1178,42 @@ useEffect(() => {
                     </div>
 
                     {notifLoading ? (
-                      <div className="text-center text-sm text-gray-500">Chargement...</div>
+                      <div className="text-center text-sm text-gray-500">
+                        Chargement...
+                      </div>
                     ) : notifications.length === 0 ? (
-                      <div className="text-center text-sm text-gray-500">Aucune notification.</div>
+                      <div className="text-center text-sm text-gray-500">
+                        Aucune notification.
+                      </div>
                     ) : (
                       <div className="space-y-3">
                         {notifications.map((n) => (
-                          <div key={n.id} className={`p-3 rounded-lg border transition-colors ${n.isRead ? 'bg-gray-50' : 'bg-white'}`}>
+                          <div
+                            key={n.id}
+                            className={`p-3 rounded-lg border transition-colors ${
+                              n.isRead ? "bg-gray-50" : "bg-white"
+                            }`}
+                          >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <div className="text-sm font-medium text-gray-800">{n.titre || 'Nouvelle notification'}</div>
-                                <div className="text-xs text-gray-500 mt-1">{n.statut} — {n.propertyId ? 'Bien lié' : 'Général'}</div>
+                                <div className="text-sm font-medium text-gray-800">
+                                  {n.titre || "Nouvelle notification"}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {n.statut} —{" "}
+                                  {n.propertyId ? "Bien lié" : "Général"}
+                                </div>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 w-8 p-0"
-                                  onClick={() => n.isRead ? handleMarkAsUnread(n.id) : handleMarkAsRead(n.id)}
+                                  onClick={() =>
+                                    n.isRead
+                                      ? handleMarkAsUnread(n.id)
+                                      : handleMarkAsRead(n.id)
+                                  }
                                 >
                                   {n.isRead ? (
                                     <EyeOff className="h-4 w-4 text-gray-500" />
@@ -1155,12 +1221,25 @@ useEffect(() => {
                                     <Eye className="h-4 w-4 text-blue-500" />
                                   )}
                                 </Button>
-                                <div className="text-xs text-gray-400">{n.createdAt ? new Date(n.createdAt).toLocaleDateString('fr-FR') : ''}</div>
+                                <div className="text-xs text-gray-400">
+                                  {n.createdAt
+                                    ? new Date(n.createdAt).toLocaleDateString(
+                                        "fr-FR"
+                                      )
+                                    : ""}
+                                </div>
                               </div>
                             </div>
                             {n.propertyId && (
                               <div className="mt-3">
-                                <a href={`/immobilier/${n.propertyId}`} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">Voir le bien</a>
+                                <a
+                                  href={`/immobilier/${n.propertyId}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-xs text-blue-600 hover:underline"
+                                >
+                                  Voir le bien
+                                </a>
                               </div>
                             )}
                           </div>
@@ -1222,17 +1301,23 @@ useEffect(() => {
                       </DropdownMenuItem>
 
                       {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/mes-commandes")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/mes-commandes")}
+                      >
                         <Package className="mr-2 h-4 w-4" />
                         Mes Commandes
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/demandes")}
+                      >
                         <ListCheck className="mr-2 h-4 w-4" />
                         Mes demandes de services
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/demandes-immobilier")}
+                        onClick={() =>
+                          navigate("/mon-compte/demandes-immobilier")
+                        }
                       >
                         <BookDashed className="mr-2 h-4 w-4" />
                         Mes demandes immobilieres
@@ -1243,7 +1328,9 @@ useEffect(() => {
                         <Calendar className="mr-2 h-4 w-4" />
                         Réservations
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/payement")}
+                      >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem>

@@ -39,9 +39,6 @@ const ServicesPartnersPage = () => {
     }
   }, [section]);
 
-  // Composant pour afficher seulement les services dans la vue "default"
-  
-
   // Header titles
   const renderHeaderTitles = () => {
     return (
