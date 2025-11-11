@@ -1,5 +1,5 @@
 // components/estimation/EstimationWizard.tsx
-import { useState, useRef,useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -133,7 +133,7 @@ const generatePDF = (result: EstimationResult, data: any, propertyTypes: any, co
   pdfContent.style.padding = '20px';
   pdfContent.style.fontFamily = 'Arial, sans-serif';
   pdfContent.style.color = '#1f2937';
-  
+
   // Header du PDF
   pdfContent.innerHTML = `
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
@@ -206,9 +206,9 @@ const generatePDF = (result: EstimationResult, data: any, propertyTypes: any, co
             <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; background: #f9fafb;">
               <div style="display: flex; align-items: center; margin-bottom: 8px;">
                 <span style="display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; 
-                  ${factor.impact === 'positive' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' : 
-                    factor.impact === 'negative' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' : 
-                    'background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;'}">
+                  ${factor.impact === 'positive' ? 'background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;' :
+      factor.impact === 'negative' ? 'background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' :
+        'background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;'}">
                   ${factor.impact === 'positive' ? '↑' : factor.impact === 'negative' ? '↓' : '→'} ${factor.factor}
                 </span>
               </div>
@@ -270,11 +270,11 @@ const generatePDF = (result: EstimationResult, data: any, propertyTypes: any, co
 function formatCoordinates(lat: any, lng: any): string {
   const latNum = typeof lat === 'number' ? lat : parseFloat(lat);
   const lngNum = typeof lng === 'number' ? lng : parseFloat(lng);
-  
+
   if (isNaN(latNum) || isNaN(lngNum)) {
     return 'Coordonnées non disponibles';
   }
-  
+
   return `${latNum.toFixed(2)}°, ${lngNum.toFixed(2)}°`;
 }
 
@@ -287,26 +287,26 @@ function getAllCountries() {
     { code: 'TN', name: 'Tunisia', nameFr: 'Tunisie', icon: Globe, lat: 33.8869, lng: 9.5375 },
     { code: 'SN', name: 'Senegal', nameFr: 'Sénégal', icon: Globe, lat: 14.4974, lng: -14.4524 },
     { code: 'CI', name: 'Ivory Coast', nameFr: 'Côte d\'Ivoire', icon: Globe, lat: 7.5400, lng: -5.5471 },
-    
+
     // Europe
     { code: 'FR', name: 'France', nameFr: 'France', icon: Landmark, lat: 46.603354, lng: 1.888334 },
     { code: 'DE', name: 'Germany', nameFr: 'Allemagne', icon: Landmark, lat: 51.165691, lng: 10.451526 },
     { code: 'IT', name: 'Italy', nameFr: 'Italie', icon: Landmark, lat: 41.87194, lng: 12.56738 },
     { code: 'ES', name: 'Spain', nameFr: 'Espagne', icon: Landmark, lat: 40.463667, lng: -3.74922 },
     { code: 'GB', name: 'United Kingdom', nameFr: 'Royaume-Uni', icon: Landmark, lat: 55.378051, lng: -3.435973 },
-    
+
     // Amériques
     { code: 'US', name: 'United States', nameFr: 'États-Unis', icon: Globe, lat: 37.09024, lng: -95.712891 },
     { code: 'CA', name: 'Canada', nameFr: 'Canada', icon: Globe, lat: 56.130366, lng: -106.346771 },
     { code: 'BR', name: 'Brazil', nameFr: 'Brésil', icon: Globe, lat: -14.235004, lng: -51.92528 },
     { code: 'MX', name: 'Mexico', nameFr: 'Mexique', icon: Globe, lat: 23.634501, lng: -102.552784 },
-    
+
     // Asie
     { code: 'CN', name: 'China', nameFr: 'Chine', icon: Globe, lat: 35.86166, lng: 104.195397 },
     { code: 'JP', name: 'Japan', nameFr: 'Japon', icon: Globe, lat: 36.204824, lng: 138.252924 },
     { code: 'IN', name: 'India', nameFr: 'Inde', icon: Globe, lat: 20.593684, lng: 78.96288 },
     { code: 'KR', name: 'South Korea', nameFr: 'Corée du Sud', icon: Globe, lat: 35.907757, lng: 127.766922 },
-    
+
     // Océanie
     { code: 'AU', name: 'Australia', nameFr: 'Australie', icon: Globe, lat: -25.274398, lng: 133.775136 },
     { code: 'NZ', name: 'New Zealand', nameFr: 'Nouvelle-Zélande', icon: Globe, lat: -40.900557, lng: 174.885971 }
@@ -319,14 +319,14 @@ function getAllCities() {
     { name: 'Antananarivo', country: 'Madagascar', icon: Building, lat: -18.8792, lng: 47.5079 },
     { name: 'Toamasina', country: 'Madagascar', icon: Building, lat: -18.1499, lng: 49.4023 },
     { name: 'Antsirabe', country: 'Madagascar', icon: Building, lat: -19.8660, lng: 47.0333 },
-    
+
     // France
     { name: 'Paris', country: 'France', icon: Landmark, lat: 48.8566, lng: 2.3522 },
     { name: 'Lyon', country: 'France', icon: Building, lat: 45.7640, lng: 4.8357 },
     { name: 'Marseille', country: 'France', icon: Building, lat: 43.2965, lng: 5.3698 },
     { name: 'Bordeaux', country: 'France', icon: Building, lat: 44.8378, lng: -0.5792 },
     { name: 'Nice', country: 'France', icon: Building, lat: 43.7102, lng: 7.2620 },
-    
+
     // Autres villes mondiales
     { name: 'Tokyo', country: 'Japan', icon: Landmark, lat: 35.6762, lng: 139.6503 },
     { name: 'New York', country: 'United States', icon: Landmark, lat: 40.7128, lng: -74.0060 },
@@ -342,13 +342,13 @@ function getAllRegions() {
     { name: 'Analamanga', country: 'Madagascar', icon: Mountain, lat: -18.8792, lng: 47.5079 },
     { name: 'Atsinanana', country: 'Madagascar', icon: Mountain, lat: -18.1499, lng: 49.4023 },
     { name: 'Vakinankaratra', country: 'Madagascar', icon: Mountain, lat: -19.8660, lng: 47.0333 },
-    
+
     // Régions françaises
     { name: 'Île-de-France', country: 'France', icon: Landmark, lat: 48.8566, lng: 2.3522 },
     { name: 'Auvergne-Rhône-Alpes', country: 'France', icon: Mountain, lat: 45.7640, lng: 4.8357 },
     { name: 'Provence-Alpes-Côte d\'Azur', country: 'France', icon: Palette, lat: 43.2965, lng: 5.3698 },
     { name: 'Nouvelle-Aquitaine', country: 'France', icon: Mountain, lat: 44.8378, lng: -0.5792 },
-    
+
     // Régions internationales
     { name: 'California', country: 'United States', icon: Palette, lat: 36.7783, lng: -119.4179 },
     { name: 'Texas', country: 'United States', icon: Mountain, lat: 31.9686, lng: -99.9018 },
@@ -449,7 +449,7 @@ function AILoading() {
           <p className="text-slate-600 max-w-md mx-auto leading-relaxed">
             Notre intelligence artificielle analyse votre bien en temps réel selon les critères du marché immobilier mondial
           </p>
-          
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -689,33 +689,94 @@ function EstimationWizard({
 
             return (
               <div key={s.number} className="flex flex-col items-center flex-1 relative">
+                {/* Cercle de l'étape */}
                 <motion.div
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold
-                    border-2 transition-all duration-300 relative z-10
-                    ${isCompleted ? 'bg-blue-500 border-blue-500 text-white shadow-lg' :
-                      isCurrent ? 'bg-white border-blue-500 text-blue-500 shadow-lg ring-2 ring-blue-200' :
-                        'bg-white border-slate-300 text-slate-400'}
-                  `}
-                  whileHover={{ scale: isUpcoming ? 1.1 : 1 }}
+      w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold
+      border-2 transition-all duration-500 relative z-10
+      ${isCompleted
+                      ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white shadow-lg shadow-emerald-200'
+                      : isCurrent
+                        ? 'bg-white border-3 border-blue-500 text-blue-600 shadow-2xl ring-4 ring-blue-100 scale-110'
+                        : 'bg-slate-50 border-slate-300 text-slate-400'
+                    }
+    `}
+                  whileHover={{
+                    scale: 1.1,
+                    transition: { type: "spring", stiffness: 500 }
+                  }}
+                  animate={{
+                    scale: isCurrent ? 1.1 : 1,
+                    boxShadow: isCurrent
+                      ? "0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.1)"
+                      : isCompleted
+                        ? "0 10px 15px -3px rgba(16, 185, 129, 0.3)"
+                        : "0 1px 3px 0px rgba(0, 0, 0, 0.1)"
+                  }}
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="w-5 h-5" />
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                    </motion.div>
                   ) : (
                     <IconComponent className="w-4 h-4" />
                   )}
                 </motion.div>
 
+                {/* Ligne de progression */}
                 {index < steps.length - 1 && (
-                  <div className={`absolute top-5 left-1/2 w-full h-1 -z-10 ${s.number < step ? 'bg-blue-500' : 'bg-slate-200'
-                    }`}></div>
+                  <div className="absolute top-6 left-1/2 w-full h-1 z-0 overflow-hidden">
+                    {/* Ligne de fond statique */}
+                    <div className="absolute inset-0 bg-slate-200 rounded-full"></div>
+
+                    {/* Ligne de progression animée */}
+                    <motion.div
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 via-green-400 to-green-300 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: s.number < step ? '100%' : '0%' }}
+                      transition={{
+                        duration: 0.8,
+                        ease: [0.4, 0, 0.2, 1],
+                        delay: s.number < step ? 0.3 : 0
+                      }}
+                    />
+
+                    {/* Effet de brillance sur la ligne de progression */}
+                    {s.number < step && (
+                      <motion.div
+                        className="absolute inset-y-0 left-0 w-4 bg-white opacity-30 rounded-full"
+                        animate={{ x: ['0%', '100%'] }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    )}
+                  </div>
                 )}
 
-                <span className={`text-xs mt-3 font-medium text-center px-2 ${isCurrent ? 'text-blue-600 font-semibold' :
-                    isCompleted ? 'text-blue-600' : 'text-slate-500'
-                  }`}>
+                {/* Label */}
+                <motion.span
+                  className={`
+      text-xs mt-3 font-medium text-center px-2 max-w-[120px] leading-tight
+      ${isCurrent
+                      ? 'text-blue-800 font-bold bg-blue-50 px-3 py-1 rounded-full'
+                      : isCompleted
+                        ? 'text-green-700 font-semibold'
+                        : 'text-slate-500'
+                    }
+    `}
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                >
                   {s.title}
-                </span>
+                </motion.span>
               </div>
             );
           })}
@@ -743,10 +804,10 @@ function Step1({ data, onUpdate, onNext, propertyTypes }: any) {
     <div className="text-center">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Quel type de bien souhaitez-vous estimer ?</h2>
-        <p className="text-slate-600">Sélectionnez le type de bien qui correspond à votre propriété</p>
+        <p className="text-slate-600 text-xs">Sélectionnez le type de bien qui correspond à votre propriété</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-2 mb-8">
         {propertyTypes.map((type: any) => {
           const IconComponent = type.icon;
           const isSelected = data.propertyType === type.value;
@@ -754,10 +815,8 @@ function Step1({ data, onUpdate, onNext, propertyTypes }: any) {
           return (
             <motion.button
               key={type.value}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
               className={`
-                p-6 rounded-xl border-2 transition-all duration-200 flex flex-col items-center
+                px-6 py-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center
                 shadow-sm hover:shadow-md
                 ${isSelected
                   ? 'border-blue-500 bg-blue-50 shadow-md ring-2 ring-blue-200'
@@ -769,9 +828,9 @@ function Step1({ data, onUpdate, onNext, propertyTypes }: any) {
                 p-3 rounded-lg mb-3 transition-colors
                 ${isSelected ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}
               `}>
-                <IconComponent className="w-6 h-6" />
+                <IconComponent className="w-4 h-4" />
               </div>
-              <div className="font-semibold text-slate-900">{type.label}</div>
+              <div className="font-semibold text-slate-900 text-xs">{type.label}</div>
             </motion.button>
           );
         })}
@@ -851,7 +910,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
               transition={{ delay: index * 0.1 }}
               className="bg-slate-50 rounded-xl px-6 py-2 border border-slate-200 hover:border-blue-300 transition-colors"
             >
-              <label className="block text-sm font-semibold text-slate-700 mb-3  items-center">
+              <label className="flex text-sm font-semibold text-slate-700 mb-3  items-center">
                 <IconComponent className="w-4 h-4 mr-2 text-blue-500" />
                 {input.label}
               </label>
@@ -876,7 +935,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
         })}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex justify-end gap-4">
         <motion.button
           onClick={onBack}
           whileHover={{ scale: 1.02 }}
@@ -947,7 +1006,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   // Recherche en temps réel avec suggestions
   const handleSearchChange = async (query: string) => {
     setSearchQuery(query);
-    
+
     if (query.length < 2) {
       setShowSuggestions(false);
       setSuggestions([]);
@@ -964,11 +1023,11 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   const generateLocalSuggestions = (query: string) => {
     const queryLower = query.toLowerCase();
     const allCountries = getAllCountries();
-    
+
     return [
       // Correspondances exactes de pays
       ...allCountries
-        .filter(country => 
+        .filter(country =>
           country.name.toLowerCase().includes(queryLower) ||
           country.nameFr?.toLowerCase().includes(queryLower)
         )
@@ -980,10 +1039,10 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
           icon: country.icon,
           exactMatch: true
         })),
-      
+
       // Villes principales correspondantes
       ...getAllCities()
-        .filter(city => 
+        .filter(city =>
           city.name.toLowerCase().includes(queryLower) ||
           city.country.toLowerCase().includes(queryLower)
         )
@@ -1001,19 +1060,19 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   const handleAddressSearch = async (query?: string) => {
     const searchTerm = query || searchQuery;
     if (!searchTerm.trim() || searchTerm.length < 3) return;
-    
+
     setIsSearching(true);
     setShowResults(false);
     setShowSuggestions(false);
-    
+
     try {
       const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTerm)}&limit=10&addressdetails=1&accept-language=fr`;
-      
+
       const response = await fetch(searchUrl);
-      
+
       if (response.ok) {
         const results = await response.json();
-        
+
         const enrichedResults = results.map((result: any) => ({
           ...result,
           type: determineResultType(result),
@@ -1021,7 +1080,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
           lat: parseFloat(result.lat) || 0,
           lon: parseFloat(result.lon) || 0
         })).sort((a: any, b: any) => b.importance - a.importance);
-        
+
         setSearchResults(enrichedResults);
         setShowResults(true);
       }
@@ -1059,7 +1118,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     ];
 
     const localResults = allLocations
-      .filter(location => 
+      .filter(location =>
         location.name.toLowerCase().includes(queryLower) ||
         location.country.toLowerCase().includes(queryLower) ||
         location.nameFr?.toLowerCase().includes(queryLower)
@@ -1072,19 +1131,19 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
 
   const handleResultSelect = (result: any) => {
     let locationData;
-    
+
     if (result.lat && result.lon) {
       locationData = createLocationFromOSM(result);
     } else {
       locationData = createLocationFromLocal(result);
     }
-    
+
     onUpdate({ location: locationData });
     setSearchQuery(locationData.address);
     setShowResults(false);
     setShowSuggestions(false);
     setSearchResults([]);
-    
+
     // Remettre le focus sur le champ après sélection
     setTimeout(() => {
       if (searchInputRef.current) {
@@ -1102,10 +1161,10 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   // Création depuis OSM
   const createLocationFromOSM = (result: any) => {
     const address = result.address;
-    
+
     const lat = typeof result.lat === 'number' ? result.lat : parseFloat(result.lat) || 0;
     const lng = typeof result.lon === 'number' ? result.lon : parseFloat(result.lon) || 0;
-    
+
     return {
       address: result.display_name,
       city: extractCityFromOSM(result),
@@ -1123,11 +1182,11 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   const createLocationFromLocal = (result: any) => {
     const isCity = result.type === 'city';
     const isRegion = result.type === 'region';
-    
+
     return {
-      address: isCity ? `${result.name}, ${result.country}` : 
-               isRegion ? `${result.name}, ${result.country}` : 
-               result.name,
+      address: isCity ? `${result.name}, ${result.country}` :
+        isRegion ? `${result.name}, ${result.country}` :
+          result.name,
       city: isCity ? result.name : '',
       country: result.country,
       region: isRegion ? result.name : '',
@@ -1150,7 +1209,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
     setShowResults(false);
     setShowSuggestions(false);
     onUpdate({ location: null });
-    
+
     // Remettre le focus après suppression
     setTimeout(() => {
       if (searchInputRef.current) {
@@ -1165,7 +1224,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
       const IconComponent = result.icon;
       return <IconComponent className="w-4 h-4" />;
     }
-    
+
     switch (result.type) {
       case 'city': return <Building className="w-4 h-4" />;
       case 'region': return <Mountain className="w-4 h-4" />;
@@ -1193,7 +1252,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Localisation du bien</h2>
         <p className="text-slate-600 text-sm">Recherchez n'importe quelle ville, région ou pays dans le monde</p>
       </div>
-      
+
       <div className="space-y-6 mb-8">
         {/* Barre de recherche principale */}
         <div className="bg-white rounded-xl p-6 border border-slate-200">
@@ -1211,7 +1270,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
               </motion.span>
             )}
           </h3>
-          
+
           <div className="relative" ref={searchInputRef}>
             <div className="flex gap-2">
               <div className="flex-1 relative">
@@ -1255,7 +1314,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                 <Search className="w-5 h-5" />
               </motion.button>
             </div>
-            
+
             {/* Indicateur de recherche automatique */}
             {searchQuery.length > 0 && searchQuery.length < 3 && (
               <motion.div
@@ -1268,7 +1327,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                 </div>
               </motion.div>
             )}
-            
+
             {/* Suggestions en temps réel */}
             {showSuggestions && suggestions.length > 0 && (
               <motion.div
@@ -1300,8 +1359,8 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                           </div>
                           <div className="text-xs text-slate-600 flex items-center mt-1">
                             <MapPin className="w-3 h-3 mr-1" />
-                            {suggestion.type === 'city' ? 'Ville' : 
-                             suggestion.type === 'region' ? 'Région' : 'Pays'}
+                            {suggestion.type === 'city' ? 'Ville' :
+                              suggestion.type === 'region' ? 'Région' : 'Pays'}
                             {suggestion.exactMatch && (
                               <span className="ml-2 px-1 bg-green-100 text-green-800 text-xs rounded">Correspondance exacte</span>
                             )}
@@ -1313,7 +1372,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                 })}
               </motion.div>
             )}
-            
+
             {/* Résultats de recherche */}
             {showResults && searchResults.length > 0 && (
               <motion.div
@@ -1353,7 +1412,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
               </motion.div>
             )}
           </div>
-          
+
           <div className="flex items-center justify-between mt-2">
             <p className="text-xs text-slate-500">
               Recherche automatique activée • Monde entier • Villes, régions, pays
@@ -1402,7 +1461,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
             })}
           </div>
         </div>
-        
+
         {/* Localisation confirmée */}
         {data.location && (
           <motion.div
@@ -1417,9 +1476,9 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
                   <span className="font-semibold">Localisation confirmée ✓</span>
                   <p className="text-sm">{data.location.address}</p>
                   <p className="text-xs opacity-75">
-                    {data.location.type === 'city' ? 'Ville' : 
-                     data.location.type === 'region' ? 'Région' : 
-                     data.location.type === 'country' ? 'Pays' : 'Lieu'}
+                    {data.location.type === 'city' ? 'Ville' :
+                      data.location.type === 'region' ? 'Région' :
+                        data.location.type === 'country' ? 'Pays' : 'Lieu'}
                     {data.location.country && ` • ${data.location.country}`}
                     {` • ${formatCoordinates(data.location.lat, data.location.lng)}`}
                   </p>
@@ -1435,8 +1494,8 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
           </motion.div>
         )}
       </div>
-      
-      <div className="flex gap-4">
+
+      <div className="flex justify-end gap-4">
         <motion.button
           onClick={onBack}
           whileHover={{ scale: 1.02 }}
@@ -1467,12 +1526,12 @@ function Step4({ data, onUpdate, onNext, onBack }: any) {
     <div>
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">État et équipements</h2>
-        <p className="text-slate-600">Décrivez l'état de votre bien et ses équipements</p>
+        <p className="text-slate-600 text-xs">Décrivez l'état de votre bien et ses équipements</p>
       </div>
 
       <div className="space-y-8 mb-8">
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-4 flex items-center">
+          <label className="text-sm font-semibold text-slate-700 mb-4 flex items-center">
             <Wrench className="w-5 h-5 mr-2 text-blue-500" />
             État général du bien
           </label>
@@ -1504,7 +1563,7 @@ function Step4({ data, onUpdate, onNext, onBack }: any) {
           <label className="block text-sm font-semibold text-slate-700 mb-4">
             Équipements et extras
           </label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
             {featuresConfig.map((feature, index) => {
               const IconComponent = feature.icon;
               const isSelected = data.features[feature.key as keyof typeof data.features];
@@ -1545,7 +1604,7 @@ function Step4({ data, onUpdate, onNext, onBack }: any) {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 justify-end">
         <motion.button
           onClick={onBack}
           whileHover={{ scale: 1.02 }}
@@ -1603,7 +1662,7 @@ function Step5({
           Erreur lors de l'estimation
         </h3>
         <p className="text-slate-600 mb-6">{error}</p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex gap-4 justify-end">
           <button
             onClick={onBack}
             className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center border border-slate-300"
@@ -1662,7 +1721,7 @@ function Step5({
           <CheckCircle2 className="w-8 h-8 text-green-500" />
         </motion.div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Vérifiez votre estimation</h2>
-        <p className="text-slate-600">Toutes les informations sont-elles correctes ?</p>
+        <p className="text-slate-600 text-xs">Toutes les informations sont-elles correctes ?</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -1673,44 +1732,41 @@ function Step5({
               Caractéristiques principales
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
+              <div className='flex gap-2'>
                 <span className="text-slate-600">Type:</span>
                 <p className="font-semibold">{getPropertyTypeLabel(data.propertyType)}</p>
               </div>
-              <div>
+              <div className='flex gap-2'>
                 <span className="text-slate-600">Surface:</span>
                 <p className="font-semibold">{data.surface}m²</p>
               </div>
-              <div>
+              <div className='flex gap-2'>
                 <span className="text-slate-600">Pièces:</span>
                 <p className="font-semibold">{data.rooms}</p>
               </div>
-              <div>
+              <div className='flex gap-2'>
                 <span className="text-slate-600">Chambres:</span>
                 <p className="font-semibold">{data.bedrooms}</p>
               </div>
-              <div>
+              <div className='flex gap-2'>
                 <span className="text-slate-600">SDB:</span>
                 <p className="font-semibold">{data.bathrooms}</p>
               </div>
-              <div>
+              <div className='flex gap-2'>
                 <span className="text-slate-600">État:</span>
                 <p className="font-semibold">{getConditionLabel(data.condition)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-            <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center">
-              <MapPin className="w-5 h-5 mr-2 text-blue-500" />
-              Localisation
+          <div className="relative bg-slate-50 rounded-2xl p-6 border flex gap-2 border-slate-200">
+            <h3 className="font-bold text-slate-900 text-md flex items-center">
+              <MapPin className="w-4 h-4 mr-2 text-blue-500" />
+              Localisation :
             </h3>
-            <div className="flex items-start">
-              <MapPin className="w-4 h-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-slate-900">{data.location?.address}</p>
-                <p className="text-slate-600 text-sm">{data.location?.city} {data.location?.postalCode}</p>
-              </div>
+            <div className=" flex  flex-col">
+                <p className="mt-1 font-semibold text-slate-900 text-xs">{data.location?.address}</p>
+                <p className="text-slate-600 text-xs absolute right-2 bottom-2">{data.location?.city} {data.location?.postalCode}</p>
             </div>
           </div>
         </div>
@@ -1853,8 +1909,8 @@ function EstimationResult({ result, data, propertyTypes, conditions, onNewEstima
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
         className={`rounded-2xl p-8 text-center ${result.isFallback
-            ? 'bg-yellow-100 border border-yellow-200'
-            : 'bg-blue-100 border border-blue-200'
+          ? 'bg-yellow-100 border border-yellow-200'
+          : 'bg-blue-100 border border-blue-200'
           }`}
       >
         <div className="text-sm text-slate-700 mb-2">Valeur estimée</div>

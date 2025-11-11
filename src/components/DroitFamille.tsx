@@ -74,12 +74,12 @@ export default function DroitFamille() {
 
     const getServiceColor = (color: string) => {
         const colors = {
-            blue: 'from-blue-500 to-cyan-500',
-            purple: 'from-purple-500 to-pink-500',
-            green: 'from-green-500 to-emerald-500',
-            orange: 'from-orange-500 to-red-500',
-            red: 'from-red-500 to-pink-500',
-            indigo: 'from-indigo-500 to-blue-500'
+            blue: 'from-slate-500 to-black',
+            purple: 'from-purple-900 to-slate-900',
+            green: 'from-green-900 to-emerald-900',
+            orange: 'from-orange-900 to-red-950',
+            red: 'from-red-900 to-pink-950',
+            indigo: 'from-indigo-950 to-blue-950'
         };
         return colors[color as keyof typeof colors] || 'from-gray-500 to-gray-600';
     };
@@ -126,7 +126,7 @@ export default function DroitFamille() {
                                 className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 group p-6"
                             >
                                 <div className="flex items-center mb-4">
-                                    <div className="p-3 bg-blue-100 rounded-xl text-blue-600 mr-4 group-hover:scale-110 transition-transform">
+                                    <div className="p-3 bg-blue-100 rounded-xl text-slate-600 mr-4 group-hover:scale-110 transition-transform">
                                         {domain.icon}
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900">{domain.title}</h3>

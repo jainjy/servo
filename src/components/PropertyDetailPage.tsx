@@ -255,21 +255,21 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   const mm = gsap.matchMedia();
   useEffect(() => {
     mm.add("(min-width: 1024px)", () => {
-    ScrollTrigger.create({
-      trigger: "#agent",
-      start: "top 90px",
-      end: "bottom 55px",
-      pin: true,
-      scrub: 1,
-      //markers: true
-    });
+      ScrollTrigger.create({
+        trigger: "#agent",
+        start: "top 90px",
+        end: "bottom 55px",
+        pin: true,
+        scrub: 1,
+        //markers: true
+      });
     })
   }, []);
 
   return (
     <div className="min-h-screen bg-background pt-16">
       {/* Header avec bouton retour */}
-      <div className="container mx-auto px-4 py-4">
+      {/* <div className="container mx-auto px-4 py-4">
         <Button
           variant="ghost"
           onClick={() => navigate("/immobilier")}
@@ -278,17 +278,17 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour aux propriétés
         </Button>
-      </div>
+      </div> */}
 
-      <div className="container mx-auto px-4 pb-10">
+      <div className="container mx-auto px-4 py-10">
         {/* Galerie d'images et sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
           {/* Galerie principale */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 bg-white p-2 rounded-xl shadow-lg">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Image principale */}
               <div className="lg:col-span-2">
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
                   {property.images && property.images.length > 0 ? (
                     <img
                       src={property.images[selectedImage]}
@@ -341,8 +341,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                            ? "border-primary"
-                            : "border-transparent"
+                          ? "border-primary"
+                          : "border-transparent"
                           }`}
                       >
                         <img
@@ -410,7 +410,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
                 <div className="space-y-3">
                   {property.owner.phone && (
-                    <Button className="w-full" onClick={handleContact}>
+                    <Button className="w-full bg-slate-900 hover:bg-slate-900/70" onClick={handleContact}>
                       <Phone className="h-4 w-4 mr-2" />
                       {property.owner.phone}
                     </Button>
@@ -448,7 +448,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                   </div>
 
                   <Button
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                    className={`w-full ${!isAvailable ? "bg-black/80 cursor-move" : "bg-slate-950"
+                      }`}
                     size="lg"
                     onClick={handleScheduleVisit}
                     disabled={!isAvailable}
@@ -479,15 +480,15 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         </div>
 
         {/* Contenu principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 bg-white p-2 rounded-lg shadow-lg">
           {/* Contenu principal */}
           <div className="lg:col-span-3 space-y-8">
             {/* En-tête */}
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-4">
+              <h1 className="text-2xl lg:text-2xl font-bold mb-4">
                 {property.title}
               </h1>
-              <div className="flex items-center gap-2 text-muted-foreground mb-4">
+              <div className="flex items-center text-sm gap-2 text-muted-foreground mb-4">
                 <MapPin className="h-5 w-5" />
                 <span>{getFullAddress()}</span>
               </div>
@@ -496,8 +497,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y">
                 {property.surface && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Ruler className="h-5 w-5 text-primary" />
+                    <div className="p-2 bg-slate-900/10 rounded-lg">
+                      <Ruler className="h-5 w-5 text-slate-900" />
                     </div>
                     <div>
                       <div className="font-semibold">{property.surface} m²</div>
@@ -509,8 +510,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
                 {property.bedrooms && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Bed className="h-5 w-5 text-primary" />
+                    <div className="p-2 bg-slate-900/10 rounded-lg">
+                      <Bed className="h-5 w-5 text-slate-900" />
                     </div>
                     <div>
                       <div className="font-semibold">{property.bedrooms}</div>
@@ -522,8 +523,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
                 {property.bathrooms && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Bath className="h-5 w-5 text-primary" />
+                    <div className="p-2 bg-slate-900/10 rounded-lg">
+                      <Bath className="h-5 w-5 text-slate-900" />
                     </div>
                     <div>
                       <div className="font-semibold">{property.bathrooms}</div>
@@ -535,8 +536,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
                 {property.rooms && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Home className="h-5 w-5 text-primary" />
+                    <div className="p-2 bg-slate-900/10 rounded-lg">
+                      <Home className="h-5 w-5 text-slate-900" />
                     </div>
                     <div>
                       <div className="font-semibold">{property.rooms}</div>

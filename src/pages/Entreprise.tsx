@@ -455,12 +455,12 @@ const Entreprise = () => {
       >
         <motion.div
           variants={itemVariants}
-          className="text-center mb-0 lg:mb-16"
+          className="text-center mb-0 lg:mb-8"
         >
           <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
             Services <span className="text-slate-900">d'Entreprise</span>
           </h1>
-          <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto mb-8">
+          <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto mb-8">
             Tous les services essentiels pour le développement et la gestion de
             votre entreprise
           </p>
@@ -610,18 +610,18 @@ const Entreprise = () => {
         <div className="container mx-auto px-4">
           <motion.div
             variants={itemVariants}
-            className="text-center mb-4 lg:mb-16"
+            className="text-center mb-4 lg:mb-8"
           >
             <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
               Devenir <span className="text-slate-900">Partenaire</span>
             </h1>
-            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto mb-4 lg:mb-8">
+            <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto mb-4 lg:mb-8">
               Rejoignez notre réseau d'experts et développez votre activité
             </p>
           </motion.div>
 
           {/* Filtres et actions */}
-          <motion.div variants={itemVariants} className="mb-12">
+          <motion.div variants={itemVariants} className="mb-8">
             <div className="flex flex-wrap gap-4 mb-8 justify-center">
               {[
                 { label: "Présentation partenaires", value: "presentation" },
@@ -678,7 +678,7 @@ const Entreprise = () => {
                 <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
                   {/* Badge */}
                   <motion.div
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
+                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-orange-700"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.5 }}

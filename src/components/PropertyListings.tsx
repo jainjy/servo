@@ -1084,7 +1084,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           <div className="flex flex-wrap items-center gap-1">
             <Button
               variant={activeTab === 'tous' ? 'default' : 'outline'}
-              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'tous' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === 'tous' ? 'bg-slate-900 text-primary-foreground hover:bg-transparent' : 'border-2'}`}
               onClick={() => setActiveTab('tous')}
             >
               TOUS
@@ -1092,21 +1092,21 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
             <Button
               variant={activeTab === 'achat' ? 'default' : 'outline'}
-              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'achat' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === 'achat' ? 'bg-slate-900 text-primary-foreground hover:bg-transparent' : 'border-2'}`}
               onClick={() => setActiveTab('achat')}
             >
               ACHAT
             </Button>
             <Button
               variant={activeTab === 'location' ? 'default' : 'outline'}
-              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'location' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === 'location' ? 'bg-slate-900 text-primary-foreground hover:bg-transparent' : 'border-2'}`}
               onClick={() => setActiveTab('location')}
             >
               LOCATION LONGUE DURÉE
             </Button>
             <Button
               variant={activeTab === 'saisonniere' ? 'default' : 'outline'}
-              className={`px-2 py-1 text-xs lg:p-4 lg:text-sm ${activeTab === 'saisonniere' ? 'bg-primary text-primary-foreground' : 'border-2'}`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === 'saisonniere' ? 'bg-slate-900 text-primary-foreground hover:bg-transparent' : 'border-2'}`}
               onClick={() => setActiveTab('saisonniere')}
             >
               LOCATION SAISONNIÈRE
@@ -1340,7 +1340,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           </div>
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>RAYON</span>
+              <span className="font-semibold">RAYON</span>
               <span className="font-medium">{radiusKm} Km</span>
             </div>
             <Slider
@@ -1555,7 +1555,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                         {/* Boutons d'action */}
                         <div className="flex gap-1">
                           <button
-                            className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition disabled:opacity-60 disabled:bg-orange-600"
+                            className="w-full bg-slate-900 text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-slate-900/90 transition disabled:opacity-60 disabled:bg-orange-600"
                             onClick={(e) => handleDemanderVisite(property, e)}
                             disabled={!!sentRequests?.[property?.id]}
                           >
