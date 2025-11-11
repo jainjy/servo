@@ -31,6 +31,8 @@ import {
   MapPin,
   Users,
   ShoppingCart,
+  Wine,
+  Utensils,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -193,15 +195,24 @@ const Alimentation = () => {
     await fetchProducts();
   };
 
-  const handleCategoryClick = (category, section) => {
+  // CORRIGÉ: Fonction pour naviguer vers la catégorie
+  const handleCategoryClick = (category) => {
+    console.log("🟢 Catégorie cliquée:", category);
+
     const categoryData = {
       name: category.name,
       description: category.description,
       image: category.image,
-      section: section,
+      foodCategory: category.foodCategory,
+      iconName: category.iconName
     };
 
-    navigate(`/alimentation/categorie/${encodeURIComponent(category.name)}`, {
+    // DEBUG: Vérifier les données avant navigation
+    console.log("📋 Données de navigation:", categoryData);
+    console.log("🔗 URL de navigation:", `/alimentation/food-category/${encodeURIComponent(category.foodCategory)}`);
+
+    // Utiliser foodCategory pour la navigation
+    navigate(`/alimentation/food-category/${encodeURIComponent(category.foodCategory)}`, {
       state: categoryData,
     });
   };
@@ -216,113 +227,161 @@ const Alimentation = () => {
     return categoryCounts[categoryName] || 0;
   };
 
-  // Données statiques pour les catégories alimentaires
-  const fruitsCategories = [
+  // Données pour les 4 nouvelles sections basées sur foodCategory
+  const sections = [
     {
-      name: "Fruits Frais",
-      iconName: "Apple",
-      description: "Fruits de saison bio et locaux",
-      image:
-        "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      id: "cours-epicerie",
+      title: "Cours & Epicerie",
+      icon: ShoppingCart,
+      description: "Produits frais et essentiels du quotidien",
     },
     {
-      name: "Fruits Exotiques",
-      iconName: "Sparkles",
-      description: "Mangues, ananas, fruits de la passion",
-      image:
-        "https://images.unsplash.com/photo-1550253006-0754c2af5a4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      id: "boulangerie-charcuterie",
+      title: "Boulangerie & Charcuterie",
+      icon: ChefHat,
+      description: "Pains, charcuteries et fromages artisanaux",
     },
     {
-      name: "Fruits Rouges",
-      iconName: "Heart",
-      description: "Fraises, framboises, myrtilles",
-      image:
-        "https://images.unsplash.com/photo-1577069861033-55d04ce4b9c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      id: "cave-vins",
+      title: "Cave & Vins",
+      icon: Wine,
+      description: "Vins, spiritueux et champagnes sélectionnés",
     },
     {
-      name: "Agrumes",
-      iconName: "Zap",
-      description: "Oranges, citrons, pamplemousses",
-      image:
-        "https://images.unsplash.com/photo-1547514701-42782101795e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
+      id: "restaurant",
+      title: "Restaurant",
+      icon: Utensils,
+      description: "Plats préparés et spécialités maison",
+    }
   ];
 
-  const legumesCategories = [
-    {
-      name: "Légumes Frais",
-      iconName: "Carrot",
-      description: "Légumes de saison bio et locaux",
-      image:
-        "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Légumes Racines",
-      iconName: "Carrot",
-      description: "Carottes, pommes de terre, betteraves",
-      image:
-        "https://images.unsplash.com/photo-1598171707953-eb0be8d8b8e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Salades & Herbes",
-      iconName: "Leaf",
-      description: "Laitues, basilic, persil, coriandre",
-      image:
-        "https://images.unsplash.com/photo-1595535873420-a5991951dbeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Légumes Anciens",
-      iconName: "Sparkles",
-      description: "Variétés rares et oubliées",
-      image:
-        "https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-  ];
+  // Fonction pour obtenir les catégories par section
+  const getCategoriesForSection = (section) => {
+    const categoryMapping = {
+      "cours-epicerie": [
+        {
+          name: "Fruits Frais",
+          foodCategory: "fruits",
+          iconName: "Apple",
+          description: "Fruits de saison bio et locaux",
+          image: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Légumes Frais",
+          foodCategory: "legumes",
+          iconName: "Carrot",
+          description: "Légumes de saison bio et locaux",
+          image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Épicerie Bio",
+          foodCategory: "epicerie",
+          iconName: "Wheat",
+          description: "Pâtes, riz, céréales bio",
+          image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Produits Laitiers",
+          foodCategory: "produits-laitiers",
+          iconName: "Milk",
+          description: "Lait, fromages, yaourts bio",
+          image: "https://images.unsplash.com/photo-1566772940196-0e2e789813d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        }
+      ],
+      "boulangerie-charcuterie": [
+        {
+          name: "Boulangerie",
+          foodCategory: "boulangerie",
+          iconName: "Wheat",
+          description: "Pains artisanaux et viennoiseries",
+          image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Pâtisserie",
+          foodCategory: "patisseries",
+          iconName: "Sparkles",
+          description: "Gâteaux et desserts artisanaux",
+          image: "https://images.unsplash.com/photo-1555507036-ab794f27d2e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Charcuterie",
+          foodCategory: "charcuterie",
+          iconName: "ChefHat",
+          description: "Saucissons, jambons, pâtés",
+          image: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Fromagerie",
+          foodCategory: "fromages",
+          iconName: "Milk",
+          description: "Fromages affinés et frais",
+          image: "https://images.unsplash.com/photo-1486297678162-eb2a1b331e84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        }
+      ],
+      "cave-vins": [
+        {
+          name: "Vins Rouges",
+          foodCategory: "vins-rouges",
+          iconName: "Heart",
+          description: "Cépages français et internationaux",
+          image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Vins Blancs",
+          foodCategory: "vins-blancs",
+          iconName: "Sparkles",
+          description: "Vins frais et fruités",
+          image: "https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Champagnes",
+          foodCategory: "champagnes",
+          iconName: "Zap",
+          description: "Champagnes et vins effervescents",
+          image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Spiritueux",
+          foodCategory: "spiritueux",
+          iconName: "Flame",
+          description: "Whisky, vodka, gin et rhum",
+          image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        }
+      ],
+      "restaurant": [
+        {
+  name: "Plats Préparés",
+  foodCategory: "plats-prepares",
+  iconName: "ChefHat",
+  description: "Plats frais préparés par nos chefs",
+  image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+},
+        {
+          name: "Sandwichs & Salades",
+          foodCategory: "sandwichs",
+          iconName: "Leaf",
+          description: "Préparations fraîches du jour",
+          image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Pâtisseries Maison",
+          foodCategory: "patisseries",
+          iconName: "Heart",
+          description: "Desserts et pâtisseries fraîches",
+          image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
+        {
+          name: "Boissons Chaudes",
+          foodCategory: "boissons-chaudes",
+          iconName: "Coffee",
+          description: "Cafés, thés et chocolats chauds",
+          image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        }
+      ]
+    };
 
-  const autresCategories = [
-    {
-      name: "Produits Laitiers",
-      iconName: "Milk",
-      description: "Lait, fromages, yaourts bio",
-      image:
-        "https://images.unsplash.com/photo-1566772940196-0e2e789813d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Boucherie",
-      iconName: "ChefHat",
-      description: "Viandes fraîches et volailles",
-      image:
-        "https://images.unsplash.com/photo-1604503468506-a8da13d82791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Poissonnerie",
-      iconName: "Fish",
-      description: "Poissons et fruits de mer frais",
-      image:
-        "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Épicerie Bio",
-      iconName: "Wheat",
-      description: "Pâtes, riz, céréales bio",
-      image:
-        "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Boulangerie",
-      iconName: "Wheat",
-      description: "Pains artisanaux et viennoiseries",
-      image:
-        "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      name: "Boissons",
-      iconName: "Coffee",
-      description: "Jus, vins, boissons healthy",
-      image:
-        "https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-    },
-  ];
+    return categoryMapping[section.id] || [];
+  };
 
   // Fonction pour obtenir l'icône par nom
   const getIconByName = (iconName) => {
@@ -344,33 +403,18 @@ const Alimentation = () => {
     return icons[iconName] || Apple;
   };
 
-  // Filtrer les catégories basées sur la recherche et exclure celles avec 0 produit
-  const filteredFruits = fruitsCategories.filter(
-    (category) =>
-      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        category.description
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0
-  );
+  // Filtrer les sections basées sur les produits disponibles
+  const filteredSections = sections.map(section => {
+    const categories = getCategoriesForSection(section);
+    const filteredCategories = categories.filter(
+      category => getProductCount(category.name) > 0
+    );
 
-  const filteredLegumes = legumesCategories.filter(
-    (category) =>
-      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        category.description
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0
-  );
-
-  const filteredAutres = autresCategories.filter(
-    (category) =>
-      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        category.description
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0
-  );
+    return {
+      ...section,
+      categories: filteredCategories
+    };
+  }).filter(section => section.categories.length > 0);
 
   return (
     <div className="min-h-screen relative pt-16 overflow-hidden bg-[#F6F8FA]">
@@ -380,7 +424,6 @@ const Alimentation = () => {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
-            backgroundAttachment: "fixed"
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -410,10 +453,10 @@ const Alimentation = () => {
           {/* En-tête avec animation */}
           <div className="bg-white/90 py-5 rounded-lg backdrop-blur-sm">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className=" text-xl tracking-widest lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#00C2A8] bg-clip-text text-transparent">
+              <h1 className="azonix text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#00C2A8] bg-clip-text text-transparent">
                 Alimentation & Épicerie
               </h1>
-              <p className="text-sm px-2 lg:text-md text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm px-2 lg:text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
                 Découvrez nos produits frais, bio et locaux pour une
                 alimentation saine et savoureuse
               </p>
@@ -427,17 +470,17 @@ const Alimentation = () => {
               <div className="relative group">
                 <Input
                   type="text"
-                  placeholder="Rechercher un produit, une catégorie..."
-                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold tracking-wide transition-all duration-300 border-slate-900/30 bg-white/80 backdrop-blur-md focus:border-[#00C2A8] focus:ring-2 focus:ring-[#00C2A8]/20"
+                  placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
+                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-lg border-[#00C2A8]/30 bg-white/80 backdrop-blur-md focus:border-[#00C2A8] focus:ring-2 focus:ring-[#00C2A8]/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
-                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-slate-900 transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
+                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-[#00C2A8] transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
 
                 <Button
                   type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-[#00C2A8] hover:bg-[#00A890] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -457,19 +500,19 @@ const Alimentation = () => {
               className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in"
               style={{ animationDelay: "0.3s" }}
             >
-              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
                 <Leaf className="h-3 w-3 mr-1" />
                 Produits Bio
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
                 <Truck className="h-3 w-3 mr-1" />
                 Livraison 24h
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
                 <ShieldCheck className="h-3 w-3 mr-1" />
                 Qualité Garantie
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 hover:bg-transparent text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
                 <Star className="h-3 w-3 mr-1" />
                 Producteurs Locaux
               </Badge>
@@ -497,238 +540,106 @@ const Alimentation = () => {
             </div>
           )}
 
-          {/* Section Fruits */}
-          {filteredFruits.length > 0 && (
-            <div
-              className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-              id="fruits"
-            >
+          {/* Sections dynamiques */}
+          {filteredSections.map((section, sectionIndex) => {
+            const IconComponent = section.icon;
+            const animationDelays = {
+              container: `${0.2 + sectionIndex * 0.2}s`,
+              cards: `${0.3 + sectionIndex * 0.2}s`
+            };
+
+            return (
               <div
-                className="flex items-center gap-4 mb-8 animate-slide-from-left"
-                style={{ animationDelay: "0.2s" }}
+                key={section.id}
+                className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
+                id={section.id}
               >
-                <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
-                  <Apple className="h-8 w-8 text-white" />
+                <div
+                  className="flex items-center gap-4 mb-8 animate-slide-from-left"
+                  style={{ animationDelay: animationDelays.container }}
+                >
+                  <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                    <IconComponent className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                      {section.title}
+                    </h2>
+                    <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                      {section.description}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl lg:text-2xl font-bold text-black/70">
-                    Fruits Frais
-                  </h2>
-                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                    Sélection des meilleurs fruits de saison, bio et locaux
-                  </p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredFruits.map((category, index) => {
-                  const IconComponent = getIconByName(category.iconName);
-                  const productCount = getProductCount(category.name);
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {section.categories.map((category, index) => {
+                    const CategoryIcon = getIconByName(category.iconName);
+                    const productCount = getProductCount(category.name);
 
-                  return (
-                    <Card
-                      key={category.name}
-                      className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                      style={{
-                        animationDelay: `${0.3 + index * 0.1}s`,
-                      }}
-                    >
-                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                        <img
-                          src={category.image}
-                          alt={category.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                          <Badge className="bg-[#00C2A8] text-white">
-                            {productCount} produit
-                            {productCount !== 1 ? "s" : ""}
-                          </Badge>
-                        </div>
-                      </div>
-                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                        {category.name}
-                      </h3>
-                      <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <Button
-                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                        onClick={() => handleCategoryClick(category, "fruits")}
+                    return (
+                      <Card
+                        key={category.name}
+                        className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
+                        style={{
+                          animationDelay: `${parseFloat(animationDelays.cards) + index * 0.1}s`,
+                        }}
                       >
-                        Explorer
-                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section Légumes */}
-          {filteredLegumes.length > 0 && (
-            <div
-              className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-              id="legumes"
-            >
-              <div
-                className="flex items-center gap-4 mb-8 animate-slide-from-right"
-                style={{ animationDelay: "0.4s" }}
-              >
-                <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
-                  <Carrot className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl lg:text-2xl font-bold text-black/70">
-                    Légumes & Herbes
-                  </h2>
-                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                    Légumes frais, herbes aromatiques et produits du potager
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredLegumes.map((category, index) => {
-                  const IconComponent = getIconByName(category.iconName);
-                  const productCount = getProductCount(category.name);
-
-                  return (
-                    <Card
-                      key={category.name}
-                      className="group p-6 border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
-                      style={{
-                        animationDelay: `${0.5 + index * 0.1}s`,
-                      }}
-                    >
-                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                        <img
-                          src={category.image}
-                          alt={category.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                          <Badge className="bg-[#00C2A8] text-white">
-                            {productCount} produit
-                            {productCount !== 1 ? "s" : ""}
-                          </Badge>
+                        <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                          <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                          <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
+                            <Badge className="bg-[#00C2A8] text-white">
+                              {productCount} produit{productCount !== 1 ? "s" : ""}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-
-                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                        {category.name}
-                      </h3>
-                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <Button
-                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                        onClick={() => handleCategoryClick(category, "légumes")}
-                      >
-                        Explorer
-                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section Autres Produits */}
-          {filteredAutres.length > 0 && (
-            <div
-              className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm"
-              id="autres"
-            >
-              <div
-                className="flex items-center gap-4 mb-8 animate-scale-up"
-                style={{ animationDelay: "0.6s" }}
-              >
-                <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
-                  <ShoppingCart className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl lg:text-2xl font-bold text-black/70">
-                    Épicerie & Autres
-                  </h2>
-                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                    Produits laitiers, boucherie, poissonnerie et épicerie fine
-                  </p>
+                        <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
+                          {category.name}
+                        </h3>
+                        <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
+                          {category.description}
+                        </p>
+                        <Button
+                          className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                          onClick={() => handleCategoryClick(category)}
+                        >
+                          Explorer
+                          <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                        </Button>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredAutres.map((category, index) => {
-                  const IconComponent = getIconByName(category.iconName);
-                  const productCount = getProductCount(category.name);
-
-                  return (
-                    <Card
-                      key={category.name}
-                      className="group p-6 border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
-                      style={{
-                        animationDelay: `${0.7 + index * 0.1}s`,
-                      }}
-                    >
-                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                        <img
-                          src={category.image}
-                          alt={category.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                          <Badge className="bg-[#00C2A8] text-white">
-                            {productCount} produit
-                            {productCount !== 1 ? "s" : ""}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                        {category.name}
-                      </h3>
-                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <Button
-                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                        onClick={() => handleCategoryClick(category, "autres")}
-                      >
-                        Explorer
-                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            );
+          })}
 
           {/* Section CTA */}
           <div
-            className="text-center my-4 animate-bounce-in"
+            className="text-center animate-bounce-in"
             style={{ animationDelay: "0.8s" }}
           >
             <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 lg:p-12 border border-white/20 shadow-2xl">
               <h3 className="text-xl lg:text-3xl font-bold text-gray-700 mb-4">
                 Livraison de produits frais à domicile
               </h3>
-              <p className="text-sm lg:text-md text-[#5A6470] mb-8 max-w-2xl mx-auto">
+              <p className="text-sm lg:text-xl text-[#5A6470] mb-8 max-w-2xl mx-auto">
                 Commandez vos produits alimentaires frais et recevez-les sous
                 24h. Qualité garantie, producteurs locaux et service
                 personnalisé.
               </p>
               <div className="flex gap-4 justify-center flex-wrap">
                 <Button
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 animate-pulse-cta"
+                  className="bg-[#00C2A8] hover:bg-[#00A890] text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl animate-pulse-cta"
                   onClick={() => handleContactClick("contact")}
                 >
                   Commander maintenant
                 </Button>
                 <Button
-                  className="bg-white hover:bg-gray-50 text-slate-900 border-2 border-slate-900 px-8 py-3 text-lg rounded-xl transition-all duration-300"
+                  className="bg-white hover:bg-gray-50 text-[#00C2A8] border-2 border-[#00C2A8] px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl"
                   onClick={() => handleContactClick("rdv")}
                 >
                   <Users className="h-5 w-5 mr-2" />

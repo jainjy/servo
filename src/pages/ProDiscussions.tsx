@@ -20,6 +20,9 @@ import {
   Download,
   CheckCircle,
   Eye,
+  Lock,
+  Star,
+  ArrowDown,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -58,6 +61,8 @@ export default function ProDiscussions({
   const [devisMontant, setDevisMontant] = useState("");
   const [devisDescription, setDevisDescription] = useState("");
   const [devisFile, setDevisFile] = useState(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const messagesContainerRef = useRef(null);
 
   const actionsMenuRef = useRef(null);
 
@@ -68,7 +73,22 @@ export default function ProDiscussions({
     loading: messagesLoading,
     sendMessage,
     sending,
+    messagesEndRef,
+    scrollToBottom,
   } = useMessaging(id);
+
+  // Gérer l'affichage du bouton scroll
+  const handleScroll = (e) => {
+    const container = e.target;
+    const isAtBottom = 
+      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    setShowScrollButton(!isAtBottom);
+  };
+
+  const handleScrollToBottom = () => {
+    scrollToBottom();
+    setShowScrollButton(false);
+  };
 
   // Charger les détails de l'artisan
   useEffect(() => {
@@ -172,6 +192,34 @@ export default function ProDiscussions({
       console.error("Erreur fin des travaux:", error);
       toast.error("Erreur lors du marquage des travaux comme terminés");
     }
+  };
+  // Fonction pour extraire la note du message AVIS_LAISSE
+  const extractRatingFromMessage = (content) => {
+    const match = content.match(/Note:\s*(\d+)\/5/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Composant pour afficher les étoiles
+  const RatingStars = ({ rating }) => {
+    return (
+      <div className="flex gap-1 mt-2">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <div
+            key={star}
+            className={`p-1 rounded ${
+              star <= rating ? "bg-yellow-400" : "bg-gray-300"
+            }`}
+          >
+            <Star
+              className={`w-5 h-5 ${
+                star <= rating ? "text-yellow-600" : "text-gray-500"
+              }`}
+              fill="currentColor"
+            />
+          </div>
+        ))}
+      </div>
+    );
   };
   const handleSubmitDevis = async (montant, description, file) => {
     try {
@@ -448,6 +496,36 @@ export default function ProDiscussions({
     return message.expediteur?.userType === "PRESTATAIRE";
   };
 
+  const getInitials = (user) => {
+    if (!user) return "?";
+    const firstName = user.firstName?.[0] ?? "";
+    const lastName = user.lastName?.[0] ?? "";
+    return `${firstName}${lastName}`.toUpperCase();
+  };
+
+  const renderAvatar = (message) => {
+    const user = message.expediteur;
+    if (!user) return null;
+
+    // Si l'utilisateur a un avatar/logo, l'afficher
+    if (user.avatar) {
+      return (
+        <img
+          src={user.avatar}
+          alt={getSenderName(message)}
+          className="w-8 h-8 rounded-full object-cover"
+        />
+      );
+    }
+
+    // Sinon, afficher les initiales
+    return (
+      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
+        {getInitials(user)}
+      </div>
+    );
+  };
+
   const handleProposerRendezVous = () => {
     setShowActionsMenu(false);
     setShowRendezVousModal(true);
@@ -650,7 +728,21 @@ export default function ProDiscussions({
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div 
+            className="flex-1 overflow-y-auto p-6 scroll-smooth relative"
+            ref={messagesContainerRef}
+            onScroll={handleScroll}
+          >
+            {/* Bouton scroll vers le bas */}
+            {showScrollButton && (
+              <button
+                onClick={handleScrollToBottom}
+                className="fixed bottom-32 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+                title="Scroller vers le bas"
+              >
+                <ArrowDown className="w-5 h-5" />
+              </button>
+            )}
             {messagesLoading ? (
               <div className="flex justify-center items-center h-32">
                 <LoadingSpinner text="Chargement des messages..." />
@@ -666,9 +758,7 @@ export default function ProDiscussions({
                   >
                     {!isCurrentUser(message) && (
                       <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100">
-                          <User className="w-4 h-4 text-blue-600" />
-                        </div>
+                        {renderAvatar(message)}
                         {index < messages.length - 1 && (
                           <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
                         )}
@@ -716,7 +806,7 @@ export default function ProDiscussions({
                         <p className="text-sm whitespace-pre-wrap">
                           {message.contenu}
                         </p>
-                        {message.evenementType =="FACTURE_PAYEE" && (
+                        {message.evenementType == "FACTURE_PAYEE" && (
                           <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                             <p className="text-sm font-medium mb-2">
                               Paiement effectué par le client.
@@ -737,6 +827,13 @@ export default function ProDiscussions({
                             </div>
                           </div>
                         )}
+                        {message.evenementType === "AVIS_LAISSE" && (
+                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                            <RatingStars
+                              rating={extractRatingFromMessage(message.contenu)}
+                            />
+                          </div>
+                        )}
                       </div>
                       <div
                         className={`text-xs mt-1 flex items-center gap-1 ${
@@ -753,9 +850,7 @@ export default function ProDiscussions({
 
                     {isCurrentUser(message) && (
                       <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-100">
-                          <User className="w-4 h-4 text-purple-600" />
-                        </div>
+                        {renderAvatar(message)}
                         {index < messages.length - 1 && (
                           <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
                         )}
@@ -771,6 +866,35 @@ export default function ProDiscussions({
                     <p className="text-sm">
                       Soyez le premier à envoyer un message !
                     </p>
+                  </div>
+                )}
+                {/* Référence pour scroller vers le bas */}
+                <div ref={messagesEndRef} />
+                {/* Affichage si la demande est terminée */}
+                {demande?.statut === "terminée" && (
+                  <div className="mt-8 flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-b from-green-50 to-green-100 rounded-2xl border-2 border-green-300">
+                    <div className="mb-4 p-4 bg-green-500 rounded-full">
+                      <img
+                        src="/Completed.gif"
+                        alt="complete"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                    <h3 className="text-2xl font-bold text-green-900 mb-2">
+                      Travaux Terminés
+                    </h3>
+                    <p className="text-green-700 text-center mb-1">
+                      Les travaux ont été complétés avec succès
+                    </p>
+                    <p className="text-sm text-green-600">
+                      Cette demande est maintenant clôturée
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-green-700">
+                      <Lock className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        Conversation verrouillée
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -889,17 +1013,25 @@ export default function ProDiscussions({
                   }
                 }}
                 disabled={
-                  sending || uploadingFile || artisanDetails.recruited == false
+                  sending ||
+                  uploadingFile ||
+                  artisanDetails?.recruited === false ||
+                  demande?.statut == "terminée"
                 }
               />
 
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
-                disabled={sending || uploadingFile || !input.trim()}
+                disabled={
+                  sending ||
+                  uploadingFile ||
+                  !input.trim() ||
+                  demande?.statut == "terminée"
+                }
               >
                 {sending ? (
-                  <LoadingSpinner size="small" />
+                  <LoadingSpinner size="sm" />
                 ) : (
                   <>
                     <Send className="w-4 h-4" />

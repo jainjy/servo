@@ -13,7 +13,6 @@ import {
   CheckCircle,
   MapPin,
   Hash,
-  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,14 +26,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
+import { LocationPickerModal } from "@/components/location-picker-modal";
 
 const ProRegisterPage = () => {
   const navigate = useNavigate();
@@ -42,6 +35,7 @@ const ProRegisterPage = () => {
   const location = useLocation();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { subscriptionData } = location.state || {};
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     // Informations de base
     firstName: "",
@@ -568,35 +562,48 @@ const ProRegisterPage = () => {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
-                              Latitude
+                              Position géographique *
                             </label>
-                            <Input
-                              type="number"
-                              step="any"
-                              placeholder="48.8566"
-                              className="h-11 bg-white border-gray-300"
-                              value={formData.latitude}
-                              onChange={(e) =>
-                                handleInputChange("latitude", e.target.value)
-                              }
-                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setLocationModalOpen(true)}
+                              className="w-full justify-start h-11 border-gray-300"
+                            >
+                              <MapPin className="h-4 w-4 mr-2" />
+                              {formData.latitude && formData.longitude
+                                ? `Position définie: ${parseFloat(
+                                    formData.latitude
+                                  ).toFixed(4)}, ${parseFloat(
+                                    formData.longitude
+                                  ).toFixed(4)}`
+                                : "Cliquez pour sélectionner sur la carte"}
+                            </Button>
+                            <p className="text-xs text-gray-500">
+                              Sélectionnez votre position précise sur la carte
+                              pour être localisé par les clients
+                            </p>
                           </div>
 
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Longitude
-                            </label>
-                            <Input
-                              type="number"
-                              step="any"
-                              placeholder="2.3522"
-                              className="h-11 bg-white border-gray-300"
-                              value={formData.longitude}
-                              onChange={(e) =>
-                                handleInputChange("longitude", e.target.value)
-                              }
-                            />
-                          </div>
+                          {/* Modal de sélection de position */}
+                          <LocationPickerModal
+                            open={locationModalOpen}
+                            onOpenChange={setLocationModalOpen}
+                            latitude={
+                              formData.latitude
+                                ? parseFloat(formData.latitude)
+                                : null
+                            }
+                            longitude={
+                              formData.longitude
+                                ? parseFloat(formData.longitude)
+                                : null
+                            }
+                            onLocationChange={(lat, lng) => {
+                              handleInputChange("latitude", lat.toString());
+                              handleInputChange("longitude", lng.toString());
+                            }}
+                          />
                         </div>
                       </div>
 

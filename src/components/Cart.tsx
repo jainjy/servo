@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "./contexts/CartContext";
-import api from "@/lib/api"; // Import de votre configuration Axios
+import api from "@/lib/api";
 import { toast } from "sonner";
+import { trackUserActivity } from '@/lib/suggestionApi';
 
 const Cart = ({ isOpen, onClose }) => {
   const {
@@ -23,8 +24,6 @@ const Cart = ({ isOpen, onClose }) => {
   const [localCartItems, setLocalCartItems] = useState([]);
   const [imageErrors, setImageErrors] = useState({});
   const [validationErrors, setValidationErrors] = useState([]);
-
-  // Vérifier l'authentification
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -33,13 +32,103 @@ const Cart = ({ isOpen, onClose }) => {
     setLocalCartItems(cartItems || []);
   }, [cartItems]);
 
-  // Vérifier l'authentification quand le panier s'ouvre
+  // Vérifier l'authentification et tracker l'ouverture du panier
   useEffect(() => {
     if (isOpen) {
       console.log("🛒 [CART] - Ouverture du panier, vérification auth...");
       checkAuthentication();
+      
+      // Track l'ouverture du panier
+      safeTrack(() => trackUserActivity({
+        entityType: "cart",
+        entityId: "cart_view",
+        action: "view_cart",
+        metadata: {
+          itemsCount: cartItems?.length || 0,
+          total: calculateTotal()
+        }
+      }));
     }
   }, [isOpen]);
+
+  // Empêcher le scroll du body quand le panier est ouvert
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  // Fonctions de tracking avec gestion d'erreurs
+  const safeTrack = async (trackingFunction) => {
+    try {
+      await trackingFunction();
+    } catch (error) {
+      console.error('Erreur tracking (non bloquante):', error);
+    }
+  };
+
+  const trackAddToCart = async (item) => {
+    await trackUserActivity({
+      entityType: "product",
+      entityId: item.id,
+      action: "add_to_cart",
+      metadata: {
+        productName: item.name,
+        price: item.price,
+        quantity: item.quantity
+      }
+    });
+  };
+
+  const trackRemoveFromCart = async (item, reason = "manual_remove") => {
+    await trackUserActivity({
+      entityType: "product",
+      entityId: item.id,
+      action: "remove_from_cart",
+      metadata: {
+        productName: item.name,
+        reason: reason,
+        quantity: item.quantity
+      }
+    });
+  };
+
+  const trackPurchase = async (items, total) => {
+    for (const item of items) {
+      await trackUserActivity({
+        entityType: "product",
+        entityId: item.id,
+        action: "purchase",
+        metadata: {
+          productName: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          total: total
+        }
+      });
+    }
+  };
+
+  const trackQuantityChange = async (item, oldQuantity, newQuantity) => {
+    const action = newQuantity > oldQuantity ? "cart_quantity_increase" : "cart_quantity_decrease";
+    await trackUserActivity({
+      entityType: "product",
+      entityId: item.id,
+      action: action,
+      metadata: {
+        productName: item.name,
+        oldQuantity,
+        newQuantity,
+        difference: Math.abs(newQuantity - oldQuantity)
+      }
+    });
+  };
 
   // Fonction pour vérifier l'authentification
   const checkAuthentication = () => {
@@ -81,19 +170,6 @@ const Cart = ({ isOpen, onClose }) => {
     }
   };
 
-  // Empêcher le scroll du body quand le panier est ouvert
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
   // Gérer les erreurs d'image
   const handleImageError = (productId) => {
     setImageErrors((prev) => ({
@@ -118,25 +194,50 @@ const Cart = ({ isOpen, onClose }) => {
     return price * quantity;
   };
 
-  // Mettre à jour la quantité
+  // Mettre à jour la quantité avec tracking
   const handleUpdateQuantity = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
     try {
+      const item = localCartItems.find(item => item.id === productId);
+      const oldQuantity = item?.quantity || 0;
+      
       await updateQuantity(productId, newQuantity);
+      
+      // Track le changement de quantité
+      if (item && newQuantity !== oldQuantity) {
+        await safeTrack(() => trackQuantityChange(item, oldQuantity, newQuantity));
+      }
     } catch (error) {
       toast.error(error.message);
     }
   };
 
-  // Supprimer un article
-  const handleRemoveItem = (productId) => {
+  // Supprimer un article avec tracking
+  const handleRemoveItem = async (productId) => {
+    const item = localCartItems.find(item => item.id === productId);
+    if (item) {
+      await safeTrack(() => trackRemoveFromCart(item, "manual_remove"));
+    }
     removeFromCart(productId);
   };
 
-  // Vider le panier
-  const handleClearCart = () => {
-    clearCart();
-    setValidationErrors([]);
+  // Vider le panier avec tracking
+  const handleClearCart = async () => {
+    try {
+      // Track chaque article supprimé
+      for (const item of localCartItems) {
+        await safeTrack(() => trackRemoveFromCart(item, "clear_cart"));
+      }
+      
+      clearCart();
+      setValidationErrors([]);
+      toast.success("Panier vidé");
+    } catch (error) {
+      console.error('Erreur tracking clear cart:', error);
+      // Vider quand même le panier même si le tracking échoue
+      clearCart();
+      setValidationErrors([]);
+    }
   };
 
   // Rediriger vers la page de connexion
@@ -244,7 +345,10 @@ const Cart = ({ isOpen, onClose }) => {
       const orderResult = await createOrder();
 
       console.log("✅ [CART CHECKOUT] - Commande créée avec succès:", orderResult);
-
+      
+      // Track l'achat
+      await safeTrack(() => trackPurchase(localCartItems, calculateTotal()));
+      
       // Vider le panier
       handleClearCart();
 
@@ -252,15 +356,6 @@ const Cart = ({ isOpen, onClose }) => {
       onClose();
 
       // Afficher le succès
-      const itemsSummary = localCartItems
-        .map(
-          (item) =>
-            `• ${item.name} x${item.quantity} - €${calculateItemTotal(
-              item
-            ).toFixed(2)}`
-        )
-        .join("\n");
-      
       toast.info(
         `Commande #${orderResult.order.orderNumber} passée avec succès !`
       );
@@ -285,7 +380,7 @@ const Cart = ({ isOpen, onClose }) => {
     }
   };
 
-  // Test manuel d'authentification
+  // Test manuel d'authentification (optionnel)
   const testAuthManually = () => {
     console.log("=== 🧪 TEST MANUEL AUTHENTIFICATION ===");
     const token = localStorage.getItem("auth-token");
@@ -385,7 +480,6 @@ const Cart = ({ isOpen, onClose }) => {
                   </Button>
                 </div>
               )}
-
 
               {items.map((item) => (
                 <Card key={item.id} className="p-4 bg-white shadow-sm">

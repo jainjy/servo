@@ -211,3 +211,41 @@
 .conic-gradient {
   background: conic-gradient(from 0deg, transparent, currentColor, transparent);
 }
+/* Styles pour Leaflet */
+/* Styles pour le modal de localisation */
+[data-radix-dialog-content] {
+  max-height: 90vh !important;
+}
+
+/* Assurer que le contenu du modal est scrollable si nécessaire */
+.dialog-content-overflow {
+  overflow: hidden !important;
+}
+
+/* Styles Leaflet */
+.leaflet-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8fafc;
+}
+
+.leaflet-control-zoom a {
+  background-color: white !important;
+  color: #374151 !important;
+  border: 1px solid #e5e7eb !important;
+  border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Empêcher le body de scroll quand le modal est ouvert */
+body:has(.radix-dialog[data-state="open"]) {
+  overflow: hidden;
+}
+

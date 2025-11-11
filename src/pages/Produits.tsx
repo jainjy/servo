@@ -1,5 +1,5 @@
 // pages/Produits.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EquipementSection from "@/components/produits/EquipementSection";
@@ -21,11 +21,27 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { default as ProductCard } from "@/components/ProductCard";
 import api from "@/lib/api";
+import { useProduitsTracking } from '@/hooks/useProduitsTracking';
 
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category?: string;
+}
+
+interface FetchProductsParams {
+  status: string;
+  category?: string;
+  search?: string;
 }
 
 // Composant Contact Modal
@@ -116,30 +132,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, type }) =>
   );
 };
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-}
-
-interface ProductCardProps {
-  product: Product;
-  onAddToCart: (product: Product) => void;
-  user: any;
-}
-
-interface SectionProps {
-  searchQuery: string;
-}
-
-interface FetchProductsParams {
-  status: string;
-  category?: string;
-  search?: string;
-}
-
 const Produits = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -147,11 +139,31 @@ const Produits = () => {
   const [contactModalType, setContactModalType] = useState("contact");
   const [products, setProducts] = useState<Product[]>([]);
   
+  // Intégration du hook de tracking
+  const {
+    trackProduitsView,
+    trackProductView,
+    trackProductClick,
+    trackAddToCart,
+    trackProductSearch,
+    trackProductFilter,
+    trackCategoryClick
+  } = useProduitsTracking();
+
+  // Track de la vue de la page produits
+  useEffect(() => {
+    trackProduitsView();
+  }, [trackProduitsView]);
+
   const { user } = useAuth();
   const { addToCart } = useCart(user);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Tracking de la recherche
+    trackProductSearch(searchQuery);
+    
     try {
       setIsLoading(true);
       const params: FetchProductsParams = { 
@@ -161,11 +173,29 @@ const Produits = () => {
       
       const response = await api.get('/products', { params });
       setProducts(response.data.products);
+      
+      // Track des vues de produits individuels
+      response.data.products.forEach((product: Product) => {
+        trackProductView(product.id.toString(), product.name, product.category || 'unknown');
+      });
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Gestion de l'ajout au panier avec tracking
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    trackAddToCart(product.id.toString(), product.name, product.category || 'unknown');
+  };
+
+  // Gestion du clic sur un produit avec tracking
+  const handleProductClick = (product: Product) => {
+    trackProductClick(product.id.toString(), product.name, product.category || 'unknown');
+    // Navigation vers la page détail du produit si nécessaire
+    // navigate(`/produits/${product.id}`);
   };
 
   const handleContactClick = (type: string) => {
@@ -261,7 +291,8 @@ const Produits = () => {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    onAddToCart={addToCart}
+                    onAddToCart={handleAddToCart}
+                    onProductClick={handleProductClick}
                     user={user}
                   />
                 ))}
@@ -269,9 +300,19 @@ const Produits = () => {
             </div>
           )}
 
-          <EquipementSection searchQuery={searchQuery} />
-          <MateriauxSection searchQuery={searchQuery} />
-          <DesignSection searchQuery={searchQuery} />
+          {/* Sections avec props de tracking */}
+          <EquipementSection 
+            searchQuery={searchQuery} 
+            onCategoryClick={trackCategoryClick}
+          />
+          <MateriauxSection 
+            searchQuery={searchQuery} 
+            onCategoryClick={trackCategoryClick}
+          />
+          <DesignSection 
+            searchQuery={searchQuery} 
+            onCategoryClick={trackCategoryClick}
+          />
 
           {/* Section CTA */}
           <div

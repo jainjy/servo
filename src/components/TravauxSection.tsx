@@ -31,6 +31,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
 // Images de fond pour chaque catégorie
 const backgroundImages = {
@@ -440,6 +441,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
 
 // Composant principal combiné
 const IntelligibleSection = ({ showAllPrestations }) => {
+  const { trackConstructionInteraction } = useInteractionTracking();
   const location = useLocation();
   const navigate = useNavigate();
   const [categorie, setCategorie] = useState("interieurs");
@@ -477,6 +479,17 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   ];
 
   const currentCategory = categories[categorie];
+
+  // Track le chargement des services
+  useEffect(() => {
+    if (servicesCategorie?.services) {
+      servicesCategorie.services.forEach(service => {
+        trackConstructionInteraction(service.id, service.libelle, 'view', {
+          section: currentCategory.label
+        });
+      });
+    }
+  }, [servicesCategorie, currentCategory]);
 
   const fetchServicesCategorie = async (cat) => {
     // Début du chargement
@@ -575,14 +588,22 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   };
 
   const openPhotosModal = (prestation) => {
+    // Track la visualisation des photos
+    trackConstructionInteraction(prestation.id, prestation.libelle, 'view_photos', {
+      imageCount: prestation.images?.length || 0
+    });
     setPhotosModal({ isOpen: true, prestation });
   };
 
   const openDevisModal = (prestation) => {
+    // Track la demande de devis
+    trackConstructionInteraction(prestation.id, prestation.libelle, 'devis_request', {
+      type: prestation.libelle,
+      price: prestation.price
+    });
+    
     if (!isAuthenticated) {
       toast.error("Vous devez être connecté pour faire une demande de devis.");
-      // Optionnel : rediriger vers la page de connexion
-      // window.location.href = "/login/particular";
       return;
     }
     setDevisModal({ isOpen: true, prestation });

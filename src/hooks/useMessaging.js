@@ -1,6 +1,6 @@
 // hooks/useMessaging.js
-import { useState, useEffect, useCallback } from "react";
-import {useSocket} from "@/Contexts/SocketContext";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSocket } from "@/Contexts/SocketContext";
 import api from "@/lib/api";
 
 export const useMessaging = (demandeId) => {
@@ -9,6 +9,31 @@ export const useMessaging = (demandeId) => {
   const [conversation, setConversation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [artisansStats, setArtisansStats] = useState([]);
+  const messagesEndRef = useRef(null);
+  const shouldScrollRef = useRef(true);
+
+  // Fonction pour scroller vers le bas
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+    }
+  }, []);
+
+  // Charger les statistiques des artisans
+  const loadArtisansStats = useCallback(async () => {
+    if (!demandeId) return;
+
+    try {
+      const response = await api.get(`/demandes/${demandeId}/artisans-stats`);
+      setArtisansStats(response.data);
+    } catch (error) {
+      console.error("Erreur chargement stats artisans:", error);
+      setArtisansStats([]);
+    }
+  }, [demandeId]);
 
   // Charger la conversation et les messages
   const loadConversation = useCallback(async () => {
@@ -22,23 +47,46 @@ export const useMessaging = (demandeId) => {
         `/conversations/demande/${demandeId}/details`
       );
       setConversation(convResponse.data);
-      const url = `/conversations/${demandeId}/messages`;
+
       // Charger les messages
-      const messagesResponse = await api.get(url);
+      const messagesResponse = await api.get(
+        `/conversations/${demandeId}/messages`
+      );
       setMessages(messagesResponse.data || []);
+
+      // Charger les statistiques des artisans
+      await loadArtisansStats();
 
       // Rejoindre la conversation via socket
       if (socket && convResponse.data.id) {
         socket.emit("join_conversation", convResponse.data.id);
       }
+
+      // Scroller vers le bas après chargement
+      shouldScrollRef.current = true;
     } catch (error) {
       console.error("Erreur chargement conversation:", error);
-      // Si la conversation n'existe pas, on ne la crée pas automatiquement
-      // Elle sera créée lors du premier message
     } finally {
       setLoading(false);
     }
-  }, [demandeId, socket]);
+  }, [demandeId, socket, loadArtisansStats]);
+
+  // Scroller vers le bas quand les messages changent
+  useEffect(() => {
+    if (shouldScrollRef.current) {
+      scrollToBottom();
+      shouldScrollRef.current = false;
+    }
+  }, [messages, scrollToBottom]);
+
+  // Scroller vers le bas au premier chargement
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [loading, messages.length, scrollToBottom]);
 
   // Écouter les nouveaux messages
   useEffect(() => {
@@ -47,6 +95,12 @@ export const useMessaging = (demandeId) => {
     const handleNewMessage = (newMessage) => {
       if (newMessage.conversationId === conversation.id) {
         setMessages((prev) => [...prev, newMessage]);
+        shouldScrollRef.current = true;
+
+        // Rafraîchir les stats si c'est un message système (événement important)
+        if (newMessage.type === "SYSTEM" || newMessage.evenementType) {
+          loadArtisansStats();
+        }
       }
     };
 
@@ -67,7 +121,7 @@ export const useMessaging = (demandeId) => {
       socket.off("new_message", handleNewMessage);
       socket.off("message_read", handleMessageRead);
     };
-  }, [socket, conversation]);
+  }, [socket, conversation, loadArtisansStats]);
 
   // Envoyer un message
   const sendMessage = async (contenu, type = "TEXT", fileData = null) => {
@@ -90,7 +144,7 @@ export const useMessaging = (demandeId) => {
           `/conversations/${demandeId}/messages`,
           messageData
         );
-        console.log("Message envoyé avec succès",messageData);
+        console.log("Message envoyé avec succès", messageData);
       } catch (error) {
         // Si la conversation n'existe pas (404), on essaie de créer un message système d'abord
         if (error.response?.status === 404) {
@@ -112,6 +166,7 @@ export const useMessaging = (demandeId) => {
       const newMessage = response.data;
 
       setMessages((prev) => [...prev, newMessage]);
+      shouldScrollRef.current = true;
 
       // Émettre l'événement socket
       if (socket) {
@@ -132,6 +187,7 @@ export const useMessaging = (demandeId) => {
     }
   };
 
+  // Effet principal
   useEffect(() => {
     loadConversation();
   }, [loadConversation]);
@@ -141,7 +197,11 @@ export const useMessaging = (demandeId) => {
     conversation,
     loading,
     sending,
+    artisansStats,
     sendMessage,
     refreshMessages: loadConversation,
+    refreshArtisansStats: loadArtisansStats,
+    messagesEndRef,
+    scrollToBottom,
   };
 };
