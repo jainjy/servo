@@ -22,7 +22,7 @@ import {
   Lock,
   ArrowDown,
 } from "lucide-react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useSocket } from "@/Contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
@@ -48,7 +48,7 @@ export default function UserDiscussions() {
   const messagesContainerRef = useRef(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const actionsMenuRef = useRef(null);
-
+  const navigate = useNavigate();
   const { isConnected } = useSocket();
   const {
     messages,
@@ -61,7 +61,6 @@ export default function UserDiscussions() {
     refreshMessages,
   } = useMessaging(id);
 
-
   useEffect(() => {
     if (!isConnected && autoRefresh) {
       const interval = setInterval(() => {
@@ -71,7 +70,6 @@ export default function UserDiscussions() {
       return () => clearInterval(interval);
     }
   }, [isConnected, autoRefresh, refreshMessages]);
-
 
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
@@ -280,19 +278,29 @@ export default function UserDiscussions() {
     // Si l'utilisateur a un avatar/logo, l'afficher
     if (user.avatar) {
       return (
-        <img
-          src={user.avatar}
-          alt={getSenderName(message)}
-          className="w-8 h-8 rounded-full object-cover"
-        />
+        <button
+          onClick={() => navigate(`/professional/profiles/${user.id}`)}
+          className="hover:opacity-80 transition-opacity"
+        >
+          <img
+            src={user.avatar}
+            alt={getSenderName(message)}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        </button>
       );
     }
 
     // Sinon, afficher les initiales
     return (
-      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
-        {getInitials(user)}
-      </div>
+      <button
+        onClick={() => navigate(`/professional/profiles/${user.id}`)}
+        className="hover:opacity-80 transition-opacity"
+      >
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
+          {getInitials(user)}
+        </div>
+      </button>
     );
   };
 
@@ -587,17 +595,40 @@ export default function UserDiscussions() {
                   {artisans.map((artisan) => (
                     <div
                       key={artisan.userId}
-                      className="bg-white border border-gray-200 rounded-xl p-4"
+                      className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow duration-200"
                     >
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">
-                            {artisan.user.companyName ||
-                              `${artisan.user.firstName} ${artisan.user.lastName}`}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {artisan.user.phone}
-                          </p>
+                        <div className="flex-1">
+                          {/* Profil cliquable */}
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/professional/profiles/${artisan.userId}`
+                              )
+                            }
+                            className="text-left hover:opacity-80 transition-opacity w-full"
+                          >
+                            <h4 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                              {artisan.user.companyName ||
+                                `${artisan.user.firstName} ${artisan.user.lastName}`}
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {artisan.user.phone}
+                            </p>
+                            {/* Avatar si disponible */}
+                            {artisan.user.avatar && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <img
+                                  src={artisan.user.avatar}
+                                  alt="Avatar"
+                                  className="w-6 h-6 rounded-full object-cover"
+                                />
+                                <span className="text-xs text-blue-600 font-medium">
+                                  Voir le profil complet →
+                                </span>
+                              </div>
+                            )}
+                          </button>
                         </div>
                         <div className="relative" ref={actionsMenuRef}>
                           <button
@@ -610,6 +641,20 @@ export default function UserDiscussions() {
                           {showActionsMenu === artisan.userId && (
                             <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                               <div className="p-2">
+                                {/* Lien vers le profil dans le menu */}
+                                <button
+                                  onClick={() => {
+                                    setShowActionsMenu(false);
+                                    navigate(
+                                      `/professional/profiles/${artisan.userId}`
+                                    );
+                                  }}
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                                >
+                                  <User className="w-4 h-4" />
+                                  Voir le profil
+                                </button>
+
                                 {hasDevis(artisan) && !artisan.recruited && (
                                   <button
                                     onClick={() =>
@@ -655,17 +700,9 @@ export default function UserDiscussions() {
                                   <button
                                     onClick={() => handleNoterArtisan(artisan)}
                                     className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-yellow-600 hover:bg-yellow-50 rounded-md"
-                                    disabled={artisan.aDejaNote} // Vous devrez ajouter cette propriété
                                   >
                                     <Star className="w-4 h-4" />
-                                    {artisan.aDejaNote ? (
-                                      <>
-                                        <span>Déjà noté</span>
-                                        <CheckCircle className="w-4 h-4 text-green-600" />
-                                      </>
-                                    ) : (
-                                      <span>Noter l'artisan</span>
-                                    )}
+                                    <span>Noter l'artisan</span>
                                   </button>
                                 )}
                                 {artisan.devisFileUrl && (
@@ -731,6 +768,19 @@ export default function UserDiscussions() {
                             À noter
                           </span>
                         )}
+                      </div>
+
+                      {/* Informations supplémentaires */}
+                      <div className="mt-2 text-xs text-gray-500">
+                        <button
+                          onClick={() =>
+                            navigate(`/professional/profiles/${artisan.userId}`)
+                          }
+                          className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                        >
+                          <User className="w-3 h-3" />
+                          Consulter le profil professionnel
+                        </button>
                       </div>
                     </div>
                   ))}
