@@ -46,7 +46,6 @@ export default function UserDiscussions() {
   const [reviewComment, setReviewComment] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesContainerRef = useRef(null);
-  const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const actionsMenuRef = useRef(null);
 
@@ -59,54 +58,21 @@ export default function UserDiscussions() {
     sending,
     messagesEndRef,
     scrollToBottom,
-    refreshMessages, // Assurez-vous que cette fonction existe dans useMessaging
+    refreshMessages,
   } = useMessaging(id);
-  // Indicateur de statut de connexion
-  const getConnectionStatus = () => {
-    if (!isConnected) {
-      return {
-        text: "Hors ligne - Actualisation manuelle",
-        color: "text-red-500",
-        bg: "bg-red-100",
-      };
-    }
-    return {
-      text: "En ligne - Temps réel",
-      color: "text-green-500",
-      bg: "bg-green-100",
-    };
-  };
 
-  const connectionStatus = getConnectionStatus();
 
-  // Fonction pour forcer l'actualisation
-  const handleManualRefresh = async () => {
-    try {
-      await refreshMessages();
-      setLastUpdate(new Date());
-      toast.success("Messages actualisés");
-    } catch (error) {
-      toast.error("Erreur lors de l'actualisation");
-    }
-  };
-
-  // Actualisation automatique si déconnecté
   useEffect(() => {
     if (!isConnected && autoRefresh) {
       const interval = setInterval(() => {
         refreshMessages();
-      }, 10000); // Toutes les 10 secondes si déconnecté
+      }, 10000);
 
       return () => clearInterval(interval);
     }
   }, [isConnected, autoRefresh, refreshMessages]);
 
-  // Mettre à jour le timestamp à chaque nouveau message
-  useEffect(() => {
-    if (messages.length > 0) {
-      setLastUpdate(new Date());
-    }
-  }, [messages]);
+
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
@@ -650,9 +616,17 @@ export default function UserDiscussions() {
                                       handleSignerDevis(artisan.userId)
                                     }
                                     className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-green-600 hover:bg-green-50 rounded-md"
+                                    disabled={artisan.recruited}
                                   >
                                     <FileSignature className="w-4 h-4" />
-                                    Signer le devis
+                                    {artisan.recruited ? (
+                                      <>
+                                        <span>Devis signé</span>
+                                        <CheckCircle className="w-4 h-4 text-green-600" />
+                                      </>
+                                    ) : (
+                                      <span>Signer le devis</span>
+                                    )}
                                   </button>
                                 )}
                                 {hasFacture(artisan) &&
@@ -662,18 +636,36 @@ export default function UserDiscussions() {
                                         handlePayerFacture(artisan.userId)
                                       }
                                       className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                                      disabled={
+                                        artisan.factureStatus === "validee"
+                                      }
                                     >
                                       <CreditCard className="w-4 h-4" />
-                                      Payer la facture
+                                      {artisan.factureStatus === "validee" ? (
+                                        <>
+                                          <span>Facture payée</span>
+                                          <CheckCircle className="w-4 h-4 text-green-600" />
+                                        </>
+                                      ) : (
+                                        <span>Payer la facture</span>
+                                      )}
                                     </button>
                                   )}
                                 {canReviewArtisan(artisan) && (
                                   <button
                                     onClick={() => handleNoterArtisan(artisan)}
                                     className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-yellow-600 hover:bg-yellow-50 rounded-md"
+                                    disabled={artisan.aDejaNote} // Vous devrez ajouter cette propriété
                                   >
                                     <Star className="w-4 h-4" />
-                                    Noter l'artisan
+                                    {artisan.aDejaNote ? (
+                                      <>
+                                        <span>Déjà noté</span>
+                                        <CheckCircle className="w-4 h-4 text-green-600" />
+                                      </>
+                                    ) : (
+                                      <span>Noter l'artisan</span>
+                                    )}
                                   </button>
                                 )}
                                 {artisan.devisFileUrl && (

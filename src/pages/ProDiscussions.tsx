@@ -73,6 +73,7 @@ export default function ProDiscussions() {
     sending,
     messagesEndRef,
     scrollToBottom,
+    refreshMessages,
   } = useMessaging(id);
 
   // Gérer l'affichage du bouton scroll
@@ -528,6 +529,7 @@ export default function ProDiscussions() {
   const handleProposerRendezVous = () => {
     setShowActionsMenu(false);
     setShowRendezVousModal(true);
+    console.log(artisanDetails);
   };
 
   const handleEnvoyerFacture = () => {
@@ -543,7 +545,7 @@ export default function ProDiscussions() {
   const handleAfficherActions = () => {
     setShowActionsMenu(false);
     setShowActionsPanel(true);
-    console.log(artisanDetails)
+    console.log(artisanDetails);
   };
 
   const handleFileChange = (setFileFunction) => (event) => {
@@ -923,23 +925,47 @@ export default function ProDiscussions() {
                         disabled={artisanDetails && artisanDetails.rdv}
                       >
                         <Calendar className="w-4 h-4" />
-                        <span>Proposer un rendez-vous</span>
+                        {artisanDetails && artisanDetails.rdv ? (
+                          <>
+                            <span>rendez-vous deja proposé </span>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </>
+                        ) : (
+                          <span>Proposer un rendez-vous</span>
+                        )}
                       </button>
-
                       <button
                         onClick={handleEnvoyerDevis}
                         className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors duration-200"
+                        disabled={artisanDetails && artisanDetails.devisFileUrl}
                       >
                         <FileDigit className="w-4 h-4" />
-                        <span>Envoyer un devis</span>
+                        {artisanDetails && artisanDetails.devisFileUrl ? (
+                          <>
+                            <span>Devis déjà envoyé</span>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </>
+                        ) : (
+                          <span>Envoyer un devis</span>
+                        )}
                       </button>
 
                       <button
                         onClick={handleEnvoyerFacture}
                         className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors duration-200"
+                        disabled={
+                          artisanDetails && artisanDetails.factureFileUrl
+                        }
                       >
                         <DollarSign className="w-4 h-4" />
-                        <span>Envoyer une facture</span>
+                        {artisanDetails && artisanDetails.factureFileUrl ? (
+                          <>
+                            <span>Facture déjà envoyée</span>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </>
+                        ) : (
+                          <span>Envoyer une facture</span>
+                        )}
                       </button>
 
                       {/* NOUVEAU: Bouton pour confirmer le paiement */}
@@ -948,9 +974,17 @@ export default function ProDiscussions() {
                           <button
                             onClick={() => handleConfirmerPaiement(true)}
                             className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                            disabled={artisanDetails?.factureConfirmee}
                           >
                             <CheckCircle className="w-4 h-4" />
-                            <span>Confirmer le paiement</span>
+                            {artisanDetails?.factureConfirmee ? (
+                              <>
+                                <span>Paiement confirmé</span>
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              </>
+                            ) : (
+                              <span>Confirmer le paiement</span>
+                            )}
                           </button>
                         )}
 
@@ -960,9 +994,17 @@ export default function ProDiscussions() {
                           <button
                             onClick={handleTerminerTravaux}
                             className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
+                            disabled={artisanDetails?.travauxTermines}
                           >
                             <CheckCircle className="w-4 h-4" />
-                            <span>Marquer travaux terminés</span>
+                            {artisanDetails?.travauxTermines ? (
+                              <>
+                                <span>Travaux terminés</span>
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              </>
+                            ) : (
+                              <span>Marquer travaux terminés</span>
+                            )}
                           </button>
                         )}
 
@@ -1043,7 +1085,7 @@ export default function ProDiscussions() {
       </div>
 
       {/* Panneau des actions de l'artisan */}
-      {showActionsPanel  && artisanDetails && (
+      {showActionsPanel && artisanDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
