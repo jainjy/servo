@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Users, Tag, Search, Star, Clock, Wrench, FileText, Loader2, X, Mail, Phone, Building } from "lucide-react";
-
+import {
+  ArrowLeft,
+  Users,
+  Tag,
+  Search,
+  Star,
+  Clock,
+  Wrench,
+  FileText,
+  Loader2,
+  X,
+  Mail,
+  Phone,
+  Building,
+} from "lucide-react";
+import api from "@/lib/api";
 // Interfaces
 interface User {
   id: string;
@@ -65,7 +79,7 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       alert(`Message envoyé à ${expert.firstName} ${expert.lastName} !`);
       setIsContactModalOpen(false);
       onClose();
@@ -82,7 +96,10 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
 
   if (!isOpen || !expert) return null;
 
-  const displayName = expert.commercialName || expert.companyName || `${expert.firstName} ${expert.lastName}`;
+  const displayName =
+    expert.commercialName ||
+    expert.companyName ||
+    `${expert.firstName} ${expert.lastName}`;
 
   return (
     <>
@@ -92,12 +109,17 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
           <div className="p-6">
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">{displayName}</h2>
-              <button onClick={onClose} className="text-2xl font-bold text-gray-500 hover:text-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {displayName}
+              </h2>
+              <button
+                onClick={onClose}
+                className="text-2xl font-bold text-gray-500 hover:text-gray-700"
+              >
                 ×
               </button>
             </div>
-            
+
             {/* Avatar */}
             <div className="mb-4 relative">
               {expert.avatar ? (
@@ -116,7 +138,9 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
             {/* Informations */}
             <div className="space-y-4 mb-6">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900">{displayName}</h3>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  {displayName}
+                </h3>
                 {expert.userType && (
                   <p className="text-blue-600 font-medium">{expert.userType}</p>
                 )}
@@ -155,7 +179,9 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
                   <Star className="w-5 h-5 text-yellow-500" />
                   <div>
                     <p className="text-sm text-gray-600">Expérience</p>
-                    <p className="font-medium">{expert.experience || '5+'} ans</p>
+                    <p className="font-medium">
+                      {expert.experience || "5+"} ans
+                    </p>
                   </div>
                 </div>
               </div>
@@ -174,10 +200,16 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
 
             {/* Boutons */}
             <div className="flex gap-2 mt-6">
-              <button onClick={onClose} className="flex-1 bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition-colors">
+              <button
+                onClick={onClose}
+                className="flex-1 bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition-colors"
+              >
                 Fermer
               </button>
-              <button onClick={handleContactClick} className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={handleContactClick}
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              >
                 <Mail className="w-4 h-4" />
                 Contacter
               </button>
@@ -188,7 +220,7 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
 
       {/* Modal Contact */}
       {isContactModalOpen && (
-        <ContactModal 
+        <ContactModal
           expert={expert}
           isOpen={isContactModalOpen}
           onClose={handleCloseContactModal}
@@ -203,18 +235,18 @@ const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
 // Composant Modal Contact
 const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
   const [formData, setFormData] = useState({
-    nom: '',
-    prenom: '',
-    email: '',
-    telephone: '',
-    message: ''
+    nom: "",
+    prenom: "",
+    email: "",
+    telephone: "",
+    message: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -225,7 +257,10 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
 
   if (!isOpen) return null;
 
-  const displayName = expert.commercialName || expert.companyName || `${expert.firstName} ${expert.lastName}`;
+  const displayName =
+    expert.commercialName ||
+    expert.companyName ||
+    `${expert.firstName} ${expert.lastName}`;
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
@@ -239,9 +274,7 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
               <h2 className="text-xl font-bold text-gray-900">
                 Contacter l'expert
               </h2>
-              <p className="text-gray-600 text-xs lg:text-sm">
-                {displayName}
-              </p>
+              <p className="text-gray-600 text-xs lg:text-sm">{displayName}</p>
             </div>
           </div>
           <button
@@ -259,10 +292,10 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nom *
               </label>
-              <input 
-                name="nom" 
-                placeholder="Votre nom" 
-                required 
+              <input
+                name="nom"
+                placeholder="Votre nom"
+                required
                 value={formData.nom}
                 onChange={handleChange}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -273,10 +306,10 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Prénom *
               </label>
-              <input 
-                name="prenom" 
-                placeholder="Votre prénom" 
-                required 
+              <input
+                name="prenom"
+                placeholder="Votre prénom"
+                required
                 value={formData.prenom}
                 onChange={handleChange}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -290,11 +323,11 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email *
               </label>
-              <input 
-                name="email" 
-                type="email" 
-                placeholder="votre@email.com" 
-                required 
+              <input
+                name="email"
+                type="email"
+                placeholder="votre@email.com"
+                required
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -305,10 +338,10 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Téléphone *
               </label>
-              <input 
-                name="telephone" 
-                placeholder="06 12 34 56 78" 
-                required 
+              <input
+                name="telephone"
+                placeholder="06 12 34 56 78"
+                required
                 value={formData.telephone}
                 onChange={handleChange}
                 className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -321,10 +354,10 @@ const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Message *
             </label>
-            <textarea 
-              name="message" 
-              placeholder="Décrivez votre projet ou votre demande..." 
-              rows={4} 
+            <textarea
+              name="message"
+              placeholder="Décrivez votre projet ou votre demande..."
+              rows={4}
               required
               value={formData.message}
               onChange={handleChange}
@@ -379,75 +412,31 @@ const PartnersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedExpert, setSelectedExpert] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // États pour les recherches
   const [metierSearchQuery, setMetierSearchQuery] = useState("");
   const [expertSearchQuery, setExpertSearchQuery] = useState("");
 
   // Récupérer les métiers depuis l'API
- // Récupérer les métiers depuis l'API
-useEffect(() => {
-  const fetchMetiers = async () => {
-    try {
-      setLoading(true);
-      
-      // Vérifier si l'utilisateur est connecté et récupérer le token
-      const token = localStorage.getItem('authToken') || 
-                    sessionStorage.getItem('authToken') ||
-                    localStorage.getItem('token') || 
-                    sessionStorage.getItem('token');
-      
-      // Préparer les headers avec authentification si disponible
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch('http://localhost:3001/api/metiers', {
-        method: 'GET',
-        headers: headers,
-        credentials: 'include' // Inclure les cookies si nécessaire
-      });
-      
-      if (response.status === 401) {
-        console.warn('Token invalide ou expiré, chargement sans authentification');
-        // Continuer sans token - faire une nouvelle requête sans auth
-        const retryResponse = await fetch('http://localhost:3001/api/metiers', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (!retryResponse.ok) {
-          throw new Error('Erreur lors de la récupération des métiers');
-        }
-        
-        const data = await retryResponse.json();
-        setMetiers(data);
-        return;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des métiers');
-      }
-      
-      const data = await response.json();
-      setMetiers(data);
-      
-    } catch (err: any) {
-      setError(err.message);
-      console.error('Erreur:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Récupérer les métiers depuis l'API
+  useEffect(() => {
+    const fetchMetiers = async () => {
+      try {
+        setLoading(true);
 
-  fetchMetiers();
-}, []);
+        const response = await api.get("/metiers");
+
+        setMetiers(response.data);
+      } catch (err: any) {
+        setError(err.message);
+        console.error("Erreur:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetiers();
+  }, []);
 
   // Gérer le clic sur "VOIR" pour afficher les experts du métier
   const handleViewExperts = (metier: Metier) => {
@@ -476,19 +465,36 @@ useEffect(() => {
 
   // Fonction utilitaire pour obtenir une image par défaut
   const getDefaultImage = (libelle: string) => {
-    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500'];
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-orange-500",
+      "bg-red-500",
+    ];
     const color = colors[libelle.length % colors.length];
-    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="${color.replace('bg-', '')}"><rect width="32" height="32" fill="${color.replace('bg-', '')}"/><text x="16" y="20" text-anchor="middle" fill="white" font-size="12">${libelle.charAt(0)}</text></svg>`;
+    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="${color.replace(
+      "bg-",
+      ""
+    )}"><rect width="32" height="32" fill="${color.replace(
+      "bg-",
+      ""
+    )}"/><text x="16" y="20" text-anchor="middle" fill="white" font-size="12">${libelle.charAt(
+      0
+    )}</text></svg>`;
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallbackText: string) => {
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>,
+    fallbackText: string
+  ) => {
     const target = e.target as HTMLImageElement;
     target.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%23E5E7EB"/><text x="150" y="100" text-anchor="middle" fill="%23374151" font-family="Arial" font-size="14">${fallbackText}</text></svg>`;
   };
 
   // Filtrer les métiers
   const getFilteredMetiers = () => {
-    return metiers.filter(metier =>
+    return metiers.filter((metier) =>
       metier.libelle.toLowerCase().includes(metierSearchQuery.toLowerCase())
     );
   };
@@ -498,24 +504,35 @@ useEffect(() => {
     if (!selectedMetier) return [];
     if (!expertSearchQuery) return selectedMetier.users;
 
-    return selectedMetier.users.filter(expert =>
-      expert.firstName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
-      expert.lastName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
-      expert.companyName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
-      expert.commercialName?.toLowerCase().includes(expertSearchQuery.toLowerCase()) ||
-      expert.email?.toLowerCase().includes(expertSearchQuery.toLowerCase())
+    return selectedMetier.users.filter(
+      (expert) =>
+        expert.firstName
+          ?.toLowerCase()
+          .includes(expertSearchQuery.toLowerCase()) ||
+        expert.lastName
+          ?.toLowerCase()
+          .includes(expertSearchQuery.toLowerCase()) ||
+        expert.companyName
+          ?.toLowerCase()
+          .includes(expertSearchQuery.toLowerCase()) ||
+        expert.commercialName
+          ?.toLowerCase()
+          .includes(expertSearchQuery.toLowerCase()) ||
+        expert.email?.toLowerCase().includes(expertSearchQuery.toLowerCase())
     );
   };
 
   // Composant de carte pour les experts
   const renderExpertCard = (expert: User, index: number) => {
-    const displayName = expert.commercialName || expert.companyName || 
-                       `${expert.firstName} ${expert.lastName}` || 
-                       'Expert';
-    
+    const displayName =
+      expert.commercialName ||
+      expert.companyName ||
+      `${expert.firstName} ${expert.lastName}` ||
+      "Expert";
+
     return (
-      <div 
-        key={expert.id || `expert-${index}`} 
+      <div
+        key={expert.id || `expert-${index}`}
         className="bg-white rounded-xl shadow-lg border border-green-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
         onClick={() => handleOpenExpertModal(expert)}
       >
@@ -527,7 +544,7 @@ useEffect(() => {
               alt={displayName}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).style.display = "none";
               }}
             />
           ) : (
@@ -551,7 +568,8 @@ useEffect(() => {
           <div className="space-y-2 text-sm text-gray-600 mb-4">
             {expert.firstName && expert.lastName && (
               <p className="line-clamp-1">
-                <span className="font-medium">Nom:</span> {expert.firstName} {expert.lastName}
+                <span className="font-medium">Nom:</span> {expert.firstName}{" "}
+                {expert.lastName}
               </p>
             )}
             {expert.userType && (
@@ -560,7 +578,8 @@ useEffect(() => {
               </p>
             )}
             <p className="line-clamp-1">
-              <span className="font-medium">Expérience:</span> {expert.experience || '5+'} ans
+              <span className="font-medium">Expérience:</span>{" "}
+              {expert.experience || "5+"} ans
             </p>
           </div>
 
@@ -568,7 +587,7 @@ useEffect(() => {
           <div className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-3">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400" />
-              <span className="font-medium">{expert.rating || '4.5'}/5</span>
+              <span className="font-medium">{expert.rating || "4.5"}/5</span>
             </div>
           </div>
 
@@ -594,10 +613,10 @@ useEffect(() => {
     return (
       <div className="space-y-6 animate-fade-in">
         {/* Modal de détails */}
-        <ExpertDetailsModal 
-          isOpen={isModalOpen} 
-          onClose={handleCloseModal} 
-          expert={selectedExpert} 
+        <ExpertDetailsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          expert={selectedExpert}
         />
 
         {/* En-tête avec bouton retour et recherche */}
@@ -612,10 +631,14 @@ useEffect(() => {
                 Tous les Métiers
               </button>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900">Experts en {metier.libelle}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Experts en {metier.libelle}
+                </h1>
                 <p className="text-gray-600 mt-1">
-                  {filteredExperts.length} expert{filteredExperts.length > 1 ? 's' : ''} disponible{filteredExperts.length > 1 ? 's' : ''}
-                  {expertSearchQuery && ' (recherche appliquée)'}
+                  {filteredExperts.length} expert
+                  {filteredExperts.length > 1 ? "s" : ""} disponible
+                  {filteredExperts.length > 1 ? "s" : ""}
+                  {expertSearchQuery && " (recherche appliquée)"}
                 </p>
               </div>
             </div>
@@ -641,7 +664,9 @@ useEffect(() => {
           {filteredExperts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600">
-                {expertSearchQuery ? "Aucun expert trouvé pour votre recherche" : "Aucun expert disponible pour ce métier."}
+                {expertSearchQuery
+                  ? "Aucun expert trouvé pour votre recherche"
+                  : "Aucun expert disponible pour ce métier."}
               </p>
               {expertSearchQuery && (
                 <button
@@ -654,7 +679,9 @@ useEffect(() => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredExperts.map((expert, index) => renderExpertCard(expert, index))}
+              {filteredExperts.map((expert, index) =>
+                renderExpertCard(expert, index)
+              )}
             </div>
           )}
         </div>
@@ -684,14 +711,11 @@ useEffect(() => {
         <h3 className="font-bold text-lg text-gray-900 mb-2">
           {metier.libelle}
         </h3>
-        
-        
 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-sm text-gray-600">
               <Tag className="w-4 h-4 text-blue-500" />
-              
             </div>
             <div className="flex items-center gap-1 text-sm text-gray-600">
               <Users className="w-4 h-4 text-green-500" />
@@ -731,11 +755,13 @@ useEffect(() => {
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-              
+
         {filteredMetiers.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">
-              {metierSearchQuery ? "Aucun métier trouvé pour votre recherche" : "Aucun métier disponible pour le moment."}
+              {metierSearchQuery
+                ? "Aucun métier trouvé pour votre recherche"
+                : "Aucun métier disponible pour le moment."}
             </p>
             {metierSearchQuery && (
               <button
@@ -764,10 +790,12 @@ useEffect(() => {
         {loading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-gray-600">Chargement des métiers...</span>
+            <span className="ml-3 text-gray-600">
+              Chargement des métiers...
+            </span>
           </div>
         )}
-        
+
         {error && !loading && (
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
             <p className="font-semibold">Attention</p>
@@ -777,7 +805,9 @@ useEffect(() => {
 
         {/* Affichage conditionnel */}
         {!showExperts && !loading && <MetiersGrid />}
-        {showExperts && selectedMetier && <ExpertsSection metier={selectedMetier} />}
+        {showExperts && selectedMetier && (
+          <ExpertsSection metier={selectedMetier} />
+        )}
       </div>
     </div>
   );
