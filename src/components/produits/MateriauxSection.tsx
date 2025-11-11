@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 
 interface MateriauxSectionProps {
-    searchQuery?: string;
+  searchQuery?: string;
+  onCategoryClick?: (categoryName: string, section: string) => void;
 }
 
 const iconComponents = {
@@ -34,7 +35,7 @@ const iconComponents = {
     Package,
 };
 
-const MateriauxSection = ({ searchQuery }: MateriauxSectionProps) => {
+const MateriauxSection = ({ searchQuery, onCategoryClick }: MateriauxSectionProps) => {
     const [categories, setCategories] = useState<MateriauxCategory[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [localSearch, setLocalSearch] = useState(searchQuery || "");

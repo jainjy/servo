@@ -22,8 +22,8 @@ import {
 
 interface DesignSectionProps {
   searchQuery?: string;
+  onCategoryClick?: (categoryName: string, section: string) => void;
 }
-
 const iconComponents = {
   PaintBucket,
   Sofa,
@@ -36,7 +36,8 @@ const iconComponents = {
   Package,
 };
 
-const DesignSection = ({ searchQuery }: DesignSectionProps) => {
+
+const DesignSection = ({ searchQuery, onCategoryClick }: DesignSectionProps) => {
   const [categories, setCategories] = useState<DesignCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
