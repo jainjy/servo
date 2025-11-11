@@ -16,7 +16,7 @@ import {
   BarChart3,
   Users
 } from "lucide-react";
-import MediaService from "../../services/MediaService";
+import MediaService from "../../services/mediaService";
 import MediaUpload from "./MediaUpload";
 
 const AdminMedia = () => {

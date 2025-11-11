@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import { useLocation } from 'react-router-dom';
+import AnnonceModal from './AnnonceModal';
 
 const ImmobilierSections = () => {
     const location = useLocation();
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const sections = [
         {
@@ -16,7 +18,13 @@ const ImmobilierSections = () => {
                         <h3 className="text-2xl font-semibold">Nos dernières annonces</h3>
                         <p className="text-gray-600">Découvrez notre sélection de biens premium</p>
                     </div>
-                    <button className="bg-black text-white px-6 py-0 rounded-lg hover:bg-gray-800 transition-colors">
+                    <button 
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
                         Déposer une annonce
                     </button>
                 </div>
@@ -59,10 +67,24 @@ const ImmobilierSections = () => {
                                 <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
                                 <p className="text-gray-600 text-sm mb-3">{item.location}</p>
                                 <div className="flex justify-between text-sm text-gray-500">
-                                    <span>{item.surface}</span>
-                                    <span>{item.rooms}</span>
+                                    <span className="flex items-center gap-1">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        {item.surface}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        {item.rooms}
+                                    </span>
                                 </div>
-                                <button className="w-full mt-4 bg-black text-white py-2 rounded hover:bg-gray-800 transition-colors">
+                                <button className="w-full mt-4 bg-black text-white py-2 rounded hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
                                     Voir le bien
                                 </button>
                             </div>
@@ -122,6 +144,12 @@ const ImmobilierSections = () => {
         }
     ];
 
+    const handleAddAnnonce = (newAnnonce) => {
+        // Ici vous pouvez ajouter la logique pour sauvegarder l'annonce
+        console.log("Nouvelle annonce ajoutée:", newAnnonce);
+        // Ajouter à votre état ou envoyer à une API
+    };
+
     useEffect(() => {
         if (location.hash) {
             const hash = location.hash.replace('#', '');
@@ -136,13 +164,20 @@ const ImmobilierSections = () => {
 
     return (
         <div className="container mx-auto px-4 py-8 mt-20">
+            {/* Modal d'ajout d'annonce */}
+            <AnnonceModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onAddAnnonce={handleAddAnnonce}
+            />
+
             <div className='absolute inset-0 -z-20 overflow-hidden h-80 w-full'>
                 <div className='bg-black/50 absolute w-full h-full backdrop-blur-sm '></div>
                 <img
                     className='h-full w-full object-cover'
                     src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg" alt="" />
             </div>
-            <h1 className="text-5xl text-white font-bold mb-10  text-center">Bâtiments & Construction</h1>
+            <h1 className="text-5xl text-white font-bold mb-10 text-center">Bâtiments & Construction</h1>
 
             <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
                 <Tab.List className="flex flex-wrap gap-2 mb-4">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Upload, Video, Headphones, X, Loader } from "lucide-react";
-import MediaService from "../../services/MediaService";
+import MediaService from "../../services/mediaService";
 
 const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
   const [formData, setFormData] = useState({
