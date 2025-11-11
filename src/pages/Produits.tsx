@@ -1,52 +1,51 @@
-// pages/Produits.js
-import { Card } from "@/components/ui/card";
+// pages/Produits.tsx
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import '/fonts/Azonix.otf'
+import EquipementSection from "@/components/produits/EquipementSection";
+import MateriauxSection from "@/components/produits/MateriauxSection";
+import DesignSection from "@/components/produits/DesignSection";
+import '/fonts/Azonix.otf';
 import {
   Search,
-  Home,
-  Construction,
-  ArrowRight,
   Sparkles,
   Shield,
   Zap,
-  Flame,
-  Sofa,
-  Palette,
-  Sprout,
-  Wrench,
-  Lock,
-  Lamp,
-  Warehouse,
-  Thermometer,
-  Square,
-  TreePine,
-  DoorClosed,
-  Droplets,
   X,
   Phone,
   Calendar,
   MapPin,
-  Users,
   Clock,
-  Brush,
-  Wand2,
-  PaintBucket,
-  Package,
-  ShoppingCart,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
-import ProductCard from "@/components/ProductCard";
+import { default as ProductCard } from "@/components/ProductCard";
 import api from "@/lib/api";
 import { useProduitsTracking } from '@/hooks/useProduitsTracking';
 
+interface ContactModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  type: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category?: string;
+}
+
+interface FetchProductsParams {
+  status: string;
+  category?: string;
+  search?: string;
+}
+
 // Composant Contact Modal
-const ContactModal = ({ isOpen, onClose, type }) => {
+const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, type }) => {
   if (!isOpen) return null;
 
   return (
@@ -138,9 +137,7 @@ const Produits = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactModalType, setContactModalType] = useState("contact");
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [categoryCounts, setCategoryCounts] = useState({});
+  const [products, setProducts] = useState<Product[]>([]);
   
   // Intégration du hook de tracking
   const {
@@ -158,34 +155,28 @@ const Produits = () => {
     trackProduitsView();
   }, [trackProduitsView]);
 
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart } = useCart(user);
 
-  // Charger les produits et catégories au montage du composant
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
-
-  const fetchProducts = async (category = null) => {
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Tracking de la recherche
+    trackProductSearch(searchQuery);
+    
     try {
       setIsLoading(true);
-      const params = { status: 'active' };
-      if (category) {
-        params.category = category;
-        trackProductFilter(category);
-      }
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
+      const params: FetchProductsParams = { 
+        status: 'active',
+        search: searchQuery
+      };
+      
       const response = await api.get('/products', { params });
       setProducts(response.data.products);
       
       // Track des vues de produits individuels
-      response.data.products.forEach(product => {
-        trackProductView(product.id, product.name, product.category);
+      response.data.products.forEach((product: Product) => {
+        trackProductView(product.id.toString(), product.name, product.category || 'unknown');
       });
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
@@ -194,251 +185,23 @@ const Produits = () => {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/products/categories');
-      setCategories(response.data);
-
-      // Créer un objet avec les comptes par catégorie pour un accès facile
-      const counts = {};
-      response.data.forEach(cat => {
-        counts[cat.name] = cat.count;
-      });
-      setCategoryCounts(counts);
-    } catch (error) {
-      console.error('Erreur lors du chargement des catégories:', error);
-    }
-  };
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    trackProductSearch(searchQuery);
-    await fetchProducts();
-  };
-
-  // Gestion du clic sur une catégorie avec tracking
-  const handleCategoryClick = (category, section) => {
-    trackCategoryClick(category.name, section);
-    const categoryData = {
-      name: category.name,
-      description: category.description,
-      image: category.image,
-      section: section
-    };
-    
-    navigate(`/produits/categorie/${encodeURIComponent(category.name)}`, {
-      state: categoryData
-    });
-  };
-
   // Gestion de l'ajout au panier avec tracking
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product: Product) => {
     addToCart(product);
-    trackAddToCart(product.id, product.name, product.price, product.category);
+    trackAddToCart(product.id.toString(), product.name, product.category || 'unknown');
   };
 
   // Gestion du clic sur un produit avec tracking
-  const handleProductClick = (product) => {
-    trackProductClick(product.id, product.name, product.category);
+  const handleProductClick = (product: Product) => {
+    trackProductClick(product.id.toString(), product.name, product.category || 'unknown');
     // Navigation vers la page détail du produit si nécessaire
     // navigate(`/produits/${product.id}`);
   };
 
-  const handleContactClick = (type) => {
+  const handleContactClick = (type: string) => {
     setContactModalType(type);
     setIsContactModalOpen(true);
   };
-
-  // Fonction pour obtenir le nombre de produits pour une catégorie
-  const getProductCount = (categoryName) => {
-    return categoryCounts[categoryName] || 0;
-  };
-
-  // Stocker les noms d'icônes au lieu des composants
-  const equipmentCategories = [
-    {
-      name: "Équipements de chauffage",
-      iconName: "Flame",
-      description: "Chauffage et climatisation",
-      image: "/equipement/chauffage.jfif"
-    },
-    {
-      name: "Électroménager",
-      iconName: "Zap",
-      description: "Appareils ménagers modernes",
-      image: "/equipement/electroménager.jfif"
-    },
-    {
-      name: "Meubles",
-      iconName: "Sofa",
-      description: "Meubles design et fonctionnels",
-      image: "/equipement/Meubles.jfif"
-    },
-    {
-      name: "Décoration",
-      iconName: "Palette",
-      description: "Décorations intérieures",
-      image: "/equipement/Decoration.jfif"
-    },
-    {
-      name: "Jardinage",
-      iconName: "Sprout",
-      description: "Équipement de jardin",
-      image: "/equipement/Équipement_de_jardin.jfif"
-    },
-    {
-      name: "Outillage",
-      iconName: "Wrench",
-      description: "Outils professionnels",
-      image: "/equipement/Outils_professionnels.jfif"
-    },
-    {
-      name: "Sécurité maison",
-      iconName: "Lock",
-      description: "Systèmes de sécurité",
-      image: "/equipement/Systèmes_de_sécurité.jfif"
-    },
-    {
-      name: "Luminaires",
-      iconName: "Lamp",
-      description: "Éclairage intérieur et extérieur",
-      image: "/equipement/Éclairage_intérieur_et_extérieur.jfif"
-    },
-  ];
-
-  const materialsCategories = [
-    {
-      name: "Matériaux de construction",
-      iconName: "Warehouse",
-      description: "Matériaux de base",
-      image: "/materiaux/Matériaux_de_construction.jfif"
-    },
-    {
-      name: "Isolation",
-      iconName: "Thermometer",
-      description: "Isolation thermique et phonique",
-      image: "/materiaux/Isolation thermique et phonique.jfif"
-    },
-    {
-      name: "Revêtements de sol",
-      iconName: "Square",
-      description: "Parquet, carrelage, moquette",
-      image: "/materiaux/Parquet, carrelage, moquette.jfif"
-    },
-    {
-      name: "Carrelage",
-      iconName: "Square",
-      description: "Carreaux et faïence",
-      image: "/materiaux/Carreaux et faïence.jfif"
-    },
-    {
-      name: "Bois et panneaux",
-      iconName: "TreePine",
-      description: "Bois massif et dérivés",
-      image: "/materiaux/Bois massif et dérivés.jfif"
-    },
-    {
-      name: "Menuiserie",
-      iconName: "DoorClosed",
-      description: "Portes et fenêtres",
-      image: "/materiaux/Portes et fenêtres.jfif"
-    },
-    {
-      name: "Plomberie",
-      iconName: "Droplets",
-      description: "Tuyauterie et sanitaires",
-      image: "/materiaux/Tuyauterie et sanitaires.jfif"
-    },
-    {
-      name: "Électricité",
-      iconName: "Zap",
-      description: "Câbles et appareillages",
-      image: "/materiaux/Électricité.jfif"
-    },
-  ];
-
-  const designCategories = [
-    {
-      name: "Peinture & Revêtements",
-      iconName: "PaintBucket",
-      description: "Peintures et finitions murales",
-      image: "/design/Peinture & Revêtements.jfif"
-    },
-    {
-      name: "Mobilier Design",
-      iconName: "Sofa",
-      description: "Meubles contemporains et design",
-      image: "/design/Meubles contemporains et design.jfif"
-    },
-    {
-      name: "Décoration Murale",
-      iconName: "Brush",
-      description: "Éléments décoratifs muraux",
-      image: "/design/Éléments décoratifs muraux.jfif"
-    },
-    {
-      name: "Luminaires Design",
-      iconName: "Lamp",
-      description: "Éclairage design et contemporain",
-      image: "/design/Éclairage design et contemporain.jfif"
-    },
-    {
-      name: "Textiles Décoratifs",
-      iconName: "Wand2",
-      description: "Tissus et textiles d'ameublement",
-      image: "/design/Tissus et textiles d'ameublement.jfif"
-    },
-    {
-      name: "Accessoires Déco",
-      iconName: "Sparkles",
-      description: "Accessoires de décoration",
-      image: "/design/Accessoires de décoration.jfif"
-    },
-    {
-      name: "Art & Tableaux",
-      iconName: "Palette",
-      description: "Œuvres d'art et reproductions",
-      image: "/design/Œuvres d'art et reproductions.jfif"
-    },
-    {
-      name: "Rangements Design",
-      iconName: "Warehouse",
-      description: "Solutions de rangement esthétiques",
-      image: "/design/Solutions de rangement esthétiques.jfif"
-    },
-  ];
-
-  // Fonction pour obtenir l'icône par nom
-  const getIconByName = (iconName) => {
-    const icons = {
-      Flame, Zap, Sofa, Palette, Sprout, Wrench, Lock, Lamp,
-      Warehouse, Thermometer, Square, TreePine, DoorClosed, Droplets,
-      Brush, Wand2, PaintBucket, Home, Construction
-    };
-    return icons[iconName] || Package;
-  };
-
-  // Filtrer les catégories basées sur la recherche et exclure celles avec 0 produit
-  const filteredEquipment = equipmentCategories.filter(
-    (category) =>
-      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0
-  );
-
-  const filteredMaterials = materialsCategories.filter(
-    (category) =>
-      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0
-  );
-
-  const filteredDesign = designCategories.filter(
-    (category) =>
-      (category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      getProductCount(category.name) > 0
-  );
 
   return (
     <div className="min-h-screen relative pt-16 overflow-hidden bg-[#F6F8FA]">
@@ -524,205 +287,32 @@ const Produits = () => {
             <div className="mb-12 animate-fade-in">
               <h2 className="text-3xl font-bold mb-6">Résultats pour "{searchQuery}"</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products
-                  .filter(product => product.id !== 0)
-                  .map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                      onProductClick={handleProductClick}
-                      user={user}
-                    />
-                  ))}
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                    onProductClick={handleProductClick}
+                    user={user}
+                  />
+                ))}
               </div>
             </div>
           )}
 
-          {/* Section Équipement */}
-          {filteredEquipment.length > 0 && (
-            <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="equipement">
-              <div
-                className=" flex items-center gap-4 mb-8 animate-slide-from-left"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                  <Home className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                    Équipement Maison
-                  </h2>
-                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                    Tout le matériel et équipement pour aménager et équiper votre intérieur
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredEquipment.map((category, index) => {
-                  const IconComponent = getIconByName(category.iconName);
-                  const productCount = getProductCount(category.name);
-
-                  return (
-                    <Card
-                      key={category.name}
-                      className=" group p-4 flex flex-col border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                      style={{
-                        animationDelay: `${0.3 + index * 0.1}s`,
-                      }}
-                    >
-                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                        <img src={category.image} alt="" className="w-full h-full object-cover" />
-                        <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                          <Badge>
-                            {productCount} produit{productCount !== 1 ? 's' : ''}
-                          </Badge>
-                        </div>
-                      </div>
-                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
-                        {category.name}
-                      </h3>
-                      <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <Button
-                        className="w-full bg-[#0052FF]/10 hover:bg-[#0052FF] hover:text-white text-[#0052FF] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                        onClick={() => handleCategoryClick(category, "équipement")}
-                      >
-                        Explorer
-                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section Matériaux */}
-          {filteredMaterials.length > 0 && (
-            <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="materiaux">
-              <div
-                className="flex items-center gap-4 mb-8 animate-slide-from-right"
-                style={{ animationDelay: "0.4s" }}
-              >
-                <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                  <Construction className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                    Matériaux Construction
-                  </h2>
-                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                    Matériaux de construction et fournitures pour tous vos projets de rénovation
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredMaterials.map((category, index) => {
-                  const IconComponent = getIconByName(category.iconName);
-                  const productCount = getProductCount(category.name);
-
-                  return (
-                    <Card
-                      key={category.name}
-                      className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-right-card"
-                      style={{
-                        animationDelay: `${0.5 + index * 0.1}s`,
-                      }}
-                    >
-                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                        <img src={category.image} alt="" className="w-full h-full object-cover" />
-                        <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                          <Badge>
-                            {productCount} produit{productCount !== 1 ? 's' : ''}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#00C2A8] transition-colors duration-300">
-                        {category.name}
-                      </h3>
-                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <Button
-                        className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                        onClick={() => handleCategoryClick(category, "matériaux")}
-                      >
-                        Explorer
-                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Section Design & Décoration */}
-          {filteredDesign.length > 0 && (
-            <div className="bg-white/70 p-5 pb-14 my-5 rounded-lg" id="design">
-              <div
-                className="flex items-center gap-4 mb-8 animate-scale-up"
-                style={{ animationDelay: "0.6s" }}
-              >
-                <div className="p-3 rounded-2xl bg-[#0052FF] shadow-lg transform transition-transform duration-300 hover:scale-110">
-                  <Brush className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl lg:text-4xl font-bold text-black/70">
-                    Design & Décoration
-                  </h2>
-                  <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
-                    Solutions esthétiques pour sublimer votre intérieur
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredDesign.map((category, index) => {
-                  const IconComponent = getIconByName(category.iconName);
-                  const productCount = getProductCount(category.name);
-
-                  return (
-                    <Card
-                      key={category.name}
-                      className="group p-6 border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-scale-up-card"
-                      style={{
-                        animationDelay: `${0.7 + index * 0.1}s`,
-                      }}
-                    >
-                      <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                        <img src={category.image} alt="" className="w-full h-full object-cover" />
-                        <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
-                          <Badge>
-                            {productCount} produit{productCount !== 1 ? 's' : ''}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
-                        {category.name}
-                      </h3>
-                      <p className="text-[#5A6470] text-sm mb-4 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <Button
-                        className="w-full bg-[#0052FF]/10 hover:bg-[#0052FF] hover:text-white text-[#0052FF] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
-                        onClick={() => handleCategoryClick(category, "design")}
-                      >
-                        Explorer
-                        <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                      </Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Sections avec props de tracking */}
+          <EquipementSection 
+            searchQuery={searchQuery} 
+            onCategoryClick={trackCategoryClick}
+          />
+          <MateriauxSection 
+            searchQuery={searchQuery} 
+            onCategoryClick={trackCategoryClick}
+          />
+          <DesignSection 
+            searchQuery={searchQuery} 
+            onCategoryClick={trackCategoryClick}
+          />
 
           {/* Section CTA */}
           <div
@@ -762,183 +352,6 @@ const Produits = () => {
         onClose={() => setIsContactModalOpen(false)}
         type={contactModalType}
       />
-
-      {/* Styles CSS pour les animations */}
-      <style>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes slide-from-left {
-          from {
-            opacity: 0;
-            transform: translateX(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slide-from-right {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes slide-from-left-card {
-          from {
-            opacity: 0;
-            transform: translateX(-30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-        @keyframes slide-from-right-card {
-          from {
-            opacity: 0;
-            transform: translateX(30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-        @keyframes scale-up {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes scale-up-card {
-          from {
-            opacity: 0;
-            transform: scale(0.9) translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-        @keyframes bounce-in {
-          0% {
-            opacity: 0;
-            transform: scale(0.3);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.05);
-          }
-          70% {
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes pulse-slow {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
-        }
-        @keyframes pulse-cta {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.02);
-          }
-        }
-        @keyframes scale-in {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out forwards;
-        }
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out forwards;
-        }
-        .animate-slide-from-left {
-          animation: slide-from-left 0.8s ease-out forwards;
-        }
-        .animate-slide-from-right {
-          animation: slide-from-right 0.8s ease-out forwards;
-        }
-        .animate-slide-from-left-card {
-          animation: slide-from-left-card 0.6s ease-out forwards;
-        }
-        .animate-slide-from-right-card {
-          animation: slide-from-right-card 0.6s ease-out forwards;
-        }
-        .animate-scale-up {
-          animation: scale-up 0.7s ease-out forwards;
-        }
-        .animate-scale-up-card {
-          animation: scale-up-card 0.6s ease-out forwards;
-        }
-        .animate-bounce-in {
-          animation: bounce-in 1s ease-out forwards;
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 2s ease-in-out infinite;
-        }
-        .animate-pulse-cta {
-          animation: pulse-cta 3s ease-in-out infinite;
-        }
-        .animate-scale-in {
-          animation: scale-in 0.3s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

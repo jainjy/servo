@@ -12,7 +12,9 @@ import { Flame, Zap, Sofa, Palette, Sprout, Wrench, Lock, Lamp, Package } from "
 
 interface EquipementSectionProps {
   searchQuery?: string;
+  onCategoryClick?: (categoryName: string, section: string) => void;
 }
+
 
 const iconComponents = {
   Flame,
@@ -26,7 +28,7 @@ const iconComponents = {
   Package,
 };
 
-const EquipementSection = ({ searchQuery }: EquipementSectionProps) => {
+const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionProps) => {
   const [categories, setCategories] = useState<EquipementCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
@@ -60,8 +62,11 @@ const EquipementSection = ({ searchQuery }: EquipementSectionProps) => {
   });
 
   const handleCategoryClick = (category: EquipementCategory) => {
+     if (onCategoryClick) {
+      onCategoryClick(category.name, "équipement");
+    }
     navigate(`/produits/categorie/${encodeURIComponent(category.name)}`, {
-      state: {
+     state: {
         name: category.name,
         description: category.description,
         image: category.image,
