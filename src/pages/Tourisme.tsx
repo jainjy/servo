@@ -156,7 +156,7 @@ export const TourismSection = () => {
     const fetchPopularDestinations = async () => {
       try {
         const response = await api.get("/tourisme");
-        
+
         if (response.data.success && Array.isArray(response.data.data)) {
           // Regrouper les hébergements par ville
           const grouped = response.data.data.reduce((acc: any, listing: any) => {
@@ -168,8 +168,8 @@ export const TourismSection = () => {
                 image: Array.isArray(listing.images)
                   ? listing.images[0]
                   : listing.images
-                  ? listing.images
-                  : "https://via.placeholder.com/400x300?text=Aucune+image",
+                    ? listing.images
+                    : "https://via.placeholder.com/400x300?text=Aucune+image",
               };
             } else if (listing.price < acc[city].price) {
               acc[city].price = listing.price; // garder le prix minimum par ville
@@ -287,7 +287,7 @@ export const TourismSection = () => {
 
       if (response.data.success) {
         setListings(response.data.data);
-        
+
         // TRACKING: Recherche effectuée
         trackTourismInteraction('search', 'Recherche hébergements', 'search', {
           destination: filters.destination,
@@ -328,7 +328,7 @@ export const TourismSection = () => {
       checkIn: filters.checkIn,
       checkOut: filters.checkOut
     }));
-    
+
     // Vérifier la disponibilité avant d'ouvrir le modal
     if (filters.checkIn && filters.checkOut) {
       try {
@@ -372,10 +372,10 @@ export const TourismSection = () => {
       };
 
       const response = await api.post("/tourisme-bookings", bookingData);
-      
+
       if (response.data.success) {
         setBookingSuccess(response.data);
-        
+
         // TRACKING: Réservation confirmée
         if (response.data.success && selectedListing) {
           await trackTourismInteraction(selectedListing.id, selectedListing.title, 'booking_confirmed', {
@@ -383,7 +383,7 @@ export const TourismSection = () => {
             totalAmount: response.data.data.totalAmount
           });
         }
-        
+
         // Réinitialiser le formulaire
         setBookingForm({
           listingId: '',
@@ -450,7 +450,7 @@ export const TourismSection = () => {
       const action = favorites.has(listingId) ? 'remove_favorite' : 'add_favorite';
       trackTourismInteraction(listingId, listing.title, action);
     }
-    
+
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(listingId)) {
@@ -468,10 +468,10 @@ export const TourismSection = () => {
 
     // Pause l'animation pendant le défilement manuel
     slider.style.animationPlayState = 'paused';
-    
+
     const scrollAmount = 300;
     const currentScroll = slider.scrollLeft;
-    
+
     if (direction === 'left') {
       slider.scrollLeft = currentScroll - scrollAmount;
     } else {
@@ -867,7 +867,10 @@ export const TourismSection = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 italic px-4">Chargement des destinations...</p>
+                <div className='flex flex-col gap-4'>
+                  <img src="/loading.gif" alt="" className='w-24 h-24' />
+                  <p className="text-gray-500 italic px-4">Chargement des destinations...</p>
+                </div>
               )}
             </div>
           </div>
@@ -1164,8 +1167,8 @@ export const TourismSection = () => {
 
                     <div className="flex items-start space-x-4 mb-6">
                       <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex-shrink-0">
-                        {selectedListing.images[0] ? 
-                          <img src={selectedListing.images[0]} alt="" className="w-full h-full object-cover rounded-xl" /> 
+                        {selectedListing.images[0] ?
+                          <img src={selectedListing.images[0]} alt="" className="w-full h-full object-cover rounded-xl" />
                           : <div className="w-full h-full flex items-center justify-center text-white text-xs">Image non disponible</div>
                         }
                       </div>

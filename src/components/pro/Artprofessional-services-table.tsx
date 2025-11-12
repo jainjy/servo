@@ -66,7 +66,9 @@ const fetchServices = async () => {
     fetchServices();
   }, [searchQuery]);
 
-  if (loading) return <p>Chargement...</p>;
+  if (loading) return <div className="flex flex-col gap-4">
+  <img src="/loading.gif" alt="" className='w-24 h-24'/>
+    Chargement...</div>;
   if (services.length === 0) return <p>Aucun service trouvé.</p>;
 
   return (

@@ -92,6 +92,8 @@ export default function LogoLoader() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
+
           <p className="text-sm font-medium text-gray-700">Chargement de SERVO…</p>
         </motion.div>
       </div>

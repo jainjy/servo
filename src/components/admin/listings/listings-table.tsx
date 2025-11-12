@@ -212,7 +212,7 @@ export function ListingsTable() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
           <p>Chargement des annonces...</p>
         </div>
       </div>

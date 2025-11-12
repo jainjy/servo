@@ -4,27 +4,27 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Package,
-  Flame, 
-  Zap, 
-  Sofa, 
-  Palette, 
-  Sprout, 
-  Wrench, 
-  Lock, 
+  Flame,
+  Zap,
+  Sofa,
+  Palette,
+  Sprout,
+  Wrench,
+  Lock,
   Lamp,
-  Warehouse, 
-  Thermometer, 
-  Square, 
-  TreePine, 
-  DoorClosed, 
+  Warehouse,
+  Thermometer,
+  Square,
+  TreePine,
+  DoorClosed,
   Droplets,
-  Brush, 
-  Wand2, 
-  PaintBucket, 
-  Home, 
+  Brush,
+  Wand2,
+  PaintBucket,
+  Home,
   Construction,
   Users,
   Phone,
@@ -94,24 +94,24 @@ const CategorieProduits = () => {
       );
       return;
     }
-    
+
     try {
       setAddingProductId(product.id);
-      
+
       // Ajouter le produit au panier
       addToCart(product);
-      
+
       // Petit délai pour laisser le temps à l'état de se mettre à jour
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Trouver l'article dans le panier pour afficher la bonne quantité
       const cartItem = cartItems.find(item => item.id === product.id);
       const quantity = cartItem ? cartItem.quantity : 1;
       const totalItems = getCartItemsCount();
-      
+
       // Afficher une confirmation détaillée
       toast.info(`${product.name} ajouté au panier !`);
-      
+
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error("Erreur lors de l'ajout au panier");
@@ -124,9 +124,9 @@ const CategorieProduits = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des produits...</p>
+        <div className=" py-12 flex flex-col justify-center items-center">
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
+          <p className="text-gray-500 mt-4">Chargement des produits...</p>
         </div>
       </div>
     );
@@ -137,18 +137,11 @@ const CategorieProduits = () => {
       <div className="container mx-auto px-4 py-8">
         {/* En-tête de la catégorie */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/produits')}
-            className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour aux catégories
-          </Button>
+
 
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
                 {category?.iconName && (
                   <div className="p-2 rounded-xl bg-[#0052FF]/10">
                     {(() => {
@@ -157,11 +150,20 @@ const CategorieProduits = () => {
                     })()}
                   </div>
                 )}
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/domicile')}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Retour
+                </Button>
                 <div>
+
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
                     {category?.name || decodeURIComponent(categoryName)}
                   </h2>
-                  <p className="text-[#5A6470]">
+                  <p className="text-[#5A6470] text-xs">
                     {category?.description || "Découvrez tous nos produits dans cette catégorie"}
                   </p>
                 </div>
@@ -213,7 +215,7 @@ const CategorieProduits = () => {
 
                   {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-[#0052FF] hover:bg-[#003EE6] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity === 0 || addingProductId === product.id}
                   >

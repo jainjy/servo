@@ -231,7 +231,8 @@ const ProfessionalSubscriptionPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex-col gap-4 flex items-center justify-center bg-gray-900">
+        <img src="/loading.gif" alt="" className='w-24 h-24'/>
         <div className="text-white text-xl">Chargement des plans...</div>
       </div>
     );

@@ -68,7 +68,7 @@ const PropertyPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         if (!id) {
           setError("ID de propriété manquant");
           return;
@@ -91,7 +91,7 @@ const PropertyPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
           <p className="mt-4 text-muted-foreground">Chargement de la propriété...</p>
         </div>
       </div>

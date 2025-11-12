@@ -684,7 +684,8 @@ const ArtCommerceDetail = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {loading ? (
-                      <div className="col-span-full text-center py-16 text-gray-500">
+                      <div className="col-span-full flex flex-col gap-4 text-center py-16 text-gray-500">
+                        <img src="/loading.gif" alt="" className='w-24 h-24'/>
                         Chargement...
                       </div>
                     ) : oeuvres.length > 0 ? (

@@ -1141,7 +1141,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
               {demandesLoading && (
                 <div className="inline-flex items-center ml-3 text-sm text-muted-foreground">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
                   Chargement demandes...
                 </div>
               )}

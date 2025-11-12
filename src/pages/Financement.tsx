@@ -7,17 +7,17 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { motion } from "framer-motion";
 import { financementAPI } from "@/lib/api";
-import { 
-  Building2, 
-  Users, 
-  Shield, 
-  Home, 
-  FileText, 
-  Calculator, 
-  Phone, 
-  Mail, 
-  Star, 
-  CheckCircle, 
+import {
+  Building2,
+  Users,
+  Shield,
+  Home,
+  FileText,
+  Calculator,
+  Phone,
+  Mail,
+  Star,
+  CheckCircle,
   TrendingUp,
   Handshake,
   BadgeDollarSign,
@@ -27,7 +27,7 @@ import {
   ArrowRight,
   LucideIcon
 } from "lucide-react";
-import {useAuth} from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 // Types
 interface FinancementPartenaire {
   id: number;
@@ -159,7 +159,7 @@ export default function Financement() {
     selectedPartenaire: null,
     simulationData: null
   });
-   
+
   const { isAuthenticated } = useAuth();
   const [partenairesFinancement, setPartenairesFinancement] = useState<FinancementPartenaire[]>([]);
   const [servicesAssurance, setServicesAssurance] = useState<AssuranceService[]>([]);
@@ -172,12 +172,12 @@ export default function Financement() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const [partenairesResponse, assurancesResponse] = await Promise.all([
           financementAPI.getPartenaires(),
           financementAPI.getAssurances()
         ]);
-        
+
         setPartenairesFinancement(partenairesResponse.data);
         setServicesAssurance(assurancesResponse.data);
       } catch (error) {
@@ -213,9 +213,9 @@ export default function Financement() {
   };
 
   const handlePartenaireClick = (partenaire: FinancementPartenaire) => {
-    if (isAuthenticated){
+    if (isAuthenticated) {
       openModal("contact", { selectedPartenaire: partenaire });
-    }else{
+    } else {
       alert("veuiller vous connecter ou vous inscrire pour contacter un partenaire.")
     }
   };
@@ -254,7 +254,7 @@ export default function Financement() {
 
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
+            <img src="/loading.gif" alt="" className='w-24 h-24' />
             <p className="text-slate-600">Chargement des données...</p>
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function Financement() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-      
+
       {/* Message d'erreur */}
       {error && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mx-4 mt-4">
@@ -276,16 +276,16 @@ export default function Financement() {
           </div>
         </div>
       )}
-      
+
       {/* Hero Section avec background image */}
       <section className="relative py-24 overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80')`
           }}
         />
-        
+
         <div className="container mx-auto px-4 h-24 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -297,7 +297,7 @@ export default function Financement() {
               Financement & <span className="text-blue-400">Assurance</span>
             </h1>
             <p className="text-sm text-slate-200 mb-4 lg:mb-10 leading-relaxed">
-              Des solutions complètes pour financer votre projet et le protéger avec nos partenaires de confiance. 
+              Des solutions complètes pour financer votre projet et le protéger avec nos partenaires de confiance.
               Accompagnement personnalisé de A à Z.
             </p>
 
@@ -371,9 +371,9 @@ export default function Financement() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <p className="text-slate-600 mb-6 leading-relaxed">{partenaire.description}</p>
-                  
+
                   <div className="space-y-3 mb-8">
                     {partenaire.avantages && partenaire.avantages.map((avantage, idx) => (
                       <div key={idx} className="flex items-center text-sm">
@@ -383,7 +383,7 @@ export default function Financement() {
                     ))}
                   </div>
 
-                  <Button 
+                  <Button
                     className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-slate-900 hover:border-slate-800"
                     onClick={() => handlePartenaireClick(partenaire)}
                   >
@@ -423,7 +423,7 @@ export default function Financement() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
               >
-                <Card 
+                <Card
                   className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 cursor-pointer bg-white group"
                   onClick={() => handleAssuranceClick(assurance)}
                 >
@@ -445,7 +445,7 @@ export default function Financement() {
                   <h3 className="text-2xl font-bold text-slate-900 mb-4">{assurance.nom}</h3>
                   <p className="text-slate-600 mb-4 leading-relaxed">{assurance.description}</p>
                   <p className="text-sm text-slate-500 mb-6 leading-relaxed">{assurance.details}</p>
-                  
+
                   <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                     <span className="text-sm text-slate-600 font-medium">{assurance.public}</span>
                     <div className="flex items-center text-slate-900 font-semibold text-sm group-hover:text-slate-700 transition-colors duration-300">
@@ -539,7 +539,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     if ((name === 'montant' || name === 'duree') && formData.montant && formData.duree) {
       const montant = name === 'montant' ? value : formData.montant;
       const duree = name === 'duree' ? value : formData.duree;
@@ -552,7 +552,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!isAuthenticated){
+    if (!isAuthenticated) {
       alert("Veuillez vous connecter ou vous inscrire pour envoyer une demande.");
       return;
     }
@@ -705,8 +705,8 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
           <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
             Durée du prêt
           </label>
-          <Select 
-            value={formData.duree} 
+          <Select
+            value={formData.duree}
             onValueChange={(value) => handleSelectChange('duree', value)}
           >
             <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
@@ -787,8 +787,8 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
       </div>
 
       <div className="grid lg:flex gap-4">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
           disabled={submitting}
         >
@@ -809,10 +809,10 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
             </>
           )}
         </Button>
-        <Button 
+        <Button
           type="button"
           onClick={onClose}
-          variant="outline" 
+          variant="outline"
           className="flex-1 rounded-xl py-4 text-base font-semibold border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
           disabled={submitting}
         >
@@ -855,19 +855,19 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
           {/* Contenu dynamique */}
           {type === 'service' && renderServiceContent()}
           {type === 'simulation' && renderSimulationContent()}
-          
+
           {/* Formulaire de contact pour tous les types */}
           {(type === 'contact' || type === 'simulation') && renderContactForm()}
-          
+
           {/* Bouton de contact pour le modal service */}
           {type === 'service' && (
             <div className="flex gap-4 mt-8">
-              <Button 
+              <Button
                 onClick={() => {
                   // Utilisez une fonction pour ouvrir le modal contact
                   const openContactModal = () => {
-                    const event = new CustomEvent('openModal', { 
-                      detail: { type: 'contact' } 
+                    const event = new CustomEvent('openModal', {
+                      detail: { type: 'contact' }
                     });
                     window.dispatchEvent(event);
                   };
@@ -878,9 +878,9 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
                 <Phone className="h-5 w-5 mr-3" />
                 Contacter un expert
               </Button>
-              <Button 
+              <Button
                 onClick={onClose}
-                variant="outline" 
+                variant="outline"
                 className="flex-1 rounded-xl py-4 text-base font-semibold border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
               >
                 Fermer

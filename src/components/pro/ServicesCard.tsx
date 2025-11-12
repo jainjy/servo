@@ -91,7 +91,8 @@ export function ServicesCard() {
 
     if (loading) {
         return (
-            <Card className="bg-card border-border p-6">
+            <Card className="bg-card border-border p-6 flex flex-col gap-4">
+                <img src="/loading.gif" alt="" className='w-24 h-24'/>
                 <div className="text-center text-muted-foreground">Chargement des services...</div>
             </Card>
         )

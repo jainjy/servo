@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 
 interface MateriauxSectionProps {
-  searchQuery?: string;
-  onCategoryClick?: (categoryName: string, section: string) => void;
+    searchQuery?: string;
+    onCategoryClick?: (categoryName: string, section: string) => void;
 }
 
 const iconComponents = {
@@ -178,10 +178,10 @@ const MateriauxSection = ({ searchQuery, onCategoryClick }: MateriauxSectionProp
 
             {/* Loading */}
             {isLoading ? (
-                <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00C2A8] mx-auto"></div>
-                    <p className="text-gray-500 mt-4">Chargement des matériaux...</p>
-                </div>
+                <div className=" py-12 flex flex-col justify-center items-center">
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
+          <p className="text-gray-500 mt-4">Chargement des matériaux...</p>
+        </div>
             ) : (
                 <>
                     {/* Grille des catégories */}

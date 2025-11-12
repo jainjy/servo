@@ -68,7 +68,7 @@ const Header = () => {
   const { getCartItemsCount } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?$%*#";
     const speed = 20; // <-- vitesse (ms) : plus petit = plus rapide
     const step = 0.5; // <-- incrément d'itérations (plus grand = plus vite)
@@ -131,7 +131,7 @@ useEffect(() => {
       activeIntervals.clear();
       busy.clear();
     };
-  }, []); 
+  }, []);
 
 
   useEffect(() => {
@@ -322,7 +322,7 @@ useEffect(() => {
         //   href: "/batiments#construction-plans",
         //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
         // },
-         {
+        {
           title: "Matériaux & viabilisations",
           description: " Solutions durables pour vos projets",
           href: "/batiments#materiaux-viabilisations",
@@ -362,7 +362,7 @@ useEffect(() => {
         }, {
           title: "Equipements & livraison",
           description: " Solutions pour un domicile moderne",
-          href: "/domicile#equipements-livraison",
+          href: "/domicile#équipements-livraison",
           image: "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg"
         },
         {
@@ -383,7 +383,7 @@ useEffect(() => {
         }, {
           title: "Matériaux",
           description: "Matériaux de construction qualité premium",
-          href: "/domicile#utilities",
+          href: "/domicile#materiaux",
           image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
         }
       ],
@@ -982,10 +982,9 @@ useEffect(() => {
                                 onFocus={() =>
                                   hasItems && setHoveredSection(section.title)
                                 }
-                                onMouseLeave={() => {}}
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
-                                  isActive ? "bg-white/10" : "hover:bg-white/5"
-                                }`}
+                                onMouseLeave={() => { }}
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"
+                                  }`}
                               >
                                 {hasItems ? (
                                   <button className="scramble  w-full text-left text-xs font-semibold text-white">
@@ -1175,6 +1174,8 @@ useEffect(() => {
 
                     {notifLoading ? (
                       <div className="text-center text-sm text-gray-500">
+                        <img src="/loading.gif" alt="" className='w-24 h-24' />
+
                         Chargement...
                       </div>
                     ) : notifications.length === 0 ? (
@@ -1186,9 +1187,8 @@ useEffect(() => {
                         {notifications.map((n) => (
                           <div
                             key={n.id}
-                            className={`p-3 rounded-lg border transition-colors ${
-                              n.isRead ? "bg-gray-50" : "bg-white"
-                            }`}
+                            className={`p-3 rounded-lg border transition-colors ${n.isRead ? "bg-gray-50" : "bg-white"
+                              }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
@@ -1220,8 +1220,8 @@ useEffect(() => {
                                 <div className="text-xs text-gray-400">
                                   {n.createdAt
                                     ? new Date(n.createdAt).toLocaleDateString(
-                                        "fr-FR"
-                                      )
+                                      "fr-FR"
+                                    )
                                     : ""}
                                 </div>
                               </div>
