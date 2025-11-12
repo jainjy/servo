@@ -3,6 +3,7 @@ import { Tab } from '@headlessui/react';
 import { useLocation } from 'react-router-dom';
 import api from '../../lib/api.js'; // Adjust the path according to your project structure
 import { DemandeDevisModal } from '@/components/DemandeDevis'; // Import du modal
+import { Loader2 } from 'lucide-react';
 
 const BatimentsLayout = () => {
   const location = useLocation();
@@ -213,8 +214,9 @@ const BatimentsLayout = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-xl">Chargement des services...</div>
+        <div className="flex flex-col justify-center items-center h-64">
+          <Loader2 className="h-12 w-12 text-slate-900 animate-spin mx-auto" />
+          <div className="text-md">Chargement des services...</div>
         </div>
       </div>
     );

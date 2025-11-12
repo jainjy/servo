@@ -525,6 +525,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const cat = params.get("categorie");
+    const searchParam = params.get("search");
 
     const validIds = sections.map((s) => s.id);
     const validCategorie = validIds.includes(cat) ? cat : "interieurs";
@@ -537,6 +538,11 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
     setCategorie(validCategorie);
     fetchServicesCategorie(categories[validCategorie].sectionId);
+    
+    // Appliquer le filtre de recherche si présent dans l'URL
+    if (searchParam) {
+      setSearchFilter(decodeURIComponent(searchParam));
+    }
   }, [location.search, navigate]);
 
   // Filtrage des prestations basé sur la recherche et le type sélectionné
