@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { UserPlus, LogIn, Sparkles, SparklesIcon, Home, Sparkle } from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -272,6 +272,28 @@ export const ModalDemandeVisite = ({
 
   const { user, isAuthenticated } = useAuth();
 
+  // Réinitialiser le formulaire quand la modale se ferme ou que la propriété change
+  useEffect(() => {
+    if (!open) {
+      setFormData({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+      });
+    } else if (user && user.firstName) {
+      // Pré-remplir avec les données de l'utilisateur s'il existe
+      setFormData(prev => ({
+        ...prev,
+        nomPrenom: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        email: user.email || '',
+        telephone: user.phone || '',
+      }));
+    }
+  }, [open, user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!property) return;
@@ -360,10 +382,10 @@ export const ModalDemandeVisite = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   if (!open) return null;
 
