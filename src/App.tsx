@@ -14,6 +14,7 @@ import CategorieProduits from "./components/CategorieProduits";
 import BienEtre from "./pages/bien_etre";
 import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
+import ProduitsGeneraux from "./components/produits/ProduitsGeneraux";
 import Entreprise from "./pages/Entreprise";
 import Financement from "./pages/Financement";
 import Actualites from "./pages/Actualites";
@@ -281,6 +282,7 @@ const App = () => {
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
+                  <Route path="/produits-generaux" element={<ProduitsGeneraux />} />
                   <Route
                     path="/stripe-create"
                     element={<StripeConnectButton user={user} />}

@@ -139,7 +139,7 @@ const AlimentationCategorie = () => {
     return (
       <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00C2A8] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Chargement des produits...</p>
         </div>
       </div>
@@ -164,10 +164,10 @@ const AlimentationCategorie = () => {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 {category?.iconName && (
-                  <div className="p-2 rounded-xl bg-[#00C2A8]/10">
+                  <div className="p-2 rounded-xl bg-blue-600/10">
                     {(() => {
                       const IconComponent = getIconByName(category.iconName);
-                      return <IconComponent className="h-6 w-6 text-[#00C2A8]" />;
+                      return <IconComponent className="h-6 w-6 text-blue-600" />;
                     })()}
                   </div>
                 )}
@@ -185,14 +185,14 @@ const AlimentationCategorie = () => {
               <div className="hidden md:flex gap-2">
                 <Badge
                   variant="outline"
-                  className="bg-[#00C2A8]/10 text-[#00C2A8] border-0"
+                  className="bg-blue-600/10 text-blue-600 border-0"
                 >
                   <Truck className="h-3 w-3 mr-1" />
                   Livraison 24h
                 </Badge>
                 <Badge
                   variant="outline"
-                  className="bg-[#00C2A8]/10 text-[#00C2A8] border-0"
+                  className="bg-blue-600/10 text-blue-600 border-0"
                 >
                   <ShieldCheck className="h-3 w-3 mr-1" />
                   Fraîcheur garantie
@@ -234,11 +234,11 @@ const AlimentationCategorie = () => {
                     </div>
                   ) : (
                     <div className="w-full h-48 bg-gradient-to-br from-[#00C2A8]/20 to-[#00C2A8]/10 rounded-lg mb-4 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-[#00C2A8]/40" />
+                      <Package className="h-12 w-12 text-blue-600/40" />
                     </div>
                   )}
 
-                  <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-[#00C2A8] transition-colors">
+                  <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {product.name}
                   </h3>
 
@@ -277,7 +277,7 @@ const AlimentationCategorie = () => {
 
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <span className="text-2xl font-bold text-[#00C2A8]">
+                      <span className="text-2xl font-bold text-blue-600">
                         €{typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                       </span>
                       {product.unit && (
@@ -302,7 +302,7 @@ const AlimentationCategorie = () => {
 
                   {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-[#00C2A8] hover:bg-[#00A890] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-blue-600 hover:bg-[#00A890] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity === 0 || addingProductId === product.id}
                   >
@@ -330,7 +330,7 @@ const AlimentationCategorie = () => {
               </p>
               <Button
                 onClick={() => navigate("/alimentation")}
-                className="mt-4 bg-[#00C2A8] hover:bg-[#00A890]"
+                className="mt-4 bg-blue-600 hover:bg-[#00A890]"
               >
                 Retour à l'alimentation
               </Button>
@@ -339,23 +339,23 @@ const AlimentationCategorie = () => {
 
           {/* Section Informations importantes */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-[#00C2A8]/5 rounded-xl p-4 text-center">
-              <Truck className="h-8 w-8 text-[#00C2A8] mx-auto mb-2" />
-              <h4 className="font-semibold text-[#00C2A8]">Livraison Rapide</h4>
+            <div className="bg-blue-600/5 rounded-xl p-4 text-center">
+              <Truck className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <h4 className="font-semibold text-blue-600">Livraison Rapide</h4>
               <p className="text-sm text-gray-600">
                 Sous 24h pour préserver la fraîcheur
               </p>
             </div>
-            <div className="bg-[#00C2A8]/5 rounded-xl p-4 text-center">
-              <ShieldCheck className="h-8 w-8 text-[#00C2A8] mx-auto mb-2" />
-              <h4 className="font-semibold text-[#00C2A8]">Qualité Garantie</h4>
+            <div className="bg-blue-600/5 rounded-xl p-4 text-center">
+              <ShieldCheck className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <h4 className="font-semibold text-blue-600">Qualité Garantie</h4>
               <p className="text-sm text-gray-600">
                 Produits frais contrôlés quotidiennement
               </p>
             </div>
-            <div className="bg-[#00C2A8]/5 rounded-xl p-4 text-center">
-              <Leaf className="h-8 w-8 text-[#00C2A8] mx-auto mb-2" />
-              <h4 className="font-semibold text-[#00C2A8]">Produits Bio</h4>
+            <div className="bg-blue-600/5 rounded-xl p-4 text-center">
+              <Leaf className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <h4 className="font-semibold text-blue-600">Produits Bio</h4>
               <p className="text-sm text-gray-600">
                 Large sélection de produits biologiques
               </p>

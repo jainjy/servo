@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import EquipementSection from '@/components/produits/EquipementSection';
 import MateriauxSection from '@/components/produits/MateriauxSection';
 import DesignSection from '@/components/produits/DesignSection';
+import ProduitsGeneraux from '@/components/produits/ProduitsGeneraux';
 
 import Modal from '@/components/ui/modal';
 
@@ -24,7 +25,6 @@ const DomicileLayout = () => {
     setSelectedItem({ item, section });
     setIsModalOpen(true);
   };
-
   useEffect(() => {
     if (location.hash) {
       const hash = location.hash.replace('#', '');
@@ -174,8 +174,11 @@ const DomicileLayout = () => {
             >
               {section.title === "Équipements & Livraison" ? (
                 <EquipementSection searchQuery="" />
-              ) : section.title === "Matériaux" ? (
+              ) 
+              : section.title === "Matériaux" ? (
                 <MateriauxSection searchQuery="" />
+              ) : section.title === "Produits & Commerces" ? (
+                <ProduitsGeneraux />
               ) : section.title === "Design & Décoration" ? (
                 <DesignSection searchQuery="" />
               ) : (

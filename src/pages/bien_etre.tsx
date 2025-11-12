@@ -88,7 +88,7 @@ const SlideIn = ({ children, direction = "left", delay = 0 }) => {
   );
 };
 
-// Composant formulaire de rendez-vous
+// Composant formulaire de rendez-vous - AGRANDI AVEC BOUTON FERMER EN CERCLE
 const AppointmentForm = ({ isOpen, onClose, service }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -114,23 +114,19 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
     setIsLoading(true);
 
     try {
-      // Track la réservation
       trackBienEtreServiceBook(service.id, service.libelle, service.category?.name || 'general');
 
-      // Appel à l'API pour créer le rendez-vous
       const response = await api.post('/harmonie/appointments', {
-        serviceId: service.id, // ID du service sélectionné
+        serviceId: service.id,
         date: formData.date,
         time: formData.time,
         message: formData.message
-        // userId est récupéré automatiquement du token
       });
 
       console.log("✅ Rendez-vous créé:", response.data);
       alert("Rendez-vous confirmé ! Nous vous contacterons rapidement.");
       onClose();
 
-      // Réinitialiser le formulaire
       setFormData({
         name: "",
         email: "",
@@ -151,16 +147,24 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-500 ease-out animate-slideUp">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-800">
-              Prendre rendez-vous - {service?.libelle}
-            </h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      {/* Modal agrandi - max-w-2xl au lieu de max-w-md */}
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
+        <div className="p-8">
+          {/* En-tête avec bouton fermer en cercle */}
+          <div className="flex justify-between items-start mb-8">
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold text-gray-900">
+                Prendre rendez-vous
+              </h2>
+              <p className="text-gray-600 mt-2 text-lg">
+                {service?.libelle}
+              </p>
+            </div>
+            {/* Bouton fermer en cercle */}
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="h-12 w-12 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200 flex items-center justify-center flex-shrink-0 ml-4"
               disabled={isLoading}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,122 +173,134 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nom complet *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Téléphone *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+          {/* Formulaire avec plus d'espace */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date *
+                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
+                  Nom complet *
                 </label>
                 <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
+                  type="text"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
-                  min={new Date().toISOString().split('T')[0]} // Pas de dates passées
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors duration-200"
+                  placeholder="Votre nom complet"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Heure *
+                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
+                  Email *
                 </label>
                 <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
+                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors duration-200"
+                  placeholder="votre@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
+                  Téléphone *
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors duration-200"
+                  placeholder="Votre numéro de téléphone"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors duration-200"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
+                    Heure *
+                  </label>
+                  <input
+                    type="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                    className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors duration-200"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3 text-left">
+                  Message (optionnel)
+                </label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={5}
+                  disabled={isLoading}
+                  className="w-full px-4 py-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors duration-200 resize-none"
+                  placeholder="Informations supplémentaires, préférences, questions..."
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message (optionnel)
-              </label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                rows={3}
+            {/* Actions avec boutons plus grands */}
+            <div className="flex gap-4 pt-6">
+              <button
+                type="submit"
                 disabled={isLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100"
-                placeholder="Informations supplémentaires, préférences, etc."
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4">
+                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-5 text-lg font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                    Création...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Confirmer le rendez-vous
+                  </>
+                )}
+              </button>
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
+                className="flex-1 rounded-xl py-5 text-lg font-semibold border border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-800 transition-all duration-300 disabled:opacity-50"
               >
                 Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Création...
-                  </>
-                ) : (
-                  "Confirmer le rendez-vous"
-                )}
               </button>
             </div>
           </form>
@@ -294,75 +310,70 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
   );
 };
 
-// Composant de petite carte moderne
-const ServiceCard = ({ service, index }) => {
-  const [showForm, setShowForm] = useState(false);
+// Composant de petite carte moderne - SANS LE MODAL INTÉGRÉ
+const ServiceCard = ({ service, index, onOpenModal }) => {
   const { trackBienEtreServiceClick } = useBienEtreTracking();
 
   const handleCardClick = () => {
     trackBienEtreServiceClick(service.id, service.libelle, service.category?.name || 'general');
-    setShowForm(true);
+    onOpenModal(service);
   };
 
   return (
-    <>
-      <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-primary transform hover:-translate-y-2">
+    <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-primary transform hover:-translate-y-2">
 
-        {/* Image */}
-        <div className="relative h-56 overflow-hidden">
-          <img
-            src={service.images[0]}
-            alt={service.libelle}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      {/* Image */}
+      <div className="relative h-56 overflow-hidden">
+        <img
+          src={service.images[0]}
+          alt={service.libelle}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-          {/* Prix badge */}
-          <div className="absolute top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-full shadow-xl font-bold">
-            {service.price ? `${service.price}€` : "N/A"}
-          </div>
+        {/* Prix badge */}
+        <div className="absolute top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-full shadow-xl font-bold">
+          {service.price ? `${service.price}€` : "N/A"}
         </div>
-
-        {/* Contenu */}
-        <div className="p-6 space-y-4">
-          {/* Titre */}
-          <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-blue-600 dark:group-hover:text-primary transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
-            {service.libelle || "Titre non disponible"}
-          </h3>
-
-          {/* Description */}
-          <p className="text-gray-600 dark:text-muted-foreground text-sm leading-relaxed line-clamp-3 min-h-[4rem]">
-            {service.description || "Description non disponible"}
-          </p>
-
-          {/* Bouton */}
-          <button
-            onClick={handleCardClick}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Rendez-vous
-          </button>
-        </div>
-
-        {/* Effet de brillance au survol */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
       </div>
 
-      <AppointmentForm
-        isOpen={showForm}
-        onClose={() => setShowForm(false)}
-        service={service}
-      />
-    </>
+      {/* Contenu */}
+      <div className="p-6 space-y-4">
+        {/* Titre */}
+        <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-blue-600 dark:group-hover:text-primary transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
+          {service.libelle || "Titre non disponible"}
+        </h3>
+
+        {/* Description */}
+        <p className="text-gray-600 dark:text-muted-foreground text-sm leading-relaxed line-clamp-3 min-h-[4rem]">
+          {service.description || "Description non disponible"}
+        </p>
+
+        {/* Bouton */}
+        <button
+          onClick={handleCardClick}
+          className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Rendez-vous
+        </button>
+      </div>
+
+      {/* Effet de brillance au survol */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+    </div>
   );
 };
 
 const BienEtre = () => {
   const navigate = useNavigate();
   const section2Ref = useRef(null);
+  
+  // États pour gérer le modal
+  const [selectedService, setSelectedService] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Initialisation du tracking
   const { 
@@ -383,6 +394,17 @@ const BienEtre = () => {
       behavior: 'smooth',
       block: 'start'
     });
+  };
+
+  // Fonctions pour gérer le modal
+  const handleOpenModal = (service) => {
+    setSelectedService(service);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedService(null);
   };
 
   // State pour la tabulation
@@ -555,7 +577,7 @@ const BienEtre = () => {
           <SlideIn direction="up" delay={400}>
             <button
               onClick={scrollToSection2}
-              className="bg-slate-900 text-white px-8 py-2 rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-2xl font-semibold text-md">
+              className="bg-slate-900 text-white px-8 py-2 -mt-11 rounded-xl hover:bg-slate-800 transition-all duration-300 shadow-2xl font-semibold text-md">
               Commencer mon voyage
             </button>
           </SlideIn>
@@ -613,7 +635,11 @@ const BienEtre = () => {
                       {getCurrentServices().length > 0 ? (
                         getCurrentServices().map((service, index) => (
                           <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard service={service} index={index} />
+                            <ServiceCard 
+                              service={service} 
+                              index={index} 
+                              onOpenModal={handleOpenModal}
+                            />
                           </SlideIn>
                         ))
                       ) : (
@@ -644,7 +670,11 @@ const BienEtre = () => {
                         {getCurrentServices().length > 0 ? (
                           getCurrentServices().map((service, index) => (
                             <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                              <ServiceCard service={service} index={index} />
+                              <ServiceCard 
+                                service={service} 
+                                index={index} 
+                                onOpenModal={handleOpenModal}
+                              />
                             </SlideIn>
                           ))
                         ) : (
@@ -676,7 +706,11 @@ const BienEtre = () => {
                       {getCurrentServices().length > 0 ? (
                         getCurrentServices().map((service, index) => (
                           <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard service={service} index={index} />
+                            <ServiceCard 
+                              service={service} 
+                              index={index} 
+                              onOpenModal={handleOpenModal}
+                            />
                           </SlideIn>
                         ))
                       ) : (
@@ -706,7 +740,11 @@ const BienEtre = () => {
                       {getCurrentServices().length > 0 ? (
                         getCurrentServices().map((service, index) => (
                           <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard service={service} index={index} />
+                            <ServiceCard 
+                              service={service} 
+                              index={index} 
+                              onOpenModal={handleOpenModal}
+                            />
                           </SlideIn>
                         ))
                       ) : (
@@ -736,6 +774,13 @@ const BienEtre = () => {
           </div>
         </div>
       </div>
+
+      {/* MODAL AU NIVEAU RACINE - AGRANDI AVEC BOUTON FERMER EN CERCLE */}
+      <AppointmentForm
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        service={selectedService}
+      />
 
     </div>
   );
