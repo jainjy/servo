@@ -1,47 +1,96 @@
-import React, { useState, useEffect } from "react";
-import { ChevronDown, Search, X, Home, Send, Mail, Star, FileText, Loader2 } from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { ChevronDown, Search, X, Home, Send, Star, FileText, Loader2, Building, Filter } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/api"; // IMPORTATION DU MÊME CLIENT API
+import api from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth"; // Import du hook d'authentification
+
+// Types TypeScript
+interface Metier {
+  id?: string;
+  name?: string;
+  libelle?: string;
+}
+
+interface ServiceType {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  price?: number | string;
+  duration?: number;
+  rating?: number;
+  images?: string[];
+  metiers?: Metier[];
+  type?: string;
+}
+
+interface PropertyType {
+  value: string;
+  label: string;
+  icon: React.ComponentType<any>;
+}
+
+interface ServiceCategory {
+  value: string;
+  label: string;
+}
 
 const ServicesPage = () => {
+  // États principaux
   const [showStatuses, setShowStatuses] = useState(false);
-  const [selectedService, setSelectedService] = useState("");
+  const [services, setServices] = useState<ServiceType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth(); // Récupération de l'utilisateur connecté
+  const isLoggedIn = Boolean(user); // Vérification de la connexion
+  
+  // États de recherche et filtres
   const [servicesSearchQuery, setServicesSearchQuery] = useState("");
-  const [displayCount, setDisplayCount] = useState(8);
   const [propertyType, setPropertyType] = useState("");
+  const [serviceCategory, setServiceCategory] = useState("");
+  const [displayCount, setDisplayCount] = useState(8);
+  
+  // États d'interface
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
-  const [showCard, setShowCard] = useState(false);
-  const [selectedServiceForm, setSelectedServiceForm] = useState('');
-  const [selectedImage, setSelectedImage] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [dropdownResults, setDropdownResults] = useState<ServiceType[]>([]);
+  
+  // États modaux
+  const [isDevisModalOpen, setIsDevisModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentService, setCurrentService] = useState<ServiceType | null>(null);
   const [showMessageCard, setShowMessageCard] = useState(false);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // États pour le modal de devis
-  const [isDevisModalOpen, setIsDevisModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentService, setCurrentService] = useState(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const propertyTypes = [
+  // Types de propriétés
+  const propertyTypes: PropertyType[] = [
     { value: "maison", label: "Maison/Villa", icon: Home },
-    { value: "appartement", label: "Appartement", icon: Home },
+    { value: "appartement", label: "Appartement", icon: Building },
     { value: "terrain", label: "Terrain", icon: Home },
-    { value: "hotel", label: "Hôtel/Gîte", icon: Home }
+    { value: "hotel", label: "Hôtel/Gîte", icon: Building }
   ];
+
+  // Catégories extraites des services réels
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([
+    { value: "", label: "Toutes les catégories" }
+  ]);
 
   // Récupérer les services depuis l'API
   const fetchServices = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await api.get("/services");
       
       if (response.status === 200) {
         const data = response.data;
         
-        const parseApiData = (data: any) => {
+        const parseApiData = (data: any): ServiceType[] => {
           if (!data) return [];
           if (Array.isArray(data)) return data;
           if (data.services && Array.isArray(data.services)) return data.services;
@@ -54,11 +103,24 @@ const ServicesPage = () => {
         const parsedServices = parseApiData(data);
         console.log('Services chargés:', parsedServices.length);
         setServices(parsedServices);
+
+        // Extraire les catégories uniques des services
+        const uniqueCategories = [...new Set(parsedServices
+          .map(service => service.category)
+          .filter(Boolean)
+        )].map(category => ({
+            value: category as string,
+            label: (category as string).charAt(0).toUpperCase() + (category as string).slice(1).toLowerCase()
+          }));
+        
+        setServiceCategories(prev => [
+          { value: "", label: "Toutes les catégories" },
+          ...uniqueCategories
+        ]);
       } else {
-        console.warn('Erreur services:', response.status);
-        setServices([]);
+        throw new Error(`Statut de réponse: ${response.status}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
       console.error('Erreur lors du chargement des services:', err);
     } finally {
@@ -70,49 +132,87 @@ const ServicesPage = () => {
     fetchServices();
   }, []);
 
-  const getFilteredServices = () => {
-    let filtered = services;
+  // Filtrage des résultats pour l'autocomplétion
+  useEffect(() => {
+    if (!servicesSearchQuery.trim()) {
+      setDropdownResults([]);
+      return;
+    }
+
+    const results = services
+      .filter((service) =>
+        service.name?.toLowerCase().includes(servicesSearchQuery.toLowerCase()) ||
+        service.description?.toLowerCase().includes(servicesSearchQuery.toLowerCase()) ||
+        service.category?.toLowerCase().includes(servicesSearchQuery.toLowerCase())
+      )
+      .slice(0, 6);
     
-    if (servicesSearchQuery) {
-      const q = servicesSearchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
-        s.name?.toLowerCase().includes(q) ||
-        s.description?.toLowerCase().includes(q) ||
-        (s.metiers && s.metiers.some(metier => 
-          metier.libelle?.toLowerCase().includes(q) || 
-          metier.name?.toLowerCase().includes(q)
+    setDropdownResults(results);
+  }, [servicesSearchQuery, services]);
+
+  // Filtrage principal des services
+  const getFilteredServices = useCallback(() => {
+    let filtered = services;
+
+    // Filtre par recherche texte
+    if (servicesSearchQuery.trim()) {
+      const query = servicesSearchQuery.toLowerCase();
+      filtered = filtered.filter(service => 
+        service.name?.toLowerCase().includes(query) ||
+        service.description?.toLowerCase().includes(query) ||
+        service.category?.toLowerCase().includes(query) ||
+        (service.metiers && service.metiers.some(metier => 
+          metier.libelle?.toLowerCase().includes(query) || 
+          metier.name?.toLowerCase().includes(query)
         ))
       );
     }
 
+    // Filtre par type de propriété
     if (propertyType) {
-      filtered = filtered.filter(s => {
-        const typeToCategoryMap = {
-          'maison': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'CONSTRUCTION', 'SECURITE'],
-          'appartement': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'SECURITE'],
-          'terrain': ['ESTIMATION', 'FINANCEMENT', 'JURIDIQUE', 'CONSTRUCTION'],
-          'hotel': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'JURIDIQUE', 'CONSTRUCTION']
-        };
-        
-        const serviceCategory = s.category || s.type || 'OTHER';
-        return typeToCategoryMap[propertyType]?.includes(serviceCategory) || !propertyType;
+      const typeToCategoryMap: Record<string, string[]> = {
+        'maison': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'CONSTRUCTION', 'RENOVATION', 'SECURITE', 'ENTRETIEN'],
+        'appartement': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'RENOVATION', 'SECURITE', 'ENTRETIEN'],
+        'terrain': ['ESTIMATION', 'FINANCEMENT', 'JURIDIQUE', 'CONSTRUCTION'],
+        'hotel': ['ESTIMATION', 'FINANCEMENT', 'ASSURANCE', 'JURIDIQUE', 'CONSTRUCTION', 'RENOVATION', 'ENTRETIEN']
+      };
+      
+      filtered = filtered.filter(service => {
+        const serviceCategory = service.category || service.type || 'OTHER';
+        return typeToCategoryMap[propertyType]?.includes(serviceCategory);
       });
     }
 
-    return filtered;
-  };
+    // Filtre par catégorie de service
+    if (serviceCategory) {
+      filtered = filtered.filter(service => 
+        service.category === serviceCategory
+      );
+    }
 
-  const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 8);
+    return filtered;
+  }, [services, servicesSearchQuery, propertyType, serviceCategory]);
+
+  // Gestionnaires d'événements
+  const handleResetFilters = () => {
+    setServicesSearchQuery("");
+    setPropertyType("");
+    setServiceCategory("");
+    setDisplayCount(8);
   };
 
   const handleSendMessage = () => {
+    if (!email || !message) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+    
     console.log("Email:", email);
     console.log("Message:", message);
     setShowMessageCard(false);
     setEmail('');
     setMessage('');
-    alert("Message envoyé avec succès!");
+    toast.success("Message envoyé avec succès!");
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallbackText: string) => {
@@ -120,47 +220,45 @@ const ServicesPage = () => {
     target.src = `https://via.placeholder.com/300x200/E5E7EB/374151?text=${encodeURIComponent(fallbackText)}`;
   };
 
-  const handleDevisClick = (service: any) => {
+  const handleDevisClick = (service: ServiceType) => {
+    if (!isLoggedIn) {
+      toast.info("Vous devez être connecté pour demander un devis !");
+      return; // ne pas ouvrir le modal
+    }
+
     setCurrentService(service);
     setIsDevisModalOpen(true);
   };
 
-  // FONCTION CORRIGÉE AVEC LE MÊME CLIENT API
-  const handleDevisSubmit = async (e: React.FormEvent) => {
+  const handleDevisSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData(e.target as HTMLFormElement);
+      const formData = new FormData(e.currentTarget);
       const data = Object.fromEntries(formData);
 
-      // STRUCTURE EXACTEMENT IDENTIQUE À L'AUTRE COMPOSANT
       const demandeData = {
-        contactNom: data.nom,
-        contactPrenom: data.prenom,
-        contactEmail: data.email,
-        contactTel: data.telephone,
-        lieuAdresse: data.adresse,
-        lieuAdresseCp: "75000",
-        lieuAdresseVille: "Paris",
+        contactNom: data.nom as string,
+        contactPrenom: data.prenom as string,
+        contactEmail: data.email as string,
+        contactTel: data.telephone as string,
+        lieuAdresse: data.adresse as string,
+        lieuAdresseCp: data.codePostal as string || "75000",
+        lieuAdresseVille: data.ville as string || "Paris",
         optionAssurance: false,
-        description: data.message || `Demande de devis pour: ${currentService?.name}`,
+        description: data.message as string || `Demande de devis pour: ${currentService?.name}`,
         devis: `Budget: ${data.budget}, Date souhaitée: ${data.dateSouhaitee}`,
         serviceId: currentService?.id,
         serviceName: currentService?.name,
         nombreArtisans: "UNIQUE",
-        createdById: "user-anonymous", // Ou récupérer l'ID utilisateur si connecté
+        createdById: user?.id || "user-anonymous", // Utilisation de l'ID utilisateur
         status: "pending",
         type: "devis",
         source: "services-page"
       };
 
-      console.log('📤 Envoi demande de devis:', demandeData);
-
-      // UTILISER LE MÊME CLIENT API QUE L'AUTRE COMPOSANT
       const response = await api.post("/demandes/immobilier", demandeData);
-
-      console.log('✅ Réponse API:', response);
 
       if (response.status === 201 || response.status === 200) {
         toast.success("Votre demande a été créée avec succès !");
@@ -169,133 +267,64 @@ const ServicesPage = () => {
       } else {
         throw new Error(`Statut inattendu: ${response.status}`);
       }
-
-    } catch (error) {
-      console.error('❌ Erreur détaillée:', error);
-      
-      // Afficher plus de détails sur l'erreur
-      if (error.response) {
-        // Erreur de réponse du serveur
-        console.error('Données erreur:', error.response.data);
-        console.error('Status erreur:', error.response.status);
-        console.error('Headers erreur:', error.response.headers);
-        
-        const errorMessage = error.response.data?.message || 
-                            error.response.data?.error || 
-                            "Erreur lors de la création de la demande";
-        toast.error(errorMessage);
-      } else if (error.request) {
-        // Erreur de réseau
-        console.error('Aucune réponse reçue:', error.request);
-        toast.error("Erreur de connexion au serveur");
-      } else {
-        // Erreur de configuration
-        console.error('Erreur de configuration:', error.message);
-        toast.error("Erreur de configuration de la requête");
-      }
+    } catch (error: any) {
+      console.error('Erreur détaillée:', error);
+      toast.error(error.response?.data?.message || "Erreur lors de la création de la demande");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // VERSION ALTERNATIVE SI LA PREMIÈRE NE FONCTIONNE PAS
-  const handleDevisSubmitAlternative = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const formData = new FormData(e.target as HTMLFormElement);
-      const data = Object.fromEntries(formData);
-
-      // STRUCTURE MINIMALE POUR TEST
-      const demandeData = {
-        contactNom: data.nom,
-        contactPrenom: data.prenom,
-        contactEmail: data.email,
-        contactTel: data.telephone,
-        lieuAdresse: data.adresse,
-        description: data.message || `Devis pour: ${currentService?.name}`,
-        serviceName: currentService?.name,
-        status: "pending"
-      };
-
-      console.log('📤 Envoi demande simplifiée:', demandeData);
-
-      const response = await api.post("/demandes/immobilier", demandeData);
-
-      if (response.status === 201 || response.status === 200) {
-        toast.success("Demande envoyée avec succès !");
-        setIsDevisModalOpen(false);
-        setCurrentService(null);
-      }
-
-    } catch (error) {
-      console.error('Erreur alternative:', error);
-      
-      // Essayer avec fetch directement
-      try {
-        const formData = new FormData(e.target as HTMLFormElement);
-        const data = Object.fromEntries(formData);
-        
-        const demandeData = {
-          contactNom: data.nom,
-          contactPrenom: data.prenom,
-          contactEmail: data.email,
-          contactTel: data.telephone,
-          lieuAdresse: data.adresse,
-          description: data.message,
-          serviceName: currentService?.name,
-          status: "pending"
-        };
-
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const fetchResponse = await fetch(`${API_BASE_URL}/api/demandes/immobilier`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(demandeData),
-        });
-
-        if (fetchResponse.ok) {
-          toast.success("Demande créée avec succès !");
-          setIsDevisModalOpen(false);
-          setCurrentService(null);
-        } else {
-          throw new Error(`HTTP ${fetchResponse.status}`);
-        }
-      } catch (fetchError) {
-        console.error('Erreur fetch:', fetchError);
-        toast.error("Échec de l'envoi de la demande");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Gestion du focus simplifiée
+  const handleInputFocus = () => {
+    setIsFocused(true);
   };
 
+  const handleInputBlur = () => {
+    setTimeout(() => setIsFocused(false), 150);
+  };
+
+  // Fermer les dropdowns quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.filter-dropdown') && 
+          !target.closest('.category-dropdown')) {
+        setShowPropertyDropdown(false);
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Composant de section des services
   const ServicesSection = () => {
     const filteredServices = getFilteredServices();
     const displayedServices = filteredServices.slice(0, displayCount);
+    const hasActiveFilters = servicesSearchQuery || propertyType || serviceCategory;
 
     if (loading) {
       return (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Chargement des services...</span>
+        <div className="flex justify-center items-center py-20">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <span className="text-gray-600">Chargement des services...</span>
+          </div>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-red-50 rounded-lg mx-4">
           <div className="text-red-500 text-lg mb-4">
             Erreur lors du chargement des services
           </div>
           <button
             onClick={fetchServices}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
           >
             Réessayer
           </button>
@@ -305,119 +334,205 @@ const ServicesPage = () => {
 
     return (
       <>
+        {/* Barre de recherche et filtres */}
         <div className="mb-8 mt-6 animate-fade-in">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative flex-1 min-w-[300px]">
-              <input
-                type="text"
-                placeholder="RECHERCHER UN SERVICE..."
-                value={servicesSearchQuery}
-                onChange={(e) => setServicesSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-3 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+            {/* Recherche - Version améliorée */}
+            <div className="relative flex items-center gap-2 w-full sm:max-w-sm md:max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="RECHERCHER UN SERVICE..."
+                  value={servicesSearchQuery}
+                  onChange={(e) => setServicesSearchQuery(e.target.value)}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all search-input"
+                  autoComplete="off"
+                />
+                {servicesSearchQuery && (
+                  <button
+                    onClick={() => setServicesSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Bouton effacer tous les filtres */}
+              {hasActiveFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="flex items-center gap-2 whitespace-nowrap text-sm text-gray-600 hover:text-gray-800 transition-colors px-4 py-2 border border-gray-200 rounded-full hover:bg-gray-100"
+                >
+                  <X className="w-4 h-4" />
+                  Effacer
+                </button>
+              )}
             </div>
 
-            <div className="relative">
+            {/* Dropdown suggestions */}
+            {isFocused && dropdownResults.length > 0 && (
+              <div className="absolute top-full left-0 mt-2 w-full sm:max-w-sm md:max-w-md bg-white border border-gray-200 rounded-xl shadow-lg z-50 dropdown-results">
+                {dropdownResults.map((result, idx) => (
+                  <button
+                    key={result.id || idx}
+                    onClick={() => {
+                      setServicesSearchQuery(result.name);
+                      setIsFocused(false);
+                    }}
+                    className="block w-full text-left px-4 py-3 hover:bg-gray-50 first:rounded-t-xl last:rounded-b-xl border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="font-medium text-gray-900">{result.name}</div>
+                    {result.category && (
+                      <div className="text-xs text-gray-500 mt-1">{result.category}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Filtre Catégorie de service */}
+            <div className="relative category-dropdown">
               <button 
-                className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-3 text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => setShowPropertyDropdown(!showPropertyDropdown)}
+                className={`flex items-center gap-2 border rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                  serviceCategory 
+                    ? "border-purple-500 bg-purple-50 text-purple-700" 
+                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                }`}
+                onClick={() => {
+                  setShowCategoryDropdown(!showCategoryDropdown);
+                  setShowPropertyDropdown(false);
+                }}
               >
-                <Home className="w-4 h-4" />
-                {propertyType ? propertyTypes.find(p => p.value === propertyType)?.label : "Type de bien"}
+                <Filter className="w-4 h-4" />
+                {serviceCategory ? serviceCategories.find(c => c.value === serviceCategory)?.label : "Catégorie"}
                 <ChevronDown className="w-4 h-4" />
               </button>
               
-              {showPropertyDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 animate-slide-down">
-                  {propertyTypes.map((type) => (
+              {showCategoryDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-30 animate-slide-down max-h-60 overflow-y-auto">
+                  {serviceCategories.map((category) => (
                     <button
-                      key={type.value}
-                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3 ${
-                        propertyType === type.value ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
-                      }`}
+                      key={category.value}
+                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
+                        serviceCategory === category.value ? 'bg-purple-50 text-purple-600' : 'text-gray-700'
+                      } first:rounded-t-xl last:rounded-b-xl`}
                       onClick={() => {
-                        setPropertyType(type.value === propertyType ? "" : type.value);
-                        setShowPropertyDropdown(false);
+                        setServiceCategory(category.value === serviceCategory ? "" : category.value);
+                        setShowCategoryDropdown(false);
                       }}
                     >
-                      <type.icon className="w-4 h-4" />
-                      {type.label}
+                      {category.label}
                     </button>
                   ))}
                 </div>
               )}
             </div>
+          </div>
 
-            {servicesSearchQuery && (
-              <button
-                onClick={() => setServicesSearchQuery("")}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+          {/* Indicateurs de filtres actifs */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {propertyType && (
+                <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                  {propertyTypes.find(p => p.value === propertyType)?.label}
+                  <button onClick={() => setPropertyType("")} className="hover:text-green-900">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {serviceCategory && (
+                <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-medium">
+                  {serviceCategories.find(c => c.value === serviceCategory)?.label}
+                  <button onClick={() => setServiceCategory("")} className="hover:text-purple-900">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Résultats */}
+        {filteredServices.length === 0 ? (
+          <div className="text-center py-16 animate-fade-in bg-gray-50 rounded-2xl mx-4">
+            <div className="text-gray-400 mb-4">
+              <Search className="w-16 h-16 mx-auto" />
+            </div>
+            <p className="text-gray-600 text-lg mb-4">Aucun service trouvé avec ces critères.</p>
+            {hasActiveFilters && (
+              <button 
+                onClick={handleResetFilters}
+                className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
               >
-                <X className="w-4 h-4" />
-                Effacer
+                Tous les services
               </button>
             )}
           </div>
-        </div>
-
-        {filteredServices.length === 0 ? (
-          <div className="text-center py-12 animate-fade-in">
-            <p className="text-gray-600">Aucun service trouvé avec ces critères.</p>
-            <button 
-              onClick={() => {
-                setServicesSearchQuery("");
-                setPropertyType("");
-              }}
-              className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Effacer les filtres
-            </button>
-          </div>
         ) : (
           <>
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
+            {/* Compteur de résultats */}
+            <div className="flex justify-between items-center mb-6 px-4">
+              <p className="text-gray-600 text-sm">
+                {filteredServices.length} service{filteredServices.length > 1 ? 's' : ''} trouvé{filteredServices.length > 1 ? 's' : ''}
+                {hasActiveFilters && " avec les filtres actuels"}
+              </p>
+            </div>
+
+            {/* Grille des services */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 animate-fade-in px-4">
               {displayedServices.map((service, index) => (
                 <div
                   key={service.id || index}
-                  className="bg-white rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-slide-up border border-gray-200"
-                  style={{ 
-                    minHeight: "320px",
-                    animationDelay: `${index * 0.1}s` 
-                  }}
+                  className="bg-white rounded-2xl overflow-hidden flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 group"
                 >
-                  <div className="relative">
+                  {/* Image du service */}
+                  <div className="relative overflow-hidden">
                     <img 
                       src={service.images?.[0] || `https://via.placeholder.com/300x200/E5E7EB/374151?text=${encodeURIComponent(service.name || 'Service')}`} 
                       alt={service.name}
-                      className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                       onError={(e) => handleImageError(e, service.name || 'Service')}
                     />
                     
-                    <div className="absolute top-3 left-3 bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs font-medium">
-                      Photos ({service.images?.length || 1})
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs font-medium">
+                      {service.images?.length || 1} photo{service.images?.length > 1 ? 's' : ''}
                     </div>
                     
+                    {/* Catégorie */}
+                    {service.category && (
+                      <div className="absolute top-3 right-3 bg-white bg-opacity-90 text-gray-800 px-3 py-1 rounded-full text-xs font-medium">
+                        {service.category}
+                      </div>
+                    )}
+                    
                     {service.rating && (
-                      <div className="absolute top-3 right-3 bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                      <div className="absolute bottom-3 left-3 bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
                         {service.rating}
                       </div>
                     )}
                   </div>
 
-                  <div className="p-4 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-900 mb-2 leading-tight">
+                  {/* Contenu du service */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-2 leading-tight text-base">
                         {service.name || 'Service sans nom'}
                       </h3>
                       
-                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
                         {service.description || 'Description non disponible'}
                       </p>
                       
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {service.metiers?.slice(0, 2).map((metier, idx) => (
+                      {/* Métiers */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {service.metiers?.slice(0, 3).map((metier, idx) => (
                           <span 
                             key={metier.id || idx}
                             className="inline-block px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium"
@@ -425,48 +540,37 @@ const ServicesPage = () => {
                             {metier.libelle || metier.name}
                           </span>
                         ))}
-                        {(!service.metiers || service.metiers.length === 0) && (
-                          <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                            {service.category || 'Général'}
-                          </span>
-                        )}
                       </div>
                       
-                      <div className="flex justify-between items-center text-xs text-gray-500">
+                      {/* Prix et durée */}
+                      <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
                         {service.price && (
-                          <span className="font-semibold text-green-600">
+                          <span className="font-semibold text-green-600 text-base">
                             {typeof service.price === 'number' ? service.price.toLocaleString() : service.price} €
                           </span>
                         )}
                         {service.duration && (
-                          <span>Durée: {service.duration}min</span>
+                          <span className="bg-gray-100 px-2 py-1 rounded text-xs">
+                            ⏱ {service.duration}min
+                          </span>
                         )}
                       </div>
                     </div>
                     
-                    <div className="mt-4">
-                      <button 
-                        className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors transform hover:scale-105 shadow-md"
+                    {/* Bouton devis */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <Button
+                          className="text-white font-medium bg-slate-900 rounded-lg text-xs hover:bg-black transition-colors duration-200 flex-1"
                         onClick={() => handleDevisClick(service)}
                       >
-                        FAIRE UN DEVIS
-                      </button>
+                       <FileText className="h-3 w-3 mr-1" />
+                        DEVIS
+                      </Button>           
                     </div>
                   </div>
                 </div>
               ))}
             </section>
-            
-            {filteredServices.length > displayCount && (
-              <div className="text-center mb-16 mt-8">
-                <button 
-                  onClick={handleLoadMore}
-                  className="inline-block px-8 py-4 bg-blue-500 text-white rounded-full text-sm font-semibold cursor-pointer hover:bg-blue-600 transition-colors transform hover:scale-105 shadow-lg"
-                >
-                  VOIR PLUS DE SERVICES
-                </button>
-              </div>
-            )}
           </>
         )}
       </>
@@ -490,8 +594,8 @@ const ServicesPage = () => {
 
       {/* Modal de devis */}
       {isDevisModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in">
             <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -515,7 +619,6 @@ const ServicesPage = () => {
               </button>
             </div>
 
-            {/* ESSAYER handleDevisSubmitAlternative SI handleDevisSubmit NE FONCTIONNE PAS */}
             <form onSubmit={handleDevisSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -646,11 +749,16 @@ const ServicesPage = () => {
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isSubmitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Envoi en cours...</span>
+                    </>
                   ) : (
-                    <FileText className="h-4 w-4" />
+                    <>
+                      <FileText className="h-4 w-4" />
+                      <span>Envoyer la demande</span>
+                    </>
                   )}
-                  {isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}
                 </button>
                 <button
                   type="button"

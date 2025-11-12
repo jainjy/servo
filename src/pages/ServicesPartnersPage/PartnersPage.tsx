@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   Users,
@@ -39,8 +39,8 @@ interface Metier {
   services: Service[];
   users: User[];
   _count: {
-    services: number;
-    users: number;
+  services: number;
+  users: number;
   };
 }
 
@@ -64,6 +64,9 @@ interface Category {
   id: number;
   name: string;
 }
+
+
+
 
 // Composant Modal pour les détails des experts
 const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
@@ -418,7 +421,6 @@ const PartnersPage = () => {
   const [expertSearchQuery, setExpertSearchQuery] = useState("");
 
   // Récupérer les métiers depuis l'API
-  // Récupérer les métiers depuis l'API
   useEffect(() => {
     const fetchMetiers = async () => {
       try {
@@ -625,11 +627,13 @@ const PartnersPage = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={handleBackToMetiers}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-600 text-blue-600 font-medium hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Tous les Métiers
               </button>
+
+
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-gray-900">
                   Experts en {metier.libelle}
@@ -739,61 +743,100 @@ const PartnersPage = () => {
   );
 
   // Affichage principal des métiers
-  const MetiersGrid = () => {
-    const filteredMetiers = getFilteredMetiers();
+const MetiersGrid = () => {
+  const filteredMetiers = getFilteredMetiers();
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef(null);
 
-    return (
-      <div className="space-y-8">
-        {/* Barre de recherche pour les métiers */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Rechercher un métier..."
-            value={metierSearchQuery}
-            onChange={(e) => setMetierSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+  // Filtrer les métiers pour le dropdown (premiers résultats)
+  const dropdownResults = filteredMetiers.slice(0, 5);
 
-        {filteredMetiers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              {metierSearchQuery
-                ? "Aucun métier trouvé pour votre recherche"
-                : "Aucun métier disponible pour le moment."}
-            </p>
+  return (
+    <div className="space-y-8">
+      {/* Barre de recherche pour les métiers */}
+      <div className="mb-2 mt-6 animate-fade-in">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+             {/* Recherche avec dropdown */}
+          <div className="relative min-w-[300px] max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="RECHERCHER UN MÉTIER..."
+              value={metierSearchQuery}
+              onChange={(e) => setMetierSearchQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={(e) => {
+                if (metierSearchQuery.length > 0 || document.activeElement === e.target) {
+                  setTimeout(() => {
+                    inputRef.current?.focus();
+                  }, 0);
+                } else {
+                  setIsFocused(false);
+                }
+              }}
+              onMouseDown={(e) => {
+                if (document.activeElement !== e.currentTarget) {
+                  e.preventDefault();
+                  e.currentTarget.focus();
+                }
+              }}
+              className="search-input pl-10 pr-4 py-3 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              autoComplete="off"
+              autoFocus
+            />
+            
+            {/* Bouton Effacer la recherche */}
             {metierSearchQuery && (
               <button
                 onClick={() => setMetierSearchQuery("")}
-                className="mt-4 text-blue-600 hover:text-blue-700 underline"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                Effacer la recherche
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredMetiers.map((metier, index) => (
-              <MetierCard key={metier.id} metier={metier} index={index} />
-            ))}
-          </div>
-        )}
+        </div>
       </div>
-    );
-  };
+
+      {filteredMetiers.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-600">
+            {metierSearchQuery
+              ? "Aucun métier trouvé pour votre recherche"
+              : "Aucun métier disponible pour le moment."}
+          </p>
+          {metierSearchQuery && (
+            <button
+              onClick={() => setMetierSearchQuery("")}
+              className="mt-4 text-blue-600 hover:text-blue-700 underline"
+            >
+              Effacer la recherche
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredMetiers.map((metier, index) => (
+            <MetierCard key={metier.id} metier={metier} index={index} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         {/* Indicateurs de chargement et d'erreur */}
         {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-gray-600">
-              Chargement des métiers...
-            </span>
-          </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              <span className="text-gray-600">Chargement des Métiers...</span>
+            </div>
+            </div>
         )}
 
         {error && !loading && (
