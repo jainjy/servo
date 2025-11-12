@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import { useLocation } from 'react-router-dom';
 import api from '../../lib/api.js'; // Adjust the path according to your project structure
-import { DemandeDevisModal } from '@/components/DemandeDevis'; // Import du modal
+import { DemandeDevisModal } from '@/components/DemandeDevisModal.js'; // Import du modal
 import { Loader2 } from 'lucide-react';
 
 const BatimentsLayout = () => {

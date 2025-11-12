@@ -8,7 +8,7 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 
 interface DemandeDevisModalProps {
-  isOpen: boolean;
+  isOpen: boolean;  
   onClose: () => void;
   prestation: any;
 }

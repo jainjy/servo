@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/tooltip";
 import { professionalProfileService } from "@/services/professionalProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { DemandeDevisModal } from "@/components/DemandeDevis";
+import { DemandeDevisModal } from "@/components/DemandeDevisModal";
 import { ContactModal } from "@/components/ContactModal";
 
 interface ProfessionalProfile {
