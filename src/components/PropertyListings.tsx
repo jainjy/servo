@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { UserPlus, LogIn } from 'lucide-react';
+import { UserPlus, LogIn, Sparkles, SparklesIcon, Home, Sparkle } from 'lucide-react';
 import { AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import property1 from "@/assets/property-1.jpg";
@@ -1150,76 +1150,103 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
               <AnimatePresence>
                 {showCard && (
                   <motion.div
-                    className="fixed inset-0 flex z-50 items-center justify-center bg-black/40 backdrop-blur-sm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <motion.div
-                      initial={{ y: 50, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: 50, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="bg-gray-900 relative rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden bg-opacity-95"
-                    >
-                      <button
-                        onClick={() => setShowCard(false)}
-                        className="p-2 absolute right-0 z-50 group ml-2 flex-shrink-0"
-                      >
-                        <X className="w-7 h-7 text-white bg-red-700 rounded-full p-1 group-hover:text-black transition-colors" />
-                      </button>
-                      {/* Conteneur d'image avec image réelle */}
-                      <div className="relative h-56 bg-gray-800  overflow-hidden">
-                        <img
-                          src="/illus.gif"
-                          alt="Immobilier"
-                          className="w-full h-full object-cover object-center"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
-                      </div>
+  className="fixed inset-0 flex z-50 items-center justify-center bg-black/40 backdrop-blur-sm"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+>
+  <motion.div
+    initial={{ y: 50, opacity: 0, scale: 0.9 }}
+    animate={{ y: 0, opacity: 1, scale: 1 }}
+    exit={{ y: 50, opacity: 0, scale: 0.9 }}
+    transition={{ duration: 0.5, ease: "easeOut" }}
+    className="bg-gray-900 relative rounded-2xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden bg-opacity-95 border border-gray-700"
+  >
+    {/* Bouton fermeture */}
+    <button
+      onClick={() => setShowCard(false)}
+      className="absolute top-4 right-4 z-50 p-2 bg-red-600 hover:bg-red-700 rounded-full transition-all duration-300 group shadow-lg"
+    >
+      <X className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+    </button>
 
-                      {/* Le reste du contenu reste identique */}
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-6">
-                          <div className="flex items-start gap-4">
-                            <div className="w-3 h-12 bg-blue-500 rounded-full mt-1 shadow-lg shadow-blue-500/30" />
-                            <p className="text-gray-200 text-sm lg:text-base leading-relaxed font-medium">
-                              Merci de vous connecter à votre compte afin de publier une annonce de location ou de vente de votre bien.
-                            </p>
-                          </div>
+    {/* Header avec Lottie */}
+    <div className="relative h-48 bg-gradient-to-br from-blue-900/50 to-purple-900/50 overflow-hidden flex items-center justify-center">
+      {/* Animation Lottie - Remplacez par votre composant Lottie */}
+      <div className="w-32 h-32 flex items-center justify-center">
+        {/* Exemple avec une div animée en attendant Lottie */}
+        <div className="w-24 h-24 bg-transparent border-2 border-white ring-2 ring-white outline-dotted rounded-full animate-pulse flex items-center justify-center">
+          <Home className="w-12 h-12 text-white" />
+        </div>
+      </div>
+      
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent"></div>
+    </div>
 
-                        </div>
+    {/* Contenu */}
+    <div className="p-8">
+      {/* Message */}
+      <div className="flex items-start gap-4 mb-8">
+        <div className="flex flex-col items-center">
+          <div className="w-3 h-12 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full shadow-lg shadow-blue-500/30" />
+          <div className="w-1 h-8 bg-gradient-to-b from-purple-500/50 to-transparent rounded-full mt-2"></div>
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-white mb-2">Publiez votre bien</h3>
+          <p className="text-gray-300 text-sm leading-relaxed">
+            Merci de vous connecter à votre compte afin de publier une annonce de location ou de vente de votre bien.
+          </p>
+        </div>
+      </div>
 
-                        <div className="grid lg:flex gap-3">
-                          <button
-                            onClick={() => navigate('/register')}
-                            className="w-full bg-blue-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-blue-700 active:bg-blue-800 transition-all flex items-center justify-center gap-3 group"
-                          >
-                            <div className="p-1.5 bg-white bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                              <UserPlus className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-base">Créer un compte</span>
-                          </button>
+      {/* Boutons d'action */}
+      <div className="grid lg:grid-cols-2 gap-4 mb-6">
+        {/* Bouton Créer un compte */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate('/register')}
+          className="relative bg-white text-slate-900 px-6 py-2 rounded-xl font-bold overflow-hidden group transition-all duration-300 shadow-lg"
+        >
+          <div className="relative z-10 flex items-center justify-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform duration-200">
+              <UserPlus className="w-5 h-5 text-slate-900" />
+            </div>
+            <span className="text-base">Créer un compte</span>
+          </div>
+        </motion.button>
 
-                          <button
-                            onClick={() => navigate('/login')}
-                            className="w-full bg-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-purple-700 active:bg-purple-800 transition-all duration-200 flex items-center justify-center gap-3 group"
-                          >
-                            <div className="p-1.5 bg-white bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                              <LogIn className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-base">Se connecter</span>
-                          </button>
-                        </div>
+        {/* Bouton Se connecter */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate('/login')}
+          className="relative bg-transparent text-white border-2 border-white px-6 py-4 rounded-xl font-bold overflow-hidden group transition-all duration-300 shadow-lg"
+        >
+          
+          <div className="relative z-10 flex items-center justify-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform duration-200">
+              <LogIn className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-base">Se connecter</span>
+          </div>
+        </motion.button>
+      </div>
 
-                        <div className="mt-4 pt-4 border-t border-gray-700">
-                          <p className="text-gray-400 text-xs text-center">
-                            Accédez à tous vos biens et gérez vos annonces en toute simplicité
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </motion.div>
+      {/* Footer */}
+      <div className="pt-6 border-t border-gray-700">
+        <div className="flex items-center justify-center gap-2 text-gray-400">
+          <Sparkle className="w-4 h-4" />
+          <p className="text-xs text-center">
+            Accédez à tous vos biens et gérez vos annonces en toute simplicité
+          </p>
+          <Sparkle className="w-4 h-4" />
+        </div>
+      </div>
+    </div>
+  </motion.div>
+</motion.div>
                 )}
               </AnimatePresence>
             </div>

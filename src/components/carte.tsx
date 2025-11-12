@@ -349,9 +349,9 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
             {/* Barre d'onglets */}
             <div className="flex border-b">
               <button
-                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'properties' 
-                    ? 'bg-primary text-primary-foreground' 
+                    ? 'bg-slate-900 text-primary-foreground' 
                     : 'bg-muted hover:bg-muted/80'
                 }`}
                 onClick={() => setActiveTab('properties')}
@@ -359,9 +359,9 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                 Nos propriétés ({validProperties.length})
               </button>
               <button
-                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'search' 
-                    ? 'bg-primary text-primary-foreground' 
+                    ? 'bg-slate-900 text-primary-foreground' 
                     : 'bg-muted hover:bg-muted/80'
                 }`}
                 onClick={() => setActiveTab('search')}
@@ -396,7 +396,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                     validProperties.map((property) => (
                       <div
                         key={property.id}
-                        className="p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors group"
+                        className="p-3 border rounded-lg hover:bg-slate-200 cursor-pointer transition-colors group"
                         onClick={() => handlePropertySelect(property)}
                       >
                         <div className="flex items-start gap-3">
@@ -495,7 +495,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                 <p className="text-sm mb-2 line-clamp-2">{selectedLocation.address}</p>
                 <Button 
                   onClick={handleValidate}
-                  className="w-full"
+                  className="w-full bg-slate-900 hover:bg-slate-700"
                   size="sm"
                 >
                   Valider cet emplacement

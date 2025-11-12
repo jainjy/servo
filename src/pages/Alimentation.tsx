@@ -65,9 +65,9 @@ const ContactModal = ({ isOpen, onClose, type }) => {
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-[#00C2A8]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
               {type === "contact" ? (
-                <Phone className="h-8 w-8 text-[#00C2A8]" />
+                <Phone className="h-8 w-8 text-slate-900" />
               ) : (
-                <Calendar className="h-8 w-8 text-[#00C2A8]" />
+                <Calendar className="h-8 w-8 text-slate-900" />
               )}
             </div>
             <h3 className="text-xl font-semibold text-[#0A0A0A] mb-2">
@@ -82,7 +82,7 @@ const ContactModal = ({ isOpen, onClose, type }) => {
 
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-[#F6F8FA]">
-              <Phone className="h-5 w-5 text-[#00C2A8]" />
+              <Phone className="h-5 w-5 text-slate-900" />
               <div>
                 <p className="font-semibold text-[#0A0A0A]">
                   +33 1 23 45 67 89
@@ -92,7 +92,7 @@ const ContactModal = ({ isOpen, onClose, type }) => {
             </div>
 
             <div className="flex items-center gap-3 p-3 rounded-xl bg-[#F6F8FA]">
-              <MapPin className="h-5 w-5 text-[#00C2A8]" />
+              <MapPin className="h-5 w-5 text-slate-900" />
               <div>
                 <p className="font-semibold text-[#0A0A0A]">
                   Marché Bio Paris 15
@@ -102,7 +102,7 @@ const ContactModal = ({ isOpen, onClose, type }) => {
             </div>
 
             <div className="flex items-center gap-3 p-3 rounded-xl bg-[#F6F8FA]">
-              <Clock className="h-5 w-5 text-[#00C2A8]" />
+              <Clock className="h-5 w-5 text-slate-900" />
               <div>
                 <p className="font-semibold text-[#0A0A0A]">Livraison</p>
                 <p className="text-sm text-[#5A6470]">Sous 24h</p>
@@ -112,7 +112,7 @@ const ContactModal = ({ isOpen, onClose, type }) => {
 
           <div className="mt-6 flex gap-3">
             <Button
-              className="flex-1 bg-[#00C2A8] hover:bg-[#00A890] text-white"
+              className="flex-1 bg-slate-900 hover:bg-slate-700 text-white"
               onClick={() => {
                 if (typeof window !== "undefined") {
                   window.open("tel:+33123456789");
@@ -424,6 +424,7 @@ const Alimentation = () => {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
+          backgroundAttachment: "fixed"
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -431,32 +432,17 @@ const Alimentation = () => {
 
       <div className="absolute inset-0 bg-gradient-to-br from-[#00C2A8]/20 to-[#F6F8FA]/30 z-1" />
 
-      {/* Éléments décoratifs animés */}
-      <div className="absolute top-20 left-10 animate-float z-2">
-        <Apple className="h-8 w-8 text-[#00C2A8]/40" />
-      </div>
-      <div
-        className="absolute top-40 right-20 animate-float z-2"
-        style={{ animationDelay: "1s" }}
-      >
-        <Leaf className="h-6 w-6 text-[#00C2A8]/40" />
-      </div>
-      <div
-        className="absolute bottom-40 left-20 animate-float z-2"
-        style={{ animationDelay: "2s" }}
-      >
-        <Carrot className="h-5 w-5 text-[#00C2A8]/40" />
-      </div>
+      
 
       <div className="relative z-10">
         <section className="container mx-auto px-4 py-8">
           {/* En-tête avec animation */}
           <div className="bg-white/90 py-5 rounded-lg backdrop-blur-sm">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className="azonix text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#00C2A8] bg-clip-text text-transparent">
+              <h1 className="tracking-widest  text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-slate-900 bg-clip-text text-transparent">
                 Alimentation & Épicerie
               </h1>
-              <p className="text-sm px-2 lg:text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm px-2 lg:text-sm text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
                 Découvrez nos produits frais, bio et locaux pour une
                 alimentation saine et savoureuse
               </p>
@@ -471,16 +457,16 @@ const Alimentation = () => {
                 <Input
                   type="text"
                   placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
-                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-lg border-[#00C2A8]/30 bg-white/80 backdrop-blur-md focus:border-[#00C2A8] focus:ring-2 focus:ring-[#00C2A8]/20"
+                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold tracking-wide transition-all duration-300 border-slate-600 bg-white/80 backdrop-blur-md focus:border-slate-900 focus:ring-2 focus:ring-slate-900"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
-                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-[#00C2A8] transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
+                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-slate-800 transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
 
                 <Button
                   type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-[#00C2A8] hover:bg-[#00A890] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-slate-800 hover:bg-[#00A890] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -500,19 +486,19 @@ const Alimentation = () => {
               className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in"
               style={{ animationDelay: "0.3s" }}
             >
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-slate-900 text-white hover:bg-slate-800 border-0 px-4 py-2">
                 <Leaf className="h-3 w-3 mr-1" />
                 Produits Bio
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-slate-900 text-white hover:bg-slate-800 border-0 px-4 py-2">
                 <Truck className="h-3 w-3 mr-1" />
                 Livraison 24h
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-slate-900 text-white hover:bg-slate-800 border-0 px-4 py-2">
                 <ShieldCheck className="h-3 w-3 mr-1" />
                 Qualité Garantie
               </Badge>
-              <Badge className="bg-[#00C2A8]/10 text-[#00C2A8] border-0 px-4 py-2">
+              <Badge className="bg-slate-900 text-white hover:bg-slate-800 border-0 px-4 py-2">
                 <Star className="h-3 w-3 mr-1" />
                 Producteurs Locaux
               </Badge>
@@ -558,14 +544,14 @@ const Alimentation = () => {
                   className="flex items-center gap-4 mb-8 animate-slide-from-left"
                   style={{ animationDelay: animationDelays.container }}
                 >
-                  <div className="p-3 rounded-2xl bg-[#00C2A8] shadow-lg transform transition-transform duration-300 hover:scale-110">
+                  <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
                     <IconComponent className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl lg:text-4xl font-bold text-black/70">
+                    <h2 className="text-xl lg:text-2xl font-bold text-black/70">
                       {section.title}
                     </h2>
-                    <p className="text-xs lg:text-sm text-[#5A6470] mt-2">
+                    <p className="text-xs text-[#5A6470] mt-2">
                       {section.description}
                     </p>
                   </div>
@@ -590,8 +576,8 @@ const Alimentation = () => {
                             alt={category.name}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />
-                          <div className="flex justify-end absolute bg-[#00C2A8] rounded-full text-white bottom-2 right-2">
-                            <Badge className="bg-[#00C2A8] text-white">
+                          <div className="flex justify-end absolute rounded-full text-white bottom-2 right-2">
+                            <Badge className="bg-black text-white">
                               {productCount} produit{productCount !== 1 ? "s" : ""}
                             </Badge>
                           </div>
@@ -603,7 +589,7 @@ const Alimentation = () => {
                           {category.description}
                         </p>
                         <Button
-                          className="w-full bg-[#00C2A8]/10 hover:bg-[#00C2A8] hover:text-white text-[#00C2A8] border-0 transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                          className="w-full bg-slate-900 hover:bg-slate-700 hover:text-white text-white border-0 transition-all duration-300"
                           onClick={() => handleCategoryClick(category)}
                         >
                           Explorer
@@ -623,23 +609,23 @@ const Alimentation = () => {
             style={{ animationDelay: "0.8s" }}
           >
             <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 lg:p-12 border border-white/20 shadow-2xl">
-              <h3 className="text-xl lg:text-3xl font-bold text-gray-700 mb-4">
+              <h3 className="text-xl lg:text-2xl font-bold text-gray-700 mb-4">
                 Livraison de produits frais à domicile
               </h3>
-              <p className="text-sm lg:text-xl text-[#5A6470] mb-8 max-w-2xl mx-auto">
+              <p className="text-sm lg:text-md text-[#5A6470] mb-8 max-w-2xl mx-auto">
                 Commandez vos produits alimentaires frais et recevez-les sous
                 24h. Qualité garantie, producteurs locaux et service
                 personnalisé.
               </p>
               <div className="flex gap-4 justify-center flex-wrap">
                 <Button
-                  className="bg-[#00C2A8] hover:bg-[#00A890] text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl animate-pulse-cta"
+                  className="bg-slate-900 hover:bg-slate-700 text-white px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl animate-pulse-cta"
                   onClick={() => handleContactClick("contact")}
                 >
                   Commander maintenant
                 </Button>
                 <Button
-                  className="bg-white hover:bg-gray-50 text-[#00C2A8] border-2 border-[#00C2A8] px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  className="bg-white hover:bg-gray-50 text-slate-900 border-2 border-slate-900 px-8 py-3 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl"
                   onClick={() => handleContactClick("rdv")}
                 >
                   <Users className="h-5 w-5 mr-2" />
