@@ -131,4 +131,34 @@ export const estimationAPI = {
   // Informations sur le service
   getServiceInfo: () => api.get('/estimation/info'),
 };
+export const annonceAPI = {
+  // Créer une nouvelle annonce
+  createAnnonce: (formData) => api.post('/anonce', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
+  // Récupérer toutes les annonces
+   getAnnonces: () => api.get('/anonce/affiche_anonce'),
+  // Récupérer une annonce par ID
+  getAnnonceById: (id) => api.get(`/anonce/${id}`),
+
+  // Mettre à jour une annonce
+  updateAnnonce: (id, formData) => api.put(`/anonce/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
+  // Supprimer une annonce
+  deleteAnnonce: (id) => api.delete(`/anonce/${id}`),
+
+  // Récupérer les annonces de l'utilisateur connecté
+  getUserAnnonces: () => api.get('/anonce/user/mes-annonces'),
+
+  // Rechercher des annonces
+  searchAnnonces: (filters) => api.get('/anonce/search', { params: filters }),
+};
+
 export default api;

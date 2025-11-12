@@ -113,19 +113,6 @@ export function ServicesStats() {
           </p>
         </CardContent>
       </Card>
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Catégories
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.totalCategories}
-          </div>
-          <p className="text-xs text-muted-foreground">Catégories actives</p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
