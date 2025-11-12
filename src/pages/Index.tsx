@@ -85,7 +85,7 @@ const Index = () => {
           {/* Section biens immobiliers */}
           <>
             <div className="text-center mt-6 flex items-center justify-between">
-              <h2 className="text-4xl font-bold ml-8 text-gray-700 my-6">Nos biens immobiliers</h2>
+              <h2 className="text-3xl font-bold ml-8 text-slate-900 my-6">Nos biens immobiliers</h2>
               {/* Voir plus button */}
 
               <Button

@@ -123,7 +123,7 @@ const Hero = () => {
               </div>
               <Button
                 size="lg"
-                className="md:w-auto"
+                className="md:w-auto bg-slate-900 hover:bg-slate-700 text-white"
               // onClick={openSearchPage}
               >
                 Rechercher
