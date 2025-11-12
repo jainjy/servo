@@ -100,7 +100,7 @@ import AdminBookings from "./components/admin/tourism/AdminBookings";
 import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
 //tracking page
-import GlobalTracking from '@/components/GlobalTracking';
+import GlobalTracking from "@/components/GlobalTracking";
 
 //import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
@@ -129,6 +129,7 @@ import PodcastsServices from "./components/components/Podcast_services";
 import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 import AdminMedia from "./pages/pro/adminMedia";
+import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -181,7 +182,7 @@ const App = () => {
             <BrowserRouter>
               {/* Intégration du GlobalTracking pour le tracking des pages */}
               <GlobalTracking />
-              
+
               <ScrollToHash />
               <ScrollToTop />
               <Layout>
@@ -197,13 +198,27 @@ const App = () => {
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
                   <Route path="/aideFonds" element={<AidesLeveesFonds />} />
-                  <Route path="/juridiqueLiquidation" element={<JuridiqueLiquidation />} />
-                  <Route path="/podcast_service" element={<PodcastsServices />} />
-                  <Route path="/formationTourisme" element={<FormationsTourisme />} />
-                  <Route path="/activiteLoisirs" element={<ActivitesLoisirsFAQ />} />
-
+                  <Route
+                    path="/juridiqueLiquidation"
+                    element={<JuridiqueLiquidation />}
+                  />
+                  <Route
+                    path="/podcast_service"
+                    element={<PodcastsServices />}
+                  />
+                  <Route
+                    path="/formationTourisme"
+                    element={<FormationsTourisme />}
+                  />
+                  <Route
+                    path="/activiteLoisirs"
+                    element={<ActivitesLoisirsFAQ />}
+                  />
+                  <Route
+                    path="/professional/:id"
+                    element={<ProfessionalProfilePage />}
+                  />
                   {/* /*entreprise link* */}
-
                   <Route
                     path="/immobilier-sections"
                     element={<ImmobilierSections />}
@@ -238,7 +253,6 @@ const App = () => {
                     path="/formation-podcasts"
                     element={<BatimentsLayout />}
                   />
-
                   {/* Routes Domicile */}
                   <Route path="/domicile" element={<DomicileLayout />} />
                   <Route
@@ -263,8 +277,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  <Route path="/recherche" element={<Recherche  />} />
-
+                  <Route path="/recherche" element={<Recherche />} />
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
@@ -286,9 +299,14 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   {/* Add redirect from /service to /services-partners */}
-                  <Route path="/service" element={<Navigate to="/services-partners" replace />} />
-                  <Route path="/services-partners" element={<ServicesPartnersPage />} />
-
+                  <Route
+                    path="/service"
+                    element={<Navigate to="/services-partners" replace />}
+                  />
+                  <Route
+                    path="/services-partners"
+                    element={<ServicesPartnersPage />}
+                  />
                   {/* <Route path="/publicite" element={<Publicite />} /> */}
                   <Route
                     path="/estimations"

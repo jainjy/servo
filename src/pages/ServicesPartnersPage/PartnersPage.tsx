@@ -15,6 +15,7 @@ import {
   Building,
 } from "lucide-react";
 import api from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 // Interfaces
 interface User {
   id: string;
@@ -64,173 +65,6 @@ interface Category {
   id: number;
   name: string;
 }
-
-// Composant Modal pour les détails des experts
-const ExpertDetailsModal = ({ isOpen, onClose, expert }) => {
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleContactClick = () => {
-    setIsContactModalOpen(true);
-  };
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert(`Message envoyé à ${expert.firstName} ${expert.lastName} !`);
-      setIsContactModalOpen(false);
-      onClose();
-    } catch (error) {
-      alert("Erreur lors de l'envoi.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCloseContactModal = () => {
-    setIsContactModalOpen(false);
-  };
-
-  if (!isOpen || !expert) return null;
-
-  const displayName =
-    expert.commercialName ||
-    expert.companyName ||
-    `${expert.firstName} ${expert.lastName}`;
-
-  return (
-    <>
-      {/* Modal principale */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {displayName}
-              </h2>
-              <button
-                onClick={onClose}
-                className="text-2xl font-bold text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Avatar */}
-            <div className="mb-4 relative">
-              {expert.avatar ? (
-                <img
-                  src={expert.avatar}
-                  alt={displayName}
-                  className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-200"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full mx-auto bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-4 border-blue-200">
-                  <Users className="w-16 h-16 text-blue-400" />
-                </div>
-              )}
-            </div>
-
-            {/* Informations */}
-            <div className="space-y-4 mb-6">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  {displayName}
-                </h3>
-                {expert.userType && (
-                  <p className="text-blue-600 font-medium">{expert.userType}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="w-5 h-5 text-blue-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{expert.email}</p>
-                  </div>
-                </div>
-
-                {expert.phone && (
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Phone className="w-5 h-5 text-green-500" />
-                    <div>
-                      <p className="text-sm text-gray-600">Téléphone</p>
-                      <p className="font-medium">{expert.phone}</p>
-                    </div>
-                  </div>
-                )}
-
-                {expert.companyName && (
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Building className="w-5 h-5 text-purple-500" />
-                    <div>
-                      <p className="text-sm text-gray-600">Entreprise</p>
-                      <p className="font-medium">{expert.companyName}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Expérience</p>
-                    <p className="font-medium">
-                      {expert.experience || "5+"} ans
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {(expert.address || expert.city) && (
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Adresse</p>
-                  <p className="font-medium">
-                    {expert.address && `${expert.address}, `}
-                    {expert.zipCode && `${expert.zipCode} `}
-                    {expert.city}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Boutons */}
-            <div className="flex gap-2 mt-6">
-              <button
-                onClick={onClose}
-                className="flex-1 bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition-colors"
-              >
-                Fermer
-              </button>
-              <button
-                onClick={handleContactClick}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <Mail className="w-4 h-4" />
-                Contacter
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal Contact */}
-      {isContactModalOpen && (
-        <ContactModal
-          expert={expert}
-          isOpen={isContactModalOpen}
-          onClose={handleCloseContactModal}
-          onSubmit={handleContactSubmit}
-          isSubmitting={isSubmitting}
-        />
-      )}
-    </>
-  );
-};
 
 // Composant Modal Contact
 const ContactModal = ({ expert, isOpen, onClose, onSubmit, isSubmitting }) => {
@@ -410,9 +244,7 @@ const PartnersPage = () => {
   const [metiers, setMetiers] = useState<Metier[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedExpert, setSelectedExpert] = useState<User | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const navigate=useNavigate()
   // États pour les recherches
   const [metierSearchQuery, setMetierSearchQuery] = useState("");
   const [expertSearchQuery, setExpertSearchQuery] = useState("");
@@ -451,17 +283,6 @@ const PartnersPage = () => {
     setExpertSearchQuery("");
   };
 
-  // Ouvrir la modal de détails de l'expert
-  const handleOpenExpertModal = (expert: User) => {
-    setSelectedExpert(expert);
-    setIsModalOpen(true);
-  };
-
-  // Fermer la modal
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedExpert(null);
-  };
 
   // Fonction utilitaire pour obtenir une image par défaut
   const getDefaultImage = (libelle: string) => {
@@ -534,7 +355,7 @@ const PartnersPage = () => {
       <div
         key={expert.id || `expert-${index}`}
         className="bg-white rounded-xl shadow-lg border border-green-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
-        onClick={() => handleOpenExpertModal(expert)}
+        onClick={() => navigate(`/professional/${expert.id}`)}
       >
         {/* Avatar/Image */}
         <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 relative">
@@ -577,27 +398,20 @@ const PartnersPage = () => {
                 <span className="font-medium">Type:</span> {expert.userType}
               </p>
             )}
-            <p className="line-clamp-1">
-              <span className="font-medium">Expérience:</span>{" "}
-              {expert.experience || "5+"} ans
-            </p>
           </div>
 
           {/* Note moyenne */}
           <div className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-3">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400" />
-              <span className="font-medium">{expert.rating || "4.5"}/5</span>
+              <span className="font-medium">{expert.rating || "0"}/5</span>
             </div>
           </div>
 
           {/* Bouton d'action */}
           <button
             className="w-full mt-4 bg-green-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenExpertModal(expert);
-            }}
+            onClick={() => navigate(`/professional/${expert.id}`)}
           >
             Voir le Profil
           </button>
@@ -612,13 +426,6 @@ const PartnersPage = () => {
 
     return (
       <div className="space-y-6 animate-fade-in">
-        {/* Modal de détails */}
-        <ExpertDetailsModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          expert={selectedExpert}
-        />
-
         {/* En-tête avec bouton retour et recherche */}
         <div className="bg-white rounded-xl shadow-lg border border-green-200 p-6">
           <div className="flex flex-col gap-4">

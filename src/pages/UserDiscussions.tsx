@@ -279,7 +279,9 @@ export default function UserDiscussions() {
     if (user.avatar) {
       return (
         <button
-          onClick={() => navigate(`/professional/profiles/${user.id}`)}
+          onClick={() =>
+            isCurrentUser(message) ? "" : (navigate(`/professional/${user.id}`))
+          }
           className="hover:opacity-80 transition-opacity"
         >
           <img
@@ -294,7 +296,7 @@ export default function UserDiscussions() {
     // Sinon, afficher les initiales
     return (
       <button
-        onClick={() => navigate(`/professional/profiles/${user.id}`)}
+        onClick={() => navigate(`/professional/${user.id}`)}
         className="hover:opacity-80 transition-opacity"
       >
         <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
@@ -602,9 +604,7 @@ export default function UserDiscussions() {
                           {/* Profil cliquable */}
                           <button
                             onClick={() =>
-                              navigate(
-                                `/professional/profiles/${artisan.userId}`
-                              )
+                              navigate(`/professional/${artisan.userId}`)
                             }
                             className="text-left hover:opacity-80 transition-opacity w-full"
                           >
@@ -645,9 +645,7 @@ export default function UserDiscussions() {
                                 <button
                                   onClick={() => {
                                     setShowActionsMenu(false);
-                                    navigate(
-                                      `/professional/profiles/${artisan.userId}`
-                                    );
+                                    navigate(`/professional/${artisan.userId}`);
                                   }}
                                   className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-md"
                                 >
@@ -774,7 +772,7 @@ export default function UserDiscussions() {
                       <div className="mt-2 text-xs text-gray-500">
                         <button
                           onClick={() =>
-                            navigate(`/professional/profiles/${artisan.userId}`)
+                            navigate(`/professional/${artisan.userId}`)
                           }
                           className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                         >
@@ -900,23 +898,36 @@ export default function UserDiscussions() {
                             <p className="text-sm font-medium mb-2">
                               Nouveau devis reçu
                             </p>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => {
-                                  const artisan = artisans.find(
-                                    (a) => a.userId === message.expediteurId
-                                  );
-                                  if (artisan)
-                                    handleSignerDevis(artisan.userId);
-                                }}
-                                className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
-                              >
-                                Signer
-                              </button>
-                              <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
-                                Refuser
-                              </button>
-                            </div>
+                            {!(artisans.find(
+                              (a) => a.userId === message.expediteurId
+                            ).devisFileUrl != null ||
+                            artisans.find(
+                              (a) => a.userId === message.expediteurId
+                            ).devis != null )? (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    const artisan = artisans.find(
+                                      (a) => a.userId === message.expediteurId
+                                    );
+                                    if (artisan)
+                                      handleSignerDevis(artisan.userId);
+                                  }}
+                                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                >
+                                  Signer
+                                </button>
+                                <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+                                  Refuser
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
+                                  deja signer <CheckCircle />
+                                </span>
+                              </div>
+                            )}
                           </div>
                         )}
                         {message.evenementType === "FACTURE_ENVOYEE" && (
@@ -955,22 +966,30 @@ export default function UserDiscussions() {
                               L'artisan a marqué les travaux comme terminés.
                             </p>
                             <div className="flex gap-2">
-                              <button
-                                onClick={() =>
-                                  handleConfirmerTravauxTermines(true)
-                                }
-                                className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
-                              >
-                                Confirmer
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleConfirmerTravauxTermines(false)
-                                }
-                                className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                              >
-                                Refuser
-                              </button>
+                              {demande.statut != "terminée" ? (
+                                <>
+                                  <button
+                                    onClick={() =>
+                                      handleConfirmerTravauxTermines(true)
+                                    }
+                                    className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                  >
+                                    Confirmer
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleConfirmerTravauxTermines(false)
+                                    }
+                                    className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                                  >
+                                    Refuser
+                                  </button>
+                                </>
+                              ) : (
+                                <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
+                                  accepter <CheckCircle />
+                                </span>
+                              )}
                             </div>
                           </div>
                         )}
