@@ -275,12 +275,12 @@ export const ModalDemandeVisite = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!property) return;
-    
+
     // Track contact action
     if (onPropertyContact) {
       onPropertyContact(property);
     }
-    
+
     if (isAlreadySent) {
       toast({ title: "Demande déjà envoyée", description: "Vous avez déjà envoyé une demande pour ce bien." });
       return;
@@ -545,7 +545,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   onFilter
 }) => {
   const navigate = useNavigate();
-  
+
   // Initialisation du tracking
   const {
     trackPropertyView,
@@ -603,11 +603,11 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           const propertyId = entry.target.getAttribute('data-property-id');
           const property = [...buyProperties, ...rentProperties, ...seasonalProperties]
             .find(p => p.id === propertyId);
-          
+
           if (property) {
             // Track avec useImmobilierTracking
             trackPropertyView(property.id, property.type, property.price);
-            
+
             // Callback parent si fourni
             if (onPropertyView) {
               onPropertyView(property);
@@ -716,12 +716,12 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   const handlePropertyClick = (property: any) => {
     // Track avec useImmobilierTracking
     trackPropertyClick(property.id, property.title, property.price);
-    
+
     // Callback parent si fourni
     if (onPropertyClick) {
       onPropertyClick(property);
     }
-    
+
     // Navigation
     navigate(`/immobilier/${property.id}`);
   };
@@ -729,7 +729,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   const handlePropertyContact = (property: any) => {
     // Track avec useImmobilierTracking
     trackPropertyContact(property.id, property.title);
-    
+
     // Callback parent si fourni
     if (onPropertyContact) {
       onPropertyContact(property);
@@ -738,11 +738,11 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
   const handleSearch = (query: string) => {
     setLocalisation(query);
-    
+
     // Track avec useImmobilierTracking
     const resultsCount = displayed.length;
     trackPropertySearch(query, resultsCount);
-    
+
     // Callback parent si fourni
     if (onSearch) {
       onSearch(query, resultsCount);
@@ -751,9 +751,9 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
   const handleFilterChange = () => {
     const filters = {
-      type: activeTab === 'achat' ? typeBienAchat : 
-            activeTab === 'location' ? typeBienLocation : 
-            activeTab === 'saisonniere' ? typeBienSaison : undefined,
+      type: activeTab === 'achat' ? typeBienAchat :
+        activeTab === 'location' ? typeBienLocation :
+          activeTab === 'saisonniere' ? typeBienSaison : undefined,
       priceMin,
       priceMax,
       location: localisation,
@@ -765,10 +765,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
       exterieur,
       extras
     };
-    
+
     // Track avec useImmobilierTracking
     trackPropertyFilter(filters);
-    
+
     // Callback parent si fourni
     if (onFilter) {
       onFilter(filters);
@@ -901,10 +901,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
   const handleDemanderVisite = (property: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     // Track contact action
     handlePropertyContact(property);
-    
+
     if (sentRequests?.[property?.id]) {
       toast({ title: "Demande déjà envoyée", description: "Vous avez déjà envoyé une demande pour ce bien." });
       return;
@@ -956,7 +956,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                           <div className="absolute bg-gray-700 rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge">
                             {property.type}
                           </div>
-                          <div className="absolute bg-green-700 p-1 text-white font-semibold text-sm rounded-full bottom-3 right-3 home-card-price">
+                          <div className="absolute bg-green-950 p-1 text-white font-semibold text-sm rounded-full bottom-3 right-3 home-card-price">
                             {priceLabel}
                           </div>
                           {totalImages > 1 && (
@@ -1028,7 +1028,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                           </div>
                           {/* Boutons d'action */}
                           <div className="flex gap-1">
-                            <button
+                            {/* <button
                               className={`w-full px-4 py-2 rounded-lg font-semibold transition ${
                               sentRequests?.[property?.id] 
                                 ? 'bg-orange-500 text-white cursor-not-allowed' 
@@ -1038,12 +1038,19 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                               disabled={!!sentRequests?.[property?.id]}
                             >
                               {sentRequests?.[property?.id] ? 'Demande déjà envoyée' : 'Demander visite'}
-                            </button>
+                            </button> */}
                             <button
-                              className="border-2 p-2 rounded-md"
+                              className="relative border-2 p-2 mx-auto border-slate-900 flex items-center gap-2 overflow-hidden rounded-md group transition-all duration-500 hover:shadow-lg"
                               onClick={() => handlePropertyClick(property)}
                             >
-                              <Eye className="w-4 h-4" />
+                              {/* Background animé avec effet smooth */}
+                              <span className="absolute inset-0 -left-2 top-10 w-36 h-32 bg-slate-900 group-hover:-top-12 transition-all duration-700 ease-out origin-bottom rounded-full transform scale-95 group-hover:scale-100"></span>
+
+                              {/* Contenu */}
+                              <span className="relative z-10 text-slate-900 font-semibold group-hover:text-white transition-all duration-500 ease-out group-hover:translate-x-1">
+                                Voir details
+                              </span>
+                              <Eye className="w-4 h-4 relative z-10 text-slate-900 group-hover:text-white transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-x-0.5" />
                             </button>
                           </div>
                         </div>
@@ -1053,12 +1060,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                 })}
               </div>
 
-              {/* Voir plus button */}
-              <div className="text-center mt-6">
-                <Button className="px-8 py-3" onClick={() => navigate('/immobilier')}>
-                  Voir plus
-                </Button>
-              </div>
+              
             </>
           )}
         </div>

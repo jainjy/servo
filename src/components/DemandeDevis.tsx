@@ -97,7 +97,7 @@ export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisM
         <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-6 w-6 text-blue-600" />
+              <FileText className="h-6 w-6 text-slate-900" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
@@ -112,10 +112,10 @@ export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisM
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute lg:relative right-2 top-2 h-8 w-8 bg-red-600 text-white font-bold rounded-full hover:bg-gray-100"
+            className="absolute lg:relative right-2 top-2 h-8 w-8 bg-red-600 text-white font-bold rounded-full hover:bg-red-200 group"
             disabled={isSubmitting}
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 group-hover:text-red-900" />
           </Button>
         </div>
 
@@ -270,10 +270,10 @@ export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisM
           </div>
 
           {/* Boutons d'action */}
-          <div className="grid lg:flex gap-3 pt-4 border-t">
+          <div className="grid lg:flex lg:flex-row-reverse gap-3 pt-4 border-t">
             <Button
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="flex-1 bg-slate-900 hover:bg-slate-700 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

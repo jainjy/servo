@@ -316,12 +316,13 @@ useEffect(() => {
           href: "/batiments#renovation-chantiers",
           image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
         },
-        {
-          title: "Construction & plans",
-          description: " De la conception à la réalisation",
-          href: "/batiments#construction-plans",
-          image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
-        }, {
+        // {
+        //   title: "Construction & plans",
+        //   description: " De la conception à la réalisation",
+        //   href: "/batiments#construction-plans",
+        //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
+        // },
+         {
           title: "Matériaux & viabilisations",
           description: " Solutions durables pour vos projets",
           href: "/batiments#materiaux-viabilisations",

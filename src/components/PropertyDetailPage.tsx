@@ -33,9 +33,11 @@ import {
   Square,
   Eye,
   UploadIcon,
+  X,
 } from "lucide-react";
 import gsap from "gsap";
 import PropertyMap from "@/components/PropertyMap";
+import { ModalDemandeVisite } from "@/components/PropertyListings";
 
 interface Property {
   id: string;
@@ -98,6 +100,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
 
   const handleContact = () => {
     if (property.owner.phone) {
@@ -113,13 +116,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   };
 
   const handleScheduleVisit = () => {
-    // Rediriger vers la page de contact ou ouvrir un formulaire
-    navigate("/contact", {
-      state: {
-        propertyId: property.id,
-        propertyTitle: property.title
-      }
-    });
+    // Ouvrir le modal de demande de visite
+    setIsVisitModalOpen(true);
   };
 
   const toggleFavorite = () => {
@@ -688,6 +686,16 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
           </div>
         </div>
       </div>
+
+      {/* Modal de demande de visite */}
+      <ModalDemandeVisite
+        open={isVisitModalOpen}
+        onClose={() => setIsVisitModalOpen(false)}
+        property={property}
+        onSuccess={() => {
+          setIsVisitModalOpen(false);
+        }}
+      />
     </div>
   );
 };

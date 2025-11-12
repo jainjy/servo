@@ -48,6 +48,20 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
     setCurrentImageIndexes(indexes);
   }, []);
 
+  const handleCardClick = (prestation) => {
+    if (homeCards) {
+      // Trouver la catégorie de la prestation
+      const category = Object.entries(prestationsData).find(([_, prestations]) =>
+        (prestations as any[]).some((p) => p.id === prestation.id)
+      )?.[0];
+      
+      if (category) {
+        // Naviguer vers Travaux avec le filtre de catégorie et la recherche par titre
+        navigate(`/travaux?categorie=${category}&search=${encodeURIComponent(prestation.title)}`);
+      }
+    }
+  };
+
   const nextImage = (prestationId, totalImages, e) => {
     e?.stopPropagation();
     setCurrentImageIndexes((prev) => ({
@@ -113,6 +127,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
                     ? "home-card group cursor-pointer h-full"
                     : "group overflow-hidden border-0 bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 rounded-3xl cursor-pointer transform hover:-translate-y-2"
                 }
+                onClick={() => handleCardClick(prestation)}
               >
                 <div className="relative overflow-hidden">
                   <div className={homeCards ?"h-72 rounded-lg overflow-hidden":"relative h-56 overflow-hidden rounded-t-3xl"}>
