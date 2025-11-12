@@ -53,6 +53,7 @@ import { professionalProfileService } from "@/services/professionalProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { DemandeDevisModal } from "@/components/DemandeDevis";
 import { ContactModal } from "@/components/ContactModal";
+
 interface ProfessionalProfile {
   id: string;
   firstName: string;
@@ -134,6 +135,7 @@ const ProfessionalProfilePage = () => {
   const [selectedService, setSelectedService] = useState<any>(null);
   const [isDemandeModalOpen, setIsDemandeModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
   useEffect(() => {
     if (id) {
       loadProfessionalData();
@@ -209,6 +211,11 @@ const ProfessionalProfilePage = () => {
     if (stats.totalDemandes > 50) return "Confirmé";
     if (stats.totalDemandes > 10) return "Intermédiaire";
     return "Débutant";
+  };
+
+  const handleServiceClick = (service: any) => {
+    setSelectedService(service);
+    setIsDemandeModalOpen(true);
   };
 
   if (loading) {
@@ -516,7 +523,10 @@ const ProfessionalProfilePage = () => {
                       <OverviewTab profile={profile} stats={stats} />
                     </TabsContent>
                     <TabsContent value="services">
-                      <ServicesTab services={profile.services} setSelectedService={setSelectedService} setIsDemandeModalOpen={setIsDemandeModalOpen} />
+                      <ServicesTab
+                        services={profile.services}
+                        onServiceClick={handleServiceClick}
+                      />
                     </TabsContent>
                     <TabsContent value="reviews">
                       <ReviewsTab reviews={profile.Review} />
@@ -530,25 +540,25 @@ const ProfessionalProfilePage = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Modals */}
-      {selectedService && (
-        <DemandeDevisModal
-          isOpen={isDemandeModalOpen}
-          onClose={() => {
-            setIsDemandeModalOpen(false);
-            setSelectedService(null);
-          }}
-          prestation={selectedService}
+        {/* Modals */}
+        {selectedService && (
+          <DemandeDevisModal
+            isOpen={isDemandeModalOpen}
+            onClose={() => {
+              setIsDemandeModalOpen(false);
+              setSelectedService(null);
+            }}
+            prestation={selectedService}
+          />
+        )}
+
+        <ContactModal
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+          professional={profile}
         />
-      )}
-
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-        professional={profile}
-      />
+      </div>
     </TooltipProvider>
   );
 };
@@ -686,21 +696,15 @@ const OverviewTab = ({
 );
 
 // Composant pour l'onglet Services amélioré
-// Composant pour l'onglet Services amélioré
-const ServicesTab = ({
-  services,
-  setSelectedService,
-  setIsDemandeModalOpen,
-}: {
+interface ServicesTabProps {
   services: ProfessionalProfile["services"];
-  setSelectedService;
-  setIsDemandeModalOpen;
-}) => {
-  const handleServiceClick = (service: any) => {
-    setSelectedService(service.service);
-    setIsDemandeModalOpen(true);
-  };
+  onServiceClick: (service: any) => void;
+}
 
+const ServicesTab: React.FC<ServicesTabProps> = ({
+  services,
+  onServiceClick,
+}) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-8">
@@ -765,7 +769,7 @@ const ServicesTab = ({
 
               {/* Bouton pour ouvrir le modal de demande */}
               <Button
-                onClick={() => handleServiceClick(service)}
+                onClick={() => onServiceClick(service)}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 <FileText className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -965,17 +969,5 @@ const ProfileSkeleton = () => (
     </div>
   </div>
 );
-
-// Fonction utilitaire pour les initiales
-const getInitials = (firstName: string, lastName: string) => {
-  return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-};
-
-// Fonction utilitaire pour formater les horaires
-const formatHoraires = (horaires: any) => {
-  if (!horaires) return "Non renseigné";
-  if (!horaires.ouvert) return "Fermé";
-  return `${horaires.debut} - ${horaires.fin}`;
-};
 
 export default ProfessionalProfilePage;

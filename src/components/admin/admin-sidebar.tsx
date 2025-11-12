@@ -35,7 +35,6 @@ const navigation = [
   { name: "Métiers", href: "/admin/metiers", icon: Ruler },
   { name: "Financements", href: "/admin/financement-demandes", icon: FileText },
   { name: "Publicité", href: "/admin/publicite", icon: MessageCircle },
-  { name: "Paramètres", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
