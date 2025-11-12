@@ -1,82 +1,76 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Upload, Video, Headphones, X, Loader } from "lucide-react";
-import MediaService from "../../services/MediaService";
+import mediaService from "../../services/mediaService";
 
-const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
-  const [formData, setFormData] = useState({
+// Types
+interface Category {
+  id: string;
+  name: string;
+  type?: string;
+}
+
+interface MediaUploadProps {
+  type: 'podcast' | 'video';
+  onUploadSuccess: (newMedia: any) => void;
+  onClose: () => void;
+  categories?: Category[]; // ← AJOUTEZ CETTE LIGNE
+}
+
+interface FormDataState {
+  title: string;
+  description: string;
+  duration: string;
+  categoryId: string;
+}
+
+interface FilesState {
+  media: File | null;
+  thumbnail: File | null;
+}
+
+const MediaUpload: React.FC<MediaUploadProps> = ({ 
+  type, 
+  onUploadSuccess, 
+  onClose,
+  categories = [] // ← AJOUTEZ CETTE LIGNE
+}) => {
+  const [formData, setFormData] = useState<FormDataState>({
     title: '',
     description: '',
     duration: '',
     categoryId: ''
   });
-  const [files, setFiles] = useState({
+  const [files, setFiles] = useState<FilesState>({
     media: null,
     thumbnail: null
   });
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [localCategories, setLocalCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
-  // Charger les catégories
+  // Charger les catégories seulement si pas fournies en prop
   useEffect(() => {
     const loadCategories = async () => {
+      // Utilise les categories de la prop si fournies, sinon les charge
+      if (categories.length > 0) {
+        setLocalCategories(categories);
+        return;
+      }
+      
       try {
-        const response = await MediaService.getCategories(type === 'podcast' ? 'podcast' : 'video');
+        const response = await mediaService.getCategories(type === 'podcast' ? 'podcast' : 'video');
         if (response.success) {
-          setCategories(response.data);
+          setLocalCategories(response.data || []);
         }
       } catch (err) {
         setError('Erreur lors du chargement des catégories');
       }
     };
     loadCategories();
-  }, [type]);
+  }, [type, categories]); // ← Ajoutez categories aux dépendances
 
-  // 🔥 CORRECTION: Fonction pour récupérer le token
-  const getAuthToken = () => {
-    // Méthode 1: Token depuis auth-token (votre cas)
-    let token = localStorage.getItem('auth-token');
-    console.log('🔐 Token from auth-token:', token);
-
-    // Méthode 2: Depuis les données utilisateur
-    if (!token) {
-      const userData = localStorage.getItem('user-data');
-      if (userData) {
-        try {
-          const user = JSON.parse(userData);
-          if (user.id) {
-            token = `real-jwt-token-${user.id}`;
-            console.log('🔐 Token from user-data:', token);
-          }
-        } catch (e) {
-          console.error('Error parsing user data:', e);
-        }
-      }
-    }
-
-    // Méthode 3: Vérifier d'autres clés possibles
-    if (!token) {
-      const possibleKeys = ['token', 'jwtToken', 'accessToken', 'userToken'];
-      for (const key of possibleKeys) {
-        const value = localStorage.getItem(key);
-        if (value) {
-          token = value;
-          console.log(`🔐 Token from ${key}:`, token);
-          break;
-        }
-      }
-    }
-
-    if (!token) {
-      console.log('❌ No token found in localStorage');
-      console.log('📋 Available keys:', Object.keys(localStorage));
-    }
-
-    return token;
-  };
-
-  const handleFileChange = (fileType, event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (fileType: keyof FilesState, event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
     if (file) {
       setFiles(prev => ({
         ...prev,
@@ -85,21 +79,10 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    // 🔥 CORRECTION: Utiliser la nouvelle fonction pour récupérer le token
-    const token = getAuthToken();
-
-    if (!token) {
-      setError('Vous devez être connecté pour uploader un fichier. Veuillez vous reconnecter.');
-      setLoading(false);
-      return;
-    }
-
-    console.log('🎯 Final token being sent:', token);
 
     // Validation
     if (!formData.title.trim() || !formData.description.trim() || !formData.duration.trim() || !formData.categoryId) {
@@ -131,9 +114,9 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
 
       let response;
       if (type === 'podcast') {
-        response = await MediaService.uploadPodcast(uploadData, token);
+        response = await mediaService.uploadPodcast(uploadData);
       } else {
-        response = await MediaService.uploadVideo(uploadData, token);
+        response = await mediaService.uploadVideo(uploadData);
       }
 
       console.log('📦 Upload response:', response);
@@ -143,20 +126,23 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
       } else {
         setError(response.message || `Erreur lors de l'upload du ${type}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Upload error:', err);
-      setError(err.message || 'Erreur de connexion au serveur');
+      setError(err.response?.data?.message || err.message || 'Erreur de connexion au serveur');
     } finally {
       setLoading(false);
     }
   };
 
-  const removeFile = (fileType) => {
+  const removeFile = (fileType: keyof FilesState) => {
     setFiles(prev => ({
       ...prev,
       [fileType]: null
     }));
   };
+
+  // Utilise les catégories de la prop ou celles chargées localement
+  const displayCategories = categories.length > 0 ? categories : localCategories;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -240,7 +226,7 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Sélectionner une catégorie</option>
-                  {categories.map(category => (
+                  {displayCategories.map(category => (
                     <option key={category.id} value={category.id}>
                       {category.name}
                     </option>

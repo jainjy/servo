@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Headphones, Video, Play, Clock, Calendar, Eye, ArrowLeft, Heart, Loader } from "lucide-react";
-import MediaService from "../services/mediaService";
+import  mediaService  from "../services/mediaService";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -137,7 +137,7 @@ const PodcastCard = ({ podcast }) => {
         setIsPlaying(true);
         
         // Incrémenter le compteur seulement au début de la lecture
-        await MediaService.incrementPodcastListens(podcast.id);
+        await mediaService.incrementPodcastListens(podcast.id);
       }
     } catch (error) {
       console.error('Erreur de lecture:', error);
@@ -153,7 +153,7 @@ const PodcastCard = ({ podcast }) => {
       {/* Player audio caché */}
       <audio
         ref={audioRef}
-        src={`http://localhost:3001${podcast.audioUrl}`}
+        src={podcast.audioUrl} // URL directe Supabase
         onEnded={handleEnded}
         preload="metadata"
       />
@@ -221,31 +221,20 @@ const PodcastCard = ({ podcast }) => {
   );
 };
 
-// Composant Modal de Lecture Vidéo - TAILLE RÉDUITE
+// Composant Modal de Lecture Vidéo
 const VideoModal = ({ video, isOpen, onClose }) => {
   const videoRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasPlayed, setHasPlayed] = useState(false);
 
-  // Fonction pour obtenir l'URL de la vidéo
-  const getVideoUrl = () => {
-    if (!video.videoUrl) return null;
-    const baseUrl = 'http://localhost:3001';
-    
-    if (video.videoUrl.startsWith('/media/')) {
-      return `${baseUrl}${video.videoUrl}`;
-    }
-    
-    return `${baseUrl}/media/videos/${video.videoUrl}`;
-  };
-
-  const videoUrl = getVideoUrl();
+  // URL directe Supabase
+  const videoUrl = video.videoUrl;
 
   // Incrémenter les vues quand la vidéo commence à jouer
   const handlePlay = async () => {
     if (!hasPlayed) {
       try {
-        await MediaService.incrementVideoViews(video.id);
+        await mediaService.incrementVideoViews(video.id);
         setHasPlayed(true);
       } catch (error) {
         console.error('Erreur incrémentation vues:', error);
@@ -273,30 +262,7 @@ const VideoModal = ({ video, isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4">
-      
-      {/* ==================== DÉBUT - CONFIGURATION TAILLE MODAL ==================== */}
-      {/* 
-        🎯 CONFIGURATION DE LA TAILLE DU MODAL :
-        
-        OPTIONS DE LARGEUR (max-w-*) :
-        - max-w-xs  → 320px  (très petit)
-        - max-w-sm  → 384px  (petit)
-        - max-w-md  → 448px  (moyen - RECOMMANDÉ pour votre capture)
-        - max-w-lg  → 512px  (moyen-grand)
-        - max-w-xl  → 576px  (grand)
-        - max-w-2xl → 672px  (très grand)
-        
-        OPTIONS DE HAUTEUR VIDÉO (max-h-*) :
-        - max-h-[250px] → très compact
-        - max-h-[300px] → compact
-        - max-h-[350px] → moyen
-        - max-h-[400px] → grand
-        
-        MODIFIER CES VALEURS POUR AJUSTER LA TAILLE :
-      */}
       <div className="bg-black rounded-2xl shadow-2xl w-full max-w-md h-auto overflow-hidden transform transition-all duration-300">
-      {/* ==================== FIN - CONFIGURATION TAILLE MODAL ==================== */}
-        
         {/* En-tête du modal */}
         <div className="flex justify-between items-center p-4 bg-black border-b border-gray-800">
           <div className="flex-1 min-w-0">
@@ -317,8 +283,7 @@ const VideoModal = ({ video, isOpen, onClose }) => {
 
         {/* Conteneur principal */}
         <div className="flex flex-col">
-          
-          {/* Lecteur vidéo - Taille réduite */}
+          {/* Lecteur vidéo */}
           <div className="relative bg-black">
             {isLoading && (
               <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
@@ -329,11 +294,6 @@ const VideoModal = ({ video, isOpen, onClose }) => {
               </div>
             )}
             
-            {/* ==================== DÉBUT - CONFIGURATION TAILLE VIDÉO ==================== */}
-            {/* 
-              🎯 CONFIGURATION DE LA TAILLE DE LA VIDÉO :
-              Modifier max-h-[300px] pour ajuster la hauteur de la vidéo
-            */}
             <video
               ref={videoRef}
               key={videoUrl}
@@ -347,13 +307,12 @@ const VideoModal = ({ video, isOpen, onClose }) => {
               onLoadStart={handleLoadStart}
               onError={() => setIsLoading(false)}
             >
-            {/* ==================== FIN - CONFIGURATION TAILLE VIDÉO ==================== */}
               <source src={videoUrl} type="video/mp4" />
               Votre navigateur ne supporte pas la lecture de vidéos.
             </video>
           </div>
 
-          {/* Informations de la vidéo - Style compact */}
+          {/* Informations de la vidéo */}
           <div className="p-4 bg-black text-white">
             <div className="mb-3">
               <h4 className="text-base font-semibold mb-2">{video.title}</h4>
@@ -484,16 +443,16 @@ const Proadcast = () => {
         setError(null);
 
         const [podcastsResponse, videosResponse] = await Promise.all([
-          MediaService.getPodcasts({ limit: 6 }),
-          MediaService.getVideos({ limit: 6 })
+          mediaService.getPodcasts({ limit: 6 }),
+          mediaService.getVideos({ limit: 6 })
         ]);
 
         if (podcastsResponse.success) {
-          setPodcasts(podcastsResponse.data);
+          setPodcasts(podcastsResponse.data || []);
         }
 
         if (videosResponse.success) {
-          setVideos(videosResponse.data);
+          setVideos(videosResponse.data || []);
         }
 
       } catch (err) {
@@ -512,14 +471,14 @@ const Proadcast = () => {
       setModalType(type);
       
       if (type === 'podcasts') {
-        const response = await MediaService.getPodcasts({ limit: 50 });
+        const response = await mediaService.getPodcasts({ limit: 50 });
         if (response.success) {
-          setPodcasts(response.data);
+          setPodcasts(response.data || []);
         }
       } else {
-        const response = await MediaService.getVideos({ limit: 50 });
+        const response = await mediaService.getVideos({ limit: 50 });
         if (response.success) {
-          setVideos(response.data);
+          setVideos(response.data || []);
         }
       }
       setModalOpen(true);
