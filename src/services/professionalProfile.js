@@ -15,7 +15,9 @@ export const professionalProfileService = {
   // Récupérer les statistiques du professionnel
   async getProfessionalStats(professionalId) {
     try {
-      const response = await api.get(`/professional/stats/${professionalId}`);
+      const response = await api.get(
+        `/professional/profile/stats/${professionalId}`
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -25,7 +27,9 @@ export const professionalProfileService = {
   // Récupérer les avis du professionnel
   async getProfessionalReviews(professionalId) {
     try {
-      const response = await api.get(`/professional/reviews/${professionalId}`);
+      const response = await api.get(
+        `/professional/profile/reviews/${professionalId}`
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -36,7 +40,7 @@ export const professionalProfileService = {
   async getProfessionalServices(professionalId) {
     try {
       const response = await api.get(
-        `/professional/services/${professionalId}`
+        `/professional/profile/services/${professionalId}`
       );
       return response.data;
     } catch (error) {
