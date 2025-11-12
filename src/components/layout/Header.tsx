@@ -1,5 +1,5 @@
 // components/Header.js
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 // Import des images pour les sections
-import imgImmobilier from "../../assets/hero-house.jpg";
 
 
 // Import des icônes
 import {
   Menu,
-  X,
   LogOut,
   User as UserIcon,
   ChevronDown,
@@ -51,8 +49,6 @@ import Cart from "@/components/Cart";
 import AuthService from "@/services/authService";
 import type { User as AuthUser } from "@/types/type";
 
-// Import GSAP and API
-import { gsap } from "gsap";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api.js";
 
@@ -70,7 +66,6 @@ const Header = () => {
 
   // Utiliser le contexte panier
   const { getCartItemsCount } = useCart();
-
   const [isCartOpen, setIsCartOpen] = useState(false);
 
 useEffect(() => {
