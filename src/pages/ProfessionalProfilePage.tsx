@@ -302,7 +302,6 @@ const ProfessionalProfilePage = () => {
             </div>
           </div>
         </header>
-
         {/* Section principale avec design amélioré */}
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -540,7 +539,6 @@ const ProfessionalProfilePage = () => {
             </div>
           </div>
         </div>
-
         {/* Modals */}
         {selectedService && (
           <DemandeDevisModal
@@ -550,9 +548,9 @@ const ProfessionalProfilePage = () => {
               setSelectedService(null);
             }}
             prestation={selectedService}
+            artisanId={profile.id} // NOUVEAU: Passer l'ID du professionnel
           />
         )}
-
         <ContactModal
           isOpen={isContactModalOpen}
           onClose={() => setIsContactModalOpen(false)}

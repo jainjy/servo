@@ -1,19 +1,35 @@
+// components/DemandeDevisModal.tsx
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
-import { FileText, X, User, Phone, Mail, Home, Calendar, Loader2 } from "lucide-react";
+import {
+  FileText,
+  X,
+  User,
+  Phone,
+  Mail,
+  Home,
+  Calendar,
+  Loader2,
+} from "lucide-react";
 import React, { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
 interface DemandeDevisModalProps {
-  isOpen: boolean;  
+  isOpen: boolean;
   onClose: () => void;
   prestation: any;
+  artisanId?: string; // NOUVEAU: ID de l'artisan spécifique
 }
 
-export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisModalProps) => {
+export const DemandeDevisModal = ({
+  isOpen,
+  onClose,
+  prestation,
+  artisanId,
+}: DemandeDevisModalProps) => {
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -67,6 +83,7 @@ export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisM
         serviceId: prestation.id,
         nombreArtisans: "UNIQUE",
         createdById: userId,
+        artisanId: artisanId || null, // NOUVEAU: Inclure l'artisanId
       };
 
       const response = await api.post("/demandes/immobilier", demandeData);
@@ -83,7 +100,11 @@ export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisM
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -106,6 +127,11 @@ export const DemandeDevisModal = ({ isOpen, onClose, prestation }: DemandeDevisM
               <p className="text-gray-600 text-xs lg:text-sm">
                 {prestation.libelle}
               </p>
+              {artisanId && (
+                <p className="text-green-600 text-xs mt-1">
+                  📍 Demande directe à cet artisan
+                </p>
+              )}
             </div>
           </div>
           <Button
