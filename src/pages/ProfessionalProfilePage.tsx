@@ -27,12 +27,28 @@ import {
   Copy,
   ThumbsUp,
   AlertCircle,
+  Shield,
+  Clock4,
+  Sparkles,
+  BadgeCheck,
+  CalendarDays,
+  UserCheck,
+  Rocket,
+  Lightbulb,
+  BarChart3,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { professionalProfileService } from "@/services/professionalProfile";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -113,6 +129,8 @@ const ProfessionalProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -144,13 +162,15 @@ const ProfessionalProfilePage = () => {
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number, size = "w-4 h-4") => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"
-        }`}
+        className={`${size} ${
+          i < rating
+            ? "text-yellow-400 fill-yellow-400 drop-shadow-lg"
+            : "text-gray-600"
+        } transition-all duration-300`}
       />
     ));
   };
@@ -163,7 +183,6 @@ const ProfessionalProfilePage = () => {
 
   const getHoraires = () => {
     if (!profile?.ProfessionalSettings) return null;
-
     const settings = profile.ProfessionalSettings;
     return [
       { jour: "Lundi", horaire: settings.horairesLundi },
@@ -176,26 +195,40 @@ const ProfessionalProfilePage = () => {
     ];
   };
 
+  const copyProfileLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const getExperienceLevel = () => {
+    if (!stats) return "Débutant";
+    if (stats.totalDemandes > 100) return "Expert";
+    if (stats.totalDemandes > 50) return "Confirmé";
+    if (stats.totalDemandes > 10) return "Intermédiaire";
+    return "Débutant";
+  };
+
   if (loading) {
     return <ProfileSkeleton />;
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="p-8 bg-gray-800 border-gray-700 text-center max-w-md w-full">
-          <div className="text-red-400 mb-4">
-            <Award className="w-16 h-16 mx-auto" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
+        <Card className="p-8 bg-gray-800/80 backdrop-blur-xl border-gray-700/50 text-center max-w-md w-full shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div className="text-red-400/80 mb-4">
+            <AlertCircle className="w-16 h-16 mx-auto drop-shadow-lg" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent mb-2">
             Profil non trouvé
           </h2>
-          <p className="text-gray-400 mb-6">
+          <p className="text-gray-300 mb-6">
             {error || "Le professionnel demandé n'existe pas"}
           </p>
           <Button
             onClick={() => navigate(-1)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
@@ -207,230 +240,299 @@ const ProfessionalProfilePage = () => {
 
   const horaires = getHoraires();
   const settings = profile.ProfessionalSettings;
+  const experienceLevel = getExperienceLevel();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white mt-16">
-      {/* Header avec navigation */}
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur-sm sticky top-16 z-50 ">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour
-            </Button>
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white mt-16">
+        {/* Header avec navigation amélioré */}
+        <header className="border-b border-gray-700/50 bg-gray-900/90 backdrop-blur-xl sticky top-16 z-50 shadow-2xl">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="text-gray-300 hover:text-white hover:bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 group"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                Retour
+              </Button>
 
-            <div className="flex items-center gap-3">
-              {user && user.id !== profile.id && (
-                <Button
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contacter
-                </Button>
-              )}
-            </div>
-            
-          </div>
-        </div>
-      </header>
+              <div className="flex items-center gap-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={copyProfileLink}
+                      className="text-gray-300 hover:text-white hover:bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300"
+                    >
+                      {copied ? (
+                        <CheckCircle className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{copied ? "Lien copié !" : "Copier le lien"}</p>
+                  </TooltipContent>
+                </Tooltip>
 
-      {/* Section principale */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Carte profil */}
-            <Card className="p-6 bg-gray-800 border-gray-700">
-              <div className="text-center">
-                <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-gray-700">
-                  <AvatarImage src={profile.avatar || ""} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-xl">
-                    {getInitials(
-                      profile.firstName || "",
-                      profile.lastName || ""
-                    )}
-                  </AvatarFallback>
-                </Avatar>
-
-                <h1 className="text-xl font-bold text-white mb-2">
-                  {profile.firstName} {profile.lastName}
-                </h1>
-
-                <p className="text-gray-400 mb-4">
-                  {profile.commercialName ||
-                    profile.companyName ||
-                    "Professionnel"}
-                </p>
-
-                {/* Note moyenne */}
-                {stats && (
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <div className="flex">
-                      {renderStars(Math.round(stats.noteMoyenne))}
-                    </div>
-                    <span className="text-yellow-400 font-semibold">
-                      {stats.noteMoyenne.toFixed(1)}
-                    </span>
-                    <span className="text-gray-400 text-sm">
-                      ({stats.totalAvis} avis)
-                    </span>
-                  </div>
+                {user && user.id !== profile.id && (
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                    Contacter
+                  </Button>
                 )}
-
-                {/* Badges métiers */}
-                <div className="flex flex-wrap gap-2 justify-center mb-4">
-                  {profile.metiers.slice(0, 3).map(({ metier }) => (
-                    <Badge
-                      key={metier.id}
-                      variant="secondary"
-                      className="bg-blue-600/20 text-blue-400 border-blue-600/30"
-                    >
-                      {metier.libelle}
-                    </Badge>
-                  ))}
-                  {profile.metiers.length > 3 && (
-                    <Badge
-                      variant="outline"
-                      className="text-gray-400 border-gray-600"
-                    >
-                      +{profile.metiers.length - 3}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Statut vérifié */}
-                <div className="flex items-center justify-center gap-2 text-green-400 mb-6">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm font-medium">Profil vérifié</span>
-                </div>
-
-                {/* Informations de contact */}
-                <div className="space-y-3 text-left">
-                  {settings?.telephone && (
-                    <div className="flex items-center gap-3 text-gray-300">
-                      <Phone className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm">{settings.telephone}</span>
-                    </div>
-                  )}
-
-                  {settings?.emailContact && (
-                    <div className="flex items-center gap-3 text-gray-300">
-                      <Mail className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm truncate">
-                        {settings.emailContact}
-                      </span>
-                    </div>
-                  )}
-
-                  {settings?.adresse && (
-                    <div className="flex items-center gap-3 text-gray-300">
-                      <MapPin className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm">{settings.adresse}</span>
-                    </div>
-                  )}
-                </div>
               </div>
-            </Card>
+            </div>
+          </div>
+        </header>
 
-            {/* Statistiques rapides */}
-            {stats && (
-              <Card className="p-6 bg-gray-800 border-gray-700">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-blue-400" />
-                  Statistiques
-                </h3>
+        {/* Section principale avec design amélioré */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Sidebar améliorée */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Carte profil avec glassmorphism */}
+              <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+                <div className="text-center">
+                  {/* Avatar avec effet de halo */}
+                  <div className="relative inline-block mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-30 animate-pulse"></div>
+                    <Avatar className="w-28 h-28 border-4 border-gray-800/50 relative z-10 transform hover:scale-105 transition-transform duration-300">
+                      <AvatarImage
+                        src={profile.avatar || ""}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-2xl font-bold">
+                        {getInitials(
+                          profile.firstName || "",
+                          profile.lastName || ""
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">Demandes</span>
-                    <span className="text-white font-semibold">
-                      {stats.totalDemandes}
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-2">
+                    {profile.firstName} {profile.lastName}
+                  </h1>
+
+                  <p className="text-gray-300 mb-4 text-lg">
+                    {profile.commercialName ||
+                      profile.companyName ||
+                      "Professionnel"}
+                  </p>
+
+                  {/* Badge niveau d'expérience */}
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 mb-4">
+                    <Rocket className="w-3 h-3 text-yellow-400" />
+                    <span className="text-yellow-400 text-sm font-medium">
+                      {experienceLevel}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">
-                      Taux d'acceptation
-                    </span>
-                    <span className="text-green-400 font-semibold">
-                      {stats.tauxAcceptation}%
+                  {/* Note moyenne améliorée */}
+                  {stats && (
+                    <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-gray-700/30 rounded-2xl backdrop-blur-sm">
+                      <div className="flex">
+                        {renderStars(Math.round(stats.noteMoyenne), "w-5 h-5")}
+                      </div>
+                      <div className="text-center">
+                        <span className="text-yellow-400 font-bold text-2xl block leading-none">
+                          {stats.noteMoyenne.toFixed(1)}
+                        </span>
+                        <span className="text-gray-400 text-sm">
+                          ({stats.totalAvis} avis)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Badges métiers améliorés */}
+                  <div className="flex flex-wrap gap-2 justify-center mb-6">
+                    {profile.metiers.slice(0, 3).map(({ metier }) => (
+                      <Badge
+                        key={metier.id}
+                        className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border-blue-500/30 backdrop-blur-sm hover:scale-105 transition-transform duration-200"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        {metier.libelle}
+                      </Badge>
+                    ))}
+                    {profile.metiers.length > 3 && (
+                      <Badge
+                        variant="outline"
+                        className="text-gray-400 border-gray-600 backdrop-blur-sm"
+                      >
+                        +{profile.metiers.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Statut vérifié amélioré */}
+                  <div className="flex items-center justify-center gap-2 text-green-400/90 mb-6 p-3 bg-green-500/10 rounded-xl backdrop-blur-sm">
+                    <BadgeCheck className="w-5 h-5" />
+                    <span className="text-sm font-semibold">
+                      Profil vérifié
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">Services</span>
-                    <span className="text-white font-semibold">
-                      {stats.totalServices}
-                    </span>
-                  </div>
+                  {/* Informations de contact améliorées */}
+                  <div className="space-y-3 text-left bg-gray-700/20 rounded-2xl p-4 backdrop-blur-sm">
+                    {settings?.telephone && (
+                      <div className="flex items-center gap-3 text-gray-200 group hover:text-white transition-colors duration-200">
+                        <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
+                          <Phone className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <span className="text-sm font-medium">
+                          {settings.telephone}
+                        </span>
+                      </div>
+                    )}
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">Avis</span>
-                    <span className="text-white font-semibold">
-                      {stats.totalAvis}
-                    </span>
+                    {settings?.emailContact && (
+                      <div className="flex items-center gap-3 text-gray-200 group hover:text-white transition-colors duration-200">
+                        <div className="p-2 bg-purple-500/20 rounded-lg group-hover:bg-purple-500/30 transition-colors">
+                          <Mail className="w-4 h-4 text-purple-400" />
+                        </div>
+                        <span className="text-sm font-medium truncate">
+                          {settings.emailContact}
+                        </span>
+                      </div>
+                    )}
+
+                    {settings?.adresse && (
+                      <div className="flex items-center gap-3 text-gray-200 group hover:text-white transition-colors duration-200">
+                        <div className="p-2 bg-green-500/20 rounded-lg group-hover:bg-green-500/30 transition-colors">
+                          <MapPin className="w-4 h-4 text-green-400" />
+                        </div>
+                        <span className="text-sm font-medium">
+                          {settings.adresse}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
-            )}
-          </div>
 
-          {/* Contenu principal */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Navigation par onglets */}
-            <Card className="p-1 bg-gray-800 border-gray-700">
-              <div className="flex space-x-1">
-                {[
-                  { id: "overview", label: "Aperçu", icon: Building },
-                  { id: "services", label: "Services", icon: Briefcase },
-                  { id: "reviews", label: "Avis", icon: Star },
-                  { id: "schedule", label: "Horaires", icon: Clock },
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        activeTab === tab.id
-                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
-                          : "text-gray-400 hover:text-white hover:bg-gray-700"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </Card>
+              {/* Statistiques rapides améliorées */}
+              {stats && (
+                <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+                  <h3 className="font-bold text-white mb-6 flex items-center gap-3 text-lg">
+                    <BarChart3 className="w-5 h-5 text-blue-400" />
+                    Performance
+                  </h3>
 
-            {/* Contenu des onglets */}
-            <div className="animate-fadeIn">
-              {activeTab === "overview" && (
-                <OverviewTab profile={profile} stats={stats} />
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: Target,
+                        label: "Demandes",
+                        value: stats.totalDemandes,
+                        color: "text-blue-400",
+                      },
+                      {
+                        icon: UserCheck,
+                        label: "Acceptation",
+                        value: `${stats.tauxAcceptation}%`,
+                        color: "text-green-400",
+                      },
+                      {
+                        icon: Briefcase,
+                        label: "Services",
+                        value: stats.totalServices,
+                        color: "text-purple-400",
+                      },
+                      {
+                        icon: Star,
+                        label: "Avis",
+                        value: stats.totalAvis,
+                        color: "text-yellow-400",
+                      },
+                    ].map((item, index) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl backdrop-blur-sm hover:bg-gray-700/50 transition-all duration-300 group"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-600/50 rounded-lg group-hover:scale-110 transition-transform">
+                            <item.icon className={`w-4 h-4 ${item.color}`} />
+                          </div>
+                          <span className="text-gray-300 text-sm font-medium">
+                            {item.label}
+                          </span>
+                        </div>
+                        <span className={`font-bold ${item.color}`}>
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
               )}
-              {activeTab === "services" && (
-                <ServicesTab services={profile.services} />
-              )}
-              {activeTab === "reviews" && (
-                <ReviewsTab reviews={profile.Review} />
-              )}
-              {activeTab === "schedule" && <ScheduleTab horaires={horaires} />}
+            </div>
+
+            {/* Contenu principal amélioré */}
+            <div className="lg:col-span-3 space-y-8">
+              {/* Navigation par onglets améliorée */}
+              <Card className="p-2 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid grid-cols-4 bg-gray-700/30 backdrop-blur-sm p-1">
+                    {[
+                      { id: "overview", label: "Aperçu", icon: Building },
+                      { id: "services", label: "Services", icon: Briefcase },
+                      { id: "reviews", label: "Avis", icon: Star },
+                      { id: "schedule", label: "Horaires", icon: CalendarDays },
+                    ].map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <TabsTrigger
+                          key={tab.id}
+                          value={tab.id}
+                          className="flex items-center gap-2 text-sm font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-gray-700/50"
+                        >
+                          <Icon className="w-4 h-4" />
+                          {tab.label}
+                        </TabsTrigger>
+                      );
+                    })}
+                  </TabsList>
+
+                  <div className="mt-6 animate-in fade-in duration-500">
+                    <TabsContent value="overview">
+                      <OverviewTab profile={profile} stats={stats} />
+                    </TabsContent>
+                    <TabsContent value="services">
+                      <ServicesTab services={profile.services} />
+                    </TabsContent>
+                    <TabsContent value="reviews">
+                      <ReviewsTab reviews={profile.Review} />
+                    </TabsContent>
+                    <TabsContent value="schedule">
+                      <ScheduleTab horaires={horaires} />
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </Card>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
-// Composant pour l'onglet Aperçu
+// Composant pour l'onglet Aperçu amélioré
 const OverviewTab = ({
   profile,
   stats,
@@ -439,106 +541,166 @@ const OverviewTab = ({
   stats: ProfessionalStats | null;
 }) => (
   <div className="space-y-6">
-    {/* Présentation */}
-    <Card className="p-6 bg-gray-800 border-gray-700">
-      <h2 className="text-xl font-bold text-white mb-4">Présentation</h2>
-      <p className="text-gray-300 leading-relaxed">
-        {profile.companyName
-          ? `Expert en ${profile.metiers
-              .map((m) => m.metier.libelle)
-              .join(", ")} chez ${profile.companyName}. 
-          Fort de ${
-            stats?.totalDemandes || 0
-          } demandes traitées avec un taux de satisfaction de ${
-              stats?.tauxAcceptation || 0
-            }%.`
-          : `Professionnel spécialisé en ${profile.metiers
-              .map((m) => m.metier.libelle)
-              .join(", ")}. 
-          Expérience éprouvée avec ${
-            stats?.totalDemandes || 0
-          } projets réalisés.`}
-      </p>
+    {/* Présentation améliorée */}
+    <Card className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+      <div className="flex items-start gap-4">
+        <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl">
+          <Lightbulb className="w-6 h-6 text-blue-400" />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
+            Présentation
+          </h2>
+          <p className="text-gray-300 leading-relaxed text-lg">
+            {profile.companyName
+              ? `Expert en ${profile.metiers
+                  .map((m) => m.metier.libelle)
+                  .join(", ")} chez ${profile.companyName}. 
+              Fort de ${
+                stats?.totalDemandes || 0
+              } demandes traitées avec un taux de satisfaction de ${
+                  stats?.tauxAcceptation || 0
+                }%.`
+              : `Professionnel spécialisé en ${profile.metiers
+                  .map((m) => m.metier.libelle)
+                  .join(", ")}. 
+              Expérience éprouvée avec ${
+                stats?.totalDemandes || 0
+              } projets réalisés.`}
+          </p>
+        </div>
+      </div>
     </Card>
 
-    {/* Métiers et spécialités */}
-    <Card className="p-6 bg-gray-800 border-gray-700">
-      <h2 className="text-xl font-bold text-white mb-4">Spécialités</h2>
+    {/* Métiers et spécialités améliorés */}
+    <Card className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
+          <Award className="w-6 h-6 text-yellow-400" />
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          Spécialités
+        </h2>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {profile.metiers.map(({ metier }) => (
+        {profile.metiers.map(({ metier }, index) => (
           <div
             key={metier.id}
-            className="flex items-center gap-3 p-3 bg-gray-700/50 rounded-lg"
+            className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-700/50 to-gray-600/30 rounded-xl backdrop-blur-sm hover:from-gray-700/70 hover:to-gray-600/50 transition-all duration-300 group hover:scale-105 border border-gray-600/30"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <Award className="w-5 h-5 text-blue-400" />
-            <span className="text-white font-medium">{metier.libelle}</span>
+            <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg group-hover:scale-110 transition-transform">
+              <Zap className="w-5 h-5 text-blue-400" />
+            </div>
+            <span className="text-white font-semibold text-lg">
+              {metier.libelle}
+            </span>
           </div>
         ))}
       </div>
     </Card>
 
-    {/* Statistiques détaillées */}
+    {/* Statistiques détaillées améliorées */}
     {stats && (
-      <Card className="p-6 bg-gray-800 border-gray-700">
-        <h2 className="text-xl font-bold text-white mb-6">Performance</h2>
+      <Card className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl">
+            <TrendingUp className="w-6 h-6 text-green-400" />
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            Performance Détaillée
+          </h2>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-2">
-              {stats.totalDemandes}
+          {[
+            {
+              value: stats.totalDemandes,
+              label: "Demandes",
+              color: "from-blue-500 to-cyan-500",
+              icon: Target,
+            },
+            {
+              value: `${stats.tauxAcceptation}%`,
+              label: "Acceptation",
+              color: "from-green-500 to-emerald-500",
+              icon: UserCheck,
+            },
+            {
+              value: stats.noteMoyenne.toFixed(1),
+              label: "Note",
+              color: "from-yellow-500 to-orange-500",
+              icon: Star,
+            },
+            {
+              value: stats.totalServices,
+              label: "Services",
+              color: "from-purple-500 to-pink-500",
+              icon: Briefcase,
+            },
+          ].map((stat, index) => (
+            <div
+              key={stat.label}
+              className="text-center p-6 bg-gradient-to-br from-gray-700/50 to-gray-600/30 rounded-2xl backdrop-blur-sm hover:scale-105 transition-all duration-500 border border-gray-600/30 group"
+              style={{ animationDelay: `${index * 150}ms` }}
+            >
+              <div
+                className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl mb-3 group-hover:scale-110 transition-transform`}
+              >
+                <stat.icon className="w-6 h-6 text-white" />
+              </div>
+              <div
+                className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}
+              >
+                {stat.value}
+              </div>
+              <div className="text-gray-300 text-sm font-medium">
+                {stat.label}
+              </div>
             </div>
-            <div className="text-gray-400 text-sm">Demandes totales</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-400 mb-2">
-              {stats.tauxAcceptation}%
-            </div>
-            <div className="text-gray-400 text-sm">Taux d'acceptation</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-400 mb-2">
-              {stats.noteMoyenne.toFixed(1)}
-            </div>
-            <div className="text-gray-400 text-sm">Note moyenne</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-2">
-              {stats.totalServices}
-            </div>
-            <div className="text-gray-400 text-sm">Services proposés</div>
-          </div>
+          ))}
         </div>
       </Card>
     )}
   </div>
 );
 
-// Composant pour l'onglet Services
+// Composant pour l'onglet Services amélioré
 const ServicesTab = ({
   services,
 }: {
   services: ProfessionalProfile["services"];
 }) => (
-  <div className="space-y-4">
-    <h2 className="text-xl font-bold text-white mb-6">Services proposés</h2>
+  <div className="space-y-6">
+    <div className="flex items-center gap-3 mb-8">
+      <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+        <Briefcase className="w-6 h-6 text-purple-400" />
+      </div>
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        Services Proposés
+      </h2>
+    </div>
 
     {services.length === 0 ? (
-      <Card className="p-8 bg-gray-800 border-gray-700 text-center">
-        <FileText className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-        <p className="text-gray-400">Aucun service disponible pour le moment</p>
+      <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
+        <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+        <p className="text-gray-400 text-lg">
+          Aucun service disponible pour le moment
+        </p>
       </Card>
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {services.map(({ service }) => (
+        {services.map(({ service }, index) => (
           <Card
             key={service.id}
-            className="p-6 bg-gray-800 border-gray-700 hover:border-blue-500/50 transition-all duration-300 hover:scale-105"
+            className="p-6 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 group"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-white text-lg">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="font-bold text-white text-xl group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-300">
                 {service.libelle}
               </h3>
               {service.price && (
-                <Badge className="bg-green-600/20 text-green-400 border-green-600/30">
+                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-500/30 backdrop-blur-sm">
                   <Euro className="w-3 h-3 mr-1" />
                   {service.price}€
                 </Badge>
@@ -548,22 +710,22 @@ const ServicesTab = ({
             {service.category && (
               <Badge
                 variant="outline"
-                className="mb-3 text-gray-400 border-gray-600"
+                className="mb-4 text-gray-400 border-gray-600 backdrop-blur-sm"
               >
                 {service.category.name}
               </Badge>
             )}
 
             {service.description && (
-              <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+              <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
                 {service.description}
               </p>
             )}
 
             {service.duration && (
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <div className="flex items-center gap-2 text-gray-400 text-sm bg-gray-700/30 rounded-lg p-2 backdrop-blur-sm">
                 <Clock className="w-4 h-4" />
-                {service.duration} min
+                <span className="font-medium">{service.duration} minutes</span>
               </div>
             )}
           </Card>
@@ -573,7 +735,7 @@ const ServicesTab = ({
   </div>
 );
 
-// Composant pour l'onglet Avis
+// Composant pour l'onglet Avis amélioré
 const ReviewsTab = ({
   reviews,
 }: {
@@ -583,30 +745,43 @@ const ReviewsTab = ({
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"
-        }`}
+        className={`w-5 h-5 ${
+          i < rating
+            ? "text-yellow-400 fill-yellow-400 drop-shadow-lg"
+            : "text-gray-600"
+        } transition-all duration-300`}
       />
     ));
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold text-white mb-6">Avis clients</h2>
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
+          <Star className="w-6 h-6 text-yellow-400" />
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          Avis Clients
+        </h2>
+      </div>
 
       {reviews.length === 0 ? (
-        <Card className="p-8 bg-gray-800 border-gray-700 text-center">
-          <Star className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400">Aucun avis pour le moment</p>
+        <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
+          <Star className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400 text-lg">Aucun avis pour le moment</p>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <Card key={review.id} className="p-6 bg-gray-800 border-gray-700">
+        <div className="space-y-6">
+          {reviews.map((review, index) => (
+            <Card
+              key={review.id}
+              className="p-6 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
               <div className="flex items-start gap-4">
-                <Avatar className="w-10 h-10">
+                <Avatar className="w-12 h-12 border-2 border-gray-600/50">
                   <AvatarImage src={review.user.avatar || ""} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
                     {getInitials(
                       review.user.firstName || "",
                       review.user.lastName || ""
@@ -615,20 +790,24 @@ const ReviewsTab = ({
                 </Avatar>
 
                 <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-2">
-                    <h4 className="font-semibold text-white">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <h4 className="font-bold text-white text-lg">
                       {review.user.firstName} {review.user.lastName}
                     </h4>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       {renderStars(review.rating)}
                     </div>
-                    <span className="text-gray-400 text-sm">
-                      {new Date(review.createdAt).toLocaleDateString("fr-FR")}
+                    <span className="text-gray-400 text-sm bg-gray-700/30 rounded-full px-3 py-1 backdrop-blur-sm">
+                      {new Date(review.createdAt).toLocaleDateString("fr-FR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
 
                   {review.comment && (
-                    <p className="text-gray-300 leading-relaxed">
+                    <p className="text-gray-300 leading-relaxed text-lg bg-gray-700/20 rounded-2xl p-4 backdrop-blur-sm">
                       {review.comment}
                     </p>
                   )}
@@ -642,29 +821,42 @@ const ReviewsTab = ({
   );
 };
 
-// Composant pour l'onglet Horaires
+// Composant pour l'onglet Horaires amélioré
 const ScheduleTab = ({ horaires }: { horaires: any[] | null }) => (
   <div className="space-y-6">
-    <h2 className="text-xl font-bold text-white mb-6">Horaires d'ouverture</h2>
+    <div className="flex items-center gap-3 mb-8">
+      <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl">
+        <CalendarDays className="w-6 h-6 text-cyan-400" />
+      </div>
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        Horaires d'Ouverture
+      </h2>
+    </div>
 
     {!horaires ? (
-      <Card className="p-8 bg-gray-800 border-gray-700 text-center">
-        <Clock className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-        <p className="text-gray-400">Horaires non renseignés</p>
+      <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
+        <Clock className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+        <p className="text-gray-400 text-lg">Horaires non renseignés</p>
       </Card>
     ) : (
-      <Card className="p-6 bg-gray-800 border-gray-700">
-        <div className="space-y-4">
-          {horaires.map(({ jour, horaire }) => (
+      <Card className="p-8 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl">
+        <div className="space-y-3">
+          {horaires.map(({ jour, horaire }, index) => (
             <div
               key={jour}
-              className="flex items-center justify-between py-3 border-b border-gray-700 last:border-0"
+              className="flex items-center justify-between p-4 bg-gray-700/30 rounded-xl backdrop-blur-sm hover:bg-gray-700/50 transition-all duration-300 group border border-gray-600/30"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <span className="font-medium text-white">{jour}</span>
+              <span className="font-semibold text-white text-lg flex items-center gap-3">
+                <CalendarDays className="w-4 h-4 text-gray-400" />
+                {jour}
+              </span>
               <span
-                className={`${
-                  horaire?.ouvert ? "text-green-400" : "text-red-400"
-                } font-semibold`}
+                className={`font-bold text-lg px-4 py-2 rounded-lg backdrop-blur-sm ${
+                  horaire?.ouvert
+                    ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                    : "bg-red-500/20 text-red-400 border border-red-500/30"
+                } transition-all duration-300 group-hover:scale-105`}
               >
                 {formatHoraires(horaire)}
               </span>
@@ -676,45 +868,52 @@ const ScheduleTab = ({ horaires }: { horaires: any[] | null }) => (
   </div>
 );
 
-// Composant Skeleton pour le chargement
+// Composant Skeleton amélioré
 const ProfileSkeleton = () => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+  <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar Skeleton */}
+        {/* Sidebar Skeleton amélioré */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="p-6 bg-gray-800 border-gray-700">
+          <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50">
             <div className="text-center">
-              <Skeleton className="w-24 h-24 rounded-full mx-auto mb-4 bg-gray-700" />
-              <Skeleton className="h-6 w-32 mx-auto mb-2 bg-gray-700" />
-              <Skeleton className="h-4 w-24 mx-auto mb-4 bg-gray-700" />
-              <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
-              <Skeleton className="h-4 w-3/4 mx-auto bg-gray-700" />
+              <Skeleton className="w-28 h-28 rounded-full mx-auto mb-4 bg-gray-700/50" />
+              <Skeleton className="h-8 w-40 mx-auto mb-3 bg-gray-700/50" />
+              <Skeleton className="h-6 w-32 mx-auto mb-4 bg-gray-700/50" />
+              <Skeleton className="h-6 w-full mb-2 bg-gray-700/50 rounded-full" />
+              <Skeleton className="h-6 w-3/4 mx-auto mb-4 bg-gray-700/50 rounded-full" />
+              <Skeleton className="h-12 w-full mb-4 bg-gray-700/50 rounded-xl" />
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-800 border-gray-700">
-            <Skeleton className="h-6 w-24 mb-4 bg-gray-700" />
-            <div className="space-y-3">
+          <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50">
+            <Skeleton className="h-7 w-32 mb-6 bg-gray-700/50 rounded-full" />
+            <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex justify-between">
-                  <Skeleton className="h-4 w-20 bg-gray-700" />
-                  <Skeleton className="h-4 w-10 bg-gray-700" />
+                <div
+                  key={i}
+                  className="flex justify-between items-center p-3 bg-gray-700/30 rounded-xl"
+                >
+                  <Skeleton className="h-5 w-24 bg-gray-700/50 rounded-full" />
+                  <Skeleton className="h-6 w-12 bg-gray-700/50 rounded-full" />
                 </div>
               ))}
             </div>
           </Card>
         </div>
 
-        {/* Main Content Skeleton */}
+        {/* Main Content Skeleton amélioré */}
         <div className="lg:col-span-3 space-y-6">
-          <Skeleton className="h-12 w-full bg-gray-700 rounded-lg" />
+          <Skeleton className="h-14 w-full bg-gray-700/50 rounded-2xl" />
 
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="p-6 bg-gray-800 border-gray-700">
-              <Skeleton className="h-6 w-32 mb-4 bg-gray-700" />
-              <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
-              <Skeleton className="h-4 w-3/4 bg-gray-700" />
+            <Card
+              key={i}
+              className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50"
+            >
+              <Skeleton className="h-8 w-48 mb-6 bg-gray-700/50 rounded-full" />
+              <Skeleton className="h-6 w-full mb-3 bg-gray-700/50 rounded-full" />
+              <Skeleton className="h-6 w-3/4 bg-gray-700/50 rounded-full" />
             </Card>
           ))}
         </div>

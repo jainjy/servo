@@ -23,5 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .env
-src/pages/TestPage.jsx
-src/components/ScrollImage.jsx
