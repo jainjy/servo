@@ -192,7 +192,7 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/cookies" element={<CookiesPolicy />} />
-                  {/* <Route path="/podcasts" element={<Podcast />} /> */}
+                   <Route path="/podcasts" element={<Podcast />} /> 
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   {/* /*entreprise link* */}
@@ -402,7 +402,9 @@ const App = () => {
                       path="demandes-devis"
                       element={<ListeDemandesDevis />}
                     />
+
                     <Route path="media" element={<AdminMedia />} />
+
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route path="/mon-compte">

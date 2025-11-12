@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Headphones, Video, Play, Clock, Calendar, Eye, ArrowLeft, Heart, Loader } from "lucide-react";
-import MediaService from "../services/mediaService";
+import  mediaService  from "../services/mediaService";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -135,9 +135,9 @@ const PodcastCard = ({ podcast }) => {
       } else {
         await audioRef.current.play();
         setIsPlaying(true);
-
+        
         // Incrémenter le compteur seulement au début de la lecture
-        await MediaService.incrementPodcastListens(podcast.id);
+        await mediaService.incrementPodcastListens(podcast.id);
       }
     } catch (error) {
       console.error('Erreur de lecture:', error);
@@ -153,11 +153,11 @@ const PodcastCard = ({ podcast }) => {
       {/* Player audio caché */}
       <audio
         ref={audioRef}
-        src={`http://localhost:3001${podcast.audioUrl}`}
+        src={podcast.audioUrl} // URL directe Supabase
         onEnded={handleEnded}
         preload="metadata"
       />
-
+      
       <div className="relative">
         <img
           src={podcast.imageUrl}
@@ -166,8 +166,9 @@ const PodcastCard = ({ podcast }) => {
         />
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
-            className={`p-4 rounded-full transition-all duration-300 transform hover:scale-110 ${isPlaying ? 'bg-red-500' : 'bg-blue-600'
-              } text-white`}
+            className={`p-4 rounded-full transition-all duration-300 transform hover:scale-110 ${
+              isPlaying ? 'bg-red-500' : 'bg-blue-600'
+            } text-white`}
             onClick={handlePlay}
           >
             {isPlaying ? (
@@ -205,7 +206,7 @@ const PodcastCard = ({ podcast }) => {
           </div>
         </div>
 
-        <button
+        <button 
           className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group"
           onClick={handlePlay}
         >
@@ -220,31 +221,20 @@ const PodcastCard = ({ podcast }) => {
   );
 };
 
-// Composant Modal de Lecture Vidéo - TAILLE RÉDUITE
+// Composant Modal de Lecture Vidéo
 const VideoModal = ({ video, isOpen, onClose }) => {
   const videoRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasPlayed, setHasPlayed] = useState(false);
 
-  // Fonction pour obtenir l'URL de la vidéo
-  const getVideoUrl = () => {
-    if (!video.videoUrl) return null;
-    const baseUrl = 'http://localhost:3001';
-
-    if (video.videoUrl.startsWith('/media/')) {
-      return `${baseUrl}${video.videoUrl}`;
-    }
-
-    return `${baseUrl}/media/videos/${video.videoUrl}`;
-  };
-
-  const videoUrl = getVideoUrl();
+  // URL directe Supabase
+  const videoUrl = video.videoUrl;
 
   // Incrémenter les vues quand la vidéo commence à jouer
   const handlePlay = async () => {
     if (!hasPlayed) {
       try {
-        await MediaService.incrementVideoViews(video.id);
+        await mediaService.incrementVideoViews(video.id);
         setHasPlayed(true);
       } catch (error) {
         console.error('Erreur incrémentation vues:', error);
@@ -272,30 +262,7 @@ const VideoModal = ({ video, isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4">
-
-      {/* ==================== DÉBUT - CONFIGURATION TAILLE MODAL ==================== */}
-      {/* 
-        🎯 CONFIGURATION DE LA TAILLE DU MODAL :
-        
-        OPTIONS DE LARGEUR (max-w-*) :
-        - max-w-xs  → 320px  (très petit)
-        - max-w-sm  → 384px  (petit)
-        - max-w-md  → 448px  (moyen - RECOMMANDÉ pour votre capture)
-        - max-w-lg  → 512px  (moyen-grand)
-        - max-w-xl  → 576px  (grand)
-        - max-w-2xl → 672px  (très grand)
-        
-        OPTIONS DE HAUTEUR VIDÉO (max-h-*) :
-        - max-h-[250px] → très compact
-        - max-h-[300px] → compact
-        - max-h-[350px] → moyen
-        - max-h-[400px] → grand
-        
-        MODIFIER CES VALEURS POUR AJUSTER LA TAILLE :
-      */}
       <div className="bg-black rounded-2xl shadow-2xl w-full max-w-md h-auto overflow-hidden transform transition-all duration-300">
-        {/* ==================== FIN - CONFIGURATION TAILLE MODAL ==================== */}
-
         {/* En-tête du modal */}
         <div className="flex justify-between items-center p-4 bg-black border-b border-gray-800">
           <div className="flex-1 min-w-0">
@@ -316,23 +283,17 @@ const VideoModal = ({ video, isOpen, onClose }) => {
 
         {/* Conteneur principal */}
         <div className="flex flex-col">
-
-          {/* Lecteur vidéo - Taille réduite */}
+          {/* Lecteur vidéo */}
           <div className="relative bg-black">
             {isLoading && (
               <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
                 <div className="flex items-center gap-2 text-white">
-                  <img src="/loading.gif" alt="" className='w-24 h-24' />
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                   <span className="text-sm">Chargement...</span>
                 </div>
               </div>
             )}
-
-            {/* ==================== DÉBUT - CONFIGURATION TAILLE VIDÉO ==================== */}
-            {/* 
-              🎯 CONFIGURATION DE LA TAILLE DE LA VIDÉO :
-              Modifier max-h-[300px] pour ajuster la hauteur de la vidéo
-            */}
+            
             <video
               ref={videoRef}
               key={videoUrl}
@@ -346,19 +307,18 @@ const VideoModal = ({ video, isOpen, onClose }) => {
               onLoadStart={handleLoadStart}
               onError={() => setIsLoading(false)}
             >
-              {/* ==================== FIN - CONFIGURATION TAILLE VIDÉO ==================== */}
               <source src={videoUrl} type="video/mp4" />
               Votre navigateur ne supporte pas la lecture de vidéos.
             </video>
           </div>
 
-          {/* Informations de la vidéo - Style compact */}
+          {/* Informations de la vidéo */}
           <div className="p-4 bg-black text-white">
             <div className="mb-3">
               <h4 className="text-base font-semibold mb-2">{video.title}</h4>
               <p className="text-gray-300 text-sm leading-relaxed">{video.description}</p>
             </div>
-
+            
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-400">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
@@ -403,7 +363,7 @@ const VideoCard = ({ video }) => {
             alt={video.title}
             className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           />
-
+          
           {/* Overlay de lecture */}
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
@@ -413,7 +373,7 @@ const VideoCard = ({ video }) => {
               <Play className="w-6 h-6" fill="currentColor" />
             </button>
           </div>
-
+          
           <div className="absolute top-3 left-3">
             <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
               {video.category?.name || 'Vidéo'}
@@ -443,7 +403,7 @@ const VideoCard = ({ video }) => {
             </div>
           </div>
 
-          <button
+          <button 
             className="w-full bg-slate-900 text-white py-3 rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group"
             onClick={handlePlayClick}
           >
@@ -456,7 +416,7 @@ const VideoCard = ({ video }) => {
       </div>
 
       {/* Modal de Lecture Vidéo */}
-      <VideoModal
+      <VideoModal 
         video={video}
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
@@ -483,16 +443,16 @@ const Proadcast = () => {
         setError(null);
 
         const [podcastsResponse, videosResponse] = await Promise.all([
-          MediaService.getPodcasts({ limit: 6 }),
-          MediaService.getVideos({ limit: 6 })
+          mediaService.getPodcasts({ limit: 6 }),
+          mediaService.getVideos({ limit: 6 })
         ]);
 
         if (podcastsResponse.success) {
-          setPodcasts(podcastsResponse.data);
+          setPodcasts(podcastsResponse.data || []);
         }
 
         if (videosResponse.success) {
-          setVideos(videosResponse.data);
+          setVideos(videosResponse.data || []);
         }
 
       } catch (err) {
@@ -509,16 +469,16 @@ const Proadcast = () => {
   const openModal = async (type) => {
     try {
       setModalType(type);
-
+      
       if (type === 'podcasts') {
-        const response = await MediaService.getPodcasts({ limit: 50 });
+        const response = await mediaService.getPodcasts({ limit: 50 });
         if (response.success) {
-          setPodcasts(response.data);
+          setPodcasts(response.data || []);
         }
       } else {
-        const response = await MediaService.getVideos({ limit: 50 });
+        const response = await mediaService.getVideos({ limit: 50 });
         if (response.success) {
-          setVideos(response.data);
+          setVideos(response.data || []);
         }
       }
       setModalOpen(true);
@@ -532,7 +492,7 @@ const Proadcast = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center mt-20">
         <div className="flex justify-center items-center py-12">
-          <img src="/loading.gif" alt="" className='w-24 h-24' />
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
           <span className="ml-2 text-gray-600">Chargement des médias...</span>
         </div>
       </div>
@@ -542,7 +502,7 @@ const Proadcast = () => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 py-4 lg:py-12 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="container mx-auto">
-
+        
         {/* En-tête */}
         <SlideIn direction="up">
           <div className="text-center mb-12 flex relative">

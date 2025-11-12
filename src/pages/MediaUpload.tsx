@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Upload, Video, Headphones, X, Loader } from "lucide-react";
-import MediaService from "../services/mediaService";
+import  mediaService from "../services/mediaService";
 
 const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
   const [formData, setFormData] = useState({
@@ -21,7 +21,7 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await MediaService.getCategories(type === 'podcast' ? 'podcast' : 'video');
+        const response = await mediaService.getCategories(type === 'podcast' ? 'podcast' : 'video');
         if (response.success) {
           setCategories(response.data);
         }
@@ -31,49 +31,6 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
     };
     loadCategories();
   }, [type]);
-
-  // 🔥 CORRECTION: Fonction pour récupérer le token
-  const getAuthToken = () => {
-    // Méthode 1: Token depuis auth-token (votre cas)
-    let token = localStorage.getItem('auth-token');
-    console.log('🔐 Token from auth-token:', token);
-
-    // Méthode 2: Depuis les données utilisateur
-    if (!token) {
-      const userData = localStorage.getItem('user-data');
-      if (userData) {
-        try {
-          const user = JSON.parse(userData);
-          if (user.id) {
-            token = `real-jwt-token-${user.id}`;
-            console.log('🔐 Token from user-data:', token);
-          }
-        } catch (e) {
-          console.error('Error parsing user data:', e);
-        }
-      }
-    }
-
-    // Méthode 3: Vérifier d'autres clés possibles
-    if (!token) {
-      const possibleKeys = ['token', 'jwtToken', 'accessToken', 'userToken'];
-      for (const key of possibleKeys) {
-        const value = localStorage.getItem(key);
-        if (value) {
-          token = value;
-          console.log(`🔐 Token from ${key}:`, token);
-          break;
-        }
-      }
-    }
-
-    if (!token) {
-      console.log('❌ No token found in localStorage');
-      console.log('📋 Available keys:', Object.keys(localStorage));
-    }
-
-    return token;
-  };
 
   const handleFileChange = (fileType, event) => {
     const file = event.target.files[0];
@@ -89,17 +46,6 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    // 🔥 CORRECTION: Utiliser la nouvelle fonction pour récupérer le token
-    const token = getAuthToken();
-
-    if (!token) {
-      setError('Vous devez être connecté pour uploader un fichier. Veuillez vous reconnecter.');
-      setLoading(false);
-      return;
-    }
-
-    console.log('🎯 Final token being sent:', token);
 
     // Validation
     if (!formData.title.trim() || !formData.description.trim() || !formData.duration.trim() || !formData.categoryId) {
@@ -131,9 +77,9 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
 
       let response;
       if (type === 'podcast') {
-        response = await MediaService.uploadPodcast(uploadData, token);
+        response = await mediaService.uploadPodcast(uploadData);
       } else {
-        response = await MediaService.uploadVideo(uploadData, token);
+        response = await mediaService.uploadVideo(uploadData);
       }
 
       console.log('📦 Upload response:', response);
@@ -145,7 +91,7 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
       }
     } catch (err) {
       console.error('❌ Upload error:', err);
-      setError(err.message || 'Erreur de connexion au serveur');
+      setError(err.response?.data?.message || err.message || 'Erreur de connexion au serveur');
     } finally {
       setLoading(false);
     }
