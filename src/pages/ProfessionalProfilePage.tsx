@@ -51,7 +51,8 @@ import {
 } from "@/components/ui/tooltip";
 import { professionalProfileService } from "@/services/professionalProfile";
 import { useAuth } from "@/hooks/useAuth";
-
+import { DemandeDevisModal } from "@/components/DemandeDevis";
+import { ContactModal } from "@/components/ContactModal";
 interface ProfessionalProfile {
   id: string;
   firstName: string;
@@ -123,7 +124,6 @@ const ProfessionalProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const [profile, setProfile] = useState<ProfessionalProfile | null>(null);
   const [stats, setStats] = useState<ProfessionalStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,7 +131,9 @@ const ProfessionalProfilePage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isFollowing, setIsFollowing] = useState(false);
   const [copied, setCopied] = useState(false);
-
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [isDemandeModalOpen, setIsDemandeModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   useEffect(() => {
     if (id) {
       loadProfessionalData();
@@ -282,6 +284,7 @@ const ProfessionalProfilePage = () => {
                 {user && user.id !== profile.id && (
                   <Button
                     size="sm"
+                    onClick={() => setIsContactModalOpen(true)}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                   >
                     <MessageCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -513,7 +516,7 @@ const ProfessionalProfilePage = () => {
                       <OverviewTab profile={profile} stats={stats} />
                     </TabsContent>
                     <TabsContent value="services">
-                      <ServicesTab services={profile.services} />
+                      <ServicesTab services={profile.services} setSelectedService={setSelectedService} setIsDemandeModalOpen={setIsDemandeModalOpen} />
                     </TabsContent>
                     <TabsContent value="reviews">
                       <ReviewsTab reviews={profile.Review} />
@@ -528,6 +531,24 @@ const ProfessionalProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {selectedService && (
+        <DemandeDevisModal
+          isOpen={isDemandeModalOpen}
+          onClose={() => {
+            setIsDemandeModalOpen(false);
+            setSelectedService(null);
+          }}
+          prestation={selectedService}
+        />
+      )}
+
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        professional={profile}
+      />
     </TooltipProvider>
   );
 };
@@ -665,75 +686,98 @@ const OverviewTab = ({
 );
 
 // Composant pour l'onglet Services amélioré
+// Composant pour l'onglet Services amélioré
 const ServicesTab = ({
   services,
+  setSelectedService,
+  setIsDemandeModalOpen,
 }: {
   services: ProfessionalProfile["services"];
-}) => (
-  <div className="space-y-6">
-    <div className="flex items-center gap-3 mb-8">
-      <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
-        <Briefcase className="w-6 h-6 text-purple-400" />
-      </div>
-      <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-        Services Proposés
-      </h2>
-    </div>
+  setSelectedService;
+  setIsDemandeModalOpen;
+}) => {
+  const handleServiceClick = (service: any) => {
+    setSelectedService(service.service);
+    setIsDemandeModalOpen(true);
+  };
 
-    {services.length === 0 ? (
-      <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
-        <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-        <p className="text-gray-400 text-lg">
-          Aucun service disponible pour le moment
-        </p>
-      </Card>
-    ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {services.map(({ service }, index) => (
-          <Card
-            key={service.id}
-            className="p-6 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 group"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="font-bold text-white text-xl group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-300">
-                {service.libelle}
-              </h3>
-              {service.price && (
-                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-500/30 backdrop-blur-sm">
-                  <Euro className="w-3 h-3 mr-1" />
-                  {service.price}€
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
+          <Briefcase className="w-6 h-6 text-purple-400" />
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          Services Proposés
+        </h2>
+      </div>
+
+      {services.length === 0 ? (
+        <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
+          <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400 text-lg">
+            Aucun service disponible pour le moment
+          </p>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {services.map(({ service }, index) => (
+            <Card
+              key={service.id}
+              className="p-6 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 group"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="font-bold text-white text-xl group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-300">
+                  {service.libelle}
+                </h3>
+                {service.price && (
+                  <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-500/30 backdrop-blur-sm">
+                    <Euro className="w-3 h-3 mr-1" />
+                    {service.price}€
+                  </Badge>
+                )}
+              </div>
+
+              {service.category && (
+                <Badge
+                  variant="outline"
+                  className="mb-4 text-gray-400 border-gray-600 backdrop-blur-sm"
+                >
+                  {service.category.name}
                 </Badge>
               )}
-            </div>
 
-            {service.category && (
-              <Badge
-                variant="outline"
-                className="mb-4 text-gray-400 border-gray-600 backdrop-blur-sm"
+              {service.description && (
+                <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
+                  {service.description}
+                </p>
+              )}
+
+              {service.duration && (
+                <div className="flex items-center gap-2 text-gray-400 text-sm bg-gray-700/30 rounded-lg p-2 backdrop-blur-sm mb-4">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-medium">
+                    {service.duration} minutes
+                  </span>
+                </div>
+              )}
+
+              {/* Bouton pour ouvrir le modal de demande */}
+              <Button
+                onClick={() => handleServiceClick(service)}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
-                {service.category.name}
-              </Badge>
-            )}
-
-            {service.description && (
-              <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
-                {service.description}
-              </p>
-            )}
-
-            {service.duration && (
-              <div className="flex items-center gap-2 text-gray-400 text-sm bg-gray-700/30 rounded-lg p-2 backdrop-blur-sm">
-                <Clock className="w-4 h-4" />
-                <span className="font-medium">{service.duration} minutes</span>
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
-    )}
-  </div>
-);
+                <FileText className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                Demander un devis
+              </Button>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Composant pour l'onglet Avis amélioré
 const ReviewsTab = ({
