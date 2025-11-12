@@ -79,7 +79,7 @@ export function ProductsTable() {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto"></div>
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
           <p className="text-muted-foreground mt-2">Chargement des produits...</p>
         </div>
       </Card>

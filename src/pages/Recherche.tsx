@@ -50,7 +50,7 @@ const PositionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
-const Recherche = ({onClick}: {onClick?: () => void}) => {
+const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -774,50 +774,51 @@ const Recherche = ({onClick}: {onClick?: () => void}) => {
           {historyOpen && (
             <>
               <div
-                className="fixed inset-0 bg-black/10 backdrop-blur-sm z-40"
+                className="fixed inset-0 bg-black/10 w-screen h-screen overflow-hidden backdrop-blur-sm z-50"
                 onClick={() => setHistoryOpen(false)}
               />
-              <aside className="absolute z-50 h-96 w-1/2 bg-white border border-gray-200 shadow-2xl rounded-xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">                <div className="h-full flex flex-col">
-                <div className="px-4 py-3 border-b flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <History className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-semibold text-gray-800">Historique</span>
+              <aside className="absolute z-50 h-96 w-1/2 bg-white border border-gray-200 rounded-b-xl  left-1/2 top-0 transform -translate-x-1/2">
+                <div className="h-full flex flex-col">
+                  <div className="px-4 py-3 border-b flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <History className="h-4 w-4 text-gray-700" />
+                      <span className="text-sm font-semibold text-gray-800">Historique</span>
+                    </div>
+                    <button
+                      className="text-xs text-red-600 hover:underline"
+                      onClick={() => { setSearchHistory([]); saveHistory([]); }}
+                    >
+                      Vider
+                    </button>
                   </div>
-                  <button
-                    className="text-xs text-red-600 hover:underline"
-                    onClick={() => { setSearchHistory([]); saveHistory([]); }}
-                  >
-                    Vider
-                  </button>
+                  <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
+                    {searchHistory.length === 0 ? (
+                      <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
+                    ) : (
+                      <ul className="divide-y">
+                        {searchHistory.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
+                            onClick={() => {
+                              setQuery(item.q);
+                              setHistoryOpen(false);
+                              setStage('loading');
+                              runSearch(item.q);
+                            }}
+                          >
+                            <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                              {item.q}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(item.date).toLocaleString()}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
-                  {searchHistory.length === 0 ? (
-                    <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
-                  ) : (
-                    <ul className="divide-y">
-                      {searchHistory.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
-                          onClick={() => {
-                            setQuery(item.q);
-                            setHistoryOpen(false);
-                            setStage('loading');
-                            runSearch(item.q);
-                          }}
-                        >
-                          <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                            {item.q}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {new Date(item.date).toLocaleString()}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
               </aside>
             </>
           )}
@@ -839,7 +840,11 @@ const Recherche = ({onClick}: {onClick?: () => void}) => {
 
             {stage === "loading" && (
               <div className="py-20 flex flex-col items-center justify-center">
-                <LoadingSpinner size="lg" text="Recherche en cours" />
+                {/* <LoadingSpinner size="lg" text="Recherche en cours" /> */}
+                <img src="/chatbot.gif" alt="" className="w-56 h-56" />
+                <div className="text-lg text-gray-700 mt-2">
+                  Recherche en cours...
+                </div>
               </div>
             )}
 

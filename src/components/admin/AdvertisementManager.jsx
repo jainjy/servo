@@ -857,7 +857,7 @@ const AdvertisementManager = () => {
         <CardContent>
           {loading ? (
             <div className="text-center py-12">
-              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
               <p className="text-muted-foreground">Chargement des publicités...</p>
             </div>
           ) : filteredAdvertisements.length === 0 ? (

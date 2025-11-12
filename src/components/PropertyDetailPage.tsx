@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,23 +102,27 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
 
-  const handleContact = () => {
+  const handleContact = useCallback(() => {
     if (property.owner.phone) {
       window.open(`tel:${property.owner.phone}`, "_self");
     }
-  };
+  }, [property.owner.phone]);
 
-  const handleEmail = () => {
+  const handleEmail = useCallback(() => {
     window.open(
       `mailto:${property.owner.email}?subject=Demande d'information - ${property.title}`,
       "_self"
     );
-  };
+  }, [property.owner.email, property.title]);
 
-  const handleScheduleVisit = () => {
+  const handleScheduleVisit = useCallback(() => {
     // Ouvrir le modal de demande de visite
     setIsVisitModalOpen(true);
-  };
+  }, []);
+
+  const handleCloseVisitModal = useCallback(() => {
+    setIsVisitModalOpen(false);
+  }, []);
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -690,10 +694,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
       {/* Modal de demande de visite */}
       <ModalDemandeVisite
         open={isVisitModalOpen}
-        onClose={() => setIsVisitModalOpen(false)}
+        onClose={handleCloseVisitModal}
         property={property}
         onSuccess={() => {
-          setIsVisitModalOpen(false);
+          handleCloseVisitModal();
         }}
       />
     </div>

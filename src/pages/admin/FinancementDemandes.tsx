@@ -63,10 +63,10 @@ const FinancementDemandes: React.FC = () => {
   const [demandes, setDemandes] = useState<FinancementDemande[]>([]);
   const [selectedDemande, setSelectedDemande] = useState<FinancementDemande | null>(null);
   const [detailOpen, setDetailOpen] = useState<boolean>(false);
-  const [notification, setNotification] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ 
-    show: false, 
-    message: '', 
-    type: 'success' 
+  const [notification, setNotification] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+    show: false,
+    message: '',
+    type: 'success'
   });
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
@@ -100,10 +100,10 @@ const FinancementDemandes: React.FC = () => {
 
       const response = await financementAPI.getAllDemandes(params);
       const data = response.data;
-      
+
       setDemandes(data.demandes);
       setPagination(data.pagination);
-      
+
       // Calcul des statistiques
       calculateStats(data.demandes);
     } catch (error: any) {
@@ -253,7 +253,7 @@ const FinancementDemandes: React.FC = () => {
       )}
 
       {/* En-tête principal */}
-      <div style={{ 
+      <div style={{
         backgroundColor: 'white',
         padding: '24px',
         borderRadius: '12px',
@@ -264,16 +264,16 @@ const FinancementDemandes: React.FC = () => {
         alignItems: 'center'
       }}>
         <div>
-          <h1 style={{ 
-            fontSize: '24px', 
-            fontWeight: '700', 
+          <h1 style={{
+            fontSize: '24px',
+            fontWeight: '700',
             color: '#2c3e50',
             marginBottom: '8px'
           }}>
             Demandes de financement
           </h1>
-          <div style={{ 
-            fontSize: '14px', 
+          <div style={{
+            fontSize: '14px',
             color: '#64748b',
             display: 'flex',
             alignItems: 'center',
@@ -295,8 +295,8 @@ const FinancementDemandes: React.FC = () => {
       </div>
 
       {/* Cartes de statistiques */}
-      <div style={{ 
-        display: 'grid', 
+      <div style={{
+        display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '16px',
         marginBottom: '24px'
@@ -311,7 +311,7 @@ const FinancementDemandes: React.FC = () => {
           <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>Total</div>
           <div style={{ fontSize: '28px', fontWeight: '700', color: '#2c3e50' }}>{stats.total}</div>
         </div>
-        
+
         <div style={{
           backgroundColor: 'white',
           padding: '20px',
@@ -322,7 +322,7 @@ const FinancementDemandes: React.FC = () => {
           <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>En attente</div>
           <div style={{ fontSize: '28px', fontWeight: '700', color: '#f59e0b' }}>{stats.pending}</div>
         </div>
-        
+
         <div style={{
           backgroundColor: 'white',
           padding: '20px',
@@ -333,7 +333,7 @@ const FinancementDemandes: React.FC = () => {
           <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>En traitement</div>
           <div style={{ fontSize: '28px', fontWeight: '700', color: '#3b82f6' }}>{stats.processing}</div>
         </div>
-        
+
         <div style={{
           backgroundColor: 'white',
           padding: '20px',
@@ -347,7 +347,7 @@ const FinancementDemandes: React.FC = () => {
       </div>
 
       {/* Barre de recherche et filtres */}
-      <div style={{ 
+      <div style={{
         backgroundColor: 'white',
         padding: '20px',
         borderRadius: '12px',
@@ -379,10 +379,10 @@ const FinancementDemandes: React.FC = () => {
 
           {/* Filtres */}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <select 
+            <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              style={{ 
+              style={{
                 padding: '12px 16px',
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
@@ -399,10 +399,10 @@ const FinancementDemandes: React.FC = () => {
               <option value="rejected">Rejeté</option>
             </select>
 
-            <select 
+            <select
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
-              style={{ 
+              style={{
                 padding: '12px 16px',
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
@@ -422,7 +422,7 @@ const FinancementDemandes: React.FC = () => {
       </div>
 
       {/* Tableau des demandes */}
-      <div style={{ 
+      <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
@@ -435,9 +435,9 @@ const FinancementDemandes: React.FC = () => {
           borderBottom: '1px solid #e2e8f0',
           backgroundColor: '#f8fafc'
         }}>
-          <h3 style={{ 
-            fontSize: '18px', 
-            fontWeight: '600', 
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
             color: '#2c3e50',
             margin: 0
           }}>
@@ -447,64 +447,64 @@ const FinancementDemandes: React.FC = () => {
 
         {/* Corps du tableau */}
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ 
-            width: '100%', 
+          <table style={{
+            width: '100%',
             borderCollapse: 'collapse',
             minWidth: '1000px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#f8fafc' }}>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#475569'
                 }}>Client</th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#475569'
                 }}>Contact</th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#475569'
                 }}>Type</th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#475569'
                 }}>Montant</th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#475569'
                 }}>Date</th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   color: '#475569'
                 }}>Statut</th>
-                <th style={{ 
-                  padding: '16px 20px', 
-                  textAlign: 'left', 
+                <th style={{
+                  padding: '16px 20px',
+                  textAlign: 'left',
                   borderBottom: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
@@ -516,20 +516,13 @@ const FinancementDemandes: React.FC = () => {
               {loading ? (
                 <tr>
                   <td colSpan={7} style={{ padding: '48px', textAlign: 'center' }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
                       gap: '12px'
                     }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '3px solid #e2e8f0',
-                        borderTop: '3px solid #3b82f6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
+                      <img src="/loading.gif" alt="" className='w-24 h-24' />
                       <div style={{ color: '#64748b', fontSize: '14px' }}>
                         Chargement des demandes...
                       </div>
@@ -538,9 +531,9 @@ const FinancementDemandes: React.FC = () => {
                 </tr>
               ) : filteredDemandes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ 
-                    padding: '48px', 
-                    textAlign: 'center', 
+                  <td colSpan={7} style={{
+                    padding: '48px',
+                    textAlign: 'center',
                     color: '#64748b',
                     fontSize: '14px'
                   }}>
@@ -549,7 +542,7 @@ const FinancementDemandes: React.FC = () => {
                 </tr>
               ) : (
                 filteredDemandes.map((demande) => (
-                  <tr key={demande.id} style={{ 
+                  <tr key={demande.id} style={{
                     borderBottom: '1px solid #f1f5f9',
                     transition: 'background-color 0.2s'
                   }} onMouseEnter={(e) => {
@@ -606,7 +599,7 @@ const FinancementDemandes: React.FC = () => {
                     <td style={{ padding: '16px 20px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', minWidth: '120px' }}>
                         {/* Bouton Voir - en haut */}
-                        <button 
+                        <button
                           onClick={() => viewDetails(demande)}
                           style={{
                             padding: '6px 12px',
@@ -630,7 +623,7 @@ const FinancementDemandes: React.FC = () => {
                         >
                           Voir
                         </button>
-                        
+
                         {/* Sélecteur de statut - au milieu */}
                         <select
                           value={demande.status}
@@ -653,7 +646,7 @@ const FinancementDemandes: React.FC = () => {
                         </select>
 
                         {/* Bouton Supprimer - en bas */}
-                        <button 
+                        <button
                           onClick={() => handleDelete(demande.id)}
                           style={{
                             padding: '6px 12px',
@@ -728,7 +721,7 @@ const FinancementDemandes: React.FC = () => {
                 <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#2c3e50' }}>
                   Détails de la demande
                 </h2>
-                <button 
+                <button
                   onClick={closeDetails}
                   style={{
                     background: 'none',
@@ -741,7 +734,7 @@ const FinancementDemandes: React.FC = () => {
                   ×
                 </button>
               </div>
-              
+
               <div style={{ marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#2c3e50', marginBottom: '12px' }}>
                   Informations client
@@ -796,7 +789,7 @@ const FinancementDemandes: React.FC = () => {
               )}
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button 
+                <button
                   onClick={closeDetails}
                   style={{
                     padding: '10px 20px',

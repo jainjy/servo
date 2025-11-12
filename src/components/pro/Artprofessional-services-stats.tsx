@@ -42,7 +42,9 @@ export function ArtProfessionalServicesStats() {
     fetchStats();
   }, []);
 
-  if (loading) return <p>Chargement des données...</p>;
+  if (loading) return <div className="flex flex-col gap-4">
+  <img src="/loading.gif" alt="" className='w-24 h-24'/>
+    Chargement des données...</div>;
   if (error) return <p>{error}</p>;
 
 //   return (

@@ -62,11 +62,11 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
   });
 
   const handleCategoryClick = (category: EquipementCategory) => {
-     if (onCategoryClick) {
+    if (onCategoryClick) {
       onCategoryClick(category.name, "équipement");
     }
     navigate(`/produits/categorie/${encodeURIComponent(category.name)}`, {
-     state: {
+      state: {
         name: category.name,
         description: category.description,
         image: category.image,
@@ -121,7 +121,7 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
               </button>
             )}
           </div>
-          
+
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
@@ -164,7 +164,7 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
       {localSearch && (
         <div className="mb-6 animate-fade-in">
           <p className="text-gray-600">
-            {sortedCategories.length > 0 
+            {sortedCategories.length > 0
               ? `${sortedCategories.length} résultat(s) pour "${localSearch}"`
               : `Aucun résultat pour "${localSearch}"`
             }
@@ -174,8 +174,8 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
 
       {/* Loading */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0052FF] mx-auto"></div>
+        <div className=" py-12 flex flex-col justify-center items-center">
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
           <p className="text-gray-500 mt-4">Chargement des équipements...</p>
         </div>
       ) : (

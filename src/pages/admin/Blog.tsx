@@ -9,15 +9,15 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Calendar, 
-  User, 
-  Clock, 
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Calendar,
+  User,
+  Clock,
   Filter,
   Upload,
   Image,
@@ -28,7 +28,7 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
-import  AuthService  from "@/services/authService";
+import AuthService from "@/services/authService";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
@@ -91,8 +91,7 @@ const GestionBlog = () => {
     } catch (error: any) {
       console.error('Erreur lors du chargement des articles:', error);
       toast.error(
-        `Erreur lors du chargement des articles: ${
-          error.response?.data?.error || error.message
+        `Erreur lors du chargement des articles: ${error.response?.data?.error || error.message
         }`
       );
     } finally {
@@ -103,8 +102,8 @@ const GestionBlog = () => {
   const filteredArticles = useMemo(() => {
     return articles.filter(article => {
       const matchesSearch = article.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                article.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+        article.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory = selectedCategory === "Toutes" || article.categorie === selectedCategory;
       const matchesStatut = selectedStatut === "Tous" || article.statut === selectedStatut;
       return matchesSearch && matchesCategory && matchesStatut;
@@ -116,13 +115,13 @@ const GestionBlog = () => {
       setUploading(true);
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await api.post('/upload/image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      
+
       if (response.data.success) {
         setFormData(prev => ({ ...prev, image: response.data.url }));
         return response.data.url;
@@ -132,8 +131,7 @@ const GestionBlog = () => {
     } catch (error: any) {
       console.error('Erreur upload:', error);
       toast.error(
-        `Erreur lors de l'upload de l'image: ${
-          error.response?.data?.error || error.message
+        `Erreur lors de l'upload de l'image: ${error.response?.data?.error || error.message
         }`
       );
     } finally {
@@ -188,8 +186,7 @@ const GestionBlog = () => {
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error);
       toast.error(
-        `Erreur lors de la suppression: ${
-          error.response?.data?.error || error.message
+        `Erreur lors de la suppression: ${error.response?.data?.error || error.message
         }`
       );
     }
@@ -208,15 +205,14 @@ const GestionBlog = () => {
       } else {
         await api.post('/articles', payload);
       }
-      
+
       await fetchArticles();
       setIsDialogOpen(false);
       setCurrentArticle(null);
     } catch (error: any) {
       console.error('Erreur lors de la sauvegarde:', error);
       toast.error(
-        `Erreur lors de la sauvegarde: ${
-          error.response?.data?.error || error.message
+        `Erreur lors de la sauvegarde: ${error.response?.data?.error || error.message
         }`
       );
     }
@@ -231,13 +227,12 @@ const GestionBlog = () => {
         ...article,
         statut: newStatut
       });
-      
+
       await fetchArticles();
     } catch (error: any) {
       console.error('Erreur lors du changement de statut:', error);
       toast.error(
-        `Erreur lors du changement de statut: ${
-          error.response?.data?.error || error.message
+        `Erreur lors du changement de statut: ${error.response?.data?.error || error.message
         }`
       );
     }
@@ -272,7 +267,7 @@ const GestionBlog = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
           <p className="mt-4 text-muted-foreground">Chargement des articles...</p>
         </div>
       </div>
@@ -294,7 +289,7 @@ const GestionBlog = () => {
                 Créez, modifiez et gérez vos articles de blog
               </p>
             </div>
-            <Button 
+            <Button
               onClick={handleCreateArticle}
               className="bg-white text-primary hover:bg-white/90 px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
             >
@@ -376,11 +371,11 @@ const GestionBlog = () => {
                 <div key={article.id} className="p-6 hover:bg-muted/30 transition-colors duration-200">
                   <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Image miniature */}
-                    <div 
+                    <div
                       className="w-20 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex-shrink-0 bg-cover bg-center"
                       style={{ backgroundImage: `url(${article.image})` }}
                     />
-                    
+
                     {/* Contenu */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
@@ -396,11 +391,11 @@ const GestionBlog = () => {
                           </span>
                         </div>
                       </div>
-                      
+
                       <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
                         {article.description}
                       </p>
-                      
+
                       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
@@ -419,7 +414,7 @@ const GestionBlog = () => {
                           {article.tempsLecture}
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-wrap gap-1 mt-2">
                         {article.tags.slice(0, 3).map((tag, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
@@ -462,8 +457,8 @@ const GestionBlog = () => {
                   <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Aucun article trouvé</h3>
                   <p className="text-muted-foreground mb-6">
-                    {articles.length === 0 
-                      ? "Commencez par créer votre premier article" 
+                    {articles.length === 0
+                      ? "Commencez par créer votre premier article"
                       : "Aucun article ne correspond à vos critères de recherche."
                     }
                   </p>
@@ -535,7 +530,7 @@ const GestionBlog = () => {
               {/* Image */}
               <div className="space-y-4">
                 <Label>Image de l'article</Label>
-                <div 
+                <div
                   className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
@@ -543,9 +538,9 @@ const GestionBlog = () => {
                 >
                   {formData.image ? (
                     <div className="space-y-2">
-                      <img 
-                        src={formData.image} 
-                        alt="Preview" 
+                      <img
+                        src={formData.image}
+                        alt="Preview"
                         className="w-full h-32 object-cover rounded-md mx-auto"
                       />
                       <p className="text-sm text-muted-foreground">
@@ -560,9 +555,9 @@ const GestionBlog = () => {
                       </p>
                     </>
                   )}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     disabled={uploading}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -591,8 +586,8 @@ const GestionBlog = () => {
               {/* Catégorie */}
               <div className="space-y-2">
                 <Label htmlFor="categorie">Catégorie *</Label>
-                <Select 
-                  value={formData.categorie} 
+                <Select
+                  value={formData.categorie}
                   onValueChange={(value) => setFormData({ ...formData, categorie: value })}
                 >
                   <SelectTrigger>
@@ -625,8 +620,8 @@ const GestionBlog = () => {
               {/* Statut */}
               <div className="space-y-2">
                 <Label htmlFor="statut">Statut</Label>
-                <Select 
-                  value={formData.statut} 
+                <Select
+                  value={formData.statut}
                   onValueChange={(value: any) => setFormData({ ...formData, statut: value })}
                 >
                   <SelectTrigger>
@@ -678,7 +673,7 @@ const GestionBlog = () => {
               Confirmer la suppression
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="py-4">
             <p>
               Êtes-vous sûr de vouloir supprimer l'article <strong>"{currentArticle?.titre}"</strong> ?

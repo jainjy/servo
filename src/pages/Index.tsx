@@ -17,7 +17,7 @@ const RecommendationsSection = lazy(() => import("@/components/RecommendationsSe
 const LoadingFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <img src="/loading.gif" alt="" className='w-24 h-24' />
       <p className="text-gray-600">Chargement...</p>
     </div>
   </div>
@@ -85,7 +85,7 @@ const Index = () => {
           {/* Section biens immobiliers */}
           <>
             <div className="text-center mt-6 flex items-center justify-between">
-              <h2 className="text-4xl font-bold ml-8 text-gray-700 my-6">Nos biens immobiliers</h2>
+              <h2 className="text-3xl font-bold ml-8 text-slate-900 my-6">Nos biens immobiliers</h2>
               {/* Voir plus button */}
 
               <Button

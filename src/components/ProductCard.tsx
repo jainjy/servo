@@ -51,7 +51,7 @@ const CategorieProduits = () => {
     return (
       <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
           <p className="mt-4 text-gray-600">Chargement des produits...</p>
         </div>
       </div>

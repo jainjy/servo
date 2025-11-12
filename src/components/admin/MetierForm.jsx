@@ -169,10 +169,9 @@ const MetierForm = ({
                 disabled={loading}
                 className={`
                   w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                  ${
-                    errors.libelle
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
+                  ${errors.libelle
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
                   }
                   ${loading ? "bg-gray-100 cursor-not-allowed" : ""}
                   transition-colors duration-200
@@ -229,25 +228,8 @@ const MetierForm = ({
               </label>
               {servicesLoading ? (
                 <div className="flex items-center gap-2 text-gray-600">
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <img src="/loading.gif" alt="" className='w-24 h-24' />
+
                   Chargement des services...
                 </div>
               ) : servicesError ? (
@@ -261,10 +243,9 @@ const MetierForm = ({
                   disabled={loading || servicesLoading}
                   className={`
                     w-full h-32 px-3 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                    ${
-                      loading || servicesLoading
-                        ? "bg-gray-100 cursor-not-allowed"
-                        : "border-gray-300"
+                    ${loading || servicesLoading
+                      ? "bg-gray-100 cursor-not-allowed"
+                      : "border-gray-300"
                     }
                     transition-colors duration-200
                   `}

@@ -135,7 +135,7 @@ const PodcastCard = ({ podcast }) => {
       } else {
         await audioRef.current.play();
         setIsPlaying(true);
-        
+
         // Incrémenter le compteur seulement au début de la lecture
         await MediaService.incrementPodcastListens(podcast.id);
       }
@@ -157,7 +157,7 @@ const PodcastCard = ({ podcast }) => {
         onEnded={handleEnded}
         preload="metadata"
       />
-      
+
       <div className="relative">
         <img
           src={podcast.imageUrl}
@@ -166,9 +166,8 @@ const PodcastCard = ({ podcast }) => {
         />
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
-            className={`p-4 rounded-full transition-all duration-300 transform hover:scale-110 ${
-              isPlaying ? 'bg-red-500' : 'bg-blue-600'
-            } text-white`}
+            className={`p-4 rounded-full transition-all duration-300 transform hover:scale-110 ${isPlaying ? 'bg-red-500' : 'bg-blue-600'
+              } text-white`}
             onClick={handlePlay}
           >
             {isPlaying ? (
@@ -206,7 +205,7 @@ const PodcastCard = ({ podcast }) => {
           </div>
         </div>
 
-        <button 
+        <button
           className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group"
           onClick={handlePlay}
         >
@@ -231,11 +230,11 @@ const VideoModal = ({ video, isOpen, onClose }) => {
   const getVideoUrl = () => {
     if (!video.videoUrl) return null;
     const baseUrl = 'http://localhost:3001';
-    
+
     if (video.videoUrl.startsWith('/media/')) {
       return `${baseUrl}${video.videoUrl}`;
     }
-    
+
     return `${baseUrl}/media/videos/${video.videoUrl}`;
   };
 
@@ -273,7 +272,7 @@ const VideoModal = ({ video, isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4">
-      
+
       {/* ==================== DÉBUT - CONFIGURATION TAILLE MODAL ==================== */}
       {/* 
         🎯 CONFIGURATION DE LA TAILLE DU MODAL :
@@ -295,8 +294,8 @@ const VideoModal = ({ video, isOpen, onClose }) => {
         MODIFIER CES VALEURS POUR AJUSTER LA TAILLE :
       */}
       <div className="bg-black rounded-2xl shadow-2xl w-full max-w-md h-auto overflow-hidden transform transition-all duration-300">
-      {/* ==================== FIN - CONFIGURATION TAILLE MODAL ==================== */}
-        
+        {/* ==================== FIN - CONFIGURATION TAILLE MODAL ==================== */}
+
         {/* En-tête du modal */}
         <div className="flex justify-between items-center p-4 bg-black border-b border-gray-800">
           <div className="flex-1 min-w-0">
@@ -317,18 +316,18 @@ const VideoModal = ({ video, isOpen, onClose }) => {
 
         {/* Conteneur principal */}
         <div className="flex flex-col">
-          
+
           {/* Lecteur vidéo - Taille réduite */}
           <div className="relative bg-black">
             {isLoading && (
               <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
                 <div className="flex items-center gap-2 text-white">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <img src="/loading.gif" alt="" className='w-24 h-24' />
                   <span className="text-sm">Chargement...</span>
                 </div>
               </div>
             )}
-            
+
             {/* ==================== DÉBUT - CONFIGURATION TAILLE VIDÉO ==================== */}
             {/* 
               🎯 CONFIGURATION DE LA TAILLE DE LA VIDÉO :
@@ -347,7 +346,7 @@ const VideoModal = ({ video, isOpen, onClose }) => {
               onLoadStart={handleLoadStart}
               onError={() => setIsLoading(false)}
             >
-            {/* ==================== FIN - CONFIGURATION TAILLE VIDÉO ==================== */}
+              {/* ==================== FIN - CONFIGURATION TAILLE VIDÉO ==================== */}
               <source src={videoUrl} type="video/mp4" />
               Votre navigateur ne supporte pas la lecture de vidéos.
             </video>
@@ -359,7 +358,7 @@ const VideoModal = ({ video, isOpen, onClose }) => {
               <h4 className="text-base font-semibold mb-2">{video.title}</h4>
               <p className="text-gray-300 text-sm leading-relaxed">{video.description}</p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-400">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
@@ -404,7 +403,7 @@ const VideoCard = ({ video }) => {
             alt={video.title}
             className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          
+
           {/* Overlay de lecture */}
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
@@ -414,7 +413,7 @@ const VideoCard = ({ video }) => {
               <Play className="w-6 h-6" fill="currentColor" />
             </button>
           </div>
-          
+
           <div className="absolute top-3 left-3">
             <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
               {video.category?.name || 'Vidéo'}
@@ -444,7 +443,7 @@ const VideoCard = ({ video }) => {
             </div>
           </div>
 
-          <button 
+          <button
             className="w-full bg-slate-900 text-white py-3 rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group"
             onClick={handlePlayClick}
           >
@@ -457,7 +456,7 @@ const VideoCard = ({ video }) => {
       </div>
 
       {/* Modal de Lecture Vidéo */}
-      <VideoModal 
+      <VideoModal
         video={video}
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
@@ -510,7 +509,7 @@ const Proadcast = () => {
   const openModal = async (type) => {
     try {
       setModalType(type);
-      
+
       if (type === 'podcasts') {
         const response = await MediaService.getPodcasts({ limit: 50 });
         if (response.success) {
@@ -533,7 +532,7 @@ const Proadcast = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center mt-20">
         <div className="flex justify-center items-center py-12">
-          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
           <span className="ml-2 text-gray-600">Chargement des médias...</span>
         </div>
       </div>
@@ -543,7 +542,7 @@ const Proadcast = () => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 py-4 lg:py-12 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="container mx-auto">
-        
+
         {/* En-tête */}
         <SlideIn direction="up">
           <div className="text-center mb-12 flex relative">

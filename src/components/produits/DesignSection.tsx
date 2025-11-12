@@ -102,7 +102,7 @@ const DesignSection = ({ searchQuery, onCategoryClick }: DesignSectionProps) => 
             </p>
           </div>
         </div>
-        
+
         <div className="text-center py-12">
           <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-600 mb-2">
@@ -156,7 +156,7 @@ const DesignSection = ({ searchQuery, onCategoryClick }: DesignSectionProps) => 
               </button>
             )}
           </div>
-          
+
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
@@ -199,7 +199,7 @@ const DesignSection = ({ searchQuery, onCategoryClick }: DesignSectionProps) => 
       {localSearch && (
         <div className="mb-6 animate-fade-in">
           <p className="text-gray-600">
-            {sortedCategories.length > 0 
+            {sortedCategories.length > 0
               ? `${sortedCategories.length} résultat(s) pour "${localSearch}"`
               : `Aucun résultat pour "${localSearch}"`
             }
@@ -209,8 +209,8 @@ const DesignSection = ({ searchQuery, onCategoryClick }: DesignSectionProps) => 
 
       {/* Loading */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0052FF] mx-auto"></div>
+        <div className=" py-12 flex flex-col justify-center items-center">
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
           <p className="text-gray-500 mt-4">Chargement des designs...</p>
         </div>
       ) : (

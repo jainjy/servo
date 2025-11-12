@@ -62,7 +62,7 @@ export function ServicesTable() {
     (service) =>
       service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       service.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.metiers.some(metier => 
+      service.metiers.some(metier =>
         metier.libelle.toLowerCase().includes(searchQuery.toLowerCase())
       )
   )
@@ -97,13 +97,14 @@ export function ServicesTable() {
     const totalVendors = service.vendors.length
     const avgRating = service.vendors.reduce((acc, vendor) => acc + vendor.rating, 0) / totalVendors || 0
     const totalBookings = service.vendors.reduce((acc, vendor) => acc + vendor.bookings, 0)
-    
+
     return { totalVendors, avgRating, totalBookings }
   }
 
   if (loading) {
     return (
-      <Card className="bg-card border-border p-6">
+      <Card className="bg-card flex flex-col gap-4 border-border p-6">
+        <img src="/loading.gif" alt="" className='w-24 h-24' />
         <div className="text-center text-muted-foreground">Chargement des services...</div>
       </Card>
     )
@@ -139,7 +140,7 @@ export function ServicesTable() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredServices.map((service) => {
                 const stats = getVendorStats(service)
-                
+
                 return (
                   <Card key={service.id} className="border-border bg-card p-6 hover:shadow-lg transition-shadow">
                     <div className="flex items-start justify-between mb-4">
@@ -151,8 +152,8 @@ export function ServicesTable() {
                           <Badge variant="outline" className="border-border text-foreground text-xs">
                             {service.category || "Non catégorisé"}
                           </Badge>
-                          <Badge 
-                            variant="secondary" 
+                          <Badge
+                            variant="secondary"
                             className={statusColors[service.status as keyof typeof statusColors]}
                           >
                             {service.status === "active" ? "Actif" : "Inactif"}
@@ -224,7 +225,7 @@ export function ServicesTable() {
                         <Eye className="h-4 w-4 mr-2" />
                         Voir
                       </Button>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -253,10 +254,10 @@ export function ServicesTable() {
         </div>
       </Card>
 
-      <ServiceModal 
-        open={editModalOpen} 
-        onOpenChange={setEditModalOpen} 
-        service={selectedService} 
+      <ServiceModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        service={selectedService}
         mode="edit"
         onServiceUpdated={fetchServices}
       />

@@ -215,7 +215,7 @@ const BatimentsLayout = () => {
     return (
       <div className="container mx-auto px-4 py-8 mt-20">
         <div className="flex flex-col justify-center items-center h-64">
-          <Loader2 className="h-12 w-12 text-slate-900 animate-spin mx-auto" />
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
           <div className="text-md">Chargement des services...</div>
         </div>
       </div>
