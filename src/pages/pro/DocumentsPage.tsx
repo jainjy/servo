@@ -1,3 +1,4 @@
+// pages/documents.jsx
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,330 +36,12 @@ import {
   FileSignature,
   Banknote,
 } from "lucide-react";
-
-// Types de documents
-const TYPES_DOCUMENTS = {
-  ASSURANCE: {
-    label: "Assurance",
-    color: "bg-blue-100 text-blue-800",
-    icon: Shield,
-  },
-  DIPLOME: {
-    label: "Diplôme",
-    color: "bg-green-100 text-green-800",
-    icon: Award,
-  },
-  CERTIFICATION: {
-    label: "Certification",
-    color: "bg-purple-100 text-purple-800",
-    icon: FileCheck,
-  },
-  CONTRAT: {
-    label: "Contrat",
-    color: "bg-orange-100 text-orange-800",
-    icon: FileText,
-  },
-  CGV: { label: "CGV/CGU", color: "bg-red-100 text-red-800", icon: Shield },
-  ARCHIVE: {
-    label: "Archive",
-    color: "bg-gray-100 text-gray-800",
-    icon: Archive,
-  },
-  IMMOBILIER: {
-    label: "Immobilier",
-    color: "bg-indigo-100 text-indigo-800",
-    icon: Home,
-  },
-};
-
-const STATUT_DOCUMENT = {
-  VALIDE: { label: "Valide", color: "bg-green-100 text-green-800" },
-  EXPIRANT: { label: "Expirant", color: "bg-yellow-100 text-yellow-800" },
-  EXPIRE: { label: "Expiré", color: "bg-red-100 text-red-800" },
-  EN_ATTENTE: { label: "En attente", color: "bg-blue-100 text-blue-800" },
-};
-
-// Données initiales
-const documentsInitiaux = [
-  {
-    id: 1,
-    nom: "Assurance Responsabilité Civile Professionnelle",
-    type: "ASSURANCE",
-    dateExpiration: "2024-12-31",
-    dateUpload: "2024-01-15",
-    statut: "VALIDE",
-    taille: "2.4 MB",
-    format: "PDF",
-    url: "/documents/assurance-rcp.pdf",
-    tags: ["Obligatoire", "Annuel"],
-  },
-  {
-    id: 2,
-    nom: "Diplôme Agent Immobilier",
-    type: "DIPLOME",
-    dateExpiration: null,
-    dateUpload: "2023-06-20",
-    statut: "VALIDE",
-    taille: "1.8 MB",
-    format: "PDF",
-    url: "/documents/diplome-agent.pdf",
-    tags: ["Formation", "Certifié"],
-  },
-  {
-    id: 3,
-    nom: "Certification AMF",
-    type: "CERTIFICATION",
-    dateExpiration: "2024-06-30",
-    dateUpload: "2023-12-15",
-    statut: "EXPIRANT",
-    taille: "3.1 MB",
-    format: "PDF",
-    url: "/documents/certification-amf.pdf",
-    tags: ["Réglementaire", "Annuel"],
-  },
-  {
-    id: 4,
-    nom: "Contrat de Mandat Exclusif",
-    type: "CONTRAT",
-    dateExpiration: null,
-    dateUpload: "2024-01-10",
-    statut: "VALIDE",
-    taille: "1.2 MB",
-    format: "DOCX",
-    url: "/documents/mandat-exclusif.docx",
-    tags: ["Modèle", "Vente"],
-  },
-  {
-    id: 5,
-    nom: "Conditions Générales de Vente",
-    type: "CGV",
-    dateExpiration: null,
-    dateUpload: "2024-01-05",
-    statut: "VALIDE",
-    taille: "0.9 MB",
-    format: "PDF",
-    url: "/documents/cgv.pdf",
-    tags: ["Légal", "Standard"],
-  },
-  {
-    id: 6,
-    nom: "Revenu Foncier 2023",
-    type: "IMMOBILIER",
-    dateExpiration: null,
-    dateUpload: "2024-03-01",
-    statut: "VALIDE",
-    taille: "1.5 MB",
-    format: "PDF",
-    url: "/documents/revenu-foncier-2023.pdf",
-    tags: ["Fiscal", "Annuel"],
-  },
-];
-
-const contratsTypes = [
-  {
-    id: 1,
-    nom: "Mandat Exclusif de Vente",
-    description:
-      "Contrat standard pour la vente exclusive d'un bien immobilier",
-    contenu: `CONTRAT DE MANDAT EXCLUSIF DE VENTE
-
-Entre les soussignés :
-[PROPRIETAIRE], propriétaire du bien situé à [ADRESSE]
-et
-[AGENCE], agence immobilière représentée par [NOM_AGENT]
-
-ARTICLE 1 - OBJET
-Le propriétaire donne mandat exclusif à l'agence pour la vente du bien...
-
-ARTICLE 2 - DURÉE
-Le présent mandat est conclu pour une durée de [DUREE] mois...`,
-    variables: [
-      "PROPRIETAIRE",
-      "ADRESSE",
-      "AGENCE",
-      "NOM_AGENT",
-      "DUREE",
-      "PRIX",
-      "COMMISSION",
-    ],
-    utilise: 45,
-    derniereModification: "2024-01-10",
-  },
-  {
-    id: 2,
-    nom: "Contrat de Location",
-    description: "Contrat type pour la location d'un bien immobilier",
-    contenu: `CONTRAT DE LOCATION D'HABITATION
-
-Entre :
-[BAILLEUR], propriétaire du logement situé à [ADRESSE]
-et
-[LOCATAIRE], demeurant à [ADRESSE_LOCATAIRE]
-
-ARTICLE 1 - OBJET
-Le présent contrat a pour objet la location du logement...`,
-    variables: [
-      "BAILLEUR",
-      "ADRESSE",
-      "LOCATAIRE",
-      "ADRESSE_LOCATAIRE",
-      "LOYER",
-      "CAUTION",
-      "DURÉE",
-    ],
-    utilise: 32,
-    derniereModification: "2024-01-08",
-  },
-  {
-    id: 3,
-    nom: "Compromis de Vente",
-    description: "Contrat type pour le compromis de vente immobilier",
-    contenu: `COMPROMIS DE VENTE IMMOBILIÈRE
-
-Entre :
-[VENDEUR], propriétaire du bien situé à [ADRESSE]
-et
-[ACHETEUR], demeurant à [ADRESSE_ACHETEUR]
-
-ARTICLE 1 - OBJET
-Par le présent compromis, les parties conviennent de la vente...`,
-    variables: [
-      "VENDEUR",
-      "ADRESSE",
-      "ACHETEUR",
-      "ADRESSE_ACHETEUR",
-      "PRIX",
-      "DATE_SIGNATURE",
-      "NOTAIRE",
-    ],
-    utilise: 28,
-    derniereModification: "2024-01-12",
-  },
-];
-
-const archivesSignes = [
-  {
-    id: 1,
-    nom: "Contrat de vente - Villa Les Roses",
-    type: "CONTRAT",
-    dateSignature: "2024-01-15",
-    parties: ["DUPONT Martin", "LEFEBVRE Sophie"],
-    bien: "45 Villa Les Roses, 92100 Boulogne",
-    reference: "VENTE-2024-001",
-    url: "/archives/vente-villa-roses.pdf",
-    statut: "SIGNÉ",
-  },
-  {
-    id: 2,
-    nom: "Contrat location - Appartement République",
-    type: "CONTRAT",
-    dateSignature: "2024-01-10",
-    parties: ["PETIT Julie", "MOREAU Thomas"],
-    bien: "78 Avenue de la République, 75011 Paris",
-    reference: "LOC-2024-015",
-    url: "/archives/location-republique.pdf",
-    statut: "SIGNÉ",
-  },
-];
-
-// Nouveaux documents immobiliers
-const documentsImmobiliers = [
-  {
-    id: 1,
-    nom: "Revenu Foncier 2023 - Résidence Les Cèdres",
-    type: "IMMOBILIER",
-    dateExpiration: null,
-    dateUpload: "2024-03-01",
-    statut: "VALIDE",
-    taille: "1.5 MB",
-    format: "PDF",
-    url: "/documents/immobilier/revenu-foncier-cedres-2023.pdf",
-    tags: ["Fiscal", "Annuel", "Déclaration"],
-    categorie: "REVENU_FONCIER",
-  },
-  {
-    id: 2,
-    nom: "Bail Location - Appartement T2 République",
-    type: "IMMOBILIER",
-    dateExpiration: "2025-06-30",
-    dateUpload: "2024-01-15",
-    statut: "VALIDE",
-    taille: "2.1 MB",
-    format: "PDF",
-    url: "/documents/immobilier/bail-republique-t2.pdf",
-    tags: ["Location", "Contrat", "Actif"],
-    categorie: "BAIL_LOCATION",
-  },
-  {
-    id: 3,
-    nom: "Quittance Loyer Mars 2024 - M. Martin",
-    type: "IMMOBILIER",
-    dateExpiration: null,
-    dateUpload: "2024-03-05",
-    statut: "VALIDE",
-    taille: "0.8 MB",
-    format: "PDF",
-    url: "/documents/immobilier/quittance-martin-mars-2024.pdf",
-    tags: ["Quittance", "Loyer", "Mensuel"],
-    categorie: "QUITTANCE_LOYER",
-  },
-  {
-    id: 4,
-    nom: "État des Lieux Entrée - Studio Montmartre",
-    type: "IMMOBILIER",
-    dateExpiration: null,
-    dateUpload: "2024-02-10",
-    statut: "VALIDE",
-    taille: "3.2 MB",
-    format: "PDF",
-    url: "/documents/immobilier/etat-lieux-entree-montmartre.pdf",
-    tags: ["État des lieux", "Entrée", "Photos"],
-    categorie: "ETAT_LIEUX",
-  },
-  {
-    id: 5,
-    nom: "Contrat de Gestion - Immeuble Les Hauts",
-    type: "IMMOBILIER",
-    dateExpiration: "2026-12-31",
-    dateUpload: "2024-01-20",
-    statut: "VALIDE",
-    taille: "4.5 MB",
-    format: "PDF",
-    url: "/documents/immobilier/contrat-gestion-immeuble-hauts.pdf",
-    tags: ["Gestion", "Syndic", "Long terme"],
-    categorie: "GESTION",
-  },
-];
-
-// Catégories de documents immobiliers
-const CATEGORIES_IMMOBILIER = {
-  REVENU_FONCIER: {
-    label: "Revenu Foncier",
-    icon: Banknote,
-    color: "bg-green-100 text-green-800",
-  },
-  BAIL_LOCATION: {
-    label: "Bail de Location",
-    icon: FileSignature,
-    color: "bg-blue-100 text-blue-800",
-  },
-  QUITTANCE_LOYER: {
-    label: "Quittance de Loyer",
-    icon: Receipt,
-    color: "bg-purple-100 text-purple-800",
-  },
-  ETAT_LIEUX: {
-    label: "État des Lieux",
-    icon: Home,
-    color: "bg-orange-100 text-orange-800",
-  },
-  GESTION: {
-    label: "Gestion Immobilière",
-    icon: Building,
-    color: "bg-indigo-100 text-indigo-800",
-  },
-  AUTRE: { label: "Autre", icon: FileText, color: "bg-gray-100 text-gray-800" },
-};
+import {
+  documentService,
+  TYPES_DOCUMENTS,
+  STATUT_DOCUMENT,
+  CATEGORIES_IMMOBILIER,
+} from "@/services/documentService";
 
 // Composant Modal
 const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
@@ -407,6 +90,8 @@ const ModalUploadDocument = ({
     categorie: "REVENU_FONCIER",
     dateExpiration: "",
     fichier: null,
+    description: "",
+    tags: [],
   });
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -430,46 +115,49 @@ const ModalUploadDocument = ({
 
     setIsUploading(true);
 
-    // Simulation upload
-    for (let i = 0; i <= 100; i += 10) {
-      setUploadProgress(i);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("fichier", formData.fichier);
+      uploadFormData.append("nom", formData.nom);
+      uploadFormData.append("type", formData.type);
+      uploadFormData.append("description", formData.description);
+
+      if (formData.dateExpiration) {
+        uploadFormData.append("dateExpiration", formData.dateExpiration);
+      }
+
+      if (formData.type === "IMMOBILIER") {
+        uploadFormData.append("categorie", formData.categorie);
+      }
+
+      if (formData.tags.length > 0) {
+        uploadFormData.append("tags", JSON.stringify(formData.tags));
+      }
+
+      const nouveauDocument = await documentService.uploadDocument(
+        uploadFormData
+      );
+
+      onUpload(nouveauDocument);
+      setIsUploading(false);
+      setUploadProgress(0);
+      onClose();
+
+      // Reset form
+      setFormData({
+        nom: "",
+        type: typeDocument === "IMMOBILIER" ? "IMMOBILIER" : "ASSURANCE",
+        categorie: "REVENU_FONCIER",
+        dateExpiration: "",
+        fichier: null,
+        description: "",
+        tags: [],
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'upload:", error);
+      setIsUploading(false);
+      setUploadProgress(0);
     }
-
-    const nouveauDocument = {
-      id: Date.now(),
-      nom: formData.nom,
-      type: formData.type,
-      dateExpiration: formData.dateExpiration || null,
-      dateUpload: new Date().toISOString().split("T")[0],
-      statut: formData.dateExpiration ? "VALIDE" : "VALIDE",
-      taille: `${(formData.fichier.size / 1024 / 1024).toFixed(1)} MB`,
-      format: formData.fichier.name.split(".").pop().toUpperCase(),
-      url: URL.createObjectURL(formData.fichier),
-      tags: ["Nouveau"],
-    };
-
-    // Ajouter la catégorie pour les documents immobiliers
-    if (formData.type === "IMMOBILIER") {
-      nouveauDocument.categorie = formData.categorie;
-      nouveauDocument.tags = [
-        CATEGORIES_IMMOBILIER[formData.categorie]?.label || "Immobilier",
-      ];
-    }
-
-    onUpload(nouveauDocument);
-    setIsUploading(false);
-    setUploadProgress(0);
-    onClose();
-
-    // Reset form
-    setFormData({
-      nom: "",
-      type: typeDocument === "IMMOBILIER" ? "IMMOBILIER" : "ASSURANCE",
-      categorie: "REVENU_FONCIER",
-      dateExpiration: "",
-      fichier: null,
-    });
   };
 
   return (
@@ -494,6 +182,18 @@ const ModalUploadDocument = ({
                 ? "Ex: Bail Location Appartement T2 République"
                 : "Ex: Assurance RC Pro 2024"
             }
+          />
+        </div>
+
+        <div>
+          <Label className="block mb-2">Description (optionnel)</Label>
+          <Textarea
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            placeholder="Description du document..."
+            rows={3}
           />
         </div>
 
@@ -625,19 +325,28 @@ const ModalEditeurContrat = ({ isOpen, onClose, contrat, onSave }) => {
     }
   }, [contrat]);
 
-  const handleSave = () => {
-    const contratModifie = {
-      id: contrat?.id || Date.now(),
-      nom,
-      description,
-      contenu,
-      variables: extraireVariables(contenu),
-      utilise: contrat?.utilise || 0,
-      derniereModification: new Date().toISOString().split("T")[0],
-    };
+  const handleSave = async () => {
+    try {
+      const variables = extraireVariables(contenu);
+      const contratModifie = {
+        nom,
+        description,
+        contenu,
+        variables,
+      };
 
-    onSave(contratModifie);
-    onClose();
+      if (contrat?.id) {
+        contratModifie.id = contrat.id;
+      }
+
+      const savedContrat = await documentService.saveContratType(
+        contratModifie
+      );
+      onSave(savedContrat);
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde du contrat:", error);
+    }
   };
 
   const extraireVariables = (texte) => {
@@ -733,11 +442,10 @@ Utilisez [NOM_VARIABLE] pour les parties variables..."
 };
 
 const DocumentsPage = () => {
-  const [documents, setDocuments] = useState(documentsInitiaux);
-  const [contrats, setContrats] = useState(contratsTypes);
-  const [archives, setArchives] = useState(archivesSignes);
-  const [documentsImmobiliersList, setDocumentsImmobiliersList] =
-    useState(documentsImmobiliers);
+  const [documents, setDocuments] = useState([]);
+  const [contrats, setContrats] = useState([]);
+  const [archives, setArchives] = useState([]);
+  const [documentsImmobiliersList, setDocumentsImmobiliersList] = useState([]);
   const [filtres, setFiltres] = useState({
     recherche: "",
     type: "",
@@ -753,6 +461,69 @@ const DocumentsPage = () => {
     useState(false);
   const [showModalEditeur, setShowModalEditeur] = useState(false);
   const [contratSelectionne, setContratSelectionne] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total: 0,
+    expirant: 0,
+    expire: 0,
+    contrats: 0,
+    immobilier: 0,
+  });
+
+  // Charger les données initiales
+  useEffect(() => {
+    chargerDonnees();
+  }, []);
+
+  // Dans le composant DocumentsPage, modifiez chargerDonnees()
+  const chargerDonnees = async () => {
+    try {
+      setLoading(true);
+
+      const [documentsData, contratsData, archivesData, statsData] =
+        await Promise.all([
+          documentService.getDocuments(),
+          documentService.getContratsTypes(),
+          documentService.getArchivesSignes(),
+          documentService.getStats(),
+        ]);
+
+      setDocuments(documentsData || []);
+      setContrats(contratsData || []);
+      setArchives(archivesData || []);
+      setStats(
+        statsData || {
+          total: 0,
+          expirant: 0,
+          expire: 0,
+          contrats: 0,
+          immobilier: 0,
+        }
+      );
+
+      // Filtrer les documents immobiliers
+      const docsImmobiliers = (documentsData || []).filter(
+        (doc) => doc.type === "IMMOBILIER"
+      );
+      setDocumentsImmobiliersList(docsImmobiliers);
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
+      // Initialiser avec des tableaux vides en cas d'erreur
+      setDocuments([]);
+      setContrats([]);
+      setArchives([]);
+      setDocumentsImmobiliersList([]);
+      setStats({
+        total: 0,
+        expirant: 0,
+        expire: 0,
+        contrats: 0,
+        immobilier: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filtrer les documents
   const documentsFiltres = documents.filter((doc) => {
@@ -780,27 +551,75 @@ const DocumentsPage = () => {
   // Gestion des documents
   const uploadDocument = (nouveauDocument) => {
     setDocuments([nouveauDocument, ...documents]);
+    setStats((prev) => ({
+      ...prev,
+      total: prev.total + 1,
+    }));
   };
 
   const uploadDocumentImmobilier = (nouveauDocument) => {
     setDocumentsImmobiliersList([nouveauDocument, ...documentsImmobiliersList]);
+    setDocuments([nouveauDocument, ...documents]);
+    setStats((prev) => ({
+      ...prev,
+      total: prev.total + 1,
+      immobilier: prev.immobilier + 1,
+    }));
   };
 
-  const supprimerDocument = (id) => {
-    setDocuments(documents.filter((doc) => doc.id !== id));
+  const supprimerDocument = async (id) => {
+    try {
+      await documentService.deleteDocument(id);
+      setDocuments(documents.filter((doc) => doc.id !== id));
+      setStats((prev) => ({
+        ...prev,
+        total: prev.total - 1,
+      }));
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+    }
   };
 
-  const supprimerDocumentImmobilier = (id) => {
-    setDocumentsImmobiliersList(
-      documentsImmobiliersList.filter((doc) => doc.id !== id)
-    );
+  const supprimerDocumentImmobilier = async (id) => {
+    try {
+      await documentService.deleteDocument(id);
+      setDocumentsImmobiliersList(
+        documentsImmobiliersList.filter((doc) => doc.id !== id)
+      );
+      setDocuments(documents.filter((doc) => doc.id !== id));
+      setStats((prev) => ({
+        ...prev,
+        total: prev.total - 1,
+        immobilier: prev.immobilier - 1,
+      }));
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+    }
   };
 
-  const telechargerDocument = (url, nom) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = nom;
-    link.click();
+  const telechargerDocument = async (document) => {
+    try {
+      // Pour Supabase, on peut soit:
+      // 1. Ouvrir directement l'URL dans un nouvel onglet
+      window.open(document.url, "_blank");
+
+      // Ou 2. Télécharger via une requête API si besoin d'authentification
+      // const response = await documentService.downloadDocument(document.id);
+      // const downloadUrl = response.downloadUrl;
+
+      // Créer un lien de téléchargement
+      const link = document.createElement("a");
+      link.href = document.url;
+      link.download = document.nom + "." + document.format.toLowerCase();
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Erreur lors du téléchargement:", error);
+      // Fallback: ouvrir l'URL directement
+      window.open(document.url, "_blank");
+    }
   };
 
   // Gestion des contrats
@@ -809,31 +628,46 @@ const DocumentsPage = () => {
       setContrats(contrats.map((c) => (c.id === contrat.id ? contrat : c)));
     } else {
       setContrats([...contrats, contrat]);
+      setStats((prev) => ({
+        ...prev,
+        contrats: prev.contrats + 1,
+      }));
     }
   };
 
-  const supprimerContrat = (id) => {
-    setContrats(contrats.filter((c) => c.id !== id));
+  const supprimerContrat = async (id) => {
+    try {
+      await documentService.deleteContratType(id);
+      setContrats(contrats.filter((c) => c.id !== id));
+      setStats((prev) => ({
+        ...prev,
+        contrats: prev.contrats - 1,
+      }));
+    } catch (error) {
+      console.error("Erreur lors de la suppression du contrat:", error);
+    }
   };
 
   const dupliquerContrat = (contrat) => {
     const nouveauContrat = {
       ...contrat,
-      id: Date.now(),
+      id: null,
       nom: `${contrat.nom} (Copie)`,
       utilise: 0,
     };
     setContrats([...contrats, nouveauContrat]);
   };
 
-  // Statistiques
-  const stats = {
-    total: documents.length,
-    expirant: documents.filter((d) => d.statut === "EXPIRANT").length,
-    expire: documents.filter((d) => d.statut === "EXPIRE").length,
-    contrats: contrats.length,
-    immobilier: documentsImmobiliersList.length,
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des documents...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1053,9 +887,7 @@ const DocumentsPage = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              telechargerDocument(document.url, document.nom)
-                            }
+                            onClick={() => telechargerDocument(document)}
                           >
                             <Download size={16} />
                           </Button>
@@ -1076,6 +908,12 @@ const DocumentsPage = () => {
                       >
                         {document.nom}
                       </h3>
+
+                      {document.description && (
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {document.description}
+                        </p>
+                      )}
 
                       <div
                         className="space-y-2 text-sm"
@@ -1116,15 +954,16 @@ const DocumentsPage = () => {
                       </div>
 
                       <div className="flex flex-wrap gap-1 mt-3">
-                        {document.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
+                        {document.tags &&
+                          document.tags.map((tag, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
                       </div>
                     </Card>
                   );
@@ -1269,9 +1108,7 @@ const DocumentsPage = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              telechargerDocument(document.url, document.nom)
-                            }
+                            onClick={() => telechargerDocument(document)}
                           >
                             <Download size={16} />
                           </Button>
@@ -1294,6 +1131,12 @@ const DocumentsPage = () => {
                       >
                         {document.nom}
                       </h3>
+
+                      {document.description && (
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {document.description}
+                        </p>
+                      )}
 
                       <div
                         className="space-y-2 text-sm"
@@ -1334,15 +1177,16 @@ const DocumentsPage = () => {
                       </div>
 
                       <div className="flex flex-wrap gap-1 mt-3">
-                        {document.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
+                        {document.tags &&
+                          document.tags.map((tag, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
                       </div>
                     </Card>
                   );
