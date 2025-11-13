@@ -21,6 +21,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   Briefcase,
+  ChevronDown,
+  X, Check
 } from "lucide-react";
 import { proAPI } from "../../lib/proApi";
 
@@ -134,7 +136,7 @@ const DemandeCard = ({ demande, onAction }) => {
           <button
             onClick={handleDecline}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            className="bg-red-600 hover:bg-red-700 text-white lg:px-4 py-2 px-2 text-xs lg:text-lg rounded-sm lg:rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
           >
             <ThumbsDown className="w-4 h-4" />
             Refuser
@@ -142,7 +144,7 @@ const DemandeCard = ({ demande, onAction }) => {
           <button
             onClick={handleAccept}
             disabled={isLoading}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            className="bg-green-600 hover:bg-green-700 text-white lg:px-4 lg:py-2 px-2 py-1 lg:text-lg text-xs rounded-sm lg:rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
           >
             <ThumbsUp className="w-4 h-4" />
             Accepter
@@ -164,63 +166,70 @@ const DemandeCard = ({ demande, onAction }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
-      {/* Badge Nouveau */}
+    <div className="bg-white rounded-lg py-8 lg:py-6 sm:rounded-xl border border-gray-200 p-3 sm:p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
+      {/* Badge Nouveau - réduit sur mobile */}
       {demande.nouvelle && (
-        <div className="absolute -top-2 -left-2">
-          <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-            <Star className="w-3 h-3 fill-current" />
-            NOUVEAU
+        <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2">
+          <div className="bg-green-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-md">
+            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
+            <span className="hidden xs:inline">NOUVEAU</span>
+            <span className="xs:hidden">NOUVEAU</span>
           </div>
         </div>
       )}
 
-      {/* Badge Urgent */}
+      {/* Badge Urgent - réduit sur mobile */}
       {demande.urgent && (
-        <div className="absolute -top-2 -right-2">
-          <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg animate-pulse">
-            <AlertCircle className="w-3 h-3" />
-            URGENT
+        <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2">
+          <div className="bg-red-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-md animate-pulse">
+            <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+            <span className="hidden xs:inline">URGENT</span>
+            <span className="xs:hidden">URG</span>
           </div>
         </div>
       )}
 
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative">
+      {/* Header compact pour mobile */}
+      <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
+        <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+          {/* Icône réduite */}
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative flex-shrink-0">
             {getMetierIcon(demande.metier)}
             {demande.nouvelle && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full border border-white"></div>
             )}
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
+
+          {/* Contenu texte compact */}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 text-xs lg:text-lg group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
               {demande.titre}
             </h3>
-            <p className="text-gray-600 text-sm mt-1 flex items-center gap-2">
-              <span className="bg-gray-100 px-2 py-1 rounded text-xs border border-gray-200">
+            <div className="flex flex-col xs:flex-row xs:items-center gap-1 sm:gap-2 mt-1">
+              <span className="bg-gray-100 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-[10px] lg:text-sm border border-gray-200 w-fit truncate">
                 {typeof demande.metier === "string"
                   ? demande.metier
                   : demande.metier?.libelle}
               </span>
-              <span className="flex items-center gap-1 text-gray-500">
-                <MapPin className="w-3 h-3" />
-                {demande.lieu}
+              <span className="flex items-center gap-1 text-gray-500 text-xs sm:text-sm">
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">{demande.lieu}</span>
               </span>
-            </p>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
+
+        {/* Status et urgence empilés sur mobile */}
+        <div className="flex flex-col items-end gap-1 sm:gap-2 flex-shrink-0">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+            className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-medium border ${getStatusColor(
               demande.statut
             )}`}
           >
-            {/* AFFICHER LE VRAI STATUT DE LA BASE */}
             {demande.statut}
           </span>
           <span
-            className={`text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
+            className={`text-xs sm:text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
               demande.urgence
             )}`}
           >
@@ -230,28 +239,36 @@ const DemandeCard = ({ demande, onAction }) => {
         </div>
       </div>
 
-      <p className="text-gray-700 mb-4 line-clamp-2 leading-relaxed">
+      {/* Description réduite */}
+      <p className="text-gray-700 text-xs sm:text-base mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
         {demande.description}
       </p>
 
-      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-        <div className="flex items-center gap-4 text-gray-500 text-sm">
+      {/* Footer compact */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-100">
+        {/* Métadonnées empilées sur mobile */}
+        <div className="flex lg:flex-row flex-wrap items-center gap-2 sm:gap-4 text-gray-500 text-xs sm:text-sm w-full sm:w-auto justify-between">
           <span className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            {demande.date}
+            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden xs:inline">{demande.date}</span>
+            <span className="xs:hidden text-[10px]">{new Date(demande.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}</span>
           </span>
           <span className="flex items-center gap-1">
-            <User className="w-4 h-4" />
-            {demande.client}
+            <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="truncate max-w-20">{demande.client}</span>
           </span>
           {demande.budget && (
             <span className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4" />
-              {demande.budget}
+              <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="text-[10px] sm:text-sm">{demande.budget}</span>
             </span>
           )}
         </div>
-        <div className="flex gap-2">{renderActionButtons()}</div>
+
+        {/* Actions réduites */}
+        <div className="flex gap-1 sm:gap-2 w-full sm:w-auto justify-end">
+          {renderActionButtons()}
+        </div>
       </div>
     </div>
   );
@@ -269,14 +286,14 @@ const StatsCardPro = ({ number, label, color, icon, badge }) => {
   const IconComponent = icon;
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-all duration-300 group shadow-sm relative">
+    <div className="bg-white rounded-xl p-3 sm:p-6 border border-gray-200 hover:border-blue-300 transition-all duration-300 group shadow-sm relative scale-95 sm:scale-100 hover:scale-100 sm:hover:scale-105">
       {badge && (
-        <div className="absolute -top-2 -right-2">
+        <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2">
           <div
-            className={`${badge.color} text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg`}
+            className={`${badge.color} text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-lg`}
           >
-            {badge.icon && <badge.icon className="w-3 h-3" />}
-            {badge.text}
+            {badge.icon && <badge.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
+            <span className="text-[10px] sm:text-xs">{badge.text}</span>
           </div>
         </div>
       )}
@@ -284,16 +301,16 @@ const StatsCardPro = ({ number, label, color, icon, badge }) => {
       <div className="flex items-center justify-between">
         <div>
           <div
-            className={`text-3xl font-bold bg-gradient-to-r ${colorClasses[color]} bg-clip-text text-transparent`}
+            className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${colorClasses[color]} bg-clip-text text-transparent`}
           >
             {number}
           </div>
-          <div className="text-gray-600 text-sm mt-1">{label}</div>
+          <div className="text-gray-600 text-xs sm:text-sm mt-0.5 sm:mt-1 leading-tight">{label}</div>
         </div>
         <div
-          className={`p-3 rounded-lg bg-gradient-to-r ${colorClasses[color]} text-white group-hover:scale-110 transition-transform duration-300`}
+          className={`p-2.5 sm:p-3 rounded-lg bg-gradient-to-r ${colorClasses[color]} text-white group-hover:scale-110 transition-transform duration-300`}
         >
-          <IconComponent className="w-6 h-6" />
+          <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
       </div>
     </div>
@@ -380,55 +397,57 @@ const ProDemandesPage = () => {
 
   const realTimeStats = stats
     ? [
-        {
-          number: stats.total,
-          label: "Demandes totales",
-          color: "purple",
-          icon: FileText,
-          badge:
-            stats.nouvelles > 0
-              ? {
-                  color: "bg-green-500",
-                  text: `${stats.nouvelles} nouv.`,
-                  icon: Bell,
-                }
-              : null,
-        },
-        {
-          number: stats.disponibles,
-          label: "Disponibles",
-          color: "green",
-          icon: Briefcase,
-        },
-        {
-          number: stats.assignees,
-          label: "En attente",
-          color: "orange",
-          icon: Clock,
-        },
-        {
-          number: stats.validees,
-          label: "Validées",
-          color: "blue",
-          icon: CheckCircle,
-        },
-      ]
+      {
+        number: stats.total,
+        label: "Demandes totales",
+        color: "purple",
+        icon: FileText,
+        badge:
+          stats.nouvelles > 0
+            ? {
+              color: "bg-green-500",
+              text: `${stats.nouvelles} nouv.`,
+              icon: Bell,
+            }
+            : null,
+      },
+      {
+        number: stats.disponibles,
+        label: "Disponibles",
+        color: "green",
+        icon: Briefcase,
+      },
+      {
+        number: stats.assignees,
+        label: "En attente",
+        color: "orange",
+        icon: Clock,
+      },
+      {
+        number: stats.validees,
+        label: "Validées",
+        color: "blue",
+        icon: CheckCircle,
+      },
+    ]
     : [];
 
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-0 lg:p-2">
       {/* Header Professionnel */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="relative">
-            <h1 className="text-3xl font-bold text-gray-900">Mes demandes</h1>
-          </div>
+      <div className="flex items-center justify-between mb-4 lg:mb-8">
+        <div className="flex flex-col md:flex-row items-center gap-1 lg:gap-4">
+
+          <h1 className="text-3xl font-bold text-gray-900">Mes demandes</h1>
+
           <p className="text-gray-600">Gérez vos demandes de services</p>
         </div>
       </div>
 
       {/* Statistiques en temps réel */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-1 lg:gap-4 mb-8">
         {realTimeStats.map((stat, index) => (
           <StatsCardPro
             key={index}
@@ -444,49 +463,144 @@ const ProDemandesPage = () => {
       {/* Barre de recherche et filtres */}
       <div className="bg-white rounded-xl p-6 border border-gray-200 mb-8 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
-          {/* Barre de recherche */}
+          {/* Barre de recherche avec bouton tri intégré sur mobile */}
           <div className="flex-1 w-full lg:w-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Rechercher une demande, un client, une ville..."
-                className="w-full lg:w-96 pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="relative flex items-center gap-2">
+              {/* Input de recherche */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Rechercher une demande, un client, une ville..."
+                  className="w-full pl-10 pr-12 lg:pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+
+                {/* Bouton tri mobile - intégré à l'input */}
+                <button
+                  onClick={() => setIsSortModalOpen(true)}
+                  className="lg:hidden absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                >
+                  <ArrowUpDown className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Tri */}
-          <div className="flex items-center gap-4">
+          {/* Tri desktop - caché sur mobile */}
+          <div className="hidden lg:flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-600">
-              <ArrowUpDown className="w-4 h-4" />
-              <span className="text-sm">Trier par:</span>
+              <ArrowUpDown className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-semibold">Trier par :</span>
             </div>
-            <select
-              className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="date">Date</option>
-              <option value="urgence">Urgence</option>
-              <option value="statut">Statut</option>
-            </select>
+
+            <div className="relative">
+              <select
+                className="w-48 bg-white border border-gray-300 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer appearance-none text-gray-700 font-medium bg-gradient-to-br from-white to-gray-50 hover:from-blue-50 hover:to-white"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="date" className="bg-white hover:bg-blue-50 text-gray-700 py-2">Date de création</option>
+                <option value="urgence" className="bg-white hover:bg-blue-50 text-gray-700 py-2">Niveau d'urgence</option>
+                <option value="statut" className="bg-white hover:bg-blue-50 text-gray-700 py-2">Statut de la demande</option>
+              </select>
+
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </div>
+            </div>
           </div>
+
+          {/* Modal de tri mobile */}
+          {isSortModalOpen && (
+            <div className="fixed inset-0 z-50 lg:hidden">
+              {/* Overlay */}
+              <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setIsSortModalOpen(false)}
+              />
+
+              {/* Modal content */}
+              <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-6 animate-slide-up">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-gray-900">Trier par</h3>
+                  <button
+                    onClick={() => setIsSortModalOpen(false)}
+                    className="p-2 text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Options de tri */}
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setSortBy('date');
+                      setIsSortModalOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 ${sortBy === 'date'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300'
+                      }`}
+                  >
+                    <span className="font-medium">Date de création</span>
+                    {sortBy === 'date' && <Check className="w-5 h-5 text-blue-600" />}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSortBy('urgence');
+                      setIsSortModalOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 ${sortBy === 'urgence'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300'
+                      }`}
+                  >
+                    <span className="font-medium">Niveau d'urgence</span>
+                    {sortBy === 'urgence' && <Check className="w-5 h-5 text-blue-600" />}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSortBy('statut');
+                      setIsSortModalOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 ${sortBy === 'statut'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-gray-300'
+                      }`}
+                  >
+                    <span className="font-medium">Statut de la demande</span>
+                    {sortBy === 'statut' && <Check className="w-5 h-5 text-blue-600" />}
+                  </button>
+                </div>
+
+                {/* Bouton d'action */}
+                <button
+                  onClick={() => setIsSortModalOpen(false)}
+                  className="w-full mt-6 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors duration-200"
+                >
+                  Appliquer
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filtres rapides */}
-        <div className="flex gap-2 mt-6 justify-start flex-wrap">
+        <div className="grid grid-cols-2 lg:flex gap-2 mt-6 justify-start flex-wrap">
           {filters.map((filter) => (
             <button
               key={filter.key}
               onClick={() => setActiveFilter(filter.key)}
-              className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border ${
-                activeFilter === filter.key
-                  ? "bg-blue-100 text-blue-700 border-blue-300 shadow-md"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-gray-700 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border ${activeFilter === filter.key
+                ? "bg-blue-100 text-blue-700 border-blue-300 shadow-md"
+                : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-gray-700 hover:bg-gray-50"
+                }`}
             >
               {filter.label}
             </button>
@@ -504,14 +618,14 @@ const ProDemandesPage = () => {
             ({pagination.total} demande{pagination.total > 1 ? "s" : ""})
           </span>
         </h2>
-        <div className="text-gray-500 text-sm flex items-center gap-1">
+        <div className="text-gray-500 text-sm hidden lg:flex items-center gap-1">
           <span>
             Tri:{" "}
             {sortBy === "date"
               ? "Plus récent"
               : sortBy === "urgence"
-              ? "Urgence"
-              : "Statut"}
+                ? "Urgence"
+                : "Statut"}
           </span>
         </div>
       </div>
@@ -600,11 +714,10 @@ const ProDemandesPage = () => {
               <button
                 key={page}
                 onClick={() => loadDemandes(page)}
-                className={`px-4 py-2 rounded-lg ${
-                  page === pagination.page
-                    ? "bg-blue-600 text-white"
-                    : "bg-white border border-gray-300 hover:bg-gray-50"
-                }`}
+                className={`px-4 py-2 rounded-lg ${page === pagination.page
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 {page}
               </button>

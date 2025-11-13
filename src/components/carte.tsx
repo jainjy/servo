@@ -335,34 +335,36 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="flex lg:text-lg text-xs items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Sélectionnez une localisation sur la carte
+      <DialogContent className="max-w-4xl md:max-w-6xl h-[85vh] md:h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-3 md:px-6 py-3 md:py-4 border-b flex-shrink-0">
+          <DialogTitle className="flex lg:text-lg md:text-base text-sm items-center gap-2 truncate">
+            <MapPin className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+            <span className="truncate">Sélectionnez une localisation</span>
           </DialogTitle>
         </DialogHeader>
         
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-col md:flex-row flex-1 min-h-0">
           {/* Panneau latéral */}
-          <div className="w-96 flex flex-col border-r">
+          <div className="w-full md:w-80 lg:w-96 flex flex-col border-b md:border-b-0 md:border-r flex-shrink-0 md:flex-1">
             {/* Barre d'onglets */}
-            <div className="flex border-b">
+            <div className="flex border-b gap-1 p-1">
               <button
-                className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 md:py-3 px-2 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-colors ${
                   activeTab === 'properties' 
-                    ? 'bg-slate-900 text-primary-foreground' 
-                    : 'bg-muted hover:bg-muted/80'
+                    ? 'bg-slate-900 text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200'
                 }`}
                 onClick={() => setActiveTab('properties')}
               >
-                Nos propriétés ({validProperties.length})
+                <span className="hidden md:inline">Nos propriétés</span>
+                <span className="md:hidden">Propriétés</span>
+                <span className="text-[10px] md:text-xs ml-0.5"> ({validProperties.length})</span>
               </button>
               <button
-                className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 md:py-3 px-2 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-colors ${
                   activeTab === 'search' 
-                    ? 'bg-slate-900 text-primary-foreground' 
-                    : 'bg-muted hover:bg-muted/80'
+                    ? 'bg-slate-900 text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200'
                 }`}
                 onClick={() => setActiveTab('search')}
               >
@@ -371,65 +373,65 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
             </div>
 
             {/* Barre de recherche */}
-            <div className="p-4 border-b">
+            <div className="p-2 md:p-4 border-b flex-shrink-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher une adresse..."
-                  className="pl-9"
+                  placeholder="Rechercher..."
+                  className="pl-8 text-xs md:text-sm h-8 md:h-10"
                 />
               </div>
             </div>
 
             {/* Contenu selon l'onglet */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto md:max-h-[400px]">
               {activeTab === 'properties' ? (
-                <div className="p-4 space-y-3">
+                <div className="p-2 md:p-4 space-y-2 md:space-y-3">
                   {validProperties.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>Aucune propriété avec localisation disponible</p>
+                      <MapPin className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs md:text-sm">Aucune propriété avec localisation disponible</p>
                     </div>
                   ) : (
                     validProperties.map((property) => (
                       <div
                         key={property.id}
-                        className="p-3 border rounded-lg hover:bg-slate-200 cursor-pointer transition-colors group"
+                        className="p-2 md:p-3 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
                         onClick={() => handlePropertySelect(property)}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                        <div className="flex items-start gap-2 md:gap-3">
+                          <div className="p-1 md:p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors flex-shrink-0">
                             {getPropertyIcon(property.type)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between mb-1">
-                              <h4 className="font-semibold text-sm line-clamp-1">
+                            <div className="flex items-start justify-between mb-1 gap-1">
+                              <h4 className="font-semibold text-xs md:text-sm line-clamp-1">
                                 {property.title}
                               </h4>
                               {property.status === 'for_sale' ? (
-                                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full whitespace-nowrap ml-2">
+                                <span className="bg-blue-100 text-blue-800 text-[10px] md:text-xs px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                                   À vendre
                                 </span>
                               ) : (
-                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full whitespace-nowrap ml-2">
+                                <span className="bg-green-100 text-green-800 text-[10px] md:text-xs px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                                   À louer
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground line-clamp-1 mb-1">
+                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1 mb-1">
                               {property.address}
                             </p>
-                            <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
+                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1 mb-2">
                               {property.city}
                             </p>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-primary">
+                              <span className="text-xs md:text-sm font-semibold text-primary">
                                 {formatPrice(property.price)}
                               </span>
                               <button 
-                                className="text-xs text-primary hover:underline"
+                                className="text-[10px] md:text-xs text-primary hover:underline"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePropertySelect(property);
@@ -490,7 +492,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
 
             {/* Informations de localisation sélectionnée */}
             {selectedLocation && (
-              <div className="p-4 border-t bg-accent/50">
+              <div className="p-4 border-t bg-slate-100 rounded-xl">
                 <h4 className="font-medium mb-2 text-sm">Localisation sélectionnée</h4>
                 <p className="text-sm mb-2 line-clamp-2">{selectedLocation.address}</p>
                 <Button 
