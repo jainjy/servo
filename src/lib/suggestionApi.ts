@@ -1,5 +1,6 @@
 // src/lib/suggestionApi.ts
 import { UserActivity, UserEvent, Recommendation } from '../types/suggestionTypes';
+import AuthService from '../services/authService';
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 const API_URL = `${API_BASE_URL}/suggestion`;
@@ -19,6 +20,20 @@ const getAuthToken = (): string | null => {
 // Queue pour les activités avec debounce
 let activityQueue: any[] = [];
 let activityTimeout: NodeJS.Timeout;
+
+// Vérifie si l'utilisateur est authentifié (préférence AuthService si dispo)
+const isUserAuthenticated = (): boolean => {
+  try {
+    if (AuthService && typeof AuthService.isAuthenticated === 'function') {
+      return AuthService.isAuthenticated();
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  // Fallback : présence de token
+  return !!getAuthToken();
+};
 
 // Fonction principale avec gestion du rate limiting
 async function apiFetch(path: string, options: RequestInit = {}, maxRetries = 3) {
@@ -92,11 +107,19 @@ export async function trackUserActivity(data: {
   searchQuery?: string;
   metadata?: Record<string, any>;
 }) {
+  // Si pas authentifié : stocker localement et ne pas appeler l'API
+  const activity = { ...data, timestamp: new Date().toISOString() };
+  if (!isUserAuthenticated()) {
+    try {
+      storePendingActivities([activity]);
+      return;
+    } catch (e) {
+      return;
+    }
+  }
+
   // Ajouter à la queue
-  activityQueue.push({
-    ...data,
-    timestamp: new Date().toISOString()
-  });
+  activityQueue.push(activity);
   
   // Clear le timeout existant
   if (activityTimeout) clearTimeout(activityTimeout);
@@ -143,6 +166,9 @@ function storePendingActivities(activities: any[]) {
 
 // 📍 Retry les activités en attente
 export async function retryPendingActivities() {
+  // Ne rien faire si non authentifié
+  if (!isUserAuthenticated()) return;
+
   try {
     const pendingActivities = JSON.parse(localStorage.getItem('pendingActivities') || '[]');
     
@@ -178,6 +204,11 @@ export async function trackUserEvent<T = unknown>(data: {
   eventType: string;
   eventData?: T;
 }) {
+  // Ne pas appeler l'API si l'utilisateur n'est pas connecté
+  if (!isUserAuthenticated()) {
+    // optionnel: stocker localement si nécessaire
+    return Promise.resolve(null);
+  }
   return apiFetch("/event", {
     method: "POST",
     body: JSON.stringify(data),
@@ -204,6 +235,12 @@ export function flushActivityQueue() {
   if (activityQueue.length > 0) {
     const activitiesToSend = [...activityQueue];
     activityQueue = [];
+
+    // Si pas authentifié, stocker et ne pas appeler l'API
+    if (!isUserAuthenticated()) {
+      storePendingActivities(activitiesToSend);
+      return;
+    }
     
     apiFetch("/activity/batch", {
       method: "POST",
@@ -217,8 +254,16 @@ export function flushActivityQueue() {
 
 // Retry automatique au chargement de la page
 if (typeof window !== 'undefined') {
-  window.addEventListener('load', retryPendingActivities);
-  
-  // Retry toutes les 5 minutes
-  setInterval(retryPendingActivities, 5 * 60 * 1000);
-}
+  // Lancer le retry automatique seulement si authentifié
+  if (isUserAuthenticated()) {
+    window.addEventListener('load', retryPendingActivities);
+    setInterval(retryPendingActivities, 5 * 60 * 1000);
+  }
+
+  // Écouter les changements d'auth (AuthService devrait dispatcher 'auth-change')
+  window.addEventListener('auth-change', () => {
+    if (isUserAuthenticated()) {
+      retryPendingActivities();
+    }
+  });
+ }

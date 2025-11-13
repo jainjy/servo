@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Plus, Search } from "lucide-react"
@@ -12,11 +12,18 @@ export default function ProfessionalServicesPage() {
   const [isAvailableModalOpen, setIsAvailableModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("associated") // "associated" | "available"
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [statsRefreshKey, setStatsRefreshKey] = useState(0)
+  const [tableRefreshKey, setTableRefreshKey] = useState(0)
 
-  const handleServiceUpdated = () => {
-    setRefreshKey(prev => prev + 1)
-  }
+  const handleServiceUpdated = useCallback(() => {
+    // Rafraîchir seulement les stats et la table associée
+    setStatsRefreshKey(prev => prev + 1)
+    setTableRefreshKey(prev => prev + 1)
+  }, [])
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -34,7 +41,7 @@ export default function ProfessionalServicesPage() {
         </Button>
       </div>
 
-      <ProfessionalServicesStats key={`stats-${refreshKey}`} />
+      <ProfessionalServicesStats key={`stats-${statsRefreshKey}`} />
 
       <Card className="bg-card border-border p-6">
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
@@ -63,14 +70,14 @@ export default function ProfessionalServicesPage() {
               type="search"
               placeholder="Rechercher un service..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 bg-background border-input"
             />
           </div>
         </div>
 
         <ProfessionalServicesTable 
-          key={`table-${refreshKey}-${activeTab}`}
+          key={`table-${tableRefreshKey}-${activeTab}`}
           activeTab={activeTab}
           searchQuery={searchQuery}
           onServiceUpdated={handleServiceUpdated}

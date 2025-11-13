@@ -30,7 +30,7 @@ import { useSocket } from "@/Contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
-
+import { useAuth } from "@/hooks/useAuth";
 export default function ProDiscussions() {
   const { id } = useParams();
   const [demande, setDemande] = useState(null);
@@ -61,9 +61,7 @@ export default function ProDiscussions() {
   const [devisFile, setDevisFile] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesContainerRef = useRef(null);
-
   const actionsMenuRef = useRef(null);
-
   const { isConnected } = useSocket();
   const {
     messages,
@@ -75,7 +73,11 @@ export default function ProDiscussions() {
     scrollToBottom,
     refreshMessages,
   } = useMessaging(id);
-
+  const [currentUserId, setCurrentUserId] = useState(null);
+const { user } = useAuth();
+  useEffect(() => {
+    setCurrentUserId(user?.id);
+  }, []);
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
@@ -493,7 +495,7 @@ export default function ProDiscussions() {
   };
 
   const isCurrentUser = (message) => {
-    return message.expediteur?.userType === "PRESTATAIRE";
+    return message.expediteurId === currentUserId;
   };
 
   const getInitials = (user) => {

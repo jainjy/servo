@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -72,41 +72,59 @@ export function ProfessionalServicesTable({
     }
   };
 
-  const handleAssociateService = async (serviceId: string) => {
-    try {
-      setActionLoading(serviceId);
-      await api.post(`/professional/services/${serviceId}/associate`);
-      onServiceUpdated();
-      await fetchServices(); // Recharger la liste
-    } catch (error: any) {
-      console.error("Erreur lors de l'association:", error);
-      toast.error(
-        error.response?.data?.error || "Erreur lors de l'association"
-      );
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  const handleAssociateService = useCallback(
+    async (serviceId: string) => {
+      try {
+        setActionLoading(serviceId);
 
-  const handleDisassociateService = async (serviceId: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir retirer ce service ?")) {
-      return;
-    }
+        // Mise à jour optimiste de l'interface
+        setServices((prev) => prev.filter((s) => s.id !== serviceId));
 
-    try {
-      setActionLoading(serviceId);
-      await api.delete(`/professional/services/${serviceId}/disassociate`);
-      onServiceUpdated();
-      await fetchServices(); // Recharger la liste
-    } catch (error: any) {
-      console.error("Erreur lors de la désassociation:", error);
-      toast.error(
-        error.response?.data?.error || "Erreur lors de la désassociation"
-      );
-    } finally {
-      setActionLoading(null);
-    }
-  };
+        await api.post(`/professional/services/${serviceId}/associate`);
+        onServiceUpdated();
+        toast.success("Service associé avec succès");
+      } catch (error: any) {
+        console.error("Erreur lors de l'association:", error);
+        toast.error(
+          error.response?.data?.error || "Erreur lors de l'association"
+        );
+        // Rechargement en cas d'erreur uniquement
+        await fetchServices();
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [onServiceUpdated]
+  );
+
+  const handleDisassociateService = useCallback(
+    async (serviceId: string) => {
+      if (!confirm("Êtes-vous sûr de vouloir retirer ce service ?")) {
+        return;
+      }
+
+      try {
+        setActionLoading(serviceId);
+
+        // Mise à jour optimiste: retirer de la liste
+        setServices((prev) => prev.filter((s) => s.id !== serviceId));
+
+        await api.delete(`/professional/services/${serviceId}/disassociate`);
+        onServiceUpdated();
+        toast.success("Service retiré avec succès");
+      } catch (error: any) {
+        console.error("Erreur lors de la désassociation:", error);
+        toast.error(
+          error.response?.data?.error || "Erreur lors de la désassociation"
+        );
+        // Rechargement en cas d'erreur uniquement
+        await fetchServices();
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [onServiceUpdated]
+  );
 
   const filteredServices = services.filter(
     (service) =>

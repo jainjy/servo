@@ -35,7 +35,7 @@ const navigation = [
   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-  { name: "Mes Clients", href: "/pro/clients", icon: Users },
+  // { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },

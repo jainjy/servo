@@ -34,10 +34,12 @@ import {
   Upload,
   Star,
   Loader2,
+  Navigation,
 } from "lucide-react";
 import api from "@/lib/api";
 import AuthService from "@/services/authService";
 import { toast } from "sonner";
+import { LocationPickerModal } from "@/components/location-picker-modal";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -107,6 +109,7 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
   const [loading, setLoading] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [user, setUser] = useState(null);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [formData, setFormData] = useState({
     // Étape 1 - Informations générales
     title: "",
@@ -120,6 +123,9 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
     bathrooms: "",
     address: "",
     city: "",
+    // Étape 2.5 - Localisation
+    latitude: null,
+    longitude: null,
     // Étape 3 - Options
     listingType: "sale",
     rentType: "longue_duree",
@@ -157,6 +163,8 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
         bathrooms: annonce.bathrooms || "",
         address: annonce.address || "",
         city: annonce.city || "",
+        latitude: annonce.latitude || null,
+        longitude: annonce.longitude || null,
         listingType: annonce.listingType || "sale",
         rentType: annonce.rentType || "longue_duree",
         features: annonce.features || [],
@@ -176,6 +184,8 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
         bathrooms: "",
         address: "",
         city: "",
+        latitude: null,
+        longitude: null,
         listingType: "sale",
         rentType: "longue_duree",
         features: [],
@@ -291,6 +301,14 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
     return [...existingImages.map((img) => img.url || img), ...uploadedUrls];
   };
 
+  const handleLocationChange = (lat, lng) => {
+    setFormData({
+      ...formData,
+      latitude: lat,
+      longitude: lng,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -307,6 +325,8 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
         rooms: formData.rooms ? parseInt(formData.rooms) : null,
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
         bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
         ownerId: user.id,
       };
 
@@ -355,528 +375,605 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
   ];
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={annonce ? "Modifier l'annonce" : "Nouvelle annonce"}
-      size="xl"
-    >
-      <form onSubmit={handleSubmit}>
-        {/* Barre de progression */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            {etapes.map((step, index) => (
-              <div key={step.numero} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    etape >= step.numero
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "border-gray-300 text-gray-500"
-                  }`}
-                >
-                  {step.numero}
-                </div>
-                {index < etapes.length - 1 && (
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={annonce ? "Modifier l'annonce" : "Nouvelle annonce"}
+        size="xl"
+      >
+        <form onSubmit={handleSubmit}>
+          {/* Barre de progression */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              {etapes.map((step, index) => (
+                <div key={step.numero} className="flex items-center">
                   <div
-                    className={`w-12 h-1 mx-2 ${
-                      etape > step.numero ? "bg-blue-600" : "bg-gray-300"
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                      etape >= step.numero
+                        ? "bg-blue-600 border-blue-600 text-white"
+                        : "border-gray-300 text-gray-500"
                     }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="text-center font-medium" style={{ color: "#0A0A0A" }}>
-            {etapes.find((s) => s.numero === etape)?.titre}
-          </div>
-        </div>
-
-        {/* Étape 1 - Informations générales */}
-        {etape === 1 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <Label className="block mb-2">Titre de l'annonce *</Label>
-              <Input
-                required
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                placeholder="Ex: Superbe appartement vue panoramique..."
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label className="block mb-2">Type de bien *</Label>
-                <select
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.type}
-                  onChange={(e) =>
-                    setFormData({ ...formData, type: e.target.value })
-                  }
-                  required
-                >
-                  {Object.entries(TYPE_BIEN).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <Label className="block mb-2">Prix *</Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    required
-                    value={formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: e.target.value })
-                    }
-                    placeholder="Ex: 450000"
-                    className="pl-8"
-                  />
-                  <Euro
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <Label className="block mb-2">Description *</Label>
-              <Textarea
-                required
-                rows={6}
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Décrivez votre bien en détail..."
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Étape 2 - Caractéristiques */}
-        {etape === 2 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <Label className="block mb-2">Surface (m²) *</Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    required
-                    value={formData.surface}
-                    onChange={(e) =>
-                      setFormData({ ...formData, surface: e.target.value })
-                    }
-                    placeholder="Ex: 75"
-                    className="pl-8"
-                  />
-                  <Ruler
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="block mb-2">Nombre de pièces *</Label>
-                <Input
-                  type="number"
-                  required
-                  value={formData.rooms}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rooms: e.target.value })
-                  }
-                  placeholder="Ex: 3"
-                />
-              </div>
-
-              <div>
-                <Label className="block mb-2">Nombre de chambres *</Label>
-                <Input
-                  type="number"
-                  required
-                  value={formData.bedrooms}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bedrooms: e.target.value })
-                  }
-                  placeholder="Ex: 2"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label className="block mb-2">Salles de bain</Label>
-                <Input
-                  type="number"
-                  value={formData.bathrooms}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bathrooms: e.target.value })
-                  }
-                  placeholder="Ex: 1"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <Label className="block mb-2">Adresse complète *</Label>
-                <div className="relative">
-                  <Input
-                    required
-                    value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                    placeholder="Ex: 123 Avenue des Champs-Élysées"
-                    className="pl-8"
-                  />
-                  <MapPin
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label className="block mb-2">Ville *</Label>
-                <Input
-                  required
-                  value={formData.city}
-                  onChange={(e) =>
-                    setFormData({ ...formData, city: e.target.value })
-                  }
-                  placeholder="Ex: Paris"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Étape 3 - Options */}
-        {etape === 3 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <Label className="block mb-2">Type d'annonce *</Label>
-              <select
-                className="w-full p-3 border rounded-lg"
-                value={formData.listingType}
-                onChange={(e) =>
-                  setFormData({ ...formData, listingType: e.target.value })
-                }
-                required
-              >
-                {Object.entries(LISTING_TYPE).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Ajouter le champ rentType si le type est location */}
-            {(formData.listingType === "rent" ||
-              formData.listingType === "both") && (
-              <div className="mt-4">
-                <Label className="block mb-2">Type de location *</Label>
-                <select
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.rentType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rentType: e.target.value })
-                  }
-                  required
-                >
-                  {Object.entries(TYPE_LOCATION).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div>
-              <Label className="block mb-4">Équipements et commodités</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {equipementsDisponibles.map((equipement) => (
-                  <div key={equipement} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                      checked={formData.features.includes(equipement)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData({
-                            ...formData,
-                            features: [...formData.features, equipement],
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            features: formData.features.filter(
-                              (e) => e !== equipement
-                            ),
-                          });
-                        }
-                      }}
-                    />
-                    <Label className="text-sm capitalize">
-                      {equipement.replace("_", " ")}
-                    </Label>
+                  >
+                    {step.numero}
                   </div>
-                ))}
-              </div>
+                  {index < etapes.length - 1 && (
+                    <div
+                      className={`w-12 h-1 mx-2 ${
+                        etape > step.numero ? "bg-blue-600" : "bg-gray-300"
+                      }`}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="text-center font-medium" style={{ color: "#0A0A0A" }}>
+              {etapes.find((s) => s.numero === etape)?.titre}
             </div>
           </div>
-        )}
 
-        {/* Étape 4 - Médias */}
-        {etape === 4 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <Label className="block mb-2">Photos du bien</Label>
-              <div
-                className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
-                  uploadingImages ? "opacity-50" : "hover:border-blue-400"
-                }`}
-              >
-                <Upload className="mx-auto mb-3 text-gray-400" size={48} />
-                <div
-                  className="text-lg font-semibold mb-2"
-                  style={{ color: "#0A0A0A" }}
-                >
-                  {uploadingImages
-                    ? "Upload en cours..."
-                    : "Ajouter des photos"}
-                </div>
-                <div className="text-sm mb-4" style={{ color: "#5A6470" }}>
-                  Glissez-déposez vos photos ou cliquez pour parcourir
-                  <br />
-                  <span className="text-xs">
-                    Formats supportés: JPG, PNG, WEBP (max 5MB par image)
-                  </span>
-                </div>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="property-images"
-                  disabled={uploadingImages}
+          {/* Étape 1 - Informations générales */}
+          {etape === 1 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <Label className="block mb-2">Titre de l'annonce *</Label>
+                <Input
+                  required
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  placeholder="Ex: Superbe appartement vue panoramique..."
                 />
-                <Label
-                  htmlFor="property-images"
-                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${
-                    uploadingImages
-                      ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer hover:bg-gray-50"
-                  }`}
-                >
-                  {uploadingImages ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="mr-2" size={16} />
-                  )}
-                  {uploadingImages ? "Upload..." : "Choisir des fichiers"}
-                </Label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label className="block mb-2">Type de bien *</Label>
+                  <select
+                    className="w-full p-3 border rounded-lg"
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
+                    required
+                  >
+                    {Object.entries(TYPE_BIEN).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <Label className="block mb-2">Prix *</Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      required
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      placeholder="Ex: 450000"
+                      className="pl-8"
+                    />
+                    <Euro
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="block mb-2">Description *</Label>
+                <Textarea
+                  required
+                  rows={6}
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  placeholder="Décrivez votre bien en détail..."
+                />
               </div>
             </div>
+          )}
 
-            {formData.images.length > 0 && (
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <Label>Images sélectionnées ({formData.images.length})</Label>
-                  {formData.images.some((img) => img.isNew) && (
-                    <span className="text-sm text-blue-600">
-                      {formData.images.filter((img) => img.isNew).length}{" "}
-                      nouvelle(s) image(s) à uploader
-                    </span>
-                  )}
+          {/* Étape 2 - Caractéristiques */}
+          {etape === 2 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <Label className="block mb-2">Surface (m²) *</Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      required
+                      value={formData.surface}
+                      onChange={(e) =>
+                        setFormData({ ...formData, surface: e.target.value })
+                      }
+                      placeholder="Ex: 75"
+                      className="pl-8"
+                    />
+                    <Ruler
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={image.preview || image.url}
-                        alt={`Image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
+
+                <div>
+                  <Label className="block mb-2">Nombre de pièces *</Label>
+                  <Input
+                    type="number"
+                    required
+                    value={formData.rooms}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rooms: e.target.value })
+                    }
+                    placeholder="Ex: 3"
+                  />
+                </div>
+
+                <div>
+                  <Label className="block mb-2">Nombre de chambres *</Label>
+                  <Input
+                    type="number"
+                    required
+                    value={formData.bedrooms}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bedrooms: e.target.value })
+                    }
+                    placeholder="Ex: 2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label className="block mb-2">Salles de bain</Label>
+                  <Input
+                    type="number"
+                    value={formData.bathrooms}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bathrooms: e.target.value })
+                    }
+                    placeholder="Ex: 1"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <Label className="block mb-2">Adresse complète *</Label>
+                  <div className="relative">
+                    <Input
+                      required
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                      placeholder="Ex: 123 Avenue des Champs-Élysées"
+                      className="pl-8"
+                    />
+                    <MapPin
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="block mb-2">Ville *</Label>
+                  <Input
+                    required
+                    value={formData.city}
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
+                    placeholder="Ex: Paris"
+                  />
+                </div>
+              </div>
+
+              {/* Localisation sur carte */}
+              <div>
+                <Label className="block mb-2">Localisation précise</Label>
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    onClick={() => setShowLocationPicker(true)}
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <Navigation size={16} />
+                    {formData.latitude && formData.longitude
+                      ? `Position définie (${formData.latitude.toFixed(
+                          4
+                        )}, ${formData.longitude.toFixed(4)})`
+                      : "Sélectionner sur la carte"}
+                  </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm mb-1 block">Latitude</Label>
+                      <Input
+                        type="number"
+                        value={formData.latitude || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            latitude: e.target.value
+                              ? parseFloat(e.target.value)
+                              : null,
+                          })
+                        }
+                        placeholder="Ex: -20.8789"
+                        step="0.0001"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 rounded-lg flex items-center justify-center">
-                        <button
-                          type="button"
-                          className="bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity transform scale-0 group-hover:scale-100 duration-300"
-                          onClick={() => removeImage(index)}
-                          disabled={uploadingImages}
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      {image.isNew && (
-                        <div className="absolute top-2 left-2">
-                          <Badge className="bg-green-500 text-white text-xs">
-                            Nouveau
-                          </Badge>
-                        </div>
-                      )}
+                    </div>
+                    <div>
+                      <Label className="text-sm mb-1 block">Longitude</Label>
+                      <Input
+                        type="number"
+                        value={formData.longitude || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            longitude: e.target.value
+                              ? parseFloat(e.target.value)
+                              : null,
+                          })
+                        }
+                        placeholder="Ex: 55.4481"
+                        step="0.0001"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Étape 3 - Options */}
+          {etape === 3 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <Label className="block mb-2">Type d'annonce *</Label>
+                <select
+                  className="w-full p-3 border rounded-lg"
+                  value={formData.listingType}
+                  onChange={(e) =>
+                    setFormData({ ...formData, listingType: e.target.value })
+                  }
+                  required
+                >
+                  {Object.entries(LISTING_TYPE).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Ajouter le champ rentType si le type est location */}
+              {(formData.listingType === "rent" ||
+                formData.listingType === "both") && (
+                <div className="mt-4">
+                  <Label className="block mb-2">Type de location *</Label>
+                  <select
+                    className="w-full p-3 border rounded-lg"
+                    value={formData.rentType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rentType: e.target.value })
+                    }
+                    required
+                  >
+                    {Object.entries(TYPE_LOCATION).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <Label className="block mb-4">Équipements et commodités</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {equipementsDisponibles.map((equipement) => (
+                    <div key={equipement} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        checked={formData.features.includes(equipement)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({
+                              ...formData,
+                              features: [...formData.features, equipement],
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              features: formData.features.filter(
+                                (e) => e !== equipement
+                              ),
+                            });
+                          }
+                        }}
+                      />
+                      <Label className="text-sm capitalize">
+                        {equipement.replace("_", " ")}
+                      </Label>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-
-            {formData.images.length === 0 && !uploadingImages && (
-              <div className="text-center py-8 text-gray-500">
-                <Home className="mx-auto mb-3 text-gray-300" size={48} />
-                <p>Aucune image sélectionnée</p>
-                <p className="text-sm">
-                  Ajoutez au moins une photo pour rendre votre annonce plus
-                  attractive
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Étape 5 - Publication */}
-        {etape === 5 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <Label className="block mb-2">Statut de publication</Label>
-              <select
-                className="w-full p-3 border rounded-lg"
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
-                }
-              >
-                {Object.entries(STATUT_ANNONCE).map(([key, statut]) => (
-                  <option key={key} value={key}>
-                    {statut.label}
-                  </option>
-                ))}
-              </select>
             </div>
+          )}
 
-            <Card className="p-6 bg-blue-50 border-blue-200">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <CheckCircle className="text-blue-600" size={20} />
-                Récapitulatif
-              </h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span style={{ color: "#5A6470" }}>Titre:</span>
-                  <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                    {formData.title}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: "#5A6470" }}>Type:</span>
-                  <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                    {TYPE_BIEN[formData.type]}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: "#5A6470" }}>Prix:</span>
-                  <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                    {formData.price} €
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: "#5A6470" }}>Surface:</span>
-                  <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                    {formData.surface} m²
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: "#5A6470" }}>Type d'annonce:</span>
-                  <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                    {LISTING_TYPE[formData.listingType]}
-                  </span>
-                </div>
-                {(formData.listingType === "rent" ||
-                  formData.listingType === "both") && (
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Type de location:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {TYPE_LOCATION[formData.rentType]}
+          {/* Étape 4 - Médias */}
+          {etape === 4 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <Label className="block mb-2">Photos du bien</Label>
+                <div
+                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
+                    uploadingImages ? "opacity-50" : "hover:border-blue-400"
+                  }`}
+                >
+                  <Upload className="mx-auto mb-3 text-gray-400" size={48} />
+                  <div
+                    className="text-lg font-semibold mb-2"
+                    style={{ color: "#0A0A0A" }}
+                  >
+                    {uploadingImages
+                      ? "Upload en cours..."
+                      : "Ajouter des photos"}
+                  </div>
+                  <div className="text-sm mb-4" style={{ color: "#5A6470" }}>
+                    Glissez-déposez vos photos ou cliquez pour parcourir
+                    <br />
+                    <span className="text-xs">
+                      Formats supportés: JPG, PNG, WEBP (max 5MB par image)
                     </span>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span style={{ color: "#5A6470" }}>Images:</span>
-                  <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                    {formData.images.length} image(s)
-                    {formData.images.some((img) => img.isNew) &&
-                      ` (${
-                        formData.images.filter((img) => img.isNew).length
-                      } nouvelle(s))`}
-                  </span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="property-images"
+                    disabled={uploadingImages}
+                  />
+                  <Label
+                    htmlFor="property-images"
+                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${
+                      uploadingImages
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer hover:bg-gray-50"
+                    }`}
+                  >
+                    {uploadingImages ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="mr-2" size={16} />
+                    )}
+                    {uploadingImages ? "Upload..." : "Choisir des fichiers"}
+                  </Label>
                 </div>
               </div>
-            </Card>
-          </div>
-        )}
 
-        {/* Navigation entre étapes */}
-        <div className="flex justify-between pt-6 mt-6 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={etapePrecedente}
-            disabled={etape === 1 || loading || uploadingImages}
-          >
-            <ChevronLeft className="mr-2" size={16} />
-            Précédent
-          </Button>
+              {formData.images.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label>Images sélectionnées ({formData.images.length})</Label>
+                    {formData.images.some((img) => img.isNew) && (
+                      <span className="text-sm text-blue-600">
+                        {formData.images.filter((img) => img.isNew).length}{" "}
+                        nouvelle(s) image(s) à uploader
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {formData.images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image.preview || image.url}
+                          alt={`Image ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 rounded-lg flex items-center justify-center">
+                          <button
+                            type="button"
+                            className="bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity transform scale-0 group-hover:scale-100 duration-300"
+                            onClick={() => removeImage(index)}
+                            disabled={uploadingImages}
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        {image.isNew && (
+                          <div className="absolute top-2 left-2">
+                            <Badge className="bg-green-500 text-white text-xs">
+                              Nouveau
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {etape < 5 ? (
+              {formData.images.length === 0 && !uploadingImages && (
+                <div className="text-center py-8 text-gray-500">
+                  <Home className="mx-auto mb-3 text-gray-300" size={48} />
+                  <p>Aucune image sélectionnée</p>
+                  <p className="text-sm">
+                    Ajoutez au moins une photo pour rendre votre annonce plus
+                    attractive
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Étape 5 - Publication */}
+          {etape === 5 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div>
+                <Label className="block mb-2">Statut de publication</Label>
+                <select
+                  className="w-full p-3 border rounded-lg"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                >
+                  {Object.entries(STATUT_ANNONCE).map(([key, statut]) => (
+                    <option key={key} value={key}>
+                      {statut.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <Card className="p-6 bg-blue-50 border-blue-200">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <CheckCircle className="text-blue-600" size={20} />
+                  Récapitulatif
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Titre:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {formData.title}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Type:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {TYPE_BIEN[formData.type]}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Prix:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {formData.price} €
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Surface:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {formData.surface} m²
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Type d'annonce:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {LISTING_TYPE[formData.listingType]}
+                    </span>
+                  </div>
+                  {(formData.listingType === "rent" ||
+                    formData.listingType === "both") && (
+                    <div className="flex justify-between">
+                      <span style={{ color: "#5A6470" }}>Type de location:</span>
+                      <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                        {TYPE_LOCATION[formData.rentType]}
+                      </span>
+                    </div>
+                  )}
+                  {formData.latitude && formData.longitude && (
+                    <div className="flex justify-between">
+                      <span style={{ color: "#5A6470" }}>Position:</span>
+                      <span
+                        className="font-medium text-xs"
+                        style={{ color: "#0A0A0A" }}
+                      >
+                        {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Images:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {formData.images.length} image(s)
+                      {formData.images.some((img) => img.isNew) &&
+                        ` (${
+                          formData.images.filter((img) => img.isNew).length
+                        } nouvelle(s))`}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Navigation entre étapes */}
+          <div className="flex justify-between pt-6 mt-6 border-t">
             <Button
               type="button"
-              onClick={etapeSuivante}
-              style={{ backgroundColor: "#0052FF", color: "white" }}
-              disabled={loading || uploadingImages}
+              variant="outline"
+              onClick={etapePrecedente}
+              disabled={etape === 1 || loading || uploadingImages}
             >
-              {uploadingImages ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <ChevronRight className="ml-2" size={16} />
-              )}
-              {uploadingImages ? "Upload..." : "Suivant"}
+              <ChevronLeft className="mr-2" size={16} />
+              Précédent
             </Button>
-          ) : (
-            <Button
-              type="submit"
-              style={{ backgroundColor: "#0052FF", color: "white" }}
-              disabled={loading || uploadingImages}
-            >
-              {loading || uploadingImages ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2" size={16} />
-              )}
-              {loading || uploadingImages
-                ? uploadingImages
-                  ? "Upload..."
-                  : "Sauvegarde..."
-                : annonce
-                ? "Modifier"
-                : "Publier"}{" "}
-              l'annonce
-            </Button>
-          )}
-        </div>
-      </form>
-    </Modal>
+
+            {etape < 5 ? (
+              <Button
+                type="button"
+                onClick={etapeSuivante}
+                style={{ backgroundColor: "#0052FF", color: "white" }}
+                disabled={loading || uploadingImages}
+              >
+                {uploadingImages ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ChevronRight className="ml-2" size={16} />
+                )}
+                {uploadingImages ? "Upload..." : "Suivant"}
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                style={{ backgroundColor: "#0052FF", color: "white" }}
+                disabled={loading || uploadingImages}
+              >
+                {loading || uploadingImages ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2" size={16} />
+                )}
+                {loading || uploadingImages
+                  ? uploadingImages
+                    ? "Upload..."
+                    : "Sauvegarde..."
+                  : annonce
+                  ? "Modifier"
+                  : "Publier"}{" "}
+                l'annonce
+              </Button>
+            )}
+          </div>
+        </form>
+      </Modal>
+
+      <LocationPickerModal
+        open={showLocationPicker}
+        onOpenChange={setShowLocationPicker}
+        latitude={formData.latitude}
+        longitude={formData.longitude}
+        onLocationChange={handleLocationChange}
+      />
+    </>
   );
 };
 

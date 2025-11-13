@@ -368,7 +368,7 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
-                    <Route path="clients" element={<ClientSection />} />
+                    {/* <Route path="clients" element={<ClientSection />} /> */}
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />

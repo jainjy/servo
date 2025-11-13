@@ -42,6 +42,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import UserService from "@/services/userService";
 import { toast } from "sonner";
+import {LocationPickerModal} from "@/components/location-picker-modal";
 
 interface UserProfile {
   id: string;
@@ -115,7 +116,10 @@ const ProfilePage = () => {
     addressComplement: "",
     commercialName: "",
     siret: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -137,6 +141,8 @@ const ProfilePage = () => {
         addressComplement: userData.addressComplement || "",
         commercialName: userData.commercialName || "",
         siret: userData.siret || "",
+        latitude: userData.latitude,
+        longitude: userData.longitude,
       });
     } catch (error) {
       console.error("Erreur lors du chargement du profil:", error);
@@ -161,6 +167,8 @@ const ProfilePage = () => {
         addressComplement: formData.addressComplement,
         commercialName: formData.commercialName,
         siret: formData.siret,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
 
       await UserService.updateProfile(updateData);
@@ -189,6 +197,8 @@ const ProfilePage = () => {
         addressComplement: user.addressComplement || "",
         commercialName: user.commercialName || "",
         siret: user.siret || "",
+        latitude: user.latitude,
+        longitude: user.longitude,
       });
     }
     setIsEditing(false);
@@ -252,8 +262,12 @@ const ProfilePage = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
   };
 
   // Fonctions pour la modale de changement de mot de passe
@@ -593,6 +607,68 @@ const ProfilePage = () => {
                     placeholder="Appartement, étage, etc."
                   />
                 </div>
+
+                {/* Nouvelles coordonnées GPS */}
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Coordonnées GPS
+                    </h4>
+                    {isEditing && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsLocationModalOpen(true)}
+                        className="gap-2"
+                      >
+                        <MapPin className="h-3 w-3" />
+                        Sur la carte
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Latitude</label>
+                      <Input
+                        type="number"
+                        step="0.000001"
+                        value={formData.latitude || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "latitude",
+                            e.target.value ? parseFloat(e.target.value) : null
+                          )
+                        }
+                        disabled={!isEditing}
+                        placeholder="Ex: -20.8789"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Longitude</label>
+                      <Input
+                        type="number"
+                        step="0.000001"
+                        value={formData.longitude || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "longitude",
+                            e.target.value ? parseFloat(e.target.value) : null
+                          )
+                        }
+                        disabled={!isEditing}
+                        placeholder="Ex: 55.4481"
+                      />
+                    </div>
+                  </div>
+
+                  {formData.latitude && formData.longitude && (
+                    <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700 border border-blue-200">
+                      Position : {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -920,6 +996,15 @@ const ProfilePage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* LocationPicker Modal */}
+      <LocationPickerModal
+        open={isLocationModalOpen}
+        onOpenChange={setIsLocationModalOpen}
+        latitude={formData.latitude}
+        longitude={formData.longitude}
+        onLocationChange={handleLocationChange}
+      />
     </div>
   );
 };
