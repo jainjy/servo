@@ -337,7 +337,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex lg:text-lg text-xs items-center gap-2">
             <MapPin className="h-5 w-5" />
             Sélectionnez une localisation sur la carte
           </DialogTitle>
@@ -512,7 +512,7 @@ const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
 
         {/* Section masquée lorsqu'une localisation est sélectionnée */}
         {!selectedLocation && (
-          <div className="flex justify-between items-center p-4 border-t">
+          <div className="grid  lg:gap-0 lg:flex justify-between items-center p-4 border-t">
             <div className="text-sm text-muted-foreground">
               Cliquez sur la carte ou sélectionnez une propriété
             </div>
