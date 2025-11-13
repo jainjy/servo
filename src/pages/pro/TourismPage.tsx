@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Search, MapPin, Calendar, Users, Star, ChevronLeft, ChevronRight,
+  MapPin, Users, Star, 
   Heart, Bed, Wifi, Car, Utensils, Snowflake, Dumbbell, Tv,
-  Map, Phone, Mail, Shield, Clock, CheckCircle, X, Plus, Minus,
+  CheckCircle, X, 
   Edit, Trash2, Eye, PlusCircle, Building, Bath, Square,
-  TrendingUp, Map as MapIcon, Home, Upload, Image, Trash
+  TrendingUp, Home, Upload, Trash
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { tourismeAPI } from "@/lib/api"
-
+import api from "@/lib/api"
 export default function TourismPage() {
   const [listings, setListings] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
@@ -255,19 +255,7 @@ export default function TourismPage() {
     toast.info("Réservation confirmée ! Un email de confirmation vous a été envoyé.");
   };
 
-  const nextImage = (listingId, totalImages) => {
-    setCurrentImageIndex(prev => ({
-      ...prev,
-      [listingId]: (prev[listingId] + 1) % totalImages
-    }));
-  };
 
-  const prevImage = (listingId, totalImages) => {
-    setCurrentImageIndex(prev => ({
-      ...prev,
-      [listingId]: (prev[listingId] - 1 + totalImages) % totalImages
-    }));
-  };
 
   const toggleFavorite = (listingId) => {
     setFavorites(prev => {
@@ -281,38 +269,8 @@ export default function TourismPage() {
     });
   };
 
-  const scrollSlider = (direction) => {
-    if (sliderRef.current) {
-      const scrollAmount = 300;
-      sliderRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
 
-  const updateGuestCount = (type, delta) => {
-    setFilters(prev => {
-      const newValues = { ...prev };
-      const current = newValues[type];
-      const newValue = Math.max(0, current + delta);
-      const totalGuests = newValue +
-        (type === 'adults' ? prev.children + prev.infants :
-          type === 'children' ? prev.adults + prev.infants : prev.adults + prev.children);
 
-      if (totalGuests <= 16) {
-        newValues[type] = newValue;
-        newValues.guests = newValues.adults + newValues.children + newValues.infants;
-      }
-
-      return newValues;
-    });
-  };
-
-  const getAmenityIcon = (amenityId) => {
-    const amenity = availableAmenities.find(a => a.id === amenityId);
-    return amenity?.icon || CheckCircle;
-  };
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -799,16 +757,7 @@ export default function TourismPage() {
         files.forEach(file => {
           formData.append('files', file);
         });
-
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${API_BASE_URL}/api/upload/tourism-multiple`, {
-          method: 'POST',
-          // TEMPORAIRE : Enlevez l'authentification
-          // headers: {
-          //   'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
-          // },
-          body: formData
-        });
+        const response = await api.post(`/upload/tourism-multiple`, formData);
 
         console.log('📤 Statut réponse:', response.status);
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import api from "@/lib/api"
 interface Advertisement {
   id: string;
   title: string;
@@ -20,7 +20,7 @@ const AdvertisementPopup: React.FC<Props> = ({ refreshMinutes = 3 }) => {
   // Fonction pour récupérer les pubs actives
   const fetchAdvertisements = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/advertisements/active");
+      const response = await api.get("/advertisements/active");
       if (!response.ok) throw new Error("Erreur réseau lors du chargement des pubs");
       const data = await response.json();
 
@@ -55,9 +55,7 @@ const handleClick = async () => {
   if (ad) {
     try {
       // Enregistrer le clic côté backend
-      await fetch(`http://localhost:3001/api/advertisements/${ad.id}/click`, {
-        method: "POST"
-      });
+      await api.post(`/advertisements/${ad.id}/click`);
     } catch (error) {
       console.error("Erreur enregistrement clic :", error);
     }
