@@ -6,7 +6,6 @@ import {
   MapPin,
   Wrench,
   Zap,
-  User,
   MessageCircle,
   AlertCircle,
   Clock,
