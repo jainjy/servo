@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw } from "lucide-react";
+import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
@@ -709,7 +709,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           <div className="mb-6">
 
             <div className="p-4 flex items-center gap-3">
-              <div className="p-1 rounded-full bg-white border-black border-2">
+              <div className="p-1 lg:block hidden rounded-full bg-white border-black border-2">
                 <img
                   src={logo}
                   alt="Servo Logo"
@@ -718,21 +718,58 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               </div>
 
               <div className="relative bg-white rounded-lg flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute lg:block hidden left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+
                 <Input
                   ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Rechercher un bien, service, article..."
-                  className="pl-10 h-12 text-lg border-0 bg-transparent focus-visible:ring-0"
+                  className="pl-2 lg:pl-10 pr-12 lg:pr-10 h-12 text-lg border-0 bg-transparent focus-visible:ring-0"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       handleSearch();
                     }
                   }}
                 />
-              </div>
 
+                {/* Bouton Rechercher - Desktop */}
+                <Button
+                  onClick={handleSearch}
+                  disabled={isLoading}
+                  className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 h-10 min-w-24 bg-black/90 hover:bg-black overflow-hidden text-sm"
+                >
+                  {runnerVisible ? (
+                    <span className="inline-flex items-center">
+                      <img
+                        src={start}
+                        alt="recherche"
+                        className={`w-6 transition-transform duration-300 ease-out ${runnerExit ? 'translate-x-[200%]' : 'translate-x-0'}`}
+                      />
+                      {isLoading ? ' Recherche...' : ''}
+                    </span>
+                  ) : (
+                    isLoading ? "Recherche..." : "Rechercher"
+                  )}
+                </Button>
+
+                {/* Icône Recherche - Mobile */}
+                <Button
+                  onClick={handleSearch}
+                  disabled={isLoading}
+                  size="icon"
+                  variant="ghost"
+                  className="lg:hidden absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-100 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <div className="w-10 h-full bg-slate-900 rounded-sm grid place-items-center"> 
+                      <Search className="h-10 w-10  z-50 rounded-sm text-slate-100" />
+                    </div>
+                  )}
+                </Button>
+              </div>
               <Button
                 onClick={() => setHistoryOpen(true)}
                 variant="ghost"
@@ -742,25 +779,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                 <History className="h-5 w-5" />
               </Button>
 
-              <Button
-                onClick={handleSearch}
-                disabled={isLoading}
-                className="h-12 min-w-32 bg-black/90 hover:bg-black overflow-hidden"
-              >
-                {runnerVisible ? (
-                  <span className="inline-flex items-center">
-                    <img
-                      src={start}
-                      alt="recherche"
-                      className={`w-10 transition-transform duration-300 ease-out ${runnerExit ? 'translate-x-[200%]' : 'translate-x-0'
-                        }`}
-                    />
-                    {isLoading ? ' Recherche...' : ''}
-                  </span>
-                ) : (
-                  isLoading ? "Recherche..." : "Rechercher"
-                )}
-              </Button>
+
               <button onClick={handleClose} className="relative w-10 h-10 group transition-all duration-300">
                 <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 transition-all duration-500">
                   <span className="absolute h-0.5 bg-gray-600 group-hover:bg-slate-900 w-11/12 -translate-y-1 group-hover:rotate-45 group-hover:translate-y-0 group-hover:scale-125 transition-all duration-500 origin-center"></span>
@@ -777,7 +796,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                 className="fixed inset-0 bg-black/10 w-screen h-screen overflow-hidden backdrop-blur-sm z-50"
                 onClick={() => setHistoryOpen(false)}
               />
-              <aside className="absolute z-50 h-96 w-1/2 bg-white border border-gray-200 rounded-b-xl  left-1/2 top-0 transform -translate-x-1/2">
+              <aside className="absolute z-50 h-96 w-11/12  lg:w-1/2 bg-white border border-gray-200 rounded-xl lg:rounded-b-xl  left-1/2 top-0 transform -translate-x-1/2">
                 <div className="h-full flex flex-col">
                   <div className="px-4 py-3 border-b flex items-center justify-between">
                     <div className="flex items-center gap-2">

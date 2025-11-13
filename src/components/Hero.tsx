@@ -69,12 +69,12 @@ const Hero = () => {
     <>
       <section
         id="hero"
-        className="relative min-h-[600px] flex items-center justify-center overflow-hidden"
+        className="relative min-h-96 lg:min-h-[600px] flex items-start lg:items-center  overflow-hidden"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
         <div
-          className="perspective-[500px] w-full h-screen rounded-lg bg-black overflow-hidden absolute"
+          className="perspective-[500px] w-full h-[420px] lg:h-screen rounded-lg bg-black overflow-hidden absolute"
           style={{ transformStyle: "preserve-3d" }}
         >
           <img
@@ -101,13 +101,13 @@ const Hero = () => {
             de l'habitat
           </h1>
 
-          <p className="mb-12 text-xl text-white drop-shadow-md">
+          <p className="mb-12 text-sm lg:text-xl text-white drop-shadow-md">
             Immobilier, services et produits — tout en un, guidé par l'IA
           </p>
 
           <div className="mx-auto max-w-3xl" onClick={openModal}>
             <div
-              className="flex flex-col md:flex-row gap-3 bg-white rounded-2xl p-3 shadow-2xl cursor-text"
+              className="flex flex-col md:flex-row gap-3 bg-white rounded-2xl p-3 lg:mt-0 -mt-4 shadow-2xl cursor-text"
             //  onClick={openSearchPage}
             >
               <div className="flex-1 relative">
@@ -118,7 +118,7 @@ const Hero = () => {
                   // onFocus={openSearchPage}
                   // onKeyPress={handleKeyPress}
                   placeholder="Cliquez pour lancer une recherche avancée"
-                  className="pl-12 h-12 border-0 bg-transparent text-base focus-visible:ring-0 placeholder:text-gray-500 cursor-pointer"
+                  className="pl-12 h-12 lg:placeholder:text-base placeholder:text-xs border-0 bg-transparent text-base focus-visible:ring-0 placeholder:text-gray-500 cursor-pointer"
                 />
               </div>
               <Button
@@ -133,9 +133,8 @@ const Hero = () => {
         </div>
       </section>
       {isModalOpen && (
-        <div className="fixed z-50 overflow-hidden w-full h-full backdrop-blur-md inset-0">
-
-          <div className="h-[600px] absolute bottom-0 w-full overflow-hidden">
+        <div className="fixed z-50 overflow-hidden w-full h-full backdrop-blur-sm lg:backdrop-blur-md inset-0">
+          <div className="lg:h-[600px] absolute top-12 bottom-0 w-full overflow-hidden">
             <Recherche onClick={closeModal} />
           </div>
         </div>
