@@ -15,6 +15,7 @@ import BienEtre from "./pages/bien_etre";
 import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
 import ProduitsGeneraux from "./components/produits/ProduitsGeneraux";
+import ServicesMaison from "./components/produits/ServiceMaison";
 import Entreprise from "./pages/Entreprise";
 import Financement from "./pages/Financement";
 import Actualites from "./pages/Actualites";
@@ -131,6 +132,7 @@ import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 import AdminMedia from "./pages/pro/adminMedia";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
+import UtilitiesProduits from "./components/produits/UtilitiesProduits";
 
 const queryClient = new QueryClient();
 
@@ -283,6 +285,9 @@ const App = () => {
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
                   <Route path="/produits-generaux" element={<ProduitsGeneraux />} />
+                  <Route path="/services-maison" element={<ServicesMaison />} />
+                  <Route path="/utilitie" element={<UtilitiesProduits />} />
+
                   <Route
                     path="/stripe-create"
                     element={<StripeConnectButton user={user} />}

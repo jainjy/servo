@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import EquipementSection from '@/components/produits/EquipementSection';
 import MateriauxSection from '@/components/produits/MateriauxSection';
 import DesignSection from '@/components/produits/DesignSection';
 import ProduitsGeneraux from '@/components/produits/ProduitsGeneraux';
-
+import ServicesMaison from '@/components/produits/ServiceMaison';
+import UtilitiesProduits from '@/components/produits/UtilitiesProduits';
 import Modal from '@/components/ui/modal';
 
 interface ItemDetails {
@@ -17,6 +18,7 @@ interface ItemDetails {
 
 const DomicileLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{item: ItemDetails; section: string} | null>(null);
@@ -25,6 +27,17 @@ const DomicileLayout = () => {
     setSelectedItem({ item, section });
     setIsModalOpen(true);
   };
+
+  // Fonction pour gérer le clic sur "Service & Maison"
+  const handleServicesMaisonClick = () => {
+    navigate('/services-maison');
+  };
+
+  // Fonction pour gérer le clic sur "Utilities"
+  const handleUtilitiesClick = () => {
+    navigate('/utilitie');
+  };
+
   useEffect(() => {
     if (location.hash) {
       const hash = location.hash.replace('#', '');
@@ -36,6 +49,7 @@ const DomicileLayout = () => {
       }
     }
   }, [location]);
+
   const sections = [
     {
       title: "Produits & Commerces",
@@ -52,7 +66,7 @@ const DomicileLayout = () => {
       ]
     },
     {
-      title: "Service Maison",
+      title: "Service & Maison",
       description: "Services à domicile de qualité",
       items: [
         { title: "Ménage", price: "25€/h", image: "https://i.pinimg.com/736x/a1/7f/6d/a17f6d0d7e4a0dd16e01f84d41b51da3.jpg", description: "Service de nettoyage professionnel" },
@@ -159,6 +173,12 @@ const DomicileLayout = () => {
                     : 'bg-white text-black hover:bg-gray-100'
                 } px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-sm`
               }
+              // Gestion spéciale pour les onglets avec navigation
+              onClick={
+                section.title === "Service & Maison" ? handleServicesMaisonClick :
+                section.title === "Utilities" ? handleUtilitiesClick :
+                undefined
+              }
             >
               {section.title}
             </Tab>
@@ -177,7 +197,8 @@ const DomicileLayout = () => {
               ) 
               : section.title === "Matériaux" ? (
                 <MateriauxSection searchQuery="" />
-              ) : section.title === "Produits & Commerces" ? (
+              )
+               : section.title === "Produits & Commerces" ? (
                 <ProduitsGeneraux />
               ) : section.title === "Design & Décoration" ? (
                 <DesignSection searchQuery="" />
