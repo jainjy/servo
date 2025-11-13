@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import AnnonceModal from './AnnonceModal';
 import AnnonceInfo from './AnnonceInfo';
 import { annonceAPI } from '../lib/api';
+import DemandeAudit from './DemandeAudit';
 
 // Interface pour le type Annonce
 interface Owner {
@@ -40,6 +41,7 @@ const ImmobilierSections = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [annonces, setAnnonces] = useState<Annonce[]>([]);
+    const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedAnnonce, setSelectedAnnonce] = useState<Annonce | null>(null);
@@ -90,6 +92,12 @@ const ImmobilierSections = () => {
         console.log("Nouvelle annonce ajoutée:", newAnnonce);
         fetchAnnonces();
     };
+    
+    const handleAddAudit = (newAudit: any) => {
+        console.log("Nouvel audit ajouté:", newAudit);
+        // Afficher un message de confirmation
+        alert('Votre demande d\'audit a été soumise avec succès ! Notre équipe vous contactera sous 48h.');
+    };
 
     const handleViewAnnonce = (annonce: Annonce) => {
         setSelectedAnnonce(annonce);
@@ -112,7 +120,7 @@ const ImmobilierSections = () => {
                             <h3 className="text-2xl font-semibold">Nos dernières annonces</h3>
                             <p className="text-gray-600">Découvrez notre sélection de biens premium</p>
                         </div>
-                        <button 
+                        {/* <button 
                             onClick={() => setIsModalOpen(true)}
                             className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
                         >
@@ -120,7 +128,7 @@ const ImmobilierSections = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                             </svg>
                             Déposer une annonce
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* État de chargement */}
@@ -315,21 +323,36 @@ const ImmobilierSections = () => {
                                 );
                             })}
                         </div>
-                    )}
+                    )}  
                 </div>
             )
         },
-        {
+       {
             title: "Audit patrimonial & finance",
             description: "Gestion locative & syndic",
             content: (
                 <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div className="space-y-4">
+                    {/* Section en-tête avec bouton aligné à droite */}
+                    <div className="flex justify-between mb-8">
+                        <div className="space-y-2">
                             <h3 className="text-2xl font-semibold">Optimisez votre patrimoine</h3>
                             <p className="text-gray-600">
                                 Notre équipe d'experts vous accompagne dans l'analyse et l'optimisation de votre patrimoine immobilier.
                             </p>
+                        </div>
+                        <button 
+                            onClick={() => setIsAuditModalOpen(true)}
+                            className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            Demander un audit
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
                             <ul className="space-y-2">
                                 {[
                                     "Analyse complète de votre patrimoine",
@@ -346,9 +369,6 @@ const ImmobilierSections = () => {
                                     </li>
                                 ))}
                             </ul>
-                            <button className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors mt-4">
-                                Demander un audit
-                            </button>
                         </div>
                         <div className="space-y-4">
                             <div className="bg-gray-50 p-6 rounded-lg">
@@ -364,6 +384,17 @@ const ImmobilierSections = () => {
                                         <span className="text-green-600 font-medium">{service.price}</span>
                                     </div>
                                 ))}
+                            </div>
+                            
+                            {/* Section informations complémentaires */}
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                                <h4 className="font-semibold text-blue-800 mb-2">Pourquoi un audit ?</h4>
+                                <ul className="text-sm text-blue-700 space-y-1">
+                                    <li>• Identifier les opportunités d'optimisation</li>
+                                    <li>• Anticiper les risques fiscaux</li>
+                                    <li>• Maximiser votre rendement</li>
+                                    <li>• Planifier votre succession</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -398,6 +429,11 @@ const ImmobilierSections = () => {
                 isOpen={isViewModalOpen}
                 onClose={handleCloseModal}
                 annonce={selectedAnnonce}
+            />
+            <DemandeAudit 
+                isOpen={isAuditModalOpen}
+                onClose={() => setIsAuditModalOpen(false)}
+                onAddAudit={handleAddAudit}
             />
 
             <div className='absolute inset-0 -z-20 overflow-hidden h-80 w-full'>

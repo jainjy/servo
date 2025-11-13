@@ -134,6 +134,7 @@ import AdminMedia from "./pages/pro/adminMedia";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
 import UtilitiesProduits from "./components/produits/UtilitiesProduits";
 
+import AuditsPage from "./pages/admin/AdminAuditPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -434,6 +435,7 @@ const App = () => {
                     <Route path="blog" element={<Blog />} />
                     <Route path="bookings" element={<Bookings />} />
                     <Route path="listings" element={<Listings />} />
+                    <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
                     <Route path="products" element={<Products />} />
                     <Route path="profile" element={<Profile />} />

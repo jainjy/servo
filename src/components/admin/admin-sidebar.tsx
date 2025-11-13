@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils"; // Utilitaire cn (à s'assurer qu'il est disponible)
 import {
   LayoutDashboard, Users, Building2, Wrench, Calendar,
-  ShoppingBag, Plane, CreditCard, Newspaper, Settings,
+  ShoppingBag, Plane, CreditCard, Newspaper, Settings,ShieldCheck,
   ChevronUp, ChevronDown,
   MessageCircle,
   FileCheck,
@@ -20,6 +20,7 @@ const navigation = [
   { name: "Utilisateurs", href: "/admin/users", icon: Users },
   // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
+  { name: "Audit", href: "/admin/audits", icon: ShieldCheck },
   { name: "Services", href: "/admin/services", icon: Wrench },
   {
     name: "categorie de services",
