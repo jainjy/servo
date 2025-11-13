@@ -846,15 +846,7 @@ const Header = () => {
                   </button>
                 </div>
               )}
-              <div className="text-center">
-                <a
-                  href="/devis"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
-                >
-                  Demander un devis gratuit
-                </a>
-              </div>
+            
             </div>
           </div>
         </SheetContent>

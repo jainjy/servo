@@ -1037,7 +1037,9 @@ const { user } = useAuth();
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploadingFile || sending}
+                  disabled={
+                    uploadingFile || sending || demande?.statut == "terminée"
+                  }
                 />
               </label>
 

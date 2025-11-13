@@ -898,12 +898,12 @@ export default function UserDiscussions() {
                             <p className="text-sm font-medium mb-2">
                               Nouveau devis reçu
                             </p>
-                            {!(artisans.find(
+                            {(artisans.find(
                               (a) => a.userId === message.expediteurId
                             ).devisFileUrl != null ||
                             artisans.find(
                               (a) => a.userId === message.expediteurId
-                            ).devis != null )? (
+                            ).devis != null ) ? (
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => {
@@ -1087,7 +1087,7 @@ export default function UserDiscussions() {
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploadingFile || sending}
+                  disabled={uploadingFile || sending || demande?.statut == "terminée"}
                 />
               </label>
 
