@@ -3,6 +3,8 @@ import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+// Dans PartnersPage.tsx et ServicesPages.tsx
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Calendar, ArrowRight, ChevronDown, X, Clock, User, Play, Headphones, BookOpen, Download, MessageCircle, ThumbsUp, Share2, Bookmark, Heart, Eye, Pause } from "lucide-react";
 import "@/styles/actualite.css";
@@ -265,7 +267,7 @@ const Actualites = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <style jsx global>{`
+      <style >{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
         
         .font-elegant {

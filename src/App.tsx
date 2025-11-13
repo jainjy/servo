@@ -23,7 +23,6 @@ import RegisterPage from "./pages/Register";
 import ProRegisterPage from "./pages/ProRegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import TourismSection from "./pages/Tourisme";
-import ServicesPartnersPage from "./pages/ServicesPartnersPage";
 import EstimationImmobilierPage from "./pages/EstimationImmobilierPage";
 import Index from "./pages/Index";
 import Podcast from "./pages/podcast";
@@ -31,6 +30,7 @@ import ProLayout from "./pages/pro/ProLayout";
 import Dashboard from "./pages/pro/Dashboard";
 import ListingsPage from "./pages/pro/ListingsPage";
 import CalendarPage from "./pages/pro/CalendarPage";
+import ServicesPartnersPage from './pages/ServicesPartnersPage';
 import ClientSection from "./pages/pro/ClientSection";
 import DocumentsPage from "./pages/pro/DocumentsPage";
 import ReviewsPage from "./pages/pro/ReviewsPage";
@@ -192,6 +192,7 @@ const App = () => {
               <Layout>
                 <Routes>
                   {/* Section publiques Routes */}
+                  <Route path="/services-partners" element={<ServicesPartnersPage />} />
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/cookies" element={<CookiesPolicy />} />
