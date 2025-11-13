@@ -161,4 +161,15 @@ export const annonceAPI = {
   searchAnnonces: (filters) => api.get('/anonce/search', { params: filters }),
 };
 
+export const auditAPI = {
+  // Créer une demande d'audit
+  createAudit: (data) => api.post('/add_audit', data),
+  
+  // Récupérer les audits de l'utilisateur
+  getUserAudits: () => api.get('/add_audit/user/mes-audits'),
+  
+  // Supprimer un audit
+  deleteAudit: (id) => api.delete(`/add_audit/${id}`),
+};
+
 export default api;
