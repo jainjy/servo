@@ -286,9 +286,9 @@ const App = () => {
                   <Route path="/immobilier/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
-                  <Route path="/produits-generaux" element={<ProduitsGeneraux />} />
-                  <Route path="/services-maison" element={<ServicesMaison />} />
-                  <Route path="/utilitie" element={<UtilitiesProduits />} />
+                  {/* <Route path="/produits-generaux" element={<ProduitsGeneraux />} /> */}
+                  {/* <Route path="/services-maison" element={<ServicesMaison />} />
+                  <Route path="/utilitie" element={<UtilitiesProduits />} /> */}
 
                   <Route
                     path="/stripe-create"

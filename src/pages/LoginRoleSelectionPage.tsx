@@ -86,10 +86,10 @@ const LoginRoleSelectionPage = () => {
               />
             </div>
           </div>
-          <CardTitle className="text-4xl font-bold text-white tracking-wide mb-2">
+          <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
             Connectez-vous à votre compte
           </CardTitle>
-          <CardDescription className="mb-5 text-md text-gray-400 font-extralight max-w-2xl mx-auto">
+          <CardDescription className="mb-5 text-sm lg:text-md text-gray-400 font-extralight max-w-2xl mx-auto">
             Sélectionnez le type de compte avec lequel vous souhaitez vous connecter.
             Votre expérience sera adaptée à votre profil.
           </CardDescription>
@@ -101,7 +101,7 @@ const LoginRoleSelectionPage = () => {
             return (
               <div
                 key={role.id}
-                className={`relative border-2 ${color.border} rounded-xl p-8 hover:${color.hoverBorder} transition-all duration-500 cursor-pointer group bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-xl border-opacity-20 hover:border-opacity-40`}
+                className={`lg:m-0 m-4 relative border-2 ${color.border} rounded-xl p-8 hover:${color.hoverBorder} transition-all duration-500 cursor-pointer group bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-xl border-opacity-20 hover:border-opacity-40`}
                 onClick={() => handleRoleSelection(role.id as "particular" | "professional")}
               >
 
@@ -146,7 +146,7 @@ const LoginRoleSelectionPage = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-12 space-y-4">
+        <div className=" text-center mt-12 lg:mb-0 mb-4 space-y-4">
           <div className="text-md text-gray-600">
             Pas encore de compte ?{" "}
             <a
@@ -159,7 +159,7 @@ const LoginRoleSelectionPage = () => {
 
           
         </div>
-        <div className="flex items-center mt-16  justify-between px-2 text-sm text-gray-500">
+        <div className="lg:flex hidden items-center mt-16  justify-between px-2 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               <span>100% sécurisé</span>

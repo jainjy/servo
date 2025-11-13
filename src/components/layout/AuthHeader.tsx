@@ -231,16 +231,12 @@ export function AuthHeader() {
   };
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
+    <header className="flex h-16 items-center justify-between border-b border-border bg-white lg:mt-0 mt-16 px-0 lg:px-6">
       {/* Barre de Recherche */}
       <div className="relative flex flex-1 items-center">
-        <div className="absolute -left-2 lg:hidden sm:hidden p-1 rounded-full  bg-white border-black border-2">
-          {/* Remplacement de <Image> par <img> */}
-          <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
-        </div>
         {/* L'ajustement des classes Tailwind 'w-40 left-24' est conservé */}
         <div
-          className="lg:left-0 md:left-0 w-40 left-16 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96"
+          className="lg:left-0 md:left-0 w-11/12 left-2 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96"
           ref={searchRef}
         >
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -322,7 +318,7 @@ export function AuthHeader() {
           </Button>
 
           {showNotifications && (
-            <div className="absolute -right-16 lg:right-0 top-full mt-2 w-96 rounded-lg border border-border bg-card shadow-lg z-50 max-h-96 overflow-hidden">
+            <div className="absolute -right-12 lg:right-0 top-full mt-2 w-96 rounded-lg border border-border bg-card shadow-lg z-50 max-h-96 overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b">
                 <span className="font-semibold">Notifications</span>
                 {unreadCount > 0 && (
@@ -401,7 +397,7 @@ export function AuthHeader() {
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
             {currentUser?.avatar ? (
-              <img className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm"
+              <img className="flex h-full w-full object-cover items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm"
                 src={currentUser.avatar} alt="avatar"/>
   
             ) : (

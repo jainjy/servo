@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Package,
   ShoppingCart,
   Star,
@@ -33,7 +33,7 @@ const ProduitsGeneraux = () => {
       setIsLoading(true);
       const response = await api.get('/products', {
         params: {
-          productType: 'general',  
+          productType: 'general',
           status: 'active'
         }
       });
@@ -54,24 +54,24 @@ const ProduitsGeneraux = () => {
       );
       return;
     }
-    
+
     try {
       setAddingProductId(product.id);
-      
+
       // Ajouter le produit au panier
       addToCart(product);
-      
+
       // Petit délai pour laisser le temps à l'état de se mettre à jour
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Trouver l'article dans le panier pour afficher la bonne quantité
       const cartItem = cartItems.find(item => item.id === product.id);
       const quantity = cartItem ? cartItem.quantity : 1;
       const totalItems = getCartItemsCount();
-      
+
       // Afficher une confirmation détaillée
       toast.info(`${product.name} ajouté au panier !`);
-      
+
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error("Erreur lors de l'ajout au panier");
@@ -82,25 +82,25 @@ const ProduitsGeneraux = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des produits généraux...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center">
+          <img src="/loading.gif" className="w-32 h-32" alt="" />
+          <p className=" text-gray-600">Chargement des produits généraux...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-[#F6F8FA]">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4">
         {/* En-tête de la page */}
         <div className="mb-8">
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-[#0052FF]/10">
-                  <Tag className="h-6 w-6 text-[#0052FF]" />
+                  <Tag className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
@@ -111,7 +111,7 @@ const ProduitsGeneraux = () => {
                   </p>
                 </div>
               </div>
-              
+
               {/* Badge de comptage */}
               <Badge variant="secondary" className="px-3 py-1">
                 {products.length} produit{products.length > 1 ? 's' : ''}
@@ -158,7 +158,7 @@ const ProduitsGeneraux = () => {
                   {/* Prix et stock */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex flex-col">
-                      <span className="text-2xl font-bold text-[#0052FF]">
+                      <span className="text-2xl font-bold text-slate-900">
                         €{product.price}
                       </span>
                       {product.comparePrice && product.comparePrice > product.price && (
@@ -191,7 +191,7 @@ const ProduitsGeneraux = () => {
 
                   {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-[#0052FF] hover:bg-[#003EE6] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity === 0 || addingProductId === product.id}
                   >
@@ -217,8 +217,8 @@ const ProduitsGeneraux = () => {
               <p className="text-muted-foreground">
                 Aucun produit de type général disponible pour le moment.
               </p>
-              <Button 
-                onClick={() => navigate('/produits')} 
+              <Button
+                onClick={() => navigate('/produits')}
                 className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
               >
                 Voir toutes les catégories

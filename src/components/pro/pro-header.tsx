@@ -12,7 +12,7 @@ export function ProHeader() {
   const user = AuthService.getCurrentUser()
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-background px-6">
+    <header className="flex h-16 items-center justify-between border-b border-border bg-black px-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="lg:hidden">
           <Menu className="h-5 w-5" />

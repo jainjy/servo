@@ -29,14 +29,6 @@ const DomicileLayout = () => {
   };
 
   // Fonction pour gérer le clic sur "Service & Maison"
-  const handleServicesMaisonClick = () => {
-    navigate('/services-maison');
-  };
-
-  // Fonction pour gérer le clic sur "Utilities"
-  const handleUtilitiesClick = () => {
-    navigate('/utilitie');
-  };
 
   useEffect(() => {
     if (location.hash) {
@@ -173,12 +165,7 @@ const DomicileLayout = () => {
                     : 'bg-white text-black hover:bg-gray-100'
                 } px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-sm`
               }
-              // Gestion spéciale pour les onglets avec navigation
-              onClick={
-                section.title === "Service & Maison" ? handleServicesMaisonClick :
-                section.title === "Utilities" ? handleUtilitiesClick :
-                undefined
-              }
+
             >
               {section.title}
             </Tab>
@@ -202,6 +189,15 @@ const DomicileLayout = () => {
                 <ProduitsGeneraux />
               ) : section.title === "Design & Décoration" ? (
                 <DesignSection searchQuery="" />
+              ) :
+              section.title === "Service & Maison" ? (
+                <ServicesMaison />
+              ) 
+              :
+              section.title === "Utilities" ? (
+                <UtilitiesProduits />
+              ) :section.title === "Produits & Commerces" ? (
+                <ProduitsGeneraux />
               ) : (
                 <>
                   <div className="mb-6">
