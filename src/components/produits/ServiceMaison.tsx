@@ -8,38 +8,82 @@ import {
   Package,
   ShoppingCart,
   Star,
-  Tag
+  Home,
+  Wrench,
+  Sparkles,
+  Leaf,
+  Droplets,
+  Zap,
+  Paintbrush,
+  Hammer,
+  Key,
+  Snowflake
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "../contexts/CartContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
-const ProduitsGeneraux = () => {
+const ServicesMaison = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart, cartItems, getCartItemsCount } = useCart();
 
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addingProductId, setAddingProductId] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState("Toutes");
+
+  // Icônes pour chaque sous-catégorie
+  const subcategoryIcons = {
+    "Ménage": <Sparkles className="h-4 w-4" />,
+    "Jardinage": <Leaf className="h-4 w-4" />,
+    "Plomberie": <Droplets className="h-4 w-4" />,
+    "Électricité": <Zap className="h-4 w-4" />,
+    "Peinture": <Paintbrush className="h-4 w-4" />,
+    "Bricolage": <Hammer className="h-4 w-4" />,
+    "Serrurerie": <Key className="h-4 w-4" />,
+    "Climatisation": <Snowflake className="h-4 w-4" />,
+    "Toutes": <Home className="h-4 w-4" />
+  };
+
+  // Couleurs pour chaque sous-catégorie
+  const subcategoryColors = {
+    "Ménage": "bg-blue-100 text-blue-800 border-blue-200",
+    "Jardinage": "bg-green-100 text-green-800 border-green-200",
+    "Plomberie": "bg-cyan-100 text-cyan-800 border-cyan-200",
+    "Électricité": "bg-yellow-100 text-yellow-800 border-yellow-200",
+    "Peinture": "bg-purple-100 text-purple-800 border-purple-200",
+    "Bricolage": "bg-orange-100 text-orange-800 border-orange-200",
+    "Serrurerie": "bg-gray-100 text-gray-800 border-gray-200",
+    "Climatisation": "bg-indigo-100 text-indigo-800 border-indigo-200"
+  };
 
   useEffect(() => {
-    fetchGeneralProducts();
+    fetchServicesMaisonProducts();
   }, []);
 
-  const fetchGeneralProducts = async () => {
+  useEffect(() => {
+    if (selectedSubcategory === "Toutes") {
+      setFilteredProducts(products);
+    } else {
+      setFilteredProducts(products.filter(product => product.subcategory === selectedSubcategory));
+    }
+  }, [selectedSubcategory, products]);
+
+  const fetchServicesMaisonProducts = async () => {
     try {
       setIsLoading(true);
       const response = await api.get('/products', {
         params: {
-          productType: 'general',  
+          category: 'Services Maison',
           status: 'active'
         }
       });
       setProducts(response.data.products);
     } catch (error) {
-      console.error('Erreur lors du chargement des produits généraux:', error);
+      console.error('Erreur lors du chargement des produits Services Maison:', error);
       setProducts([]);
       toast.error("Erreur lors du chargement des produits");
     } finally {
@@ -80,12 +124,15 @@ const ProduitsGeneraux = () => {
     }
   };
 
+  // Obtenir toutes les sous-catégories uniques
+  const subcategories = ["Toutes", ...new Set(products.map(product => product.subcategory).filter(Boolean))];
+
   if (isLoading) {
     return (
       <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des produits généraux...</p>
+          <p className="mt-4 text-gray-600">Chargement des services maison...</p>
         </div>
       </div>
     );
@@ -100,31 +147,57 @@ const ProduitsGeneraux = () => {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-[#0052FF]/10">
-                  <Tag className="h-6 w-6 text-[#0052FF]" />
+                  <Home className="h-6 w-6 text-[#0052FF]" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
-                    Produits Généraux
+                    Services Maison
                   </h2>
                   <p className="text-[#5A6470]">
-                    Découvrez tous nos produits généraux - une sélection variée pour tous vos besoins
+                    Tout pour l'entretien, la réparation et l'amélioration de votre maison
                   </p>
                 </div>
               </div>
               
               {/* Badge de comptage */}
               <Badge variant="secondary" className="px-3 py-1">
-                {products.length} produit{products.length > 1 ? 's' : ''}
+                {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
               </Badge>
             </div>
           </div>
         </div>
 
-        {/* Produits généraux */}
+        {/* Filtres par sous-catégorie */}
+        <div className="mb-6 bg-white rounded-3xl p-4">
+          <div className="flex flex-wrap gap-2">
+            {subcategories.map((subcategory) => (
+              <Button
+                key={subcategory}
+                variant={selectedSubcategory === subcategory ? "default" : "outline"}
+                className={`flex items-center gap-2 ${
+                  selectedSubcategory === subcategory 
+                    ? "bg-[#0052FF] text-white" 
+                    : "bg-white hover:bg-gray-50"
+                }`}
+                onClick={() => setSelectedSubcategory(subcategory)}
+              >
+                {subcategoryIcons[subcategory]}
+                {subcategory}
+                {subcategory !== "Toutes" && (
+                  <Badge variant="secondary" className="ml-1 bg-white/20 text-white">
+                    {products.filter(p => p.subcategory === subcategory).length}
+                  </Badge>
+                )}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Produits Services Maison */}
         <div className="bg-white rounded-3xl p-6">
-          {products && products.length > 0 ? (
+          {filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
                   {/* Image du produit */}
                   {product.images && product.images.length > 0 ? (
@@ -138,7 +211,7 @@ const ProduitsGeneraux = () => {
                     </div>
                   )}
 
-                  {/* En-tête du produit avec badge */}
+                  {/* En-tête du produit avec badge de sous-catégorie */}
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-[#0052FF] transition-colors flex-1 mr-2">
                       {product.name}
@@ -150,6 +223,21 @@ const ProduitsGeneraux = () => {
                       </Badge>
                     )}
                   </div>
+
+                  {/* Badge de sous-catégorie */}
+                  {product.subcategory && (
+                    <div className="mb-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs flex items-center gap-1 w-fit ${
+                          subcategoryColors[product.subcategory] || "bg-gray-100 text-gray-800 border-gray-200"
+                        }`}
+                      >
+                        {subcategoryIcons[product.subcategory]}
+                        {product.subcategory}
+                      </Badge>
+                    </div>
+                  )}
 
                   <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                     {product.description}
@@ -180,15 +268,6 @@ const ProduitsGeneraux = () => {
                     </div>
                   )}
 
-                  {/* Catégorie */}
-                  {product.category && (
-                    <div className="mb-4">
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                  )}
-
                   {/* Bouton Ajouter au panier */}
                   <Button
                     className="w-full bg-[#0052FF] hover:bg-[#003EE6] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
@@ -212,16 +291,34 @@ const ProduitsGeneraux = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit général trouvé</h3>
+              <Wrench className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">
+                {selectedSubcategory === "Toutes" 
+                  ? "Aucun service maison trouvé" 
+                  : `Aucun produit dans ${selectedSubcategory}`
+                }
+              </h3>
               <p className="text-muted-foreground">
-                Aucun produit de type général disponible pour le moment.
+                {selectedSubcategory === "Toutes"
+                  ? "Aucun produit de services maison disponible pour le moment."
+                  : `Aucun produit disponible dans la catégorie ${selectedSubcategory}.`
+                }
               </p>
+              {selectedSubcategory !== "Toutes" && (
+                <Button 
+                  onClick={() => setSelectedSubcategory("Toutes")} 
+                  className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
+                >
+                  Voir tous les services maison
+                </Button>
+              )}
               <Button 
                 onClick={() => navigate('/produits')} 
-                className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
+                variant="outline"
+                className="mt-4 ml-2"
               >
-                Voir toutes les catégories
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour aux catégories
               </Button>
             </div>
           )}
@@ -231,4 +328,4 @@ const ProduitsGeneraux = () => {
   );
 };
 
-export default ProduitsGeneraux;
+export default ServicesMaison;

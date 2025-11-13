@@ -1,45 +1,97 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Package,
+  Zap,
+  Droplets,
+  Wifi,
+  Flame,
+  Gauge,
+  Sun,
+  Recycle,
+  Battery,
   ShoppingCart,
-  Star,
-  Tag
+  Star
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "../contexts/CartContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
-const ProduitsGeneraux = () => {
+const UtilitiesProduits = () => {
+  const { categoryName } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart, cartItems, getCartItemsCount } = useCart();
 
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [category, setCategory] = useState(null);
   const [addingProductId, setAddingProductId] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState("Toutes");
+
+  // Icônes pour chaque sous-catégorie
+  const subcategoryIcons = {
+    "Électricité": <Zap className="h-4 w-4" />,
+    "Eau": <Droplets className="h-4 w-4" />,
+    "Internet": <Wifi className="h-4 w-4" />,
+    "Gaz": <Flame className="h-4 w-4" />,
+    "Smart Meter": <Gauge className="h-4 w-4" />,
+    "Solar Energy": <Sun className="h-4 w-4" />,
+    "Waste Management": <Recycle className="h-4 w-4" />,
+    "Home Battery": <Battery className="h-4 w-4" />,
+    "Toutes": <Package className="h-4 w-4" />
+  };
+
+  // Couleurs pour chaque sous-catégorie
+  const subcategoryColors = {
+    "Électricité": "bg-yellow-100 text-yellow-800 border-yellow-200",
+    "Eau": "bg-blue-100 text-blue-800 border-blue-200",
+    "Internet": "bg-purple-100 text-purple-800 border-purple-200",
+    "Gaz": "bg-orange-100 text-orange-800 border-orange-200",
+    "Smart Meter": "bg-green-100 text-green-800 border-green-200",
+    "Solar Energy": "bg-amber-100 text-amber-800 border-amber-200",
+    "Waste Management": "bg-emerald-100 text-emerald-800 border-emerald-200",
+    "Home Battery": "bg-indigo-100 text-indigo-800 border-indigo-200"
+  };
 
   useEffect(() => {
-    fetchGeneralProducts();
-  }, []);
+    const categoryData = location.state;
+    if (categoryData) {
+      setCategory(categoryData);
+    }
+  }, [location.state]);
 
-  const fetchGeneralProducts = async () => {
+  useEffect(() => {
+    fetchUtilitiesProducts();
+  }, [categoryName]);
+
+  useEffect(() => {
+    if (selectedSubcategory === "Toutes") {
+      setFilteredProducts(products);
+    } else {
+      setFilteredProducts(products.filter(product => product.subcategory === selectedSubcategory));
+    }
+  }, [selectedSubcategory, products]);
+
+  const fetchUtilitiesProducts = async () => {
     try {
       setIsLoading(true);
       const response = await api.get('/products', {
         params: {
-          productType: 'general',  
+          category: 'Utilities',
           status: 'active'
         }
       });
       setProducts(response.data.products);
     } catch (error) {
-      console.error('Erreur lors du chargement des produits généraux:', error);
+      console.error('Erreur lors du chargement des produits Utilities:', error);
       setProducts([]);
       toast.error("Erreur lors du chargement des produits");
     } finally {
@@ -54,24 +106,24 @@ const ProduitsGeneraux = () => {
       );
       return;
     }
-    
+
     try {
       setAddingProductId(product.id);
-      
+
       // Ajouter le produit au panier
       addToCart(product);
-      
+
       // Petit délai pour laisser le temps à l'état de se mettre à jour
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Trouver l'article dans le panier pour afficher la bonne quantité
       const cartItem = cartItems.find(item => item.id === product.id);
       const quantity = cartItem ? cartItem.quantity : 1;
       const totalItems = getCartItemsCount();
-      
+
       // Afficher une confirmation détaillée
       toast.info(`${product.name} ajouté au panier !`);
-      
+
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error("Erreur lors de l'ajout au panier");
@@ -80,12 +132,15 @@ const ProduitsGeneraux = () => {
     }
   };
 
+  // Obtenir toutes les sous-catégories uniques
+  const subcategories = ["Toutes", ...new Set(products.map(product => product.subcategory).filter(Boolean))];
+
   if (isLoading) {
     return (
       <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des produits généraux...</p>
+        <div className="py-12 flex flex-col justify-center items-center">
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
+          <p className="text-gray-500 mt-4">Chargement des produits utilities...</p>
         </div>
       </div>
     );
@@ -94,37 +149,63 @@ const ProduitsGeneraux = () => {
   return (
     <div className="min-h-screen pt-16 bg-[#F6F8FA]">
       <div className="container mx-auto px-4 py-8">
-        {/* En-tête de la page */}
+        {/* En-tête de la catégorie */}
         <div className="mb-8">
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-[#0052FF]/10">
-                  <Tag className="h-6 w-6 text-[#0052FF]" />
+                  <Zap className="h-6 w-6 text-[#0052FF]" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
-                    Produits Généraux
+                    Utilities & Énergie
                   </h2>
                   <p className="text-[#5A6470]">
-                    Découvrez tous nos produits généraux - une sélection variée pour tous vos besoins
+                    Solutions complètes pour la gestion de vos utilités domestiques et énergétiques
                   </p>
                 </div>
               </div>
               
               {/* Badge de comptage */}
               <Badge variant="secondary" className="px-3 py-1">
-                {products.length} produit{products.length > 1 ? 's' : ''}
+                {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
               </Badge>
             </div>
           </div>
         </div>
 
-        {/* Produits généraux */}
+        {/* Filtres par sous-catégorie */}
+        <div className="mb-6 bg-white rounded-3xl p-4">
+          <div className="flex flex-wrap gap-2">
+            {subcategories.map((subcategory) => (
+              <Button
+                key={subcategory}
+                variant={selectedSubcategory === subcategory ? "default" : "outline"}
+                className={`flex items-center gap-2 ${
+                  selectedSubcategory === subcategory 
+                    ? "bg-[#0052FF] text-white" 
+                    : "bg-white hover:bg-gray-50"
+                }`}
+                onClick={() => setSelectedSubcategory(subcategory)}
+              >
+                {subcategoryIcons[subcategory]}
+                {subcategory}
+                {subcategory !== "Toutes" && (
+                  <Badge variant="secondary" className="ml-1 bg-white/20 text-white">
+                    {products.filter(p => p.subcategory === subcategory).length}
+                  </Badge>
+                )}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Produits Utilities */}
         <div className="bg-white rounded-3xl p-6">
-          {products && products.length > 0 ? (
+          {filteredProducts && filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
                   {/* Image du produit */}
                   {product.images && product.images.length > 0 ? (
@@ -138,7 +219,7 @@ const ProduitsGeneraux = () => {
                     </div>
                   )}
 
-                  {/* En-tête du produit avec badge */}
+                  {/* En-tête du produit avec badge de sous-catégorie */}
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-[#0052FF] transition-colors flex-1 mr-2">
                       {product.name}
@@ -150,6 +231,21 @@ const ProduitsGeneraux = () => {
                       </Badge>
                     )}
                   </div>
+
+                  {/* Badge de sous-catégorie */}
+                  {product.subcategory && (
+                    <div className="mb-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs flex items-center gap-1 w-fit ${
+                          subcategoryColors[product.subcategory] || "bg-gray-100 text-gray-800 border-gray-200"
+                        }`}
+                      >
+                        {subcategoryIcons[product.subcategory]}
+                        {product.subcategory}
+                      </Badge>
+                    </div>
+                  )}
 
                   <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                     {product.description}
@@ -180,15 +276,6 @@ const ProduitsGeneraux = () => {
                     </div>
                   )}
 
-                  {/* Catégorie */}
-                  {product.category && (
-                    <div className="mb-4">
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                  )}
-
                   {/* Bouton Ajouter au panier */}
                   <Button
                     className="w-full bg-[#0052FF] hover:bg-[#003EE6] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
@@ -212,16 +299,34 @@ const ProduitsGeneraux = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit général trouvé</h3>
+              <Zap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">
+                {selectedSubcategory === "Toutes" 
+                  ? "Aucun produit utilities trouvé" 
+                  : `Aucun produit dans ${selectedSubcategory}`
+                }
+              </h3>
               <p className="text-muted-foreground">
-                Aucun produit de type général disponible pour le moment.
+                {selectedSubcategory === "Toutes"
+                  ? "Aucun produit de utilities disponible pour le moment."
+                  : `Aucun produit disponible dans la catégorie ${selectedSubcategory}.`
+                }
               </p>
+              {selectedSubcategory !== "Toutes" && (
+                <Button 
+                  onClick={() => setSelectedSubcategory("Toutes")} 
+                  className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
+                >
+                  Voir tous les produits utilities
+                </Button>
+              )}
               <Button 
-                onClick={() => navigate('/produits')} 
-                className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
+                onClick={() => navigate('/domicile')} 
+                variant="outline"
+                className="mt-4 ml-2"
               >
-                Voir toutes les catégories
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour aux catégories
               </Button>
             </div>
           )}
@@ -231,4 +336,4 @@ const ProduitsGeneraux = () => {
   );
 };
 
-export default ProduitsGeneraux;
+export default UtilitiesProduits;
