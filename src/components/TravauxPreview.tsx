@@ -101,7 +101,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Nos Travaux
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 lg:text-md text-sm text-sm max-w-2xl mx-auto">
             Découvrez un aperçu de nos travaux les plus récents
           </p>
         </div>
@@ -208,7 +208,7 @@ const TravauxPreview = ({ homeCards }: { homeCards?: boolean }) => {
 
           <Button
             variant="outline"
-            className="rounded-2xl border-1 bg-slate-950 border-gray-300 hover:border-blue-500 hover:bg-black text-lg py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
+            className="rounded-2xl border-1 lg:w-auto w-full bg-slate-950 border-gray-300 hover:border-blue-500 hover:bg-black text-lg py-4 font-semibold transition-all duration-300 hover:shadow-lg group"
             onClick={() => navigate("/travaux?categorie=interieurs")}
           >
             <span className="text-white text-base font-mono">
