@@ -128,7 +128,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <div className=" flex items-center justify-center bg-white overflow-auto rounded-lg py-6 px-6 lg:px-2">
+        <div className=" flex items-center justify-center bg-white overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-white">
               <Link 
@@ -140,7 +140,7 @@ const LoginPage = () => {
               </Link>
               <CardHeader className="space-y-0">
                 <div className="flex justify-center mb-4 lg:hidden">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
                     <img src="/logo.png" className="h-10 w-10" alt="Logo" />
                   </div>
                 </div>

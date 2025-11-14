@@ -87,120 +87,118 @@ const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
-      {/* Badge Nouveau */}
-      {demande.nouvelle && (
-        <div className="absolute -top-2 -left-2">
-          <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-            <Star className="w-3 h-3 fill-current" />
-            NOUVEAU
-          </div>
-        </div>
-      )}
-
-      {/* Badge Urgent */}
-      {demande.urgent && (
-        <div className="absolute -top-2 -right-2">
-          <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg animate-pulse">
-            <AlertCircle className="w-3 h-3" />
-            URGENT
-          </div>
-        </div>
-      )}
-
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative">
-            {getMetierIcon(demande.metierLabel)}
-            {demande.nouvelle && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            )}
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
-              {demande.titre}
-            </h3>
-            <p className="text-gray-600 text-sm mt-1 flex items-center gap-2">
-              <span className="bg-gray-100 px-2 py-1 rounded text-xs border border-gray-200">
-                {demande.metierLabel}
-              </span>
-              <span className="flex items-center gap-1 text-gray-500">
-                <MapPin className="w-3 h-3" />
-                {demande.lieu}
-              </span>
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-              demande.statut
-            )}`}
-          >
-            {demande.statut}
-          </span>
-          <span
-            className={`text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
-              demande.urgence
-            )}`}
-          >
-            {getUrgencyIcon(demande.urgence)}
-            {demande.urgence}
-          </span>
-        </div>
+    <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
+  {/* Badge Nouveau */}
+  {demande.nouvelle && (
+    <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2">
+      <div className="bg-green-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-md sm:shadow-lg">
+        <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
+        <span className="hidden xs:inline">NOUVEAU</span>
+        <span className="xs:hidden">NEW</span>
       </div>
+    </div>
+  )}
 
-      <p className="text-gray-700 mb-4 line-clamp-2 leading-relaxed">
-        {demande.description}
-      </p>
+  {/* Badge Urgent */}
+  {demande.urgent && (
+    <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2">
+      <div className="bg-red-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-md sm:shadow-lg animate-pulse">
+        <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+        <span className="hidden xs:inline">URGENT</span>
+        <span className="xs:hidden">URG</span>
+      </div>
+    </div>
+  )}
 
-      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-        <div className="flex items-center gap-4 text-gray-500 text-sm">
-          <span className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            {demande.date}
+  {/* Header compact pour mobile */}
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3 sm:mb-4">
+    <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+      {/* Icône réduite */}
+      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative flex-shrink-0">
+        {getMetierIcon(demande.metierLabel)}
+        {demande.nouvelle && (
+          <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full border border-white"></div>
+        )}
+      </div>
+      
+      {/* Contenu texte compact */}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-gray-900 text-xs lg:text-lg group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+          {demande.titre}
+        </h3>
+        <div className="flex flex-col xs:flex-row xs:items-center gap-1 sm:gap-2 mt-1">
+          <span className="bg-gray-100 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs border border-gray-200 w-fit truncate">
+            {demande.metierLabel}
           </span>
-          <span className="flex items-center gap-1">
-            <User className="w-4 h-4" />
-            {demande.client}
+          <span className="flex items-center gap-1 text-gray-500 text-xs sm:text-sm">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{demande.lieu}</span>
           </span>
-          {demande.budget && (
-            <span className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4" />
-              {demande.budget}
-            </span>
-          )}
-        </div>
-        <div className="flex gap-2">
-          {/* {demande.statut === 'En attente' && (
-            <>
-              <button
-                onClick={() => onValidate(demande.id)}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
-              >
-                <CheckCircle className="w-4 h-4" />
-                Valider
-              </button>
-              <button
-                onClick={() => onAssign(demande.id)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
-              >
-                <Users className="w-4 h-4" />
-                Assigner
-              </button>
-            </>
-          )} */}
-          <Link
-            to={`/admin/messages/${demande.id}`}
-            state={{ demande }}
-            className="bg-gray-800 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 group/btn"
-          >
-            <Eye className="w-4 h-4" />
-            Détails
-          </Link>
         </div>
       </div>
     </div>
+    
+    {/* Status et urgence empilés sur mobile */}
+    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-1 sm:gap-2 self-stretch">
+      <span
+        className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-medium border ${getStatusColor(
+          demande.statut
+        )}`}
+      >
+        {demande.statut}
+      </span>
+      <span
+        className={`text-xs sm:text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
+          demande.urgence
+        )}`}
+      >
+        {getUrgencyIcon(demande.urgence)}
+        {demande.urgence}
+      </span>
+    </div>
+  </div>
+
+  {/* Description réduite */}
+  <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
+    {demande.description}
+  </p>
+
+  {/* Footer compact */}
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-100">
+    {/* Métadonnées empilées sur mobile */}
+    <div className="flex flex-wrap items-center gap-3 text-gray-500 text-xs sm:text-sm w-full sm:w-auto justify-between sm:justify-start">
+      <span className="flex items-center gap-1">
+        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+        <span className="hidden xs:inline">{demande.date}</span>
+        <span className="xs:hidden text-[10px]">
+          {new Date(demande.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+        </span>
+      </span>
+      <span className="flex items-center gap-1">
+        <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+        <span className="truncate max-w-20 sm:max-w-none">{demande.client}</span>
+      </span>
+      {demande.budget && (
+        <span className="flex items-center gap-1">
+          <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+          <span className="text-[10px] sm:text-sm">{demande.budget}</span>
+        </span>
+      )}
+    </div>
+    
+    {/* Bouton unique sur mobile */}
+    <div className="flex gap-2 w-full sm:w-auto justify-end">
+      <Link
+        to={`/admin/messages/${demande.id}`}
+        state={{ demande }}
+        className="w-full sm:w-auto bg-gray-800 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group/btn text-sm sm:text-base"
+      >
+        <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+        <span>Détails</span>
+      </Link>
+    </div>
+  </div>
+</div>
   );
 };
 
@@ -258,9 +256,8 @@ const StatsCardAdmin = ({
           <div className="text-gray-600 text-sm mt-1">{label}</div>
           {trend && (
             <div
-              className={`text-xs mt-1 flex items-center gap-1 ${
-                trend > 0 ? "text-green-600" : "text-red-600"
-              }`}
+              className={`text-xs mt-1 flex items-center gap-1 ${trend > 0 ? "text-green-600" : "text-red-600"
+                }`}
             >
               <TrendingUp
                 className={`w-3 h-3 ${trend > 0 ? "" : "rotate-180"}`}
@@ -374,10 +371,10 @@ const AdminDemandesPage = () => {
         badge:
           stats.nouvelles > 0
             ? {
-                color: "bg-green-500",
-                text: `${stats.nouvelles} nouv.`,
-                icon: Bell,
-              }
+              color: "bg-green-500",
+              text: `${stats.nouvelles} nouv.`,
+              icon: Bell,
+            }
             : null,
         loading,
       },
@@ -396,10 +393,10 @@ const AdminDemandesPage = () => {
         badge:
           stats.urgentes > 0
             ? {
-                color: "bg-red-500",
-                text: `${stats.urgentes} urg.`,
-                icon: AlertCircle,
-              }
+              color: "bg-red-500",
+              text: `${stats.urgentes} urg.`,
+              icon: AlertCircle,
+            }
             : null,
         loading,
       },
@@ -466,7 +463,7 @@ const AdminDemandesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header Admin */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -496,7 +493,7 @@ const AdminDemandesPage = () => {
       </div>
 
       {/* Barre de recherche et filtres */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 mb-8 shadow-sm">
+      <div className="bg-white rounded-xl border lg:p-6 p-2 border-gray-200 mb-8 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
           {/* Barre de recherche */}
           <div className="flex-1 w-full lg:w-auto">
@@ -531,24 +528,23 @@ const AdminDemandesPage = () => {
         </div>
 
         {/* Filtres rapides avec compteurs en temps réel */}
-        <div className="flex gap-2 mt-6 justify-start flex-wrap">
-          {filters.map((filter) => (
+        <div className=" lg:flex grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6">
+          {filters.map((filter, index) => (
             <button
               key={filter.key}
               onClick={() => setActiveFilter(filter.key)}
-              className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border ${
-                activeFilter === filter.key
+              className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border ${activeFilter === filter.key
                   ? "bg-blue-100 text-blue-700 border-blue-300 shadow-md"
                   : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-gray-700 hover:bg-gray-50"
-              }`}
+                } ${index === 0 ? "col-span-2" : ""
+                }`}
             >
               {filter.label}
               <span
-                className={`text-xs px-2 py-1 rounded-full ${
-                  activeFilter === filter.key
+                className={`text-xs px-2 py-1 rounded-full ${activeFilter === filter.key
                     ? "bg-blue-200 text-blue-800"
                     : "bg-gray-100 text-gray-600"
-                }`}
+                  }`}
               >
                 {filter.count}
               </span>
@@ -568,14 +564,14 @@ const AdminDemandesPage = () => {
             {filteredDemandes.length > 1 ? "s" : ""})
           </span>
         </h2>
-        <div className="text-gray-500 text-sm flex items-center gap-1">
+        <div className="text-gray-500 lg:flex hidden text-sm  items-center gap-1">
           <span>
             Tri:{" "}
             {sortBy === "date"
               ? "Plus récent"
               : sortBy === "urgence"
-              ? "Urgence"
-              : "Statut"}
+                ? "Urgence"
+                : "Statut"}
           </span>
         </div>
       </div>
@@ -597,10 +593,7 @@ const AdminDemandesPage = () => {
                     <div className="h-3 bg-gray-200 rounded w-32"></div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <div className="h-6 bg-gray-200 rounded w-20"></div>
-                  <div className="h-4 bg-gray-200 rounded w-16"></div>
-                </div>
+                
               </div>
               <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
               <div className="h-3 bg-gray-200 rounded w-3/4"></div>

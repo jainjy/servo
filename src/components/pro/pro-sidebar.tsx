@@ -125,7 +125,7 @@ export function ProSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto h-screen p-4">
         {navigation.map((item) => {
           const isActive = getIsActive(item.href);
           const notificationCount = getNotificationCount(item.name);
@@ -181,7 +181,7 @@ export function ProSidebar() {
       </aside>
 
       {/* Mobile: header */}
-      <div className="flex md:hidden items-center h-16 border-b border-sidebar-border px-4 bg-sidebar w-screen fixed top-0 left-0 z-40">
+      <div className="flex md:hidden  items-center h-16 border-b border-sidebar-border px-4  w-screen fixed top-0 left-0 z-40">
         <div className="flex items-center gap-2">
           <div className="p-1 rounded-full bg-white border-black border-2">
             <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
@@ -194,14 +194,6 @@ export function ProSidebar() {
           </div>
         </div>
 
-        {/* Badge de notification mobile */}
-        {notifications.pendingOrders > 0 && (
-          <div className="ml-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-            {notifications.pendingOrders > 99
-              ? "99+"
-              : notifications.pendingOrders}
-          </div>
-        )}
 
         {/* Bouton menu mobile */}
         <button

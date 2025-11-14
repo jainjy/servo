@@ -157,7 +157,7 @@ export default function ForgotPasswordPage() {
 
               {/* Logo au-dessus du titre sur petits écrans */}
               <div className="flex justify-center mb-4 lg:hidden">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
                   <img src="/logo.png" className="h-10 w-10" alt="Logo" />
                 </div>
               </div>

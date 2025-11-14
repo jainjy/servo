@@ -34,21 +34,21 @@ const stats = [
 
 export function StatsCards() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat) => (
-        <Card key={stat.name} className="p-6 bg-card border-border">
-          <div className="flex items-center justify-between">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <stat.icon className="h-6 w-6 text-primary" />
-            </div>
-            <span className="text-sm font-medium text-success">{stat.change}</span>
-          </div>
-          <div className="mt-4">
-            <p className="text-sm font-medium text-muted-foreground">{stat.name}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{stat.value}</p>
-          </div>
-        </Card>
-      ))}
-    </div>
+    <div className="grid gap-2 sm:gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+  {stats.map((stat) => (
+    <Card key={stat.name} className="p-2 sm:p-6 bg-card border-border">
+      <div className="flex items-center justify-between">
+        <div className="flex h-6 w-6 sm:h-12 sm:w-12 items-center justify-center rounded-md sm:rounded-lg bg-primary/10">
+          <stat.icon className="h-3 w-3 sm:h-6 sm:w-6 text-primary" />
+        </div>
+        <span className="text-[10px] sm:text-sm font-medium text-success">{stat.change}</span>
+      </div>
+      <div className="mt-1 sm:mt-4">
+        <p className="text-[10px] sm:text-sm font-medium text-muted-foreground truncate">{stat.name}</p>
+        <p className="mt-0.5 text-base sm:text-2xl font-bold text-foreground">{stat.value}</p>
+      </div>
+    </Card>
+  ))}
+</div>
   )
 }

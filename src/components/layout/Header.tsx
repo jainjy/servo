@@ -188,6 +188,11 @@ const Header = () => {
           description: " Évaluez la valeur de votre bien",
           href: "/estimation-immobilier",
           image: "https://i.pinimg.com/1200x/2a/33/c7/2a33c7347de60d0c65be83a72c4495be.jpg"
+        }, {
+          title: "Podcasts & vidéos",
+          description: "Vidéos fournies par des experts",
+          href: "/estimation-immobilier",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         }
       ],
     },
@@ -243,19 +248,19 @@ const Header = () => {
       title: "ENTREPRISE",
       items: [
         {
-          title: "Solutions professionnelles",
-          description: "Services sur mesure pour les entreprises",
+          title: "Formation",
+          description: "Formations pour entrepreneurs",
           href: "/entreprise#services",
           image: "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg"
-
         },
-        {
-          title: "Devenir partenaire",
-          description: "Rejoignez notre réseau d'experts",
-          href: "/entreprise#partenaire",
-          image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
+        // {
+        //   title: "Devenir partenaire",
+        //   description: "Rejoignez notre réseau d'experts",
+        //   href: "/entreprise#partenaire",
+        //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
 
-        }, {
+        // },
+         {
           title: "Création & reprise",
           description: "Accompagnement pour entrepreneurs",
           href: "/reprise",
@@ -281,7 +286,15 @@ const Header = () => {
           href: "/juridiqueLiquidation",
           image: "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg"
 
-        }, {
+        },
+        {
+          title: "Comptabilité",
+          description: " Services comptables professionnels",
+          href: "/comptabilite",
+          image: "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg"
+
+        },
+     {
           title: "Podcasts & autres services",
           description: " Ressources pour entrepreneurs",
           href: "/podcast_service",
@@ -291,7 +304,7 @@ const Header = () => {
       ],
     },
     {
-      title: "FINANCEMENT",
+      title: "CREDIT & ASSURANCE",
       items: [
         {
           title: "Financement immobilier",
@@ -303,6 +316,21 @@ const Header = () => {
         {
           title: "Assurance habitation",
           description: "Protection complète pour votre logement",
+          href: "/financement#assurances",
+          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
+        },{
+          title: "Aides",
+          description: "Solutions d'aides au financement",
+          href: "/financement#assurances",
+          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
+        },{
+          title: "Formations ",
+          description: "Formations au financement et crédit",
+          href: "/financement#assurances",
+          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
+        },{
+          title: "Podcasts & vidéos",
+          description: " Ressources sur le financement",
           href: "/financement#assurances",
           image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
         },
@@ -385,6 +413,11 @@ const Header = () => {
           description: "Matériaux de construction qualité premium",
           href: "/domicile#materiaux",
           image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
+        }, {
+          title: "Podcasts & vidéos",
+          description: "Ressources pour l'aménagement",
+          href: "/domicile#materiaux",
+          image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
         }
       ],
     },
@@ -461,6 +494,11 @@ const Header = () => {
         }, {
           title: "Obligations & associations",
           description: "Soutenez des causes tout en investissant",
+          href: "/investir/isr",
+          image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg"
+        },{
+          title: "Podcasts & vidéos",
+          description: "Ressources sur l'investissement",
           href: "/investir/isr",
           image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg"
         },
