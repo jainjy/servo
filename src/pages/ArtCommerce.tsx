@@ -115,11 +115,10 @@ const ArtCommerce: React.FC = () => {
       <div className="flex flex-wrap gap-3 justify-center mb-8 mt-6">
         <button
           onClick={() => setSelectedCategory("all")}
-          className={`px-6 py-3 rounded-xl ${
-            selectedCategory === "all"
+          className={`px-6 py-3 rounded-xl ${selectedCategory === "all"
               ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
               : "bg-white text-slate-700 border border-gray-200"
-          }`}
+            }`}
         >
           Tous
         </button>
@@ -128,11 +127,10 @@ const ArtCommerce: React.FC = () => {
           <button
             key={catName}
             onClick={() => setSelectedCategory(catName)}
-            className={`px-6 py-3 rounded-xl ${
-              selectedCategory.toLowerCase() === catName.toLowerCase()
+            className={`px-6 py-3 rounded-xl ${selectedCategory.toLowerCase() === catName.toLowerCase()
                 ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
                 : "bg-white text-slate-700 border border-gray-200"
-            }`}
+              }`}
           >
             {catName.charAt(0).toUpperCase() + catName.slice(1)}
           </button>
@@ -140,65 +138,66 @@ const ArtCommerce: React.FC = () => {
       </div>
 
       {/* Grille des services */}
-<div className="flex justify-center bg-gradient-to-b from-gray-50 to-white">
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 w-full max-w-6xl py-10">
-    {filteredServices.length > 0 ? (
-      filteredServices.map((item) => (
-        <div
-          key={item.id}
-          className="group bg-white rounded-3xl shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 overflow-hidden"
-        >
-          {/* Image */}
-          <div
-            className="h-52 bg-cover bg-center relative"
-            style={{
-              backgroundImage: `url(${item.images?.[0] || ""})`,
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/40 transition-all duration-300"></div>
-          </div>
+      <div className="flex justify-center bg-gradient-to-b from-gray-50 to-white">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 w-full max-w-6xl py-10">
+          {filteredServices.length > 0 ? (
+            filteredServices.map((item) => (
+              <div
+                key={item.id}
+                className="group bg-white rounded-3xl shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 overflow-hidden"
+              >
+                {/* Image */}
+                <div
+                  className="h-52 bg-cover bg-center relative"
+                  style={{
+                    backgroundImage: `url(${item.images?.[0] || ""})`,
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/40 transition-all duration-300"></div>
+                </div>
 
-          {/* Contenu */}
-          <div className="p-6 flex flex-col justify-between min-h-[190px]">
-            <div>
-              <h3 className="font-semibold text-lg text-gray-800 group-hover:text-gray-900 transition">
-                {item.libelle}
-              </h3>
+                {/* Contenu */}
+                <div className="p-6 flex flex-col justify-between min-h-[190px]">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-800 group-hover:text-gray-900 transition">
+                      {item.libelle}
+                    </h3>
 
-              <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">
-                {item.description}
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <span className="text-sm font-semibold text-slate-800">
+                      {item.price ? `${item.price}€` : "—"}
+                    </span>
+                    <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                      {item.category?.name || "—"}
+                    </span>
+                  </div>
+
+                  {/* Bouton gradient amélioré */}
+                  <button
+                    onClick={() => navigate(`/art-commerce/${item.id}`)}
+                    className="mt-5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white text-sm py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+                  >
+                    Voir les détails
+                  </button>
+
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-20 text-gray-500">
+              <p className="text-base font-medium">Aucun résultat trouvé</p>
+              <p className="text-sm mt-2 text-gray-400">
+                Essaie avec un autre mot-clé ou une autre catégorie.
               </p>
             </div>
-
-            <div className="mt-4 flex justify-between items-center">
-              <span className="text-sm font-semibold text-slate-800">
-                {item.price ? `${item.price}€` : "—"}
-              </span>
-              <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                {item.category?.name || "—"}
-              </span>
-            </div>
-
-            {/* Bouton gradient amélioré */}
-            <button
-              onClick={() => navigate(`/art-commerce/${item.id}`)}
-              className="mt-5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white text-sm py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
-            >
-              Voir les détails
-            </button>
-          </div>
+          )}
         </div>
-      ))
-    ) : (
-      <div className="col-span-full text-center py-20 text-gray-500">
-        <p className="text-base font-medium">Aucun résultat trouvé</p>
-        <p className="text-sm mt-2 text-gray-400">
-          Essaie avec un autre mot-clé ou une autre catégorie.
-        </p>
       </div>
-    )}
-  </div>
-</div>
 
 
 
