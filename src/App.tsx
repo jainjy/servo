@@ -141,6 +141,7 @@ import PodcastsImmobilier from "./components/PodcastsImmobilier";
 import PodcastsDomicile from "./components/components/PodcastsDomicil";
 import PodcastsBienEtre from "./components/PodcastsBienEtre";
 import LieuxHistoriques from "./components/components/Tourisme_lieux";
+import ConstructionServicesPage from "./pages/BatimentPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -238,6 +239,7 @@ const App = () => {
                   <Route path="/podcasts/tourisme" element={<PodcastsTourisme />} />
                   <Route path="/podcasts/domicile" element={<PodcastsDomicile />} />
                   <Route path="/podcasts/bien-etre" element={<PodcastsBienEtre />} />
+                  <Route path="/formation-batiment" element={<ConstructionServicesPage />} />
                   <Route
                     path="/activiteLoisirs"
                     element={<ActivitesLoisirsFAQ />}
