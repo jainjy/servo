@@ -1,3 +1,4 @@
+// src/components/advertisementPop
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";

@@ -105,10 +105,10 @@ const RoleSelectionPage = () => {
               />
             </div>
           </div>
-          <CardTitle className="text-4xl font-bold text-gray-100 tracking-wide mb-4">
+          <CardTitle className="text-xl lg:text-4xl font-bold text-gray-100 tracking-wide mb-4">
             Choisissez votre profil
           </CardTitle>
-          <CardDescription className="text-md font-extralight text-gray-400 max-w-2xl mx-auto">
+          <CardDescription className="text-sm lg:text-md font-extralight text-gray-400 max-w-2xl mx-auto">
             Sélectionnez le type de compte qui correspond le mieux à vos besoins.
             Vous pourrez toujours ajuster vos préférences plus tard.
           </CardDescription>
@@ -120,7 +120,7 @@ const RoleSelectionPage = () => {
             return (
               <div
                 key={role.id}
-                className={`relative border-2 ${color.border} rounded-2xl p-8 hover:${color.hoverBorder} transition-all duration-500 cursor-pointer group bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-xl hover:shadow-2xl border-opacity-20 hover:border-opacity-40`}
+                className={`lg:m-0 m-4 relative border-2 ${color.border} rounded-2xl p-8 hover:${color.hoverBorder} transition-all duration-500 cursor-pointer group bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-xl hover:shadow-2xl border-opacity-20 hover:border-opacity-40`}
                 onClick={() => handleRoleSelection(role.id as "particular" | "professional")}
               >
                 {/* Badge populaire amélioré */}
@@ -188,7 +188,7 @@ const RoleSelectionPage = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8 mb-2 space-y-4">
+        <div className="text-center mt-8 lg:mb-2 mb-8 space-y-4">
           <div className="text-lg text-gray-600">
            Vous avez déjà un compte ?{" "}
             <a
@@ -199,7 +199,7 @@ const RoleSelectionPage = () => {
             </a>
           </div>
 
-          <div className="flex items-center justify-between px-2 gap-6 text-sm text-gray-500">
+          <div className="lg:flex hidden items-center justify-between px-2 gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               <span>100% sécurisé</span>

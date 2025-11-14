@@ -137,7 +137,7 @@ const UtilitiesProduits = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="py-12 flex flex-col justify-center items-center">
           <img src="/loading.gif" alt="" className='w-24 h-24' />
           <p className="text-gray-500 mt-4">Chargement des produits utilities...</p>
@@ -147,15 +147,15 @@ const UtilitiesProduits = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-[#F6F8FA]">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4">
         {/* En-tête de la catégorie */}
         <div className="mb-8">
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-[#0052FF]/10">
-                  <Zap className="h-6 w-6 text-[#0052FF]" />
+                  <Zap className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
@@ -184,7 +184,7 @@ const UtilitiesProduits = () => {
                 variant={selectedSubcategory === subcategory ? "default" : "outline"}
                 className={`flex items-center gap-2 ${
                   selectedSubcategory === subcategory 
-                    ? "bg-[#0052FF] text-white" 
+                    ? "bg-slate-900 hover:bg-slate-700 text-white" 
                     : "bg-white hover:bg-gray-50"
                 }`}
                 onClick={() => setSelectedSubcategory(subcategory)}
@@ -254,7 +254,7 @@ const UtilitiesProduits = () => {
                   {/* Prix et stock */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex flex-col">
-                      <span className="text-2xl font-bold text-[#0052FF]">
+                      <span className="text-2xl font-bold text-slate-900">
                         €{product.price}
                       </span>
                       {product.comparePrice && product.comparePrice > product.price && (
@@ -278,7 +278,7 @@ const UtilitiesProduits = () => {
 
                   {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-[#0052FF] hover:bg-[#003EE6] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity === 0 || addingProductId === product.id}
                   >

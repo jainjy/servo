@@ -22,13 +22,14 @@ import {
   Clock4,
   Star,
   ArrowDown,
+  X,
 } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
-import { useSocket } from "@/Contexts/SocketContext";
+import { useSocket } from "../contexts/SocketContext";
 
 export default function AdminDiscussions() {
   const { id } = useParams();
@@ -39,6 +40,8 @@ export default function AdminDiscussions() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [artisansStats, setArtisansStats] = useState([]);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false);
   const messagesContainerRef = useRef(null);
 
   const { socket, isConnected } = useSocket();
@@ -344,9 +347,9 @@ export default function AdminDiscussions() {
 
   return (
     <div className="min-h-full">
-      <div className="flex h-[calc(100vh-100px)]">
+      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)]">
         {/* Côté gauche - Informations du projet */}
-        <div className="w-1/2 bg-white rounded-lg shadow-sm border-r border-gray-200 p-8 overflow-y-auto">
+        <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-20">
           <div className="max-w-2xl mx-auto">
             {/* Informations principales */}
             <div className="relative space-y-1">
@@ -500,8 +503,8 @@ export default function AdminDiscussions() {
           </div>
         </div>
 
-        {/* Côté droit - Discussion et Statistiques */}
-        <div className="w-1/2 flex flex-col bg-white">
+        {/* Côté droit - Discussion (Desktop uniquement) */}
+        <div className="hidden lg:flex w-1/2 flex-col bg-white">
           {/* Header discussion */}
           <div className="border-b border-gray-200 px-6 py-3">
             <div className="flex items-center justify-between">
@@ -824,6 +827,342 @@ export default function AdminDiscussions() {
             </div>
           </div>
         </div>
+
+        {/* Bouton pour ouvrir la discussion sur mobile */}
+        <div className="lg:hidden fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => setShowChatModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
+            title="Ouvrir la discussion"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Modale de chat pour mobile */}
+        {showChatModal && (
+          <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
+            <div className="fixed inset-0 flex flex-col bg-white">
+              {/* Header modale */}
+              <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-5 h-5 text-blue-600" />
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Discussion{" "}
+                    {conversation && `(#${conversation.id.slice(0, 8)})`}
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Bouton fermeture */}
+                  <button
+                    onClick={() => setShowChatModal(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div
+                className="flex-1 overflow-y-auto p-4 scroll-smooth relative"
+                ref={messagesContainerRef}
+                onScroll={handleScroll}
+              >
+                {/* Bouton scroll vers le bas */}
+                {showScrollButton && (
+                  <button
+                    onClick={handleScrollToBottom}
+                    className="fixed bottom-32 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+                    title="Scroller vers le bas"
+                  >
+                    <ArrowDown className="w-5 h-5" />
+                  </button>
+                )}
+                {messagesLoading ? (
+                  <div className="flex justify-center items-center h-32">
+                    <LoadingSpinner text="Chargement des messages..." />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Section Statistiques des Artisans */}
+                    {artisansStats.length > 0 && (
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Users className="w-5 h-5 text-blue-600" />
+                          <h3 className="text-lg font-bold text-gray-900">
+                            Suivi des Artisans
+                          </h3>
+                        </div>
+                        <div className="grid gap-3">
+                          {artisansStats.map((artisan) => {
+                            const status = getArtisanStatus(artisan);
+                            return (
+                              <div
+                                key={artisan.userId}
+                                className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                      <User className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold text-gray-900">
+                                        {artisan.user.companyName ||
+                                          `${artisan.user.firstName} ${artisan.user.lastName}`}
+                                      </h4>
+                                      <p className="text-sm text-gray-500">
+                                        {artisan.user.email}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div
+                                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                                      status
+                                    )}`}
+                                  >
+                                    {getStatusIcon(status)}
+                                    <span className="capitalize">{status}</span>
+                                  </div>
+                                </div>
+
+                                {/* Détails des actions */}
+                                <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                                  {artisan.rdv && (
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="w-4 h-4 text-blue-500" />
+                                      <span className="text-gray-600">
+                                        RDV:{" "}
+                                        {new Date(artisan.rdv).toLocaleDateString(
+                                          "fr-FR"
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {artisan.devis && (
+                                    <div className="flex items-center gap-2">
+                                      <FileCheck className="w-4 h-4 text-green-500" />
+                                      <span className="text-gray-600">
+                                        Devis envoyé
+                                      </span>
+                                    </div>
+                                  )}
+                                  {artisan.factureMontant && (
+                                    <div className="flex items-center gap-2">
+                                      <Euro className="w-4 h-4 text-purple-500" />
+                                      <span className="text-gray-600">
+                                        Facture: {artisan.factureMontant}€
+                                      </span>
+                                    </div>
+                                  )}
+                                  {artisan.travauxTermines && (
+                                    <div className="flex items-center gap-2 col-span-2">
+                                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                      <span className="text-gray-600 font-medium">
+                                        Travaux terminés
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Messages de la conversation */}
+                    {messages.map((message, index) => (
+                      <div
+                        key={message.id}
+                        className={`flex gap-4 ${
+                          isCurrentUser(message) ? "justify-end" : ""
+                        }`}
+                      >
+                        {!isCurrentUser(message) && (
+                          <div className="flex flex-col items-center">
+                            {renderAvatar(message)}
+                            {index < messages.length - 1 && (
+                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                            )}
+                          </div>
+                        )}
+
+                        <div
+                          className={`max-w-[70%] ${
+                            isCurrentUser(message) ? "order-first" : ""
+                          }`}
+                        >
+                          {!isCurrentUser(message) && (
+                            <div className="text-xs font-medium text-gray-600 mb-1">
+                              {getSenderName(message)}
+                            </div>
+                          )}
+
+                          <div
+                            className={`rounded-2xl p-4 ${
+                              isCurrentUser(message)
+                                ? "bg-blue-600 text-white rounded-br-none"
+                                : "bg-gray-100 text-gray-900 rounded-bl-none"
+                            }`}
+                          >
+                            {message.urlFichier && (
+                              <div className="mb-2">
+                                <a
+                                  href={message.urlFichier}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`flex items-center gap-2 text-sm underline ${
+                                    isCurrentUser(message)
+                                      ? "text-blue-200"
+                                      : "text-blue-600"
+                                  }`}
+                                >
+                                  <FileText className="w-4 h-4" />
+                                  {message.nomFichier}
+                                </a>
+                              </div>
+                            )}
+
+                            <p className="text-sm whitespace-pre-wrap">
+                              {message.contenu}
+                            </p>
+                            {message.evenementType === "AVIS_LAISSE" && (
+                              <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                                <RatingStars
+                                  rating={extractRatingFromMessage(message.contenu)}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div
+                            className={`text-xs mt-1 flex items-center gap-1 ${
+                              isCurrentUser(message)
+                                ? "text-gray-500 text-right"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {formatMessageTime(message.createdAt)}
+                            {message.lu && " • Lu"}
+                            {message.type === "SYSTEM" && " • Système"}
+                          </div>
+                        </div>
+
+                        {isCurrentUser(message) && (
+                          <div className="flex flex-col items-center">
+                            {renderAvatar(message)}
+                            {index < messages.length - 1 && (
+                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {messages.length === 0 && !messagesLoading && (
+                      <div className="text-center text-gray-500 py-8">
+                        <MessageCircle className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                        <p>Aucun message dans cette conversation</p>
+                        <p className="text-sm">
+                          Soyez le premier à envoyer un message !
+                        </p>
+                      </div>
+                    )}
+                    {/* Référence pour scroller vers le bas */}
+                    <div ref={messagesEndRef} />
+                    {/* Affichage si la demande est terminée */}
+                    {demande?.statut === "terminée" && (
+                      <div className="mt-8 flex flex-col items-center justify-center py-12 px-6 bg-gradient-to-b from-green-50 to-green-100 rounded-2xl border-2 border-green-300">
+                        <div className="mb-4 p-4 bg-green-500 rounded-full">
+                          <img
+                            src="/Completed.gif"
+                            alt="complete"
+                            className="w-full h-full object-cover object-center"
+                          />
+                        </div>
+                        <h3 className="text-2xl font-bold text-green-900 mb-2">
+                          Travaux Terminés
+                        </h3>
+                        <p className="text-green-700 text-center mb-1">
+                          Les travaux ont été complétés avec succès
+                        </p>
+                        <p className="text-sm text-green-600">
+                          Cette demande est maintenant clôturée
+                        </p>
+                        <div className="mt-4 flex items-center gap-2 text-green-700">
+                          <Lock className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            Conversation verrouillée
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Zone d'envoi de message */}
+              <div className="border-t border-gray-200 px-4 py-3 bg-gray-50">
+                <div className="flex gap-3">
+                  <label
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                      uploadingFile || demande?.statut == "terminée"
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    <Paperclip className="w-4 h-4" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={
+                        uploadingFile || sending || demande?.statut == "terminée"
+                      }
+                    />
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Tapez votre message ici..."
+                    className="disabled:cursor-not-allowed flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                      }
+                    }}
+                    disabled={
+                      sending || uploadingFile || demande?.statut == "terminée"
+                    }
+                  />
+
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleSend}
+                    disabled={
+                      sending ||
+                      uploadingFile ||
+                      !input.trim() ||
+                      demande?.statut == "terminée"
+                    }
+                  >
+                    {sending ? (
+                      <LoadingSpinner size="sm" />
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

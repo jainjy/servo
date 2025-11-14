@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -6,52 +6,146 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { StarIcon } from "lucide-react";
+import { StarIcon, MessageCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { reviewService } from "@/services/reviewService";
+import { useToast } from "@/components/ui/use-toast";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 // Types pour les avis
 interface Review {
   id: string;
-  clientName: string;
   rating: number;
   comment: string;
-  date: string;
-  response?: string;
-  isModerated: boolean;
+  createdAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    companyName: string;
+    avatar: string;
+    email: string;
+  };
+  service?: {
+    id: number;
+    libelle: string;
+    category: {
+      name: string;
+    };
+  };
+  metadata?: {
+    professionalResponse?: string;
+    responseDate?: string;
+  };
 }
 
-// Données mockées pour l'exemple
-const mockReviews: Review[] = [
-  {
-    id: "1",
-    clientName: "Jean Dupont",
-    rating: 5,
-    comment: "Excellent service, très professionnel !",
-    date: "2025-10-05",
-    isModerated: true,
-  },
-  {
-    id: "2",
-    clientName: "Marie Martin",
-    rating: 4,
-    comment: "Bon travail, délais respectés.",
-    date: "2025-10-03",
-    response: "Merci pour votre confiance !",
-    isModerated: true,
-  },
-];
+interface ReviewsData {
+  reviews: Review[];
+  statistics: {
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: Array<{
+      stars: number;
+      count: number;
+      percentage: number;
+    }>;
+  };
+  badges: string[];
+}
 
 const ReviewsPage: FC = () => {
-  const averageRating = 4.5;
-  const totalReviews = 245;
-  const ratingDistribution = [
-    { stars: 5, count: 150 },
-    { stars: 4, count: 60 },
-    { stars: 3, count: 20 },
-    { stars: 2, count: 10 },
-    { stars: 1, count: 5 },
-  ];
+  const [reviewsData, setReviewsData] = useState<ReviewsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
+  const [responseText, setResponseText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadReviews();
+  }, []);
+
+  const loadReviews = async () => {
+    try {
+      setLoading(true);
+      const data = await reviewService.getMyReviews();
+      setReviewsData(data);
+    } catch (error) {
+      console.error("Erreur chargement avis:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les avis",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRespond = async (reviewId: string) => {
+    if (!responseText.trim()) return;
+
+    try {
+      setSubmitting(true);
+      await reviewService.respondToReview(reviewId, responseText);
+
+      toast({
+        title: "Succès",
+        description: "Votre réponse a été publiée",
+      });
+
+      setRespondingTo(null);
+      setResponseText("");
+      await loadReviews();
+    } catch (error) {
+      console.error("Erreur envoi réponse:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'envoyer la réponse",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getClientName = (review: Review) => {
+    if (review.user.firstName && review.user.lastName) {
+      return `${review.user.firstName} ${review.user.lastName}`;
+    }
+    return review.user.companyName || "Client";
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!reviewsData) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-gray-500">
+              Impossible de charger les avis
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { reviews, statistics, badges } = reviewsData;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -65,13 +159,15 @@ const ReviewsPage: FC = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
-              <span className="text-4xl font-bold">{averageRating}</span>
+              <span className="text-4xl font-bold">
+                {statistics.averageRating}
+              </span>
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <StarIcon
                     key={i}
                     className={`w-5 h-5 ${
-                      i < Math.floor(averageRating)
+                      i < Math.floor(statistics.averageRating)
                         ? "text-yellow-400 fill-current"
                         : "text-gray-300"
                     }`}
@@ -80,7 +176,7 @@ const ReviewsPage: FC = () => {
               </div>
             </div>
             <p className="text-sm text-gray-500 mt-2">
-              Basé sur {totalReviews} avis
+              Basé sur {statistics.totalReviews} avis
             </p>
           </CardContent>
         </Card>
@@ -91,14 +187,11 @@ const ReviewsPage: FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {ratingDistribution.map((dist) => (
+              {statistics.ratingDistribution.map((dist) => (
                 <div key={dist.stars} className="flex items-center gap-2">
-                  <span className="w-8">{dist.stars}★</span>
-                  <Progress
-                    value={(dist.count / totalReviews) * 100}
-                    className="h-2"
-                  />
-                  <span className="text-sm text-gray-500">
+                  <span className="w-8 text-sm">{dist.stars}★</span>
+                  <Progress value={dist.percentage} className="h-2 flex-1" />
+                  <span className="text-sm text-gray-500 w-12 text-right">
                     {dist.count}
                   </span>
                 </div>
@@ -113,10 +206,11 @@ const ReviewsPage: FC = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Pro Certifié</Badge>
-              <Badge variant="secondary">Excellence Service</Badge>
-              <Badge variant="secondary">Réponse Rapide</Badge>
-              <Badge variant="secondary">Top Prestataire 2025</Badge>
+              {badges.map((badge, index) => (
+                <Badge key={index} variant="secondary">
+                  {badge}
+                </Badge>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -131,45 +225,113 @@ const ReviewsPage: FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            {mockReviews.map((review) => (
-              <div
-                key={review.id}
-                className="border-b border-gray-200 pb-4 last:border-0"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-semibold">{review.clientName}</h3>
-                    <div className="flex items-center space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <StarIcon
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating
-                              ? "text-yellow-400 fill-current"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
+          {reviews.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">
+              Aucun avis pour le moment
+            </p>
+          ) : (
+            <div className="space-y-6">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="border-b border-gray-200 pb-6 last:border-0"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-semibold">{getClientName(review)}</h3>
+                      {review.service && (
+                        <p className="text-sm text-gray-600">
+                          Service: {review.service.libelle}
+                        </p>
+                      )}
+                      <div className="flex items-center space-x-1 mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < review.rating
+                                ? "text-yellow-400 fill-current"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
+                    <span className="text-sm text-gray-500">
+                      {formatDate(review.createdAt)}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500">{review.date}</span>
+
+                  <p className="text-gray-700 mb-3">{review.comment}</p>
+
+                  {review.metadata?.professionalResponse && (
+                    <div className="bg-blue-50 p-3 rounded-md mt-2 border border-blue-200">
+                      <p className="text-sm font-semibold text-blue-800 flex items-center gap-1">
+                        <MessageCircle className="w-4 h-4" />
+                        Votre réponse:
+                      </p>
+                      <p className="text-sm text-blue-700 mt-1">
+                        {review.metadata.professionalResponse}
+                      </p>
+                      {review.metadata.responseDate && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          Le {formatDate(review.metadata.responseDate)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {!review.metadata?.professionalResponse && (
+                    <div className="mt-3">
+                      {respondingTo === review.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            placeholder="Votre réponse à cet avis..."
+                            value={responseText}
+                            onChange={(e) => setResponseText(e.target.value)}
+                            rows={3}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleRespond(review.id)}
+                              disabled={submitting || !responseText.trim()}
+                              size="sm"
+                            >
+                              {submitting && (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                              )}
+                              Publier la réponse
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setRespondingTo(null);
+                                setResponseText("");
+                              }}
+                              size="sm"
+                              disabled={submitting}
+                            >
+                              Annuler
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setRespondingTo(review.id)}
+                          className="flex items-center gap-1"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          Répondre à cet avis
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <p className="text-gray-700 mb-2">{review.comment}</p>
-                {review.response && (
-                  <div className="bg-gray-50 p-3 rounded-md mt-2">
-                    <p className="text-sm font-semibold">Votre réponse:</p>
-                    <p className="text-sm text-gray-600">{review.response}</p>
-                  </div>
-                )}
-                {!review.response && (
-                  <button className="text-sm text-blue-600 hover:text-blue-800">
-                    Répondre à cet avis
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

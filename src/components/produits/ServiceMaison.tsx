@@ -129,7 +129,7 @@ const ServicesMaison = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
           <p className="mt-4 text-gray-600">Chargement des services maison...</p>
@@ -139,15 +139,15 @@ const ServicesMaison = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-[#F6F8FA]">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4">
         {/* En-tête de la page */}
         <div className="mb-8">
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-[#0052FF]/10">
-                  <Home className="h-6 w-6 text-[#0052FF]" />
+                  <Home className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#0A0A0A]">
@@ -176,7 +176,7 @@ const ServicesMaison = () => {
                 variant={selectedSubcategory === subcategory ? "default" : "outline"}
                 className={`flex items-center gap-2 ${
                   selectedSubcategory === subcategory 
-                    ? "bg-[#0052FF] text-white" 
+                    ? "bg-slate-900 hover:bg-slate-700 text-white" 
                     : "bg-white hover:bg-gray-50"
                 }`}
                 onClick={() => setSelectedSubcategory(subcategory)}
@@ -246,7 +246,7 @@ const ServicesMaison = () => {
                   {/* Prix et stock */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex flex-col">
-                      <span className="text-2xl font-bold text-[#0052FF]">
+                      <span className="text-2xl font-bold text-slate-900">
                         €{product.price}
                       </span>
                       {product.comparePrice && product.comparePrice > product.price && (
@@ -270,7 +270,7 @@ const ServicesMaison = () => {
 
                   {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-[#0052FF] hover:bg-[#003EE6] text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 group-hover:scale-105 shadow-md"
                     onClick={() => handleAddToCart(product)}
                     disabled={product.quantity === 0 || addingProductId === product.id}
                   >
