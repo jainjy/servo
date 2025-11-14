@@ -4,7 +4,7 @@ import api from "@/lib/api"
 import { Headphones, Home, Video, MessageCircle, Activity } from "lucide-react";
 import PodcastCard from "@/components/PodcastCard";
 import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
-import Podcast from "@/pages/podcast";
+//import Podcast from "@/pages/podcast";
 import ArtCommerce from "./ArtCommerce";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 
@@ -758,12 +758,12 @@ const BienEtre = () => {
               </section>
             )}
 
-            {/* PODCASTEUR */}
+            {/* PODCASTEUR 
             {activeTab === 'Podcasteur' && (
               <>
                 <Podcast />
               </>
-            )}
+            )}*/}
 
             {activeTab === 'BoutiqueNaturels' && (
               <>

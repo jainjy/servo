@@ -25,7 +25,6 @@ import ForgotPasswordPage from "./pages/ForgotPassword";
 import TourismSection from "./pages/Tourisme";
 import EstimationImmobilierPage from "./pages/EstimationImmobilierPage";
 import Index from "./pages/Index";
-import Podcast from "./pages/podcast";
 import ProLayout from "./pages/pro/ProLayout";
 import Dashboard from "./pages/pro/Dashboard";
 import ListingsPage from "./pages/pro/ListingsPage";
@@ -196,7 +195,6 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/cookies" element={<CookiesPolicy />} />
-                   <Route path="/podcasts" element={<Podcast />} /> 
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   {/* /*entreprise link* */}
