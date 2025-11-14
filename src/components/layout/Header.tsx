@@ -56,6 +56,8 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const navigate = useNavigate();
+const [isDeletingAll, setIsDeletingAll] = useState(false);
+const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({});
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
@@ -637,23 +639,38 @@ const Header = () => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    if (!user?.id) return;
+ const handleMarkAllAsRead = async () => {
+  console.log("🟡 Marquage de toutes les notifications comme lues");
+  
+  setIsDeletingAll(true);
+  
+  // Animation avant la suppression réelle
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const unreadNotifications = notifications.filter(n => !n.read);
+  let successCount = 0;
 
-    try {
-      await api.post(`/notifications/user/${user.id}/read-all`);
-      loadNotifications(); // Recharger les notifications
-      toast({
-        description: "Toutes les notifications ont été marquées comme lues"
-      });
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de tout marquer comme lu"
-      });
+  const results = await Promise.allSettled(
+    unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
+  );
+
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled' && result.value === true) {
+      successCount++;
+    } else {
+      console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
     }
-  };
+  });
+
+  if (successCount > 0) {
+    setNotifications([]);
+    setUnreadCount(0);
+    console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
+  }
+  
+  setIsDeletingAll(false);
+  setNotifications(false);
+};
 
   const handleClearAll = async () => {
     if (!user?.id) return;
@@ -1383,3 +1400,7 @@ const Header = () => {
 };
 
 export default Header;
+
+function setUnreadCount(arg0: number) {
+  throw new Error("Function not implemented.");
+}

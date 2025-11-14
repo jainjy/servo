@@ -21,7 +21,6 @@ import { Badge } from "@/components/ui/badge";
 import AuthService from "@/services/authService";
 import NotificationService, { Notification } from "@/services/notificationService";
 import { api } from "@/lib/axios";
-import { get } from "http";
 
 interface SearchResult {
   id: string;
@@ -43,11 +42,90 @@ export function AuthHeader() {
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({});
 
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Styles d'animation CSS
+  const deleteAnimationStyles = `
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+        max-height: 100px;
+        margin-bottom: 8px;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+      75% { transform: translateX(-3px); }
+    }
+
+    @keyframes pulseDanger {
+      0%, 100% { 
+        background-color: transparent;
+        border-color: transparent;
+      }
+      50% { 
+        background-color: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .notification-deleting {
+      animation: slideOutRight 0.6s ease-in-out forwards;
+      overflow: hidden;
+    }
+
+    .delete-all-shaking {
+      animation: shake 0.5s ease-in-out, pulseDanger 0.5s ease-in-out;
+    }
+
+    .delete-button-loading::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(239, 68, 68, 0.2),
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
 
   // Récupérer l'utilisateur connecté et initialiser les notifications
   useEffect(() => {
@@ -236,37 +314,63 @@ export function AuthHeader() {
     }
   };
 
-  const markAllAsRead = async () => {
-    console.log("🟡 Marquage de toutes les notifications comme lues");
+const markAllAsRead = async () => {
+  console.log("🟡 Marquage de toutes les notifications comme lues");
+  
+  setIsDeletingAll(true);
+  
+  // Animation avant la mise à jour
+  await new Promise(resolve => setTimeout(resolve, 600));
+  
+  const unreadNotifications = notifications.filter(n => !n.read);
+  
+  if (unreadNotifications.length === 0) {
+    setIsDeletingAll(false);
+    return;
+  }
 
-    const unreadNotifications = notifications.filter(n => !n.read);
-    let successCount = 0;
+  let successCount = 0;
 
-    const results = await Promise.allSettled(
-      unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
-    );
+  // Marquer chaque notification non lue comme lue
+  const results = await Promise.allSettled(
+    unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
+  );
 
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value === true) {
-        successCount++;
-      } else {
-        console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
-      }
-    });
-
-    if (successCount > 0) {
-      setNotifications(prev =>
-        prev.map(notif => ({ ...notif, read: true }))
-      );
-      setUnreadCount(0);
-      console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled' && result.value === true) {
+      successCount++;
+    } else {
+      console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
     }
-  };
+  });
+
+  if (successCount > 0) {
+    // Mettre à jour l'état pour marquer toutes les notifications comme lues
+    setNotifications(prev => 
+      prev.map(notification => ({
+        ...notification,
+        read: true
+      }))
+    );
+    setUnreadCount(0);
+    console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
+  } else {
+    console.error("❌ Aucune notification n'a pu être marquée comme lue");
+  }
+  
+  setIsDeletingAll(false);
+  setShowNotifications(false);
+};
 
   const deleteNotification = async (id: number, event: React.MouseEvent) => {
     event.stopPropagation();
-
+    
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette notification ?")) {
+      setDeletingStates(prev => ({ ...prev, [id]: true }));
+      
+      // Animation avant suppression
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
       const success = await NotificationService.deleteNotification(id);
       if (success) {
         setNotifications(prev => prev.filter(notif => notif.id !== id));
@@ -277,6 +381,12 @@ export function AuthHeader() {
       } else {
         alert("Erreur lors de la suppression de la notification");
       }
+      
+      setDeletingStates(prev => {
+        const newState = { ...prev };
+        delete newState[id];
+        return newState;
+      });
     }
   };
 
@@ -356,7 +466,7 @@ export function AuthHeader() {
 
           {/* Afficher le conteneur dès que l'utilisateur tape (même s'il n'y a pas de résultats encore) */}
           {searchQuery.length >= 2 && (
-            <div className="absolute top-full mt-2 w-full rounded-lg border border-border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto">
+            <div className="absolute top-full mt-2 w-full rounded-lg border border-border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto fade-in">
               {/* Header */}
               <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border bg-card">
                 <span className="text-sm font-semibold">
@@ -400,8 +510,6 @@ export function AuthHeader() {
                         }}
                         className="group flex items-center gap-4 p-4 rounded-2xl bg-background border-2 border-transparent hover:border-primary/30 transition-all duration-500"
                       >
-
-
                         {/* Album art */}
                         <div className="relative flex-shrink-0">
                           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden shadow-sm bg-gradient-to-br from-primary/20 to-primary/10">
@@ -431,8 +539,6 @@ export function AuthHeader() {
                               {result.subtitle}
                             </p>
                           </div>
-
-
                         </div>
                         {/* Genre tags */}
                         <div className="flex items-center gap-2">
@@ -490,7 +596,10 @@ export function AuthHeader() {
           </Button>
 
           {showNotifications && (
-            <div className="absolute -right-12 lg:right-0 top-full mt-2 w-96 rounded-lg border border-border bg-card shadow-lg z-50 max-h-96 overflow-hidden">
+            <div className="absolute -right-12 lg:right-0 top-full mt-2 w-96 rounded-lg border border-border bg-card shadow-lg z-50 max-h-96 overflow-hidden fade-in">
+              {/* Injecter les styles d'animation */}
+              <style>{deleteAnimationStyles}</style>
+              
               <div className="flex items-center justify-between p-4 border-b">
                 <span className="font-semibold">Notifications</span>
                 <div className="flex gap-2">
@@ -498,10 +607,22 @@ export function AuthHeader() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-xs"
+                      className={`h-7 text-xs transition-all duration-300 relative ${
+                        isDeletingAll 
+                          ? 'delete-all-shaking delete-button-loading bg-red-50 text-red-600 border border-red-200' 
+                          : 'hover:bg-red-50 hover:text-red-600'
+                      }`}
                       onClick={markAllAsRead}
+                      disabled={isDeletingAll}
                     >
-                      Tout marquer comme lu
+                      {isDeletingAll ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          ...
+                        </div>
+                      ) : (
+                        "Tout marquer lu"
+                      )}
                     </Button>
                   )}
                 </div>
@@ -512,20 +633,37 @@ export function AuthHeader() {
                   notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className="p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer group relative"
+                      className={`
+                        p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer group relative 
+                        transition-all duration-500 ease-in-out
+                        ${deletingStates[notification.id] ? 'notification-deleting' : ''}
+                        ${isDeletingAll ? 'opacity-50' : ''}
+                      `}
                       onClick={() => {
-                        if (!notification.read) {
+                        if (!notification.read && !deletingStates[notification.id] && !isDeletingAll) {
                           markAsRead(notification.id);
                         }
                         setShowNotifications(false);
                       }}
                     >
                       <button
-                        onClick={(e) => deleteNotification(notification.id, e)}
-                        className="absolute right-2 top-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 text-black"
+                        onClick={(e) => !isDeletingAll && deleteNotification(notification.id, e)}
+                        className={`
+                          absolute right-2 top-2 p-1 rounded transition-all duration-300
+                          ${deletingStates[notification.id] 
+                            ? 'opacity-100 bg-red-100 text-red-600' 
+                            : 'opacity-0 group-hover:opacity-100 hover:bg-red-100 text-black'
+                          }
+                          ${isDeletingAll ? 'pointer-events-none opacity-30' : ''}
+                        `}
                         title="Supprimer la notification"
+                        disabled={isDeletingAll || deletingStates[notification.id]}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        {deletingStates[notification.id] ? (
+                          <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3 w-3" />
+                        )}
                       </button>
 
                       <div className="flex gap-3 w-full pr-6">
@@ -539,15 +677,16 @@ export function AuthHeader() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p
-                              className={`text-sm font-medium ${!notification.read
-                                ? "text-foreground"
-                                : "text-muted-foreground"
-                                }`}
+                              className={`text-sm font-medium transition-colors ${
+                                !notification.read
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                              }`}
                             >
                               {notification.title}
                             </p>
-                            {!notification.read && (
-                              <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
+                            {!notification.read && !deletingStates[notification.id] && (
+                              <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5 animate-pulse" />
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
@@ -562,7 +701,14 @@ export function AuthHeader() {
                   ))
                 ) : (
                   <div className="p-8 text-center text-sm text-muted-foreground">
-                    Aucune notification
+                    {isDeletingAll ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        <span>Nettoyage en cours...</span>
+                      </div>
+                    ) : (
+                      "Aucune notification"
+                    )}
                   </div>
                 )}
               </div>
@@ -592,7 +738,7 @@ export function AuthHeader() {
             )}
           </Button>
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-white shadow-lg z-50">
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-white shadow-lg z-50 fade-in">
               <div className="p-3 border-b">
                 <p className="text-sm font-medium">
                   {currentUser?.firstName} {currentUser?.lastName}
@@ -604,7 +750,7 @@ export function AuthHeader() {
                   <>
                     <Link
                       to="/admin/profile"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="mr-2 h-4 w-4" />
@@ -612,7 +758,7 @@ export function AuthHeader() {
                     </Link>
                     <Link
                       to="/admin/settings"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <Settings className="mr-2 h-4 w-4" />
@@ -623,7 +769,7 @@ export function AuthHeader() {
                   <>
                     <Link
                       to="/pro/profile"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="mr-2 h-4 w-4" />
@@ -631,7 +777,7 @@ export function AuthHeader() {
                     </Link>
                     <Link
                       to="/pro/settings"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
+                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <Settings className="mr-2 h-4 w-4" />
@@ -642,7 +788,7 @@ export function AuthHeader() {
                 <div className="border-t my-1"></div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded w-full"
+                  className="flex items-center px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded w-full transition-colors"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Déconnexion
