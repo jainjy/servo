@@ -39,7 +39,8 @@ import {
   Eye,
   EyeOff,
   Trash2,
-  Package // Icône pour Mes Commandes
+  Package, // Icône pour Mes Commandes
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -55,6 +56,7 @@ import api from "@/lib/api.js";
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -148,7 +150,12 @@ const Header = () => {
     setIsAuthenticated(false);
     setRole(null);
     setUser(null);
+    setIsLogoutDialogOpen(false);
     navigate("/");
+  };
+
+  const handleCancelLogout = () => {
+    setIsLogoutDialogOpen(false);
   };
 
   const menuSections = [
@@ -291,7 +298,7 @@ const Header = () => {
           title: "Comptabilité",
           description: " Services comptables professionnels",
           href: "/comptabilite",
-          image: "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg"
+          image: "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg"
 
         },
      {
@@ -321,18 +328,18 @@ const Header = () => {
         },{
           title: "Aides",
           description: "Solutions d'aides au financement",
-          href: "/financement#assurances",
-          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
+          href: "/aide_financement",
+          image: "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg"
         },{
           title: "Formations ",
           description: "Formations au financement et crédit",
-          href: "/financement#assurances",
-          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
+          href: "/formation_finance",
+          image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
         },{
           title: "Podcasts & vidéos",
           description: " Ressources sur le financement",
           href: "/financement#assurances",
-          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
     }, {
@@ -361,17 +368,22 @@ const Header = () => {
           description: " Optimisation de l'espace foncier",
           href: "/batiments#division-parcellaire",
           image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
-        }, {
-          title: "Formation & podcasts",
-          description: " Formation continue et actualités",
-          href: "/batiments#formation-podcasts",
-          image: "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg"
-        }, {
+        },{
           title: "Travaux & construction",
           description: " Services de construction professionnels",
           href: "/travaux",
           image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
-        },
+        },{
+          title: "Formation",
+          description: " Formations pour professionnels du bâtiment",
+          href: "/travaux",
+          image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
+        }, {
+          title: "Podcasts & vidéos",
+          description: " Formation continue et actualités",
+          href: "/batiments#formation-podcasts",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
+        }, 
       ],
     }, {
       title: "DOMICILE",
@@ -417,7 +429,7 @@ const Header = () => {
           title: "Podcasts & vidéos",
           description: "Ressources pour l'aménagement",
           href: "/domicile#materiaux",
-          image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         }
       ],
     },
@@ -429,6 +441,12 @@ const Header = () => {
           description: "Formations & ateliers personnalisés",
           href: "/bien-etre",
           image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg"
+        },
+        {
+          title: "Arts & commerces",
+          description: "Artisans & boutiques bien-être",
+          href: "/bien-etre",
+          image: "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg"
         },
         {
           title: "Thérapeutes & soins",
@@ -445,7 +463,7 @@ const Header = () => {
           title: "Podcasts & vidéos",
           description: "Ressources pour le bien-être",
           href: "/bien-etre",
-          image: "https://i.pinimg.com/736x/a1/7f/6d/a17f6d0d7e4a0dd16e01f84d41b51da3.jpg"
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
     },
@@ -474,6 +492,11 @@ const Header = () => {
           description: "Livraison de plats de vos restaurants favoris",
           href: "/alimentation",
           image: "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg"
+        },{
+          title: "Podcasts & vidéos",
+          description: " Ressources sur l'alimentation",
+          href: "/alimentation",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
     },
@@ -500,7 +523,7 @@ const Header = () => {
           title: "Podcasts & vidéos",
           description: "Ressources sur l'investissement",
           href: "/investir/isr",
-          image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg"
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
     },
@@ -530,11 +553,21 @@ const Header = () => {
           description: "Découvertes & aventures",
           href: "/activiteLoisirs",
           image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg"
+        },{
+          title: "Lieux historiques & culturels",
+          description: "Explorez le patrimoine local",
+          href: "/formationTourisme",
+          image: "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg"
         }, {
           title: "Formations",
           description: "Cours & ateliers locaux",
           href: "/formationTourisme",
-          image: "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg"
+          image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
+        },{
+          title: "Podcasts & vidéos",
+          description: "Ressources sur le tourisme",
+          href: "/formationTourisme",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
     },
@@ -874,7 +907,10 @@ const Header = () => {
                     <span className="text-sm font-medium">Paiements</span>
                   </Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      setIsLogoutDialogOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
                     className="flex items-center gap-3 p-3 hover:bg-red-50 transition-colors w-full text-left"
                   >
                     <LogOut className="h-4 w-4 text-red-600" />
@@ -1101,7 +1137,7 @@ const Header = () => {
                         )}
                       </div>
                       <div className="absolute bottom-2 right-10 w-96 flex items-center justify-around z-50 gap-5 h-20">
-                        <span>
+                        {/* <span>
                           <Link
                             to="/services-partners?section=partenaires"
                             onClick={() => setIsPopoverOpen(false)}
@@ -1109,7 +1145,7 @@ const Header = () => {
                           >
                             Consultations & aides
                           </Link>
-                        </span>
+                        </span> */}
                         <Link
                           to="/login"
                           className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
@@ -1363,7 +1399,7 @@ const Header = () => {
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuItem onClick={handleLogout}>
+                  <DropdownMenuItem onClick={() => setIsLogoutDialogOpen(true)}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Déconnexion
                   </DropdownMenuItem>
@@ -1378,6 +1414,61 @@ const Header = () => {
       {/* Composant Cart */}
 
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Logout Confirmation Dialog */}
+      {isLogoutDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleCancelLogout}
+          />
+
+          {/* Dialog Content */}
+          <div className="relative z-50 w-full max-w-sm bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center gap-3 p-6 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
+              <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Confirmer la déconnexion
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Cette action ne peut pas être annulée
+                </p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-gray-700 text-sm leading-relaxed">
+                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous reconnecter pour accéder à votre compte.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-3 p-6 border-t border-gray-100 bg-gray-50">
+              <Button
+                variant="outline"
+                onClick={handleCancelLogout}
+                className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-100"
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleLogout}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Se déconnecter
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

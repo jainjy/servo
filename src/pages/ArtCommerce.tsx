@@ -76,10 +76,10 @@ const ArtCommerce: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div id="art_commerce" className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Section de recherche */}
       <section
-        className="relative py-24 text-white overflow-hidden"
+        className="relative py-24 rounded-lg text-white overflow-hidden"
         style={{
           backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(30, 58, 138, 0.8)), url('https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
           backgroundSize: "cover",
@@ -89,10 +89,10 @@ const ArtCommerce: React.FC = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-2xl">
+          <h1 className="text-xl md:text-3xl font-bold mb-6 drop-shadow-2xl">
             Art & Commerces
           </h1>
-          <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-blue-100 font-light">
+          <p className="text-sm md:text-md mb-10 max-w-2xl mx-auto text-blue-100 font-light">
             Découvrez l'art local et les petites boutiques de La Réunion et
             d'ailleurs
           </p>
@@ -116,7 +116,7 @@ const ArtCommerce: React.FC = () => {
         <button
           onClick={() => setSelectedCategory("all")}
           className={`px-6 py-3 rounded-xl ${selectedCategory === "all"
-              ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+              ? "bg-slate-900 text-white shadow-lg"
               : "bg-white text-slate-700 border border-gray-200"
             }`}
         >
@@ -128,7 +128,7 @@ const ArtCommerce: React.FC = () => {
             key={catName}
             onClick={() => setSelectedCategory(catName)}
             className={`px-6 py-3 rounded-xl ${selectedCategory.toLowerCase() === catName.toLowerCase()
-                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                ? "bg-slate-800 text-white shadow-lg"
                 : "bg-white text-slate-700 border border-gray-200"
               }`}
           >

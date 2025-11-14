@@ -83,15 +83,15 @@ const PodcastsBienEtre: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await MediaService.getPodcasts({ limit: 50 });
-        
+
         const mediaData = response.data?.data || response.data || response;
-        
+
         if (Array.isArray(mediaData)) {
           const bienEtreMedia: MediaEpisode[] = mediaData
-            .filter((media: any) => 
-              media.isActive !== false && 
+            .filter((media: any) =>
+              media.isActive !== false &&
               media.category === "Bien-être & Santé"
             )
             .map((media: any, index: number) => ({
@@ -108,7 +108,7 @@ const PodcastsBienEtre: React.FC = () => {
               thumbnailUrl: media.thumbnailUrl || getThumbnailByType(media.type || (index % 2 === 0 ? 'audio' : 'video'), index),
               type: media.type || (index % 2 === 0 ? 'audio' : 'video')
             }));
-          
+
           setMediaEpisodes(bienEtreMedia);
         } else {
           // Fallback si l'API ne retourne pas de données
@@ -301,16 +301,18 @@ const PodcastsBienEtre: React.FC = () => {
   // Composant de carte média réutilisable
   const MediaCard = ({ episode }: { episode: MediaEpisode }) => (
     <div
-      className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
-        episode.featured ? 'border-2 border-blue-600' : 'border-gray-200'
-      }`}
+      className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-slate-900' : 'border-gray-200'
+        }`}
     >
       {episode.featured && (
-        <div className="bg-blue-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
-          ⭐ Contenu en vedette
+        <div className="bg-slate-900 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
+          {/* Badge type */}
+
+            {episode.type === 'video' ? ' Vidéo' : ' Audio'}
+
         </div>
       )}
-      
+
       {/* Image/Thumbnail */}
       <div className="relative h-48 overflow-hidden">
         <img
@@ -319,21 +321,16 @@ const PodcastsBienEtre: React.FC = () => {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
-        
-        {/* Badge type */}
-        <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white ${
-          episode.type === 'video' ? 'bg-slate-900' : 'bg-blue-600'
-        }`}>
-          {episode.type === 'video' ? '📹 Vidéo' : '🎧 Audio'}
-        </div>
-        
+
+
+
         {/* Bouton play overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
             {episode.type === 'video' ? (
-              <Video className="w-8 h-8 text-purple-600" />
+              <Video className="w-8 h-8 text-slate-900" />
             ) : (
-              <Play className="w-8 h-8 text-blue-600" />
+              <Play className="w-8 h-8 text-slate-900" />
             )}
           </div>
         </div>
@@ -350,7 +347,7 @@ const PodcastsBienEtre: React.FC = () => {
           </div>
         </div>
 
-        <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+        <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-slate-600 transition-colors line-clamp-2">
           {episode.title}
         </h4>
 
@@ -371,11 +368,10 @@ const PodcastsBienEtre: React.FC = () => {
               setSelectedEpisode(episode);
               setIsModalOpen(true);
             }}
-            className={`flex items-center px-4 py-2 rounded-lg text-white transition-colors group/btn ${
-              episode.type === 'video' 
-                ? 'bg-slate-900 hover:bg-purple-700' 
-                : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+            className={`flex items-center px-4 py-2 rounded-lg text-white transition-colors group/btn ${episode.type === 'video'
+                ? 'bg-slate-900 hover:bg-slate-700'
+                : 'bg-slate-900 hover:bg-slate-700'
+              }`}
           >
             {episode.type === 'video' ? (
               <Video className="w-4 h-4 mr-2" />
@@ -390,17 +386,17 @@ const PodcastsBienEtre: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4">
       {/* En-tête */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
-          <Headphones className="w-10 h-10 mr-4 text-blue-600" />
+          <Headphones className="w-10 h-10 mr-4 text-slate-900" />
           Contenus Bien-être & Santé
         </h1>
-        <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+        <p className="text-gray-600 text-sm lg:text-lg max-w-3xl mx-auto">
           Découvrez nos méditations guidées, séances de yoga, conseils nutrition et techniques de relaxation pour votre bien-être au quotidien.
         </p>
-        <div className="mt-4 flex items-center justify-center space-x-6 text-sm text-gray-500">
+        <div className=" flex items-center justify-center space-x-6 text-sm text-gray-500">
           <div className="flex items-center">
             <Headphones className="w-4 h-4 mr-1" />
             {mediaEpisodes.reduce((total, ep) => total + ep.listens, 0).toLocaleString()} écoutes totales
@@ -421,22 +417,20 @@ const PodcastsBienEtre: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-lg p-2 flex space-x-2">
           <button
             onClick={() => setActiveSection('audio')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
-              activeSection === 'audio'
-                ? 'bg-blue-600 text-white shadow-md'
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${activeSection === 'audio'
+                ? 'bg-slate-900 text-white shadow-md'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Music className="w-5 h-5" />
             <span>Podcasts Audio ({audioEpisodes.length})</span>
           </button>
           <button
             onClick={() => setActiveSection('video')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
-              activeSection === 'video'
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${activeSection === 'video'
                 ? 'bg-slate-900 text-white shadow-md'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <Video className="w-5 h-5" />
             <span>Vidéos ({videoEpisodes.length})</span>
@@ -449,7 +443,7 @@ const PodcastsBienEtre: React.FC = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Music className="w-8 h-8 mr-3 text-blue-600" />
+              <Music className="w-8 h-8 mr-3 text-slate-900" />
               Podcasts Audio
             </h2>
             <div className="text-sm text-gray-500">
@@ -478,7 +472,7 @@ const PodcastsBienEtre: React.FC = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Video className="w-8 h-8 mr-3 text-purple-600" />
+              <Video className="w-8 h-8 mr-3 text-slate-900" />
               Vidéos Bien-être
             </h2>
             <div className="text-sm text-gray-500">
@@ -567,9 +561,8 @@ const PodcastsBienEtre: React.FC = () => {
             <div className="flex p-4 border-b border-gray-200">
               {/* Image */}
               <div className="flex-shrink-0 mr-4">
-                <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${
-                  selectedEpisode.type === 'video' ? 'bg-slate-900' : 'bg-blue-600'
-                }`}>
+                <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${selectedEpisode.type === 'video' ? 'bg-slate-900' : 'bg-blue-600'
+                  }`}>
                   {selectedEpisode.type === 'video' ? (
                     <Video className="w-8 h-8 text-white" />
                   ) : (
@@ -584,11 +577,10 @@ const PodcastsBienEtre: React.FC = () => {
                   <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
                     {selectedEpisode.category}
                   </span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    selectedEpisode.type === 'video' 
-                      ? 'bg-purple-100 text-purple-600' 
-                      : 'bg-blue-100 text-blue-600'
-                  }`}>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${selectedEpisode.type === 'video'
+                      ? 'bg-purple-100 text-purple-600'
+                      : 'bg-blue-900 text-blue-600'
+                    }`}>
                     {selectedEpisode.type === 'video' ? 'Vidéo' : 'Audio'}
                   </span>
                   {selectedEpisode.featured && (
@@ -633,11 +625,10 @@ const PodcastsBienEtre: React.FC = () => {
               <div className="flex gap-3 mb-3">
                 <button
                   onClick={handlePlayMedia}
-                  className={`flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedEpisode.type === 'video'
+                  className={`flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedEpisode.type === 'video'
                       ? 'bg-slate-900 hover:bg-purple-700'
                       : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
+                    }`}
                 >
                   {isPlaying ? (
                     <>
@@ -667,11 +658,10 @@ const PodcastsBienEtre: React.FC = () => {
                 </button>
                 <button
                   onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                  className={`flex items-center justify-center border px-3 py-2 rounded-lg text-sm transition-colors ${
-                    selectedEpisode && isFavorite(selectedEpisode.id)
+                  className={`flex items-center justify-center border px-3 py-2 rounded-lg text-sm transition-colors ${selectedEpisode && isFavorite(selectedEpisode.id)
                       ? 'border-red-300 bg-red-50 text-red-600'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                   title="Ajouter aux favoris"
                 >
                   <Heart className={`w-4 h-4 mr-2 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />

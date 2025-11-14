@@ -61,7 +61,7 @@ const PodcastsServices: React.FC = () => {
         if (Array.isArray(podcastsData)) {
           // Transformer les données de l'API en format compatible avec le frontend
           const formattedPodcasts: PodcastEpisode[] = podcastsData
-            .filter((podcast: any) => podcast.isActive !== false) // Filtrer les podcasts actifs
+            .filter((podcast: any) => podcast.isActive !== false && (podcast.category === 'Entreprise' || !podcast.category)) // Filtrer les podcasts actifs de la catégorie Entreprise uniquement
             .map((podcast: any) => ({
               id: podcast.id,
               title: podcast.title,
@@ -177,7 +177,6 @@ const PodcastsServices: React.FC = () => {
   // Catégories basées sur les données réelles
   const categories = [
     { id: 'tous', label: 'Tous les épisodes', count: podcastEpisodes.length },
-    { id: 'Entreprise', label: 'Entreprise', count: podcastEpisodes.filter(ep => ep.category === 'Entreprise').length },
     { id: 'favoris', label: 'Favoris', count: podcastEpisodes.filter(ep => favorites.includes(ep.id)).length }
   ];
 
@@ -304,7 +303,7 @@ const PodcastsServices: React.FC = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-                <Headphones className="w-8 h-8 mr-3 text-blue-600" />
+                <Headphones className="w-8 h-8 mr-3 text-slate-900" />
                 Podcast "Entrepreneurial Spirit"
               </h3>
               <p className="text-gray-600 text-sm">Des interviews inspirantes et conseils pratiques pour entrepreneurs</p>

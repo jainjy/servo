@@ -129,7 +129,9 @@ import AdminMedia from "./pages/pro/adminMedia";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
 
 import AuditsPage from "./pages/admin/AdminAuditPage";
-import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
+import AidesFinancement from "./components/components/Aide_finance";
+import FormationsFinancement from "./components/components/Formation_finance";
+import ComptabiliteServices from "./components/components/Comptabilite";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -264,9 +266,11 @@ const App = () => {
                   />
                   <Route
                     path="/comptabilite"
-                    element={<ComptabiliteEntrepreneur entrepriseId="ENT-12345"
-  regimeFiscal="sarl"
-  anneeFiscale={2024} />}
+                    element={<ComptabiliteServices
+                      entrepriseId="ENT-12345"
+                      typeEntreprise="sarl"
+                      chiffreAffaire={150000}
+                    />}
                   />
                   <Route path="/service-maison" element={<DomicileLayout />} />
                   <Route
@@ -369,6 +373,21 @@ const App = () => {
                   <Route
                     path="/art-commerce/:id"
                     element={<ArtCommerceDetail />}
+                  />
+                  <Route
+                    path="/aide_financement"
+                    element={<AidesFinancement
+                      entrepriseId="ENT-12345"
+                      secteurActivite="Technologie"
+                      localisation="Île-de-France"
+                    />}
+                  />
+                  <Route
+                    path="/formation_finance"
+                    element={<FormationsFinancement
+                      entrepriseId="ENT-12345"
+                      secteurActivite="Industrie"
+                    />}
                   />
                   <Route
                     path="/investir/:type"
