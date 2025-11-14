@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import api from '../../lib/api.js'; // Adjust the path according to your project structure
 import { DemandeDevisModal } from '@/components/DemandeDevisModal.js'; // Import du modal
 import { Loader2 } from 'lucide-react';
+import PodcastsBatiment from '@/components/PodcastsBatiment'; // Ajout de l'import du composant Podcasts
 
 const BatimentsLayout = () => {
   const location = useLocation();
@@ -271,50 +272,55 @@ const BatimentsLayout = () => {
                 <p className="text-gray-600">{section.description}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-6">
-                {section.items.map((item, index) => {
-                  const itemId = item.id || `${section.title}-${index}`;
-                  const hasImageError = imageErrors[itemId];
-                  const initials = getInitials(item.title);
-                  const bgColor = getBackgroundColor(initials);
+              {/* Affichage conditionnel du composant PodcastsBatiment pour la section Formation & Podcasts */}
+              {section.title === "Formation & Podcasts" ? (
+                <PodcastsBatiment />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {section.items.map((item, index) => {
+                    const itemId = item.id || `${section.title}-${index}`;
+                    const hasImageError = imageErrors[itemId];
+                    const initials = getInitials(item.title);
+                    const bgColor = getBackgroundColor(initials);
 
-                  return (
-                    <div
-                      key={itemId}
-                      className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
-                    >
-                      <div className="relative h-48">
-                        {!hasImageError ? (
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                            onError={() => handleImageError(itemId)}
-                          />
-                        ) : (
-                          <div className={`w-full h-full flex items-center justify-center ${bgColor} text-white`}>
-                            <span className="text-5xl color-white font-bold">{initials}</span>
+                    return (
+                      <div
+                        key={itemId}
+                        className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+                      >
+                        <div className="relative h-48">
+                          {!hasImageError ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              onError={() => handleImageError(itemId)}
+                            />
+                          ) : (
+                            <div className={`w-full h-full flex items-center justify-center ${bgColor} text-white`}>
+                              <span className="text-5xl color-white font-bold">{initials}</span>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                          <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-green-600">{item.price}</span>
+                            <button 
+                              className="text-sm bg-black text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                              onClick={() => openDevisModal(item)}
+                            >
+                              Demander un devis
+                            </button>
                           </div>
-                        )}
-                        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                        <p className="text-gray-600 text-sm mb-2">{item.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-green-600">{item.price}</span>
-                          <button 
-                            className="text-sm bg-black text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-                            onClick={() => openDevisModal(item)}
-                          >
-                            Demander un devis
-                          </button>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </Tab.Panel>
           ))}
         </Tab.Panels>

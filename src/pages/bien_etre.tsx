@@ -7,6 +7,7 @@ import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
 //import Podcast from "@/pages/podcast";
 import ArtCommerce from "./ArtCommerce";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
+import PodcastsBienEtre from "@/components/PodcastsBienEtre";
 
 interface Service {
   id: number
@@ -370,15 +371,15 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
 const BienEtre = () => {
   const navigate = useNavigate();
   const section2Ref = useRef(null);
-  
+
   // États pour gérer le modal
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Initialisation du tracking
-  const { 
-    trackBienEtreView, 
-    trackBienEtreServiceClick, 
+  const {
+    trackBienEtreView,
+    trackBienEtreServiceClick,
     trackBienEtreServiceBook,
     trackBienEtreSearch,
     trackBienEtreTabChange
@@ -635,9 +636,9 @@ const BienEtre = () => {
                       {getCurrentServices().length > 0 ? (
                         getCurrentServices().map((service, index) => (
                           <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard 
-                              service={service} 
-                              index={index} 
+                            <ServiceCard
+                              service={service}
+                              index={index}
                               onOpenModal={handleOpenModal}
                             />
                           </SlideIn>
@@ -670,9 +671,9 @@ const BienEtre = () => {
                         {getCurrentServices().length > 0 ? (
                           getCurrentServices().map((service, index) => (
                             <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                              <ServiceCard 
-                                service={service} 
-                                index={index} 
+                              <ServiceCard
+                                service={service}
+                                index={index}
                                 onOpenModal={handleOpenModal}
                               />
                             </SlideIn>
@@ -706,9 +707,9 @@ const BienEtre = () => {
                       {getCurrentServices().length > 0 ? (
                         getCurrentServices().map((service, index) => (
                           <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard 
-                              service={service} 
-                              index={index} 
+                            <ServiceCard
+                              service={service}
+                              index={index}
                               onOpenModal={handleOpenModal}
                             />
                           </SlideIn>
@@ -740,9 +741,9 @@ const BienEtre = () => {
                       {getCurrentServices().length > 0 ? (
                         getCurrentServices().map((service, index) => (
                           <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard 
-                              service={service} 
-                              index={index} 
+                            <ServiceCard
+                              service={service}
+                              index={index}
                               onOpenModal={handleOpenModal}
                             />
                           </SlideIn>
@@ -757,13 +758,11 @@ const BienEtre = () => {
                 </SlideIn>
               </section>
             )}
-
-            {/* PODCASTEUR 
             {activeTab === 'Podcasteur' && (
               <>
-                <Podcast />
+                <PodcastsBienEtre />
               </>
-            )}*/}
+            )}
 
             {activeTab === 'BoutiqueNaturels' && (
               <>

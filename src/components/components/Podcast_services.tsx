@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Headphones, Mic, Video, BookOpen, Users, Download, Share2, Clock, Heart, MessageCircle, ArrowRight, Sparkles, TrendingUp, Lightbulb, Calendar, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MediaService } from '../../lib/api'; // Ajustez le chemin selon votre structure
 
 interface PodcastEpisode {
-  id: number;
+  id: string;
   title: string;
   description: string;
   duration: string;
@@ -14,6 +15,8 @@ interface PodcastEpisode {
   featured: boolean;
   audioUrl: string;
   downloadUrl: string;
+  isActive?: boolean;
+  thumbnailUrl?: string;
 }
 
 interface ServiceCardProps {
@@ -37,84 +40,57 @@ const PodcastsServices: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEpisode, setSelectedEpisode] = useState<PodcastEpisode | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [podcastEpisodes, setPodcastEpisodes] = useState<PodcastEpisode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = React.useRef<HTMLAudioElement>(null);
 
-  const podcastEpisodes: PodcastEpisode[] = [
-    {
-      id: 1,
-      title: "De l'idée à la scale-up : parcours d'un entrepreneur",
-      description: "Interview exclusive avec le fondateur de TechGrowth sur les défis de la croissance rapide.",
-      duration: "45 min",
-      date: "15 Nov 2024",
-      category: "croissance",
-      guests: ["Jean Dupont - CEO TechGrowth", "Marie Martin - VC Partner"],
-      listens: 2540,
-      featured: true,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-      downloadUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-    },
-    {
-      id: 2,
-      title: "Les 5 erreurs à éviter en levée de fonds",
-      description: "Retour d'expérience et conseils pratiques pour réussir sa première levée.",
-      duration: "32 min",
-      date: "8 Nov 2024",
-      category: "financement",
-      listens: 1870,
-      featured: true,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-      downloadUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-    },
-    {
-      id: 3,
-      title: "Marketing digital : stratégies qui marchent en 2024",
-      description: "Les nouvelles tendances et outils pour booster sa visibilité en ligne.",
-      duration: "38 min",
-      date: "1 Nov 2024",
-      category: "marketing",
-      listens: 3210,
-      featured: false,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-      downloadUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-    },
-    {
-      id: 4,
-      title: "Gestion du temps pour entrepreneurs surchargés",
-      description: "Méthodes et outils pour optimiser sa productivité au quotidien.",
-      duration: "28 min",
-      date: "25 Oct 2024",
-      category: "productivite",
-      listens: 1560,
-      featured: false,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-      downloadUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-    },
-    {
-      id: 5,
-      title: "Recrutement : attirer les meilleurs talents",
-      description: "Comment construire une marque employeur attractive dans un marché concurrentiel.",
-      duration: "41 min",
-      date: "18 Oct 2024",
-      category: "rh",
-      listens: 1980,
-      featured: false,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-      downloadUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
-    },
-    {
-      id: 6,
-      title: "Internationalisation : se développer à l'étranger",
-      description: "Stratégies et pièges à éviter pour une expansion internationale réussie.",
-      duration: "36 min",
-      date: "11 Oct 2024",
-      category: "international",
-      listens: 1420,
-      featured: false,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-      downloadUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
-    }
-  ];
+  // Charger les podcasts depuis l'API
+  useEffect(() => {
+    const fetchPodcasts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await MediaService.getPodcasts({ limit: 50 });
+        
+        // Extraire les données selon la structure de votre API
+        const podcastsData = response.data?.data || response.data || response;
+        
+        if (Array.isArray(podcastsData)) {
+          // Transformer les données de l'API en format compatible avec le frontend
+          const formattedPodcasts: PodcastEpisode[] = podcastsData
+            .filter((podcast: any) => podcast.isActive !== false) // Filtrer les podcasts actifs
+            .map((podcast: any) => ({
+              id: podcast.id,
+              title: podcast.title,
+              description: podcast.description || 'Aucune description disponible',
+              duration: podcast.duration || "00:00:00",
+              date: new Date(podcast.createdAt).toLocaleDateString('fr-FR'),
+              category: podcast.category || 'Entreprise',
+              listens: podcast.listens || 0,
+              featured: podcast.listens > 1000, // Exemple de logique pour "featured"
+              audioUrl: podcast.audioUrl || '#',
+              downloadUrl: podcast.audioUrl || '#',
+              thumbnailUrl: podcast.thumbnailUrl
+            }));
+          
+          setPodcastEpisodes(formattedPodcasts);
+        } else {
+          console.error('Format de données inattendu:', podcastsData);
+          setError('Erreur lors du chargement des podcasts');
+        }
+      } catch (err: any) {
+        console.error('Erreur lors du chargement des podcasts:', err);
+        setError(err.response?.data?.error || err.message || 'Erreur de chargement');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPodcasts();
+  }, []);
 
   const services: ServiceCardProps[] = [
     {
@@ -198,12 +174,10 @@ const PodcastsServices: React.FC = () => {
     }
   ];
 
+  // Catégories basées sur les données réelles
   const categories = [
     { id: 'tous', label: 'Tous les épisodes', count: podcastEpisodes.length },
-    { id: 'croissance', label: 'Croissance', count: podcastEpisodes.filter(ep => ep.category === 'croissance').length },
-    { id: 'financement', label: 'Financement', count: podcastEpisodes.filter(ep => ep.category === 'financement').length },
-    { id: 'marketing', label: 'Marketing', count: podcastEpisodes.filter(ep => ep.category === 'marketing').length },
-    { id: 'productivite', label: 'Productivité', count: podcastEpisodes.filter(ep => ep.category === 'productivite').length },
+    { id: 'Entreprise', label: 'Entreprise', count: podcastEpisodes.filter(ep => ep.category === 'Entreprise').length },
     { id: 'favoris', label: 'Favoris', count: podcastEpisodes.filter(ep => favorites.includes(ep.id)).length }
   ];
 
@@ -215,12 +189,13 @@ const PodcastsServices: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      croissance: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      financement: 'bg-gradient-to-r from-green-500 to-emerald-500',
-      marketing: 'bg-gradient-to-r from-purple-500 to-pink-500',
-      productivite: 'bg-gradient-to-r from-orange-500 to-red-500',
-      rh: 'bg-gradient-to-r from-indigo-500 to-blue-500',
-      international: 'bg-gradient-to-r from-teal-500 to-green-500'
+      'Entreprise': 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      'croissance': 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      'financement': 'bg-gradient-to-r from-green-500 to-emerald-500',
+      'marketing': 'bg-gradient-to-r from-purple-500 to-pink-500',
+      'productivite': 'bg-gradient-to-r from-orange-500 to-red-500',
+      'rh': 'bg-gradient-to-r from-indigo-500 to-blue-500',
+      'international': 'bg-gradient-to-r from-teal-500 to-green-500'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500';
   };
@@ -257,7 +232,7 @@ const PodcastsServices: React.FC = () => {
     }
   };
 
-  const toggleFavorite = (episodeId: number) => {
+  const toggleFavorite = (episodeId: string) => {
     setFavorites(prev =>
       prev.includes(episodeId)
         ? prev.filter(id => id !== episodeId)
@@ -265,10 +240,44 @@ const PodcastsServices: React.FC = () => {
     );
   };
 
-  const isFavorite = (episodeId: number) => favorites.includes(episodeId);
+  const isFavorite = (episodeId: string) => favorites.includes(episodeId);
+
+  if (loading) {
+    return (
+      <section className="py-8 mt-12 rounded-lg">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement des podcasts...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-8 mt-12 rounded-lg">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center py-16">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-md mx-auto">
+              <p className="text-red-800 font-medium mb-2">Erreur de chargement</p>
+              <p className="text-red-600 text-sm">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Réessayer
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="py-8 mt-12 rounded-lg ">
+    <section className="py-8 mt-12 rounded-lg">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
           <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
@@ -278,10 +287,10 @@ const PodcastsServices: React.FC = () => {
             Ressources & Contenus Exclusifs
           </div>
         </div>
+
         {/* En-tête avec animation */}
         <div className="text-center mb-16">
-
-          <h2 className="text-4xl md:text-5xl font-bold  text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Podcasts & Services
           </h2>
           <p className="text-sm text-gray-200 max-w-3xl mx-auto leading-relaxed">
@@ -298,11 +307,11 @@ const PodcastsServices: React.FC = () => {
                 <Headphones className="w-8 h-8 mr-3 text-blue-600" />
                 Podcast "Entrepreneurial Spirit"
               </h3>
-              <p className="text-gray-600 text-sm">Des interviews inspirantes et conseils pratiques</p>
+              <p className="text-gray-600 text-sm">Des interviews inspirantes et conseils pratiques pour entrepreneurs</p>
             </div>
             <div className="flex items-center space-x-2 text-xs text-gray-200 bg-gray-950 px-4 py-2 rounded-full">
               <TrendingUp className="w-4 h-4" />
-              <span>+15k écoutes mensuelles</span>
+              <span>{podcastEpisodes.reduce((total, ep) => total + ep.listens, 0).toLocaleString()} écoutes totales</span>
             </div>
           </div>
 
@@ -332,15 +341,25 @@ const PodcastsServices: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredEpisodes.length === 0 ? (
               <div className="col-span-full text-center py-16">
-                <Heart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun favoris pour le moment</h3>
-                <p className="text-gray-500 mb-6">Ajoutez vos épisodes préférés en cliquant sur le cœur dans la modale</p>
-                <button
-                  onClick={() => setActiveCategory('tous')}
-                  className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Découvrir les épisodes
-                </button>
+                {activeCategory === 'favoris' ? (
+                  <>
+                    <Heart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun favoris pour le moment</h3>
+                    <p className="text-gray-500 mb-6">Ajoutez vos épisodes préférés en cliquant sur le cœur dans la modale</p>
+                    <button
+                      onClick={() => setActiveCategory('tous')}
+                      className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Découvrir les épisodes
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Headphones className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast disponible</h3>
+                    <p className="text-gray-500">Revenez plus tard pour découvrir nos nouveaux épisodes</p>
+                  </>
+                )}
               </div>
             ) : (
               filteredEpisodes.map((episode) => (
@@ -407,46 +426,6 @@ const PodcastsServices: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Services Section */}
-        {/* <div className="mb-20">
-          <h3 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Nos Services Premium
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 group"
-              >
-                <div className={`p-6 bg-gradient-to-br ${getServiceColor(service.color)} text-white rounded-t-2xl`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                      {service.icon}
-                    </div>
-                    <Sparkles className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <h4 className="font-bold text-xl mb-2">{service.title}</h4>
-                  <p className="text-blue-50 text-sm opacity-90">{service.description}</p>
-                </div>
-                <div className="p-6">
-                  <ul className="space-y-3 mb-6">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center text-sm text-gray-600">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center">
-                    {service.cta}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div> */}
 
         {/* Ressources Gratuites */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
@@ -611,23 +590,6 @@ const PodcastsServices: React.FC = () => {
                   {selectedEpisode.description}
                 </p>
               </div>
-
-              {/* Invités */}
-              {selectedEpisode.guests && selectedEpisode.guests.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Invités</h3>
-                  <div className="space-y-2">
-                    {selectedEpisode.guests.map((guest, index) => (
-                      <div key={index} className="flex items-center text-sm">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
-                          {guest.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        {guest}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Footer - Actions */}
