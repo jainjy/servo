@@ -1,73 +1,28 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Eye, CheckCircle, XCircle, MessageSquare, Calendar, MapPin, User, Building } from "lucide-react"
+import { Search, Eye, CheckCircle, XCircle, MessageSquare, Calendar, MapPin, User, Building, Loader2, Send } from "lucide-react"
+import api from "@/lib/api"
+import { toast } from "@/components/ui/sonner"
 
-const bookings = [
-  {
-    id: "1",
-    service: "Nettoyage complet",
-    client: "Marie Dubois",
-    vendor: "CleanPro Services",
-    startAt: "2024-03-15T10:00:00",
-    endAt: "2024-03-15T14:00:00",
-    status: "confirmed",
-    price: 120,
-    address: "15 rue de la Paix, Paris",
-    description: "Nettoyage complet de l'appartement incluant salle de bain, cuisine et pièces de vie.",
-    phone: "+33 1 23 45 67 89",
-    email: "marie.dubois@email.com",
-    notes: "Le client a des animaux domestiques."
-  },
-  {
-    id: "2",
-    service: "Plomberie - Réparation fuite",
-    client: "Jean Martin",
-    vendor: "Plomberie Express",
-    startAt: "2024-03-16T09:00:00",
-    endAt: "2024-03-16T11:00:00",
-    status: "pending",
-    price: 180,
-    address: "42 avenue Victor Hugo, Lyon",
-    description: "Réparation d'une fuite sous l'évier de la cuisine.",
-    phone: "+33 4 56 78 90 12",
-    email: "jean.martin@email.com",
-    notes: "Accès par le code 1234 à l'entrée."
-  },
-  {
-    id: "3",
-    service: "Déménagement",
-    client: "Sophie Laurent",
-    vendor: "Déménageurs Pro",
-    startAt: "2024-03-18T08:00:00",
-    endAt: "2024-03-18T18:00:00",
-    status: "confirmed",
-    price: 450,
-    address: "8 boulevard Gambetta, Marseille",
-    description: "Déménagement complet d'un appartement 3 pièces.",
-    phone: "+33 6 12 34 56 78",
-    email: "sophie.laurent@email.com",
-    notes: "Meubles à démonter sur place."
-  },
-  {
-    id: "4",
-    service: "Électricité - Installation",
-    client: "Pierre Durand",
-    vendor: "Électro Services",
-    startAt: "2024-03-20T14:00:00",
-    endAt: "2024-03-20T17:00:00",
-    status: "cancelled",
-    price: 200,
-    address: "23 rue Nationale, Bordeaux",
-    description: "Installation de prises électriques supplémentaires dans le salon.",
-    phone: "+33 5 67 89 01 23",
-    email: "pierre.durand@email.com",
-    notes: "Annulé à la demande du client."
-  },
-]
+interface Booking {
+  id: string
+  service: string
+  client: string
+  vendor: string
+  startAt: string
+  endAt: string
+  status: "confirmed" | "pending" | "cancelled" | "completed"
+  price: number
+  address: string
+  description: string
+  phone: string
+  email: string
+  notes: string
+}
 
 const statusColors = {
   confirmed: "bg-success/20 text-success",
@@ -85,8 +40,86 @@ const statusLabels = {
 
 export function BookingsTable() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedBooking, setSelectedBooking] = useState<(typeof bookings)[0] | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [contactBooking, setContactBooking] = useState<Booking | null>(null)
+  const [contactMessage, setContactMessage] = useState("")
+  const [contactSending, setContactSending] = useState(false)
+  const [cancellingBooking, setCancellingBooking] = useState<string | null>(null)
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      console.log("🔄 Chargement des réservations depuis l'API...")
+
+      const response = await api.get('/tourisme-bookings', {
+        params: {
+          limit: 50,
+          page: 1
+        }
+      })
+
+      console.log("📊 Réponse API réservations:", response.data)
+
+      const apiBookings = response.data?.data || response.data || []
+      const transformedBookings = transformApiBookings(apiBookings)
+
+      console.log("🎯 Réservations transformées:", transformedBookings)
+
+      setBookings(transformedBookings)
+    } catch (error) {
+      console.error("❌ Erreur lors du chargement des réservations:", error)
+      setError("Erreur lors du chargement des réservations")
+      setBookings([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const transformApiBookings = (apiBookings: any[]): Booking[] => {
+    if (!apiBookings || !Array.isArray(apiBookings)) {
+      return []
+    }
+
+    return apiBookings
+      .map((booking, index) => {
+        try {
+          const clientName = booking.user?.firstName && booking.user?.lastName
+            ? `${booking.user.firstName} ${booking.user.lastName}`
+            : booking.user?.firstName || 'Client inconnu'
+
+          return {
+            id: booking.id || `booking-${index}`,
+            service: booking.listing?.title || `Réservation ${index + 1}`,
+            client: clientName,
+            vendor: booking.listing?.type || 'Prestataire',
+            startAt: booking.checkIn || booking.createdAt,
+            endAt: booking.checkOut || booking.createdAt,
+            status: booking.status || 'pending',
+            price: booking.totalAmount || 0,
+            address: booking.listing?.city || 'Adresse non disponible',
+            description: booking.listing?.title || 'Aucune description',
+            phone: booking.user?.phone || 'Non fourni',
+            email: booking.user?.email || 'Non fourni',
+            notes: ''
+          }
+        } catch (error) {
+          console.error("❌ Erreur transformation booking:", booking, error)
+          return null
+        }
+      })
+      .filter((booking): booking is Booking => booking !== null)
+  }
 
   const filteredBookings = bookings.filter(
     (booking) =>
@@ -95,29 +128,163 @@ export function BookingsTable() {
       booking.vendor.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const handleViewDetails = (booking: (typeof bookings)[0]) => {
+  const handleViewDetails = (booking: Booking) => {
     setSelectedBooking(booking)
     setIsDetailModalOpen(true)
   }
 
-  const handleConfirm = (booking: (typeof bookings)[0]) => {
+  const handleConfirm = (booking: Booking) => {
     console.log("Confirmer la réservation:", booking)
-    // Implémentez la logique de confirmation ici
   }
 
-  const handleContact = (booking: (typeof bookings)[0]) => {
-    console.log("Contacter:", booking)
-    // Implémentez la logique de contact ici
+  const handleContact = (booking: Booking) => {
+    setContactBooking(booking)
+    setContactMessage("")
+    setIsContactModalOpen(true)
   }
 
-  const handleCancel = (booking: (typeof bookings)[0]) => {
-    console.log("Annuler la réservation:", booking)
-    // Implémentez la logique d'annulation ici
+  const handleSendMessage = async () => {
+    if (!contactBooking || !contactMessage.trim()) {
+      toast.error("Veuillez entrer un message")
+      return
+    }
+
+    try {
+      setContactSending(true)
+      console.log("📧 Envoi du message au client:", {
+        bookingId: contactBooking.id,
+        clientEmail: contactBooking.email,
+        clientPhone: contactBooking.phone,
+        message: contactMessage
+      })
+
+      toast.success("Message envoyé avec succès")
+      setIsContactModalOpen(false)
+      setContactMessage("")
+      setContactBooking(null)
+    } catch (error) {
+      console.error("❌ Erreur lors de l'envoi du message:", error)
+      toast.error("Erreur lors de l'envoi du message")
+    } finally {
+      setContactSending(false)
+    }
+  }
+
+  const handleCancel = async (booking: Booking) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir annuler cette réservation ?")) {
+      return
+    }
+
+    try {
+      setCancellingBooking(booking.id)
+      console.log("🗑️ Annulation de la réservation:", booking.id)
+
+      await api.delete(`/tourisme-bookings/${booking.id}`)
+
+      setBookings(bookings.filter(b => b.id !== booking.id))
+      toast.success("Réservation annulée avec succès")
+
+      if (isDetailModalOpen && selectedBooking?.id === booking.id) {
+        closeDetailModal()
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors de l'annulation:", error)
+      toast.error("Erreur lors de l'annulation de la réservation")
+    } finally {
+      setCancellingBooking(null)
+    }
   }
 
   const closeDetailModal = () => {
     setIsDetailModalOpen(false)
     setSelectedBooking(null)
+  }
+
+  if (loading) {
+    return (
+      <Card className="bg-card border-border">
+        <div className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Rechercher par service, client ou prestataire..."
+                disabled
+                className="pl-10 bg-background border-input"
+              />
+            </div>
+            <Button variant="outline" className="border-border bg-transparent" disabled>
+              Filtres
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((index) => (
+              <Card key={index} className="border-border bg-card p-6 animate-pulse">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-48 bg-muted rounded"></div>
+                    <div className="h-3 w-32 bg-muted rounded"></div>
+                    <div className="h-6 w-20 bg-muted rounded"></div>
+                  </div>
+                </div>
+                <div className="space-y-3 mb-4">
+                  <div className="h-6 w-16 bg-muted rounded"></div>
+                  <div className="space-y-2">
+                    <div className="h-3 w-40 bg-muted rounded"></div>
+                    <div className="h-3 w-40 bg-muted rounded"></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 w-32 bg-muted rounded"></div>
+                    <div className="h-3 w-32 bg-muted rounded"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-card border-border">
+        <div className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Rechercher par service, client ou prestataire..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-background border-input"
+              />
+            </div>
+            <Button variant="outline" className="border-border bg-transparent">
+              Filtres
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="text-center py-12">
+            <p className="text-red-600 font-medium mb-4">{error}</p>
+            <Button
+              onClick={fetchBookings}
+              className="bg-success hover:bg-success/90"
+            >
+              <Loader2 className="h-4 w-4 mr-2" />
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )
   }
 
   return (
@@ -142,118 +309,134 @@ export function BookingsTable() {
         </div>
 
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
-            {filteredBookings.map((booking) => (
-              <Card key={booking.id} className="border-border bg-card p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
-                      {booking.service}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2">{booking.address}</p>
-                    <Badge 
-                      variant="secondary" 
-                      className={statusColors[booking.status as keyof typeof statusColors]}
-                    >
-                      {statusLabels[booking.status as keyof typeof statusLabels]}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-lg text-foreground">
-                      {booking.price} €
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Client:</span>
-                      <span className="font-medium text-foreground">{booking.client}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Prestataire:</span>
-                      <span className="font-medium text-foreground">{booking.vendor}</span>
+          {filteredBookings.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="font-medium">Aucune réservation trouvée</p>
+              <p className="text-sm">Essayez de modifier vos critères de recherche</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
+              {filteredBookings.map((booking) => (
+                <Card key={booking.id} className="border-border bg-card p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+                        {booking.service}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">{booking.address}</p>
+                      <Badge 
+                        variant="secondary" 
+                        className={statusColors[booking.status as keyof typeof statusColors]}
+                      >
+                        {statusLabels[booking.status as keyof typeof statusLabels]}
+                      </Badge>
                     </div>
                   </div>
 
-                  <div className="text-sm space-y-1">
-                    <div className="font-medium text-foreground">
-                      {new Date(booking.startAt).toLocaleDateString("fr-FR", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-lg text-foreground">
+                        {booking.price} €
+                      </span>
                     </div>
-                    <div className="text-muted-foreground">
-                      {new Date(booking.startAt).toLocaleTimeString("fr-FR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
-                      -{" "}
-                      {new Date(booking.endAt).toLocaleTimeString("fr-FR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Client:</span>
+                        <span className="font-medium text-foreground">{booking.client}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Prestataire:</span>
+                        <span className="font-medium text-foreground">{booking.vendor}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-sm space-y-1">
+                      <div className="font-medium text-foreground">
+                        {new Date(booking.startAt).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {new Date(booking.startAt).toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        -{" "}
+                        {new Date(booking.endAt).toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewDetails(booking)}
-                    className="flex-1 border-border hover:bg-accent"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Détails
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleContact(booking)}
-                    className="flex-1 border-border hover:bg-accent"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Contacter
-                  </Button>
-                </div>
-
-                <div className="flex gap-2 mt-2">
-                  {booking.status === "pending" && (
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-border">
                     <Button
-                      variant="default"
+                      variant="outline"
                       size="sm"
-                      onClick={() => handleConfirm(booking)}
-                      className="flex-1 bg-success hover:bg-success/90"
+                      onClick={() => handleViewDetails(booking)}
+                      className="flex-1 border-border hover:bg-accent"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Confirmer
+                      <Eye className="h-4 w-4 mr-2" />
+                      Détails
                     </Button>
-                  )}
-                  
-                  {booking.status !== "cancelled" && (
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleContact(booking)}
+                      className="flex-1 border-border hover:bg-accent"
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Contacter
+                    </Button>
+                  </div>
+
+                  <div className="flex gap-2 mt-2">
+                    {booking.status === "pending" && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleConfirm(booking)}
+                        className="flex-1 bg-success hover:bg-success/90"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Confirmer
+                      </Button>
+                    )}
+                    
+                    {booking.status !== "cancelled" && (
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleCancel(booking)}
+                      disabled={cancellingBooking === booking.id}
                       className="flex-1"
                     >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Annuler
+                      {cancellingBooking === booking.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Annulation...
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Annuler
+                        </>
+                      )}
                     </Button>
                   )}
-                </div>
-              </Card>
-            ))}
-          </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </Card>
 
-      {/* Modal de détails */}
       <Dialog open={isDetailModalOpen} onOpenChange={closeDetailModal}>
         <DialogContent className="max-w-2xl bg-card border-border">
           {selectedBooking && (
@@ -266,7 +449,6 @@ export function BookingsTable() {
               </DialogHeader>
 
               <div className="space-y-6">
-                {/* En-tête avec service et statut */}
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-xl font-bold text-foreground">{selectedBooking.service}</h2>
@@ -280,13 +462,11 @@ export function BookingsTable() {
                   <span className="text-2xl font-bold text-foreground">{selectedBooking.price} €</span>
                 </div>
 
-                {/* Description */}
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">Description</h3>
                   <p className="text-muted-foreground">{selectedBooking.description}</p>
                 </div>
 
-                {/* Informations de contact */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -323,7 +503,6 @@ export function BookingsTable() {
                   </div>
                 </div>
 
-                {/* Adresse et horaires */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -360,7 +539,6 @@ export function BookingsTable() {
                   </div>
                 </div>
 
-                {/* Notes */}
                 {selectedBooking.notes && (
                   <div>
                     <h3 className="font-semibold text-foreground mb-2">Notes supplémentaires</h3>
@@ -368,7 +546,6 @@ export function BookingsTable() {
                   </div>
                 )}
 
-                {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-border">
                   <Button
                     variant="outline"
@@ -394,15 +571,104 @@ export function BookingsTable() {
                     <Button
                       variant="destructive"
                       onClick={() => handleCancel(selectedBooking)}
+                      disabled={cancellingBooking === selectedBooking.id}
                       className="flex-1"
                     >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Annuler
+                      {cancellingBooking === selectedBooking.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Annulation...
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Annuler
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
               </div>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
+        <DialogContent className="max-w-2xl bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Contacter le client
+            </DialogTitle>
+          </DialogHeader>
+
+          {contactBooking && (
+            <div className="space-y-6">
+              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                <div>
+                  <h3 className="font-semibold text-foreground">Client</h3>
+                  <p className="text-muted-foreground">{contactBooking.client}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground">Email</h4>
+                    <p className="text-foreground">{contactBooking.email}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground">Téléphone</h4>
+                    <p className="text-foreground">{contactBooking.phone}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground">Réservation</h4>
+                  <p className="text-foreground">{contactBooking.service}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Message</label>
+                <textarea
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  placeholder="Entrez votre message..."
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  rows={5}
+                  disabled={contactSending}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {contactMessage.length} caractères
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsContactModalOpen(false)}
+                  className="flex-1 border-border"
+                  disabled={contactSending}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={contactSending || !contactMessage.trim()}
+                  className="flex-1 bg-success hover:bg-success/90"
+                >
+                  {contactSending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Envoi...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Envoyer
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
