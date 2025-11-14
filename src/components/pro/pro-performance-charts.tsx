@@ -43,7 +43,7 @@ export function ProPerformanceCharts() {
               color: "hsl(var(--chart-2))",
             },
           }}
-          className="h-[200px]"
+          className="h-[200px] lg:w-full w-64"
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={revenueData}>
@@ -92,7 +92,7 @@ export function ProPerformanceCharts() {
               color: "hsl(var(--chart-3))",
             },
           }}
-          className="h-[150px]"
+          className="h-[150px] lg:w-full w-64"
         >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={ratingData}>

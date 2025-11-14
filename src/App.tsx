@@ -129,6 +129,7 @@ import AdminMedia from "./pages/pro/adminMedia";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
 
 import AuditsPage from "./pages/admin/AdminAuditPage";
+import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -260,6 +261,12 @@ const App = () => {
                   <Route
                     path="/produits-commerces"
                     element={<DomicileLayout />}
+                  />
+                  <Route
+                    path="/comptabilite"
+                    element={<ComptabiliteEntrepreneur entrepriseId="ENT-12345"
+  regimeFiscal="sarl"
+  anneeFiscale={2024} />}
                   />
                   <Route path="/service-maison" element={<DomicileLayout />} />
                   <Route

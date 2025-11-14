@@ -76,7 +76,7 @@ const ImmobilierSections = () => {
             }
         } catch (err) {
             console.error('Erreur récupération annonces:', err);
-            setError('Impossible de charger les annonces');
+            setError('Vous devez vous connecter pour voir les annonces.');
         } finally {
             setLoading(false);
         }
@@ -149,10 +149,10 @@ const ImmobilierSections = () => {
                                 {error}
                             </div>
                             <button 
-                                onClick={fetchAnnonces}
+                                onClick={fetchAnnonces || (() => window.location.href = '/login')}
                                 className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
                             >
-                                Réessayer
+                                {fetchAnnonces ? `Se connecter ` : 'Rafraîchir la page'}
                             </button>
                         </div>
                     )}

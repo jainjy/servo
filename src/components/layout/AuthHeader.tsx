@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   Trash2,
+  Play,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AuthService from "@/services/authService";
 import NotificationService, { Notification } from "@/services/notificationService";
+import { api } from "@/lib/axios";
+import { get } from "http";
 
 interface SearchResult {
   id: string;
@@ -26,6 +29,7 @@ interface SearchResult {
   title: string;
   subtitle: string;
   url: string;
+  image?: string;
 }
 
 export function AuthHeader() {
@@ -38,10 +42,12 @@ export function AuthHeader() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Récupérer l'utilisateur connecté et initialiser les notifications
   useEffect(() => {
@@ -96,9 +102,14 @@ export function AuthHeader() {
     };
   }, []);
 
-  // FONCTION HANDLE_SEARCH AJOUTÉE
-  const handleSearch = (query: string) => {
+  // FONCTION HANDLE_SEARCH AVEC DEBOUNCE
+  const handleSearch = async (query: string) => {
     setSearchQuery(query);
+
+    // Nettoyer le timeout précédent
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
 
     if (query.length < 2) {
       setSearchResults([]);
@@ -106,51 +117,114 @@ export function AuthHeader() {
       return;
     }
 
-    // Logique de recherche
-    const mockResults: SearchResult[] = [
-      {
-        id: "1",
-        type: "user",
-        title: "Jean Rakoto",
-        subtitle: "jean.rakoto@email.com",
-        url: "/admin/users",
-      },
-      {
-        id: "2",
-        type: "listing",
-        title: "Villa F4 à Ivandry",
-        subtitle: "450,000,000 Ar • Vente",
-        url: "/admin/listings",
-      },
-      {
-        id: "3",
-        type: "service",
-        title: "Plomberie Express",
-        subtitle: "Service de plomberie",
-        url: "/admin/services",
-      },
-      {
-        id: "4",
-        type: "booking",
-        title: "Réservation #12345",
-        subtitle: "Visite guidée Andasibe",
-        url: "/admin/bookings",
-      },
-    ].filter(
-      (result) =>
-        result.title.toLowerCase().includes(query.toLowerCase()) ||
-        result.subtitle.toLowerCase().includes(query.toLowerCase())
-    );
+    // Ajouter un debounce de 500ms
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results: SearchResult[] = [];
 
-    setSearchResults(mockResults);
-    setShowResults(true);
+        console.log("🔍 Recherche lancée pour:", query);
+
+        // Recherche utilisateurs
+        try {
+          const usersResponse = await api.get(`/users`, {
+            params: { search: query }
+          });
+          console.log("👥 Réponse utilisateurs:", usersResponse.data);
+
+          // Gérer les différents formats de réponse
+          let usersData = Array.isArray(usersResponse.data)
+            ? usersResponse.data
+            : usersResponse.data?.data || usersResponse.data?.users || [];
+
+          if (usersData.length > 0) {
+            results.push(
+              ...usersData.slice(0, 2).map((user: any) => ({
+                id: user.id,
+                type: "user" as const,
+                title: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Utilisateur",
+                subtitle: user.email || user.companyName || "Utilisateur",
+                url: `/admin/users/${user.id}`,
+                image: user.avatar,
+              }))
+            );
+          }
+        } catch (err) {
+          console.warn("⚠️ Erreur recherche utilisateurs:", err);
+        }
+
+        // Recherche annonces
+        try {
+          const listingsResponse = await api.get(`/anonce/affiche_anonce`, {
+            params: { search: query }
+          });
+          console.log("🏠 Réponse annonces brute:", listingsResponse.data);
+
+          // Gérer le format {success, message, data}
+          let listingsData = Array.isArray(listingsResponse.data)
+            ? listingsResponse.data
+            : listingsResponse.data?.data || [];
+
+          if (listingsData && listingsData.length > 0) {
+            results.push(
+              ...listingsData.slice(0, 2).map((listing: any) => ({
+                id: listing.id,
+                type: "listing" as const,
+                title: listing.titre || listing.title || "Annonce",
+                subtitle: `${listing.prixVente || listing.price || "N/A"} Ar • ${listing.type || "Annonce"}`,
+                url: `/admin/listings/${listing.id}`,
+                image: listing.image || listing.photos?.[0]?.url || listing.photos?.[0],
+              }))
+            );
+          }
+        } catch (err) {
+          console.warn("⚠️ Erreur recherche annonces:", err);
+        }
+
+        // Recherche services
+        try {
+          const servicesResponse = await api.get(`/services`, {
+            params: { search: query }
+          });
+          console.log("🔧 Réponse services:", servicesResponse.data);
+
+          let servicesData = Array.isArray(servicesResponse.data)
+            ? servicesResponse.data
+            : servicesResponse.data?.data || servicesResponse.data?.services || [];
+
+          if (servicesData && servicesData.length > 0) {
+            results.push(
+              ...servicesData.slice(0, 2).map((service: any) => ({
+                id: service.id,
+                type: "service" as const,
+                title: service.name || service.title || "Service",
+                subtitle: service.description || "Service professionnel",
+                url: `/admin/services/${service.id}`,
+                image: service.image || service.logo,
+              }))
+            );
+          }
+        } catch (err) {
+          console.warn("⚠️ Erreur recherche services:", err);
+        }
+
+        console.log("✅ Résultats trouvés:", results.length, results);
+        setSearchResults(results);
+        setShowResults(results.length > 0);
+      } catch (error) {
+        console.error("❌ Erreur lors de la recherche:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
   };
 
   const markAsRead = async (id: number) => {
     console.log(`🟡 Tentative de marquer comme lue la notification ${id}`);
-    
+
     const success = await NotificationService.markAsRead(id);
-    
+
     if (success) {
       setNotifications((prev) =>
         prev.map((n) => n.id === id ? { ...n, read: true } : n)
@@ -164,7 +238,7 @@ export function AuthHeader() {
 
   const markAllAsRead = async () => {
     console.log("🟡 Marquage de toutes les notifications comme lues");
-    
+
     const unreadNotifications = notifications.filter(n => !n.read);
     let successCount = 0;
 
@@ -181,7 +255,7 @@ export function AuthHeader() {
     });
 
     if (successCount > 0) {
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(notif => ({ ...notif, read: true }))
       );
       setUnreadCount(0);
@@ -191,7 +265,7 @@ export function AuthHeader() {
 
   const deleteNotification = async (id: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    
+
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette notification ?")) {
       const success = await NotificationService.deleteNotification(id);
       if (success) {
@@ -246,17 +320,26 @@ export function AuthHeader() {
     if (diffMins < 60) return `Il y a ${diffMins} min`;
     if (diffHours < 24) return `Il y a ${diffHours} h`;
     if (diffDays < 7) return `Il y a ${diffDays} j`;
-    
+
     return date.toLocaleDateString('fr-FR');
   };
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-white lg:mt-0 mt-16 px-0 lg:px-6">
       {/* Barre de Recherche */}
-      <div className="relative flex flex-1 items-center">
-        <div className="absolute -left-2 lg:hidden sm:hidden p-1 rounded-full bg-white border-black border-2">
-          <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
-        </div>
+      <div className="flex flex-1 items-center">
+        {currentUser?.role === "admin" && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 lg:hidden bg-white/95 backdrop-blur-sm border border-gray-300 shadow-xl z-50 rounded-2xl px-4 py-2 flex items-center gap-3">
+            <img
+              src={logo}
+              alt="Servo Logo"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200"
+            />
+            <span className="azonix tracking-widest text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">
+              Servo Admin
+            </span>
+          </div>
+        )}
         <div
           className="lg:left-0 md:left-0 w-11/12 left-2 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96"
           ref={searchRef}
@@ -271,50 +354,118 @@ export function AuthHeader() {
             onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
           />
 
-          {showResults && searchResults.length > 0 && (
-            <div className="absolute top-full mt-2 w-full rounded-lg border border-border bg-card shadow-lg z-50">
-              <div className="flex items-center justify-between p-3 border-b border-border">
-                <span className="text-sm font-medium">
-                  {searchResults.length} résultat(s)
+          {/* Afficher le conteneur dès que l'utilisateur tape (même s'il n'y a pas de résultats encore) */}
+          {searchQuery.length >= 2 && (
+            <div className="absolute top-full mt-2 w-full rounded-lg border border-border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto">
+              {/* Header */}
+              <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border bg-card">
+                <span className="text-sm font-semibold">
+                  {isSearching ? "Recherche en cours..." : `${searchResults.length} résultat(s) pour "${searchQuery}"`}
                 </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
-                  onClick={() => setShowResults(false)}
+                  onClick={() => {
+                    setShowResults(false);
+                    setSearchQuery("");
+                  }}
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="max-h-96 overflow-y-auto">
-                {searchResults.map((result) => (
-                  <Link
-                    key={result.id}
-                    to={result.url}
-                    onClick={() => {
-                      setShowResults(false);
-                      setSearchQuery("");
-                    }}
-                  >
-                    <div className="flex items-center gap-3 p-3 hover:bg-accent transition-colors cursor-pointer">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        {getIcon(result.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {result.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {result.subtitle}
-                        </p>
-                      </div>
-                      <Badge variant="outline" className="capitalize">
-                        {result.type}
-                      </Badge>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+
+              {/* État de chargement */}
+              {isSearching && (
+                <div className="p-12 flex flex-col items-center justify-center gap-4">
+                  <div className="relative w-10 h-10">
+                    <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Recherche en cours...</p>
+                </div>
+              )}
+
+              {/* Résultats en grille style YouTube */}
+              {!isSearching && searchResults.length > 0 && (
+                <div className="p-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {searchResults.map((result) => (
+                      <Link
+                        key={result.id}
+                        to={result.url}
+                        onClick={() => {
+                          setShowResults(false);
+                          setSearchQuery("");
+                        }}
+                        className="group flex items-center gap-4 p-4 rounded-2xl bg-background border-2 border-transparent hover:border-primary/30 transition-all duration-500"
+                      >
+
+
+                        {/* Album art */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden shadow-sm bg-gradient-to-br from-primary/20 to-primary/10">
+                            {result.image ? (
+                              <img
+                                src={result.image}
+                                alt={result.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <div className="text-slate-900 group-hover:text-slate-900 transition-colors text-lg">
+                                  {getIcon(result.type)}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Track info */}
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div>
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1 group-hover:text-slate-700 transition-colors">
+                              {result.title}
+                            </h3>
+                            <p className="text-xs font-bold text-muted-foreground line-clamp-1 mt-1">
+                              {result.subtitle}
+                            </p>
+                          </div>
+
+
+                        </div>
+                        {/* Genre tags */}
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs bg-primary/10 text-slate-900 border-0">
+                            {result.type === "user" && " Utilisateur"}
+                            {result.type === "listing" && " Immobilier"}
+                            {result.type === "service" && " Service"}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {getIcon(result.type)}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Aucun résultat */}
+              {!isSearching && searchResults.length === 0 && (
+                <div className="p-12 flex flex-col items-center justify-center gap-3">
+                  <Search className="w-8 h-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Aucun résultat trouvé</p>
+                  <p className="text-xs text-muted-foreground">Essayez une autre recherche</p>
+                </div>
+              )}
+
+              {/* Footer avec info */}
+              {!isSearching && searchResults.length > 0 && (
+                <div className="sticky bottom-0 p-3 border-t border-border bg-card text-center text-xs text-muted-foreground">
+                  Affichage de {searchResults.length} résultat(s)
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -376,7 +527,7 @@ export function AuthHeader() {
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
-                      
+
                       <div className="flex gap-3 w-full pr-6">
                         <div
                           className={`mt-1 flex-shrink-0 ${getNotificationColor(
@@ -388,11 +539,10 @@ export function AuthHeader() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p
-                              className={`text-sm font-medium ${
-                                !notification.read
-                                  ? "text-foreground"
-                                  : "text-muted-foreground"
-                              }`}
+                              className={`text-sm font-medium ${!notification.read
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                                }`}
                             >
                               {notification.title}
                             </p>
@@ -428,9 +578,9 @@ export function AuthHeader() {
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
             {currentUser?.avatar ? (
-              <img 
+              <img
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm"
-                src={currentUser.avatar} 
+                src={currentUser.avatar}
                 alt="avatar"
               />
             ) : (
