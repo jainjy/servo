@@ -1,361 +1,507 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { Upload, Video, Headphones, X, Loader } from "lucide-react";
-import mediaService from "../../services/mediaService";
-
-// Types
-interface Category {
-  id: string;
-  name: string;
-  type?: string;
-}
+// components/MediaUpload.tsx
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Upload, FileAudio, FileVideo, Image } from 'lucide-react';
+import api from '../../lib/api';
 
 interface MediaUploadProps {
   type: 'podcast' | 'video';
-  onUploadSuccess: (newMedia: any) => void;
+  onUploadSuccess: (media: any) => void;
   onClose: () => void;
-  categories?: Category[]; // ← AJOUTEZ CETTE LIGNE
+  existingCategories?: string[]; // Maintenant un tableau de strings
 }
 
-interface FormDataState {
-  title: string;
-  description: string;
-  duration: string;
-  categoryId: string;
-}
-
-interface FilesState {
-  media: File | null;
-  thumbnail: File | null;
-}
-
-const MediaUpload: React.FC<MediaUploadProps> = ({ 
-  type, 
-  onUploadSuccess, 
+const MediaUpload: React.FC<MediaUploadProps> = ({
+  type,
+  onUploadSuccess,
   onClose,
-  categories = [] // ← AJOUTEZ CETTE LIGNE
+  existingCategories = []
 }) => {
-  const [formData, setFormData] = useState<FormDataState>({
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState('');
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
-    duration: '',
-    categoryId: ''
+    category: '', // ← Changé de categoryId à category (string)
+    isActive: 'true'
   });
-  const [files, setFiles] = useState<FilesState>({
-    media: null,
-    thumbnail: null
-  });
-  const [localCategories, setLocalCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
 
-  // Charger les catégories seulement si pas fournies en prop
+  const [files, setFiles] = useState<{
+    media?: File;
+    thumbnail?: File;
+  }>({});
+
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  // Charger les catégories existantes
   useEffect(() => {
     const loadCategories = async () => {
-      // Utilise les categories de la prop si fournies, sinon les charge
-      if (categories.length > 0) {
-        setLocalCategories(categories);
-        return;
-      }
-      
       try {
-        const response = await mediaService.getCategories(type === 'podcast' ? 'podcast' : 'video');
-        if (response.success) {
-          setLocalCategories(response.data || []);
+        const response = await api.get('/admin/media/categories');
+        if (response.data.success) {
+          setAvailableCategories(response.data.data || []);
         }
-      } catch (err) {
-        setError('Erreur lors du chargement des catégories');
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories:', error);
+        // Utiliser les catégories fournies en prop
+        setAvailableCategories(existingCategories);
       }
     };
-    loadCategories();
-  }, [type, categories]); // ← Ajoutez categories aux dépendances
 
-  const handleFileChange = (fileType: keyof FilesState, event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
+    loadCategories();
+  }, [existingCategories]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fileType: 'media' | 'thumbnail'
+  ) => {
+    const file = e.target.files?.[0];
     if (file) {
+      // Validation de la taille du fichier
+      const maxSize = fileType === 'media' 
+        ? (type === 'podcast' ? 100 * 1024 * 1024 : 500 * 1024 * 1024)
+        : 10 * 1024 * 1024;
+
+      if (file.size > maxSize) {
+        const maxSizeMB = maxSize / (1024 * 1024);
+        setError(`Le fichier est trop volumineux. Taille maximum: ${maxSizeMB}MB`);
+        return;
+      }
+
       setFiles(prev => ({
         ...prev,
         [fileType]: file
       }));
+      setError('');
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const removeFile = (fileType: 'media' | 'thumbnail') => {
+    setFiles(prev => ({
+      ...prev,
+      [fileType]: undefined
+    }));
+    
+    if (fileType === 'media' && mediaInputRef.current) {
+      mediaInputRef.current.value = '';
+    }
+    if (fileType === 'thumbnail' && thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = '';
+    }
+  };
 
-    // Validation
-    if (!formData.title.trim() || !formData.description.trim() || !formData.duration.trim() || !formData.categoryId) {
-      setError('Tous les champs obligatoires doivent être remplis');
-      setLoading(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.title.trim()) {
+      setError('Le titre est requis');
       return;
     }
 
     if (!files.media) {
-      setError(`Veuillez sélectionner un fichier ${type === 'podcast' ? 'audio' : 'vidéo'}`);
-      setLoading(false);
+      setError(`Le fichier ${type === 'podcast' ? 'audio' : 'vidéo'} est requis`);
       return;
     }
 
     try {
-      const uploadData = new FormData();
+      setUploading(true);
+      setError('');
+      setProgress(0);
+
+      const uploadFormData = new FormData();
       
-      // Données du formulaire
-      uploadData.append('title', formData.title);
-      uploadData.append('description', formData.description);
-      uploadData.append('duration', formData.duration);
-      uploadData.append('categoryId', formData.categoryId);
-
-      // Fichiers
-      uploadData.append(type === 'podcast' ? 'audio' : 'video', files.media);
-      if (files.thumbnail) {
-        uploadData.append('thumbnail', files.thumbnail);
+      // Ajouter les données du formulaire
+      uploadFormData.append('title', formData.title);
+      uploadFormData.append('description', formData.description);
+      uploadFormData.append('isActive', formData.isActive);
+      
+      // CORRECTION : Envoyer category (string) au lieu de categoryId
+      if (formData.category && formData.category.trim() !== '') {
+        uploadFormData.append('category', formData.category.trim());
       }
 
-      let response;
+      // Ajouter les fichiers
       if (type === 'podcast') {
-        response = await mediaService.uploadPodcast(uploadData);
+        uploadFormData.append('audio', files.media);
       } else {
-        response = await mediaService.uploadVideo(uploadData);
+        uploadFormData.append('video', files.media);
+      }
+      
+      if (files.thumbnail) {
+        uploadFormData.append('thumbnail', files.thumbnail);
       }
 
-      console.log('📦 Upload response:', response);
+      console.log('📤 Données envoyées:');
+      console.log('Titre:', formData.title);
+      console.log('Description:', formData.description);
+      console.log('Catégorie:', formData.category || 'Aucune');
+      console.log('Statut:', formData.isActive);
+      console.log('Fichier média:', files.media?.name);
+      console.log('Fichier thumbnail:', files.thumbnail?.name);
 
-      if (response.success) {
-        onUploadSuccess(response.data);
+      const endpoint = type === 'podcast' 
+        ? '/admin/media/podcasts' 
+        : '/admin/media/videos';
+
+      const response = await api.post(endpoint, uploadFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentCompleted);
+          }
+        },
+        timeout: 300000,
+      });
+
+      console.log('✅ Réponse du serveur:', response.data);
+
+      if (response.data.success) {
+        onUploadSuccess(response.data.data);
       } else {
-        setError(response.message || `Erreur lors de l'upload du ${type}`);
+        throw new Error(response.data.message || 'Erreur lors de l\'upload');
       }
     } catch (err: any) {
-      console.error('❌ Upload error:', err);
-      setError(err.response?.data?.message || err.message || 'Erreur de connexion au serveur');
+      console.error('❌ Upload error détaillé:', err);
+      
+      let errorMessage = 'Erreur lors de l\'upload';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      setUploading(false);
+      setProgress(0);
     }
   };
 
-  const removeFile = (fileType: keyof FilesState) => {
-    setFiles(prev => ({
-      ...prev,
-      [fileType]: null
-    }));
+  const getFileAccept = () => {
+    if (type === 'podcast') {
+      return 'audio/*,.mp3,.wav,.ogg,.aac,.m4a';
+    } else {
+      return 'video/*,.mp4,.mov,.avi,.webm,.mkv';
+    }
   };
 
-  // Utilise les catégories de la prop ou celles chargées localement
-  const displayCategories = categories.length > 0 ? categories : localCategories;
+  const getFileSizeLimit = () => {
+    return type === 'podcast' ? '100MB' : '500MB';
+  };
+
+  const getSupportedFormats = () => {
+    return type === 'podcast' 
+      ? 'MP3, WAV, OGG, AAC, M4A' 
+      : 'MP4, MOV, AVI, WebM, MKV';
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Uploader un {type === 'podcast' ? 'Podcast' : 'Vidéo'}
+        {/* En-tête */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              Ajouter un {type === 'podcast' ? 'Podcast' : 'Vidéo'}
             </h2>
-            <button 
-              onClick={onClose} 
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-              disabled={loading}
-            >
-              <X size={24} />
-            </button>
+            <p className="text-gray-600 mt-1">
+              Téléchargez votre média et remplissez les informations
+            </p>
           </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            disabled={uploading}
+          >
+            <X size={24} />
+          </button>
+        </div>
 
+        {/* Formulaire */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-800 rounded-lg text-sm">
-              {error}
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-800 text-sm font-medium">{error}</p>
+              <p className="text-red-700 text-xs mt-1">
+                Vérifiez les informations et réessayez.
+              </p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Titre */}
+          {/* Fichier média principal */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Fichier {type === 'podcast' ? 'Audio' : 'Vidéo'} *
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors">
+              {files.media ? (
+                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    {type === 'podcast' ? (
+                      <FileAudio className="h-8 w-8 text-blue-600" />
+                    ) : (
+                      <FileVideo className="h-8 w-8 text-red-600" />
+                    )}
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">{files.media.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {(files.media.size / (1024 * 1024)).toFixed(2)} MB
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile('media')}
+                    className="text-red-600 hover:text-red-700 p-1"
+                    disabled={uploading}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    ref={mediaInputRef}
+                    type="file"
+                    accept={getFileAccept()}
+                    onChange={(e) => handleFileChange(e, 'media')}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => mediaInputRef.current?.click()}
+                    className="flex flex-col items-center space-y-3 w-full"
+                    disabled={uploading}
+                  >
+                    {type === 'podcast' ? (
+                      <FileAudio className="h-12 w-12 text-blue-600" />
+                    ) : (
+                      <FileVideo className="h-12 w-12 text-red-600" />
+                    )}
+                    <div>
+                      <p className="text-lg font-medium text-gray-900">
+                        Cliquez pour sélectionner un fichier
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {getSupportedFormats()} • Max {getFileSizeLimit()}
+                      </p>
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Miniature */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Image de couverture
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors">
+              {files.thumbnail ? (
+                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <Image className="h-8 w-8 text-green-600" />
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">{files.thumbnail.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {(files.thumbnail.size / (1024 * 1024)).toFixed(2)} MB
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile('thumbnail')}
+                    className="text-red-600 hover:text-red-700 p-1"
+                    disabled={uploading}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    ref={thumbnailInputRef}
+                    type="file"
+                    accept="image/*,.jpg,.jpeg,.png,.webp,.gif"
+                    onChange={(e) => handleFileChange(e, 'thumbnail')}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => thumbnailInputRef.current?.click()}
+                    className="flex flex-col items-center space-y-3 w-full"
+                    disabled={uploading}
+                  >
+                    <Image className="h-12 w-12 text-green-600" />
+                    <div>
+                      <p className="text-lg font-medium text-gray-900">
+                        Ajouter une image de couverture
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        JPEG, PNG, WebP, GIF • Max 10MB
+                      </p>
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Informations du média */}
+          <div className="grid grid-cols-1 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                 Titre *
               </label>
               <input
                 type="text"
-                required
+                id="title"
+                name="title"
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 placeholder={`Titre du ${type === 'podcast' ? 'podcast' : 'vidéo'}`}
+                disabled={uploading}
+                required
               />
             </div>
 
-            {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                Description
               </label>
               <textarea
-                required
+                id="description"
+                name="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={handleInputChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={`Description du ${type === 'podcast' ? 'podcast' : 'vidéo'}`}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                placeholder={`Description du ${type === 'podcast' ? 'podcast' : 'vidéo'}...`}
+                disabled={uploading}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Durée */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Durée (mm:ss) *
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  Catégorie
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="28:15"
-                  value={formData.duration}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    placeholder="Ex: Technologie, Musique, Éducation..."
+                    disabled={uploading}
+                    list="categories-list"
+                  />
+                  {/* Suggestions de catégories existantes */}
+                  <datalist id="categories-list">
+                    {availableCategories.map((category, index) => (
+                      <option key={index} value={category} />
+                    ))}
+                  </datalist>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Tapez une catégorie ou sélectionnez-en une existante
+                </p>
               </div>
 
-              {/* Catégorie */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Catégorie *
+                <label htmlFor="isActive" className="block text-sm font-medium text-gray-700 mb-2">
+                  Statut
                 </label>
                 <select
-                  required
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  id="isActive"
+                  name="isActive"
+                  value={formData.isActive}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  disabled={uploading}
                 >
-                  <option value="">Sélectionner une catégorie</option>
-                  {displayCategories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
+                  <option value="true">Actif</option>
+                  <option value="false">Inactif</option>
                 </select>
               </div>
             </div>
+          </div>
 
-            {/* Fichier Média */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fichier {type === 'podcast' ? 'Audio' : 'Vidéo'} *
-              </label>
-              {files.media ? (
-                <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-green-800">{files.media.name}</p>
-                      <p className="text-sm text-green-600">
-                        {(files.media.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile('media')}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-                </div>
+          {/* Barre de progression */}
+          {uploading && (
+            <div className="bg-gray-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Upload en cours...</span>
+                <span className="text-sm text-gray-500">{progress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Ne fermez pas cette fenêtre pendant l'upload...
+              </p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+              disabled={uploading}
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={uploading || !formData.title.trim() || !files.media}
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {uploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Upload... ({progress}%)
+                </>
               ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                  <input
-                    type="file"
-                    required
-                    accept={type === 'podcast' ? 'audio/*' : 'video/*'}
-                    onChange={(e) => handleFileChange('media', e)}
-                    className="hidden"
-                    id="media-file"
-                  />
-                  <label htmlFor="media-file" className="cursor-pointer block">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                    <span className="block text-sm font-medium text-gray-900 mb-1">
-                      Cliquer pour sélectionner un fichier
-                    </span>
-                    <span className="block text-sm text-gray-500">
-                      {type === 'podcast' ? 'MP3, WAV, M4A (max. 500MB)' : 'MP4, MOV, WebM (max. 500MB)'}
-                    </span>
-                  </label>
-                </div>
+                <>
+                  <Upload size={20} />
+                  Publier le {type === 'podcast' ? 'podcast' : 'vidéo'}
+                </>
               )}
-            </div>
-
-            {/* Thumbnail */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image de couverture (optionnel)
-              </label>
-              {files.thumbnail ? (
-                <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-blue-800">{files.thumbnail.name}</p>
-                      <p className="text-sm text-blue-600">
-                        {(files.thumbnail.size / (1024 * 1024)).toFixed(2)} MB
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile('thumbnail')}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange('thumbnail', e)}
-                    className="hidden"
-                    id="thumbnail-file"
-                  />
-                  <label htmlFor="thumbnail-file" className="cursor-pointer block">
-                    <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
-                    <span className="block text-sm text-gray-900 mb-1">
-                      Image de couverture
-                    </span>
-                    <span className="block text-xs text-gray-500">
-                      JPEG, PNG, WebP (optionnel)
-                    </span>
-                  </label>
-                </div>
-              )}
-            </div>
-
-            {/* Boutons */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="px-6 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
-              >
-                {loading ? (
-                  <>
-                    <Loader size={20} className="animate-spin" />
-                    Upload en cours...
-                  </>
-                ) : (
-                  <>
-                    Uploader {type === 'podcast' ? 'le podcast' : 'la vidéo'}
-                    {type === 'podcast' ? <Headphones size={20} /> : <Video size={20} />}
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -172,4 +172,47 @@ export const auditAPI = {
   deleteAudit: (id) => api.delete(`/add_audit/${id}`),
 };
 
+// Services pour les médias
+export const mediaAPI = {
+  // Statistiques
+  getStats: () => api.get('/admin/media/stats'),
+  
+  // Podcasts
+  getPodcasts: (params = {}) => api.get('/admin/media/podcasts', { params }),
+  createPodcast: (formData) => api.post('/admin/media/podcasts', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  updatePodcast: (id, data) => api.put(`/admin/media/podcasts/${id}`, data),
+  deletePodcast: (id) => api.delete(`/admin/media/podcasts/${id}`),
+  
+  // Vidéos
+  getVideos: (params = {}) => api.get('/admin/media/videos', { params }),
+  createVideo: (formData) => api.post('/admin/media/videos', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  updateVideo: (id, data) => api.put(`/admin/media/videos/${id}`, data),
+  deleteVideo: (id) => api.delete(`/admin/media/videos/${id}`),
+  
+  // Catégories
+  getCategories: () => api.get('/admin/media/categories'),
+};
+
+// Mettez à jour votre MediaService existant pour utiliser ces nouvelles routes
+export const MediaService = {
+  getPodcasts: (params = {}) => mediaAPI.getPodcasts(params),
+  getVideos: (params = {}) => mediaAPI.getVideos(params),
+  createPodcast: (formData) => mediaAPI.createPodcast(formData),
+  createVideo: (formData) => mediaAPI.createVideo(formData),
+  updatePodcast: (id, data) => mediaAPI.updatePodcast(id, data),
+  updateVideo: (id, data) => mediaAPI.updateVideo(id, data),
+  deletePodcast: (id) => mediaAPI.deletePodcast(id),
+  deleteVideo: (id) => mediaAPI.deleteVideo(id),
+  getCategories: () => mediaAPI.getCategories(),
+  getStats: () => mediaAPI.getStats(),
+};
+
 export default api;
