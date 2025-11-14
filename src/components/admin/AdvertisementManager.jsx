@@ -1,3 +1,4 @@
+// src/components/admin/AdvertisementManager.jsx
 import React, { useState, useEffect } from 'react'
 import {
   Card,
