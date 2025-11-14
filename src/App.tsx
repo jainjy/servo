@@ -109,6 +109,10 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
 import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 import PodcastsBatiment from './components/PodcastsBatiment';
+import PodcastsAssuranceFinance from "./components/PodcastsAssuranceFinance";
+import PodcastsAlimentation from "./components/PodcastsAlimentation";
+import PodcastsInvestissement from "./components/PodcastsInvestissement";
+import PodcastsTourisme from "./components/PodcastsTourisme";
 
 // Import des composants domicile
 import DomicileLayout from "./pages/domicile/DomicileLayout";
@@ -132,6 +136,8 @@ import AuditsPage from "./pages/admin/AdminAuditPage";
 import AidesFinancement from "./components/components/Aide_finance";
 import FormationsFinancement from "./components/components/Formation_finance";
 import ComptabiliteServices from "./components/components/Comptabilite";
+import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
+import PodcastsImmobilier from "./components/PodcastsImmobilier";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -215,6 +221,11 @@ const App = () => {
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
                   />
+                  <Route path="/podcasts/immobilier" element={<PodcastsImmobilier />} />
+                  <Route path="/podcasts/assurance-finance" element={<PodcastsAssuranceFinance />} />
+                  <Route path="/podcasts/alimentation" element={<PodcastsAlimentation />} />
+                  <Route path="/podcasts/investissement" element={<PodcastsInvestissement />} />
+                  <Route path="/podcasts/tourisme" element={<PodcastsTourisme />} />
                   <Route
                     path="/activiteLoisirs"
                     element={<ActivitesLoisirsFAQ />}
