@@ -7,8 +7,9 @@ import {
   TrendingUp, Home, Upload, Trash
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { tourismeAPI } from "@/lib/api"
-import api from "@/lib/api"
+import { tourismeAPI } from "@/lib/api";
+import api from "@/lib/api";
+
 export default function TourismPage() {
   const [listings, setListings] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
@@ -172,23 +173,30 @@ export default function TourismPage() {
     }
   };
 
-  const handleDeleteListing = async (id) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet hébergement ?')) {
-      return;
+const handleDeleteListing = async (id) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet hébergement ?')) {
+    return;
+  }
+
+  try {
+    await tourismeAPI.deleteListing(id);
+    toast.success("Hébergement supprimé avec succès");
+    setListings(prev => prev.filter(listing => listing.id !== id));
+    loadStats();
+  } catch (error) {
+    const backendMessage = error.response?.data?.error;
+
+    if (backendMessage) {
+      // 🔥 Message envoyé par le backend
+      toast.error(backendMessage);
+    } else {
+      // Message par défaut
+      toast.error("Erreur lors de la suppression");
     }
 
-    try {
-      const response = await tourismeAPI.deleteListing(id);
-      if (response.data.success) {
-        setListings(prev => prev.filter(listing => listing.id !== id));
-        toast.success('Hébergement supprimé avec succès');
-        loadStats();
-      }
-    } catch (error) {
-      console.error('Erreur suppression:', error);
-      toast.error(error.response?.data?.error || 'Erreur lors de la suppression');
-    }
-  };
+    console.error("Erreur suppression:", error);
+  }
+};
 
   const toggleAvailability = async (id) => {
     try {
@@ -255,8 +263,6 @@ export default function TourismPage() {
     toast.info("Réservation confirmée ! Un email de confirmation vous a été envoyé.");
   };
 
-
-
   const toggleFavorite = (listingId) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
@@ -268,9 +274,6 @@ export default function TourismPage() {
       return newFavorites;
     });
   };
-
-
-
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -323,10 +326,11 @@ export default function TourismPage() {
           <div className="absolute top-3 right-3 flex space-x-2">
             <button
               onClick={() => toggleFavorite(listing.id)}
-              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isFavorite
+              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
+                isFavorite
                   ? 'bg-red-500 text-white'
                   : 'bg-white/90 text-gray-600 hover:bg-white'
-                }`}
+              }`}
             >
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
@@ -349,10 +353,11 @@ export default function TourismPage() {
           <div className="absolute bottom-3 right-3">
             <button
               onClick={() => toggleAvailability(listing.id)}
-              className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${listing.available
+              className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${
+                listing.available
                   ? 'bg-green-500 text-white hover:bg-green-600'
                   : 'bg-red-500 text-white hover:bg-red-600'
-                }`}
+              }`}
             >
               {listing.available ? '✓ Disponible' : '✗ Indisponible'}
             </button>
@@ -379,10 +384,11 @@ export default function TourismPage() {
             </div>
             <button
               onClick={() => toggleFeatured(listing.id)}
-              className={`p-1 rounded-full transition-all duration-300 ${listing.featured
+              className={`p-1 rounded-full transition-all duration-300 ${
+                listing.featured
                   ? 'text-yellow-500 bg-yellow-50'
                   : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-                }`}
+              }`}
               title={listing.featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
             >
               <Star className={`w-4 h-4 ${listing.featured ? 'fill-current' : ''}`} />
@@ -455,7 +461,7 @@ export default function TourismPage() {
               <Edit className="w-4 h-4" />
             </button>
             <button
-              onClick={() => handleDeleteListing(listing.id)}
+              onClick={() => handleDeleteListing(listing.id)}  // Utiliser listing.id, pas listing.idUnique
               className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
               title="Supprimer"
             >
@@ -753,25 +759,21 @@ export default function TourismPage() {
       setUploading(true);
 
       try {
-        const formData = new FormData();
+        const uploadFormData = new FormData();
         files.forEach(file => {
-          formData.append('files', file);
+          uploadFormData.append('files', file);
         });
-        const response = await api.post(`/upload/tourism-multiple`, formData);
+        
+        const response = await api.post(`/upload/tourism-multiple`, uploadFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
 
-        console.log('📤 Statut réponse:', response.status);
+        console.log('📤 Réponse upload:', response);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('❌ Erreur détaillée:', errorText);
-          throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log('✅ Résultat upload:', result);
-
-        if (result.success) {
-          const newImageUrls = result.results
+        if (response.data.success) {
+          const newImageUrls = response.data.results
             .filter(item => item.success)
             .map(item => item.url);
 
@@ -782,11 +784,11 @@ export default function TourismPage() {
 
           toast.success(`${newImageUrls.length} image(s) uploadée(s) avec succès`);
         } else {
-          toast.error(result.error || 'Erreur lors de l\'upload des images');
+          toast.error(response.data.error || 'Erreur lors de l\'upload des images');
         }
       } catch (error) {
         console.error('❌ Erreur upload:', error);
-        toast.error('Erreur lors de l\'upload des images: ' + error.message);
+        toast.error('Erreur lors de l\'upload des images: ' + (error.response?.data?.error || error.message));
       } finally {
         setUploading(false);
         if (fileInputRef.current) {
@@ -794,6 +796,7 @@ export default function TourismPage() {
         }
       }
     };
+
     // Fonction pour supprimer une image
     const handleRemoveImage = (index) => {
       setFormData(prev => ({
@@ -964,7 +967,7 @@ export default function TourismPage() {
                   min="1"
                   className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={formData.bedrooms || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value ? Number(e.target.value) : undefined }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value ? Number(e.target.value) : null }))}
                 />
               </div>
               <div>
@@ -974,7 +977,7 @@ export default function TourismPage() {
                   min="1"
                   className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={formData.bathrooms || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value ? Number(e.target.value) : undefined }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value ? Number(e.target.value) : null }))}
                 />
               </div>
               <div>
