@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth"; // Import du hook d'authentification
 
+
 // Types TypeScript
 interface Metier {
   id?: string;
@@ -48,9 +49,7 @@ const ServicesPage = () => {
   // États de recherche et filtres
   const [servicesSearchQuery, setServicesSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const [serviceCategory, setServiceCategory] = useState("");
-  const [displayCount, setDisplayCount] = useState(8);
-  
+  const [serviceCategory, setServiceCategory] = useState("");  
   // États d'interface
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -198,7 +197,6 @@ const ServicesPage = () => {
     setServicesSearchQuery("");
     setPropertyType("");
     setServiceCategory("");
-    setDisplayCount(8);
   };
 
   const handleSendMessage = () => {
@@ -302,17 +300,18 @@ const ServicesPage = () => {
   // Composant de section des services
   const ServicesSection = () => {
     const filteredServices = getFilteredServices();
-    const displayedServices = filteredServices.slice(0, displayCount);
+    const displayedServices = filteredServices;
     const hasActiveFilters = servicesSearchQuery || propertyType || serviceCategory;
 
     if (loading) {
       return (
         <div className="flex justify-center items-center py-20">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
             <span className="text-gray-600">Chargement des services...</span>
           </div>
         </div>
+        
       );
     }
 

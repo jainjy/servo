@@ -459,7 +459,7 @@ const MetiersGrid = () => {
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              <img src="/loading.gif" alt="" className='w-24 h-24' />
               <span className="text-gray-600">Chargement des Métiers...</span>
             </div>
             </div>

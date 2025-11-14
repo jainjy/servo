@@ -20,30 +20,13 @@ const AidesPage = () => {
       <div className="bg-white border-l-4 border-l-slate-900 rounded-r-2xl shadow-2xl p-6 w-full max-w-md h-11/12 mt-10 animate-slide-from-left flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-xl">
-              <Mail className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Nouveau Message</h2>
-              <p className="text-sm text-gray-500 mt-1">Envoyez-nous votre message</p>
-            </div>
-          </div>
-          <button
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
-            onClick={() => setShowMessageCard(false)}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        
 
         {/* Formulaire */}
         <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2">
           <div>
             <label className=" text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-              Adresse email
+              e-mail
             </label>
             <div className="relative">
               <input
@@ -63,7 +46,6 @@ const AidesPage = () => {
 
           <div>
             <label className=" text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
               Votre message
             </label>
             <div className="relative">
@@ -115,7 +97,7 @@ const AidesPage = () => {
             <div className="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
               <Send className="w-4 h-4" />
             </div>
-            Envoyer le message
+            Envoyer
           </button>
         </div>
       </div>
@@ -142,15 +124,7 @@ const AidesPage = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 left-6 z-40 animate-fade-in">
-        <button
-          className="px-6 py-3 bg-slate-900 text-white rounded-full text-sm font-semibold hover:bg-slate-900 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
-          onClick={() => setShowMessageCard(true)}
-        >
-          <Send className="w-4 h-4" />
-          Envoyer un message
-        </button>
-      </div>
+      
 
       <div className="max-w-4xl mx-auto py-8 animate-fade-in">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
@@ -176,8 +150,12 @@ const AidesPage = () => {
             </div>
 
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Email</h3>
-              <p className="text-gray-600 mb-4">Envoyez-nous un message</p>
+             
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex gap-4 items-center">
+                <Mail className="w-5 h-5 text-blue-600" />
+                Email
+              </h3>
+              <p className="text-gray-600 mb-4"> Envoyez-nous un message</p>
               <button
                 className="bg-transparent border-2 border-slate-900 text-slate-900 hover:text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition-colors font-medium"
                 onClick={() => setShowMessageCard(true)}
