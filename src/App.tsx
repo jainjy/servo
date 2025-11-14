@@ -138,6 +138,8 @@ import FormationsFinancement from "./components/components/Formation_finance";
 import ComptabiliteServices from "./components/components/Comptabilite";
 import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
 import PodcastsImmobilier from "./components/PodcastsImmobilier";
+import PodcastsDomicile from "./components/components/PodcastsDomicil";
+import PodcastsBienEtre from "./components/PodcastsBienEtre";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -226,6 +228,8 @@ const App = () => {
                   <Route path="/podcasts/alimentation" element={<PodcastsAlimentation />} />
                   <Route path="/podcasts/investissement" element={<PodcastsInvestissement />} />
                   <Route path="/podcasts/tourisme" element={<PodcastsTourisme />} />
+                  <Route path="/podcasts/domicile" element={<PodcastsDomicile />} />
+                  <Route path="/podcasts/bien-etre" element={<PodcastsBienEtre />} />
                   <Route
                     path="/activiteLoisirs"
                     element={<ActivitesLoisirsFAQ />}
