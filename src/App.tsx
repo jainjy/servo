@@ -138,6 +138,7 @@ import FormationsFinancement from "./components/components/Formation_finance";
 import ComptabiliteServices from "./components/components/Comptabilite";
 import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
 import PodcastsImmobilier from "./components/PodcastsImmobilier";
+import LieuxHistoriques from "./components/components/Tourisme_lieux";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -216,6 +217,13 @@ const App = () => {
                   <Route
                     path="/podcasts-batiment"
                     element={<PodcastsBatiment />}
+                  />
+                  <Route
+                    path="/lieux_historique"
+                    element={<LieuxHistoriques
+                      ville="Paris"
+                      typeFiltre="tous"
+                    />}
                   />
                   <Route
                     path="/formationTourisme"

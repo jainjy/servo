@@ -198,7 +198,7 @@ const Header = () => {
         }, {
           title: "Podcasts & vidéos",
           description: "Vidéos fournies par des experts",
-          href: "/estimation-immobilier",
+          href: "/podcasts/immobilier",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         }
       ],
@@ -302,7 +302,7 @@ const Header = () => {
 
         },
      {
-          title: "Podcasts & autres services",
+          title: "Podcasts & videos",
           description: " Ressources pour entrepreneurs",
           href: "/podcast_service",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -338,7 +338,7 @@ const Header = () => {
         },{
           title: "Podcasts & vidéos",
           description: " Ressources sur le financement",
-          href: "/financement#assurances",
+          href: "/podcasts/assurance-finance",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
@@ -376,12 +376,12 @@ const Header = () => {
         },{
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
-          href: "/travaux",
+          href: "/formation-batiment",
           image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
         }, {
           title: "Podcasts & vidéos",
           description: " Formation continue et actualités",
-          href: "/batiments#formation-podcasts",
+          href: "/batiments#podcasts-videos",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         }, 
       ],
@@ -428,7 +428,7 @@ const Header = () => {
         }, {
           title: "Podcasts & vidéos",
           description: "Ressources pour l'aménagement",
-          href: "/domicile#materiaux",
+          href: "/podcasts/domicile",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         }
       ],
@@ -495,7 +495,7 @@ const Header = () => {
         },{
           title: "Podcasts & vidéos",
           description: " Ressources sur l'alimentation",
-          href: "/alimentation",
+          href: "/podcasts/alimentation",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
@@ -522,7 +522,7 @@ const Header = () => {
         },{
           title: "Podcasts & vidéos",
           description: "Ressources sur l'investissement",
-          href: "/investir/isr",
+          href: "/podcasts/investissement",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
@@ -556,7 +556,7 @@ const Header = () => {
         },{
           title: "Lieux historiques & culturels",
           description: "Explorez le patrimoine local",
-          href: "/formationTourisme",
+          href: "/lieux_historique",
           image: "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg"
         }, {
           title: "Formations",
@@ -566,7 +566,7 @@ const Header = () => {
         },{
           title: "Podcasts & vidéos",
           description: "Ressources sur le tourisme",
-          href: "/formationTourisme",
+          href: "/podcasts/tourisme",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],

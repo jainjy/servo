@@ -270,7 +270,7 @@ const PodcastsImmobilier: React.FC = () => {
         <div className="relative rounded-2xl overflow-hidden mb-12">
           <div className="absolute inset-0">
             <img 
-              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80" 
+              src="https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg" 
               alt="Immobilier" 
               className="w-full h-64 object-cover"
             />
@@ -280,7 +280,7 @@ const PodcastsImmobilier: React.FC = () => {
           <div className="relative z-10 p-8 h-64 flex flex-col justify-center">
             <div className="inline-flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-semibold mb-4 self-start">
               <Sparkles className="w-4 h-4 mr-2" />
-              Investissement & Patrimoine
+              Podcasts et vidéos
             </div>
             
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -317,7 +317,7 @@ const PodcastsImmobilier: React.FC = () => {
               )}
               
               {/* Image */}
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-48 overflow-hidden rounded-sm">
                 <img
                   src={podcast.thumbnailUrl}
                   alt={podcast.title}
