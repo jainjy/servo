@@ -147,7 +147,7 @@ const ProfessionalSubscriptionPage = () => {
         "Promotions ciblées",
         "Outils de communication",
       ],
-      userTypes: ["PRESTATAIRE"],
+      userTypes: ["BIEN_ETRE"],
     },
   ];
 

@@ -957,7 +957,7 @@ export default function UnifiedReservationPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Mes réservations de services</CardTitle>
+                  <CardTitle>Mes réservations de services de bien etre</CardTitle>
                   <CardDescription>
                     Historique et réservations à venir
                   </CardDescription>

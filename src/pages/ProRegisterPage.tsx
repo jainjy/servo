@@ -82,6 +82,7 @@ const ProRegisterPage = () => {
     { value: "PRESTATAIRE", label: "Prestataire" },
     { value: "VENDEUR", label: "Vendeur" },
     { value: "LOUEUR", label: "Loueur" },
+    { value: "BIEN_ETRE", label: "Bien etre" },
   ];
 
   // Types de demandes
@@ -128,7 +129,7 @@ const ProRegisterPage = () => {
         "Pro Immobilier Complet": "AGENCE",
         "Prestataires de Services": "PRESTATAIRE",
         "Espace Annonceur": "VENDEUR",
-        "Bien-être": "BIEN ETRE",
+        "Bien-être": "BIEN_ETRE",
       };
 
       finalUserType =
@@ -157,7 +158,7 @@ const ProRegisterPage = () => {
         "Pro Immobilier Complet": "AGENCE",
         "Prestataires de Services": "PRESTATAIRE",
         "Espace Annonceur": "VENDEUR",
-        "Bien-être": "BIEN ETRE",
+        "Bien-être": "BIEN_ETRE",
       };
 
       const userTypeFromSubscription =
