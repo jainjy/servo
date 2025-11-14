@@ -93,7 +93,7 @@ const BatimentsLayout = () => {
           // Add static sections for Formation & Podcasts and Construction & Plans
           const staticSections = [
             {
-              title: "Formation & Podcasts",
+              title: "Podcasts & videos",
               description: "Formation continue et actualités",
               items: [
                 { title: "Formation Rénovation", price: "490€/session", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Techniques rénovation" },
@@ -171,7 +171,7 @@ const BatimentsLayout = () => {
   // Static data fallback for when API fails
   const getStaticFallback = () => [
     {
-      title: "Formation & Podcasts",
+      title: "Podcasts & videos",
       description: "Formation continue et actualités",
       items: [
         { title: "Formation Rénovation", price: "490€/session", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Techniques rénovation" },
@@ -273,7 +273,7 @@ const BatimentsLayout = () => {
               </div>
 
               {/* Affichage conditionnel du composant PodcastsBatiment pour la section Formation & Podcasts */}
-              {section.title === "Formation & Podcasts" ? (
+              {section.title === "Podcasts & videos" ? (
                 <PodcastsBatiment />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -562,41 +562,41 @@ export const TourismSection = () => {
 
         {/* Formulaire de recherche avec animations */}
         <div
-          className="bg-white rounded-3xl shadow-2xl p-8 mb-12 border border-gray-100 transform hover:shadow-2xl transition-all duration-500"
+          className="bg-white rounded-3xl shadow-lg p-8 mb-12 border border-gray-100 transition-all duration-300 hover:shadow-xl"
           data-aos="fade-up"
           data-aos-delay="400"
         >
           <form onSubmit={handleSearch} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="space-y-3" data-aos="fade-right" data-aos-delay="100">
-              <label className="flex items-center text-sm font-semibold text-gray-700">
-                <MapPin className="w-5 h-5 mr-2 text-blue-600" />
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <MapPin className="w-4 h-4 mr-2 text-gray-600" />
                 Destination
               </label>
               <input
                 type="text"
                 placeholder="Où allez-vous ?"
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 value={filters.destination}
                 onChange={(e) => setFilters({ ...filters, destination: e.target.value })}
               />
             </div>
 
             <div className="space-y-3" data-aos="fade-right" data-aos-delay="200">
-              <label className="flex items-center text-sm font-semibold text-gray-700">
-                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Calendar className="w-4 h-4 mr-2 text-gray-600" />
                 Dates
               </label>
-              <div className="flex space-x-3">
+              <div className="flex space-x-2">
                 <input
                   type="date"
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   value={filters.checkIn}
                   onChange={(e) => setFilters({ ...filters, checkIn: e.target.value })}
                   min={new Date().toISOString().split('T')[0]}
                 />
                 <input
                   type="date"
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   value={filters.checkOut}
                   onChange={(e) => setFilters({ ...filters, checkOut: e.target.value })}
                   min={filters.checkIn || new Date().toISOString().split('T')[0]}
@@ -605,17 +605,17 @@ export const TourismSection = () => {
             </div>
 
             <div className="space-y-3" data-aos="fade-right" data-aos-delay="300">
-              <label className="flex items-center text-sm font-semibold text-gray-700">
-                <Users className="w-5 h-5 mr-2 text-blue-600" />
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Users className="w-4 h-4 mr-2 text-gray-600" />
                 Voyageurs
               </label>
               <div
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:border-gray-300 cursor-pointer"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 cursor-pointer hover:border-gray-400"
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <div className="flex justify-between items-center">
-                  <span>{filters.guests} {filters.guests === 1 ? 'voyageur' : 'voyageurs'}</span>
-                  <ChevronLeft className={`w-4 h-4 transition-transform ${showFilters ? '-rotate-90' : 'rotate-90'}`} />
+                  <span className="text-gray-900">{filters.guests} {filters.guests === 1 ? 'voyageur' : 'voyageurs'}</span>
+                  <ChevronLeft className={`w-4 h-4 transition-transform ${showFilters ? '-rotate-90' : 'rotate-90'} text-gray-500`} />
                 </div>
               </div>
             </div>
@@ -623,9 +623,9 @@ export const TourismSection = () => {
             <div className="flex items-end" data-aos="fade-left" data-aos-delay="400">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-slate-900 to-slate-600 text-white p-4 rounded-xl font-bold flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="w-full bg-slate-900 text-white p-3 rounded-lg font-medium flex items-center justify-center transition-all duration-200 hover:bg-slate-700"
               >
-                <Search className="w-5 h-5 mr-3" />
+                <Search className="w-4 h-4 mr-2" />
                 {loading ? 'Recherche...' : 'Rechercher'}
               </button>
             </div>
@@ -633,11 +633,11 @@ export const TourismSection = () => {
 
           {/* Filtres avancés dépliants */}
           {showFilters && (
-            <div className="mt-6 p-6 bg-gray-50 rounded-2xl border border-gray-200" data-aos="fade-up">
+            <div className="mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200" data-aos="fade-up">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Types d'hébergement */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Type d'hébergement</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Type d'hébergement</label>
                   <div className="space-y-2">
                     {['hotel', 'apartment', 'villa', 'guesthouse'].map(type => (
                       <label key={type} className="flex items-center">
@@ -661,7 +661,7 @@ export const TourismSection = () => {
 
                 {/* Nombre de voyageurs détaillé */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Détail voyageurs</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Détail voyageurs</label>
                   <div className="space-y-3">
                     {[
                       { label: 'Adultes', key: 'adults' as const, description: '13 ans et plus' },
@@ -677,17 +677,17 @@ export const TourismSection = () => {
                           <button
                             type="button"
                             onClick={() => updateGuestCount(key, -1)}
-                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                            className="w-7 h-7 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors"
                           >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-3 h-3" />
                           </button>
-                          <span className="w-8 text-center text-sm font-medium">{filters[key]}</span>
+                          <span className="w-6 text-center text-sm font-medium text-gray-900">{filters[key]}</span>
                           <button
                             type="button"
                             onClick={() => updateGuestCount(key, 1)}
-                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                            className="w-7 h-7 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors"
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
@@ -697,7 +697,7 @@ export const TourismSection = () => {
 
                 {/* Équipements */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Équipements</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Équipements</label>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {availableAmenities.map(amenity => (
                       <label key={amenity.id} className="flex items-center">
@@ -721,7 +721,7 @@ export const TourismSection = () => {
 
                 {/* Autres filtres */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Options</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Options</label>
                   <div className="space-y-3">
                     <label className="flex items-center">
                       <input
@@ -744,7 +744,7 @@ export const TourismSection = () => {
                         step="0.5"
                         value={filters.rating}
                         onChange={(e) => setFilters(prev => ({ ...prev, rating: parseFloat(e.target.value) }))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Toutes</span>
@@ -773,12 +773,12 @@ export const TourismSection = () => {
                     amenities: [],
                     instantBook: false
                   })}
-                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
                 >
                   Réinitialiser les filtres
                 </button>
 
-                <div className="text-sm text-gray-600 font-medium">
+                <div className="text-sm text-gray-600">
                   {filteredListings.length} hébergements trouvés
                 </div>
               </div>
@@ -790,13 +790,13 @@ export const TourismSection = () => {
             <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
               <button
                 onClick={() => setShowFilters(true)}
-                className="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-300 group"
+                className="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-200 text-sm"
               >
-                <Filter className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                <Filter className="w-4 h-4 mr-2" />
                 Plus de filtres
               </button>
 
-              <div className="text-sm text-gray-500 font-medium">
+              <div className="text-sm text-gray-500">
                 {filteredListings.length} hébergements trouvés
               </div>
             </div>
@@ -807,20 +807,6 @@ export const TourismSection = () => {
         <div className="relative mb-12" data-aos="fade-up">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-gray-900">Destinations populaires</h3>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => scrollSlider('left')}
-                className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => scrollSlider('right')}
-                className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
           {/* Conteneur avec animation infinie */}
