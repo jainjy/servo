@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-// Remplacement du Link de Next.js par celui de React Router
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
-// Import des icônes
 import {
   Bell,
   Search,
@@ -13,15 +11,15 @@ import {
   X,
   LogOut,
   Settings,
+  Trash2,
 } from "lucide-react";
 
-// NOTE: Assurez-vous que ces chemins et composants sont valides dans votre projet React.
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AuthService from "@/services/authService";
+import NotificationService, { Notification } from "@/services/notificationService";
 
-// --- Interfaces et Données Mockées (inchangées) ---
 interface SearchResult {
   id: string;
   type: "user" | "listing" | "service" | "booking";
@@ -30,77 +28,50 @@ interface SearchResult {
   url: string;
 }
 
-interface Notification {
-  id: string;
-  type: "info" | "warning" | "success" | "error";
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "warning",
-    title: "Nouvelle annonce en attente",
-    message: "Villa à Ivandry nécessite une validation",
-    time: "Il y a 5 min",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "success",
-    title: "Paiement reçu",
-    message: "Transaction de 2,500,000 Ar confirmée",
-    time: "Il y a 1h",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "info",
-    title: "Nouveau prestataire",
-    message: "Demande d'inscription de Plomberie Pro",
-    time: "Il y a 2h",
-    read: false,
-  },
-  {
-    id: "4",
-    type: "error",
-    title: "Signalement utilisateur",
-    message: "Comportement suspect détecté",
-    time: "Il y a 3h",
-    read: true,
-  },
-];
-// ----------------------------------------------------
-
 export function AuthHeader() {
-  const navigate = useNavigate(); // Hook pour la navigation (remplace une partie de useRouter)
-
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null); // Ajout d'une réf pour le menu utilisateur
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Récupérer l'utilisateur connecté au montage du composant
+  // Récupérer l'utilisateur connecté et initialiser les notifications
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     console.log("👤 Utilisateur connecté:", user);
     setCurrentUser(user);
+
+    if (user) {
+      NotificationService.connect();
+      loadNotifications();
+      NotificationService.onNewNotification((notif) => {
+        setNotifications((prev) => [notif, ...prev]);
+        setUnreadCount((c) => c + 1);
+      });
+    }
+
+    return () => {
+      NotificationService.disconnect();
+    };
   }, []);
+
+  const loadNotifications = async () => {
+    const data = await NotificationService.fetchNotifications();
+    setNotifications(data);
+    setUnreadCount(data.filter((n) => !n.read).length);
+  };
 
   const handleLogout = () => {
     if (window.confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
       AuthService.logout();
-      // Rediriger vers la page de connexion après la déconnexion
       navigate("/login");
     }
   };
@@ -108,25 +79,13 @@ export function AuthHeader() {
   // Fermer les dropdowns quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Fermer la recherche
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowResults(false);
       }
-      // Fermer les notifications
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target as Node)
-      ) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
       }
-      // Fermer le menu utilisateur (nécessite d'envelopper la DropdownButton dans une div reférencée ou de gérer le state)
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
-      ) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
       }
     };
@@ -137,6 +96,7 @@ export function AuthHeader() {
     };
   }, []);
 
+  // FONCTION HANDLE_SEARCH AJOUTÉE
   const handleSearch = (query: string) => {
     setSearchQuery(query);
 
@@ -146,7 +106,7 @@ export function AuthHeader() {
       return;
     }
 
-    // Logique de recherche (inchangée, utilise les données mockées)
+    // Logique de recherche
     const mockResults: SearchResult[] = [
       {
         id: "1",
@@ -186,22 +146,67 @@ export function AuthHeader() {
     setShowResults(true);
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((notif) =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
+  const markAsRead = async (id: number) => {
+    console.log(`🟡 Tentative de marquer comme lue la notification ${id}`);
+    
+    const success = await NotificationService.markAsRead(id);
+    
+    if (success) {
+      setNotifications((prev) =>
+        prev.map((n) => n.id === id ? { ...n, read: true } : n)
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+      console.log(`✅ Notification ${id} marquée comme lue avec succès`);
+    } else {
+      console.error(`❌ Échec du marquage comme lue pour la notification ${id}`);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    console.log("🟡 Marquage de toutes les notifications comme lues");
+    
+    const unreadNotifications = notifications.filter(n => !n.read);
+    let successCount = 0;
+
+    const results = await Promise.allSettled(
+      unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
     );
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value === true) {
+        successCount++;
+      } else {
+        console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
+      }
+    });
+
+    if (successCount > 0) {
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, read: true }))
+      );
+      setUnreadCount(0);
+      console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((notif) => ({ ...notif, read: true })));
+  const deleteNotification = async (id: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette notification ?")) {
+      const success = await NotificationService.deleteNotification(id);
+      if (success) {
+        setNotifications(prev => prev.filter(notif => notif.id !== id));
+        const deletedNotif = notifications.find(n => n.id === id);
+        if (deletedNotif && !deletedNotif.read) {
+          setUnreadCount(prev => prev - 1);
+        }
+      } else {
+        alert("Erreur lors de la suppression de la notification");
+      }
+    }
   };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const getIcon = (type: string) => {
-    // ... (Logique inchangée)
     switch (type) {
       case "user":
         return <User className="h-4 w-4" />;
@@ -217,7 +222,6 @@ export function AuthHeader() {
   };
 
   const getNotificationColor = (type: string) => {
-    // ... (Logique inchangée)
     switch (type) {
       case "warning":
         return "text-yellow-500";
@@ -230,11 +234,29 @@ export function AuthHeader() {
     }
   };
 
+  const formatTime = (createdAt: string) => {
+    const date = new Date(createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "À l'instant";
+    if (diffMins < 60) return `Il y a ${diffMins} min`;
+    if (diffHours < 24) return `Il y a ${diffHours} h`;
+    if (diffDays < 7) return `Il y a ${diffDays} j`;
+    
+    return date.toLocaleDateString('fr-FR');
+  };
+
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-white lg:mt-0 mt-16 px-0 lg:px-6">
       {/* Barre de Recherche */}
       <div className="relative flex flex-1 items-center">
-        {/* L'ajustement des classes Tailwind 'w-40 left-24' est conservé */}
+        <div className="absolute -left-2 lg:hidden sm:hidden p-1 rounded-full bg-white border-black border-2">
+          <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+        </div>
         <div
           className="lg:left-0 md:left-0 w-11/12 left-2 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96"
           ref={searchRef}
@@ -243,13 +265,12 @@ export function AuthHeader() {
           <Input
             type="search"
             placeholder="Rechercher utilisateurs, annonces, services..."
-            className=" pl-10 bg-background border-input"
+            className="pl-10 bg-background border-input"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
           />
 
-          {/* Résultats de Recherche */}
           {showResults && searchResults.length > 0 && (
             <div className="absolute top-full mt-2 w-full rounded-lg border border-border bg-card shadow-lg z-50">
               <div className="flex items-center justify-between p-3 border-b border-border">
@@ -267,9 +288,9 @@ export function AuthHeader() {
               </div>
               <div className="max-h-96 overflow-y-auto">
                 {searchResults.map((result) => (
-                  <Link // Utilisateur de Link de react-router-dom
+                  <Link
                     key={result.id}
-                    to={result.url} // Changé 'href' en 'to'
+                    to={result.url}
                     onClick={() => {
                       setShowResults(false);
                       setSearchQuery("");
@@ -299,9 +320,9 @@ export function AuthHeader() {
         </div>
       </div>
 
-      {/* Menus d'Actions (Notifications, Utilisateur) */}
+      {/* Menus d'Actions */}
       <div className="flex items-center gap-4">
-        {/* Notifications Dropdown (Personnalisé) */}
+        {/* Notifications Dropdown */}
         <div className="relative" ref={notificationRef}>
           <Button
             variant="ghost"
@@ -321,16 +342,18 @@ export function AuthHeader() {
             <div className="absolute -right-12 lg:right-0 top-full mt-2 w-96 rounded-lg border border-border bg-card shadow-lg z-50 max-h-96 overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b">
                 <span className="font-semibold">Notifications</span>
-                {unreadCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={markAllAsRead}
-                  >
-                    Tout marquer comme lu
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={markAllAsRead}
+                    >
+                      Tout marquer comme lu
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <div className="max-h-80 overflow-y-auto">
@@ -338,13 +361,23 @@ export function AuthHeader() {
                   notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className="p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer"
+                      className="p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer group relative"
                       onClick={() => {
-                        markAsRead(notification.id);
+                        if (!notification.read) {
+                          markAsRead(notification.id);
+                        }
                         setShowNotifications(false);
                       }}
                     >
-                      <div className="flex gap-3 w-full">
+                      <button
+                        onClick={(e) => deleteNotification(notification.id, e)}
+                        className="absolute right-2 top-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 text-black"
+                        title="Supprimer la notification"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                      
+                      <div className="flex gap-3 w-full pr-6">
                         <div
                           className={`mt-1 flex-shrink-0 ${getNotificationColor(
                             notification.type
@@ -371,7 +404,7 @@ export function AuthHeader() {
                             {notification.message}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {notification.time}
+                            {formatTime(notification.createdAt)}
                           </p>
                         </div>
                       </div>
@@ -387,19 +420,19 @@ export function AuthHeader() {
           )}
         </div>
 
-        {/* Menu Utilisateur (Personnalisé) */}
+        {/* Menu Utilisateur */}
         <div className="relative" ref={userMenuRef}>
-          {" "}
-          {/* Réf ajoutée ici */}
           <Button
             variant="ghost"
             className="relative h-9 w-9 rounded-full p-0"
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
             {currentUser?.avatar ? (
-              <img className="flex h-full w-full object-cover items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm"
-                src={currentUser.avatar} alt="avatar"/>
-  
+              <img 
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm"
+                src={currentUser.avatar} 
+                alt="avatar"
+              />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm">
                 {currentUser
@@ -417,18 +450,18 @@ export function AuthHeader() {
                 <p className="text-xs text-gray-500">{currentUser?.email}</p>
               </div>
               <div className="p-1">
-                {currentUser.role == "admin" ? (
+                {currentUser?.role === "admin" ? (
                   <>
-                    <Link // Utilisateur de Link de react-router-dom
-                      to="/admin/profile" // Changé 'href' en 'to'
+                    <Link
+                      to="/admin/profile"
                       className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="mr-2 h-4 w-4" />
                       Profil
                     </Link>
-                    <Link // Utilisateur de Link de react-router-dom
-                      to="/admin/settings" // Changé 'href' en 'to'
+                    <Link
+                      to="/admin/settings"
                       className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
                       onClick={() => setShowUserMenu(false)}
                     >
@@ -438,16 +471,16 @@ export function AuthHeader() {
                   </>
                 ) : (
                   <>
-                    <Link // Utilisateur de Link de react-router-dom
-                      to="/pro/profile" // Changé 'href' en 'to'
+                    <Link
+                      to="/pro/profile"
                       className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="mr-2 h-4 w-4" />
                       Profil
                     </Link>
-                    <Link // Utilisateur de Link de react-router-dom
-                      to="/pro/settings" // Changé 'href' en 'to'
+                    <Link
+                      to="/pro/settings"
                       className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded"
                       onClick={() => setShowUserMenu(false)}
                     >

@@ -164,12 +164,19 @@ export const annonceAPI = {
 export const auditAPI = {
   // Créer une demande d'audit
   createAudit: (data) => api.post('/add_audit', data),
-  
-  // Récupérer les audits de l'utilisateur
+
+  // Récupérer toutes les demandes d’audit
+  getAllAudits: () => api.get('/add_audit/all'),
+
+  // Récupérer les audits de l'utilisateur connecté
   getUserAudits: () => api.get('/add_audit/user/mes-audits'),
-  
+
+  // Mettre à jour le statut
+  updateAuditStatus: (id, data) => api.patch(`/add_audit/${id}`, data),
+
   // Supprimer un audit
-  deleteAudit: (id) => api.delete(`/add_audit/${id}`),
+  deleteAudit: (id) => api.delete(`/add_audit/delete/${id}`),
 };
+
 
 export default api;

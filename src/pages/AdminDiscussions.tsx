@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
-import { useSocket } from "@/Contexts/SocketContext";
+import { useSocket } from "../contexts/SocketContext";
 
 export default function AdminDiscussions() {
   const { id } = useParams();
