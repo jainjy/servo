@@ -107,6 +107,8 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
+import RenovationChantiers from "./pages/batiments/RenovationChantiers";
+import PodcastsBatiment from './components/PodcastsBatiment';
 
 // Import des composants domicile
 import DomicileLayout from "./pages/domicile/DomicileLayout";
@@ -201,6 +203,10 @@ const App = () => {
                   <Route
                     path="/podcast_service"
                     element={<PodcastsServices />}
+                  />
+                  <Route
+                    path="/podcasts-batiment"
+                    element={<PodcastsBatiment />}
                   />
                   <Route
                     path="/formationTourisme"
