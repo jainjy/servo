@@ -14,8 +14,6 @@ import CategorieProduits from "./components/CategorieProduits";
 import BienEtre from "./pages/bien_etre";
 import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
-import ProduitsGeneraux from "./components/produits/ProduitsGeneraux";
-import ServicesMaison from "./components/produits/ServiceMaison";
 import Entreprise from "./pages/Entreprise";
 import Financement from "./pages/Financement";
 import Actualites from "./pages/Actualites";
@@ -30,7 +28,6 @@ import Dashboard from "./pages/pro/Dashboard";
 import ListingsPage from "./pages/pro/ListingsPage";
 import CalendarPage from "./pages/pro/CalendarPage";
 import ServicesPartnersPage from './pages/ServicesPartnersPage';
-import ClientSection from "./pages/pro/ClientSection";
 import DocumentsPage from "./pages/pro/DocumentsPage";
 import ReviewsPage from "./pages/pro/ReviewsPage";
 import TourismPage from "./pages/pro/TourismPage";
@@ -76,7 +73,6 @@ import RoleSelectionPage from "./pages/RoleSelectionPage ";
 import ProfessionalSubscriptionPage from "./pages/ProfessionalSubscriptionPage";
 import DroitFamille from "./components/DroitFamille";
 import GestionImmobilier from "./components/GestionImmobilier";
-import Publicite from "./pages/Publicite";
 import LoginRoleSelectionPage from "./pages/LoginRoleSelectionPage";
 import SuccessPage from "./pages/SuccessPage";
 import PaymentPage from "./pages/PaymentPage";
@@ -108,11 +104,9 @@ import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des nouveaux composants immobilier
-import AuditPatrimonial from "./pages/immobilier/AuditPatrimonial";
 
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
-import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 
 // Import des composants domicile
 import DomicileLayout from "./pages/domicile/DomicileLayout";
@@ -131,7 +125,6 @@ import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 import AdminMedia from "./pages/pro/adminMedia";
 import ProfessionalProfilePage from "./pages/ProfessionalProfilePage";
-import UtilitiesProduits from "./components/produits/UtilitiesProduits";
 
 import AuditsPage from "./pages/admin/AdminAuditPage";
 const queryClient = new QueryClient();

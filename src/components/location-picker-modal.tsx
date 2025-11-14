@@ -1,5 +1,5 @@
 // components/location-picker-modal.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Navigation, Search, X } from "lucide-react";
+import { MapPin, Search, X, Navigation } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -62,6 +62,10 @@ export function LocationPickerModal({
   >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const markerRef = useRef<L.Marker | null>(null);
 
   // Initialiser la position
   useEffect(() => {
@@ -76,12 +80,44 @@ export function LocationPickerModal({
   useEffect(() => {
     if (map && selectedPosition && open) {
       map.setView(selectedPosition, 15);
+      updateMarker(selectedPosition[0], selectedPosition[1]);
     }
   }, [map, selectedPosition, open]);
 
   const handleMapClick = (lat: number, lng: number) => {
     const newPosition: [number, number] = [lat, lng];
     setSelectedPosition(newPosition);
+    updateMarker(lat, lng);
+
+    // Reverse geocoding pour obtenir l'adresse
+    fetchAddressFromCoordinates(lat, lng);
+  };
+
+  const fetchAddressFromCoordinates = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+      );
+      const data = await response.json();
+
+      if (data.display_name) {
+        setSearchQuery(data.display_name);
+      } else {
+        setSearchQuery(`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`);
+      }
+    } catch (error) {
+      console.error("Erreur reverse geocoding:", error);
+      setSearchQuery(`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`);
+    }
+  };
+
+  const updateMarker = (lat: number, lng: number) => {
+    if (map && markerRef.current) {
+      map.removeLayer(markerRef.current);
+    }
+    if (map) {
+      markerRef.current = L.marker([lat, lng]).addTo(map);
+    }
   };
 
   const handleUseCurrentLocation = () => {
@@ -93,11 +129,12 @@ export function LocationPickerModal({
           setSelectedPosition(newPosition);
           if (map) {
             map.setView(newPosition, 15);
+            updateMarker(lat, lng);
+            fetchAddressFromCoordinates(lat, lng);
           }
         },
         (error) => {
           console.warn("Erreur de géolocalisation:", error);
-          // Revenir à La Réunion si la géolocalisation échoue
           setSelectedPosition(DEFAULT_POSITION);
           if (map) {
             map.setView(DEFAULT_POSITION, 10);
@@ -115,13 +152,15 @@ export function LocationPickerModal({
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
+    setShowSearchResults(true);
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           searchQuery
-        )}&limit=1&addressdetails=1`
+        )}&limit=5`
       );
       const data = await response.json();
+      setSearchResults(data);
 
       if (data && data.length > 0) {
         const { lat, lon } = data[0];
@@ -132,14 +171,29 @@ export function LocationPickerModal({
         setSelectedPosition(newPosition);
         if (map) {
           map.setView(newPosition, 15);
+          updateMarker(newPosition[0], newPosition[1]);
         }
-      } else {
-        console.log("Aucun résultat trouvé");
       }
     } catch (error) {
       console.error("Erreur de recherche:", error);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleResultClick = (result: any) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+    const newPosition: [number, number] = [lat, lng];
+
+    setSearchQuery(result.display_name);
+    setSelectedPosition(newPosition);
+    setSearchResults([]);
+    setShowSearchResults(false);
+
+    if (map) {
+      map.setView(newPosition, 15);
+      updateMarker(lat, lng);
     }
   };
 
@@ -152,12 +206,17 @@ export function LocationPickerModal({
 
   const handleResetToReunion = () => {
     setSelectedPosition(DEFAULT_POSITION);
+    setSearchQuery("");
+    setShowSearchResults(false);
     if (map) {
       map.setView(DEFAULT_POSITION, 10);
+      updateMarker(DEFAULT_POSITION[0], DEFAULT_POSITION[1]);
     }
   };
 
   const handleClose = () => {
+    setShowSearchResults(false);
+    setSearchResults([]);
     onOpenChange(false);
   };
 
@@ -235,24 +294,92 @@ export function LocationPickerModal({
             </div>
           </div>
 
-          {/* Carte - Prend tout l'espace disponible */}
-          <div className="flex-1 min-h-[300px] relative">
-            {selectedPosition && (
-              <MapContainer
-                center={selectedPosition}
-                zoom={15}
-                style={{ height: "100%", width: "100%" }}
-                ref={setMap}
-                className="z-0"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <MapEvents onLocationChange={handleMapClick} />
-                {selectedPosition && <Marker position={selectedPosition} />}
-              </MapContainer>
+          {/* Conteneur principal pour carte et résultats */}
+          <div className="flex-1 flex flex-col md:flex-row min-h-0">
+            {/* Panneau des résultats de recherche - conditionnel sur mobile */}
+            {showSearchResults && (
+              <div className="w-full md:w-80 flex-col border-b md:border-b-0 md:border-r border-gray-200 bg-white flex-shrink-0 md:flex">
+                <div className="p-4 border-b border-gray-200 md:hidden flex justify-between items-center">
+                  <h3 className="font-medium text-gray-900">Résultats</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSearchResults(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-4">
+                    {isSearching ? (
+                      <div className="text-center py-4 text-gray-500">
+                        Recherche en cours...
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div className="space-y-2">
+                        {searchResults.map((result, index) => (
+                          <div
+                            key={index}
+                            className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                            onClick={() => handleResultClick(result)}
+                          >
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                              <div className="text-sm">
+                                <div className="font-medium line-clamp-1">
+                                  {result.display_name.split(",")[0]}
+                                </div>
+                                <div className="text-gray-600 text-xs line-clamp-2">
+                                  {result.display_name}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        Aucun résultat trouvé
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
+
+            {/* Carte - Prend tout l'espace disponible */}
+            <div
+              className={`flex-1 min-h-[300px] relative ${
+                showSearchResults ? "hidden md:block" : "block"
+              }`}
+            >
+          
+                <MapContainer
+                  center={selectedPosition}
+                  zoom={15}
+                  style={{ height: "100%", width: "100%" }}
+                  ref={setMap}
+                  className="z-0"
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <MapEvents onLocationChange={handleMapClick} />
+                  {selectedPosition && <Marker position={selectedPosition} />}
+                </MapContainer>
+         
+
+              {/* Bouton pour afficher les résultats sur mobile */}
+              {searchResults.length > 0 && !showSearchResults && (
+                <Button
+                  onClick={() => setShowSearchResults(true)}
+                  className="absolute top-4 right-4 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 shadow-md md:hidden z-[1000]"
+                >
+                  Voir les résultats ({searchResults.length})
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
