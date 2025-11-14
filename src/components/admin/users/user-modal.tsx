@@ -67,6 +67,7 @@ export function UserModal({
     address: "",
     zipCode: "",
     city: "",
+    userType: "",
     addressComplement: "",
     commercialName: "",
     siret: "",
@@ -120,6 +121,7 @@ export function UserModal({
         longitude: user.longitude?.toString() || "",
         metiers: user.metiers?.map((m: any) => m.id) || [],
         services: user.services?.map((s: any) => s.id) || [],
+        userType: user.userType || "",
       });
     } else {
       // Réinitialiser le formulaire pour la création
@@ -143,6 +145,7 @@ export function UserModal({
         longitude: "",
         metiers: [],
         services: [],
+        userType: "", // Ne pas accéder à user.userType si user est undefined
       });
     }
   }, [user, mode]);
@@ -265,7 +268,6 @@ export function UserModal({
                 </Select>
               </div>
             </div>
-
             {/* Type de demandeur pour les utilisateurs */}
             {isUser && (
               <div className="space-y-2">
@@ -287,7 +289,6 @@ export function UserModal({
                 </Select>
               </div>
             )}
-
             {/* Informations de base */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -319,7 +320,6 @@ export function UserModal({
                 />
               </div>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground">
                 Email *
@@ -335,7 +335,6 @@ export function UserModal({
                 required
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-foreground">
                 Téléphone
@@ -350,104 +349,57 @@ export function UserModal({
                 className="bg-background border-input"
               />
             </div>
-
             {/* Informations professionnelles */}
             {isProfessional && (
-              <>
-                <div className="space-y-2">
-                  <Label>Nom de l'entreprise *</Label>
-                  <Input
-                    value={formData.companyName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, companyName: e.target.value })
-                    }
-                    placeholder="Nom de l'entreprise"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Nom commercial</Label>
-                    <Input
-                      value={formData.commercialName}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          commercialName: e.target.value,
-                        })
-                      }
-                      placeholder="Nom commercial"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SIRET</Label>
-                    <Input
-                      value={formData.siret}
-                      onChange={(e) =>
-                        setFormData({ ...formData, siret: e.target.value })
-                      }
-                      placeholder="Numéro SIRET"
-                    />
-                  </div>
-                </div>
-
-                {/* Métiers */}
-                <div className="space-y-2">
-                  <Label>Métiers</Label>
-                  <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                    {metiers.map((metier) => (
-                      <label
-                        key={metier.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.metiers.includes(metier.id)}
-                          onChange={(e) => {
-                            const newMetiers = e.target.checked
-                              ? [...formData.metiers, metier.id]
-                              : formData.metiers.filter(
-                                  (id) => id !== metier.id
-                                );
-                            setFormData({ ...formData, metiers: newMetiers });
-                          }}
-                        />
-                        <span className="text-sm">{metier.libelle}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Services */}
-                <div className="space-y-2">
-                  <Label>Services</Label>
-                  <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                    {services.map((service) => (
-                      <label
-                        key={service.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.services.includes(service.id)}
-                          onChange={(e) => {
-                            const newServices = e.target.checked
-                              ? [...formData.services, service.id]
-                              : formData.services.filter(
-                                  (id) => id !== service.id
-                                );
-                            setFormData({ ...formData, services: newServices });
-                          }}
-                        />
-                        <span className="text-sm">{service.libelle}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label htmlFor="userType" className="text-foreground">
+                  Type de professionnel *
+                </Label>
+                <Select
+                  value={formData.userType}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, userType: value })
+                  }
+                >
+                  <SelectTrigger className="bg-background border-input">
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="PRESTATAIRE">
+                      Prestataire de services
+                    </SelectItem>
+                    <SelectItem value="VENDEUR">
+                      Vendeur (Ameublement)
+                    </SelectItem>
+                    <SelectItem value="AGENCE">Agence immobilière</SelectItem>
+                    <SelectItem value="BIEN_ETRE">
+                      Professionnel du bien-être
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
-
+            {isUser && (
+              <div className="space-y-2">
+                <Label htmlFor="userType" className="text-foreground">
+                  Type d'utilisateur
+                </Label>
+                <Select
+                  value={formData.userType}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, userType: value })
+                  }
+                >
+                  <SelectTrigger className="bg-background border-input">
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="CLIENT">Client particulier</SelectItem>
+                    <SelectItem value="VENDEUR">Vendeur occasionnel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {/* Adresse */}
             <div className="space-y-2">
               <Label>Adresse</Label>
@@ -459,7 +411,6 @@ export function UserModal({
                 placeholder="Adresse postale"
               />
             </div>
-
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Code postal</Label>
@@ -482,7 +433,6 @@ export function UserModal({
                 />
               </div>
             </div>
-
             <div className="space-y-2">
               <Label>Complément d'adresse</Label>
               <Input
@@ -496,7 +446,6 @@ export function UserModal({
                 placeholder="Complément d'adresse"
               />
             </div>
-
             {/* Coordonnées GPS */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -536,7 +485,6 @@ export function UserModal({
                 />
               </div>
             </div>
-
             {/* Mot de passe */}
             <div className="space-y-2">
               <Label>Mot de passe {mode === "create" && "*"}</Label>

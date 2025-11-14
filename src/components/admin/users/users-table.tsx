@@ -9,12 +9,10 @@ import { UserModal } from "./user-modal"
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { 
   Search, 
-  Mail, 
   Phone, 
   Ban, 
   CheckCircle, 
   Edit, 
-  Trash2, 
   Building2, 
   Package,
   Home,
@@ -45,6 +43,7 @@ interface User {
   articlesCount: number
   createdAt: string
   avatar?: string | null
+  userType?: string | null
 }
 
 export function UsersTable() {
