@@ -9,32 +9,6 @@ import ArtCommerce from "./ArtCommerce";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 import PodcastsBienEtre from "@/components/PodcastsBienEtre";
 
-interface Service {
-  id: number
-  libelle: string
-  description: string
-  category: {
-    id: number
-    name: string
-  }
-  categoryId: number
-  images: string[]
-  metiers: Array<{
-    metier: {
-      id: number
-      libelle: string
-    }
-  }>
-  users: Array<{
-    id: string
-    name: string
-    rating: number
-    bookings: number
-  }>
-  status: string
-  duration: number
-  price: number
-}
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -379,8 +353,6 @@ const BienEtre = () => {
   // Initialisation du tracking
   const {
     trackBienEtreView,
-    trackBienEtreServiceClick,
-    trackBienEtreServiceBook,
     trackBienEtreSearch,
     trackBienEtreTabChange
   } = useBienEtreTracking();

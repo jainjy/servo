@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,14 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react";
 import { LocationPickerModal } from "@/components/location-picker-modal";
-
-// Dans le composant UserModal, ajoutez cet état :
 
 interface UserModalProps {
   open: boolean;
@@ -145,10 +140,53 @@ export function UserModal({
         longitude: "",
         metiers: [],
         services: [],
-        userType: "", // Ne pas accéder à user.userType si user est undefined
+        userType: "",
       });
     }
   }, [user, mode]);
+  // Ajouter cet useEffect pour gérer le cochage automatique des métiers
+  useEffect(() => {
+    if (formData.userType === "BIEN_ETRE" && metiers.length > 0) {
+      const bienEtreMetiers = [
+        "BoutiqueNaturels",
+        "Podcasteur",
+        "Thérapeute",
+        "Masseur",
+        "Formateur",
+      ];
+      const bienEtreMetierIds = metiers
+        .filter((metier) => bienEtreMetiers.includes(metier.libelle))
+        .map((metier) => metier.id);
+
+      // Cocher seulement si les métiers ne sont pas déjà tous cochés
+      if (
+        bienEtreMetierIds.length > 0 &&
+        !bienEtreMetierIds.every((id) => formData.metiers.includes(id))
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          metiers: [...new Set([...prev.metiers, ...bienEtreMetierIds])],
+        }));
+      }
+    }
+  }, [formData.userType, metiers]);
+
+  // Modifier aussi la fonction getFilteredMetiers pour s'assurer qu'elle est cohérente
+  const getFilteredMetiers = () => {
+    if (formData.userType === "BIEN_ETRE") {
+      const bienEtreMetiers = [
+        "BoutiqueNaturels",
+        "Podcasteur",
+        "Thérapeute",
+        "Masseur",
+        "Formateur",
+      ];
+      return metiers.filter((metier) =>
+        bienEtreMetiers.includes(metier.libelle)
+      );
+    }
+    return metiers;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,6 +246,7 @@ export function UserModal({
 
   const isProfessional = formData.role === "professional";
   const isUser = formData.role === "user";
+  const filteredMetiers = getFilteredMetiers();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -351,33 +390,140 @@ export function UserModal({
             </div>
             {/* Informations professionnelles */}
             {isProfessional && (
-              <div className="space-y-2">
-                <Label htmlFor="userType" className="text-foreground">
-                  Type de professionnel *
-                </Label>
-                <Select
-                  value={formData.userType}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, userType: value })
-                  }
-                >
-                  <SelectTrigger className="bg-background border-input">
-                    <SelectValue placeholder="Sélectionner un type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    <SelectItem value="PRESTATAIRE">
-                      Prestataire de services
-                    </SelectItem>
-                    <SelectItem value="VENDEUR">
-                      Vendeur (Ameublement)
-                    </SelectItem>
-                    <SelectItem value="AGENCE">Agence immobilière</SelectItem>
-                    <SelectItem value="BIEN_ETRE">
-                      Professionnel du bien-être
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="userType" className="text-foreground">
+                    Type de professionnel *
+                  </Label>
+                  <Select
+                    value={formData.userType}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, userType: value })
+                    }
+                  >
+                    <SelectTrigger className="bg-background border-input">
+                      <SelectValue placeholder="Sélectionner un type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border">
+                      <SelectItem value="PRESTATAIRE">
+                        Prestataire de services
+                      </SelectItem>
+                      <SelectItem value="VENDEUR">
+                        Vendeur (Ameublement)
+                      </SelectItem>
+                      <SelectItem value="AGENCE">Agence immobilière</SelectItem>
+                      <SelectItem value="BIEN_ETRE">
+                        Professionnel du bien-être
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Nom de l'entreprise *</Label>
+                  <Input
+                    value={formData.companyName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, companyName: e.target.value })
+                    }
+                    placeholder="Nom de l'entreprise"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nom commercial</Label>
+                    <Input
+                      value={formData.commercialName}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          commercialName: e.target.value,
+                        })
+                      }
+                      placeholder="Nom commercial"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>SIRET</Label>
+                    <Input
+                      value={formData.siret}
+                      onChange={(e) =>
+                        setFormData({ ...formData, siret: e.target.value })
+                      }
+                      placeholder="Numéro SIRET"
+                    />
+                  </div>
+                </div>
+
+                {/* Métiers */}
+                <div className="space-y-2">
+                  <Label>Métiers</Label>
+                  {filteredMetiers.length === 0 ? (
+                    <div className="text-sm text-muted-foreground p-2 border border-border rounded-md">
+                      {formData.userType === "BIEN_ETRE"
+                        ? "Aucun métier disponible pour le bien-être"
+                        : "Aucun métier disponible"}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                      {filteredMetiers.map((metier) => (
+                        <label
+                          key={metier.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.metiers.includes(metier.id)}
+                            onChange={(e) => {
+                              const newMetiers = e.target.checked
+                                ? [...formData.metiers, metier.id]
+                                : formData.metiers.filter(
+                                    (id) => id !== metier.id
+                                  );
+                              setFormData({ ...formData, metiers: newMetiers });
+                            }}
+                          />
+                          <span className="text-sm">{metier.libelle}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Services */}
+                {formData.userType != "BIEN_ETRE" && (
+                  <div className="space-y-2">
+                    <Label>Services</Label>
+                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                      {services.map((service) => (
+                        <label
+                          key={service.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.services.includes(service.id)}
+                            onChange={(e) => {
+                              const newServices = e.target.checked
+                                ? [...formData.services, service.id]
+                                : formData.services.filter(
+                                    (id) => id !== service.id
+                                  );
+                              setFormData({
+                                ...formData,
+                                services: newServices,
+                              });
+                            }}
+                          />
+                          <span className="text-sm">{service.libelle}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             {isUser && (
               <div className="space-y-2">
