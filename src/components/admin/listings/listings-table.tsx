@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,19 +13,12 @@ import {
   XCircle, 
   Loader2,
   Home,
-  Plus,
   Filter,
   Heart,
-  Phone,
-  Archive,
-  Calendar,
   MapPin,
-  Euro,
   Ruler,
   Users,
-  TrendingUp,
-  Clock
-} from "lucide-react";
+  TrendingUp} from "lucide-react";
 import api from "@/lib/api";
 
 // Types et statuts alignés avec le backend

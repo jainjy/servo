@@ -589,12 +589,14 @@ export default function ProDiscussions() {
 
               <div className="lg:relative absolute right-0 top-0 flex flex-col items-start sm:items-end gap-2">
                 <span
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${demande.statut === "validée" || demande.statut === "acceptée"
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : demande.statut === "refusée"
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
+                    demande.statut === "validée" ||
+                    demande.statut === "acceptée"
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : demande.statut === "refusée"
                       ? "bg-red-50 text-red-700 border-red-200"
                       : "bg-yellow-50 text-yellow-700 border-yellow-200"
-                    }`}
+                  }`}
                 >
                   {demande.statut || "En attente"}
                 </span>
@@ -611,7 +613,9 @@ export default function ProDiscussions() {
               <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
                 <div className="flex items-center gap-2 text-blue-700">
                   <Calendar className="w-4 h-4" />
-                  <span className="text-sm font-medium">Date de la demande</span>
+                  <span className="text-sm font-medium">
+                    Date de la demande
+                  </span>
                 </div>
                 <p className="text-sm font-semibold text-gray-900 mt-1">
                   {new Date(demande.createdAt).toLocaleDateString("fr-FR")}
@@ -639,13 +643,17 @@ export default function ProDiscussions() {
                 {demande.metier && (
                   <div className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-lg text-sm">
                     <Wrench className="w-4 h-4" />
-                    <span className="font-medium">{demande.metier.libelle}</span>
+                    <span className="font-medium">
+                      {demande.metier.libelle}
+                    </span>
                   </div>
                 )}
                 {demande.service && (
                   <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg text-sm">
                     <Zap className="w-4 h-4" />
-                    <span className="font-medium">{demande.service.libelle}</span>
+                    <span className="font-medium">
+                      {demande.service.libelle}
+                    </span>
                   </div>
                 )}
               </div>
@@ -658,15 +666,21 @@ export default function ProDiscussions() {
                 Adresse du projet
               </h3>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <p className="text-sm text-gray-900 font-medium mb-2">{demande.lieuAdresse}</p>
+                <p className="text-sm text-gray-900 font-medium mb-2">
+                  {demande.lieuAdresse}
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-gray-500">Ville</p>
-                    <p className="text-sm font-semibold text-gray-900">{demande.lieuAdresseVille || ""}</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {demande.lieuAdresseVille || ""}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Code postal</p>
-                    <p className="text-sm font-semibold text-gray-900">{demande.lieuAdresseCp || ""}</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {demande.lieuAdresseCp || ""}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -701,11 +715,15 @@ export default function ProDiscussions() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Téléphone</p>
-                    <p className="text-sm font-semibold text-gray-900">{demande.contactTel}</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {demande.contactTel}
+                    </p>
                   </div>
                   <div className="sm:col-span-2">
                     <p className="text-xs text-gray-500 mb-1">Email</p>
-                    <p className="text-sm font-semibold text-gray-900 break-all">{demande.contactEmail}</p>
+                    <p className="text-sm font-semibold text-gray-900 break-all">
+                      {demande.contactEmail}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -727,8 +745,9 @@ export default function ProDiscussions() {
               </div>
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"
-                    }`}
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
                 ></div>
                 <span className="text-sm text-gray-500">
                   {isConnected ? "En ligne" : "Hors ligne"}
@@ -762,8 +781,9 @@ export default function ProDiscussions() {
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
-                    className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
-                      }`}
+                    className={`flex gap-4 ${
+                      isCurrentUser(message) ? "justify-end" : ""
+                    }`}
                   >
                     {!isCurrentUser(message) && (
                       <div className="flex flex-col items-center">
@@ -775,8 +795,9 @@ export default function ProDiscussions() {
                     )}
 
                     <div
-                      className={`max-w-[70%] ${isCurrentUser(message) ? "order-first" : ""
-                        }`}
+                      className={`max-w-[70%] ${
+                        isCurrentUser(message) ? "order-first" : ""
+                      }`}
                     >
                       {/* Nom de l'expéditeur pour les messages des autres */}
                       {!isCurrentUser(message) && (
@@ -786,10 +807,11 @@ export default function ProDiscussions() {
                       )}
 
                       <div
-                        className={`rounded-2xl p-4 ${isCurrentUser(message)
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-gray-100 text-gray-900 rounded-bl-none"
-                          }`}
+                        className={`rounded-2xl p-4 ${
+                          isCurrentUser(message)
+                            ? "bg-blue-600 text-white rounded-br-none"
+                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                        }`}
                       >
                         {/* Fichier joint */}
                         {message.urlFichier && (
@@ -798,10 +820,11 @@ export default function ProDiscussions() {
                               href={message.urlFichier}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
-                                ? "text-blue-200"
-                                : "text-blue-600"
-                                }`}
+                              className={`flex items-center gap-2 text-sm underline ${
+                                isCurrentUser(message)
+                                  ? "text-blue-200"
+                                  : "text-blue-600"
+                              }`}
                             >
                               <FileText className="w-4 h-4" />
                               {message.nomFichier}
@@ -842,10 +865,11 @@ export default function ProDiscussions() {
                         )}
                       </div>
                       <div
-                        className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
-                          ? "text-gray-500 text-right"
-                          : "text-gray-400"
-                          }`}
+                        className={`text-xs mt-1 flex items-center gap-1 ${
+                          isCurrentUser(message)
+                            ? "text-gray-500 text-right"
+                            : "text-gray-400"
+                        }`}
                       >
                         {formatMessageTime(message.createdAt)}
                         {message.lu && " • Lu"}
@@ -1028,10 +1052,11 @@ export default function ProDiscussions() {
 
               {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-300 cursor-pointer bg-white shadow-sm ${uploadingFile
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-                  }`}
+                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-300 cursor-pointer bg-white shadow-sm ${
+                  uploadingFile
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-100"
+                }`}
               >
                 <Paperclip className="w-4 h-4 text-gray-600" />
                 <input
@@ -1115,7 +1140,9 @@ export default function ProDiscussions() {
                   {/* Menu actions */}
                   <div className="relative">
                     <button
-                      onClick={() => setShowMobileActionsMenu(!showMobileActionsMenu)}
+                      onClick={() =>
+                        setShowMobileActionsMenu(!showMobileActionsMenu)
+                      }
                       className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100"
                     >
                       <MoreVertical className="w-5 h-5 text-gray-600" />
@@ -1147,7 +1174,9 @@ export default function ProDiscussions() {
                               setShowMobileActionsMenu(false);
                             }}
                             className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors duration-200"
-                            disabled={artisanDetails && artisanDetails.devisFileUrl}
+                            disabled={
+                              artisanDetails && artisanDetails.devisFileUrl
+                            }
                           >
                             <FileDigit className="w-4 h-4" />
                             {artisanDetails && artisanDetails.devisFileUrl ? (
@@ -1267,8 +1296,9 @@ export default function ProDiscussions() {
                     {messages.map((message, index) => (
                       <div
                         key={message.id}
-                        className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
-                          }`}
+                        className={`flex gap-4 ${
+                          isCurrentUser(message) ? "justify-end" : ""
+                        }`}
                       >
                         {!isCurrentUser(message) && (
                           <div className="flex flex-col items-center">
@@ -1280,8 +1310,9 @@ export default function ProDiscussions() {
                         )}
 
                         <div
-                          className={`max-w-[70%] ${isCurrentUser(message) ? "order-first" : ""
-                            }`}
+                          className={`max-w-[70%] ${
+                            isCurrentUser(message) ? "order-first" : ""
+                          }`}
                         >
                           {/* Nom de l'expéditeur pour les messages des autres */}
                           {!isCurrentUser(message) && (
@@ -1291,10 +1322,11 @@ export default function ProDiscussions() {
                           )}
 
                           <div
-                            className={`rounded-2xl p-4 ${isCurrentUser(message)
-                              ? "bg-blue-600 text-white rounded-br-none"
-                              : "bg-gray-100 text-gray-900 rounded-bl-none"
-                              }`}
+                            className={`rounded-2xl p-4 ${
+                              isCurrentUser(message)
+                                ? "bg-blue-600 text-white rounded-br-none"
+                                : "bg-gray-100 text-gray-900 rounded-bl-none"
+                            }`}
                           >
                             {/* Fichier joint */}
                             {message.urlFichier && (
@@ -1303,10 +1335,11 @@ export default function ProDiscussions() {
                                   href={message.urlFichier}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
-                                    ? "text-blue-200"
-                                    : "text-blue-600"
-                                    }`}
+                                  className={`flex items-center gap-2 text-sm underline ${
+                                    isCurrentUser(message)
+                                      ? "text-blue-200"
+                                      : "text-blue-600"
+                                  }`}
                                 >
                                   <FileText className="w-4 h-4" />
                                   {message.nomFichier}
@@ -1324,13 +1357,17 @@ export default function ProDiscussions() {
                                 </p>
                                 <div className="flex gap-2">
                                   <button
-                                    onClick={() => handleConfirmerPaiement(true)}
+                                    onClick={() =>
+                                      handleConfirmerPaiement(true)
+                                    }
                                     className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
                                   >
                                     Confirmer
                                   </button>
                                   <button
-                                    onClick={() => handleConfirmerPaiement(false)}
+                                    onClick={() =>
+                                      handleConfirmerPaiement(false)
+                                    }
                                     className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
                                   >
                                     Refuser
@@ -1341,16 +1378,19 @@ export default function ProDiscussions() {
                             {message.evenementType === "AVIS_LAISSE" && (
                               <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                                 <RatingStars
-                                  rating={extractRatingFromMessage(message.contenu)}
+                                  rating={extractRatingFromMessage(
+                                    message.contenu
+                                  )}
                                 />
                               </div>
                             )}
                           </div>
                           <div
-                            className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
-                              ? "text-gray-500 text-right"
-                              : "text-gray-400"
-                              }`}
+                            className={`text-xs mt-1 flex items-center gap-1 ${
+                              isCurrentUser(message)
+                                ? "text-gray-500 text-right"
+                                : "text-gray-400"
+                            }`}
                           >
                             {formatMessageTime(message.createdAt)}
                             {message.lu && " • Lu"}
@@ -1389,10 +1429,11 @@ export default function ProDiscussions() {
                 <div className="flex gap-3 items-center">
                   {/* Bouton d'upload de fichier */}
                   <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${uploadingFile
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-gray-100"
-                      }`}
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                      uploadingFile
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-gray-100"
+                    }`}
                   >
                     <Paperclip className="w-4 h-4" />
                     <input
@@ -1438,7 +1479,6 @@ export default function ProDiscussions() {
                     ) : (
                       <>
                         <Send className="w-4 h-4" />
-
                       </>
                     )}
                   </button>
@@ -1585,18 +1625,19 @@ export default function ProDiscussions() {
                         {artisanDetails.factureMontant}€
                       </p>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${artisanDetails.factureStatus === "validee"
-                          ? "bg-green-100 text-green-800"
-                          : artisanDetails.factureStatus === "refusee"
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          artisanDetails.factureStatus === "validee"
+                            ? "bg-green-100 text-green-800"
+                            : artisanDetails.factureStatus === "refusee"
                             ? "bg-red-100 text-red-800"
                             : "bg-yellow-100 text-yellow-800"
-                          }`}
+                        }`}
                       >
                         {artisanDetails.factureStatus === "validee"
                           ? "Validée"
                           : artisanDetails.factureStatus === "refusee"
-                            ? "Refusée"
-                            : "En attente"}
+                          ? "Refusée"
+                          : "En attente"}
                       </span>
                     </div>
                     <a
@@ -1727,6 +1768,7 @@ export default function ProDiscussions() {
                         date: e.target.value,
                       }))
                     }
+                    min={new Date().toISOString().split("T")[0]}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -1922,6 +1964,7 @@ export default function ProDiscussions() {
                   </label>
                   <input
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     value={rendezVousDate}
                     onChange={(e) => setRendezVousDate(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

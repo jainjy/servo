@@ -240,6 +240,7 @@ const ModalUploadDocument = ({
             <Label className="block mb-2">Date d'expiration (optionnel)</Label>
             <Input
               type="date"
+              min={new Date().toISOString().split("T")[0]}
               value={formData.dateExpiration}
               onChange={(e) =>
                 setFormData({ ...formData, dateExpiration: e.target.value })

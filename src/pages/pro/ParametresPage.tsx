@@ -294,6 +294,7 @@ const ParametresPage = () => {
                       <Input
                         type="date"
                         value={jour.date || ""}
+                        min={new Date().toISOString().split("T")[0]}
                         onChange={(e) =>
                           mettreAJourJourFerme(index, "date", e.target.value)
                         }

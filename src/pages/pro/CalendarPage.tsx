@@ -166,7 +166,12 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
   ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={rendezVous ? "Modifier le rendez-vous" : "Nouveau rendez-vous"} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={rendezVous ? "Modifier le rendez-vous" : "Nouveau rendez-vous"}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Informations de base */}
@@ -176,7 +181,9 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
               <Input
                 required
                 value={formData.titre}
-                onChange={(e) => setFormData({ ...formData, titre: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, titre: e.target.value })
+                }
                 placeholder="Ex: Visite appartement..."
               />
             </div>
@@ -186,8 +193,11 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
               <Input
                 type="date"
                 required
+                min={new Date().toISOString().split("T")[0]}
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
               />
             </div>
 
@@ -198,7 +208,9 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   type="time"
                   required
                   value={formData.heureDebut}
-                  onChange={(e) => setFormData({ ...formData, heureDebut: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, heureDebut: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -207,7 +219,9 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   type="time"
                   required
                   value={formData.heureFin}
-                  onChange={(e) => setFormData({ ...formData, heureFin: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, heureFin: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -220,10 +234,14 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, type: e.target.value })
+                }
               >
                 {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
-                  <option key={key} value={key}>{type.label}</option>
+                  <option key={key} value={key}>
+                    {type.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -233,10 +251,14 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.statut}
-                onChange={(e) => setFormData({ ...formData, statut: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, statut: e.target.value })
+                }
               >
                 {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
-                  <option key={key} value={key}>{statut.label}</option>
+                  <option key={key} value={key}>
+                    {statut.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -246,7 +268,9 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.agent}
-                onChange={(e) => setFormData({ ...formData, agent: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, agent: e.target.value })
+                }
               >
                 <option value="Pierre Dubois">Pierre Dubois</option>
                 <option value="Sophie Lambert">Sophie Lambert</option>
@@ -261,7 +285,9 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                     key={couleur}
                     type="button"
                     className={`w-8 h-8 rounded-full border-2 ${
-                      formData.couleur === couleur ? 'border-gray-800' : 'border-gray-300'
+                      formData.couleur === couleur
+                        ? "border-gray-800"
+                        : "border-gray-300"
                     }`}
                     style={{ backgroundColor: couleur }}
                     onClick={() => setFormData({ ...formData, couleur })}
@@ -283,28 +309,34 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
               placeholder="Nom du client *"
               required
               value={formData.client.nom}
-              onChange={(e) => setFormData({
-                ...formData,
-                client: { ...formData.client, nom: e.target.value }
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  client: { ...formData.client, nom: e.target.value },
+                })
+              }
             />
             <Input
               type="email"
               placeholder="Email"
               value={formData.client.email}
-              onChange={(e) => setFormData({
-                ...formData,
-                client: { ...formData.client, email: e.target.value }
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  client: { ...formData.client, email: e.target.value },
+                })
+              }
             />
             <Input
               type="tel"
               placeholder="Téléphone"
               value={formData.client.telephone}
-              onChange={(e) => setFormData({
-                ...formData,
-                client: { ...formData.client, telephone: e.target.value }
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  client: { ...formData.client, telephone: e.target.value },
+                })
+              }
             />
           </div>
         </div>
@@ -319,18 +351,22 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
             <Input
               placeholder="Adresse du bien"
               value={formData.bien.adresse}
-              onChange={(e) => setFormData({
-                ...formData,
-                bien: { ...formData.bien, adresse: e.target.value }
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  bien: { ...formData.bien, adresse: e.target.value },
+                })
+              }
             />
             <Input
               placeholder="Référence bien"
               value={formData.bien.reference}
-              onChange={(e) => setFormData({
-                ...formData,
-                bien: { ...formData.bien, reference: e.target.value }
-              })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  bien: { ...formData.bien, reference: e.target.value },
+                })
+              }
             />
           </div>
         </div>
@@ -342,7 +378,9 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
             rows={4}
             placeholder="Notes supplémentaires..."
             value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, notes: e.target.value })
+            }
           />
         </div>
 
@@ -366,9 +404,12 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Annuler
             </Button>
-            <Button type="submit" style={{ backgroundColor: '#0052FF', color: 'white' }}>
+            <Button
+              type="submit"
+              style={{ backgroundColor: "#0052FF", color: "white" }}
+            >
               <Save className="mr-2" size={16} />
-              {rendezVous ? 'Modifier' : 'Créer'} le rendez-vous
+              {rendezVous ? "Modifier" : "Créer"} le rendez-vous
             </Button>
           </div>
         </div>

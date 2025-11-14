@@ -282,9 +282,9 @@ const GestionImmobilier = () => {
             </h1>
             <p className="text-sm text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
               Des solutions complètes pour propriétaires bailleurs. Confiez-nous
-              la gestion de votre patrimoine en toute sérénité.
-              Des solutions complètes pour propriétaires bailleurs.
-              Confiez-nous la gestion de votre patrimoine en toute sérénité.
+              la gestion de votre patrimoine en toute sérénité. Des solutions
+              complètes pour propriétaires bailleurs. Confiez-nous la gestion de
+              votre patrimoine en toute sérénité.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-4 justify-center">
@@ -315,7 +315,10 @@ const GestionImmobilier = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center bg-white py-8 rounded-lg shadow-sm">
+              <div
+                key={index}
+                className="text-center bg-white py-8 rounded-lg shadow-sm"
+              >
                 <div className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
                   {stat.number}
                 </div>
@@ -347,10 +350,11 @@ const GestionImmobilier = () => {
               <Button
                 key={service.id}
                 variant={activeService === service.id ? "default" : "outline"}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold ${activeService === service.id
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-700 border-slate-300 hover:bg-slate-100"
-                  }`}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                  activeService === service.id
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-700 border-slate-300 hover:bg-slate-100"
+                }`}
                 onClick={() => setActiveService(service.id)}
               >
                 <service.icon className="h-3 w-3 mr-2" />
@@ -609,6 +613,7 @@ const GestionImmobilier = () => {
                 <Input
                   name="dateSouhaitee"
                   type="date"
+                  min={new Date().toISOString().split("T")[0]}
                   value={formData.dateSouhaitee}
                   onChange={handleInputChange}
                 />
@@ -666,7 +671,6 @@ const GestionImmobilier = () => {
                 Nous écrire
               </span>
             </DialogTitle>
-
           </DialogHeader>
           <hr />
           <form onSubmit={handleContactSubmit} className="space-y-6 p-1">

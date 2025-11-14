@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { LocationPickerModal } from "@/components/location-picker-modal";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -64,6 +65,8 @@ interface ListingModalProps {
     features: string[];
     listingType: string;
     ownerId: string;
+    longitude: number | null;
+    latitude: number | null;
   };
   mode: "create" | "edit";
   onSuccess?: () => void;
@@ -120,6 +123,7 @@ export function ListingModal({
   const [temporaryImages, setTemporaryImages] = useState<TemporaryImage[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     // Étape 1 - Informations générales
@@ -141,6 +145,8 @@ export function ListingModal({
     images: [],
     // Étape 5 - Publication
     status: "draft",
+    latitude: null,
+    longitude: null,
   });
 
   const etapes = [
@@ -168,6 +174,8 @@ export function ListingModal({
         features: listing.features || [],
         images: listing.images || [],
         status: listing.status || "draft",
+        latitude: listing.latitude ?? null,
+        longitude: listing.longitude ?? null,
       });
       setExistingImages(listing.images || []);
       setTemporaryImages([]);
@@ -188,6 +196,8 @@ export function ListingModal({
         features: [],
         images: [],
         status: "draft",
+        latitude: null,
+        longitude: null,
       });
       setExistingImages([]);
       setTemporaryImages([]);
@@ -296,6 +306,8 @@ export function ListingModal({
         bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
         images: finalImages,
         ownerId: listing?.ownerId || "default-owner-id",
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
 
       if (mode === "create") {
@@ -355,6 +367,14 @@ export function ListingModal({
     })),
   ];
 
+  const handleLocationChange = (lat: number, lng: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+  };
+
   return (
     <Modal
       isOpen={open}
@@ -362,6 +382,15 @@ export function ListingModal({
       title={mode === "create" ? "Nouvelle annonce" : "Modifier l'annonce"}
       size="xl"
     >
+      {/* Modal de sélection de position */}
+      <LocationPickerModal
+        open={locationModalOpen}
+        onOpenChange={setLocationModalOpen}
+        latitude={formData.latitude}
+        longitude={formData.longitude}
+        onLocationChange={handleLocationChange}
+      />
+
       <form onSubmit={handleSubmit}>
         {/* Barre de progression */}
         <div className="mb-8">
@@ -557,6 +586,31 @@ export function ListingModal({
                   }
                   placeholder="Ex: Paris"
                 />
+              </div>
+            </div>
+
+            {/* Sélection de la position */}
+            <div>
+              <Label className="block mb-2">Position sur la carte</Label>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocationModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <MapPin size={16} />
+                  Sélectionner sur la carte
+                </Button>
+                {formData.latitude && formData.longitude && (
+                  <span className="text-xs text-gray-600 ml-2">
+                    <strong>Lat:</strong> {formData.latitude.toFixed(6)},{" "}
+                    <strong>Lng:</strong> {formData.longitude.toFixed(6)}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Permet d'afficher le bien sur la carte.
               </div>
             </div>
           </div>

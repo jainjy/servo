@@ -133,6 +133,7 @@ export default function DevisContent() {
                   <input
                     name="dateSouhaitee"
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     placeholder="Date souhaitée"
                     value={formData.dateSouhaitee}
                     onChange={handleInputChange}

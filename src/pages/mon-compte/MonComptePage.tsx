@@ -754,6 +754,21 @@ export default function MonComptePage() {
                   >
                     Mes payements
                   </Button>
+                  {/* Ajout des liens manquants */}
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => handleNavigation("/mon-compte/mes-commandes")}
+                  >
+                    Mes commandes
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
+                  >
+                    Mes demandes immobilières
+                  </Button>
                 </CardContent>
               </Card>
 

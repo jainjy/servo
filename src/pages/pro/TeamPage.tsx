@@ -337,6 +337,7 @@ const EmployeModal = ({
                 <Label htmlFor="dateEmbauche">Date d'embauche</Label>
                 <Input
                   id="dateEmbauche"
+                  
                   type="date"
                   value={formData.dateEmbauche}
                   onChange={(e) => handleChange('dateEmbauche', e.target.value)}
