@@ -221,4 +221,8 @@ export const MediaService = {
   getStats: () => mediaAPI.getStats(),
 };
 
+export const productsAPI = {
+  getStats: () => api.get('/products/stats'),
+};
+
 export default api;
