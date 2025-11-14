@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api"
-import { Headphones, Home, Video, MessageCircle, Activity } from "lucide-react";
+import { Headphones, Home, Video, MessageCircle, Activity, PencilIcon } from "lucide-react";
 import PodcastCard from "@/components/PodcastCard";
 import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
 //import Podcast from "@/pages/podcast";
@@ -409,15 +409,10 @@ const BienEtre = () => {
   };
 
   // State pour la tabulation
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('Formateur');
 
   // Configuration des tabs avec icônes SVG
   const tabs = [
-    {
-      id: 'all',
-      label: 'Tous les services',
-      icon: <Home className="w-5 h-5" />
-    },
     {
       id: 'Formateur',
       label: 'Cours à domicile',
@@ -425,12 +420,8 @@ const BienEtre = () => {
     },
     {
       id: 'Masseur',
-      label: 'Massages à domicile',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-        </svg>
-      )
+      label: 'Arts & commerces',
+      icon: <PencilIcon className="w-5 h-5" />
     },
     {
       id: 'Thérapeute',
@@ -591,7 +582,7 @@ const BienEtre = () => {
 
           {/* Menu de tabulation moderne */}
           <SlideIn direction="down">
-            <div className="bg-white dark:bg-card rounded-2xl shadow-lg px-2 py-5 mb-12 grid grid-cols-2 lg:grid-cols-6 justify-center items-center w-full mx-auto">
+            <div className="bg-white dark:bg-card rounded-2xl shadow-lg px-2 py-5 mb-12 grid place-items-center grid-cols-2 lg:grid-cols-6 justify-center items-center w-full mx-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -602,7 +593,7 @@ const BienEtre = () => {
                     }`}
                 >
                   {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-teal-500 animate-shimmer bg-[length:200%_100%]" />
+                    <div className="absolute inset-0 bg-slate-900 animate-shimmer bg-[length:200%_100%]" />
                   )}
                   <span className="relative z-10 group-hover:scale-110 transition-transform duration-300">
                     {tab.icon}
@@ -617,42 +608,6 @@ const BienEtre = () => {
 
           {/* Contenu des tabs */}
           <div className="px-10 min-h-[500px]">
-
-            {/* TOUS LES SERVICES */}
-            {activeTab === 'all' && (
-              <section className="mb-20">
-                <SlideIn direction="left">
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                      Tous nos services de bien-être
-                    </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
-                      Découvrez l'ensemble de nos services pour prendre soin de votre corps et de votre esprit.
-                      Des cours personnalisés aux massages relaxants, en passant par les consultations en ligne
-                      et nos contenus inspirants.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                      {getCurrentServices().length > 0 ? (
-                        getCurrentServices().map((service, index) => (
-                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard
-                              service={service}
-                              index={index}
-                              onOpenModal={handleOpenModal}
-                            />
-                          </SlideIn>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                          Aucun service disponible pour le moment
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </SlideIn>
-              </section>
-            )}
 
             {/* FORMATEUR */}
             {activeTab === 'Formateur' && (
@@ -687,7 +642,6 @@ const BienEtre = () => {
                     </div>
                   </SlideIn>
                 </section>
-                <ArtCommerce />
               </>
             )}
 
@@ -695,32 +649,7 @@ const BienEtre = () => {
             {activeTab === 'Masseur' && (
               <section className="mb-20">
                 <SlideIn direction="right">
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                      Massages à domicile
-                    </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
-                      Transformez votre espace en véritable spa avec nos thérapeutes certifiés. Installation professionnelle, huiles essentielles bio et ambiance relaxante pour une expérience sensorielle complète sans vous déplacer.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                      {getCurrentServices().length > 0 ? (
-                        getCurrentServices().map((service, index) => (
-                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard
-                              service={service}
-                              index={index}
-                              onOpenModal={handleOpenModal}
-                            />
-                          </SlideIn>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                          Aucun service disponible pour cette catégorie
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <ArtCommerce />
                 </SlideIn>
               </section>
             )}

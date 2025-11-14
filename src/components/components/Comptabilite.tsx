@@ -1,711 +1,534 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import {
+  Calculator,
+  FileText,
+  TrendingUp,
+  Shield,
+  Users,
+  Clock,
+  CheckCircle,
+  Award,
+  BarChart3,
+  Receipt,
+  Building,
+  Download,
+  Phone,
+  Mail,
+  MapPin
+} from 'lucide-react';
 
-// Types et interfaces
-interface Transaction {
+interface ServiceComptable {
   id: string;
-  date: Date;
-  amount: number;
+  titre: string;
   description: string;
-  category: string;
-  type: 'income' | 'expense';
-  paymentMethod: string;
-  client?: string;
-  status: 'completed' | 'pending' | 'cancelled';
+  categorie: 'comptabilite' | 'fiscalite' | 'paie' | 'conseil' | 'audit';
+  forfait: 'basique' | 'standard' | 'premium' | 'sur-mesure';
+  prix?: number;
+  prixSurMesure?: boolean;
+  delai: string;
+  inclus: string[];
+  publicCible: string[];
+  avantages: string[];
 }
 
-interface Invoice {
-  id: string;
-  number: string;
-  client: string;
-  date: Date;
-  dueDate: Date;
-  amount: number;
-  status: 'paid' | 'unpaid' | 'overdue';
-  items: InvoiceItem[];
+interface ComptabiliteServicesProps {
+  entrepriseId?: string;
+  typeEntreprise?: 'auto-entrepreneur' | 'sarl' | 'sas' | 'eurl' | 'autre';
+  chiffreAffaire?: number;
 }
 
-interface FinancialSummary {
-  totalRevenue: number;
-  totalExpenses: number;
-  netProfit: number;
-  accountsReceivable: number;
-  cashFlow: number;
-  taxEstimate: number;
-  profitMargin: number;
-}
-
-interface ComptabiliteEntrepriseProps {
-  entrepriseId: string;
-  regimeFiscal?: 'auto-entrepreneur' | 'sas' | 'sarl' | 'ei';
-  anneeFiscale?: number;
-}
-
-const ComptabiliteEntreprise: React.FC<ComptabiliteEntrepriseProps> = ({ 
-  entrepriseId, 
-  regimeFiscal = 'sarl',
-  anneeFiscale = 2024
+const ComptabiliteServices: React.FC<ComptabiliteServicesProps> = ({
+  entrepriseId,
+  typeEntreprise = 'sarl',
+  chiffreAffaire = 50000
 }) => {
-  // États
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [factures, setFactures] = useState<Invoice[]>([]);
-  const [resumeFinancier, setResumeFinancier] = useState<FinancialSummary>({
-    totalRevenue: 0,
-    totalExpenses: 0,
-    netProfit: 0,
-    accountsReceivable: 0,
-    cashFlow: 0,
-    taxEstimate: 0,
-    profitMargin: 0
+  const [filtreCategorie, setFiltreCategorie] = useState<string>('tous');
+  const [forfaitSelectionne, setForfaitSelectionne] = useState<string>('tous');
+
+  const services: ServiceComptable[] = [
+    {
+      id: '1',
+      titre: 'Comptabilité Complète',
+      description: 'Gestion complète de votre comptabilité avec établissement des états financiers',
+      categorie: 'comptabilite',
+      forfait: 'standard',
+      prix: 299,
+      delai: 'Mensuel',
+      inclus: [
+        'Saisie des écritures comptables',
+        'Établissement des balances',
+        'Bilan et compte de résultat',
+        'Tableaux de bord financiers',
+        'Conformité légale'
+      ],
+      publicCible: ['PME', 'SARL', 'SAS', 'EURL'],
+      avantages: ['Gain de temps', 'Conformité assurée', 'Vision financière claire']
+    },
+    {
+      id: '2',
+      titre: 'Déclarations Fiscales',
+      description: 'Préparation et dépôt de toutes vos déclarations fiscales',
+      categorie: 'fiscalite',
+      forfait: 'standard',
+      prix: 199,
+      delai: 'Trimestriel/Annuel',
+      inclus: [
+        'Déclaration de TVA',
+        'Impôt sur les sociétés',
+        'CFE et CVAE',
+        'Déclarations annexes',
+        'Optimisation fiscale'
+      ],
+      publicCible: ['Toutes entreprises', 'Auto-entrepreneurs'],
+      avantages: ['Réduction d\'impôt', 'Conformité fiscale', 'Alertes échéances']
+    },
+    {
+      id: '3',
+      titre: 'Gestion de la Paie',
+      description: 'Service complet de gestion de paie pour vos collaborateurs',
+      categorie: 'paie',
+      forfait: 'basique',
+      prix: 45,
+      prixSurMesure: true,
+      delai: 'Mensuel',
+      inclus: [
+        'Bulletins de paie',
+        'Déclarations sociales',
+        'Gestion des congés',
+        'DADS-U et DSN',
+        'Convention collective'
+      ],
+      publicCible: ['Entreprises avec salariés', 'Associations'],
+      avantages: ['Gain de temps', 'Conformité sociale', 'Relations employeurs']
+    },
+    {
+      id: '4',
+      titre: 'Audit Comptable',
+      description: 'Vérification et certification de vos états financiers',
+      categorie: 'audit',
+      forfait: 'sur-mesure',
+      prixSurMesure: true,
+      delai: 'Selon mission',
+      inclus: [
+        'Vérification complète des comptes',
+        'Certification des états financiers',
+        'Rapport d\'audit détaillé',
+        'Recommandations d\'amélioration',
+        'Conformité aux normes'
+      ],
+      publicCible: ['Grandes entreprises', 'Sociétés cotées', 'Associations'],
+      avantages: ['Confiance des partenaires', 'Détection des risques', 'Amélioration continue']
+    },
+    {
+      id: '5',
+      titre: 'Conseil Stratégique',
+      description: 'Accompagnement personnalisé pour vos décisions financières',
+      categorie: 'conseil',
+      forfait: 'premium',
+      prix: 450,
+      delai: 'Selon besoins',
+      inclus: [
+        'Analyse financière approfondie',
+        'Business plan et prévisionnel',
+        'Stratégie de financement',
+        'Optimisation de la trésorerie',
+        'Tableaux de bord personnalisés'
+      ],
+      publicCible: ['Startups', 'PME en croissance', 'Entreprises en difficulté'],
+      avantages: ['Décisions éclairées', 'Croissance maîtrisée', 'Risques anticipés']
+    },
+    {
+      id: '6',
+      titre: 'Comptabilité Auto-entrepreneur',
+      description: 'Service adapté aux spécificités des auto-entrepreneurs',
+      categorie: 'comptabilite',
+      forfait: 'basique',
+      prix: 79,
+      delai: 'Trimestriel',
+      inclus: [
+        'Déclaration de chiffre d\'affaires',
+        'Calcul des cotisations',
+        'Suivi des recettes/dépenses',
+        'Assistance déclarative',
+        'Conseil régime fiscal'
+      ],
+      publicCible: ['Auto-entrepreneurs', 'Micro-entreprises'],
+      avantages: ['Simplicité', 'Coût maîtrisé', 'Conformité assurée']
+    }
+  ];
+
+  const categories = [
+    { value: 'tous', label: 'Tous les services' },
+    { value: 'comptabilite', label: 'Comptabilité' },
+    { value: 'fiscalite', label: 'Fiscalité' },
+    { value: 'paie', label: 'Paie' },
+    { value: 'audit', label: 'Audit' },
+    { value: 'conseil', label: 'Conseil' }
+  ];
+
+  const forfaits = [
+    { value: 'tous', label: 'Tous les forfaits' },
+    { value: 'basique', label: 'Basique' },
+    { value: 'standard', label: 'Standard' },
+    { value: 'premium', label: 'Premium' },
+    { value: 'sur-mesure', label: 'Sur mesure' }
+  ];
+
+  const servicesFiltres = services.filter(service => {
+    const matchCategorie = filtreCategorie === 'tous' || service.categorie === filtreCategorie;
+    const matchForfait = forfaitSelectionne === 'tous' || service.forfait === forfaitSelectionne;
+    return matchCategorie && matchForfait;
   });
-  const [ongletActif, setOngletActif] = useState<'tableau-bord' | 'transactions' | 'factures' | 'rapports'>('tableau-bord');
-  const [periodeSelectionnee, setPeriodeSelectionnee] = useState<'mois' | 'trimestre' | 'annee'>('mois');
-  const [nouvelleTransaction, setNouvelleTransaction] = useState<Partial<Transaction>>({
-    type: 'income',
-    category: 'services',
-    paymentMethod: 'virement'
-  });
 
-  // Données simulées
-  useEffect(() => {
-    const transactionsSimulees: Transaction[] = [
-      {
-        id: '1',
-        date: new Date('2024-01-15'),
-        amount: 12500,
-        description: 'Prestation de services conseil - Client A',
-        category: 'services',
-        type: 'income',
-        paymentMethod: 'virement',
-        client: 'Entreprise A',
-        status: 'completed'
-      },
-      {
-        id: '2',
-        date: new Date('2024-01-10'),
-        amount: 2450,
-        description: 'Achat matériel informatique',
-        category: 'equipement',
-        type: 'expense',
-        paymentMethod: 'carte',
-        status: 'completed'
-      },
-      {
-        id: '3',
-        date: new Date('2024-01-08'),
-        amount: 8500,
-        description: 'Développement application mobile',
-        category: 'developpement',
-        type: 'income',
-        paymentMethod: 'virement',
-        client: 'Startup B',
-        status: 'completed'
-      },
-      {
-        id: '4',
-        date: new Date('2024-01-05'),
-        amount: 1200,
-        description: 'Frais de déplacement professionnel',
-        category: 'deplacement',
-        type: 'expense',
-        paymentMethod: 'carte',
-        status: 'completed'
-      }
-    ];
-
-    const facturesSimulees: Invoice[] = [
-      {
-        id: '1',
-        number: 'FAC-2024-001',
-        client: 'Entreprise A',
-        date: new Date('2024-01-01'),
-        dueDate: new Date('2024-01-31'),
-        amount: 12500,
-        status: 'paid',
-        items: [
-          { description: 'Prestation conseil stratégique', quantity: 50, unitPrice: 250 }
-        ]
-      },
-      {
-        id: '2',
-        number: 'FAC-2024-002',
-        client: 'Startup B',
-        date: new Date('2024-01-15'),
-        dueDate: new Date('2024-02-15'),
-        amount: 8500,
-        status: 'unpaid',
-        items: [
-          { description: 'Développement application mobile', quantity: 1, unitPrice: 8500 }
-        ]
-      },
-      {
-        id: '3',
-        number: 'FAC-2024-003',
-        client: 'Société C',
-        date: new Date('2024-01-20'),
-        dueDate: new Date('2024-02-20'),
-        amount: 32000,
-        status: 'unpaid',
-        items: [
-          { description: 'Audit système informatique', quantity: 1, unitPrice: 20000 },
-          { description: 'Formation équipe technique', quantity: 2, unitPrice: 6000 }
-        ]
-      }
-    ];
-
-    setTransactions(transactionsSimulees);
-    setFactures(facturesSimulees);
-    calculerResumeFinancier(transactionsSimulees, facturesSimulees);
-  }, []);
-
-  // Calcul du résumé financier
-  const calculerResumeFinancier = (transactions: Transaction[], factures: Invoice[]) => {
-    const totalRevenue = transactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const totalExpenses = transactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const accountsReceivable = factures
-      .filter(i => i.status === 'unpaid')
-      .reduce((sum, i) => sum + i.amount, 0);
-
-    const netProfit = totalRevenue - totalExpenses;
-    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-    
-    // Estimation des taxes selon le régime fiscal
-    const tauxImposition = regimeFiscal === 'auto-entrepreneur' ? 0.22 : 
-                          regimeFiscal === 'sas' ? 0.28 : 
-                          regimeFiscal === 'sarl' ? 0.25 : 0.22;
-    const taxEstimate = netProfit * tauxImposition;
-
-    setResumeFinancier({
-      totalRevenue,
-      totalExpenses,
-      netProfit,
-      accountsReceivable,
-      cashFlow: totalRevenue - totalExpenses,
-      taxEstimate,
-      profitMargin
-    });
+  const getCategorieIcon = (categorie: string) => {
+    switch (categorie) {
+      case 'comptabilite':
+        return <Calculator className="h-6 w-6 text-blue-600" />;
+      case 'fiscalite':
+        return <FileText className="h-6 w-6 text-green-600" />;
+      case 'paie':
+        return <Users className="h-6 w-6 text-purple-600" />;
+      case 'audit':
+        return <Shield className="h-6 w-6 text-red-600" />;
+      case 'conseil':
+        return <TrendingUp className="h-6 w-6 text-orange-600" />;
+      default:
+        return <BarChart3 className="h-6 w-6 text-gray-600" />;
+    }
   };
 
-  // Gestion des nouvelles transactions
-  const ajouterTransaction = () => {
-    if (!nouvelleTransaction.amount || !nouvelleTransaction.description) return;
-
-    const transaction: Transaction = {
-      id: Date.now().toString(),
-      date: new Date(),
-      amount: nouvelleTransaction.amount!,
-      description: nouvelleTransaction.description!,
-      category: nouvelleTransaction.category || 'divers',
-      type: nouvelleTransaction.type || 'income',
-      paymentMethod: nouvelleTransaction.paymentMethod || 'virement',
-      client: nouvelleTransaction.client,
-      status: 'completed'
-    };
-
-    setTransactions(prev => [transaction, ...prev]);
-    calculerResumeFinancier([transaction, ...transactions], factures);
-    
-    // Réinitialiser le formulaire
-    setNouvelleTransaction({
-      type: 'income',
-      category: 'services',
-      paymentMethod: 'virement'
-    });
+  const getCategorieLabel = (categorie: string) => {
+    switch (categorie) {
+      case 'comptabilite':
+        return 'Comptabilité';
+      case 'fiscalite':
+        return 'Fiscalité';
+      case 'paie':
+        return 'Paie';
+      case 'audit':
+        return 'Audit';
+      case 'conseil':
+        return 'Conseil';
+      default:
+        return categorie;
+    }
   };
 
-  // Rendu du tableau de bord
-  const renderTableauDeBord = () => (
-    <div className="space-y-6">
-      {/* Cartes indicateurs financiers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-          <h3 className="text-lg font-semibold text-gray-700">Chiffre d'Affaires</h3>
-          <div className="text-2xl font-bold text-gray-900 mt-2">
-            {resumeFinancier.totalRevenue.toLocaleString('fr-FR')} €
-          </div>
-          <div className="text-sm text-green-600 mt-1">+8.2% vs période précédente</div>
+  const getForfaitColor = (forfait: string) => {
+    switch (forfait) {
+      case 'basique':
+        return 'bg-green-100 text-green-800';
+      case 'standard':
+        return 'bg-blue-100 text-blue-800';
+      case 'premium':
+        return 'bg-purple-100 text-purple-800';
+      case 'sur-mesure':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getForfaitLabel = (forfait: string) => {
+    switch (forfait) {
+      case 'basique':
+        return 'Basique';
+      case 'standard':
+        return 'Standard';
+      case 'premium':
+        return 'Premium';
+      case 'sur-mesure':
+        return 'Sur mesure';
+      default:
+        return forfait;
+    }
+  };
+
+  return (
+    <div className="min-h-screen mt-16 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* En-tête */}
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg" alt="" />
+        </div>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-100 mb-4">
+            Services Comptables Professionnels
+          </h1>
+          <p className="text-sm text-gray-200 max-w-3xl mx-auto">
+            Des solutions comptables complètes et adaptées à votre entreprise,
+            pour une gestion financière sereine et conforme
+          </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-          <h3 className="text-lg font-semibold text-gray-700">Dépenses</h3>
-          <div className="text-2xl font-bold text-gray-900 mt-2">
-            {resumeFinancier.totalExpenses.toLocaleString('fr-FR')} €
+        {/* Filtres */}
+        <div className='pt-16'>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type de service
+                </label>
+                <select
+                  value={filtreCategorie}
+                  onChange={(e) => setFiltreCategorie(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {categories.map((categorie) => (
+                    <option key={categorie.value} value={categorie.value}>
+                      {categorie.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type de forfait
+                </label>
+                <select
+                  value={forfaitSelectionne}
+                  onChange={(e) => setForfaitSelectionne(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {forfaits.map((forfait) => (
+                    <option key={forfait.value} value={forfait.value}>
+                      {forfait.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end">
+                <div className="text-sm text-gray-600">
+                  {servicesFiltres.length} service(s) trouvé(s)
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-red-600 mt-1">-3.7% vs période précédente</div>
-        </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-          <h3 className="text-lg font-semibold text-gray-700">Bénéfice Net</h3>
-          <div className="text-2xl font-bold text-gray-900 mt-2">
-            {resumeFinancier.netProfit.toLocaleString('fr-FR')} €
-          </div>
-          <div className="text-sm text-blue-600 mt-1">
-            Marge: {resumeFinancier.profitMargin.toFixed(1)}%
-          </div>
-        </div>
+          {/* Grille des services */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
+            {servicesFiltres.map((service) => (
+              <div key={service.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
+                <div className="p-6">
+                  {/* En-tête */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      {getCategorieIcon(service.categorie)}
+                      <div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getForfaitColor(service.forfait)}`}>
+                          {getForfaitLabel(service.forfait)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
-          <h3 className="text-lg font-semibold text-gray-700">Estimation Taxes</h3>
-          <div className="text-2xl font-bold text-gray-900 mt-2">
-            {resumeFinancier.taxEstimate.toLocaleString('fr-FR')} €
-          </div>
-          <div className="text-sm text-gray-600 mt-1">Régime: {regimeFiscal.toUpperCase()}</div>
-        </div>
-      </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {service.titre}
+                  </h3>
 
-      {/* Actions rapides */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Actions Rapides</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button 
-            onClick={() => setOngletActif('transactions')}
-            className="bg-blue-50 hover:bg-blue-100 text-blue-700 p-4 rounded-lg border border-blue-200 transition-colors"
-          >
-            <div className="font-medium">Nouvelle Transaction</div>
-            <div className="text-sm text-blue-600 mt-1">Enregistrer une opération</div>
-          </button>
-          <button 
-            onClick={() => setOngletActif('factures')}
-            className="bg-green-50 hover:bg-green-100 text-green-700 p-4 rounded-lg border border-green-200 transition-colors"
-          >
-            <div className="font-medium">Créer Facture</div>
-            <div className="text-sm text-green-600 mt-1">Émettre une facture</div>
-          </button>
-          <button className="bg-purple-50 hover:bg-purple-100 text-purple-700 p-4 rounded-lg border border-purple-200 transition-colors">
-            <div className="font-medium">Générer Rapport</div>
-            <div className="text-sm text-purple-600 mt-1">Rapports financiers</div>
-          </button>
-          <button className="bg-orange-50 hover:bg-orange-100 text-orange-700 p-4 rounded-lg border border-orange-200 transition-colors">
-            <div className="font-medium">Calculer Taxes</div>
-            <div className="text-sm text-orange-600 mt-1">Déclaration fiscale</div>
-          </button>
-        </div>
-      </div>
+                  <p className="text-gray-600 mb-4">
+                    {service.description}
+                  </p>
 
-      {/* Activité récente */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Activité Récente</h3>
-        <div className="space-y-3">
-          {transactions.slice(0, 5).map(transaction => (
-            <div key={transaction.id} className="flex items-center justify-between p-3 border-b border-gray-100">
-              <div className="flex items-center space-x-4">
-                <div className={`w-3 h-3 rounded-full ${transaction.type === 'income' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <div>
-                  <div className="font-medium text-gray-900">{transaction.description}</div>
-                  <div className="text-sm text-gray-500">
-                    {transaction.date.toLocaleDateString('fr-FR')} • {transaction.category}
+                  {/* Prix et délai */}
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {service.prixSurMesure ? (
+                        <span className="text-lg">Sur devis</span>
+                      ) : (
+                        `${service.prix?.toLocaleString('fr-FR')} €`
+                      )}
+                      <span className="text-sm font-normal text-gray-500 block">
+                        {service.prix && 'HT / mois'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Clock className="h-4 w-4 mr-1" />
+                        {service.delai}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Public cible */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Public cible</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {service.publicCible.map((publicItem, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700"
+                        >
+                          {publicItem}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Services inclus */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Services inclus</h4>
+                    <ul className="space-y-2">
+                      {service.inclus.slice(0, 3).map((item, index) => (
+                        <li key={index} className="flex items-start text-sm text-gray-600">
+                          <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                      {service.inclus.length > 3 && (
+                        <li className="text-sm text-blue-600">
+                          + {service.inclus.length - 3} autres services
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Avantages */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Avantages</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {service.avantages.map((avantage, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-50 text-blue-700 border border-blue-200"
+                        >
+                          {avantage}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex space-x-3">
+                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200">
+                      Demander un devis
+                    </button>
+                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-colors duration-200">
+                      <Download className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               </div>
-              <div className={`font-semibold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                {transaction.type === 'income' ? '+' : '-'}{transaction.amount.toLocaleString('fr-FR')} €
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // Rendu des transactions
-  const renderTransactions = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Gestion des Transactions</h2>
-        <select 
-          value={periodeSelectionnee}
-          onChange={(e) => setPeriodeSelectionnee(e.target.value as any)}
-          className="border border-gray-300 rounded-lg px-4 py-2"
-        >
-          <option value="mois">Mois en cours</option>
-          <option value="trimestre">Trimestre</option>
-          <option value="annee">Année {anneeFiscale}</option>
-        </select>
-      </div>
-
-      {/* Formulaire nouvelle transaction */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Nouvelle Transaction</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-          <select 
-            value={nouvelleTransaction.type}
-            onChange={(e) => setNouvelleTransaction({...nouvelleTransaction, type: e.target.value as 'income' | 'expense'})}
-            className="border border-gray-300 rounded-lg px-3 py-2"
-          >
-            <option value="income">Recette</option>
-            <option value="expense">Dépense</option>
-          </select>
-          
-          <input
-            type="number"
-            placeholder="Montant (€)"
-            value={nouvelleTransaction.amount || ''}
-            onChange={(e) => setNouvelleTransaction({...nouvelleTransaction, amount: parseFloat(e.target.value)})}
-            className="border border-gray-300 rounded-lg px-3 py-2"
-          />
-          
-          <input
-            type="text"
-            placeholder="Description"
-            value={nouvelleTransaction.description || ''}
-            onChange={(e) => setNouvelleTransaction({...nouvelleTransaction, description: e.target.value})}
-            className="border border-gray-300 rounded-lg px-3 py-2"
-          />
-          
-          <select 
-            value={nouvelleTransaction.category}
-            onChange={(e) => setNouvelleTransaction({...nouvelleTransaction, category: e.target.value})}
-            className="border border-gray-300 rounded-lg px-3 py-2"
-          >
-            <option value="services">Services</option>
-            <option value="developpement">Développement</option>
-            <option value="conseil">Conseil</option>
-            <option value="formation">Formation</option>
-            <option value="equipement">Équipement</option>
-            <option value="deplacement">Déplacement</option>
-            <option value="divers">Divers</option>
-          </select>
-          
-          <button 
-            onClick={ajouterTransaction}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium"
-          >
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      {/* Liste des transactions */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800">Historique des Transactions</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {transactions.map(transaction => (
-                <tr key={transaction.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {transaction.date.toLocaleDateString('fr-FR')}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    <div className="font-medium">{transaction.description}</div>
-                    {transaction.client && (
-                      <div className="text-gray-500 text-xs">Client: {transaction.client}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
-                    {transaction.category}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      transaction.type === 'income' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {transaction.type === 'income' ? 'Recette' : 'Dépense'}
-                    </span>
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'income' ? '+' : '-'}{transaction.amount.toLocaleString('fr-FR')} €
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Rendu des factures
-  const renderFactures = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Gestion des Factures</h2>
-      
-      {/* Statistiques des factures */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-2xl font-bold text-green-600">
-            {factures.filter(i => i.status === 'paid').length}
-          </div>
-          <div className="text-gray-600 mt-1">Factures payées</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-2xl font-bold text-yellow-600">
-            {factures.filter(i => i.status === 'unpaid').length}
-          </div>
-          <div className="text-gray-600 mt-1">En attente</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <div className="text-2xl font-bold text-red-600">
-            {resumeFinancier.accountsReceivable.toLocaleString('fr-FR')} €
-          </div>
-          <div className="text-gray-600 mt-1">Montant en attente</div>
-        </div>
-      </div>
-
-      {/* Liste des factures */}
-      <div className="space-y-4">
-        {factures.map(facture => (
-          <div key={facture.id} className={`bg-white rounded-lg shadow p-6 border-l-4 ${
-            facture.status === 'paid' ? 'border-green-500' : 
-            facture.status === 'unpaid' ? 'border-yellow-500' : 'border-red-500'
-          }`}>
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{facture.number}</h3>
-                <p className="text-gray-600">Client: {facture.client}</p>
-              </div>
-              <div className="text-right">
-                <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                  facture.status === 'paid' 
-                    ? 'bg-green-100 text-green-800' 
-                    : facture.status === 'unpaid'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {facture.status === 'paid' ? 'Payée' : 
-                   facture.status === 'unpaid' ? 'En attente' : 'En retard'}
-                </span>
-                <div className="text-xl font-bold text-gray-900 mt-1">
-                  {facture.amount.toLocaleString('fr-FR')} €
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-              <div>
-                <span className="font-medium">Date d'émission:</span> {facture.date.toLocaleDateString('fr-FR')}
-              </div>
-              <div>
-                <span className="font-medium">Date d'échéance:</span> {facture.dueDate.toLocaleDateString('fr-FR')}
-              </div>
-            </div>
-
-            <div className="flex space-x-3">
-              <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
-                Télécharger PDF
-              </button>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                Relancer client
-              </button>
-              {facture.status === 'unpaid' && (
-                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                  Marquer comme payée
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Rendu des rapports
-  const renderRapports = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Rapports Financiers</h2>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bilan comptable */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Bilan Comptable</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Actifs circulants</span>
-              <span className="font-medium">{(resumeFinancier.totalRevenue * 0.4).toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Immobilisations</span>
-              <span className="font-medium">{(resumeFinancier.totalRevenue * 0.3).toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Passifs</span>
-              <span className="font-medium">{(resumeFinancier.totalExpenses * 0.6).toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 font-semibold text-gray-900">
-              <span>Capital</span>
-              <span>{resumeFinancier.netProfit.toLocaleString('fr-FR')} €</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Compte de résultat */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Compte de Résultat</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Chiffre d'affaires</span>
-              <span className="font-medium text-green-600">{resumeFinancier.totalRevenue.toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Charges d'exploitation</span>
-              <span className="font-medium text-red-600">{resumeFinancier.totalExpenses.toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Charges financières</span>
-              <span className="font-medium text-red-600">{(resumeFinancier.totalExpenses * 0.1).toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 font-semibold text-gray-900">
-              <span>Résultat net</span>
-              <span>{resumeFinancier.netProfit.toLocaleString('fr-FR')} €</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Trésorerie */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Situation de Trésorerie</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Solde actuel</span>
-              <span className="font-medium">{resumeFinancier.cashFlow.toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Créances clients</span>
-              <span className="font-medium">{resumeFinancier.accountsReceivable.toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-700">Dettes fournisseurs</span>
-              <span className="font-medium">{(resumeFinancier.totalExpenses * 0.3).toLocaleString('fr-FR')} €</span>
-            </div>
-            <div className="flex justify-between items-center py-2 font-semibold text-gray-900">
-              <span>Trésorerie nette</span>
-              <span>{(resumeFinancier.cashFlow + resumeFinancier.accountsReceivable).toLocaleString('fr-FR')} €</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Analyse de rentabilité */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Analyse de Rentabilité</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm text-gray-600 mb-1">
-                <span>Marge bénéficiaire</span>
-                <span>{resumeFinancier.profitMargin.toFixed(1)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-green-500 h-2 rounded-full" 
-                  style={{ width: `${Math.min(resumeFinancier.profitMargin, 100)}%` }}
-                ></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm text-gray-600 mb-1">
-                <span>Taux de charges</span>
-                <span>{((resumeFinancier.totalExpenses / resumeFinancier.totalRevenue) * 100).toFixed(1)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-red-500 h-2 rounded-full" 
-                  style={{ width: `${Math.min((resumeFinancier.totalExpenses / resumeFinancier.totalRevenue) * 100, 100)}%` }}
-                ></div>
-              </div>
-            </div>
-            <div className="text-center pt-4">
-              <div className="text-sm text-gray-600">Estimation taxes à payer</div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {resumeFinancier.taxEstimate.toLocaleString('fr-FR')} €
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Actions d'export */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Export des Rapports</h3>
-        <div className="flex flex-wrap gap-4">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
-            Générer rapport PDF complet
-          </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
-            Exporter vers Excel
-          </button>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">
-            Préparer déclaration fiscale
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50 mt-16">
-      {/* En-tête */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Comptabilité d'Entreprise</h1>
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                <span>Régime fiscal: {regimeFiscal.toUpperCase()}</span>
-                <span>•</span>
-                <span>Année: {anneeFiscale}</span>
-                <span>•</span>
-                <span>Période: {periodeSelectionnee}</span>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-semibold text-gray-900">Solde: {resumeFinancier.cashFlow.toLocaleString('fr-FR')} €</div>
-              <div className="text-sm text-gray-600">Trésorerie disponible</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            {(['tableau-bord', 'transactions', 'factures', 'rapports'] as const).map(onglet => (
-              <button
-                key={onglet}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  ongletActif === onglet
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-                onClick={() => setOngletActif(onglet)}
-              >
-                {onglet === 'tableau-bord' && 'Tableau de Bord'}
-                {onglet === 'transactions' && 'Transactions'}
-                {onglet === 'factures' && 'Factures'}
-                {onglet === 'rapports' && 'Rapports Financiers'}
-              </button>
             ))}
           </div>
-        </div>
-      </nav>
 
-      {/* Contenu principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {ongletActif === 'tableau-bord' && renderTableauDeBord()}
-        {ongletActif === 'transactions' && renderTransactions()}
-        {ongletActif === 'factures' && renderFactures()}
-        {ongletActif === 'rapports' && renderRapports()}
-      </main>
+          {/* Section pourquoi nous choisir */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Pourquoi choisir nos services comptables ?
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Award className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Experts certifiés</h3>
+                <p className="text-gray-600 text-sm">
+                  Comptables experts-comptables diplômés et expérimentés
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Conformité garantie</h3>
+                <p className="text-gray-600 text-sm">
+                  Respect strict des obligations légales et fiscales
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Outils modernes</h3>
+                <p className="text-gray-600 text-sm">
+                  Plateforme digitale pour un suivi en temps réel
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-6 w-6 text-orange-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Réactivité</h3>
+                <p className="text-gray-600 text-sm">
+                  Réponse sous 24h et accompagnement personnalisé
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section contact */}
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Un projet spécifique ?
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Notre équipe d'experts-comptables est à votre disposition pour
+                  étudier votre situation et vous proposer une solution sur mesure.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center text-gray-700">
+                    <Phone className="h-5 w-5 mr-3 text-blue-600" />
+                    <span>01 23 45 67 89</span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <Mail className="h-5 w-5 mr-3 text-blue-600" />
+                    <span>contact@comptabilite-pro.fr</span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <MapPin className="h-5 w-5 mr-3 text-blue-600" />
+                    <span>123 Avenue des Champs, 75008 Paris</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Demande d'information
+                </h3>
+                <form className="space-y-4">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Nom de votre entreprise"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>Type de service recherché</option>
+                      <option>Comptabilité complète</option>
+                      <option>Déclarations fiscales</option>
+                      <option>Gestion de paie</option>
+                      <option>Audit</option>
+                      <option>Conseil</option>
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors duration-200"
+                  >
+                    Être contacté
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ComptabiliteEntreprise;
+export default ComptabiliteServices;
