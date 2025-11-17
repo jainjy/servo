@@ -1,6 +1,6 @@
-// components/PodcastsImmobilier.tsx
+// components/PodcastsEntreprise.tsx
 import React, { useState, useEffect } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download, Video, Home } from 'lucide-react';
+import { Play, Headphones, Clock, Heart, Star, Download, Video, Building } from 'lucide-react';
 import { MediaService } from '../lib/api';
 
 interface VideoEpisode {
@@ -19,7 +19,7 @@ interface VideoEpisode {
   fileSize?: number;
 }
 
-const PodcastsImmobilier: React.FC = () => {
+const PodcastsEntreprise: React.FC = () => {
   const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,32 +32,32 @@ const PodcastsImmobilier: React.FC = () => {
 
   // Images par défaut pour les vidéos sans thumbnail
   const defaultThumbnails = [
-    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1570126618953-d437176e8c79?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
   ];
 
   // Image de background pour le titre
   const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
 
-  // Charger les vidéos de la catégorie Immobilier
+  // Charger les vidéos de la catégorie Entreprise
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        console.log('🔄 Début du chargement des vidéos Immobilier...');
+        console.log('🔄 Début du chargement des vidéos Entreprise...');
         
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({ 
-          category: 'Immobilier', 
+          category: 'Entreprise', 
           limit: 50 
         });
         
         console.log('📦 Réponse COMPLÈTE de l\'API:', response);
         console.log('🔍 Structure de la réponse Axios:', {
-          data: response.data, // ← C'est ici que se trouvent vos données !
+          data: response.data,
           status: response.status,
           statusText: response.statusText
         });
@@ -78,9 +78,9 @@ const PodcastsImmobilier: React.FC = () => {
           console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
           console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
           
-          const immobilierVideos: VideoEpisode[] = apiData.data
+          const entrepriseVideos: VideoEpisode[] = apiData.data
             .filter((video: any) => {
-              const isImmobilier = video.category === "Immobilier";
+              const isEntreprise = video.category === "Entreprise";
               const isActive = video.isActive !== false;
               const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
               
@@ -88,13 +88,13 @@ const PodcastsImmobilier: React.FC = () => {
                 id: video.id,
                 title: video.title,
                 category: video.category,
-                isImmobilier: isImmobilier,
+                isEntreprise: isEntreprise,
                 isActive: isActive,
                 hasVideoUrl: hasVideoUrl,
                 videoUrl: video.videoUrl
               });
               
-              const shouldInclude = isImmobilier && isActive && hasVideoUrl;
+              const shouldInclude = isEntreprise && isActive && hasVideoUrl;
               console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
               
               return shouldInclude;
@@ -127,12 +127,12 @@ const PodcastsImmobilier: React.FC = () => {
               return mappedVideo;
             });
           
-          console.log('🎉 Vidéos Immobilier après filtrage:', immobilierVideos.length);
-          console.log('📺 Liste complète des vidéos filtrées:', immobilierVideos);
+          console.log('🎉 Vidéos Entreprise après filtrage:', entrepriseVideos.length);
+          console.log('📺 Liste complète des vidéos filtrées:', entrepriseVideos);
           
-          setVideoEpisodes(immobilierVideos);
+          setVideoEpisodes(entrepriseVideos);
           
-          if (immobilierVideos.length === 0) {
+          if (entrepriseVideos.length === 0) {
             console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
             console.log('🔍 Contenu de apiData.data:', apiData.data);
           }
@@ -172,7 +172,6 @@ const PodcastsImmobilier: React.FC = () => {
     });
   }, [videoEpisodes]);
 
-  // Le reste du code reste inchangé...
   const handlePlayMedia = () => {
     if (selectedEpisode && videoRef.current) {
       if (isPlaying) {
@@ -207,10 +206,10 @@ const PodcastsImmobilier: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
+      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
       'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
       'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
       'Bien-être & Santé': 'bg-gradient-to-r from-green-500 to-teal-500',
-      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
       'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500';
@@ -323,7 +322,7 @@ const PodcastsImmobilier: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-            <div className="text-gray-600">Chargement des vidéos Immobilier...</div>
+            <div className="text-gray-600">Chargement des vidéos Entreprise...</div>
           </div>
         </div>
       </div>
@@ -356,12 +355,12 @@ const PodcastsImmobilier: React.FC = () => {
           <div className="text-center text-white">
             {/* Titre Principal */}
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Podcast <span className="text-purple-400">Immobilier</span>
+              Podcast <span className="text-purple-400">Entreprise</span>
             </h1>
 
             {/* Sous-titre */}
             <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
-              Découvrez nos visites virtuelles, conseils d'experts et analyses de marché en vidéo
+              Stratégies de croissance, management, innovation et conseils pour entrepreneurs
             </p>
 
             {/* Statistiques */}
@@ -376,6 +375,11 @@ const PodcastsImmobilier: React.FC = () => {
                 <span className="text-2xl font-bold text-white">{videoEpisodes.length}</span>
                 <span className="ml-2">vidéos disponibles</span>
               </div>
+              <div className="flex items-center">
+                <Building className="w-6 h-6 mr-2" />
+                <span className="text-2xl font-bold text-white">{videoEpisodes.filter(ep => ep.featured).length}</span>
+                <span className="ml-2">vidéos premium</span>
+              </div>
             </div>
           </div>
         </div>
@@ -388,11 +392,11 @@ const PodcastsImmobilier: React.FC = () => {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-purple-100 rounded-2xl">
-                <Video className="w-8 h-8 text-purple-600" />
+                <Building className="w-8 h-8 text-purple-600" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Podcasts Immobilier</h2>
-                <p className="text-gray-600">Visites virtuelles, conseils experts et démonstrations pratiques</p>
+                <h2 className="text-3xl font-bold text-gray-900">Podcasts Entreprise</h2>
+                <p className="text-gray-600">Conseils stratégiques, études de cas et expertises business</p>
               </div>
             </div>
             <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
@@ -408,12 +412,12 @@ const PodcastsImmobilier: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
-              <Video className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+              <Building className="w-20 h-20 mx-auto text-gray-300 mb-4" />
               <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
               <p className="text-gray-500">
                 {error 
                   ? "Une erreur est survenue lors du chargement des vidéos" 
-                  : "Aucune vidéo immobilier n'est disponible pour le moment"
+                  : "Aucune vidéo entreprise n'est disponible pour le moment"
                 }
               </p>
             </div>
@@ -471,7 +475,7 @@ const PodcastsImmobilier: React.FC = () => {
               {/* Icône */}
               <div className="flex-shrink-0 mr-4">
                 <div className="w-16 h-16 rounded-lg bg-purple-600 flex items-center justify-center">
-                  <Video className="w-8 h-8 text-white" />
+                  <Building className="w-8 h-8 text-white" />
                 </div>
               </div>
 
@@ -583,4 +587,4 @@ const PodcastsImmobilier: React.FC = () => {
   );
 };
 
-export default PodcastsImmobilier;
+export default PodcastsEntreprise;

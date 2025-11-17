@@ -126,7 +126,7 @@ import CreationReprise from "./components/components/CreationReprise";
 import AuditMediation from "./components/components/AuditMediation";
 import AidesLeveesFonds from "./components/components/AideFonds";
 import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
-import PodcastsServices from "./components/components/Podcast_services";
+import PodcastsServices from "./components/Podcast_services";
 import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 import AdminMedia from "./pages/pro/adminMedia";
