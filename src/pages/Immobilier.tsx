@@ -83,8 +83,8 @@ const Immobilier = () => {
           </div>
         }>
           <div className='absolute top-28 w-11/12 h-full flex flex-col'>
-            <span className='text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold'>Vente et location</span>
-            <span className='text-center text-xs pt-5 text-white/60'>Vendre ou louer vos biens</span>
+            <span className='text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold'>Nos annonces immobilières</span>
+            <span className='text-center text-xs pt-5 text-white/60'>Trouvez la perle rare parmi nos annonces immobilières exclusives</span>
           </div>
 
           {/* PropertyListings avec props de tracking */}

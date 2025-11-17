@@ -127,20 +127,20 @@ const DomicileLayout = () => {
         { title: "Home Battery", price: "4999€ - 9999€", image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg", description: "Stockage énergie" }
       ]
     },
-    {
-      title: "Matériaux",
-      description: " Fournitures de construction et rénovation",
-      items: [
-        { title: "Électricité", price: "Tarifs variables", image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg", description: "Fournisseurs énergie" },
-        { title: "Eau", price: "Tarifs variables", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Services eau" },
-        { title: "Internet", price: "29€ - 89€/mois", image: "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg", description: "Connexion fibre" },
-        { title: "Gaz", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg", description: "Fournisseurs gaz" },
-        { title: "Smart Meter", price: "199€ - 399€", image: "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg", description: "Compteurs intelligents" },
-        { title: "Solar Energy", price: "Sur devis", image: "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg", description: "Énergie solaire" },
-        { title: "Waste Management", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg", description: "Gestion déchets" },
-        { title: "Home Battery", price: "4999€ - 9999€", image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg", description: "Stockage énergie" }
-      ]
-    }
+    // {
+    //   title: "Matériaux",
+    //   description: " Fournitures de construction et rénovation",
+    //   items: [
+    //     { title: "Électricité", price: "Tarifs variables", image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg", description: "Fournisseurs énergie" },
+    //     { title: "Eau", price: "Tarifs variables", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Services eau" },
+    //     { title: "Internet", price: "29€ - 89€/mois", image: "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg", description: "Connexion fibre" },
+    //     { title: "Gaz", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg", description: "Fournisseurs gaz" },
+    //     { title: "Smart Meter", price: "199€ - 399€", image: "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg", description: "Compteurs intelligents" },
+    //     { title: "Solar Energy", price: "Sur devis", image: "https://i.pinimg.com/736x/e8/75/71/e87571a444014476b09293a6ca790b26.jpg", description: "Énergie solaire" },
+    //     { title: "Waste Management", price: "Tarifs variables", image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg", description: "Gestion déchets" },
+    //     { title: "Home Battery", price: "4999€ - 9999€", image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg", description: "Stockage énergie" }
+    //   ]
+    // }
   ];
 
   return (

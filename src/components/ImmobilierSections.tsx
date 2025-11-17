@@ -8,33 +8,33 @@ import DemandeAudit from './DemandeAudit';
 
 // Interface pour le type Annonce
 interface Owner {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role?: string;
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role?: string;
 }
 
 interface Annonce {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  status: string;
-  price: number;
-  surface: number;
-  rooms: number;
-  bedrooms: number;
-  bathrooms: number;
-  address: string;
-  city: string;
-  zipCode: string;
-  features: string[];
-  images: string[];
-  listingType: string;
-  rentType: string;
-  createdAt: string;
-  owner: Owner;
+    id: string;
+    title: string;
+    description: string;
+    type: string;
+    status: string;
+    price: number;
+    surface: number;
+    rooms: number;
+    bedrooms: number;
+    bathrooms: number;
+    address: string;
+    city: string;
+    zipCode: string;
+    features: string[];
+    images: string[];
+    listingType: string;
+    rentType: string;
+    createdAt: string;
+    owner: Owner;
 }
 
 const ImmobilierSections = () => {
@@ -51,10 +51,10 @@ const ImmobilierSections = () => {
     // Fonction pour formater le prix
     const formatPrice = (price: number) => {
         if (!price) return 'Prix sur demande';
-        return new Intl.NumberFormat('fr-FR', { 
-            style: 'currency', 
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
             currency: 'EUR',
-            maximumFractionDigits: 0 
+            maximumFractionDigits: 0
         }).format(price);
     };
 
@@ -76,7 +76,7 @@ const ImmobilierSections = () => {
                     (annonce: Annonce) => annonce.owner?.role === 'professional'
                 );
                 setAnnonces(professionalAnnonces);
-                
+
                 // Si aucune annonce de pro n'est trouvée, afficher un message
                 if (professionalAnnonces.length === 0 && response.data.data.length > 0) {
                     setError('Aucune annonce de professionnels disponible pour le moment');
@@ -102,7 +102,7 @@ const ImmobilierSections = () => {
         console.log("Nouvelle annonce ajoutée:", newAnnonce);
         fetchAnnonces();
     };
-    
+
     const handleAddAudit = (newAudit: any) => {
         console.log("Nouvel audit ajouté:", newAudit);
         // Afficher un message de confirmation
@@ -120,238 +120,10 @@ const ImmobilierSections = () => {
     };
 
     const sections = [
+
         {
-            title: "Annonces & transactions",
-            description: "Vente & location de biens",
-            content: (
-                <div className="p-6">
-                    <div className="flex justify-between mb-8">
-                        <div className="space-y-2">
-                            <h3 className="text-2xl font-semibold">Nos dernières annonces</h3>
-                            <p className="text-gray-600">Découvrez notre sélection de biens premium</p>
-                        </div>
-                        {/* <button 
-                            onClick={() => setIsModalOpen(true)}
-                            className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Déposer une annonce
-                        </button> */}
-                    </div>
-
-                    {/* État de chargement */}
-                    {loading && (
-                        <div className="text-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-                            <p className="text-gray-600 mt-4">Chargement des annonces...</p>
-                        </div>
-                    )}
-
-                    {/* Message d'erreur */}
-                    {error && !loading && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                            <div className="flex items-center">
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {error}
-                            </div>
-                            <button 
-                                onClick={fetchAnnonces || (() => window.location.href = '/login')}
-                                className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-                            >
-                                {fetchAnnonces ? `Se connecter ` : 'Rafraîchir la page'}
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Aucune annonce */}
-                    {!loading && !error && annonces.length === 0 && (
-                        <div className="text-center py-12">
-                            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                            <p className="text-gray-600 text-lg mb-2">Aucune annonce de professionnels disponible</p>
-                            <p className="text-gray-500 text-sm mb-4">Revenez bientôt pour découvrir les dernières annonces</p>
-                        </div>
-                    )}
-
-                    {/* Grille des annonces */}
-                    {!loading && !error && annonces.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {annonces.map((annonce) => {
-                                const typeLabel = annonce.listingType === "rent" 
-                                    ? "Location" 
-                                    : annonce.listingType === "sale" 
-                                    ? "Vente" 
-                                    : "Annonce";
-                                
-                                const typeColor = annonce.listingType === "rent" 
-                                    ? "bg-blue-600" 
-                                    : "bg-green-600";
-                                
-                                const mainImage = annonce.images && annonce.images.length > 0 
-                                    ? annonce.images[0] 
-                                    : "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg";
-                                
-                                return (
-                                    <div key={annonce.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105">
-                                        <div className="relative h-48">
-                                            {/* Image principale */}
-                                            <img
-                                                src={mainImage}
-                                                alt={annonce.title}
-                                                className="w-full h-full object-cover"
-                                            />
-
-                                            {/* Prix */}
-                                            <div className="absolute top-2 right-2 bg-black/80 text-white px-3 py-1 rounded-full text-sm font-medium">
-                                                {formatPrice(annonce.price)}
-                                            </div>
-
-                                            {/* Type */}
-                                            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs ${typeColor} text-white font-medium`}>
-                                                {typeLabel}
-                                            </div>
-
-                                            {/* Badge Professionnel */}
-                                            {annonce.owner?.role === 'professional' && (
-                                                <div className="absolute top-12 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
-                                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                    </svg>
-                                                    Professionnel
-                                                </div>
-                                            )}
-
-                                            {/* +Photos */}
-                                            {annonce.images && annonce.images.length > 1 && (
-                                                <div className="absolute bottom-2 right-2 bg-white/90 text-gray-800 px-2 py-1 rounded text-xs">
-                                                    +{annonce.images.length - 1} photos
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="p-4">
-                                            <h4 className="font-semibold text-lg mb-2 line-clamp-2">
-                                                {annonce.title}
-                                            </h4>
-
-                                            <div className="flex items-center text-gray-600 text-sm mb-3">
-                                                <svg
-                                                    className="w-4 h-4 mr-1"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                    />
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                    />
-                                                </svg>
-                                                {annonce.city}
-                                            </div>
-
-                                            <div className="flex justify-between text-sm text-gray-500 mb-3">
-                                                <span className="flex items-center gap-1">
-                                                    <svg
-                                                        className="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                                                        />
-                                                    </svg>
-                                                    {formatSurface(annonce.surface)}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <svg
-                                                        className="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                                        />
-                                                    </svg>
-                                                    {annonce.rooms
-                                                        ? `${annonce.rooms} pièces`
-                                                        : "Pièces non précisées"}
-                                                </span>
-                                            </div>
-
-                                            {annonce.description && (
-                                                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                                                    {annonce.description}
-                                                </p>
-                                            )}
-
-                                            {/* Propriétaire */}
-                                            {annonce.owner && (
-                                                <div className="mb-3 p-2 bg-gray-50 rounded-lg text-xs">
-                                                    <p className="text-gray-600"><strong>Publié par:</strong> {annonce.owner.firstName} {annonce.owner.lastName}</p>
-                                                    <p className="text-gray-500">{annonce.owner.email}</p>
-                                                </div>
-                                            )}
-
-                                            <div className="flex gap-2">
-                                                <button 
-                                                    onClick={() => handleViewAnnonce(annonce)}
-                                                    className="flex-1 bg-black text-white py-2 rounded hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-sm"
-                                                >
-                                                    <svg
-                                                        className="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                        />
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                        />
-                                                    </svg>
-                                                    Voir l'annonce
-                                                </button>                                              
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}  
-                </div>
-            )
-        },
-       {
-            title: "Audit patrimonial & finance",
-            description: "Gestion locative & syndic",
+            title: "",
+            description: "Notre expertise transforme votre patrimoine en opportunités d'avenir",
             content: (
                 <div className="p-6">
                     {/* Section en-tête avec bouton aligné à droite */}
@@ -362,7 +134,7 @@ const ImmobilierSections = () => {
                                 Notre équipe d'experts vous accompagne dans l'analyse et l'optimisation de votre patrimoine immobilier.
                             </p>
                         </div>
-                        <button 
+                        <button
                             onClick={() => setIsAuditModalOpen(true)}
                             className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
                         >
@@ -407,7 +179,7 @@ const ImmobilierSections = () => {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             {/* Section informations complémentaires */}
                             <div className="bg-blue-50 p-4 rounded-lg">
                                 <h4 className="font-semibold text-blue-800 mb-2">Pourquoi un audit ?</h4>
@@ -440,19 +212,19 @@ const ImmobilierSections = () => {
     return (
         <div className="container mx-auto px-4 py-8 mt-20">
             {/* Modal d'ajout d'annonce */}
-            <AnnonceModal 
+            <AnnonceModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onAddAnnonce={handleAddAnnonce}
             />
 
             {/* Modal d'affichage d'annonce */}
-            <AnnonceInfo 
+            <AnnonceInfo
                 isOpen={isViewModalOpen}
                 onClose={handleCloseModal}
                 annonce={selectedAnnonce}
             />
-            <DemandeAudit 
+            <DemandeAudit
                 isOpen={isAuditModalOpen}
                 onClose={() => setIsAuditModalOpen(false)}
                 onAddAudit={handleAddAudit}
@@ -462,13 +234,14 @@ const ImmobilierSections = () => {
                 <div className='bg-black/50 absolute w-full h-full backdrop-blur-sm '></div>
                 <img
                     className='h-full w-full object-cover'
-                    src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg" 
-                    alt="Bannière immobilier" 
+                    src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg"
+                    alt="Bannière immobilier"
                 />
             </div>
-            
-            <h1 className="text-5xl text-white font-bold mb-10 text-center">Annonces & Transaction</h1>
-
+            <div className='flex flex-col gap-4 items-center mb-10'>
+                <h1 className="text-xl lg:text-5xl text-white font-bold  text-center">Audit patrimonial et finance</h1>
+                <span className='lg:text-md text-sm text-gray-300'>Notre expertise transforme votre patrimoine en opportunités d'avenir</span>
+            </div>
             <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
                 <Tab.List className="flex flex-wrap gap-2 mb-4">
                     {sections.map((section) => (
@@ -476,7 +249,7 @@ const ImmobilierSections = () => {
                             key={section.title}
                             className={({ selected }) =>
                                 `${selected
-                                    ? 'bg-black text-white'
+                                    ? ''
                                     : 'bg-white text-black hover:bg-gray-100'
                                 } px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black text-sm`
                             }

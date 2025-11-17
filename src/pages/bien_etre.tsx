@@ -8,6 +8,7 @@ import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
 import ArtCommerce from "./ArtCommerce";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 import PodcastsBienEtre from "@/components/PodcastsBienEtre";
+import FormateurTabContent from "@/components/FormateurTabContent";
 
 
 // Composant d'animation personnalisé
@@ -583,38 +584,14 @@ const BienEtre = () => {
 
             {/* FORMATEUR */}
             {activeTab === 'Formateur' && (
-              <>
-                <section className="mb-20">
-                  <SlideIn direction="left">
-                    <div className="mb-12">
-                      <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                        Cours à domicile
-                      </h2>
-                      <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
-                        Des séances personnalisées dans le confort de votre maison. Nos experts se déplacent chez vous avec tout le matériel nécessaire pour des cours sur mesure adaptés à vos objectifs et votre emploi du temps.
-                      </p>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                        {getCurrentServices().length > 0 ? (
-                          getCurrentServices().map((service, index) => (
-                            <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                              <ServiceCard
-                                service={service}
-                                index={index}
-                                onOpenModal={handleOpenModal}
-                              />
-                            </SlideIn>
-                          ))
-                        ) : (
-                          <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                            Aucun service disponible pour cette catégorie
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </SlideIn>
-                </section>
-              </>
+              <SlideIn direction="left">
+                <FormateurTabContent 
+                  onSelectCourse={(category, course) => {
+                    console.log(`Formation sélectionnée: ${category} - ${course}`);
+                    // Vous pouvez ajouter la logique pour réserver ou afficher plus de détails
+                  }}
+                />
+              </SlideIn>
             )}
 
             {/* MASSEUR */}
