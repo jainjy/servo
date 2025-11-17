@@ -1,4 +1,3 @@
-// pages/mon-compte/MesDocumentsPage.tsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,10 +14,12 @@ import {
   Trash2,
   Calendar,
   AlertTriangle,
+  BarChart3,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import api from "@/lib/api";
+
 interface Document {
   id: string;
   nom: string;
@@ -31,18 +32,33 @@ interface Document {
   taille: string;
   format: string;
   url: string;
+  cheminFichier: string;
   tags: string[];
+}
+
+interface DocumentStats {
+  total: number;
+  parStatut: {
+    VALIDE: number;
+    EXPIRÉ: number;
+    EN_ATTENTE: number;
+  };
+  parCategorie: { [key: string]: number };
+  prochainExpiration: Document | null;
 }
 
 const MesDocumentsPage = () => {
   const { user } = useAuth();
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [stats, setStats] = useState<DocumentStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("tous");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchDocuments();
+    fetchStats();
   }, []);
 
   const fetchDocuments = async () => {
@@ -52,7 +68,7 @@ const MesDocumentsPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setDocuments(data);
+        setDocuments(data.data || []);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des documents:", error);
@@ -61,50 +77,71 @@ const MesDocumentsPage = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await api.get(
+        "/client/documents/stats/mes-statistiques"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data.data);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des statistiques:", error);
+    }
+  };
+
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     try {
+      setUploading(true);
       const formData = new FormData();
-      formData.append("file", file);
+
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+
       formData.append("type", "document_client");
       formData.append("categorie", "general");
 
       const response = await api.post(
-        "/client/documents/upload",
+        "/client/documents/upload-multiple",
         formData
       );
 
       if (response.ok) {
         await fetchDocuments();
+        await fetchStats();
         // Réinitialiser l'input file
         event.target.value = "";
+      } else {
+        const errorData = await response.json();
+        alert(`Erreur lors de l'upload: ${errorData.error}`);
       }
     } catch (error) {
       console.error("Erreur lors de l'upload:", error);
+      alert("Une erreur est survenue lors de l'upload des documents");
+    } finally {
+      setUploading(false);
     }
   };
 
-  const downloadDocument = async (documentId: string, fileName: string) => {
+  const downloadDocument = async (documentUrl: string, fileName: string) => {
     try {
-      const response = await api.get(`/client/documents/download/${documentId}`);
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
+      // Pour Supabase, on peut directement utiliser l'URL publique
+      const link = document.createElement("a");
+      link.href = documentUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error("Erreur lors du téléchargement:", error);
+      alert("Erreur lors du téléchargement du document");
     }
   };
 
@@ -122,9 +159,14 @@ const MesDocumentsPage = () => {
 
       if (response.ok) {
         await fetchDocuments();
+        await fetchStats();
+      } else {
+        const errorData = await response.json();
+        alert(`Erreur lors de la suppression: ${errorData.error}`);
       }
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
+      alert("Une erreur est survenue lors de la suppression du document");
     }
   };
 
@@ -159,7 +201,10 @@ const MesDocumentsPage = () => {
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch =
       doc.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.tags.some((tag) =>
+        tag.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     const matchesCategory =
       selectedCategory === "tous" || doc.categorie === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -167,12 +212,15 @@ const MesDocumentsPage = () => {
 
   const categories = [
     "tous",
-    "identite",
-    "financier",
-    "immobilier",
-    "juridique",
-    "general",
+    ...Array.from(new Set(documents.map((doc) => doc.categorie))),
   ];
+
+  const expiringSoonDocuments = documents.filter((doc) => {
+    if (!doc.dateExpiration) return false;
+    const expirationDate = new Date(doc.dateExpiration);
+    const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    return expirationDate <= in30Days && expirationDate > new Date();
+  });
 
   if (loading) {
     return (
@@ -195,63 +243,67 @@ const MesDocumentsPage = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Mes Documents</h1>
         <p className="text-gray-600 mt-2">
-          Gérez tous vos documents personnels en un seul endroit
+          Gérez tous vos documents personnels stockés sur Supabase
         </p>
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold">{documents.length}</p>
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total</p>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                </div>
+                <FileText className="h-8 w-8 text-blue-500" />
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Valides</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {documents.filter((d) => d.statut === "VALIDE").length}
-                </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Valides</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.parStatut.VALIDE}
+                  </p>
+                </div>
+                <FileText className="h-8 w-8 text-green-500" />
               </div>
-              <FileText className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Expirés</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {documents.filter((d) => d.statut === "EXPIRÉ").length}
-                </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Expirés</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {stats.parStatut.EXPIRÉ}
+                  </p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-red-500" />
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">En attente</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {documents.filter((d) => d.statut === "EN_ATTENTE").length}
-                </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    En attente
+                  </p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {stats.parStatut.EN_ATTENTE}
+                  </p>
+                </div>
+                <FileText className="h-8 w-8 text-yellow-500" />
               </div>
-              <FileText className="h-8 w-8 text-yellow-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Actions et filtres */}
       <Card className="mb-8">
@@ -281,10 +333,10 @@ const MesDocumentsPage = () => {
             </div>
 
             <div className="flex gap-2">
-              <Button asChild>
+              <Button asChild disabled={uploading}>
                 <label htmlFor="file-upload" className="cursor-pointer">
                   <Upload className="h-4 w-4 mr-2" />
-                  Ajouter un document
+                  {uploading ? "Upload..." : "Ajouter des documents"}
                 </label>
               </Button>
               <input
@@ -292,7 +344,8 @@ const MesDocumentsPage = () => {
                 type="file"
                 className="hidden"
                 onChange={handleFileUpload}
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xls,.xlsx"
               />
             </div>
           </div>
@@ -303,8 +356,13 @@ const MesDocumentsPage = () => {
       <Tabs defaultValue="tous" className="space-y-6">
         <TabsList>
           <TabsTrigger value="tous">Tous les documents</TabsTrigger>
-          <TabsTrigger value="expirant">Bientôt expirés</TabsTrigger>
-          <TabsTrigger value="importants">Documents importants</TabsTrigger>
+          <TabsTrigger value="expirant">
+            Bientôt expirés ({expiringSoonDocuments.length})
+          </TabsTrigger>
+          <TabsTrigger value="statistiques">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Statistiques
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tous" className="space-y-4">
@@ -347,39 +405,103 @@ const MesDocumentsPage = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="expirant">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Documents bientôt expirés
-              </h3>
-              <p className="text-gray-600">
-                Fonctionnalité en cours de développement...
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="expirant" className="space-y-4">
+          {expiringSoonDocuments.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Aucun document n'expire bientôt
+                </h3>
+                <p className="text-gray-600">
+                  Tous vos documents sont à jour ou n'ont pas de date
+                  d'expiration.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {expiringSoonDocuments.map((document) => (
+                <DocumentCard
+                  key={document.id}
+                  document={document}
+                  onView={viewDocument}
+                  onDownload={downloadDocument}
+                  onDelete={deleteDocument}
+                  getStatusColor={getStatusColor}
+                  getCategoryColor={getCategoryColor}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="importants">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Documents importants
-              </h3>
-              <p className="text-gray-600">
-                Fonctionnalité en cours de développement...
-              </p>
-            </CardContent>
-          </Card>
+        <TabsContent value="statistiques">
+          {stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Répartition par catégorie
+                  </h3>
+                  <div className="space-y-3">
+                    {Object.entries(stats.parCategorie).map(
+                      ([categorie, count]) => (
+                        <div
+                          key={categorie}
+                          className="flex justify-between items-center"
+                        >
+                          <span className="capitalize">{categorie}</span>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Prochain document à expirer
+                  </h3>
+                  {stats.prochainExpiration ? (
+                    <div>
+                      <p className="font-medium">
+                        {stats.prochainExpiration.nom}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Expire le:{" "}
+                        {format(
+                          new Date(stats.prochainExpiration.dateExpiration!),
+                          "dd/MM/yyyy",
+                          { locale: fr }
+                        )}
+                      </p>
+                      <Badge
+                        className={getStatusColor(
+                          stats.prochainExpiration.statut
+                        )}
+                      >
+                        {stats.prochainExpiration.statut}
+                      </Badge>
+                    </div>
+                  ) : (
+                    <p className="text-gray-600">
+                      Aucun document avec date d'expiration
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-// Composant Carte Document
+// Composant Carte Document (inchangé)
 const DocumentCard = ({
   document,
   onView,
@@ -390,7 +512,7 @@ const DocumentCard = ({
 }: {
   document: Document;
   onView: (url: string) => void;
-  onDownload: (id: string, fileName: string) => void;
+  onDownload: (url: string, fileName: string) => void;
   onDelete: (id: string) => void;
   getStatusColor: (statut: string) => string;
   getCategoryColor: (categorie: string) => string;
@@ -491,7 +613,7 @@ const DocumentCard = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onDownload(document.id, document.nom)}
+              onClick={() => onDownload(document.url, document.nom)}
             >
               <Download className="h-4 w-4" />
             </Button>
