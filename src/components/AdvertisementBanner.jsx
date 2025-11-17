@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-
+import api from "@/lib/api";
 const AdvertisementBanner = ({ position = 'header' }) => {
   const [advertisements, setAdvertisements] = useState([])
   const [loading, setLoading] = useState(true)
@@ -7,8 +7,8 @@ const AdvertisementBanner = ({ position = 'header' }) => {
   useEffect(() => {
     const loadAds = async () => {
       try {
-        const response = await fetch(`/api/advertisements/active?position=${position}`)
-        const result = await response.json()
+        const response = await api.get(`/advertisements/active?position=${position}`)
+        const result = await response.data
         
         if (result.success) {
           setAdvertisements(result.advertisements)
