@@ -765,6 +765,13 @@ export default function MonComptePage() {
                   <Button
                     variant="outline"
                     className="justify-start"
+                    onClick={() => handleNavigation("/mon-compte/documents")}
+                  >
+                    Mes documents
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="justify-start"
                     onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
                   >
                     Mes demandes immobilières

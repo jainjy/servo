@@ -933,14 +933,14 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                     <Calendar1 className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Mon agenda</span>
                   </Link>
-                  {/* <Link
+                  <Link
                     to="/mon-compte/documents"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
                   >
                     <Calendar1 className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Mes documents</span>
-                  </Link> */}
+                  </Link>
                   <button
                     onClick={() => {
                       setIsLogoutDialogOpen(true);
@@ -1432,12 +1432,12 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem>
-                      {/* <DropdownMenuItem
+                      <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/documents")}
                       >
                         <FileText className="mr-2 h-4 w-4" />
                         Mes documents
-                      </DropdownMenuItem> */}
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/agenda")}
                       >
