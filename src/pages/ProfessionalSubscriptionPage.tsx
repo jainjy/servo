@@ -214,7 +214,7 @@ const ProfessionalSubscriptionPage = () => {
     // Redirection vers la page d'inscription avec les données de l'abonnement
     navigate("/register/professional/form", {
       state: {
-        subscriptionData: {
+        subscriptionData: { // The API should return the numeric ID as `id`
           planId: selectedPlan,
           planTitle: selectedPlanData?.title,
           price: selectedPlanData?.price,

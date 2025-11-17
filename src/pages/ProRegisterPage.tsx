@@ -125,6 +125,7 @@ const ProRegisterPage = () => {
 
     if (subscriptionData) {
       // Mapping exact basé sur les abonnements de vos images
+      console.log(subscriptionData);
       const subscriptionToUserType: { [key: string]: string } = {
         "Pro Immobilier Complet": "AGENCE",
         "Prestataires de Services": "PRESTATAIRE",
@@ -143,7 +144,7 @@ const ProRegisterPage = () => {
           ...formData,
           userType: finalUserType, // AJOUT: userType basé sur l'abonnement exact
         },
-        subscriptionData,
+        subscriptionData, // This now includes planId
       },
     });
   };

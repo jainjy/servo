@@ -93,11 +93,12 @@ class AuthService {
   }
 
   // Inscription Pro avec paiement
-  static async signupPro(userData, amount) {
+  static async signupPro(userData, amount, planId) {
     try {
       const response = await api.post("/auth/signup-pro", {
         utilisateur: userData,
         amount,
+        planId,
       });
 
       return response.data;
