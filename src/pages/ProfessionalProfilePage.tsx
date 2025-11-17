@@ -170,11 +170,10 @@ const ProfessionalProfilePage = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`${size} ${
-          i < rating
-            ? "text-yellow-400 fill-yellow-400 drop-shadow-lg"
-            : "text-gray-600"
-        } transition-all duration-300`}
+        className={`${size} ${i < rating
+          ? "text-yellow-400 fill-yellow-400"
+          : "text-gray-300"
+          }`}
       />
     ));
   };
@@ -224,20 +223,20 @@ const ProfessionalProfilePage = () => {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
-        <Card className="p-8 bg-gray-800/80 backdrop-blur-xl border-gray-700/50 text-center max-w-md w-full shadow-2xl transform hover:scale-105 transition-all duration-300">
-          <div className="text-red-400/80 mb-4">
-            <AlertCircle className="w-16 h-16 mx-auto drop-shadow-lg" />
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <Card className="p-8 bg-white border border-gray-200 text-center max-w-md w-full shadow-sm">
+          <div className="text-red-500 mb-4">
+            <AlertCircle className="w-16 h-16 mx-auto" />
           </div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Profil non trouvé
           </h2>
-          <p className="text-gray-300 mb-6">
+          <p className="text-gray-600 mb-6">
             {error || "Le professionnel demandé n'existe pas"}
           </p>
           <Button
             onClick={() => navigate(-1)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
@@ -253,17 +252,17 @@ const ProfessionalProfilePage = () => {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white mt-16">
-        {/* Header avec navigation amélioré */}
-        <header className="border-b border-gray-700/50 bg-gray-900/90 backdrop-blur-xl sticky top-16 z-50 shadow-2xl">
+      <div className="min-h-screen bg-gray-50 text-gray-900 mt-16">
+        {/* Header avec navigation */}
+        <header className=" border-y border-gray-200 bg-white sticky top-16 z-40 shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 onClick={() => navigate(-1)}
-                className="text-gray-300 hover:text-white hover:bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300 group"
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               >
-                <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Retour
               </Button>
 
@@ -274,10 +273,10 @@ const ProfessionalProfilePage = () => {
                       variant="ghost"
                       size="sm"
                       onClick={copyProfileLink}
-                      className="text-gray-300 hover:text-white hover:bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 transition-all duration-300"
+                      className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                     >
                       {copied ? (
-                        <CheckCircle className="w-4 h-4 text-green-400" />
+                        <CheckCircle className="w-4 h-4 text-green-600" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
@@ -292,9 +291,9 @@ const ProfessionalProfilePage = () => {
                   <Button
                     size="sm"
                     onClick={() => setIsContactModalOpen(true)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    <MessageCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                    <MessageCircle className="w-4 h-4 mr-2" />
                     Contacter
                   </Button>
                 )}
@@ -302,201 +301,220 @@ const ProfessionalProfilePage = () => {
             </div>
           </div>
         </header>
-        {/* Section principale avec design amélioré */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Sidebar améliorée */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Carte profil avec glassmorphism */}
-              <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
-                <div className="text-center">
-                  {/* Avatar avec effet de halo */}
-                  <div className="relative inline-block mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-30 animate-pulse"></div>
-                    <Avatar className="w-28 h-28 border-4 border-gray-800/50 relative z-10 transform hover:scale-105 transition-transform duration-300">
-                      <AvatarImage
-                        src={profile.avatar || ""}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-2xl font-bold">
-                        {getInitials(
-                          profile.firstName || "",
-                          profile.lastName || ""
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
+
+        {/* Section principale */}
+        <div className=" container mx-auto px-4 py-8">
+          <div className=" grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Sidebar */}
+            <div className="relative lg:col-span-1 space-y-6">
+              {/* Carte profil */}
+              <div className="sticky top-24 flex flex-col gap-2">
+                <Card className="relative p-6 bg-white border border-gray-200 shadow-sm">
+                  <div className="absolute top-0 overflow-hidden left-0 w-11/12 h-44 my-2 mx-4 rounded-lg bg-slate-900 -z-0">
+                    {/* Avec bordure glow */}
+                    <div className="absolute -bottom-16 rotate-[30deg] -left-4 w-56 h-56 bg-red-500/15 rounded-lg backdrop-blur-sm 
+                shadow-[0_0_35px_rgba(239,68,68,0.5)] 
+                border border-red-500/30 
+                hover:shadow-[0_0_50px_rgba(239,68,68,0.7)] 
+                hover:border-red-500/50 
+                transition-all duration-500"></div>
+
+                    {/* Avec bordure glow */}
+                    <div className="absolute -top-20 -right-10 w-56 h-56 bg-orange-500/15 rounded-full backdrop-blur-sm 
+                shadow-[0_0_40px_rgba(249,115,22,0.6)] 
+                border border-orange-500/30 
+                hover:shadow-[0_0_55px_rgba(249,115,22,0.8)] 
+                hover:border-orange-500/50 
+                transition-all duration-500"></div>
                   </div>
+                  <div className=" text-center">
+                    {/* Avatar */}
+                    <div className="mt-24 relative inline-block mb-4">
 
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-2">
-                    {profile.firstName} {profile.lastName}
-                  </h1>
-
-                  <p className="text-gray-300 mb-4 text-lg">
-                    {profile.commercialName ||
-                      profile.companyName ||
-                      "Professionnel"}
-                  </p>
-
-                  {/* Badge niveau d'expérience */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 mb-4">
-                    <Rocket className="w-3 h-3 text-yellow-400" />
-                    <span className="text-yellow-400 text-sm font-medium">
-                      {experienceLevel}
-                    </span>
-                  </div>
-
-                  {/* Note moyenne améliorée */}
-                  {stats && (
-                    <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-gray-700/30 rounded-2xl backdrop-blur-sm">
-                      <div className="flex">
-                        {renderStars(Math.round(stats.noteMoyenne), "w-5 h-5")}
-                      </div>
-                      <div className="text-center">
-                        <span className="text-yellow-400 font-bold text-2xl block leading-none">
-                          {stats.noteMoyenne.toFixed(1)}
-                        </span>
-                        <span className="text-gray-400 text-sm">
-                          ({stats.totalAvis} avis)
-                        </span>
-                      </div>
+                      <Avatar className="w-28 h-28 border-4 border-green-400 shadow-md">
+                        <AvatarImage
+                          src={profile.avatar || ""}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="bg-blue-600 text-white text-2xl font-bold">
+                          {getInitials(
+                            profile.firstName || "",
+                            profile.lastName || ""
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
                     </div>
-                  )}
 
-                  {/* Badges métiers améliorés */}
-                  <div className="flex flex-wrap gap-2 justify-center mb-6">
-                    {profile.metiers.slice(0, 3).map(({ metier }) => (
-                      <Badge
-                        key={metier.id}
-                        className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border-blue-500/30 backdrop-blur-sm hover:scale-105 transition-transform duration-200"
-                      >
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        {metier.libelle}
-                      </Badge>
-                    ))}
-                    {profile.metiers.length > 3 && (
-                      <Badge
-                        variant="outline"
-                        className="text-gray-400 border-gray-600 backdrop-blur-sm"
-                      >
-                        +{profile.metiers.length - 3}
-                      </Badge>
-                    )}
-                  </div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                      {profile.firstName} {profile.lastName}
+                    </h1>
 
-                  {/* Statut vérifié amélioré */}
-                  <div className="flex items-center justify-center gap-2 text-green-400/90 mb-6 p-3 bg-green-500/10 rounded-xl backdrop-blur-sm">
-                    <BadgeCheck className="w-5 h-5" />
-                    <span className="text-sm font-semibold">
-                      Profil vérifié
-                    </span>
-                  </div>
+                    <p className="text-gray-600 mb-4">
+                      {profile.commercialName ||
+                        profile.companyName ||
+                        "Professionnel"}
+                    </p>
 
-                  {/* Informations de contact améliorées */}
-                  <div className="space-y-3 text-left bg-gray-700/20 rounded-2xl p-4 backdrop-blur-sm">
-                    {settings?.telephone && (
-                      <div className="flex items-center gap-3 text-gray-200 group hover:text-white transition-colors duration-200">
-                        <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
-                          <Phone className="w-4 h-4 text-blue-400" />
+                    {/* Badge niveau d'expérience */}
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 border border-yellow-200 mb-4">
+                      <Rocket className="w-3 h-3 text-yellow-600" />
+                      <span className="text-yellow-700 text-sm font-medium">
+                        {experienceLevel}
+                      </span>
+                    </div>
+
+                    {/* Note moyenne */}
+                    {stats && (
+                      <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex">
+                          {renderStars(Math.round(stats.noteMoyenne), "w-5 h-5")}
                         </div>
-                        <span className="text-sm font-medium">
-                          {settings.telephone}
-                        </span>
-                      </div>
-                    )}
-
-                    {settings?.emailContact && (
-                      <div className="flex items-center gap-3 text-gray-200 group hover:text-white transition-colors duration-200">
-                        <div className="p-2 bg-purple-500/20 rounded-lg group-hover:bg-purple-500/30 transition-colors">
-                          <Mail className="w-4 h-4 text-purple-400" />
-                        </div>
-                        <span className="text-sm font-medium truncate">
-                          {settings.emailContact}
-                        </span>
-                      </div>
-                    )}
-
-                    {settings?.adresse && (
-                      <div className="flex items-center gap-3 text-gray-200 group hover:text-white transition-colors duration-200">
-                        <div className="p-2 bg-green-500/20 rounded-lg group-hover:bg-green-500/30 transition-colors">
-                          <MapPin className="w-4 h-4 text-green-400" />
-                        </div>
-                        <span className="text-sm font-medium">
-                          {settings.adresse}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-
-              {/* Statistiques rapides améliorées */}
-              {stats && (
-                <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
-                  <h3 className="font-bold text-white mb-6 flex items-center gap-3 text-lg">
-                    <BarChart3 className="w-5 h-5 text-blue-400" />
-                    Performance
-                  </h3>
-
-                  <div className="space-y-4">
-                    {[
-                      {
-                        icon: Target,
-                        label: "Demandes",
-                        value: stats.totalDemandes,
-                        color: "text-blue-400",
-                      },
-                      {
-                        icon: UserCheck,
-                        label: "Acceptation",
-                        value: `${stats.tauxAcceptation}%`,
-                        color: "text-green-400",
-                      },
-                      {
-                        icon: Briefcase,
-                        label: "Services",
-                        value: stats.totalServices,
-                        color: "text-purple-400",
-                      },
-                      {
-                        icon: Star,
-                        label: "Avis",
-                        value: stats.totalAvis,
-                        color: "text-yellow-400",
-                      },
-                    ].map((item, index) => (
-                      <div
-                        key={item.label}
-                        className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl backdrop-blur-sm hover:bg-gray-700/50 transition-all duration-300 group"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gray-600/50 rounded-lg group-hover:scale-110 transition-transform">
-                            <item.icon className={`w-4 h-4 ${item.color}`} />
-                          </div>
-                          <span className="text-gray-300 text-sm font-medium">
-                            {item.label}
+                        <div className="text-center">
+                          <span className="text-yellow-600 font-bold text-2xl block leading-none">
+                            {stats.noteMoyenne.toFixed(1)}
+                          </span>
+                          <span className="text-gray-500 text-sm">
+                            ({stats.totalAvis} avis)
                           </span>
                         </div>
-                        <span className={`font-bold ${item.color}`}>
-                          {item.value}
-                        </span>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Badges métiers */}
+                    <div className="flex flex-wrap gap-2 justify-center mb-6">
+                      {profile.metiers.slice(0, 3).map(({ metier }) => (
+                        <Badge
+                          key={metier.id}
+                          className="bg-blue-100 text-blue-700 border-blue-200"
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          {metier.libelle}
+                        </Badge>
+                      ))}
+                      {profile.metiers.length > 3 && (
+                        <Badge
+                          variant="outline"
+                          className="text-gray-500 border-gray-300"
+                        >
+                          +{profile.metiers.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Statut vérifié */}
+                    <div className="flex items-center justify-center gap-2 text-green-600 mb-6 p-3 bg-green-50 rounded-lg">
+                      <BadgeCheck className="w-5 h-5" />
+                      <span className="text-sm font-semibold">
+                        Profil vérifié
+                      </span>
+                    </div>
+
+                    {/* Informations de contact */}
+                    <div className="space-y-3 text-left bg-gray-50 rounded-lg p-4">
+                      {settings?.telephone && (
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Phone className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <span className="text-sm font-medium">
+                            {settings.telephone}
+                          </span>
+                        </div>
+                      )}
+
+                      {settings?.emailContact && (
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <div className="p-2 bg-purple-100 rounded-lg">
+                            <Mail className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <span className="text-sm font-medium truncate">
+                            {settings.emailContact}
+                          </span>
+                        </div>
+                      )}
+
+                      {settings?.adresse && (
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <MapPin className="w-4 h-4 text-green-600" />
+                          </div>
+                          <span className="text-sm font-medium">
+                            {settings.adresse}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Card>
-              )}
+
+                {/* Statistiques rapides */}
+                {stats && (
+                  <Card className="p-6 bg-white border border-gray-200 shadow-sm">
+                    <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-3">
+                      <BarChart3 className="w-5 h-5 text-blue-600" />
+                      Performance
+                    </h3>
+
+                    <div className="space-y-4">
+                      {[
+                        {
+                          icon: Target,
+                          label: "Demandes",
+                          value: stats.totalDemandes,
+                          color: "text-blue-600",
+                        },
+                        {
+                          icon: UserCheck,
+                          label: "Acceptation",
+                          value: `${stats.tauxAcceptation}%`,
+                          color: "text-green-600",
+                        },
+                        {
+                          icon: Briefcase,
+                          label: "Services",
+                          value: stats.totalServices,
+                          color: "text-purple-600",
+                        },
+                        {
+                          icon: Star,
+                          label: "Avis",
+                          value: stats.totalAvis,
+                          color: "text-yellow-600",
+                        },
+                      ].map((item, index) => (
+                        <div
+                          key={item.label}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gray-100 rounded-lg">
+                              <item.icon className={`w-4 h-4 ${item.color}`} />
+                            </div>
+                            <span className="text-gray-700 text-xs lg:text-sm font-medium">
+                              {item.label}
+                            </span>
+                          </div>
+                          <span className={`font-bold ${item.color}`}>
+                            {item.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+              </div>
             </div>
 
-            {/* Contenu principal amélioré */}
+            {/* Contenu principal */}
             <div className="lg:col-span-3 space-y-8">
-              {/* Navigation par onglets améliorée */}
-              <Card className="p-2 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl">
+              {/* Navigation par onglets */}
+              <Card className="p-2 bg-white border border-gray-200 shadow-sm">
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <TabsList className="grid grid-cols-4 bg-gray-700/30 backdrop-blur-sm p-1">
+                  <TabsList className="grid grid-cols-4 bg-gray-100 p-1">
                     {[
                       { id: "overview", label: "Aperçu", icon: Building },
                       { id: "services", label: "Services", icon: Briefcase },
@@ -508,7 +526,7 @@ const ProfessionalProfilePage = () => {
                         <TabsTrigger
                           key={tab.id}
                           value={tab.id}
-                          className="flex items-center gap-2 text-sm font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-gray-700/50"
+                          className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900"
                         >
                           <Icon className="w-4 h-4" />
                           {tab.label}
@@ -517,7 +535,7 @@ const ProfessionalProfilePage = () => {
                     })}
                   </TabsList>
 
-                  <div className="mt-6 animate-in fade-in duration-500">
+                  <div className="mt-6">
                     <TabsContent value="overview">
                       <OverviewTab profile={profile} stats={stats} />
                     </TabsContent>
@@ -539,6 +557,7 @@ const ProfessionalProfilePage = () => {
             </div>
           </div>
         </div>
+
         {/* Modals */}
         {selectedService && (
           <DemandeDevisModal
@@ -548,7 +567,7 @@ const ProfessionalProfilePage = () => {
               setSelectedService(null);
             }}
             prestation={selectedService}
-            artisanId={profile.id} // NOUVEAU: Passer l'ID du professionnel
+            artisanId={profile.id}
           />
         )}
         <ContactModal
@@ -561,7 +580,7 @@ const ProfessionalProfilePage = () => {
   );
 };
 
-// Composant pour l'onglet Aperçu amélioré
+// Composant pour l'onglet Aperçu
 const OverviewTab = ({
   profile,
   stats,
@@ -570,44 +589,41 @@ const OverviewTab = ({
   stats: ProfessionalStats | null;
 }) => (
   <div className="space-y-6">
-    {/* Présentation améliorée */}
-    <Card className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+    {/* Présentation */}
+    <Card className="p-8 bg-white border border-gray-200 shadow-sm">
       <div className="flex items-start gap-4">
-        <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl">
-          <Lightbulb className="w-6 h-6 text-blue-400" />
+        <div className="p-3 bg-blue-100 rounded-2xl">
+          <Lightbulb className="w-6 h-6 text-blue-600" />
         </div>
         <div className="flex-1">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
+          <h2 className="text-md lg:text-2xl font-bold text-gray-900 mb-4">
             Présentation
           </h2>
-          <p className="text-gray-300 leading-relaxed text-lg">
+          <p className="text-gray-700 lg:text-sm text-xs leading-relaxed">
             {profile.companyName
               ? `Expert en ${profile.metiers
-                  .map((m) => m.metier.libelle)
-                  .join(", ")} chez ${profile.companyName}. 
-              Fort de ${
-                stats?.totalDemandes || 0
-              } demandes traitées avec un taux de satisfaction de ${
-                  stats?.tauxAcceptation || 0
-                }%.`
+                .map((m) => m.metier.libelle)
+                .join(", ")} chez ${profile.companyName}. 
+              Fort de ${stats?.totalDemandes || 0
+              } demandes traitées avec un taux de satisfaction de ${stats?.tauxAcceptation || 0
+              }%.`
               : `Professionnel spécialisé en ${profile.metiers
-                  .map((m) => m.metier.libelle)
-                  .join(", ")}. 
-              Expérience éprouvée avec ${
-                stats?.totalDemandes || 0
+                .map((m) => m.metier.libelle)
+                .join(", ")}. 
+              Expérience éprouvée avec ${stats?.totalDemandes || 0
               } projets réalisés.`}
           </p>
         </div>
       </div>
     </Card>
 
-    {/* Métiers et spécialités améliorés */}
-    <Card className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+    {/* Métiers et spécialités */}
+    <Card className="p-8 bg-white border border-gray-200 shadow-sm">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
-          <Award className="w-6 h-6 text-yellow-400" />
+        <div className="p-2 bg-yellow-100 rounded-xl">
+          <Award className="w-6 h-6 text-yellow-600" />
         </div>
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        <h2 className="text-md lg:text-2xl font-bold text-gray-900">
           Spécialités
         </h2>
       </div>
@@ -615,13 +631,12 @@ const OverviewTab = ({
         {profile.metiers.map(({ metier }, index) => (
           <div
             key={metier.id}
-            className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-700/50 to-gray-600/30 rounded-xl backdrop-blur-sm hover:from-gray-700/70 hover:to-gray-600/50 transition-all duration-300 group hover:scale-105 border border-gray-600/30"
-            style={{ animationDelay: `${index * 100}ms` }}
+            className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
           >
-            <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg group-hover:scale-110 transition-transform">
-              <Zap className="w-5 h-5 text-blue-400" />
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Zap className="w-5 h-5 text-blue-600" />
             </div>
-            <span className="text-white font-semibold text-lg">
+            <span className="text-gray-900 lg:text-sm text-xs font-semibold">
               {metier.libelle}
             </span>
           </div>
@@ -629,14 +644,14 @@ const OverviewTab = ({
       </div>
     </Card>
 
-    {/* Statistiques détaillées améliorées */}
+    {/* Statistiques détaillées */}
     {stats && (
-      <Card className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
+      <Card className="p-8 bg-white border border-gray-200 shadow-sm">
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl">
-            <TrendingUp className="w-6 h-6 text-green-400" />
+          <div className="p-2 bg-green-100 rounded-xl">
+            <TrendingUp className="w-6 h-6 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <h2 className="text-md lg:text-2xl font-bold text-gray-900">
             Performance Détaillée
           </h2>
         </div>
@@ -645,44 +660,43 @@ const OverviewTab = ({
             {
               value: stats.totalDemandes,
               label: "Demandes",
-              color: "from-blue-500 to-cyan-500",
+              color: "text-blue-600",
               icon: Target,
             },
             {
               value: `${stats.tauxAcceptation}%`,
               label: "Acceptation",
-              color: "from-green-500 to-emerald-500",
+              color: "text-green-600",
               icon: UserCheck,
             },
             {
               value: stats.noteMoyenne.toFixed(1),
               label: "Note",
-              color: "from-yellow-500 to-orange-500",
+              color: "text-yellow-600",
               icon: Star,
             },
             {
               value: stats.totalServices,
               label: "Services",
-              color: "from-purple-500 to-pink-500",
+              color: "text-purple-600",
               icon: Briefcase,
             },
           ].map((stat, index) => (
             <div
               key={stat.label}
-              className="text-center p-6 bg-gradient-to-br from-gray-700/50 to-gray-600/30 rounded-2xl backdrop-blur-sm hover:scale-105 transition-all duration-500 border border-gray-600/30 group"
-              style={{ animationDelay: `${index * 150}ms` }}
+              className="text-center p-6 bg-gray-50 rounded-2xl border border-gray-200 hover:bg-gray-100 transition-colors"
             >
               <div
-                className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl mb-3 group-hover:scale-110 transition-transform`}
+                className={`inline-flex items-center justify-center w-12 h-12 bg-${stat.color.split('-')[1]}-100 rounded-xl mb-3`}
               >
-                <stat.icon className="w-6 h-6 text-white" />
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
               <div
-                className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}
+                className={`text-lg lg:text-3xl font-bold ${stat.color} mb-2`}
               >
                 {stat.value}
               </div>
-              <div className="text-gray-300 text-sm font-medium">
+              <div className="text-gray-600 text-sm font-medium">
                 {stat.label}
               </div>
             </div>
@@ -693,7 +707,7 @@ const OverviewTab = ({
   </div>
 );
 
-// Composant pour l'onglet Services amélioré
+// Composant pour l'onglet Services
 interface ServicesTabProps {
   services: ProfessionalProfile["services"];
   onServiceClick: (service: any) => void;
@@ -706,18 +720,18 @@ const ServicesTab: React.FC<ServicesTabProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl">
-          <Briefcase className="w-6 h-6 text-purple-400" />
+        <div className="p-2 bg-purple-100 rounded-xl">
+          <Briefcase className="w-6 h-6 text-purple-600" />
         </div>
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold text-gray-900">
           Services Proposés
         </h2>
       </div>
 
       {services.length === 0 ? (
-        <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
-          <FileText className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">
+        <Card className="p-12 bg-white border border-gray-200 text-center shadow-sm">
+          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">
             Aucun service disponible pour le moment
           </p>
         </Card>
@@ -726,15 +740,14 @@ const ServicesTab: React.FC<ServicesTabProps> = ({
           {services.map(({ service }, index) => (
             <Card
               key={service.id}
-              className="p-6 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 group"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="p-6 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-white text-xl group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-300">
+                <h3 className="font-bold text-gray-900 text-sm lg:text-xl">
                   {service.libelle}
                 </h3>
                 {service.price && (
-                  <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-500/30 backdrop-blur-sm">
+                  <Badge className="bg-green-100 text-green-700 border-green-200">
                     <Euro className="w-3 h-3 mr-1" />
                     {service.price}€
                   </Badge>
@@ -744,20 +757,20 @@ const ServicesTab: React.FC<ServicesTabProps> = ({
               {service.category && (
                 <Badge
                   variant="outline"
-                  className="mb-4 text-gray-400 border-gray-600 backdrop-blur-sm"
+                  className="mb-4 text-gray-500 border-gray-300"
                 >
                   {service.category.name}
                 </Badge>
               )}
 
               {service.description && (
-                <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
+                <p className="text-gray-700 text-sm mb-4 line-clamp-3 leading-relaxed">
                   {service.description}
                 </p>
               )}
 
               {service.duration && (
-                <div className="flex items-center gap-2 text-gray-400 text-sm bg-gray-700/30 rounded-lg p-2 backdrop-blur-sm mb-4">
+                <div className="flex items-center gap-2 text-gray-500 text-sm bg-gray-50 rounded-lg p-2 mb-4">
                   <Clock className="w-4 h-4" />
                   <span className="font-medium">
                     {service.duration} minutes
@@ -765,12 +778,11 @@ const ServicesTab: React.FC<ServicesTabProps> = ({
                 </div>
               )}
 
-              {/* Bouton pour ouvrir le modal de demande */}
               <Button
                 onClick={() => onServiceClick(service)}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="w-full bg-slate-900 hover:bg-slate-700 text-white"
               >
-                <FileText className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                <FileText className="w-4 h-4 mr-2" />
                 Demander un devis
               </Button>
             </Card>
@@ -781,7 +793,7 @@ const ServicesTab: React.FC<ServicesTabProps> = ({
   );
 };
 
-// Composant pour l'onglet Avis amélioré
+// Composant pour l'onglet Avis
 const ReviewsTab = ({
   reviews,
 }: {
@@ -791,11 +803,10 @@ const ReviewsTab = ({
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-5 h-5 ${
-          i < rating
-            ? "text-yellow-400 fill-yellow-400 drop-shadow-lg"
-            : "text-gray-600"
-        } transition-all duration-300`}
+        className={`w-5 h-5 ${i < rating
+          ? "text-yellow-400 fill-yellow-400"
+          : "text-gray-300"
+          }`}
       />
     ));
   };
@@ -803,31 +814,30 @@ const ReviewsTab = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
-          <Star className="w-6 h-6 text-yellow-400" />
+        <div className="p-2 bg-yellow-100 rounded-xl">
+          <Star className="w-6 h-6 text-yellow-600" />
         </div>
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        <h2 className="text-md lg:text-2xl font-bold text-gray-900">
           Avis Clients
         </h2>
       </div>
 
       {reviews.length === 0 ? (
-        <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
-          <Star className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">Aucun avis pour le moment</p>
+        <Card className="p-12 bg-white border border-gray-200 text-center shadow-sm">
+          <Star className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">Aucun avis pour le moment</p>
         </Card>
       ) : (
         <div className="space-y-6">
           {reviews.map((review, index) => (
             <Card
               key={review.id}
-              className="p-6 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl hover:shadow-3xl transition-all duration-500"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="p-6 bg-white border border-gray-200 shadow-sm"
             >
               <div className="flex items-start gap-4">
-                <Avatar className="w-12 h-12 border-2 border-gray-600/50">
+                <Avatar className="w-12 h-12 border-2 border-gray-200">
                   <AvatarImage src={review.user.avatar || ""} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+                  <AvatarFallback className="bg-blue-600 text-white font-semibold">
                     {getInitials(
                       review.user.firstName || "",
                       review.user.lastName || ""
@@ -837,13 +847,13 @@ const ReviewsTab = ({
 
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h4 className="font-bold text-white text-lg">
+                    <h4 className="font-bold text-gray-900">
                       {review.user.firstName} {review.user.lastName}
                     </h4>
                     <div className="flex items-center gap-2">
                       {renderStars(review.rating)}
                     </div>
-                    <span className="text-gray-400 text-sm bg-gray-700/30 rounded-full px-3 py-1 backdrop-blur-sm">
+                    <span className="text-gray-500 text-sm bg-gray-50 rounded-full px-3 py-1">
                       {new Date(review.createdAt).toLocaleDateString("fr-FR", {
                         year: "numeric",
                         month: "long",
@@ -853,7 +863,7 @@ const ReviewsTab = ({
                   </div>
 
                   {review.comment && (
-                    <p className="text-gray-300 leading-relaxed text-lg bg-gray-700/20 rounded-2xl p-4 backdrop-blur-sm">
+                    <p className="text-gray-700 leading-relaxed bg-gray-50 rounded-2xl p-4">
                       {review.comment}
                     </p>
                   )}
@@ -867,42 +877,40 @@ const ReviewsTab = ({
   );
 };
 
-// Composant pour l'onglet Horaires amélioré
+// Composant pour l'onglet Horaires
 const ScheduleTab = ({ horaires }: { horaires: any[] | null }) => (
   <div className="space-y-6">
     <div className="flex items-center gap-3 mb-8">
-      <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl">
-        <CalendarDays className="w-6 h-6 text-cyan-400" />
+      <div className="p-2 bg-cyan-100 rounded-xl">
+        <CalendarDays className="w-6 h-6 text-cyan-600" />
       </div>
-      <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+      <h2 className="text-md lg:text-2xl font-bold text-gray-900">
         Horaires d'Ouverture
       </h2>
     </div>
 
     {!horaires ? (
-      <Card className="p-12 bg-gray-800/60 backdrop-blur-xl border-gray-700/50 text-center shadow-2xl">
-        <Clock className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-        <p className="text-gray-400 text-lg">Horaires non renseignés</p>
+      <Card className="p-12 bg-white border border-gray-200 text-center shadow-sm">
+        <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500">Horaires non renseignés</p>
       </Card>
     ) : (
-      <Card className="p-8 bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-xl border-gray-700/50 shadow-2xl">
+      <Card className="p-8 bg-white border border-gray-200 shadow-sm">
         <div className="space-y-3">
           {horaires.map(({ jour, horaire }, index) => (
             <div
               key={jour}
-              className="flex items-center justify-between p-4 bg-gray-700/30 rounded-xl backdrop-blur-sm hover:bg-gray-700/50 transition-all duration-300 group border border-gray-600/30"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
             >
-              <span className="font-semibold text-white text-lg flex items-center gap-3">
+              <span className="font-semibold text-gray-900 flex items-center gap-3">
                 <CalendarDays className="w-4 h-4 text-gray-400" />
                 {jour}
               </span>
               <span
-                className={`font-bold text-lg px-4 py-2 rounded-lg backdrop-blur-sm ${
-                  horaire?.ouvert
-                    ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                    : "bg-red-500/20 text-red-400 border border-red-500/30"
-                } transition-all duration-300 group-hover:scale-105`}
+                className={`font-bold px-4 py-2 rounded-lg ${horaire?.ouvert
+                  ? "bg-green-100 text-green-700 border border-green-200"
+                  : "bg-red-100 text-red-700 border border-red-200"
+                  }`}
               >
                 {formatHoraires(horaire)}
               </span>
@@ -914,52 +922,52 @@ const ScheduleTab = ({ horaires }: { horaires: any[] | null }) => (
   </div>
 );
 
-// Composant Skeleton amélioré
+// Composant Skeleton
 const ProfileSkeleton = () => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+  <div className="min-h-screen bg-gray-50 text-gray-900 mt-20">
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar Skeleton amélioré */}
+        {/* Sidebar Skeleton */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50">
+          <Card className="p-6 bg-white border border-gray-200">
             <div className="text-center">
-              <Skeleton className="w-28 h-28 rounded-full mx-auto mb-4 bg-gray-700/50" />
-              <Skeleton className="h-8 w-40 mx-auto mb-3 bg-gray-700/50" />
-              <Skeleton className="h-6 w-32 mx-auto mb-4 bg-gray-700/50" />
-              <Skeleton className="h-6 w-full mb-2 bg-gray-700/50 rounded-full" />
-              <Skeleton className="h-6 w-3/4 mx-auto mb-4 bg-gray-700/50 rounded-full" />
-              <Skeleton className="h-12 w-full mb-4 bg-gray-700/50 rounded-xl" />
+              <Skeleton className="w-28 h-28 rounded-full mx-auto mb-4 bg-gray-200" />
+              <Skeleton className="h-8 w-40 mx-auto mb-3 bg-gray-200" />
+              <Skeleton className="h-6 w-32 mx-auto mb-4 bg-gray-200" />
+              <Skeleton className="h-6 w-full mb-2 bg-gray-200 rounded-full" />
+              <Skeleton className="h-6 w-3/4 mx-auto mb-4 bg-gray-200 rounded-full" />
+              <Skeleton className="h-12 w-full mb-4 bg-gray-200 rounded-xl" />
             </div>
           </Card>
 
-          <Card className="p-6 bg-gray-800/60 backdrop-blur-xl border-gray-700/50">
-            <Skeleton className="h-7 w-32 mb-6 bg-gray-700/50 rounded-full" />
+          <Card className="p-6 bg-white border border-gray-200">
+            <Skeleton className="h-7 w-32 mb-6 bg-gray-200 rounded-full" />
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center p-3 bg-gray-700/30 rounded-xl"
+                  className="flex justify-between items-center p-3 bg-gray-50 rounded-xl"
                 >
-                  <Skeleton className="h-5 w-24 bg-gray-700/50 rounded-full" />
-                  <Skeleton className="h-6 w-12 bg-gray-700/50 rounded-full" />
+                  <Skeleton className="h-5 w-24 bg-gray-200 rounded-full" />
+                  <Skeleton className="h-6 w-12 bg-gray-200 rounded-full" />
                 </div>
               ))}
             </div>
           </Card>
         </div>
 
-        {/* Main Content Skeleton amélioré */}
+        {/* Main Content Skeleton */}
         <div className="lg:col-span-3 space-y-6">
-          <Skeleton className="h-14 w-full bg-gray-700/50 rounded-2xl" />
+          <Skeleton className="h-14 w-full bg-gray-200 rounded-2xl" />
 
           {Array.from({ length: 3 }).map((_, i) => (
             <Card
               key={i}
-              className="p-8 bg-gray-800/60 backdrop-blur-xl border-gray-700/50"
+              className="p-8 bg-white border border-gray-200"
             >
-              <Skeleton className="h-8 w-48 mb-6 bg-gray-700/50 rounded-full" />
-              <Skeleton className="h-6 w-full mb-3 bg-gray-700/50 rounded-full" />
-              <Skeleton className="h-6 w-3/4 bg-gray-700/50 rounded-full" />
+              <Skeleton className="h-8 w-48 mb-6 bg-gray-200 rounded-full" />
+              <Skeleton className="h-6 w-full mb-3 bg-gray-200 rounded-full" />
+              <Skeleton className="h-6 w-3/4 bg-gray-200 rounded-full" />
             </Card>
           ))}
         </div>

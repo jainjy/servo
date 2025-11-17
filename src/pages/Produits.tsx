@@ -211,6 +211,7 @@ const Produits = () => {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
+          backgroundAttachment: 'fixed'
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-50" />
@@ -240,24 +241,24 @@ const Produits = () => {
           {/* En-tête avec animation */}
           <div className="bg-white py-5 rounded-lg">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className="azonix text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
+              <h1 className="tracking-widest text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#0A0A0A] to-[#0052FF] bg-clip-text text-transparent">
                 Produits & Accessoires
               </h1>
-              <p className="text-sm px-2 lg:text-xl text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm px-2 lg:text-md text-[#5A6470] max-w-2xl mx-auto leading-relaxed">
                 Découvrez notre gamme complète pour équiper et embellir votre maison
               </p>
             </div>
 
-            {/* Barre de recherche améliorée */}
+            {/* Barre de recherche améliorée
             <form
               onSubmit={handleSearch}
-              className="relative mb-5 w-full max-w-2xl mx-auto animate-slide-up px-4 sm:px-6 lg:px-2"
+              className="relative mb-5 w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-2"
             >
               <div className="relative group">
                 <Input
                   type="text"
                   placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
-                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold uppercase tracking-wide transition-all duration-300 group-hover:shadow-lg border-[#0052FF]/30 bg-white/80 backdrop-blur-md focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/20"
+                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold tracking-wide transition-all duration-300 group-hover:shadow-sm border-[#0052FF]/30 bg-white/80 backdrop-blur-md focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -279,7 +280,7 @@ const Produits = () => {
                   )}
                 </Button>
               </div>
-            </form>
+            </form> */}
           </div>
 
           {/* Affichage des résultats de recherche */}
