@@ -42,6 +42,7 @@ import {
   Package, // Icône pour Mes Commandes
   AlertCircle,
   Calendar1,
+  FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -932,6 +933,14 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                     <Calendar1 className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Mon agenda</span>
                   </Link>
+                  {/* <Link
+                    to="/mon-compte/documents"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <Calendar1 className="h-4 w-4 text-gray-700" />
+                    <span className="text-sm font-medium">Mes documents</span>
+                  </Link> */}
                   <button
                     onClick={() => {
                       setIsLogoutDialogOpen(true);
@@ -1074,9 +1083,10 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                                 onFocus={() =>
                                   hasItems && setHoveredSection(section.title)
                                 }
-                                onMouseLeave={() => { }}
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"
-                                  }`}
+                                onMouseLeave={() => {}}
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
+                                  isActive ? "bg-white/10" : "hover:bg-white/5"
+                                }`}
                               >
                                 {hasItems ? (
                                   <button className="scramble  w-full text-left text-xs font-semibold text-white">
@@ -1266,8 +1276,7 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
 
                     {notifLoading ? (
                       <div className="text-center text-sm text-gray-500">
-                        <img src="/loading.gif" alt="" className='w-24 h-24' />
-
+                        <img src="/loading.gif" alt="" className="w-24 h-24" />
                         Chargement...
                       </div>
                     ) : notifications.length === 0 ? (
@@ -1279,8 +1288,9 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                         {notifications.map((n) => (
                           <div
                             key={n.id}
-                            className={`p-3 rounded-lg border transition-colors ${n.isRead ? "bg-gray-50" : "bg-white"
-                              }`}
+                            className={`p-3 rounded-lg border transition-colors ${
+                              n.isRead ? "bg-gray-50" : "bg-white"
+                            }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
@@ -1312,8 +1322,8 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                                 <div className="text-xs text-gray-400">
                                   {n.createdAt
                                     ? new Date(n.createdAt).toLocaleDateString(
-                                      "fr-FR"
-                                    )
+                                        "fr-FR"
+                                      )
                                     : ""}
                                 </div>
                               </div>
@@ -1422,11 +1432,17 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem>
+                      {/* <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/documents")}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Mes documents
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/agenda")}
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {/* Mon agenda */}
+                        Mon agenda
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
@@ -1476,7 +1492,8 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
             {/* Body */}
             <div className="p-6">
               <p className="text-gray-700 text-sm leading-relaxed">
-                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous reconnecter pour accéder à votre compte.
+                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous
+                reconnecter pour accéder à votre compte.
               </p>
             </div>
 
