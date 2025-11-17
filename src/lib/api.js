@@ -224,5 +224,20 @@ export const MediaService = {
 export const productsAPI = {
   getStats: () => api.get('/products/stats'),
 };
+// Services pour le planning/calendrier
+export const planningAPI = {
+  // Récupérer le planning de l'utilisateur
+  getPlanning: () => api.get('/planning'),
+  
+  // Créer un nouveau rendez-vous
+  createAppointment: (data) => api.post('/planning', data),
+  
+  // Modifier un rendez-vous
+  updateAppointment: (id, data) => api.put(`/planning/${id}`, data),
+  
+  // Supprimer un rendez-vous
+  deleteAppointment: (id) => api.delete(`/planning/${id}`),
+}; 
+
 
 export default api;

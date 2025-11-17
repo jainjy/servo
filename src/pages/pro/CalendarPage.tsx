@@ -1,4 +1,3 @@
-"use client";
 
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import {
+import { 
   Calendar as CalendarIcon,
   Clock,
   MapPin,
@@ -36,9 +35,12 @@ import {
   User,
   Home,
   Save,
-  Trash2
+  Trash2,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 // Types de rendez-vous
 const STATUT_RENDEZ_VOUS = {
@@ -52,10 +54,13 @@ const TYPES_RENDEZ_VOUS = {
   VISITE: { label: "Visite", color: "bg-purple-100 text-purple-800", icon: MapPin },
   VIDEO: { label: "Visio", color: "bg-blue-100 text-blue-800", icon: Video },
   TELEPHONE: { label: "Téléphone", color: "bg-green-100 text-green-800", icon: Phone },
-  SIGNATURE: { label: "Signature", color: "bg-orange-100 text-orange-800", icon: Users }
+  SIGNATURE: { label: "Signature", color: "bg-orange-100 text-orange-800", icon: Users },
+  AUDIT: { label: "Audit", color: "bg-red-100 text-red-800", icon: Users },
+  TOURISME: { label: "Tourisme", color: "bg-indigo-100 text-indigo-800", icon: MapPin },
+  DEMANDE: { label: "Demande", color: "bg-pink-100 text-pink-800", icon: Users }
 };
 
-// Données initiales
+// Données initiales pour les créneaux récurrents
 const creneauxRecurrentsInitiaux = [
   { id: 1, jour: "lundi", debut: "09:00", fin: "12:00", type: "VISITE", actif: true },
   { id: 2, jour: "lundi", debut: "14:00", fin: "18:00", type: "VISITE", actif: true },
@@ -67,22 +72,116 @@ const creneauxRecurrentsInitiaux = [
   { id: 8, jour: "vendredi", debut: "09:00", fin: "12:00", type: "ADMINISTRATIF", actif: true }
 ];
 
-const rendezVousInitiaux = [
-  {
-    id: 1,
-    titre: "Visite appartement - Rue de Paris",
-    client: { nom: "Marie Martin", email: "marie.martin@email.com", telephone: "01 23 45 67 89" },
-    bien: { adresse: "123 Rue de Paris, 75001 Paris", reference: "APT-2024-001" },
-    date: new Date().toISOString().split('T')[0],
-    heureDebut: "10:00",
-    heureFin: "11:00",
-    type: "VISITE",
-    statut: "CONFIRME",
-    agent: "Pierre Dubois",
-    notes: "Client intéressé par le quartier, prévoir documentation transports",
-    couleur: "#8B5CF6"
+// Fonction pour transformer les données de l'API en format de rendez-vous
+const transformerDonneesAPI = (planningData) => {
+  if (!planningData || !Array.isArray(planningData)) {
+    console.warn("Données de planning invalides:", planningData);
+    return [];
   }
-];
+
+  console.log("Transformation des données:", planningData);
+
+  return planningData
+    .filter(item => {
+      if (!item.date) {
+        console.warn("Élément sans date ignoré:", item);
+        return false;
+      }
+      return true;
+    })
+    .map((item, index) => {
+      // Déterminer le type basé sur le type de l'API
+      let type = "DEMANDE";
+      let statut = "CONFIRME";
+      let couleur = "#8B5CF6";
+      let icone = Users;
+      
+      switch(item.type) {
+        case "appointment":
+          type = "VISITE";
+          couleur = "#3B82F6";
+          icone = MapPin;
+          break;
+        case "demande_creee":
+          type = "DEMANDE";
+          couleur = "#8B5CF6";
+          icone = Users;
+          break;
+        case "demande_artisan_direct":
+          type = "AUDIT";
+          couleur = "#EF4444";
+          icone = Users;
+          break;
+        case "demande_artisan_rdv":
+          type = "AUDIT";
+          statut = "EN_ATTENTE";
+          couleur = "#F59E0B";
+          icone = Users;
+          break;
+        case "tourisme_booking":
+          type = "TOURISME";
+          couleur = "#6366F1";
+          icone = MapPin;
+          break;
+        default:
+          type = "DEMANDE";
+          icone = Clock;
+      }
+
+      // Formater la date correctement
+      let dateFormatee;
+      try {
+        dateFormatee = new Date(item.date).toISOString().split('T')[0];
+      } catch (error) {
+        console.warn("Erreur format date:", item.date, error);
+        dateFormatee = new Date().toISOString().split('T')[0];
+      }
+      
+      // Gérer l'heure
+      let heureDebut = "09:00";
+      let heureFin = "10:00";
+      
+      if (item.time) {
+        heureDebut = item.time;
+        const [heures, minutes] = item.time.split(':');
+        const heureFinNum = parseInt(heures) + 1;
+        heureFin = `${heureFinNum.toString().padStart(2, '0')}:${minutes}`;
+      }
+
+      // Créer un titre significatif
+      let titre = item.motif || "Rendez-vous sans titre";
+      if (titre.length > 50) {
+        titre = titre.substring(0, 50) + "...";
+      }
+
+      const rendezVous = {
+        id: item.id || `event_${index}`,
+        titre: titre,
+        client: { 
+          nom: "Client", 
+          email: "", 
+          telephone: "" 
+        },
+        bien: { 
+          adresse: "", 
+          reference: "" 
+        },
+        date: dateFormatee,
+        heureDebut: heureDebut,
+        heureFin: heureFin,
+        type: type,
+        statut: statut,
+        agent: "Utilisateur",
+        notes: item.motif || "",
+        couleur: couleur,
+        icone: icone,
+        sourceData: item // Garder les données originales
+      };
+
+      console.log("Rendez-vous transformé:", rendezVous);
+      return rendezVous;
+    });
+};
 
 // Composant Modal
 const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
@@ -117,7 +216,7 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
 };
 
 // Composant Modal Rendez-vous
-const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
+const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete, onRefresh }) => {
   const [formData, setFormData] = useState({
     titre: "",
     client: { nom: "", email: "", telephone: "" },
@@ -127,10 +226,13 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
     heureFin: "11:00",
     type: "VISITE",
     statut: "EN_ATTENTE",
-    agent: "Pierre Dubois",
+    agent: "Utilisateur",
     notes: "",
-    couleur: "#8B5CF6"
+    couleur: "#8B5CF6",
+    serviceId: 1
   });
+
+  const [enregistrement, setEnregistrement] = useState(false);
 
   useEffect(() => {
     if (rendezVous) {
@@ -145,24 +247,95 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
         heureFin: "11:00",
         type: "VISITE",
         statut: "EN_ATTENTE",
-        agent: "Pierre Dubois",
+        agent: "Utilisateur",
         notes: "",
-        couleur: "#8B5CF6"
+        couleur: "#8B5CF6",
+        serviceId: 1
       });
     }
   }, [rendezVous]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
-      ...formData,
-      id: rendezVous?.id || Date.now()
-    });
-    onClose();
+    setEnregistrement(true);
+
+    try {
+      // Préparer les données pour l'API
+      const appointmentData = {
+        titre: formData.titre,
+        date: formData.date,
+        heureDebut: formData.heureDebut,
+        heureFin: formData.heureFin,
+        type: formData.type,
+        statut: formData.statut,
+        agent: formData.agent,
+        couleur: formData.couleur,
+        client: formData.client,
+        bien: formData.bien,
+        notes: formData.notes,
+        serviceId: formData.serviceId || 1
+      };
+
+      if (rendezVous?.id) {
+        // Modification d'un rendez-vous existant
+        await api.put(`/planning/${rendezVous.id}`, appointmentData);
+        toast.success("Rendez-vous modifié avec succès");
+      } else {
+        // Création d'un nouveau rendez-vous
+        await api.post('/planning', appointmentData);
+        toast.success("Rendez-vous créé avec succès");
+      }
+
+      onSave({
+        ...formData,
+        id: rendezVous?.id || Date.now()
+      });
+
+      if (onRefresh) {
+        onRefresh();
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde:", error);
+      toast.error(error.response?.data?.message || "Erreur lors de la sauvegarde du rendez-vous");
+    } finally {
+      setEnregistrement(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!rendezVous?.id) return;
+
+    try {
+      setEnregistrement(true);
+      await api.delete(`/appointments/${rendezVous.id}`);
+      
+      onDelete(rendezVous.id);
+      toast.success("Rendez-vous supprimé avec succès");
+      
+      if (onRefresh) {
+        onRefresh();
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      toast.error(error.response?.data?.message || "Erreur lors de la suppression du rendez-vous");
+    } finally {
+      setEnregistrement(false);
+    }
   };
 
   const couleursDisponibles = [
-    "#8B5CF6", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"
+    "#8B5CF6", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#6366F1"
+  ];
+
+  const servicesOptions = [
+    { id: 1, libelle: "Service Immobilier" },
+    { id: 2, libelle: "Service Audit" },
+    { id: 3, libelle: "Service Tourisme" },
+    { id: 4, libelle: "Service Général" }
   ];
 
   return (
@@ -185,6 +358,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   setFormData({ ...formData, titre: e.target.value })
                 }
                 placeholder="Ex: Visite appartement..."
+                disabled={enregistrement}
               />
             </div>
 
@@ -198,6 +372,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, date: e.target.value })
                 }
+                disabled={enregistrement}
               />
             </div>
 
@@ -211,6 +386,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, heureDebut: e.target.value })
                   }
+                  disabled={enregistrement}
                 />
               </div>
               <div>
@@ -222,8 +398,27 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, heureFin: e.target.value })
                   }
+                  disabled={enregistrement}
                 />
               </div>
+            </div>
+
+            <div>
+              <Label className="block mb-2">Service associé</Label>
+              <select
+                className="w-full p-3 border rounded-lg"
+                value={formData.serviceId}
+                onChange={(e) =>
+                  setFormData({ ...formData, serviceId: parseInt(e.target.value) })
+                }
+                disabled={enregistrement}
+              >
+                {servicesOptions.map(service => (
+                  <option key={service.id} value={service.id}>
+                    {service.libelle}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -237,6 +432,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value })
                 }
+                disabled={enregistrement}
               >
                 {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
                   <option key={key} value={key}>
@@ -254,6 +450,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, statut: e.target.value })
                 }
+                disabled={enregistrement}
               >
                 {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
                   <option key={key} value={key}>
@@ -265,16 +462,14 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
 
             <div>
               <Label className="block mb-2">Agent</Label>
-              <select
-                className="w-full p-3 border rounded-lg"
+              <Input
                 value={formData.agent}
                 onChange={(e) =>
                   setFormData({ ...formData, agent: e.target.value })
                 }
-              >
-                <option value="Pierre Dubois">Pierre Dubois</option>
-                <option value="Sophie Lambert">Sophie Lambert</option>
-              </select>
+                placeholder="Nom de l'agent"
+                disabled={enregistrement}
+              />
             </div>
 
             <div>
@@ -284,12 +479,14 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   <button
                     key={couleur}
                     type="button"
-                    className={`w-8 h-8 rounded-full border-2 ${formData.couleur === couleur
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      formData.couleur === couleur
                         ? "border-gray-800"
                         : "border-gray-300"
-                      }`}
+                    } ${enregistrement ? 'opacity-50' : ''}`}
                     style={{ backgroundColor: couleur }}
-                    onClick={() => setFormData({ ...formData, couleur })}
+                    onClick={() => !enregistrement && setFormData({ ...formData, couleur })}
+                    disabled={enregistrement}
                   />
                 ))}
               </div>
@@ -314,6 +511,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   client: { ...formData.client, nom: e.target.value },
                 })
               }
+              disabled={enregistrement}
             />
             <Input
               type="email"
@@ -325,6 +523,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   client: { ...formData.client, email: e.target.value },
                 })
               }
+              disabled={enregistrement}
             />
             <Input
               type="tel"
@@ -336,6 +535,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   client: { ...formData.client, telephone: e.target.value },
                 })
               }
+              disabled={enregistrement}
             />
           </div>
         </div>
@@ -356,6 +556,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   bien: { ...formData.bien, adresse: e.target.value },
                 })
               }
+              disabled={enregistrement}
             />
             <Input
               placeholder="Référence bien"
@@ -366,6 +567,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   bien: { ...formData.bien, reference: e.target.value },
                 })
               }
+              disabled={enregistrement}
             />
           </div>
         </div>
@@ -380,6 +582,7 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
+            disabled={enregistrement}
           />
         </div>
 
@@ -389,26 +592,41 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                onDelete(rendezVous.id);
-                onClose();
-              }}
+              onClick={handleDelete}
               className="text-red-600 border-red-200 hover:bg-red-50"
+              disabled={enregistrement}
             >
-              <Trash2 className="mr-2" size={16} />
-              Supprimer
+              {enregistrement ? (
+                <RefreshCw className="mr-2 animate-spin" size={16} />
+              ) : (
+                <Trash2 className="mr-2" size={16} />
+              )}
+              {enregistrement ? "Suppression..." : "Supprimer"}
             </Button>
           )}
           <div className="flex gap-3 ml-auto">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={enregistrement}
+            >
               Annuler
             </Button>
             <Button
               type="submit"
               style={{ backgroundColor: "#0052FF", color: "white" }}
+              disabled={enregistrement}
             >
-              <Save className="mr-2" size={16} />
-              {rendezVous ? "Modifier" : "Créer"} le rendez-vous
+              {enregistrement ? (
+                <RefreshCw className="mr-2 animate-spin" size={16} />
+              ) : (
+                <Save className="mr-2" size={16} />
+              )}
+              {enregistrement 
+                ? "Enregistrement..." 
+                : (rendezVous ? "Modifier" : "Créer") + " le rendez-vous"
+              }
             </Button>
           </div>
         </div>
@@ -462,7 +680,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
   };
 
   const toggleCreneau = (id) => {
-    setCreneauxLocaux(creneauxLocaux.map(c =>
+    setCreneauxLocaux(creneauxLocaux.map(c => 
       c.id === id ? { ...c, actif: !c.actif } : c
     ));
   };
@@ -488,19 +706,19 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                 <option key={jour.value} value={jour.value}>{jour.label}</option>
               ))}
             </select>
-
+            
             <Input
               type="time"
               value={nouveauCreneau.debut}
               onChange={(e) => setNouveauCreneau({ ...nouveauCreneau, debut: e.target.value })}
             />
-
+            
             <Input
               type="time"
               value={nouveauCreneau.fin}
               onChange={(e) => setNouveauCreneau({ ...nouveauCreneau, fin: e.target.value })}
             />
-
+            
             <select
               className="p-2 border rounded"
               value={nouveauCreneau.type}
@@ -510,7 +728,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                 <option key={key} value={key}>{type.label}</option>
               ))}
             </select>
-
+            
             <Button onClick={ajouterCreneau} className="whitespace-nowrap">
               <Plus size={16} className="mr-1" />
               Ajouter
@@ -528,7 +746,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                   checked={creneau.actif}
                   onCheckedChange={() => toggleCreneau(creneau.id)}
                 />
-
+                
                 <div className="flex-1 grid grid-cols-4 gap-4">
                   <span className="capitalize font-medium">{creneau.jour}</span>
                   <span>{creneau.debut} - {creneau.fin}</span>
@@ -540,7 +758,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                   </Badge>
                 </div>
               </div>
-
+              
               <Button
                 variant="ghost"
                 size="sm"
@@ -568,10 +786,11 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
   );
 };
 
+// Composant principal CalendarPage
 const CalendarPage = () => {
   const [vue, setVue] = useState("semaine");
   const [dateCourante, setDateCourante] = useState(new Date());
-  const [rendezVous, setRendezVous] = useState(rendezVousInitiaux);
+  const [rendezVous, setRendezVous] = useState([]);
   const [creneauxRecurrents, setCreneauxRecurrents] = useState(creneauxRecurrentsInitiaux);
   const [filtres, setFiltres] = useState({
     statut: "",
@@ -581,16 +800,47 @@ const CalendarPage = () => {
   const [showModalRendezVous, setShowModalRendezVous] = useState(false);
   const [showModalCreneaux, setShowModalCreneaux] = useState(false);
   const [rendezVousSelectionne, setRendezVousSelectionne] = useState(null);
-  const [synchronisation, setSynchronisation] = useState({
-    google: true,
-    outlook: false
-  });
+  const [chargement, setChargement] = useState(true);
+  const [erreur, setErreur] = useState(null);
+  const [debugMode, setDebugMode] = useState(false);
+
+  // Charger les rendez-vous depuis l'API
+  useEffect(() => {
+    chargerRendezVous();
+  }, []);
+
+  const chargerRendezVous = async () => {
+    try {
+      setChargement(true);
+      setErreur(null);
+      
+      console.log("Début du chargement des rendez-vous...");
+      const response = await api.get('/planning');
+      
+      console.log("Réponse API reçue:", response.data);
+      
+      if (response.data.success) {
+        const rendezVousTransformes = transformerDonneesAPI(response.data.planning);
+        console.log("Rendez-vous transformés:", rendezVousTransformes);
+        setRendezVous(rendezVousTransformes);
+        toast.success(`${rendezVousTransformes.length} rendez-vous chargés`);
+      } else {
+        throw new Error(response.data.message || "Erreur lors du chargement des rendez-vous");
+      }
+    } catch (error) {
+      console.error("Erreur détaillée lors du chargement:", error);
+      setErreur(error.response?.data?.message || error.message || "Erreur de chargement des rendez-vous");
+      toast.error("Erreur lors du chargement des rendez-vous");
+    } finally {
+      setChargement(false);
+    }
+  };
 
   // Génération des jours de la semaine
   const getJoursSemaine = () => {
     const debutSemaine = new Date(dateCourante);
     debutSemaine.setDate(dateCourante.getDate() - dateCourante.getDay() + 1);
-
+    
     return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(debutSemaine);
       date.setDate(debutSemaine.getDate() + i);
@@ -605,17 +855,21 @@ const CalendarPage = () => {
     const matchStatut = !filtres.statut || rdv.statut === filtres.statut;
     const matchType = !filtres.type || rdv.type === filtres.type;
     const matchAgent = !filtres.agent || rdv.agent === filtres.agent;
-
+    
     return matchStatut && matchType && matchAgent;
   });
 
   // Navigation
   const precedenteSemaine = () => {
-    setDateCourante(new Date(dateCourante.setDate(dateCourante.getDate() - 7)));
+    const newDate = new Date(dateCourante);
+    newDate.setDate(dateCourante.getDate() - 7);
+    setDateCourante(newDate);
   };
 
   const semaineSuivante = () => {
-    setDateCourante(new Date(dateCourante.setDate(dateCourante.getDate() + 7)));
+    const newDate = new Date(dateCourante);
+    newDate.setDate(dateCourante.getDate() + 7);
+    setDateCourante(newDate);
   };
 
   const aujourdhui = () => {
@@ -643,14 +897,7 @@ const CalendarPage = () => {
   // Gestion des créneaux
   const sauvegarderCreneaux = (nouveauxCreneaux) => {
     setCreneauxRecurrents(nouveauxCreneaux);
-  };
-
-  // Synchronisation calendrier
-  const toggleSynchronisation = (calendrier) => {
-    setSynchronisation(prev => ({
-      ...prev,
-      [calendrier]: !prev[calendrier]
-    }));
+    toast.success("Créneaux sauvegardés avec succès");
   };
 
   // Export/Import
@@ -667,6 +914,7 @@ const CalendarPage = () => {
     a.download = `calendrier-immobilier-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success("Calendrier exporté avec succès");
   };
 
   const importerCalendrier = () => {
@@ -682,7 +930,7 @@ const CalendarPage = () => {
             const data = JSON.parse(event.target.result);
             if (data.rendezVous) setRendezVous(data.rendezVous);
             if (data.creneauxRecurrents) setCreneauxRecurrents(data.creneauxRecurrents);
-            toast.info("Calendrier importé avec succès !");
+            toast.success("Calendrier importé avec succès !");
           } catch (error) {
             toast.error("Erreur lors de l'import du fichier");
           }
@@ -699,19 +947,20 @@ const CalendarPage = () => {
 
   const getRendezVousPourJourHeure = (date, heure) => {
     const dateStr = date.toISOString().split('T')[0];
-    const heureStr = formaterHeure(heure);
-
-    return rendezVousFiltres.filter(rdv =>
-      rdv.date === dateStr &&
-      parseInt(rdv.heureDebut.split(':')[0]) === heure
-    );
+    
+    return rendezVousFiltres.filter(rdv => {
+      if (rdv.date !== dateStr) return false;
+      
+      const heureDebutRdv = parseInt(rdv.heureDebut.split(':')[0]);
+      return heureDebutRdv === heure;
+    });
   };
 
   const getStyleRendezVous = (rdv) => {
     const debutMinutes = parseInt(rdv.heureDebut.split(':')[0]) * 60 + parseInt(rdv.heureDebut.split(':')[1]);
     const finMinutes = parseInt(rdv.heureFin.split(':')[0]) * 60 + parseInt(rdv.heureFin.split(':')[1]);
     const dureeMinutes = finMinutes - debutMinutes;
-
+    
     return {
       top: `${(debutMinutes - 8 * 60) * 0.8}px`,
       height: `${dureeMinutes * 0.8}px`
@@ -720,9 +969,32 @@ const CalendarPage = () => {
 
   const joursSemaine = getJoursSemaine();
 
+  if (chargement) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="animate-spin mx-auto mb-4" size={32} />
+          <p>Chargement des rendez-vous...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (erreur) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="text-red-500 mx-auto mb-4" size={32} />
+          <p className="text-red-500 mb-4">{erreur}</p>
+          <Button onClick={chargerRendezVous}>Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-1 lg:px-4 py-0 lg:py-8">
+      <div className="container mx-auto px-4 py-8">
         {/* En-tête */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div className="flex items-center gap-4 mb-4 lg:mb-0">
@@ -730,16 +1002,16 @@ const CalendarPage = () => {
               <CalendarIcon size={32} />
             </div>
             <div>
-              <h1 className="text-xl lg:text-4xl font-bold" style={{ color: '#0A0A0A' }}>
+              <h1 className="text-4xl font-bold" style={{ color: '#0A0A0A' }}>
                 Calendrier & Réservations
               </h1>
-              <p className="text-sm lg:text-lg" style={{ color: '#5A6470' }}>
-                Gérez vos rendez-vous et disponibilités
+              <p className="text-lg" style={{ color: '#5A6470' }}>
+                {rendezVous.length} rendez-vous chargés
               </p>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 lg:flex flex-wrap gap-3">
+          
+          <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={aujourdhui}>
               Aujourd'hui
             </Button>
@@ -751,7 +1023,7 @@ const CalendarPage = () => {
                 <ChevronRight size={16} />
               </Button>
             </div>
-            <select
+            <select 
               className="p-2 border rounded-lg"
               value={vue}
               onChange={(e) => setVue(e.target.value)}
@@ -763,11 +1035,47 @@ const CalendarPage = () => {
               style={{ backgroundColor: '#0052FF', color: 'white' }}
               onClick={nouveauRendezVous}
             >
-              <Plus className="lg:block md:block hidden mr-2" size={16} />
+              <Plus className="mr-2" size={16} />
               Nouveau rendez-vous
             </Button>
           </div>
         </div>
+
+        {/* Mode debug */}
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setDebugMode(!debugMode)}
+            className="flex items-center gap-2"
+          >
+            {debugMode ? <EyeOff size={16} /> : <Eye size={16} />}
+            Debug {debugMode ? "ON" : "OFF"}
+          </Button>
+        </div>
+
+        {debugMode && (
+          <Card className="p-4 mb-6 bg-yellow-50 border-yellow-200">
+            <h3 className="font-bold mb-3 text-yellow-800">Mode Debug Activé</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <strong>Données brutes API:</strong>
+                <pre className="mt-2 p-2 bg-white rounded border text-xs overflow-auto max-h-40">
+                  {JSON.stringify(rendezVous.slice(0, 3), null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Informations:</strong>
+                <div className="space-y-1 mt-2">
+                  <p>Total rendez-vous: {rendezVous.length}</p>
+                  <p>Filtres actifs: {JSON.stringify(filtres)}</p>
+                  <p>Date courante: {dateCourante.toDateString()}</p>
+                  <p>Semaine: {joursSemaine[0]?.toDateString()} - {joursSemaine[6]?.toDateString()}</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Statistiques rapides */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -820,79 +1128,79 @@ const CalendarPage = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           {/* Colonne principale - Calendrier */}
           <div className="xl:col-span-3">
-            {/* Barre de filtres - Responsive */}
-            <Card className="p-4 md:p-6 mb-4 md:mb-6">
+            {/* Barre de filtres */}
+            <Card className="p-6 mb-6">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                <div className="flex-1 w-full md:w-auto">
-                  <div className="grid grid-cols-1 md:flex md:flex-wrap gap-3 md:gap-4">
-                    <select
-                      className="w-full md:w-auto p-3 border rounded-lg text-sm md:text-base bg-white flex-1 md:flex-none"
-                      value={filtres.statut}
-                      onChange={(e) => setFiltres({ ...filtres, statut: e.target.value })}
-                    >
-                      <option value="">Tous les statuts</option>
-                      {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
-                        <option key={key} value={key}>{statut.label}</option>
-                      ))}
-                    </select>
-
-                    <select
-                      className="w-full md:w-auto p-3 border rounded-lg text-sm md:text-base bg-white flex-1 md:flex-none"
-                      value={filtres.type}
-                      onChange={(e) => setFiltres({ ...filtres, type: e.target.value })}
-                    >
-                      <option value="">Tous les types</option>
-                      {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
-                        <option key={key} value={key}>{type.label}</option>
-                      ))}
-                    </select>
-
-                    <select
-                      className="w-full md:w-auto p-3 border rounded-lg text-sm md:text-base bg-white flex-1 md:flex-none"
-                      value={filtres.agent}
-                      onChange={(e) => setFiltres({ ...filtres, agent: e.target.value })}
-                    >
-                      <option value="">Tous les agents</option>
-                      <option value="Pierre Dubois">Pierre Dubois</option>
-                      <option value="Sophie Lambert">Sophie Lambert</option>
-                    </select>
-                  </div>
+                <div className="flex-1 flex flex-wrap gap-4">
+                  <select
+                    className="p-2 border rounded-lg text-sm"
+                    value={filtres.statut}
+                    onChange={(e) => setFiltres({ ...filtres, statut: e.target.value })}
+                  >
+                    <option value="">Tous les statuts</option>
+                    {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
+                      <option key={key} value={key}>{statut.label}</option>
+                    ))}
+                  </select>
+                  
+                  <select
+                    className="p-2 border rounded-lg text-sm"
+                    value={filtres.type}
+                    onChange={(e) => setFiltres({ ...filtres, type: e.target.value })}
+                  >
+                    <option value="">Tous les types</option>
+                    {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
+                      <option key={key} value={key}>{type.label}</option>
+                    ))}
+                  </select>
+                  
+                  <select
+                    className="p-2 border rounded-lg text-sm"
+                    value={filtres.agent}
+                    onChange={(e) => setFiltres({ ...filtres, agent: e.target.value })}
+                  >
+                    <option value="">Tous les agents</option>
+                    <option value="Utilisateur">Utilisateur</option>
+                  </select>
                 </div>
-
-                {/* Boutons d'action */}
-                <div className="flex gap-2 w-full md:w-auto justify-between md:justify-start">
-                  <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={exporterCalendrier}>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={exporterCalendrier}>
                     <Download size={16} />
-                    <span className="hidden md:inline ml-2">Exporter</span>
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={importerCalendrier}>
+                  <Button variant="outline" size="sm" onClick={importerCalendrier}>
                     <Upload size={16} />
-                    <span className="hidden md:inline ml-2">Importer</span>
                   </Button>
-                  <Button
-                    variant="outline"
+                  <Button 
+                    variant="outline" 
                     size="sm"
-                    className="flex-1 md:flex-none"
                     onClick={() => setShowModalCreneaux(true)}
                   >
                     <Settings size={16} />
-                    <span className="hidden md:inline ml-2">Créneaux</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={chargerRendezVous}
+                  >
+                    <RefreshCw size={16} />
                   </Button>
                 </div>
               </div>
             </Card>
 
-            {/* Calendrier Semaine - Responsive */}
+            {/* Calendrier Semaine */}
             {vue === "semaine" && (
-              <Card className="p-4 md:p-6">
+              <Card className="p-6">
                 {/* En-tête des jours */}
-                <div className="hidden md:grid md:grid-cols-8 gap-1 mb-4">
+                <div className="grid grid-cols-8 gap-1 mb-4">
                   <div className="p-3"></div>
                   {joursSemaine.map((date, index) => {
                     const estAujourdhui = date.toDateString() === new Date().toDateString();
                     return (
-                      <div key={index} className={`p-3 text-center rounded-lg ${estAujourdhui ? 'bg-blue-100 border border-blue-200' : 'bg-gray-50'
-                        }`}>
+                      <div key={index} className={`p-3 text-center rounded-lg ${
+                        estAujourdhui ? 'bg-blue-100 border border-blue-200' : 'bg-gray-50'
+                      }`}>
                         <div className="font-semibold capitalize" style={{ color: '#0A0A0A' }}>
                           {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
                         </div>
@@ -904,50 +1212,31 @@ const CalendarPage = () => {
                   })}
                 </div>
 
-                {/* Version mobile - Header scrollable */}
-                <div className="md:hidden flex mb-4 overflow-x-auto pb-2 -mx-4 px-4">
-                  {joursSemaine.map((date, index) => {
-                    const estAujourdhui = date.toDateString() === new Date().toDateString();
-                    return (
-                      <div
-                        key={index}
-                        className={`flex-shrink-0 w-16 p-2 text-center rounded-lg mx-1 ${estAujourdhui ? 'bg-blue-100 border border-blue-200' : 'bg-gray-50'
-                          }`}
-                      >
-                        <div className="font-semibold text-xs" style={{ color: '#0A0A0A' }}>
-                          {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
-                        </div>
-                        <div className={`text-sm font-bold ${estAujourdhui ? 'text-blue-600' : 'text-gray-900'}`}>
-                          {date.getDate()}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Grille horaire Desktop */}
-                <div className="hidden md:block relative">
+                {/* Grille horaire */}
+                <div className="relative">
                   {heuresJournee.map(heure => (
-                    <div key={heure} className="flex border-t border-gray-200">
+                    <div key={heure} className="flex border-t border-gray-200 min-h-16">
                       <div className="w-20 py-2 pr-4 text-right text-sm text-gray-500">
                         {formaterHeure(heure)}
                       </div>
-
+                      
                       {joursSemaine.map((date, jourIndex) => {
                         const rdvs = getRendezVousPourJourHeure(date, heure);
                         return (
-                          <div
-                            key={jourIndex}
+                          <div 
+                            key={jourIndex} 
                             className="flex-1 min-h-16 border-l border-gray-200 relative"
                           >
                             {rdvs.map((rdv, rdvIndex) => {
-                              const TypeIcon = TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
+                              const TypeIcon = rdv.icone || TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
+                              const styleRendezVous = getStyleRendezVous(rdv);
+                              
                               return (
                                 <div
                                   key={rdv.id}
-                                  className="absolute left-1 right-1 rounded-lg p-2 text-white text-xs cursor-pointer hover:shadow-md transition-all duration-200"
+                                  className="absolute left-1 right-1 rounded-lg p-2 text-white text-xs cursor-pointer hover:shadow-lg transition-all duration-200 border border-white border-opacity-30"
                                   style={{
-                                    ...getStyleRendezVous(rdv),
+                                    ...styleRendezVous,
                                     backgroundColor: rdv.couleur,
                                     zIndex: 10 + rdvIndex
                                   }}
@@ -956,17 +1245,16 @@ const CalendarPage = () => {
                                     setShowModalRendezVous(true);
                                   }}
                                 >
-                                  <div className="font-semibold truncate">
+                                  <div className="font-semibold truncate mb-1">
                                     {rdv.titre}
                                   </div>
-                                  <div className="flex items-center gap-1 mt-1">
+                                  <div className="flex items-center gap-1 opacity-90">
                                     <TypeIcon size={10} />
-                                    <span>{rdv.heureDebut} - {rdv.heureFin}</span>
+                                    <span>{rdv.heureDebut}</span>
                                   </div>
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <Badge
-                                      className={`text-xs ${STATUT_RENDEZ_VOUS[rdv.statut].color
-                                        }`}
+                                  <div className="mt-1">
+                                    <Badge 
+                                      className={`text-xs ${STATUT_RENDEZ_VOUS[rdv.statut].color} border-0`}
                                     >
                                       {STATUT_RENDEZ_VOUS[rdv.statut].label}
                                     </Badge>
@@ -980,108 +1268,52 @@ const CalendarPage = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Grille horaire Mobile */}
-                <div className="md:hidden space-y-3">
-                  {heuresJournee.map(heure => (
-                    <div key={heure} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                      <div className="text-sm font-medium text-gray-700 mb-3 border-b pb-2">
-                        {formaterHeure(heure)}
-                      </div>
-
-                      <div className="space-y-2">
-                        {joursSemaine.map((date, jourIndex) => {
-                          const rdvs = getRendezVousPourJourHeure(date, heure);
-                          return rdvs.map((rdv, rdvIndex) => {
-                            const TypeIcon = TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
-                            const jourNom = date.toLocaleDateString('fr-FR', { weekday: 'short' });
-                            const jourNum = date.getDate();
-
-                            return (
-                              <div
-                                key={rdv.id}
-                                className="rounded-lg p-3 text-white text-sm cursor-pointer hover:shadow-md transition-all duration-200"
-                                style={{
-                                  backgroundColor: rdv.couleur,
-                                }}
-                                onClick={() => {
-                                  setRendezVousSelectionne(rdv);
-                                  setShowModalRendezVous(true);
-                                }}
-                              >
-                                <div className="flex justify-between items-start mb-2">
-                                  <div className="font-semibold flex-1">
-                                    {rdv.titre}
-                                  </div>
-                                  <div className="text-xs opacity-90 bg-black/20 px-2 py-1 rounded">
-                                    {jourNum} {jourNom}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs opacity-90">
-                                  <TypeIcon size={12} />
-                                  <span>{rdv.heureDebut} - {rdv.heureFin}</span>
-                                </div>
-                                <div className="mt-2">
-                                  <Badge
-                                    className={`text-xs ${STATUT_RENDEZ_VOUS[rdv.statut].color
-                                      }`}
-                                  >
-                                    {STATUT_RENDEZ_VOUS[rdv.statut].label}
-                                  </Badge>
-                                </div>
-                              </div>
-                            );
-                          });
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </Card>
             )}
 
-            {/* Vue Mois - Responsive */}
+            {/* Vue Mois */}
             {vue === "mois" && (
-              <Card className="p-4 md:p-6">
-                <div className="text-center mb-4 md:mb-6">
-                  <h3 className="text-lg md:text-xl font-bold" style={{ color: '#0A0A0A' }}>
+              <Card className="p-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold" style={{ color: '#0A0A0A' }}>
                     {dateCourante.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
                   </h3>
                 </div>
-
-                {/* Grille mois Desktop */}
-                <div className="hidden md:grid md:grid-cols-7 gap-1">
+                
+                <div className="grid grid-cols-7 gap-1">
                   {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(jour => (
                     <div key={jour} className="p-2 text-center font-semibold text-sm" style={{ color: '#5A6470' }}>
                       {jour}
                     </div>
                   ))}
-
+                  
                   {Array.from({ length: 35 }, (_, i) => {
                     const date = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 1);
                     date.setDate(i - date.getDay() + 2);
-
+                    
                     const estCeMois = date.getMonth() === dateCourante.getMonth();
                     const estAujourdhui = date.toDateString() === new Date().toDateString();
-                    const rdvsDuJour = rendezVousFiltres.filter(rdv =>
+                    const rdvsDuJour = rendezVousFiltres.filter(rdv => 
                       rdv.date === date.toISOString().split('T')[0]
                     );
-
+                    
                     return (
                       <div
                         key={i}
-                        className={`min-h-24 p-2 border rounded-lg ${estCeMois
-                            ? estAujourdhui
-                              ? 'bg-blue-50 border-blue-200'
+                        className={`min-h-24 p-2 border rounded-lg ${
+                          estCeMois 
+                            ? estAujourdhui 
+                              ? 'bg-blue-50 border-blue-200' 
                               : 'bg-white'
                             : 'bg-gray-50 text-gray-400'
-                          }`}
+                        }`}
                       >
-                        <div className={`text-sm font-semibold mb-1 ${estAujourdhui ? 'text-blue-600' : 'text-gray-700'
-                          }`}>
+                        <div className={`text-sm font-semibold mb-1 ${
+                          estAujourdhui ? 'text-blue-600' : 'text-gray-700'
+                        }`}>
                           {date.getDate()}
                         </div>
-
+                        
                         <div className="space-y-1">
                           {rdvsDuJour.slice(0, 2).map(rdv => (
                             <div
@@ -1089,10 +1321,10 @@ const CalendarPage = () => {
                               className="text-xs p-1 rounded text-white truncate"
                               style={{ backgroundColor: rdv.couleur }}
                             >
-                              {rdv.heureDebut} {rdv.titre.split(' - ')[0]}
+                              {rdv.heureDebut} {rdv.titre}
                             </div>
                           ))}
-
+                          
                           {rdvsDuJour.length > 2 && (
                             <div className="text-xs text-gray-500">
                               +{rdvsDuJour.length - 2} autres
@@ -1103,52 +1335,10 @@ const CalendarPage = () => {
                     );
                   })}
                 </div>
-
-                {/* Grille mois Mobile */}
-                <div className="md:hidden grid grid-cols-7 gap-1">
-                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(jour => (
-                    <div key={jour} className="p-1 text-center font-semibold text-xs" style={{ color: '#5A6470' }}>
-                      {jour}
-                    </div>
-                  ))}
-
-                  {Array.from({ length: 35 }, (_, i) => {
-                    const date = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 1);
-                    date.setDate(i - date.getDay() + 2);
-
-                    const estCeMois = date.getMonth() === dateCourante.getMonth();
-                    const estAujourdhui = date.toDateString() === new Date().toDateString();
-                    const rdvsDuJour = rendezVousFiltres.filter(rdv =>
-                      rdv.date === date.toISOString().split('T')[0]
-                    );
-
-                    return (
-                      <div
-                        key={i}
-                        className={`min-h-12 p-1 border rounded ${estCeMois
-                            ? estAujourdhui
-                              ? 'bg-blue-50 border-blue-200'
-                              : 'bg-white'
-                            : 'bg-gray-50 text-gray-400'
-                          }`}
-                      >
-                        <div className={`text-xs font-semibold ${estAujourdhui ? 'text-blue-600' : 'text-gray-700'
-                          }`}>
-                          {date.getDate()}
-                        </div>
-
-                        {rdvsDuJour.length > 0 && (
-                          <div className="mt-1 flex justify-center">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: rdvsDuJour[0].couleur }}></div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
               </Card>
             )}
           </div>
+
           {/* Colonne latérale */}
           <div className="space-y-6">
             {/* Rendez-vous du jour */}
@@ -1157,13 +1347,13 @@ const CalendarPage = () => {
                 <Star size={20} />
                 Aujourd'hui
               </h3>
-
+              
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {rendezVousFiltres
                   .filter(rdv => rdv.date === new Date().toISOString().split('T')[0])
                   .sort((a, b) => a.heureDebut.localeCompare(b.heureDebut))
                   .map(rdv => {
-                    const TypeIcon = TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
+                    const TypeIcon = rdv.icone || TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
                     return (
                       <div
                         key={rdv.id}
@@ -1184,18 +1374,18 @@ const CalendarPage = () => {
                             {STATUT_RENDEZ_VOUS[rdv.statut].label}
                           </Badge>
                         </div>
-
+                        
                         <div className="text-sm font-medium mb-1" style={{ color: '#0A0A0A' }}>
                           {rdv.titre}
                         </div>
-
+                        
                         <div className="text-xs" style={{ color: '#5A6470' }}>
                           {rdv.client.nom}
                         </div>
                       </div>
                     );
                   })}
-
+                
                 {rendezVousFiltres.filter(rdv => rdv.date === new Date().toISOString().split('T')[0]).length === 0 && (
                   <div className="text-center py-4 text-gray-500">
                     Aucun rendez-vous aujourd'hui
@@ -1214,7 +1404,7 @@ const CalendarPage = () => {
                   {creneauxRecurrents.filter(c => c.actif).length} actifs
                 </Badge>
               </div>
-
+              
               <div className="space-y-2">
                 {creneauxRecurrents.slice(0, 5).map(creneau => (
                   <div key={creneau.id} className="flex items-center justify-between p-2 border rounded">
@@ -1232,55 +1422,14 @@ const CalendarPage = () => {
                   </div>
                 ))}
               </div>
-
-              <Button
-                variant="outline"
+              
+              <Button 
+                variant="outline" 
                 className="w-full mt-3"
                 onClick={() => setShowModalCreneaux(true)}
               >
                 Gérer les créneaux
               </Button>
-            </Card>
-
-            {/* Intégrations calendrier */}
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4" style={{ color: '#0A0A0A' }}>
-                Synchronisation
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
-                      <CalendarIcon size={16} className="text-red-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium" style={{ color: '#0A0A0A' }}>Google Calendar</div>
-                      <div className="text-xs" style={{ color: '#5A6470' }}>Synchronisé</div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={synchronisation.google}
-                    onCheckedChange={() => toggleSynchronisation('google')}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-                      <CalendarIcon size={16} className="text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium" style={{ color: '#0A0A0A' }}>Outlook</div>
-                      <div className="text-xs" style={{ color: '#5A6470' }}>Non connecté</div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={synchronisation.outlook}
-                    onCheckedChange={() => toggleSynchronisation('outlook')}
-                  />
-                </div>
-              </div>
             </Card>
           </div>
         </div>
@@ -1296,6 +1445,7 @@ const CalendarPage = () => {
         rendezVous={rendezVousSelectionne}
         onSave={sauvegarderRendezVous}
         onDelete={supprimerRendezVous}
+        onRefresh={chargerRendezVous}
       />
 
       <ModalCreneaux
@@ -1305,7 +1455,7 @@ const CalendarPage = () => {
         onSaveCreneaux={sauvegarderCreneaux}
       />
 
-      <style>{`
+      <style jsx>{`
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
