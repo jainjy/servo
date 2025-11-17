@@ -41,6 +41,7 @@ import {
   Trash2,
   Package, // Icône pour Mes Commandes
   AlertCircle,
+  Calendar1,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -923,6 +924,14 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                     <CreditCard className="h-4 w-4 text-gray-700" />
                     <span className="text-sm font-medium">Paiements</span>
                   </Link>
+                  <Link
+                    to="/mon-compte/agenda"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <Calendar1 className="h-4 w-4 text-gray-700" />
+                    <span className="text-sm font-medium">Mon agenda</span>
+                  </Link>
                   <button
                     onClick={() => {
                       setIsLogoutDialogOpen(true);
@@ -1412,6 +1421,12 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                       >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/agenda")}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {/* Mon agenda */}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>

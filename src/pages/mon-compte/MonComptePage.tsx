@@ -769,6 +769,13 @@ export default function MonComptePage() {
                   >
                     Mes demandes immobilières
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => handleNavigation("/mon-compte/agenda")}
+                  >
+                    Mon Agenda
+                  </Button>
                 </CardContent>
               </Card>
 
