@@ -71,6 +71,9 @@ const PodcastsInvestissement: React.FC = () => {
     "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
   ];
 
+  // Image de background pour le titre (image moderne liée à la finance/investissement)
+  const headerBackgroundImage = "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
+
   // Charger les médias de la catégorie Investissement
   useEffect(() => {
     const fetchMedia = async () => {
@@ -294,7 +297,7 @@ const PodcastsInvestissement: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500',
+      'Investissement': 'bg-gradient-to-r from-blue-500 to-blue-600',
       'Entreprise': 'bg-gradient-to-r from-indigo-500 to-purple-500',
       'Assurance et Finance': 'bg-gradient-to-r from-green-500 to-emerald-500',
       'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
@@ -321,7 +324,7 @@ const PodcastsInvestissement: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 bg-blue-600 mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
           <div className="text-gray-600">Chargement des contenus Investissement...</div>
         </div>
       </div>
@@ -342,7 +345,7 @@ const PodcastsInvestissement: React.FC = () => {
   const MediaCard = ({ episode }: { episode: MediaEpisode }) => (
     <div
       className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
-        episode.featured ? 'border-2 bg-blue-600' : 'border-gray-200'
+        episode.featured ? 'border-2 border-blue-600' : 'border-gray-200'
       }`}
     >
       {episode.featured && (
@@ -414,7 +417,7 @@ const PodcastsInvestissement: React.FC = () => {
             className={`flex items-center px-4 py-2 rounded-lg text-white transition-colors group/btn ${
               episode.type === 'video' 
                 ? 'bg-slate-900 hover:bg-purple-700' 
-                : 'bg-blue-600 hover:bg-amber-700'
+                : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
             {episode.type === 'video' ? (
@@ -430,146 +433,169 @@ const PodcastsInvestissement: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 mt-12 py-8">
-      {/* En-tête */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
-          <div className="flex items-center">
-            <TrendingUp className="w-10 h-10 mr-2 text-blue-600" />
-            <BarChart3 className="w-10 h-10 mr-4 text-blue-600" />
-          </div>
-          Contenus Investissement & Marchés
-        </h1>
-        <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-          Maîtrisez les stratégies d'investissement, analysez les marchés financiers et développez votre patrimoine avec nos experts.
-        </p>
-        <div className="mt-4 flex items-center justify-center space-x-6 text-sm text-gray-500">
-          <div className="flex items-center">
-            <Headphones className="w-4 h-4 mr-1" />
-            {mediaEpisodes.reduce((total, ep) => total + ep.listens, 0).toLocaleString()} écoutes totales
-          </div>
-          <div className="flex items-center">
-            <Music className="w-4 h-4 mr-1" />
-            {audioEpisodes.length} podcasts audio
-          </div>
-          <div className="flex items-center">
-            <Video className="w-4 h-4 mr-1" />
-            {videoEpisodes.length} vidéos
+    <div className="min-h-screen bg-white">
+      {/* Hero Section avec Image de Background */}
+      <div 
+        className="relative py-20 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${headerBackgroundImage})` }}
+      >
+        {/* Overlay sombre pour améliorer la lisibilité */}
+        <div className="absolute inset-0 bg-black/50"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center text-white">
+            {/* Titre Principal */}
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+              Investissement <span className="text-blue-400">&</span> Marchés
+            </h1>
+
+            {/* Sous-titre */}
+            <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
+              Maîtrisez les stratégies d'investissement, analysez les marchés financiers et développez votre patrimoine avec nos experts.
+            </p>
+
+            {/* Statistiques */}
+            <div className="flex flex-wrap justify-center items-center gap-8 text-gray-200">
+              <div className="flex items-center">
+                <Headphones className="w-6 h-6 mr-2" />
+                <span className="text-2xl font-bold text-white">{mediaEpisodes.reduce((total, ep) => total + ep.listens, 0).toLocaleString()}</span>
+                <span className="ml-2">écoutes totales</span>
+              </div>
+              <div className="flex items-center">
+                <Music className="w-6 h-6 mr-2" />
+                <span className="text-2xl font-bold text-white">{audioEpisodes.length}</span>
+                <span className="ml-2">podcasts audio</span>
+              </div>
+              <div className="flex items-center">
+                <Video className="w-6 h-6 mr-2" />
+                <span className="text-2xl font-bold text-white">{videoEpisodes.length}</span>
+                <span className="ml-2">vidéos formation</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{mediaEpisodes.length}</div>
-          <div className="text-sm text-amber-700">Contenus total</div>
-        </div>
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">
-            {mediaEpisodes.reduce((total, ep) => total + ep.listens, 0).toLocaleString()}
+      {/* Contenu Principal */}
+      <div className="container mx-auto px-4 py-12">
+        {/* Cartes Statistiques */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 text-center transform hover:scale-105 transition-transform duration-300">
+            <div className="text-3xl font-bold text-blue-600 mb-2">{mediaEpisodes.length}</div>
+            <div className="text-sm font-semibold text-gray-700">Contenus total</div>
           </div>
-          <div className="text-sm text-blue-700">Écoutes totales</div>
-        </div>
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">
-            {audioEpisodes.length}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 text-center transform hover:scale-105 transition-transform duration-300">
+            <div className="text-3xl font-bold text-blue-600 mb-2">
+              {mediaEpisodes.reduce((total, ep) => total + ep.listens, 0).toLocaleString()}
+            </div>
+            <div className="text-sm font-semibold text-gray-700">Écoutes totales</div>
           </div>
-          <div className="text-sm text-purple-700">Podcasts audio</div>
-        </div>
-        <div className="bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-200 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-slate-600">
-            {videoEpisodes.length}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 text-center transform hover:scale-105 transition-transform duration-300">
+            <div className="text-3xl font-bold text-purple-600 mb-2">{audioEpisodes.length}</div>
+            <div className="text-sm font-semibold text-gray-700">Podcasts audio</div>
           </div>
-          <div className="text-sm text-slate-700">Vidéos formation</div>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 text-center transform hover:scale-105 transition-transform duration-300">
+            <div className="text-3xl font-bold text-slate-600 mb-2">{videoEpisodes.length}</div>
+            <div className="text-sm font-semibold text-gray-700">Vidéos formation</div>
+          </div>
         </div>
+
+        {/* Navigation par sections */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-white rounded-2xl shadow-lg p-2 flex space-x-2 border border-gray-200">
+            <button
+              onClick={() => setActiveSection('audio')}
+              className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 ${
+                activeSection === 'audio'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Music className="w-6 h-6" />
+              <span>Podcasts Audio ({audioEpisodes.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveSection('video')}
+              className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 ${
+                activeSection === 'video'
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Video className="w-6 h-6" />
+              <span>Vidéos ({videoEpisodes.length})</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Section Audio */}
+        {activeSection === 'audio' && (
+          <section className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 rounded-2xl">
+                  <Music className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Podcasts Investissement</h2>
+                  <p className="text-gray-600">Écoutez nos experts en finance et marchés</p>
+                </div>
+              </div>
+              <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
+                {audioEpisodes.length} podcast(s) disponible(s)
+              </div>
+            </div>
+
+            {audioEpisodes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {audioEpisodes.map((episode) => (
+                  <MediaCard key={episode.id} episode={episode} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+                <Music className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast audio disponible</h3>
+                <p className="text-gray-500">Revenez plus tard pour découvrir nos nouveaux podcasts investissement</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Section Vidéo */}
+        {activeSection === 'video' && (
+          <section className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-purple-100 rounded-2xl">
+                  <Video className="w-8 h-8 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Vidéos Formation</h2>
+                  <p className="text-gray-600">Apprenez avec nos démonstrations et analyses techniques</p>
+                </div>
+              </div>
+              <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
+                {videoEpisodes.length} vidéo(s) disponible(s)
+              </div>
+            </div>
+
+            {videoEpisodes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {videoEpisodes.map((episode) => (
+                  <MediaCard key={episode.id} episode={episode} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+                <Video className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+                <p className="text-gray-500">Revenez plus tard pour découvrir nos nouvelles vidéos formation</p>
+              </div>
+            )}
+          </section>
+        )}
       </div>
-
-      {/* Navigation par sections */}
-      <div className="flex justify-center mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-2 flex space-x-2">
-          <button
-            onClick={() => setActiveSection('audio')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
-              activeSection === 'audio'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Music className="w-5 h-5" />
-            <span>Podcasts Audio ({audioEpisodes.length})</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('video')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
-              activeSection === 'video'
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Video className="w-5 h-5" />
-            <span>Vidéos ({videoEpisodes.length})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Section Audio */}
-      {activeSection === 'audio' && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Music className="w-8 h-8 mr-3 text-blue-600" />
-              Podcasts Investissement
-            </h2>
-            <div className="text-sm text-gray-500">
-              {audioEpisodes.length} podcast(s) disponible(s)
-            </div>
-          </div>
-
-          {audioEpisodes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {audioEpisodes.map((episode) => (
-                <MediaCard key={episode.id} episode={episode} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl">
-              <Music className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast audio disponible</h3>
-              <p className="text-gray-500">Revenez plus tard pour découvrir nos nouveaux podcasts investissement</p>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Section Vidéo */}
-      {activeSection === 'video' && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Video className="w-8 h-8 mr-3 text-purple-600" />
-              Vidéos Formation & Démonstration
-            </h2>
-            <div className="text-sm text-gray-500">
-              {videoEpisodes.length} vidéo(s) disponible(s)
-            </div>
-          </div>
-
-          {videoEpisodes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videoEpisodes.map((episode) => (
-                <MediaCard key={episode.id} episode={episode} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl">
-              <Video className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
-              <p className="text-gray-500">Revenez plus tard pour découvrir nos nouvelles vidéos formation</p>
-            </div>
-          )}
-        </section>
-      )}
 
       {/* Modal Audio/Video */}
       {isModalOpen && selectedEpisode && (
@@ -656,7 +682,7 @@ const PodcastsInvestissement: React.FC = () => {
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     selectedEpisode.type === 'video' 
                       ? 'bg-purple-100 text-purple-600' 
-                      : 'bg-amber-100 text-blue-600'
+                      : 'bg-blue-100 text-blue-600'
                   }`}>
                     {selectedEpisode.type === 'video' ? 'Vidéo' : 'Audio'}
                   </span>
@@ -717,7 +743,7 @@ const PodcastsInvestissement: React.FC = () => {
                   className={`flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     selectedEpisode.type === 'video'
                       ? 'bg-slate-900 hover:bg-purple-700'
-                      : 'bg-blue-600 hover:bg-amber-700'
+                      : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                 >
                   {isPlaying ? (
