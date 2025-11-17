@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     MapPin,
     Clock,
@@ -15,8 +15,12 @@ import {
     Church,
     Building,
     Landmark,
-    GalleryVerticalEnd
+    GalleryVerticalEnd,
+    X
 } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface LieuHistorique {
     id: string;
@@ -57,6 +61,7 @@ const LieuxHistoriques: React.FC<LieuxHistoriquesProps> = ({
     const [filtreType, setFiltreType] = useState<string>('tous');
     const [tri, setTri] = useState<string>('notation');
     const [lieuSelectionne, setLieuSelectionne] = useState<LieuHistorique | null>(null);
+    const [isMapOpen, setIsMapOpen] = useState(false);
 
     const lieux: LieuHistorique[] = [
         {
@@ -193,6 +198,41 @@ const LieuxHistoriques: React.FC<LieuxHistoriquesProps> = ({
         }
     ];
 
+    // Fonction pour créer les icônes personnalisées pour la carte
+    const getMarkerIcon = (type: string) => {
+        const colors: { [key: string]: string } = {
+            chateau: '#a855f7',
+            eglise: '#3b82f6',
+            musee: '#22c55e',
+            monument: '#f97316',
+            'site-archeologique': '#ef4444'
+        };
+
+        const color = colors[type] || '#6b7280';
+
+        return L.divIcon({
+            html: `
+                <div style="
+                    background-color: ${color};
+                    color: white;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    border: 3px solid white;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                ">
+                    📍
+                </div>
+            `,
+            iconSize: [40, 40],
+            className: 'custom-marker'
+        });
+    };
+
     const types = [
         { value: 'tous', label: 'Tous les types', icon: <GalleryVerticalEnd className="w-4 h-4" /> },
         { value: 'chateau', label: 'Châteaux', icon: <Castle className="w-4 h-4" /> },
@@ -289,10 +329,10 @@ const LieuxHistoriques: React.FC<LieuxHistoriquesProps> = ({
 
                 </div>
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-gray-100 mb-4">
+                    <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
                         Lieux Historiques & Culturels
                     </h1>
-                    <p className="text-sm text-gray-200 max-w-3xl mx-auto">
+                    <p className="text-xs lg:text-sm text-gray-200 max-w-3xl mx-auto">
                         Explorez le patrimoine local et découvrez les trésors historiques de {ville}
                     </p>
                 </div>
@@ -496,7 +536,7 @@ const LieuxHistoriques: React.FC<LieuxHistoriquesProps> = ({
                 </div>
 
                 {/* Carte interactive */}
-                <div className="bg-blue-50 rounded-lg border border-blue-200 p-8">
+                <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 lg:p-8">
                     <div className="text-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">
                             Carte des Lieux Historiques
@@ -506,14 +546,16 @@ const LieuxHistoriques: React.FC<LieuxHistoriquesProps> = ({
                         </p>
                     </div>
 
-                    <div className="bg-white rounded-lg p-6 border border-gray-200">
+                    <div className="bg-white rounded-lg p-1 lg:p-6 border border-gray-200">
                         <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
                             <div className="text-center">
                                 <MapPin className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                                 <p className="text-gray-600 mb-4">
                                     Carte interactive des lieux historiques de {ville}
                                 </p>
-                                <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors duration-200">
+                                <button 
+                                    onClick={() => setIsMapOpen(true)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors duration-200">
                                     Ouvrir la carte
                                 </button>
                             </div>
@@ -529,6 +571,93 @@ const LieuxHistoriques: React.FC<LieuxHistoriquesProps> = ({
                         </div>
                     </div>
                 </div>
+
+                {/* Modal Carte Interactive */}
+                {isMapOpen && (
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="w-full max-w-6xl h-[90vh] bg-white rounded-lg shadow-xl flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-center justify-between border-b border-gray-200 p-4">
+                                <h2 className="text-xl font-bold text-gray-900">Carte des Lieux Historiques</h2>
+                                <button
+                                    onClick={() => setIsMapOpen(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <X className="w-6 h-6 text-gray-600" />
+                                </button>
+                            </div>
+
+                            {/* Map Container */}
+                            <div className="flex-1 relative">
+                                <MapContainer 
+                                    center={[48.8566, 2.3522]} 
+                                    zoom={12} 
+                                    scrollWheelZoom={true}
+                                    className="w-full h-full"
+                                >
+                                    <TileLayer
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    />
+                                    {lieux.map((lieu) => (
+                                        <Marker
+                                            key={lieu.id}
+                                            position={[lieu.coordonnees.lat, lieu.coordonnees.lng]}
+                                            icon={getMarkerIcon(lieu.type)}
+                                        >
+                                            <Popup>
+                                                <div className="max-w-xs">
+                                                    <h3 className="font-bold text-gray-900 mb-2">{lieu.nom}</h3>
+                                                    <p className="text-sm text-gray-600 mb-2">{lieu.description}</p>
+                                                    <div className="text-sm space-y-1">
+                                                        <p><strong>Adresse:</strong> {lieu.adresse}</p>
+                                                        <p><strong>Horaires:</strong> {lieu.horaires.heures}</p>
+                                                        <p><strong>Entrée:</strong> {lieu.prixEntree === 0 ? 'Gratuit' : `${lieu.prixEntree}€`}</p>
+                                                        <div className="flex items-center gap-1 mt-2">
+                                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                                            <span className="text-sm">{lieu.notation} ({lieu.avis} avis)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Popup>
+                                        </Marker>
+                                    ))}
+                                </MapContainer>
+                            </div>
+
+                            {/* Legend */}
+                            <div className="border-t border-gray-200 p-4 bg-gray-50">
+                                <p className="text-sm font-semibold text-gray-900 mb-3">Légende des marqueurs:</p>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                                    {types.slice(1).map((type) => (
+                                        <div key={type.value} className="flex items-center gap-2">
+                                            <div style={{
+                                                backgroundColor: type.value === 'chateau' ? '#a855f7' :
+                                                    type.value === 'eglise' ? '#3b82f6' :
+                                                        type.value === 'musee' ? '#22c55e' :
+                                                            type.value === 'monument' ? '#f97316' :
+                                                                type.value === 'site-archeologique' ? '#ef4444' : '#6b7280',
+                                                borderRadius: '50%',
+                                                width: '20px',
+                                                height: '20px',
+                                                border: '2px solid white',
+                                                boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'white',
+                                                fontSize: '10px'
+                                            }}>
+                                                📍
+                                            </div>
+                                            <span className="text-gray-700">{type.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
