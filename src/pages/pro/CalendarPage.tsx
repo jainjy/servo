@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { 
+import {
   Calendar as CalendarIcon,
   Clock,
   MapPin,
@@ -284,11 +284,10 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete }) => {
                   <button
                     key={couleur}
                     type="button"
-                    className={`w-8 h-8 rounded-full border-2 ${
-                      formData.couleur === couleur
+                    className={`w-8 h-8 rounded-full border-2 ${formData.couleur === couleur
                         ? "border-gray-800"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     style={{ backgroundColor: couleur }}
                     onClick={() => setFormData({ ...formData, couleur })}
                   />
@@ -463,7 +462,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
   };
 
   const toggleCreneau = (id) => {
-    setCreneauxLocaux(creneauxLocaux.map(c => 
+    setCreneauxLocaux(creneauxLocaux.map(c =>
       c.id === id ? { ...c, actif: !c.actif } : c
     ));
   };
@@ -489,19 +488,19 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                 <option key={jour.value} value={jour.value}>{jour.label}</option>
               ))}
             </select>
-            
+
             <Input
               type="time"
               value={nouveauCreneau.debut}
               onChange={(e) => setNouveauCreneau({ ...nouveauCreneau, debut: e.target.value })}
             />
-            
+
             <Input
               type="time"
               value={nouveauCreneau.fin}
               onChange={(e) => setNouveauCreneau({ ...nouveauCreneau, fin: e.target.value })}
             />
-            
+
             <select
               className="p-2 border rounded"
               value={nouveauCreneau.type}
@@ -511,7 +510,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                 <option key={key} value={key}>{type.label}</option>
               ))}
             </select>
-            
+
             <Button onClick={ajouterCreneau} className="whitespace-nowrap">
               <Plus size={16} className="mr-1" />
               Ajouter
@@ -529,7 +528,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                   checked={creneau.actif}
                   onCheckedChange={() => toggleCreneau(creneau.id)}
                 />
-                
+
                 <div className="flex-1 grid grid-cols-4 gap-4">
                   <span className="capitalize font-medium">{creneau.jour}</span>
                   <span>{creneau.debut} - {creneau.fin}</span>
@@ -541,7 +540,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                   </Badge>
                 </div>
               </div>
-              
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -591,7 +590,7 @@ const CalendarPage = () => {
   const getJoursSemaine = () => {
     const debutSemaine = new Date(dateCourante);
     debutSemaine.setDate(dateCourante.getDate() - dateCourante.getDay() + 1);
-    
+
     return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(debutSemaine);
       date.setDate(debutSemaine.getDate() + i);
@@ -606,7 +605,7 @@ const CalendarPage = () => {
     const matchStatut = !filtres.statut || rdv.statut === filtres.statut;
     const matchType = !filtres.type || rdv.type === filtres.type;
     const matchAgent = !filtres.agent || rdv.agent === filtres.agent;
-    
+
     return matchStatut && matchType && matchAgent;
   });
 
@@ -701,9 +700,9 @@ const CalendarPage = () => {
   const getRendezVousPourJourHeure = (date, heure) => {
     const dateStr = date.toISOString().split('T')[0];
     const heureStr = formaterHeure(heure);
-    
-    return rendezVousFiltres.filter(rdv => 
-      rdv.date === dateStr && 
+
+    return rendezVousFiltres.filter(rdv =>
+      rdv.date === dateStr &&
       parseInt(rdv.heureDebut.split(':')[0]) === heure
     );
   };
@@ -712,7 +711,7 @@ const CalendarPage = () => {
     const debutMinutes = parseInt(rdv.heureDebut.split(':')[0]) * 60 + parseInt(rdv.heureDebut.split(':')[1]);
     const finMinutes = parseInt(rdv.heureFin.split(':')[0]) * 60 + parseInt(rdv.heureFin.split(':')[1]);
     const dureeMinutes = finMinutes - debutMinutes;
-    
+
     return {
       top: `${(debutMinutes - 8 * 60) * 0.8}px`,
       height: `${dureeMinutes * 0.8}px`
@@ -723,7 +722,7 @@ const CalendarPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-1 lg:px-4 py-0 lg:py-8">
         {/* En-tête */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div className="flex items-center gap-4 mb-4 lg:mb-0">
@@ -731,16 +730,16 @@ const CalendarPage = () => {
               <CalendarIcon size={32} />
             </div>
             <div>
-              <h1 className="text-4xl font-bold" style={{ color: '#0A0A0A' }}>
+              <h1 className="text-xl lg:text-4xl font-bold" style={{ color: '#0A0A0A' }}>
                 Calendrier & Réservations
               </h1>
-              <p className="text-lg" style={{ color: '#5A6470' }}>
+              <p className="text-sm lg:text-lg" style={{ color: '#5A6470' }}>
                 Gérez vos rendez-vous et disponibilités
               </p>
             </div>
           </div>
-          
-          <div className="flex flex-wrap gap-3">
+
+          <div className="grid grid-cols-2 lg:flex flex-wrap gap-3">
             <Button variant="outline" onClick={aujourdhui}>
               Aujourd'hui
             </Button>
@@ -752,7 +751,7 @@ const CalendarPage = () => {
                 <ChevronRight size={16} />
               </Button>
             </div>
-            <select 
+            <select
               className="p-2 border rounded-lg"
               value={vue}
               onChange={(e) => setVue(e.target.value)}
@@ -764,7 +763,7 @@ const CalendarPage = () => {
               style={{ backgroundColor: '#0052FF', color: 'white' }}
               onClick={nouveauRendezVous}
             >
-              <Plus className="mr-2" size={16} />
+              <Plus className="lg:block md:block hidden mr-2" size={16} />
               Nouveau rendez-vous
             </Button>
           </div>
@@ -821,73 +820,79 @@ const CalendarPage = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           {/* Colonne principale - Calendrier */}
           <div className="xl:col-span-3">
-            {/* Barre de filtres */}
-            <Card className="p-6 mb-6">
+            {/* Barre de filtres - Responsive */}
+            <Card className="p-4 md:p-6 mb-4 md:mb-6">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                <div className="flex-1 flex flex-wrap gap-4">
-                  <select
-                    className="p-2 border rounded-lg text-sm"
-                    value={filtres.statut}
-                    onChange={(e) => setFiltres({ ...filtres, statut: e.target.value })}
-                  >
-                    <option value="">Tous les statuts</option>
-                    {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
-                      <option key={key} value={key}>{statut.label}</option>
-                    ))}
-                  </select>
-                  
-                  <select
-                    className="p-2 border rounded-lg text-sm"
-                    value={filtres.type}
-                    onChange={(e) => setFiltres({ ...filtres, type: e.target.value })}
-                  >
-                    <option value="">Tous les types</option>
-                    {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
-                      <option key={key} value={key}>{type.label}</option>
-                    ))}
-                  </select>
-                  
-                  <select
-                    className="p-2 border rounded-lg text-sm"
-                    value={filtres.agent}
-                    onChange={(e) => setFiltres({ ...filtres, agent: e.target.value })}
-                  >
-                    <option value="">Tous les agents</option>
-                    <option value="Pierre Dubois">Pierre Dubois</option>
-                    <option value="Sophie Lambert">Sophie Lambert</option>
-                  </select>
+                <div className="flex-1 w-full md:w-auto">
+                  <div className="grid grid-cols-1 md:flex md:flex-wrap gap-3 md:gap-4">
+                    <select
+                      className="w-full md:w-auto p-3 border rounded-lg text-sm md:text-base bg-white flex-1 md:flex-none"
+                      value={filtres.statut}
+                      onChange={(e) => setFiltres({ ...filtres, statut: e.target.value })}
+                    >
+                      <option value="">Tous les statuts</option>
+                      {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
+                        <option key={key} value={key}>{statut.label}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="w-full md:w-auto p-3 border rounded-lg text-sm md:text-base bg-white flex-1 md:flex-none"
+                      value={filtres.type}
+                      onChange={(e) => setFiltres({ ...filtres, type: e.target.value })}
+                    >
+                      <option value="">Tous les types</option>
+                      {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
+                        <option key={key} value={key}>{type.label}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="w-full md:w-auto p-3 border rounded-lg text-sm md:text-base bg-white flex-1 md:flex-none"
+                      value={filtres.agent}
+                      onChange={(e) => setFiltres({ ...filtres, agent: e.target.value })}
+                    >
+                      <option value="">Tous les agents</option>
+                      <option value="Pierre Dubois">Pierre Dubois</option>
+                      <option value="Sophie Lambert">Sophie Lambert</option>
+                    </select>
+                  </div>
                 </div>
-                
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={exporterCalendrier}>
+
+                {/* Boutons d'action */}
+                <div className="flex gap-2 w-full md:w-auto justify-between md:justify-start">
+                  <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={exporterCalendrier}>
                     <Download size={16} />
+                    <span className="hidden md:inline ml-2">Exporter</span>
                   </Button>
-                  <Button variant="outline" size="sm" onClick={importerCalendrier}>
+                  <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={importerCalendrier}>
                     <Upload size={16} />
+                    <span className="hidden md:inline ml-2">Importer</span>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
+                    className="flex-1 md:flex-none"
                     onClick={() => setShowModalCreneaux(true)}
                   >
                     <Settings size={16} />
+                    <span className="hidden md:inline ml-2">Créneaux</span>
                   </Button>
                 </div>
               </div>
             </Card>
 
-            {/* Calendrier Semaine */}
+            {/* Calendrier Semaine - Responsive */}
             {vue === "semaine" && (
-              <Card className="p-6">
+              <Card className="p-4 md:p-6">
                 {/* En-tête des jours */}
-                <div className="grid grid-cols-8 gap-1 mb-4">
+                <div className="hidden md:grid md:grid-cols-8 gap-1 mb-4">
                   <div className="p-3"></div>
                   {joursSemaine.map((date, index) => {
                     const estAujourdhui = date.toDateString() === new Date().toDateString();
                     return (
-                      <div key={index} className={`p-3 text-center rounded-lg ${
-                        estAujourdhui ? 'bg-blue-100 border border-blue-200' : 'bg-gray-50'
-                      }`}>
+                      <div key={index} className={`p-3 text-center rounded-lg ${estAujourdhui ? 'bg-blue-100 border border-blue-200' : 'bg-gray-50'
+                        }`}>
                         <div className="font-semibold capitalize" style={{ color: '#0A0A0A' }}>
                           {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
                         </div>
@@ -899,19 +904,40 @@ const CalendarPage = () => {
                   })}
                 </div>
 
-                {/* Grille horaire */}
-                <div className="relative">
+                {/* Version mobile - Header scrollable */}
+                <div className="md:hidden flex mb-4 overflow-x-auto pb-2 -mx-4 px-4">
+                  {joursSemaine.map((date, index) => {
+                    const estAujourdhui = date.toDateString() === new Date().toDateString();
+                    return (
+                      <div
+                        key={index}
+                        className={`flex-shrink-0 w-16 p-2 text-center rounded-lg mx-1 ${estAujourdhui ? 'bg-blue-100 border border-blue-200' : 'bg-gray-50'
+                          }`}
+                      >
+                        <div className="font-semibold text-xs" style={{ color: '#0A0A0A' }}>
+                          {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
+                        </div>
+                        <div className={`text-sm font-bold ${estAujourdhui ? 'text-blue-600' : 'text-gray-900'}`}>
+                          {date.getDate()}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Grille horaire Desktop */}
+                <div className="hidden md:block relative">
                   {heuresJournee.map(heure => (
                     <div key={heure} className="flex border-t border-gray-200">
                       <div className="w-20 py-2 pr-4 text-right text-sm text-gray-500">
                         {formaterHeure(heure)}
                       </div>
-                      
+
                       {joursSemaine.map((date, jourIndex) => {
                         const rdvs = getRendezVousPourJourHeure(date, heure);
                         return (
-                          <div 
-                            key={jourIndex} 
+                          <div
+                            key={jourIndex}
                             className="flex-1 min-h-16 border-l border-gray-200 relative"
                           >
                             {rdvs.map((rdv, rdvIndex) => {
@@ -938,10 +964,9 @@ const CalendarPage = () => {
                                     <span>{rdv.heureDebut} - {rdv.heureFin}</span>
                                   </div>
                                   <div className="flex items-center gap-1 mt-1">
-                                    <Badge 
-                                      className={`text-xs ${
-                                        STATUT_RENDEZ_VOUS[rdv.statut].color
-                                      }`}
+                                    <Badge
+                                      className={`text-xs ${STATUT_RENDEZ_VOUS[rdv.statut].color
+                                        }`}
                                     >
                                       {STATUT_RENDEZ_VOUS[rdv.statut].label}
                                     </Badge>
@@ -955,52 +980,108 @@ const CalendarPage = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* Grille horaire Mobile */}
+                <div className="md:hidden space-y-3">
+                  {heuresJournee.map(heure => (
+                    <div key={heure} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      <div className="text-sm font-medium text-gray-700 mb-3 border-b pb-2">
+                        {formaterHeure(heure)}
+                      </div>
+
+                      <div className="space-y-2">
+                        {joursSemaine.map((date, jourIndex) => {
+                          const rdvs = getRendezVousPourJourHeure(date, heure);
+                          return rdvs.map((rdv, rdvIndex) => {
+                            const TypeIcon = TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
+                            const jourNom = date.toLocaleDateString('fr-FR', { weekday: 'short' });
+                            const jourNum = date.getDate();
+
+                            return (
+                              <div
+                                key={rdv.id}
+                                className="rounded-lg p-3 text-white text-sm cursor-pointer hover:shadow-md transition-all duration-200"
+                                style={{
+                                  backgroundColor: rdv.couleur,
+                                }}
+                                onClick={() => {
+                                  setRendezVousSelectionne(rdv);
+                                  setShowModalRendezVous(true);
+                                }}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="font-semibold flex-1">
+                                    {rdv.titre}
+                                  </div>
+                                  <div className="text-xs opacity-90 bg-black/20 px-2 py-1 rounded">
+                                    {jourNum} {jourNom}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs opacity-90">
+                                  <TypeIcon size={12} />
+                                  <span>{rdv.heureDebut} - {rdv.heureFin}</span>
+                                </div>
+                                <div className="mt-2">
+                                  <Badge
+                                    className={`text-xs ${STATUT_RENDEZ_VOUS[rdv.statut].color
+                                      }`}
+                                  >
+                                    {STATUT_RENDEZ_VOUS[rdv.statut].label}
+                                  </Badge>
+                                </div>
+                              </div>
+                            );
+                          });
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </Card>
             )}
 
-            {/* Vue Mois */}
+            {/* Vue Mois - Responsive */}
             {vue === "mois" && (
-              <Card className="p-6">
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold" style={{ color: '#0A0A0A' }}>
+              <Card className="p-4 md:p-6">
+                <div className="text-center mb-4 md:mb-6">
+                  <h3 className="text-lg md:text-xl font-bold" style={{ color: '#0A0A0A' }}>
                     {dateCourante.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
                   </h3>
                 </div>
-                
-                <div className="grid grid-cols-7 gap-1">
+
+                {/* Grille mois Desktop */}
+                <div className="hidden md:grid md:grid-cols-7 gap-1">
                   {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(jour => (
                     <div key={jour} className="p-2 text-center font-semibold text-sm" style={{ color: '#5A6470' }}>
                       {jour}
                     </div>
                   ))}
-                  
+
                   {Array.from({ length: 35 }, (_, i) => {
                     const date = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 1);
                     date.setDate(i - date.getDay() + 2);
-                    
+
                     const estCeMois = date.getMonth() === dateCourante.getMonth();
                     const estAujourdhui = date.toDateString() === new Date().toDateString();
-                    const rdvsDuJour = rendezVousFiltres.filter(rdv => 
+                    const rdvsDuJour = rendezVousFiltres.filter(rdv =>
                       rdv.date === date.toISOString().split('T')[0]
                     );
-                    
+
                     return (
                       <div
                         key={i}
-                        className={`min-h-24 p-2 border rounded-lg ${
-                          estCeMois 
-                            ? estAujourdhui 
-                              ? 'bg-blue-50 border-blue-200' 
+                        className={`min-h-24 p-2 border rounded-lg ${estCeMois
+                            ? estAujourdhui
+                              ? 'bg-blue-50 border-blue-200'
                               : 'bg-white'
                             : 'bg-gray-50 text-gray-400'
-                        }`}
+                          }`}
                       >
-                        <div className={`text-sm font-semibold mb-1 ${
-                          estAujourdhui ? 'text-blue-600' : 'text-gray-700'
-                        }`}>
+                        <div className={`text-sm font-semibold mb-1 ${estAujourdhui ? 'text-blue-600' : 'text-gray-700'
+                          }`}>
                           {date.getDate()}
                         </div>
-                        
+
                         <div className="space-y-1">
                           {rdvsDuJour.slice(0, 2).map(rdv => (
                             <div
@@ -1011,7 +1092,7 @@ const CalendarPage = () => {
                               {rdv.heureDebut} {rdv.titre.split(' - ')[0]}
                             </div>
                           ))}
-                          
+
                           {rdvsDuJour.length > 2 && (
                             <div className="text-xs text-gray-500">
                               +{rdvsDuJour.length - 2} autres
@@ -1022,10 +1103,52 @@ const CalendarPage = () => {
                     );
                   })}
                 </div>
+
+                {/* Grille mois Mobile */}
+                <div className="md:hidden grid grid-cols-7 gap-1">
+                  {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(jour => (
+                    <div key={jour} className="p-1 text-center font-semibold text-xs" style={{ color: '#5A6470' }}>
+                      {jour}
+                    </div>
+                  ))}
+
+                  {Array.from({ length: 35 }, (_, i) => {
+                    const date = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 1);
+                    date.setDate(i - date.getDay() + 2);
+
+                    const estCeMois = date.getMonth() === dateCourante.getMonth();
+                    const estAujourdhui = date.toDateString() === new Date().toDateString();
+                    const rdvsDuJour = rendezVousFiltres.filter(rdv =>
+                      rdv.date === date.toISOString().split('T')[0]
+                    );
+
+                    return (
+                      <div
+                        key={i}
+                        className={`min-h-12 p-1 border rounded ${estCeMois
+                            ? estAujourdhui
+                              ? 'bg-blue-50 border-blue-200'
+                              : 'bg-white'
+                            : 'bg-gray-50 text-gray-400'
+                          }`}
+                      >
+                        <div className={`text-xs font-semibold ${estAujourdhui ? 'text-blue-600' : 'text-gray-700'
+                          }`}>
+                          {date.getDate()}
+                        </div>
+
+                        {rdvsDuJour.length > 0 && (
+                          <div className="mt-1 flex justify-center">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: rdvsDuJour[0].couleur }}></div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </Card>
             )}
           </div>
-
           {/* Colonne latérale */}
           <div className="space-y-6">
             {/* Rendez-vous du jour */}
@@ -1034,7 +1157,7 @@ const CalendarPage = () => {
                 <Star size={20} />
                 Aujourd'hui
               </h3>
-              
+
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {rendezVousFiltres
                   .filter(rdv => rdv.date === new Date().toISOString().split('T')[0])
@@ -1061,18 +1184,18 @@ const CalendarPage = () => {
                             {STATUT_RENDEZ_VOUS[rdv.statut].label}
                           </Badge>
                         </div>
-                        
+
                         <div className="text-sm font-medium mb-1" style={{ color: '#0A0A0A' }}>
                           {rdv.titre}
                         </div>
-                        
+
                         <div className="text-xs" style={{ color: '#5A6470' }}>
                           {rdv.client.nom}
                         </div>
                       </div>
                     );
                   })}
-                
+
                 {rendezVousFiltres.filter(rdv => rdv.date === new Date().toISOString().split('T')[0]).length === 0 && (
                   <div className="text-center py-4 text-gray-500">
                     Aucun rendez-vous aujourd'hui
@@ -1091,7 +1214,7 @@ const CalendarPage = () => {
                   {creneauxRecurrents.filter(c => c.actif).length} actifs
                 </Badge>
               </div>
-              
+
               <div className="space-y-2">
                 {creneauxRecurrents.slice(0, 5).map(creneau => (
                   <div key={creneau.id} className="flex items-center justify-between p-2 border rounded">
@@ -1109,9 +1232,9 @@ const CalendarPage = () => {
                   </div>
                 ))}
               </div>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 className="w-full mt-3"
                 onClick={() => setShowModalCreneaux(true)}
               >
@@ -1124,7 +1247,7 @@ const CalendarPage = () => {
               <h3 className="text-xl font-bold mb-4" style={{ color: '#0A0A0A' }}>
                 Synchronisation
               </h3>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
@@ -1141,7 +1264,7 @@ const CalendarPage = () => {
                     onCheckedChange={() => toggleSynchronisation('google')}
                   />
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">

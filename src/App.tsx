@@ -142,6 +142,7 @@ import PodcastsDomicile from "./components/components/PodcastsDomicil";
 import PodcastsBienEtre from "./components/PodcastsBienEtre";
 import LieuxHistoriques from "./components/components/Tourisme_lieux";
 import ConstructionServicesPage from "./pages/BatimentPage";
+import PricingPacksDisplay from "./components/components/PackComplet";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -340,6 +341,7 @@ const App = () => {
                   <Route path="/financement" element={<Financement />} />
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
+                  <Route path="/pack" element={<PricingPacksDisplay />} />
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"

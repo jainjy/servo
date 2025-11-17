@@ -52,14 +52,15 @@ import type { User as AuthUser } from "@/types/type";
 
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api.js";
+import { describe } from "node:test";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const navigate = useNavigate();
-const [isDeletingAll, setIsDeletingAll] = useState(false);
-const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({});
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({});
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
@@ -165,15 +166,9 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
       title: "IMMOBILIER",
       items: [
         {
-          title: "Vendre ou louer",
-          description: "Vente & location de biens",
+          title: "Annonces immobilières",
+          description: "Trouvez votre prochaine maison",
           href: "/immobilier",
-          image: "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg"
-        },
-        {
-          title: "Annonces & transactions",
-          description: "Nos annonces et transactions",
-          href: "/immobilier-sections",
           image: "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg"
         },
         {
@@ -184,21 +179,23 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
         },
         {
           title: "Gestion & services immobiliers",
-          description: "Gestion locative & syndic",
+          description: "Optimisez la gestion de vos biens",
           href: "/gestion-immobilier",
           image: "https://i.pinimg.com/1200x/a6/6e/47/a66e473e8ed32bb3d153017af507f83c.jpg"
         }, {
           title: "Audit patrimonial & finance",
-          description: "Gestion locative & syndic",
+          description: "Optimisez votre patrimoine immobilier",
           href: "/immobilier-sections",
           image: "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg"
-        }, {
-          title: "Estimation & expertise",
-          description: " Évaluez la valeur de votre bien",
-          href: "/estimation-immobilier",
-          image: "https://i.pinimg.com/1200x/2a/33/c7/2a33c7347de60d0c65be83a72c4495be.jpg"
-        }, {
-          title: "Podcasts & vidéos",
+        },
+        // {
+        //   title: "Estimation & expertise",
+        //   description: " Évaluez la valeur de votre bien",
+        //   href: "/estimation-immobilier",
+        //   image: "https://i.pinimg.com/1200x/2a/33/c7/2a33c7347de60d0c65be83a72c4495be.jpg"
+        // },
+        {
+          title: "Podcasts",
           description: "Vidéos fournies par des experts",
           href: "/podcasts/immobilier",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -256,12 +253,6 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
     {
       title: "ENTREPRISE",
       items: [
-        {
-          title: "Formation",
-          description: "Formations pour entrepreneurs",
-          href: "/entreprise#services",
-          image: "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg"
-        },
         // {
         //   title: "Devenir partenaire",
         //   description: "Rejoignez notre réseau d'experts",
@@ -269,7 +260,7 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
         //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
 
         // },
-         {
+        {
           title: "Création & reprise",
           description: "Accompagnement pour entrepreneurs",
           href: "/reprise",
@@ -303,8 +294,14 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           image: "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg"
 
         },
-     {
-          title: "Podcasts & videos",
+        {
+          title: "Formation",
+          description: "Formations pour entrepreneurs",
+          href: "/entreprise#services",
+          image: "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg"
+        },
+        {
+          title: "Podcasts",
           description: " Ressources pour entrepreneurs",
           href: "/podcast_service",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -316,29 +313,29 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
       title: "CREDIT & ASSURANCE",
       items: [
         {
-          title: "Financement immobilier",
+          title: "Financement",
           description: "Solutions de crédit adaptées à votre projet",
           href: "/financement#partenaires",
           image: "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg"
 
         },
         {
-          title: "Assurance habitation",
+          title: "Assurance",
           description: "Protection complète pour votre logement",
           href: "/financement#assurances",
           image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg"
-        },{
+        }, {
           title: "Aides",
           description: "Solutions d'aides au financement",
           href: "/aide_financement",
           image: "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg"
-        },{
+        }, {
           title: "Formations ",
           description: "Formations au financement et crédit",
           href: "/formation_finance",
           image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
-        },{
-          title: "Podcasts & vidéos",
+        }, {
+          title: "Podcasts",
           description: " Ressources sur le financement",
           href: "/podcasts/assurance-finance",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -348,7 +345,7 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
       title: "BATIMENTS",
       items: [
         {
-          title: "Rénovation & chantiers",
+          title: "Rénovation & construction",
           description: "Experts en rénovation de bâtiments",
           href: "/batiments#renovation-chantiers",
           image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
@@ -360,32 +357,39 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
         //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
         // },
         {
-          title: "Matériaux & viabilisations",
+          title: "Plan & administratifs",
+          description: "Documents administratifs simplifiés",
+          href: "/batiments#materiaux-viabilisations",
+          image: "https://i.pinimg.com/736x/7d/05/6d/7d056d506f943d48a0ca9ad81b85e018.jpg"
+        },
+        {
+          title: "Matériaux de construction",
           description: " Solutions durables pour vos projets",
           href: "/batiments#materiaux-viabilisations",
           image: "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg"
         },
-        {
-          title: "Division parcellaire",
-          description: " Optimisation de l'espace foncier",
-          href: "/batiments#division-parcellaire",
-          image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
-        },{
+        // {
+        //   title: "Division parcellaire",
+        //   description: " Optimisation de l'espace foncier",
+        //   href: "/batiments#division-parcellaire",
+        //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
+        // },
+         {
           title: "Travaux & construction",
           description: " Services de construction professionnels",
           href: "/travaux",
           image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
-        },{
+        }, {
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
           href: "/formation-batiment",
           image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
         }, {
-          title: "Podcasts & vidéos",
-          description: " Formation continue et actualités",
+          title: "Podcasts",
+          description: " Ressources pour le secteur du bâtiment",
           href: "/batiments#podcasts-videos",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
-        }, 
+        },
       ],
     }, {
       title: "DOMICILE",
@@ -422,13 +426,15 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           description: "Gestion efficace de votre domicile",
           href: "/domicile#utilities",
           image: "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg"
-        }, {
-          title: "Matériaux",
-          description: "Matériaux de construction qualité premium",
-          href: "/domicile#materiaux",
-          image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
-        }, {
-          title: "Podcasts & vidéos",
+        }, 
+        // {
+        //   title: "Matériaux",
+        //   description: "Matériaux de construction qualité premium",
+        //   href: "/domicile#materiaux",
+        //   image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
+        // }, 
+        {
+          title: "Podcasts",
           description: "Ressources pour l'aménagement",
           href: "/podcasts/domicile",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -462,7 +468,7 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           image: "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg"
         },
         {
-          title: "Podcasts & vidéos",
+          title: "Podcasts",
           description: "Ressources pour le bien-être",
           href: "/bien-etre",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -494,8 +500,8 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           description: "Livraison de plats de vos restaurants favoris",
           href: "/alimentation",
           image: "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg"
-        },{
-          title: "Podcasts & vidéos",
+        }, {
+          title: "Podcasts ",
           description: " Ressources sur l'alimentation",
           href: "/podcasts/alimentation",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -521,8 +527,8 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           description: "Soutenez des causes tout en investissant",
           href: "/investir/isr",
           image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg"
-        },{
-          title: "Podcasts & vidéos",
+        }, {
+          title: "Podcasts",
           description: "Ressources sur l'investissement",
           href: "/podcasts/investissement",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
@@ -555,7 +561,7 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           description: "Découvertes & aventures",
           href: "/activiteLoisirs",
           image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg"
-        },{
+        }, {
           title: "Lieux historiques & culturels",
           description: "Explorez le patrimoine local",
           href: "/lieux_historique",
@@ -565,14 +571,18 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
           description: "Cours & ateliers locaux",
           href: "/formationTourisme",
           image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg"
-        },{
-          title: "Podcasts & vidéos",
+        }, {
+          title: "Podcasts",
           description: "Ressources sur le tourisme",
           href: "/podcasts/tourisme",
           image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg"
         },
       ],
     },
+    {
+      title: "NOS OFFRES EXCLUSIVES",
+      href: "/pack"
+    }
   ];
 
   const toggleSubmenu = (title: string) => {
@@ -672,38 +682,38 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
     }
   };
 
- const handleMarkAllAsRead = async () => {
-  console.log("🟡 Marquage de toutes les notifications comme lues");
-  
-  setIsDeletingAll(true);
-  
-  // Animation avant la suppression réelle
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  const unreadNotifications = notifications.filter(n => !n.read);
-  let successCount = 0;
+  const handleMarkAllAsRead = async () => {
+    console.log("🟡 Marquage de toutes les notifications comme lues");
 
-  const results = await Promise.allSettled(
-    unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
-  );
+    setIsDeletingAll(true);
 
-  results.forEach((result, index) => {
-    if (result.status === 'fulfilled' && result.value === true) {
-      successCount++;
-    } else {
-      console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
+    // Animation avant la suppression réelle
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const unreadNotifications = notifications.filter(n => !n.read);
+    let successCount = 0;
+
+    const results = await Promise.allSettled(
+      unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
+    );
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value === true) {
+        successCount++;
+      } else {
+        console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
+      }
+    });
+
+    if (successCount > 0) {
+      setNotifications([]);
+      setUnreadCount(0);
+      console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
     }
-  });
 
-  if (successCount > 0) {
-    setNotifications([]);
-    setUnreadCount(0);
-    console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
-  }
-  
-  setIsDeletingAll(false);
-  setNotifications(false);
-};
+    setIsDeletingAll(false);
+    setNotifications(false);
+  };
 
   const handleClearAll = async () => {
     if (!user?.id) return;
@@ -937,7 +947,7 @@ const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({}
                   </button>
                 </div>
               )}
-            
+
             </div>
           </div>
         </SheetContent>

@@ -93,7 +93,7 @@ const BatimentsLayout = () => {
           // Add static sections for Formation & Podcasts and Construction & Plans
           const staticSections = [
             {
-              title: "Podcasts & videos",
+              title: "Podcasts",
               description: "Formation continue et actualités",
               items: [
                 { title: "Formation Rénovation", price: "490€/session", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Techniques rénovation" },
@@ -142,8 +142,8 @@ const BatimentsLayout = () => {
   // Helper function to get section descriptions
   const getSectionDescription = (categoryName) => {
     const descriptions = {
-      "Rénovation & Chantiers": "Experts en rénovation de bâtiments",
-      "Matériaux & Viabilisations": "Solutions durables pour vos projets", 
+      "Rénovation & construction": "Experts en rénovation de bâtiments",
+      "Matériaux de construction": "Solutions durables pour vos projets", 
       "Division Parcellaire": "Optimisation de l'espace foncier",
       "Formation & Podcasts": "Formation continue et actualités",
       "Construction & Plans": "De la conception à la réalisation"
@@ -171,7 +171,7 @@ const BatimentsLayout = () => {
   // Static data fallback for when API fails
   const getStaticFallback = () => [
     {
-      title: "Podcasts & videos",
+      title: "Podcasts",
       description: "Formation continue et actualités",
       items: [
         { title: "Formation Rénovation", price: "490€/session", image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg", description: "Techniques rénovation" },
@@ -273,7 +273,7 @@ const BatimentsLayout = () => {
               </div>
 
               {/* Affichage conditionnel du composant PodcastsBatiment pour la section Formation & Podcasts */}
-              {section.title === "Podcasts & videos" ? (
+              {section.title === "Podcasts" ? (
                 <PodcastsBatiment />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

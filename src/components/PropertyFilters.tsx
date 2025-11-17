@@ -31,9 +31,7 @@ const PropertyFilters = () => {
             <Euro className="h-4 w-4" />
             RAYON
           </Button>
-          <Button >
-          VENDRE / LOUER SON BIEN
-        </Button>
+          
         </div>
         
       </div>

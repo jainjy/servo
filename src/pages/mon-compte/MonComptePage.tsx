@@ -27,6 +27,10 @@ import {
   Check,
   Camera,
   Lock,
+  Box,
+  Settings,
+  Settings2,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
@@ -100,15 +104,15 @@ export default function MonComptePage() {
     user?.role === "admin"
       ? "Administrateur"
       : user?.role === "professional"
-      ? "Professionnel"
-      : "Utilisateur";
+        ? "Professionnel"
+        : "Utilisateur";
 
   const roleColor =
     user?.role === "admin"
       ? "bg-purple-600"
       : user?.role === "professional"
-      ? "bg-blue-600"
-      : "bg-gray-900";
+        ? "bg-blue-600"
+        : "bg-gray-900";
 
   const createdAt = user?.createdAt ? new Date(user.createdAt) : null;
 
@@ -353,309 +357,396 @@ export default function MonComptePage() {
 
   return (
     <>
-      <main className="min-h-screen pt-24 pb-16">
-        {/* Header profil */}
-        <section className="px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-black via-gray-400 to-blue-500 text-white">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/10,transparent_40%),radial-gradient(circle_at_80%_0%,white/5,transparent_35%)]" />
-              <div className="relative p-6 md:p-8">
-                <div className="flex flex-col md:flex-row md:items-center gap-6">
-                  <div className="shrink-0 relative">
-                    <div className="p-1 bg-white/20 rounded-full">
-                      <Avatar
-                        className="w-20 h-20 md:w-24 md:h-24 cursor-pointer"
-                        onClick={handleAvatarClick}
-                      >
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-16">
+        {/* Couverture style Facebook */}
+        <div className="h-64 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 relative">
+          <div className="absolute inset-0 opacity-30">
+            <div className="w-full h-full" style={{
+              backgroundImage: 'url(/metal.jpg)',
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center center',
+            }} />
+          </div>
+        </div>
+
+        {/* Conteneur principal */}
+        <div className="px-4 sm:px-6 lg:px-8 pb-8">
+          <div className="max-w-7xl mx-auto -mt-28 relative z-10">
+            {/* Grille 2 colonnes : Gauche (Profil) + Droite (Édition) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* COLONNE GAUCHE - Profil et infos */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Section Profil */}
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                  {/* En-tête du profil */}
+                  <div className="px-6 py-6">
+                    {/* Avatar */}
+                    <div className="flex flex-col items-center mb-6">
+                      <div className="relative mb-4">
+                        <div className="p-1 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full shadow-lg">
+                          <Avatar
+                            className="w-32 h-32 cursor-pointer border-4 border-white"
+                            onClick={handleAvatarClick}
+                          >
+                            {pendingAvatar ? (
+                              <AvatarImage src={pendingAvatar.preview} alt="Prévisualisation" />
+                            ) : (
+                              user.avatar && (
+                                <AvatarImage
+                                  src={user.avatar}
+                                  alt={`${user.firstName} ${user.lastName}`}
+                                />
+                              )
+                            )}
+                            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-3xl font-semibold">
+                              {uploadingAvatar ? (
+                                <span className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                initials
+                              )}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
                         {pendingAvatar ? (
-                          <AvatarImage src={pendingAvatar.preview} alt="Prévisualisation" />
+                          <div className="absolute -bottom-2 -right-2 flex gap-2">
+                            <button
+                              onClick={handleConfirmAvatar}
+                              disabled={uploadingAvatar}
+                              className="bg-green-500 text-white rounded-full p-2 shadow-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={handleCancelAvatar}
+                              disabled={uploadingAvatar}
+                              className="bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         ) : (
-                          user.avatar && (
-                            <AvatarImage
-                              src={user.avatar}
-                              alt={`${user.firstName} ${user.lastName}`}
-                            />
-                          )
+                          <button
+                            onClick={handleAvatarClick}
+                            disabled={uploadingAvatar}
+                            className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full p-2 shadow-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          >
+                            <Camera className="w-4 h-4" />
+                          </button>
                         )}
-                        <AvatarFallback className="bg-white/20 text-white text-xl font-semibold">
-                          {uploadingAvatar ? (
-                            <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            initials
-                          )}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                    {pendingAvatar ? (
-                      <div className="absolute -bottom-2 -right-2 flex gap-1">
-                        <button
-                          onClick={handleConfirmAvatar}
-                          disabled={uploadingAvatar}
-                          className="bg-green-500 text-white rounded-full p-2 shadow-lg hover:bg-green-600 transition-colors disabled:opacity-50"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={handleCancelAvatar}
-                          disabled={uploadingAvatar}
-                          className="bg-red-500 text-white rounded-full p-2 shadow-lg hover:bg-red-600 transition-colors disabled:opacity-50"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleAvatarChange}
+                          accept="image/*"
+                          className="hidden"
+                        />
                       </div>
-                    ) : (
-                      <button
-                        onClick={handleAvatarClick}
-                        disabled={uploadingAvatar}
-                        className="absolute -bottom-2 -right-2 bg-white text-gray-900 rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
-                      >
-                        <Camera className="w-4 h-4" />
-                      </button>
-                    )}
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleAvatarChange}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h1 className="text-2xl md:text-3xl font-bold">
+
+                      {/* Nom et badges */}
+                      <h1 className="text-2xl font-bold text-gray-900 text-center">
                         {form.firstName
                           ? `${form.firstName} ${form.lastName ?? ""}`.trim()
                           : user.email}
                       </h1>
-                      <Badge
-                        className={`${roleColor} text-white border-white/20`}
-                      >
+                      <Badge className={`${roleColor} text-white text-sm py-1 px-3 mt-2`}>
                         {roleLabel}
                       </Badge>
                     </div>
-                    <p className="text-white/80 text-sm md:text-base flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      {user.email}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm">
-                      {form.phone && (
-                        <span className="inline-flex items-center gap-2">
-                          <Phone className="w-4 h-4" />
-                          {form.phone}
-                        </span>
+
+                    <Separator className="my-4" />
+
+                    {/* Infos principales */}
+                    <div className="space-y-4 text-sm">
+                      <div>
+                        <p className="text-gray-500 mb-1">Email</p>
+                        <p className="text-gray-900 font-medium flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-blue-600" />
+                          {user.email}
+                        </p>
+                      </div>
+                      {user.phone && (
+                        <div>
+                          <p className="text-gray-500 mb-1">Téléphone</p>
+                          <p className="text-gray-900 font-medium flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-blue-600" />
+                            {user.phone}
+                          </p>
+                        </div>
                       )}
-                      {user.role === "professional" && form.companyName && (
-                        <span className="inline-flex items-center gap-2">
-                          <Building className="w-4 h-4" />
-                          {form.companyName}
-                        </span>
+                      {user.city && (
+                        <div>
+                          <p className="text-gray-500 mb-1">Localisation</p>
+                          <p className="text-gray-900 font-medium flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-blue-600" />
+                            {user.city} {user.zipCode && `(${user.zipCode})`}
+                          </p>
+                        </div>
                       )}
                       {createdAt && (
-                        <span className="inline-flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Inscrit le {createdAt.toLocaleDateString()}
-                        </span>
+                        <div>
+                          <p className="text-gray-500 mb-1">Inscrit le</p>
+                          <p className="text-gray-900 font-medium flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-blue-600" />
+                            {createdAt.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                </div>
+
+                {/* Raccourcis */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-blue-600" />
+                    Raccourcis
+                  </h3>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/mes-commandes")}
+                    >
+                      <Box /> Mes commandes
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/reservation")}
+                    >
+                      <Calendar /> Mes réservations
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/demandes")}
+                    >
+                      <Settings2 /> Demandes de services
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
+                    >
+                      🏠 Demandes immobilières
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/payement")}
+                    >
+                      <DollarSign /> Mes paiements
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Infos compte */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                    Compte
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Type</span>
+                      <Badge className="bg-blue-600">{roleLabel}</Badge>
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Statut</span>
+                      <span className="text-green-600 font-semibold">✓ Actif</span>
+                    </div>
+                    {user.kycStatus && (
+                      <>
+                        <Separator />
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Vérification</span>
+                          <span className="font-semibold capitalize text-orange-600">
+                            {user.kycStatus}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* COLONNE DROITE - Formulaires d'édition */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* En-tête avec boutons action */}
+                <div className="bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <Edit3 className="w-6 h-6 text-blue-600" />
+                    {isEditing ? "Modifier mon profil" : "Mon profil"}
+                  </h2>
+                  <div className="flex items-center gap-2">
                     {!isEditing ? (
                       <Button
-                        variant="outline"
-                        className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                        className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
                         onClick={() => setIsEditing(true)}
                       >
-                        <Edit3 className="w-4 h-4 mr-2" />
+                        <Edit3 className="w-4 h-4" />
                         Modifier
                       </Button>
                     ) : (
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
-                          className="bg-white/10 border-white/30 text-white hover:bg-white/20"
                           onClick={handleCancel}
                         >
                           <X className="w-4 h-4 mr-2" />
                           Annuler
                         </Button>
                         <Button
-                          className="bg-white text-gray-900 hover:bg-white/90"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={handleSave}
                           disabled={saving}
                         >
                           {saving ? (
                             <span className="inline-flex items-center gap-2">
-                              <span className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-                              Enregistrement...
+                              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             </span>
                           ) : (
-                            <span className="inline-flex items-center">
-                              <Check className="w-4 h-4 mr-2" />
-                              Enregistrer
-                            </span>
+                            <Check className="w-4 h-4 mr-2" />
                           )}
+                          Enregistrer
                         </Button>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Contenu */}
-        <section className="px-6 mt-8">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Colonne principale */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserIcon className="w-5 h-5" />
-                    Informations personnelles
-                  </CardTitle>
-                  <CardDescription>
-                    Vos informations de base et de contact.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Prénom</Label>
-                      <Input
-                        value={form.firstName}
-                        onChange={onChange("firstName")}
-                        readOnly={!isEditing}
-                        className={!isEditing ? "bg-muted/30" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Nom</Label>
-                      <Input
-                        value={form.lastName}
-                        onChange={onChange("lastName")}
-                        readOnly={!isEditing}
-                        className={!isEditing ? "bg-muted/30" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                {/* Informations personnelles */}
+                {isEditing ? (
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                      <UserIcon className="w-5 h-5 text-blue-600" />
+                      Informations personnelles
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Prénom</Label>
                         <Input
-                          value={user.email}
-                          readOnly
-                          className="pl-9 bg-muted/30"
+                          value={form.firstName}
+                          onChange={onChange("firstName")}
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Téléphone</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Nom</Label>
+                        <Input
+                          value={form.lastName}
+                          onChange={onChange("lastName")}
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Téléphone</Label>
                         <Input
                           value={form.phone}
                           onChange={onChange("phone")}
-                          readOnly={!isEditing}
-                          className={`pl-9 ${!isEditing ? "bg-muted/30" : ""}`}
+                          placeholder="Ex: +33 6 12 34 56 78"
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Adresse</Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Ville</Label>
+                        <Input
+                          value={form.city}
+                          onChange={onChange("city")}
+                          placeholder="Ex: Paris"
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Code postal</Label>
+                        <Input
+                          value={form.zipCode}
+                          onChange={onChange("zipCode")}
+                          placeholder="Ex: 75001"
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Complément d'adresse</Label>
+                        <Input
+                          value={form.addressComplement}
+                          onChange={onChange("addressComplement")}
+                          placeholder="Apt, Suite..."
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label className="text-gray-700 font-semibold">Adresse</Label>
                         <Input
                           value={form.address}
                           onChange={onChange("address")}
-                          readOnly={!isEditing}
-                          className={`pl-9 ${!isEditing ? "bg-muted/30" : ""}`}
+                          placeholder="Rue..."
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label className="text-gray-700 font-semibold">Bio / Descriptif</Label>
+                        <Input
+                          value={form.bio}
+                          onChange={onChange("bio")}
+                          placeholder="Dites-nous quelque chose sur vous..."
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Code postal</Label>
-                      <Input
-                        value={form.zipCode}
-                        onChange={onChange("zipCode")}
-                        readOnly={!isEditing}
-                        className={!isEditing ? "bg-muted/30" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Ville</Label>
-                      <Input
-                        value={form.city}
-                        onChange={onChange("city")}
-                        readOnly={!isEditing}
-                        className={!isEditing ? "bg-muted/30" : ""}
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Complément d'adresse</Label>
-                      <Input
-                        value={form.addressComplement}
-                        onChange={onChange("addressComplement")}
-                        readOnly={!isEditing}
-                        className={!isEditing ? "bg-muted/30" : ""}
-                      />
-                    </div>
-
-                    {user.role === "professional" && (
-                      <>
-                        <div className="space-y-2 md:col-span-2">
-                          <Label>Nom de l'entreprise</Label>
-                          <div className="relative">
-                            <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              value={form.companyName}
-                              onChange={onChange("companyName")}
-                              readOnly={!isEditing}
-                              className={`pl-9 ${
-                                !isEditing ? "bg-muted/30" : ""
-                              }`}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Nom commercial</Label>
-                          <Input
-                            value={form.commercialName}
-                            onChange={onChange("commercialName")}
-                            readOnly={!isEditing}
-                            className={!isEditing ? "bg-muted/30" : ""}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>SIRET</Label>
-                          <Input
-                            value={form.siret}
-                            onChange={onChange("siret")}
-                            readOnly={!isEditing}
-                            className={!isEditing ? "bg-muted/30" : ""}
-                          />
-                        </div>
-                      </>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
+                ) : null}
 
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Sécurité
-                  </CardTitle>
-                  <CardDescription>
-                    Gérez vos paramètres de sécurité.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2 md:col-span-1">
-                      <Label>Mot de passe actuel</Label>
+                {/* Informations professionnelles */}
+                {user.role === "professional" && isEditing && (
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                      <Building className="w-5 h-5 text-blue-600" />
+                      Informations professionnelles
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2 md:col-span-2">
+                        <Label className="text-gray-700 font-semibold">Nom de l'entreprise</Label>
+                        <Input
+                          value={form.companyName}
+                          onChange={onChange("companyName")}
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">Nom commercial</Label>
+                        <Input
+                          value={form.commercialName}
+                          onChange={onChange("commercialName")}
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-gray-700 font-semibold">SIRET</Label>
+                        <Input
+                          value={form.siret}
+                          onChange={onChange("siret")}
+                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sécurité et mot de passe */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <Lock className="w-5 h-5 text-blue-600" />
+                    Sécurité et mot de passe
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-6">
+                    Changez votre mot de passe régulièrement pour sécuriser votre compte.
+                  </p>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-gray-700 font-semibold">Mot de passe actuel</Label>
                       <Input
                         type="password"
                         value={passwordData.currentPassword}
@@ -666,10 +757,11 @@ export default function MonComptePage() {
                           }))
                         }
                         placeholder="••••••••"
+                        className="border-gray-300"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Nouveau mot de passe</Label>
+                      <Label className="text-gray-700 font-semibold">Nouveau mot de passe</Label>
                       <Input
                         type="password"
                         value={passwordData.newPassword}
@@ -680,10 +772,11 @@ export default function MonComptePage() {
                           }))
                         }
                         placeholder="••••••••"
+                        className="border-gray-300"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Confirmer</Label>
+                      <Label className="text-gray-700 font-semibold">Confirmer le mot de passe</Label>
                       <Input
                         type="password"
                         value={passwordData.confirmPassword}
@@ -694,118 +787,36 @@ export default function MonComptePage() {
                           }))
                         }
                         placeholder="••••••••"
+                        className="border-gray-300"
                       />
                     </div>
+                    <div className="flex justify-end pt-4">
+                      <Button
+                        onClick={handlePasswordChange}
+                        disabled={
+                          changingPassword ||
+                          !passwordData.currentPassword ||
+                          !passwordData.newPassword
+                        }
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {changingPassword ? (
+                          <span className="inline-flex items-center gap-2">
+                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Mise à jour...
+                          </span>
+                        ) : (
+                          "Mettre à jour le mot de passe"
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex justify-end mt-4">
-                    <Button
-                      onClick={handlePasswordChange}
-                      disabled={
-                        changingPassword ||
-                        !passwordData.currentPassword ||
-                        !passwordData.newPassword
-                      }
-                    >
-                      {changingPassword ? (
-                        <span className="inline-flex items-center gap-2">
-                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Mise à jour...
-                        </span>
-                      ) : (
-                        "Mettre à jour le mot de passe"
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
-            {/* Colonne latérale */}
-            <div className="space-y-6">
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="w-5 h-5" />
-                    Raccourcis
-                  </CardTitle>
-                  <CardDescription>
-                    Accédez rapidement à vos espaces.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 gap-3">
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => handleNavigation("/mon-compte/reservation")}
-                  >
-                    Mes réservations
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => handleNavigation("/mon-compte/demandes")}
-                  >
-                    Mes demandes de services
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => handleNavigation("/mon-compte/payement")}
-                  >
-                    Mes payements
-                  </Button>
-                  {/* Ajout des liens manquants */}
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => handleNavigation("/mon-compte/mes-commandes")}
-                  >
-                    Mes commandes
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
-                  >
-                    Mes demandes immobilières
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building className="w-5 h-5" />
-                    Compte
-                  </CardTitle>
-                  <CardDescription>Informations générales.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span>Type de compte</span>
-                    <Badge variant="outline">{roleLabel}</Badge>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <span>Statut</span>
-                    <span className="text-green-600 font-medium">Actif</span>
-                  </div>
-                  {user.kycStatus && (
-                    <>
-                      <Separator />
-                      <div className="flex items-center justify-between">
-                        <span>Vérification</span>
-                        <span className="font-medium capitalize">
-                          {user.kycStatus}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
           </div>
-        </section>
+        </div>
       </main>
     </>
   );

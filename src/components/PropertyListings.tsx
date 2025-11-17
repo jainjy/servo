@@ -1139,7 +1139,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           <div>
 
             <div className="relative z-10">
-              {/* Bouton principal */}
+              {/* Bouton principal
               <motion.button
                 onClick={() => setShowCard(true)}
                 className="p-2 text-xs lg:p-4 lg:text-sm flex items-center justify-center rounded-lg bg-gradient-to-r from-slate-900 to-blue-950 text-white font-semibold shadow-md"
@@ -1159,14 +1159,14 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
               >
                 <Star className="h-4 w-4 mr-2 text-yellow-500" />
                 VENDRE / LOUER SON BIEN
-              </motion.button>
+              </motion.button> */}
 
-              {demandesLoading && (
+              {/* {demandesLoading && (
                 <div className="inline-flex items-center ml-3 text-sm text-muted-foreground">
                   <img src="/loading.gif" alt="" className='w-24 h-24' />
                   Chargement demandes...
                 </div>
-              )}
+              )} */}
 
               {/* Overlay flouté + Card */}
               <AnimatePresence>
