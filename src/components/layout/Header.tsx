@@ -1615,7 +1615,7 @@ const Header = () => {
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/agenda")}
                       >
-                        <Calendar className="mr-2 h-4 w-4" />
+                        <Calendar1 className="mr-2 h-4 w-4" />
                         Mon agenda
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
