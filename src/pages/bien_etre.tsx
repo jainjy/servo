@@ -403,7 +403,7 @@ const BienEtre = () => {
     },
     {
       id: 'Podcasteur',
-      label: 'Podcasts & Vidéos',
+      label: 'Podcasts',
       icon: <MessageCircle className="w-5 h-5" />
     },
     {

@@ -1,346 +1,402 @@
-import React, { useState } from 'react';
-import { Check, X, Star, Zap, Shield, Clock, Users, Award } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Check, Star, Crown, Zap, Shield, Users, Target, TrendingUp, ArrowRight, Calendar, FileText, MessageCircle, BarChart3, Settings, Heart } from 'lucide-react';
 
-interface PackFeature {
-  id: string;
-  name: string;
-  included: boolean;
-  description?: string;
-}
+const PacksExclusifs = () => {
+  const packsSectionRef = useRef<HTMLDivElement>(null);
 
-interface PricingPack {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  billingPeriod: 'monthly' | 'yearly';
-  popular: boolean;
-  features: PackFeature[];
-  ctaText: string;
-  colorScheme: 'basic' | 'professional' | 'premium';
-}
+  const scrollToPacks = () => {
+    packsSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
 
-const PricingPacksDisplay: React.FC = () => {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
-
-  const pricingPacks: PricingPack[] = [
+  const packsExclusifs = [
     {
-      id: 'basic',
-      name: 'Essentiel',
-      description: 'Parfait pour débuter et découvrir nos services',
-      price: 19,
-      billingPeriod: 'monthly',
+      id: 'starter',
+      name: 'Starter',
+      description: 'Parfait pour débuter et tester nos services',
+      price: 'Gratuit',
+      period: '',
       popular: false,
-      ctaText: 'Commencer maintenant',
-      colorScheme: 'basic',
+      icon: Target,
+      color: 'gray',
       features: [
-        { id: 'f1', name: 'Accès base de données', included: true },
-        { id: 'f2', name: 'Support email', included: true },
-        { id: 'f3', name: 'Analyses basiques', included: true },
-        { id: 'f4', name: 'Rapports standards', included: true },
-        { id: 'f5', name: 'Support prioritaire', included: false },
-        { id: 'f6', name: 'Formations avancées', included: false },
-        { id: 'f7', name: 'API complète', included: false },
-        { id: 'f8', name: 'Accès illimité', included: false }
-      ]
+        'Gestion basique des documents',
+        '5 contrats types',
+        'Stockage 1GB',
+        'Support par email',
+        '1 utilisateur',
+        'Audit basique mensuel'
+      ],
+      limitations: [
+        'Documents limités à 50',
+        'Pas de signature électronique',
+        'Archivage limité à 1 an'
+      ],
+      buttonText: 'Commencer gratuitement',
+      buttonVariant: 'outline' as const
     },
     {
-      id: 'professional',
+      id: 'pro',
       name: 'Professionnel',
-      description: 'Idéal pour les professionnels et petites entreprises',
-      price: 49,
-      billingPeriod: 'monthly',
+      description: 'Idéal pour les artisans et petites entreprises',
+      price: '49',
+      period: '/mois',
       popular: true,
-      ctaText: 'Essai gratuit 30 jours',
-      colorScheme: 'professional',
+      icon: Zap,
+      color: 'blue',
       features: [
-        { id: 'f1', name: 'Accès base de données', included: true },
-        { id: 'f2', name: 'Support email', included: true },
-        { id: 'f3', name: 'Analyses basiques', included: true },
-        { id: 'f4', name: 'Rapports standards', included: true },
-        { id: 'f5', name: 'Support prioritaire', included: true },
-        { id: 'f6', name: 'Formations avancées', included: true },
-        { id: 'f7', name: 'API complète', included: false },
-        { id: 'f8', name: 'Accès illimité', included: false }
-      ]
+        'Gestion illimitée des documents',
+        '50+ contrats types',
+        'Stockage 10GB',
+        'Support prioritaire',
+        '3 utilisateurs inclus',
+        'Audit complet mensuel',
+        'Signature électronique',
+        'Archivage 5 ans',
+        'Modèles de devis personnalisables',
+        'Rapports analytiques basiques'
+      ],
+      highlights: [
+        'Plus populaire',
+        'Rentable pour PME'
+      ],
+      buttonText: 'Essayer 30 jours',
+      buttonVariant: 'default' as const
     },
     {
-      id: 'premium',
-      name: 'Premium',
-      description: 'Solution complète pour les entreprises exigeantes',
-      price: 99,
-      billingPeriod: 'monthly',
+      id: 'business',
+      name: 'Business',
+      description: 'Solution complète pour les entreprises en croissance',
+      price: '99',
+      period: '/mois',
       popular: false,
-      ctaText: 'Choisir ce pack',
-      colorScheme: 'premium',
+      icon: TrendingUp,
+      color: 'purple',
       features: [
-        { id: 'f1', name: 'Accès base de données', included: true },
-        { id: 'f2', name: 'Support email', included: true },
-        { id: 'f3', name: 'Analyses basiques', included: true },
-        { id: 'f4', name: 'Rapports standards', included: true },
-        { id: 'f5', name: 'Support prioritaire', included: true },
-        { id: 'f6', name: 'Formations avancées', included: true },
-        { id: 'f7', name: 'API complète', included: true },
-        { id: 'f8', name: 'Accès illimité', included: true }
-      ]
+        'Toutes fonctionnalités Pro',
+        'Contrats types illimités',
+        'Stockage 50GB',
+        'Support dédié 24/7',
+        '10 utilisateurs inclus',
+        'Audit avancé hebdomadaire',
+        'Workflows automatisés',
+        'Intégrations API',
+        'Analyses avancées',
+        'Formation équipe',
+        'Gestion multi-sociétés',
+        'Backup quotidien'
+      ],
+      highlights: [
+        'Solution complète',
+        'Évolutif'
+      ],
+      buttonText: 'Démarrer maintenant',
+      buttonVariant: 'outline' as const
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      description: 'Solution sur mesure pour les grandes organisations',
+      price: 'Sur mesure',
+      period: '',
+      popular: false,
+      icon: Crown,
+      color: 'amber',
+      features: [
+        'Toutes fonctionnalités Business',
+        'Stockage illimité',
+        'Support manager dédié',
+        'Utilisateurs illimités',
+        'Audit en temps réel',
+        'Développements sur mesure',
+        'SLA 99.9%',
+        'Conformité RGPD avancée',
+        'Formations personnalisées',
+        'Migration données assistée',
+        'SSO et sécurité avancée',
+        'Rapports executive'
+      ],
+      highlights: [
+        'Solution sur mesure',
+        'Support premium'
+      ],
+      buttonText: 'Contactez-nous',
+      buttonVariant: 'outline' as const
     }
   ];
 
-  const getColorClasses = (scheme: string) => {
-    switch (scheme) {
-      case 'basic':
-        return {
-          bg: 'bg-white',
-          border: 'border-gray-200',
-          text: 'text-gray-900',
-          button: 'bg-gray-900 text-white hover:bg-gray-800',
-          popular: 'bg-gray-100 text-gray-700'
-        };
-      case 'professional':
-        return {
-          bg: 'bg-blue-50',
-          border: 'border-blue-300',
-          text: 'text-blue-900',
-          button: 'bg-blue-600 text-white hover:bg-blue-700',
-          popular: 'bg-blue-600 text-white'
-        };
-      case 'premium':
-        return {
-          bg: 'bg-purple-50',
-          border: 'border-purple-300',
-          text: 'text-purple-900',
-          button: 'bg-purple-600 text-white hover:bg-purple-700',
-          popular: 'bg-purple-600 text-white'
-        };
-      default:
-        return {
-          bg: 'bg-white',
-          border: 'border-gray-200',
-          text: 'text-gray-900',
-          button: 'bg-gray-900 text-white hover:bg-gray-800',
-          popular: 'bg-gray-100 text-gray-700'
-        };
+  const fonctionnalitesPremium = [
+    {
+      icon: FileText,
+      title: 'Gestion Documentaire Avancée',
+      description: 'Centralisez tous vos documents avec classement intelligent et recherche avancée',
+      features: ['OCR intégré', 'Workflows automatisés', 'Versioning']
+    },
+    {
+      icon: MessageCircle,
+      title: 'Communication Unifiée',
+      description: 'Messagerie intégrée avec vos clients et partenaires',
+      features: ['Chat en temps réel', 'Notifications push', 'Historique complet']
+    },
+    {
+      icon: BarChart3,
+      title: 'Analytics & Reporting',
+      description: 'Tableaux de bord complets pour piloter votre activité',
+      features: ['KPI personnalisés', 'Rapports automatiques', 'Export Excel/PDF']
+    },
+    {
+      icon: Shield,
+      title: 'Sécurité Maximale',
+      description: 'Protection de vos données avec les standards les plus élevés',
+      features: ['Chiffrement AES-256', 'Sauvegardes automatiques', 'Conformité RGPD']
+    },
+    {
+      icon: Users,
+      title: 'Gestion d\'Équipe',
+      description: 'Collaborez efficacement avec votre équipe et vos partenaires',
+      features: ['Rôles personnalisés', 'Permissions granulaires', 'Activité en temps réel']
+    },
+    {
+      icon: Settings,
+      title: 'Intégrations Avancées',
+      description: 'Connectez tous vos outils métiers favoris',
+      features: ['API REST complète', 'Webhooks', 'Connecteurs prêts à l\'emploi']
     }
-  };
+  ];
+  const AnimatedCounter = ({ value, duration = 2 }) => {
+    const [count, setCount] = useState(0);
 
-  const getPrice = (pack: PricingPack) => {
-    if (billingPeriod === 'yearly') {
-      return pack.price * 10; // 2 mois gratuits
-    }
-    return pack.price;
-  };
+    useEffect(() => {
+      const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
+      let startTimestamp: number | null = null;
 
-  const getBillingText = (pack: PricingPack) => {
-    return billingPeriod === 'yearly' ? 'an' : 'mois';
+      const step = (timestamp: number) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
+
+        setCount(Math.floor(progress * numericValue));
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      };
+
+      requestAnimationFrame(step);
+    }, [value, duration]);
+
+    return (
+      <>
+        {value.includes('%') ? `${count}%` :
+          value.includes('+') ? `${count}+` :
+            count}
+      </>
+    );
   };
+  const statistiques = [
+    { number: '98%', text: 'de satisfaction client' },
+    { number: '24/7', text: 'support disponible' },
+    { number: '5min', text: 'de mise en place' },
+    { number: '10k+', text: 'utilisateurs actifs' }
+  ];
 
   return (
-    <div className="min-h-screen mt-10 bg-gray-50 py-12">
-      <div className="container mx-auto px-4">
-        {/* En-tête */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Choisissez Votre Pack
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg" className='h-full object-cover w-full' alt="" />
+          <Badge variant="secondary" className="absolute left-2 bottom-0 mb-4 px-4 py-1 text-sm">
+            <Star className="w-4 h-4 mr-1" />
+            Offres Exclusives
+          </Badge>
+        </div>
+        <div className="max-w-4xl mx-auto">
+
+          <h1 className="text-xl lg:text-5xl py-12 font-bold text-gray-200 mb-6">
+            Des Packs Sur Mesure
+            <span className="text-blue-600 block">Pour Votre Réussite</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Sélectionnez la formule qui correspond le mieux à vos besoins et objectifs
+          <p className="text-md text-gray-600 mb-8 max-w-2xl mx-auto">
+            Découvrez nos solutions complètes qui s'adaptent à tous vos besoins métier.
+            De la gestion simple à la solution enterprise, nous avons ce qu'il vous faut.
           </p>
-          
-          {/* Sélecteur de période de facturation */}
-          <div className="inline-flex items-center bg-white rounded-lg border border-gray-200 p-1">
-            <button
-              onClick={() => setBillingPeriod('monthly')}
-              className={`px-6 py-2 rounded-md font-medium transition-all ${
-                billingPeriod === 'monthly'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Mensuel
-            </button>
-            <button
-              onClick={() => setBillingPeriod('yearly')}
-              className={`px-6 py-2 rounded-md font-medium transition-all ${
-                billingPeriod === 'yearly'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Annuel
-            </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button size="lg" onClick={scrollToPacks} className="px-8">
+              Voir les offres
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
           </div>
-          
-          {billingPeriod === 'yearly' && (
-            <div className="mt-4 text-green-600 font-medium">
-              Economisez 2 mois en choisissant la facturation annuelle
-            </div>
-          )}
+
+          {/* Statistiques */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-5 mx-auto">
+            {statistiques.map((stat, index) => (
+              <div key={index} className="bg-white p-10 rounded-lg shadow-sm">
+                <div className='text-4xl azonix'>
+                  <AnimatedCounter value={stat.number} duration={2} />
+                </div>
+                <div className="text-gray-600 text-sm">{stat.text}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section des Packs */}
+      <section ref={packsSectionRef} className="container mx-auto px-4 scroll-mt-20">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Choisissez Votre Pack
+          </h2>
+          <p className="text-md text-gray-600 max-w-2xl mx-auto">
+            Des solutions évolutives qui grandissent avec vous.
+            Tous nos packs incluent un essai gratuit de 30 jours.
+          </p>
         </div>
 
-        {/* Grille des packs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {pricingPacks.map((pack) => {
-            const colors = getColorClasses(pack.colorScheme);
-            const displayPrice = getPrice(pack);
-            const billingText = getBillingText(pack);
-
-            return (
-              <div
-                key={pack.id}
-                className={`relative rounded-2xl border-2 ${colors.border} ${colors.bg} shadow-lg transition-all duration-300 hover:shadow-xl ${
-                  pack.popular ? 'transform scale-105' : ''
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          {packsExclusifs.map((pack) => (
+            <Card
+              key={pack.id}
+              className={`relative transition-all duration-300 hover:scale-105 hover:shadow-xl ${pack.popular ? 'border-2 border-blue-500 shadow-lg' : 'border'
                 }`}
-              >
-                {/* Badge populaire */}
-                {pack.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className={`inline-flex items-center px-4 py-2 rounded-full ${colors.popular} font-semibold text-sm`}>
-                      <Star className="w-4 h-4 mr-1" />
-                      Le plus populaire
+            >
+              {pack.popular && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-blue-600 text-white px-4 py-1">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Populaire
+                  </Badge>
+                </div>
+              )}
+
+              <CardHeader className="text-center pb-4">
+                <div className={`w-12 h-12 mx-auto mb-4 rounded-full bg-${pack.color}-100 flex items-center justify-center`}>
+                  <pack.icon className={`w-6 h-6 text-${pack.color}-600`} />
+                </div>
+                <CardTitle className="text-2xl font-bold text-gray-900">
+                  {pack.name}
+                </CardTitle>
+                <p className="text-gray-600 text-sm mt-2">
+                  {pack.description}
+                </p>
+
+                <div className="mt-6">
+                  <span className="text-4xl font-bold text-gray-900">
+                    {pack.price}
+                  </span>
+                  {pack.period && (
+                    <span className="text-gray-600 text-lg">{pack.period}</span>
+                  )}
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  {pack.features.map((feature, index) => (
+                    <div key={index} className="flex items-start">
+                      <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-sm">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {pack.limitations && (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm font-medium text-gray-500 mb-2">Limitations :</p>
+                    <div className="space-y-2">
+                      {pack.limitations.map((limitation, index) => (
+                        <div key={index} className="flex items-start">
+                          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3 mt-1.5 flex-shrink-0" />
+                          <span className="text-gray-500 text-sm">{limitation}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
+              </CardContent>
 
-                <div className="p-8">
-                  {/* En-tête du pack */}
-                  <div className="text-center mb-6">
-                    <h3 className={`text-2xl font-bold ${colors.text} mb-2`}>
-                      {pack.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {pack.description}
-                    </p>
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  variant={pack.buttonVariant}
+                  size="lg"
+                >
+                  {pack.buttonText}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Fonctionnalités Premium */}
+      <section className="bg-gray-50 py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Fonctionnalités Premium
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Découvrez toutes les fonctionnalités avancées incluses dans nos packs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {fonctionnalitesPremium.map((feature, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <feature.icon className="w-6 h-6 text-blue-600" />
                   </div>
-
-                  {/* Prix */}
-                  <div className="text-center mb-6">
-                    <div className="flex items-baseline justify-center">
-                      <span className={`text-5xl font-bold ${colors.text}`}>
-                        {displayPrice}€
-                      </span>
-                      <span className="text-gray-500 ml-2">/{billingText}</span>
-                    </div>
-                    {billingPeriod === 'yearly' && (
-                      <div className="text-gray-500 text-sm mt-1">
-                        Soit {(displayPrice / 12).toFixed(2)}€/mois
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bouton d'action */}
-                  <button
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${colors.button} shadow-sm hover:shadow-md mb-8`}
-                  >
-                    {pack.ctaText}
-                  </button>
-
-                  {/* Liste des fonctionnalités */}
-                  <div className="space-y-4">
-                    <h4 className={`font-semibold ${colors.text} text-lg mb-4`}>
-                      Ce pack inclut :
-                    </h4>
-                    {pack.features.map((feature) => (
-                      <div
-                        key={feature.id}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center">
-                          {feature.included ? (
-                            <Check className="w-5 h-5 text-green-500 mr-3" />
-                          ) : (
-                            <X className="w-5 h-5 text-gray-300 mr-3" />
-                          )}
-                          <span
-                            className={
-                              feature.included ? 'text-gray-900' : 'text-gray-400'
-                            }
-                          >
-                            {feature.name}
-                          </span>
-                        </div>
-                      </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    {feature.description}
+                  </p>
+                  <ul className="space-y-2">
+                    {feature.features.map((feat, featIndex) => (
+                      <li key={featIndex} className="flex items-center text-sm text-gray-700">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3" />
+                        {feat}
+                      </li>
                     ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Section informations complémentaires */}
-        <div className="mt-16 bg-white rounded-2xl border border-gray-200 p-8 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Pourquoi Choisir Nos Packs ?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Sécurité Maximale</h3>
-              <p className="text-gray-600 text-sm">
-                Vos données sont protégées avec les standards les plus élevés
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Performance</h3>
-              <p className="text-gray-600 text-sm">
-                Temps de chargement optimisés pour une expérience fluide
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Support Expert</h3>
-              <p className="text-gray-600 text-sm">
-                Notre équipe vous accompagne dans votre réussite
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Award className="w-6 h-6 text-orange-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Reconnaissance</h3>
-              <p className="text-gray-600 text-sm">
-                Solution primée par les professionnels du secteur
-              </p>
-            </div>
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* FAQ */}
-        <div className="mt-16 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Questions Fréquentes
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Puis-je changer de pack à tout moment ?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Oui, vous pouvez mettre à niveau ou rétrograder votre pack à tout moment. 
-                Les changements prennent effet immédiatement.
+      {/* CTA Final */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <Card className="max-w-full mx-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <CardContent className="p-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Prêt à Transformer Votre Business ?
+              </h2>
+              <p className="text-sm lg:text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+                Rejoignez des milliers de professionnels qui font confiance à nos solutions
               </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Y a-t-il un engagement minimum ?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Aucun engagement n'est requis. Vous pouvez résilier votre abonnement 
-                à tout moment sans frais supplémentaires.
-              </p>
-            </div>
-          </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" variant="secondary" className="px-8">
+                  Commencer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
 
-export default PricingPacksDisplay;
+export default PacksExclusifs;

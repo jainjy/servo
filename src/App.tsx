@@ -107,7 +107,6 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
-import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 import PodcastsBatiment from './components/PodcastsBatiment';
 import PodcastsAssuranceFinance from "./components/PodcastsAssuranceFinance";
 import PodcastsAlimentation from "./components/PodcastsAlimentation";
@@ -136,7 +135,6 @@ import AuditsPage from "./pages/admin/AdminAuditPage";
 import AidesFinancement from "./components/components/Aide_finance";
 import FormationsFinancement from "./components/components/Formation_finance";
 import ComptabiliteServices from "./components/components/Comptabilite";
-import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
 import PodcastsImmobilier from "./components/PodcastsImmobilier";
 import PodcastsDomicile from "./components/components/PodcastsDomicil";
 import PodcastsBienEtre from "./components/PodcastsBienEtre";
@@ -145,6 +143,7 @@ import ConstructionServicesPage from "./pages/BatimentPage";
 import PricingPacksDisplay from "./components/components/PackComplet";
 import AgendaPage from "./pages/mon-compte/AgendaPage";
 import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
+import PlanAdministratifServices from "./components/components/Plan_Administratifs";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -236,6 +235,10 @@ const App = () => {
                   <Route
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
+                  />
+                  <Route
+                    path="/plan_administratif"
+                    element={<PlanAdministratifServices />}
                   />
                   <Route
                     path="/podcasts/immobilier"

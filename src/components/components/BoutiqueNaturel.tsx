@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Leaf, Heart, Sparkles, Star, ShoppingCart, Plus, Minus, Eye, ArrowRight, Truck, Shield, Clock, ShoppingCartIcon, AlertTriangle } from 'lucide-react';
 
 interface Product {
@@ -132,6 +132,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
     const [selectedCategory, setSelectedCategory] = useState<string>('tous');
     const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
+    const sectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = () => {
+    sectionRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
     const products: Product[] = [
         {
             id: 1,
@@ -257,7 +265,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                         Découvrez notre sélection de produits 100% naturels pour prendre soin de vous
                         et retrouver l'harmonie entre corps et esprit.
                     </p>
-                    <button className="bg-white text-emerald-600 px-8 py-2 rounded-full font-bold transition-transform shadow-lg">
+                    <button onClick={scrollToSection} className="bg-white text-emerald-600 px-8 py-2 rounded-full font-bold transition-transform shadow-lg">
                         Découvrir la Boutique
                         <ArrowRight className="w-5 h-5 ml-2 inline" />
                     </button>
@@ -279,7 +287,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                 </div>
 
                 {/* Categories */}
-                <div className='bg-white py-5 px-2 rounded-2xl shadow-lg mb-12'>
+                <div ref={sectionRef} className='bg-white py-5 px-2 rounded-2xl shadow-lg mb-12'>
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
                             Nos Catégories

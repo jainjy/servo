@@ -1,389 +1,260 @@
-import React, { useState } from 'react';
-import {
-  FileText,
-  Download,
-  Search,
-  Filter,
-  Folder,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Shield,
-  Building,
-  Users,
-  Eye,
-  MoreVertical
-} from 'lucide-react';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileText, Archive, ClipboardList, Shield, Download, Upload, CheckCircle, Clock } from 'lucide-react';
 
-interface Document {
-  id: string;
-  title: string;
-  category: 'legal' | 'fiscal' | 'social' | 'administratif';
-  type: string;
-  size: string;
-  lastModified: Date;
-  status: 'valid' | 'expired' | 'pending';
-  downloadUrl: string;
-}
-
-const PlansAdministratifs: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  const documents: Document[] = [
+const PlanAdministratifServices = () => {
+  const servicesAdministratifs = [
     {
-      id: '1',
-      title: 'Statuts de la société',
-      category: 'legal',
-      type: 'PDF',
-      size: '2.4 MB',
-      lastModified: new Date('2024-01-15'),
-      status: 'valid',
-      downloadUrl: '#'
+      icon: FileText,
+      title: "Gestion des Documents",
+      description: "Centralisez et gérez tous vos documents administratifs en un seul endroit sécurisé",
+      features: [
+        "Stockage cloud sécurisé",
+        "Classement par catégorie",
+        "Recherche intelligente",
+        "Alertes d'expiration"
+      ],
+      stat: "Types de documents supportés",
+      statValue: "15+"
     },
     {
-      id: '2',
-      title: 'Déclaration fiscale 2023',
-      category: 'fiscal',
-      type: 'PDF',
-      size: '1.8 MB',
-      lastModified: new Date('2024-02-20'),
-      status: 'pending',
-      downloadUrl: '#'
+      icon: Archive,
+      title: "Archivage Numérique",
+      description: "Archivez vos documents signés avec un système de référencement et de traçabilité complet",
+      features: [
+        "Référence unique par document",
+        "Historique des signatures",
+        "Conservation légale",
+        "Accès multi-parties"
+      ],
+      stat: "Durée de conservation",
+      statValue: "10 ans"
     },
     {
-      id: '3',
-      title: 'Registre du personnel',
-      category: 'social',
-      type: 'Excel',
-      size: '3.2 MB',
-      lastModified: new Date('2024-01-08'),
-      status: 'valid',
-      downloadUrl: '#'
+      icon: ClipboardList,
+      title: "Contrats Types",
+      description: "Bibliothèque de modèles de contrats personnalisables pour tous vos besoins professionnels",
+      features: [
+        "Modèles pré-rédigés",
+        "Variables personnalisables",
+        "Mises à jour automatiques",
+        "Conformité légale"
+      ],
+      stat: "Modèles disponibles",
+      statValue: "50+"
     },
     {
-      id: '4',
-      title: 'Contrat de bail commercial',
-      category: 'legal',
-      type: 'PDF',
-      size: '4.1 MB',
-      lastModified: new Date('2023-11-30'),
-      status: 'expired',
-      downloadUrl: '#'
-    },
-    {
-      id: '5',
-      title: 'Plan de continuité d\'activité',
-      category: 'administratif',
-      type: 'Word',
-      size: '2.7 MB',
-      lastModified: new Date('2024-03-01'),
-      status: 'valid',
-      downloadUrl: '#'
-    },
-    {
-      id: '6',
-      title: 'Attestation URSSAF',
-      category: 'social',
-      type: 'PDF',
-      size: '1.1 MB',
-      lastModified: new Date('2024-02-28'),
-      status: 'valid',
-      downloadUrl: '#'
+      icon: Shield,
+      title: "Conformité & Sécurité",
+      description: "Respectez vos obligations légales avec un suivi rigoureux de la conformité documentaire",
+      features: [
+        "Alertes réglementaires",
+        "Audit trail complet",
+        "Chiffrement des données",
+        "Backup automatique"
+      ],
+      stat: "Normes de sécurité",
+      statValue: "RGPD"
     }
   ];
 
-  const categories = [
-    { value: 'all', label: 'Tous les documents', icon: Folder },
-    { value: 'legal', label: 'Juridique', icon: Shield },
-    { value: 'fiscal', label: 'Fiscal', icon: Building },
-    { value: 'social', label: 'Social', icon: Users },
-    { value: 'administratif', label: 'Administratif', icon: FileText }
+  const typesDocuments = [
+    {
+      name: "Documents Légaux",
+      count: "8 types",
+      items: ["Statuts", "KBIS", "Registres", "PV d'assemblée"]
+    },
+    {
+      name: "Contrats Professionnels",
+      count: "12 types",
+      items: ["Devis", "Contrats de prestation", "Conventions", "Engagements"]
+    },
+    {
+      name: "Documents Financiers",
+      count: "6 types",
+      items: ["Factures", "Relevés", "Attestations", "Bordereaux"]
+    },
+    {
+      name: "Archives Signées",
+      count: "Tous formats",
+      items: ["Contrats signés", "Conventions", "Engagements", "Procès-verbaux"]
+    }
   ];
 
-  const statuses = [
-    { value: 'all', label: 'Tous les statuts' },
-    { value: 'valid', label: 'Valide' },
-    { value: 'expired', label: 'Expiré' },
-    { value: 'pending', label: 'En attente' }
+  const avantages = [
+    {
+      icon: Download,
+      title: "Import Simplifié",
+      description: "Importez vos documents existants en quelques clics depuis tous vos appareils"
+    },
+    {
+      icon: Upload,
+      title: "Export Sécurisé",
+      description: "Exportez vos documents dans les formats standards avec certificat d'intégrité"
+    },
+    {
+      icon: CheckCircle,
+      title: "Validation Automatique",
+      description: "Vérification automatique de la complétude et de la validité des documents"
+    },
+    {
+      icon: Clock,
+      title: "Suivi en Temps Réel",
+      description: "Surveillance active des dates d'expiration et des échéances importantes"
+    }
   ];
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'valid':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'expired':
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
-      case 'pending':
-        return <Clock className="w-4 h-4 text-yellow-500" />;
-      default:
-        return <FileText className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'valid':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'expired':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    const categoryConfig = categories.find(cat => cat.value === category);
-    const IconComponent = categoryConfig?.icon || Folder;
-    return <IconComponent className="w-5 h-5" />;
-  };
-
-  const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || doc.status === selectedStatus;
-    
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* En-tête */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center items-center mb-4">
-            <div className="bg-blue-100 p-3 rounded-full">
-              <FileText className="h-8 w-8 text-blue-600" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Plans & Administratifs
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Documents administratifs simplifiés - Accédez à tous vos documents essentiels en un seul endroit
-          </p>
-        </div>
+    <div className="container mx-auto  px-4 mt-16 py-8">
+      {/* En-tête */}
+      <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+        <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+        <img src="https://i.pinimg.com/1200x/70/7c/5f/707c5f45a47547dc52b3e2f5b5fbb14f.jpg" className='h-full object-cover w-full' alt="" />
+      </div>
+      <div className="text-center mb-12">
+        <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
+          Documents Administratifs Simplifiés
+        </h1>
+        <p className="text-sm  text-gray-300 max-w-3xl mx-auto">
+          Centralisez, gérez et archivez tous vos documents administratifs en toute sécurité.
+          Gagnez du temps et de la sérénité dans la gestion de votre paperasse.
+        </p>
+      </div>
 
-        {/* Barre de recherche et filtres */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Recherche */}
-            <div className="flex-1 w-full lg:w-auto">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Rechercher un document..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Filtres */}
-            <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="flex-1 lg:flex-none px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {categories.map(category => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="flex-1 lg:flex-none px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {statuses.map(status => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Bouton de changement de vue */}
-            <button
-              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Filter className="w-5 h-5" />
-              <span>{viewMode === 'grid' ? 'Vue liste' : 'Vue grille'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {[
-            { label: 'Total documents', value: documents.length, color: 'bg-blue-500' },
-            { label: 'Documents valides', value: documents.filter(d => d.status === 'valid').length, color: 'bg-green-500' },
-            { label: 'En attente', value: documents.filter(d => d.status === 'pending').length, color: 'bg-yellow-500' },
-            { label: 'Expirés', value: documents.filter(d => d.status === 'expired').length, color: 'bg-red-500' }
-          ].map((stat, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-              <div className={`w-12 h-12 ${stat.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-              <div className="text-gray-600 text-sm">{stat.label}</div>
-            </div>
+      {/* Services principaux */}
+      <section className="mb-16 pt-10">
+        <h2 className="text-3xl font-semibold text-center mb-12 text-gray-800">
+          Nos Solutions Administratives
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {servicesAdministratifs.map((service, index) => (
+            <Card key={index} className="hover:shadow-lg transition-all duration-300 border-t-4 border-t-blue-500">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <service.icon className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <CardTitle className="text-xl text-gray-800">
+                      {service.title}
+                    </CardTitle>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-600">{service.statValue}</div>
+                    <div className="text-xs text-gray-500">{service.stat}</div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  {service.description}
+                </p>
+                <ul className="space-y-2 mb-4">
+                  {service.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start">
+                      <div className="h-1.5 w-1.5 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           ))}
         </div>
+      </section>
 
-        {/* Contenu principal */}
-        {viewMode === 'grid' ? (
-          /* Vue Grille */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDocuments.map((document) => (
-              <div
-                key={document.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    {getCategoryIcon(document.category)}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">
-                        {document.title}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-500">{document.type}</span>
-                        <span className="text-sm text-gray-500">•</span>
-                        <span className="text-sm text-gray-500">{document.size}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <MoreVertical className="w-5 h-5" />
-                  </button>
+      {/* Types de documents */}
+      <section className="mb-16">
+        <h2 className="text-3xl font-semibold text-center mb-12 text-gray-800">
+          Types de Documents Gérés
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {typesDocuments.map((type, index) => (
+            <Card key={index} className="text-center hover:shadow-md transition-shadow duration-300">
+              <CardContent className="pt-6">
+                <div className="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-6 w-6 text-gray-600" />
                 </div>
+                <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                  {type.name}
+                </h3>
+                <div className="text-blue-600 font-semibold mb-3">{type.count}</div>
+                <ul className="space-y-1 text-sm text-gray-600">
+                  {type.items.map((item, itemIndex) => (
+                    <li key={itemIndex}>• {item}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Statut</span>
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(document.status)}`}>
-                      {getStatusIcon(document.status)}
-                      {statuses.find(s => s.value === document.status)?.label}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Dernière modification</span>
-                    <span className="text-sm text-gray-900">
-                      {document.lastModified.toLocaleDateString('fr-FR')}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-2 pt-4 border-t border-gray-100">
-                    <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                      <Eye className="w-4 h-4" />
-                      Voir
-                    </button>
-                    <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                      <Download className="w-4 h-4" />
-                      Télécharger
-                    </button>
-                  </div>
+      {/* Avantages */}
+      <section className="mb-16">
+        <h2 className="text-3xl font-semibold text-center mb-12 text-gray-800">
+          Nos Avantages
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {avantages.map((avantage, index) => (
+            <Card key={index} className="text-center hover:shadow-md transition-shadow duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <CardContent className="pt-6">
+                <div className="bg-white rounded-full p-3 inline-flex mb-4 shadow-sm">
+                  <avantage.icon className="h-6 w-6 text-blue-600" />
                 </div>
+                <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                  {avantage.title}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {avantage.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Bénéfices */}
+      <section>
+        <Card className="bg-gradient-to-r from-gray-50 to-blue-50 border-0">
+          <CardContent className="pt-6">
+            <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
+              Les Bénéfices pour Votre Entreprise
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="bg-white rounded-full p-3 inline-flex mb-4 shadow-md">
+                  <Clock className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Gain de Temps</h3>
+                <p className="text-gray-600 text-sm">
+                  Réduction de 70% du temps consacré à la recherche et au classement des documents
+                </p>
               </div>
-            ))}
-          </div>
-        ) : (
-          /* Vue Liste */
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Document
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Catégorie
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Dernière modification
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredDocuments.map((document) => (
-                  <tr key={document.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {getCategoryIcon(document.category)}
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {document.title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {document.type} • {document.size}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 capitalize">
-                        {categories.find(cat => cat.value === document.category)?.label}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(document.status)}`}>
-                        {getStatusIcon(document.status)}
-                        {statuses.find(s => s.value === document.status)?.label}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {document.lastModified.toLocaleDateString('fr-FR')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
-                        <button className="text-blue-600 hover:text-blue-900">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="text-green-600 hover:text-green-900">
-                          <Download className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Message si aucun résultat */}
-        {filteredDocuments.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Aucun document trouvé
-            </h3>
-            <p className="text-gray-600">
-              Aucun document ne correspond à vos critères de recherche.
-            </p>
-          </div>
-        )}
-      </div>
+              <div className="text-center">
+                <div className="bg-white rounded-full p-3 inline-flex mb-4 shadow-md">
+                  <Shield className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Sécurité Renforcée</h3>
+                <p className="text-gray-600 text-sm">
+                  Protection de vos données sensibles avec chiffrement de bout en bout
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-white rounded-full p-3 inline-flex mb-4 shadow-md">
+                  <CheckCircle className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Conformité Totale</h3>
+                <p className="text-gray-600 text-sm">
+                  Respect automatique des délais de conservation et obligations légales
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 };
 
-export default PlansAdministratifs;
+export default PlanAdministratifServices;
