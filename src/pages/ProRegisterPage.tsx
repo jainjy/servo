@@ -77,16 +77,13 @@ const ProRegisterPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
-  const { register } = useAuth();
-
-  // Types d'utilisateurs disponibles
-  const userTypes = [
-    { value: "PRESTATAIRE", label: "Prestataire" },
-    { value: "VENDEUR", label: "Vendeur" },
-    { value: "LOUEUR", label: "Loueur" },
-    { value: "BIEN_ETRE", label: "Bien etre" },
+  const bienEtreMetiers = [
+    "BoutiqueNaturels",
+    "Podcasteur",
+    "Thérapeute",
+    "Masseur",
+    "Formateur",
   ];
-
 
   useEffect(() => {
     // Charger les métiers depuis l'API
@@ -142,6 +139,15 @@ const ProRegisterPage = () => {
         subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
     }
 
+    // Créer le mapping metiersLabel
+    const metiersLabel: { [key: number]: string } = {};
+    formData.metiers.forEach((metierId) => {
+      const metier = metiersList.find((m) => m.id === metierId);
+      if (metier) {
+        metiersLabel[metierId] = metier.libelle;
+      }
+    });
+
     // Redirection vers la page de paiement avec TOUTES les données
     navigate("/register/professional/payment", {
       state: {
@@ -149,6 +155,7 @@ const ProRegisterPage = () => {
           ...formData,
           userType: finalUserType,
         },
+        metiersLabel,
         subscriptionData,
       },
     });
@@ -462,7 +469,7 @@ const ProRegisterPage = () => {
                     <>
                       {/* Étape 2 */}
                       {/* Métiers (si prestataire) */}
-                      {formData.userType === "PRESTATAIRE" && (
+                      {formData.userType != "VENDEUR" && (
                         <div className="space-y-4 h-32 overflow-y-auto">
                           <label className="text-sm font-medium text-gray-700">
                             Sélectionnez vos métiers *
@@ -473,30 +480,38 @@ const ProRegisterPage = () => {
                             </div>
                           ) : metiersList.length > 0 ? (
                             <div className="grid grid-cols-2 gap-3">
-                              {metiersList.map((metier) => (
-                                <div
-                                  key={metier.id}
-                                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                                    formData.metiers.includes(metier.id)
-                                      ? "border-blue-500 bg-blue-50"
-                                      : "border-gray-300 hover:border-gray-400"
-                                  }`}
-                                  onClick={() => handleMetierToggle(metier.id)}
-                                >
-                                  <div className="flex items-center gap-3">
+                              {metiersList.map(
+                                (metier) =>
+                                  (metier.libelle == bienEtreMetiers[0] ||
+                                    metier.libelle == bienEtreMetiers[1] ||
+                                    metier.libelle == bienEtreMetiers[2] ||
+                                    metier.libelle == bienEtreMetiers[3]) && (
                                     <div
-                                      className={`w-5 h-5 rounded-full border-2 ${
+                                      key={metier.id}
+                                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
                                         formData.metiers.includes(metier.id)
-                                          ? "border-blue-500 bg-blue-500"
-                                          : "border-gray-400"
+                                          ? "border-blue-500 bg-blue-50"
+                                          : "border-gray-300 hover:border-gray-400"
                                       }`}
-                                    ></div>
-                                    <span className="text-sm font-medium">
-                                      {metier.libelle}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
+                                      onClick={() =>
+                                        handleMetierToggle(metier.id)
+                                      }
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div
+                                          className={`w-5 h-5 rounded-full border-2 ${
+                                            formData.metiers.includes(metier.id)
+                                              ? "border-blue-500 bg-blue-500"
+                                              : "border-gray-400"
+                                          }`}
+                                        ></div>
+                                        <span className="text-sm font-medium">
+                                          {metier.libelle}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )
+                              )}
                             </div>
                           ) : (
                             <div className="text-center text-gray-500">
