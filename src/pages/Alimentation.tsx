@@ -137,6 +137,7 @@ const Alimentation = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [categoryCounts, setCategoryCounts] = useState({});
+  const [sectionSearchQueries, setSectionSearchQueries] = useState({});
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -193,6 +194,11 @@ const Alimentation = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     await fetchProducts();
+  };
+
+  const handleSectionSearch = (e) => {
+    e.preventDefault();
+    // La recherche est faite en temps réel via le filtrage dans le render
   };
 
   // CORRIGÉ: Fonction pour naviguer vers la catégorie
@@ -448,38 +454,6 @@ const Alimentation = () => {
               </p>
             </div>
 
-            {/* Barre de recherche améliorée */}
-            <form
-              onSubmit={handleSearch}
-              className="relative mb-5 w-full max-w-2xl mx-auto animate-slide-up px-4 sm:px-6 lg:px-2"
-            >
-              <div className="relative group">
-                <Input
-                  type="text"
-                  placeholder="RECHERCHER UN PRODUIT, UNE CATÉGORIE..."
-                  className="w-full h-12 sm:h-14 lg:h-16 pl-10 sm:pl-12 lg:pl-16 pr-16 sm:pr-32 lg:pr-8 rounded-xl sm:rounded-2xl border-2 text-xs sm:text-sm lg:text-lg text-start font-semibold tracking-wide transition-all duration-300 border-slate-600 bg-white/80 backdrop-blur-md focus:border-slate-900 focus:ring-2 focus:ring-slate-900"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-
-                <Search className="absolute left-3 sm:left-4 lg:left-6 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-slate-800 transition-transform duration-300 group-hover:scale-110 group-focus-within:scale-110" />
-
-                <Button
-                  type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 sm:h-11 lg:h-12 px-3 sm:px-4 lg:px-6 bg-slate-800 hover:bg-[#00A890] text-white rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-xs sm:text-sm lg:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      <span className="hidden sm:inline">Rechercher</span>
-                      <Search className="sm:hidden h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
 
             {/* Badges d'avantages */}
             <div
@@ -541,24 +515,60 @@ const Alimentation = () => {
                 id={section.id}
               >
                 <div
-                  className="flex items-center gap-4 mb-8 animate-slide-from-left"
+                  className="flex items-center justify-between gap-4 mb-8 animate-slide-from-left"
                   style={{ animationDelay: animationDelays.container }}
                 >
-                  <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
-                    <IconComponent className="h-8 w-8 text-white" />
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
+                      <IconComponent className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl lg:text-2xl font-bold text-black/70">
+                        {section.title}
+                      </h2>
+                      <p className="text-xs text-[#5A6470] mt-2">
+                        {section.description}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl lg:text-2xl font-bold text-black/70">
-                      {section.title}
-                    </h2>
-                    <p className="text-xs text-[#5A6470] mt-2">
-                      {section.description}
-                    </p>
+
+                  {/* Barre de recherche à droite */}
+                  <div className="hidden md:flex items-center ml-auto">
+                    <form onSubmit={handleSectionSearch} className="relative">
+                      <div className="relative flex items-center">
+                        <Input
+                          type="text"
+                          placeholder={`Chercher dans ${section.title}...`}
+                          value={sectionSearchQueries[section.id] || ""}
+                          onChange={(e) => {
+                            setSectionSearchQueries({
+                              ...sectionSearchQueries,
+                              [section.id]: e.target.value
+                            });
+                          }}
+                          className="pl-10 pr-2 py-2 h-16 rounded-xl border-2 border-slate-200 focus:border-slate-900 focus:outline-none transition-all duration-300 w-32 lg:w-96 placeholder-gray-400"
+                        />
+                        <button
+                          type="submit"
+                          className="absolute left-3 text-slate-900 hover:text-slate-600 transition-colors"
+                        >
+                          <Search className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {section.categories.map((category, index) => {
+                  {section.categories
+                    .filter((category) => {
+                      const searchQuery = sectionSearchQueries[section.id] || "";
+                      return (
+                        category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        category.description.toLowerCase().includes(searchQuery.toLowerCase())
+                      );
+                    })
+                    .map((category, index) => {
                     const CategoryIcon = getIconByName(category.iconName);
                     const productCount = getProductCount(category.name);
 
@@ -598,6 +608,20 @@ const Alimentation = () => {
                       </Card>
                     );
                   })}
+
+                  {section.categories.filter((category) => {
+                    const searchQuery = sectionSearchQueries[section.id] || "";
+                    return (
+                      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+                  }).length === 0 && sectionSearchQueries[section.id] && (
+                    <div className="col-span-full text-center py-8">
+                      <p className="text-gray-500 text-lg">
+                        Aucune catégorie ne correspond à "{sectionSearchQueries[section.id]}"
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             );
