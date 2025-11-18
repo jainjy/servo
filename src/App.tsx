@@ -145,6 +145,10 @@ import ConstructionServicesPage from "./pages/BatimentPage";
 import PricingPacksDisplay from "./components/components/PackComplet";
 import AgendaPage from "./pages/mon-compte/AgendaPage";
 import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
+
+// 🗺️ IMPORT DE LA PAGE CARTE
+import MapPage from "./pages/MapPage";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -372,6 +376,10 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
+                  
+                  {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
+                  <Route path="/carte" element={<MapPage />} />
+                  
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"
