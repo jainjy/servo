@@ -1310,7 +1310,7 @@ const Header = () => {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {notifications.map((n) => (
+                       {notifications.map((n) => (
                           <div
                             key={n.id}
                             className={`p-3 rounded-lg border transition-colors ${n.isRead ? "bg-gray-50" : "bg-white"
@@ -1318,14 +1318,50 @@ const Header = () => {
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <div className="text-sm font-medium text-gray-800">
-                                  {n.titre || "Nouvelle notification"}
+                                <div className="flex items-center gap-2 mb-1">
+                                  <div className="text-sm font-medium text-gray-800">
+                                    {n.titre || "Nouvelle notification"}
+                                  </div>
+                                  {!n.isRead && (
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                  )}
                                 </div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                  {n.statut} —{" "}
-                                  {n.propertyId ? "Bien lié" : "Général"}
+                                
+                                {/* Affichage du message si disponible */}
+                                {n.message && (
+                                  <div className="text-xs text-gray-600 mb-1">
+                                    {n.message}
+                                  </div>
+                                )}
+                                
+                                {/* Affichage du statut et type */}
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  {n.statut && (
+                                    <span className={`px-2 py-1 rounded-full ${
+                                      n.statut === 'validée' || n.statut === 'validee' 
+                                        ? 'bg-green-100 text-green-800'
+                                        : n.statut === 'refusée'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {n.statut}
+                                    </span>
+                                  )}
+                                  
+                                  {/* Badge pour le type de notification */}
+                                  <span className={`px-2 py-1 rounded-full ${
+                                    n.type === 'demande_immobilier' 
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : n.type === 'system'
+                                      ? 'bg-purple-100 text-purple-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {n.type === 'demande_immobilier' ? 'Demande' : 
+                                    n.type === 'system' ? 'Système' : 'Général'}
+                                  </span>
                                 </div>
                               </div>
+                              
                               <div className="flex items-center gap-2">
                                 <Button
                                   variant="ghost"
@@ -1336,6 +1372,7 @@ const Header = () => {
                                       ? handleMarkAsUnread(n.id)
                                       : handleMarkAsRead(n.id)
                                   }
+                                  title={n.isRead ? "Marquer comme non lu" : "Marquer comme lu"}
                                 >
                                   {n.isRead ? (
                                     <EyeOff className="h-4 w-4 text-gray-500" />
@@ -1343,27 +1380,52 @@ const Header = () => {
                                     <Eye className="h-4 w-4 text-blue-500" />
                                   )}
                                 </Button>
-                                <div className="text-xs text-gray-400">
+                                
+                                <div className="text-xs text-gray-400 min-w-[70px] text-right">
                                   {n.createdAt
-                                    ? new Date(n.createdAt).toLocaleDateString(
-                                      "fr-FR"
-                                    )
+                                    ? new Date(n.createdAt).toLocaleDateString("fr-FR", {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric'
+                                      })
                                     : ""}
                                 </div>
                               </div>
                             </div>
-                            {n.propertyId && (
-                              <div className="mt-3">
+                            
+                            {/* Actions supplémentaires selon le type de notification */}
+                            <div className="mt-3 flex items-center gap-2">
+                              {n.propertyId && (
                                 <a
                                   href={`/immobilier/${n.propertyId}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-xs text-blue-600 hover:underline"
+                                  className="text-xs text-blue-600 hover:underline font-medium"
                                 >
-                                  Voir le bien
+                                  👁️ Voir le bien
                                 </a>
-                              </div>
-                            )}
+                              )}
+                              
+                              {n.demandeId && (
+                                <a
+                                  href={`/mon-compte/demandes-immobilier`}
+                                  className="text-xs text-green-600 hover:underline font-medium"
+                                >
+                                  📋 Voir la demande
+                                </a>
+                              )}
+                              
+                              {/* Bouton de suppression individuelle */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 ml-auto"
+                                onClick={() => handleDeleteNotification(n.id)}
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Supprimer
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
