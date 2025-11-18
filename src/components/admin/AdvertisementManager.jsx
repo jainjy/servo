@@ -1,4 +1,3 @@
-// src/components/admin/AdvertisementManager.jsx
 import React, { useState, useEffect } from 'react'
 import {
   Card,
@@ -54,7 +53,9 @@ import {
   TrendingUp,
   Clock,
   AlertCircle,
-  Home
+  Home,
+  Video,
+  Play
 } from 'lucide-react'
 import { Textarea } from "@/components/ui/textarea"
 import { advertisementsAPI } from '@/lib/api'
@@ -84,40 +85,46 @@ const AdvertisementManager = () => {
     startDate: '',
     endDate: '',
     priority: 1,
-    image: null
+    image: null,
+    video: null
   })
   const [imagePreview, setImagePreview] = useState('')
+  const [videoPreview, setVideoPreview] = useState('')
   const [dateError, setDateError] = useState('')
 
   // Charger les publicités
   const loadAdvertisements = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       
-      const params = {}
-      if (filters.status !== 'all') params.status = filters.status
-      if (filters.position !== 'all') params.position = filters.position
-
-      const response = await advertisementsAPI.getAdvertisements(params)
+      const params = {};
+      if (filters.status !== 'all') params.status = filters.status;
+      if (filters.position !== 'all') params.position = filters.position;
+  
+      const response = await advertisementsAPI.getAdvertisements(params);
       
-      if (response.data.success) {
-        setAdvertisements(response.data.advertisements || [])
+      // CORRECTION : Vérifier si response.data existe directement
+      if (response.data && Array.isArray(response.data.advertisements)) {
+        setAdvertisements(response.data.advertisements);
+      } else if (response.data && response.data.success) {
+        // Fallback pour l'ancienne structure
+        setAdvertisements(response.data.advertisements || []);
       } else {
-        throw new Error(response.data.message || 'Erreur lors du chargement')
+        setAdvertisements([]);
       }
     } catch (error) {
-      console.error('Erreur chargement publicités:', error)
-      const errorMessage = error.response?.data?.message || error.message || "Impossible de charger les publicités"
+      console.error('Erreur chargement publicités:', error);
+      const errorMessage = error.response?.data?.message || error.message || "Impossible de charger les publicités";
       toast({
         title: "Erreur",
         description: errorMessage,
         variant: "destructive"
-      })
-      setAdvertisements([])
+      });
+      setAdvertisements([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Charger les statistiques
   const loadStats = async () => {
@@ -162,6 +169,17 @@ const AdvertisementManager = () => {
     const newFormData = { ...formData, [field]: value }
     setFormData(newFormData)
 
+    // Réinitialiser les prévisualisations si le type change
+    if (field === 'type') {
+      if (value === 'video') {
+        setImagePreview('')
+        setFormData(prev => ({ ...prev, image: null }))
+      } else {
+        setVideoPreview('')
+        setFormData(prev => ({ ...prev, video: null }))
+      }
+    }
+
     // Valider les dates quand elles changent
     if (field === 'startDate' || field === 'endDate') {
       validateDates(
@@ -184,8 +202,39 @@ const AdvertisementManager = () => {
         return
       }
       
-      setFormData(prev => ({ ...prev, image: file }))
+      setFormData(prev => ({ ...prev, image: file, video: null }))
       setImagePreview(URL.createObjectURL(file))
+      setVideoPreview('')
+    }
+  }
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      // Validation de la taille du fichier (50MB max pour les vidéos)
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "Erreur",
+          description: "La vidéo ne doit pas dépasser 50MB",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      // Validation du type de fichier
+      const videoTypes = ['video/mp4', 'video/webm', 'video/ogg']
+      if (!videoTypes.includes(file.type)) {
+        toast({
+          title: "Erreur",
+          description: "Format vidéo non supporté. Utilisez MP4, WebM ou OGG",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      setFormData(prev => ({ ...prev, video: file, image: null }))
+      setVideoPreview(URL.createObjectURL(file))
+      setImagePreview('')
     }
   }
 
@@ -200,13 +249,15 @@ const AdvertisementManager = () => {
       startDate: '',
       endDate: '',
       priority: 1,
-      image: null
+      image: null,
+      video: null
     })
     setImagePreview('')
+    setVideoPreview('')
     setDateError('')
   }
 
-  // Créer une publicité
+  // Créer une publicité - CORRIGÉ
   const handleCreate = async (e) => {
     e.preventDefault()
     
@@ -215,11 +266,30 @@ const AdvertisementManager = () => {
       return
     }
 
-    // Validation des champs requis
-    if (!formData.title || !formData.image) {
+    // Validation des champs requis selon le type
+    if (!formData.title) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
+        description: "Veuillez remplir le titre",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Validation média selon le type
+    if (formData.type === 'video' && !formData.video) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une vidéo pour les publicités vidéo",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if ((formData.type === 'banner' || formData.type === 'popup') && !formData.image) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une image pour les bannières et popups",
         variant: "destructive"
       })
       return
@@ -228,16 +298,19 @@ const AdvertisementManager = () => {
     try {
       const formDataToSend = new FormData()
       
-      // Ajouter tous les champs au FormData
+      // Ajouter tous les champs texte
       Object.keys(formData).forEach(key => {
-        if (formData[key] !== null && formData[key] !== '') {
-          if (key === 'image' && formData[key]) {
-            formDataToSend.append('image', formData[key])
-          } else {
-            formDataToSend.append(key, formData[key])
-          }
+        if (key !== 'image' && key !== 'video' && formData[key] !== null && formData[key] !== '') {
+          formDataToSend.append(key, formData[key])
         }
       })
+
+      // Ajouter le fichier approprié selon le type
+      if (formData.type === 'video' && formData.video) {
+        formDataToSend.append('video', formData.video)
+      } else if ((formData.type === 'banner' || formData.type === 'popup') && formData.image) {
+        formDataToSend.append('image', formData.image)
+      }
 
       const response = await advertisementsAPI.createAdvertisement(formDataToSend)
 
@@ -264,7 +337,7 @@ const AdvertisementManager = () => {
     }
   }
 
-  // Modifier une publicité
+  // Modifier une publicité - CORRIGÉ
   const handleEdit = async (e) => {
     e.preventDefault()
     
@@ -273,18 +346,32 @@ const AdvertisementManager = () => {
       return
     }
 
+    // Validation des champs requis selon le type
+    if (!formData.title) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir le titre",
+        variant: "destructive"
+      })
+      return
+    }
+
     try {
       const formDataToSend = new FormData()
       
+      // Ajouter tous les champs texte
       Object.keys(formData).forEach(key => {
-        if (formData[key] !== null && formData[key] !== '') {
-          if (key === 'image' && formData[key]) {
-            formDataToSend.append('image', formData[key])
-          } else {
-            formDataToSend.append(key, formData[key])
-          }
+        if (key !== 'image' && key !== 'video' && formData[key] !== null && formData[key] !== '') {
+          formDataToSend.append(key, formData[key])
         }
       })
+
+      // Ajouter le fichier approprié selon le type seulement si un nouveau fichier est fourni
+      if (formData.type === 'video' && formData.video) {
+        formDataToSend.append('video', formData.video)
+      } else if ((formData.type === 'banner' || formData.type === 'popup') && formData.image) {
+        formDataToSend.append('image', formData.image)
+      }
 
       const response = await advertisementsAPI.updateAdvertisement(selectedAd.id, formDataToSend)
 
@@ -353,20 +440,27 @@ const AdvertisementManager = () => {
       startDate: ad.startDate ? ad.startDate.split('T')[0] : '',
       endDate: ad.endDate ? ad.endDate.split('T')[0] : '',
       priority: ad.priority,
-      image: null
+      image: null,
+      video: null
     })
-    setImagePreview(ad.imageUrl)
+    setImagePreview(ad.type === 'video' ? '' : ad.imageUrl)
+    setVideoPreview(ad.type === 'video' ? ad.imageUrl : '')
     setIsEditDialogOpen(true)
   }
 
   // Obtenir le statut actuel basé sur les dates
   const getCurrentStatus = (ad) => {
+    // Si le statut est 'inactive', retourner directement
+    if (ad.status === 'inactive') return 'inactive'
+    
+    // Pour les statuts 'scheduled' stockés, les garder comme scheduled
+    if (ad.status === 'scheduled') return 'scheduled'
+    
+    // Pour le statut 'active', vérifier les dates
     const now = new Date()
     const startDate = ad.startDate ? new Date(ad.startDate) : null
     const endDate = ad.endDate ? new Date(ad.endDate) : null
 
-    if (ad.status === 'inactive') return 'inactive'
-    
     if (startDate && now < startDate) return 'scheduled'
     if (endDate && now > endDate) return 'expired'
     
@@ -407,6 +501,30 @@ const AdvertisementManager = () => {
       <Badge variant="outline" className="flex items-center">
         {icons[position]}
         {labels[position] || position}
+      </Badge>
+    )
+  }
+
+  const getTypeBadge = (type) => {
+    const variants = {
+      banner: 'default',
+      popup: 'secondary',
+      video: 'destructive'
+    }
+    const labels = {
+      banner: 'Bannière',
+      popup: 'Popup',
+      video: 'Vidéo'
+    }
+    const icons = {
+      banner: <ImageIcon className="w-3 h-3 mr-1" />,
+      popup: <Eye className="w-3 h-3 mr-1" />,
+      video: <Video className="w-3 h-3 mr-1" />
+    }
+    return (
+      <Badge variant={variants[type]} className="flex items-center">
+        {icons[type]}
+        {labels[type]}
       </Badge>
     )
   }
@@ -658,36 +776,58 @@ const AdvertisementManager = () => {
                   )}
                 </div>
 
-                {/* Image */}
+                {/* Média */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4" />
-                    Image de la publicité
+                    {formData.type === 'video' ? (
+                      <Video className="w-4 h-4" />
+                    ) : (
+                      <ImageIcon className="w-4 h-4" />
+                    )}
+                    {formData.type === 'video' ? 'Vidéo de la publicité' : 'Image de la publicité'}
                   </h3>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="image">Image *</Label>
+                    <Label htmlFor="media">
+                      {formData.type === 'video' ? 'Vidéo *' : 'Image *'}
+                    </Label>
                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
                       <Input
-                        id="image"
+                        id="media"
                         type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
+                        accept={formData.type === 'video' ? "video/*" : "image/*"}
+                        onChange={formData.type === 'video' ? handleVideoChange : handleImageChange}
                         className="hidden"
                       />
-                      <Label htmlFor="image" className="cursor-pointer">
+                      <Label htmlFor="media" className="cursor-pointer">
                         <div className="flex flex-col items-center gap-2">
-                          <Upload className="w-8 h-8 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            Cliquez pour uploader une image
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            PNG, JPG, WEBP jusqu'à 5MB
-                          </span>
+                          {formData.type === 'video' ? (
+                            <>
+                              <Video className="w-8 h-8 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                Cliquez pour uploader une vidéo
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                MP4, WebM, OGG jusqu'à 50MB
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-8 h-8 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                Cliquez pour uploader une image
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                PNG, JPG, WEBP jusqu'à 5MB
+                              </span>
+                            </>
+                          )}
                         </div>
                       </Label>
                     </div>
-                    {imagePreview && (
+                    
+                    {/* Aperçu */}
+                    {imagePreview && formData.type !== 'video' && (
                       <div className="mt-4">
                         <p className="text-sm font-medium mb-2">Aperçu :</p>
                         <img 
@@ -695,6 +835,22 @@ const AdvertisementManager = () => {
                           alt="Aperçu" 
                           className="max-h-40 rounded-lg object-cover border"
                         />
+                      </div>
+                    )}
+                    
+                    {videoPreview && formData.type === 'video' && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium mb-2">Aperçu :</p>
+                        <div className="relative max-h-40 rounded-lg border overflow-hidden">
+                          <video 
+                            src={videoPreview} 
+                            className="w-full h-full object-cover"
+                            controls
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <Play className="w-12 h-12 text-white" />
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -858,7 +1014,7 @@ const AdvertisementManager = () => {
         <CardContent>
           {loading ? (
             <div className="text-center py-12">
-          <img src="/loading.gif" alt="" className='w-24 h-24'/>
+              <RefreshCw className="w-12 h-12 animate-spin text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">Chargement des publicités...</p>
             </div>
           ) : filteredAdvertisements.length === 0 ? (
@@ -892,6 +1048,7 @@ const AdvertisementManager = () => {
                   <TableRow>
                     <TableHead>Publicité</TableHead>
                     <TableHead>Position</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Performance</TableHead>
                     <TableHead>Planning</TableHead>
@@ -903,13 +1060,24 @@ const AdvertisementManager = () => {
                     <TableRow key={ad.id} className="hover:bg-muted/50">
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={ad.imageUrl} 
-                            alt={ad.title}
-                            className="w-12 h-12 rounded-lg object-cover border"
-                          />
+                          {ad.type === 'video' ? (
+                            <div className="relative w-12 h-12 rounded-lg border overflow-hidden bg-muted flex items-center justify-center">
+                              <Video className="w-6 h-6 text-muted-foreground" />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                <Play className="w-4 h-4 text-white" />
+                              </div>
+                            </div>
+                          ) : (
+                            <img 
+                              src={ad.imageUrl} 
+                              alt={ad.title}
+                              className="w-12 h-12 rounded-lg object-cover border"
+                            />
+                          )}
                           <div className="min-w-0 flex-1">
-                            <div className="font-semibold truncate">{ad.title}</div>
+                            <div className="font-semibold truncate flex items-center gap-2">
+                              {ad.title}
+                            </div>
                             {ad.description && (
                               <div className="text-sm text-muted-foreground truncate">
                                 {ad.description}
@@ -925,6 +1093,7 @@ const AdvertisementManager = () => {
                         </div>
                       </TableCell>
                       <TableCell>{getPositionBadge(ad.position)}</TableCell>
+                      <TableCell>{getTypeBadge(ad.type)}</TableCell>
                       <TableCell>{getStatusBadge(ad)}</TableCell>
                       <TableCell>
                         <div className="space-y-1">
@@ -1184,43 +1353,78 @@ const AdvertisementManager = () => {
               )}
             </div>
 
-            {/* Image */}
+            {/* Média */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <ImageIcon className="w-4 h-4" />
-                Image de la publicité
+                {formData.type === 'video' ? (
+                  <Video className="w-4 h-4" />
+                ) : (
+                  <ImageIcon className="w-4 h-4" />
+                )}
+                {formData.type === 'video' ? 'Vidéo de la publicité' : 'Image de la publicité'}
               </h3>
               
               <div className="space-y-2">
-                <Label htmlFor="edit-image">Image</Label>
+                <Label htmlFor="edit-media">
+                  {formData.type === 'video' ? 'Vidéo' : 'Image'}
+                </Label>
                 <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
                   <Input
-                    id="edit-image"
+                    id="edit-media"
                     type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
+                    accept={formData.type === 'video' ? "video/*" : "image/*"}
+                    onChange={formData.type === 'video' ? handleVideoChange : handleImageChange}
                     className="hidden"
                   />
-                  <Label htmlFor="edit-image" className="cursor-pointer">
+                  <Label htmlFor="edit-media" className="cursor-pointer">
                     <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-8 h-8 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        Cliquez pour changer l'image
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        PNG, JPG, WEBP jusqu'à 5MB
-                      </span>
+                      {formData.type === 'video' ? (
+                        <>
+                          <Video className="w-8 h-8 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            Cliquez pour changer la vidéo
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            MP4, WebM, OGG jusqu'à 50MB
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            Cliquez pour changer l'image
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            PNG, JPG, WEBP jusqu'à 5MB
+                          </span>
+                        </>
+                      )}
                     </div>
                   </Label>
                 </div>
-                {imagePreview && (
+                
+                {/* Aperçu actuel */}
+                {(imagePreview || videoPreview) && (
                   <div className="mt-4">
                     <p className="text-sm font-medium mb-2">Aperçu actuel :</p>
-                    <img 
-                      src={imagePreview} 
-                      alt="Aperçu" 
-                      className="max-h-40 rounded-lg object-cover border"
-                    />
+                    {formData.type === 'video' && videoPreview ? (
+                      <div className="relative max-h-40 rounded-lg border overflow-hidden">
+                        <video 
+                          src={videoPreview} 
+                          className="w-full h-full object-cover"
+                          controls
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <Play className="w-12 h-12 text-white" />
+                        </div>
+                      </div>
+                    ) : formData.type !== 'video' && imagePreview ? (
+                      <img 
+                        src={imagePreview} 
+                        alt="Aperçu" 
+                        className="max-h-40 rounded-lg object-cover border"
+                      />
+                    ) : null}
                   </div>
                 )}
               </div>
