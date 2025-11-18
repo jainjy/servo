@@ -14,6 +14,7 @@ export default function TourismPage() {
   const [listings, setListings] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [filters, setFilters] = useState({
     destination: '',
@@ -24,7 +25,7 @@ export default function TourismPage() {
     children: 0,
     infants: 0,
     minPrice: 0,
-    maxPrice: 1000,
+    maxPrice: 100000,
     type: [],
     rating: 0,
     amenities: [],
@@ -64,25 +65,115 @@ export default function TourismPage() {
     { id: 'kitchen', label: 'Cuisine', icon: null }
   ];
 
+  // Fonction pour réinitialiser complètement les filtres
+  const resetAllFilters = () => {
+    const resetFilters = {
+      destination: '',
+      checkIn: '',
+      checkOut: '',
+      guests: 2,
+      adults: 2,
+      children: 0,
+      infants: 0,
+      minPrice: 0,
+      maxPrice: 100000,
+      type: [],
+      rating: 0,
+      amenities: [],
+      instantBook: false
+    };
+    
+    setFilters(resetFilters);
+    console.log('🔄 Filtres complètement réinitialisés');
+  };
+
+  // Debug useEffect
+  useEffect(() => {
+    console.log('🔍 État actuel - Listings:', listings.length);
+    console.log('🔍 État actuel - FilteredListings:', filteredListings.length);
+    console.log('🔍 État actuel - Stats:', stats);
+    
+    // FORCER la synchronisation si incohérence
+    if (listings.length !== filteredListings.length) {
+      console.warn('⚠️ INCOHÉRENCE DÉTECTÉE: listings != filteredListings');
+      console.warn('Forcer la synchronisation...');
+      setFilteredListings(listings);
+    }
+  }, [listings, filteredListings, stats]);
+
   // Charger les données depuis l'API
   useEffect(() => {
     loadListings();
     loadStats();
   }, []);
 
+  // Fonction pour analyser pourquoi les listings sont filtrés
+  const analyzeFiltering = (listings, currentFilters) => {
+    console.log('🔍 ANALYSE DES FILTRES:');
+    
+    let filteredCount = 0;
+    
+    listings.forEach(listing => {
+      const matchesDestination = !currentFilters.destination || 
+        listing.city.toLowerCase().includes(currentFilters.destination.toLowerCase()) ||
+        listing.title.toLowerCase().includes(currentFilters.destination.toLowerCase());
+      
+      const matchesType = currentFilters.type.length === 0 || 
+        currentFilters.type.includes(listing.type);
+      
+      const matchesRating = listing.rating >= currentFilters.rating;
+      
+      const matchesAmenities = currentFilters.amenities.length === 0 ||
+        currentFilters.amenities.every(amenity => listing.amenities.includes(amenity));
+      
+      const matchesInstantBook = !currentFilters.instantBook || listing.instantBook;
+      
+      const matchesPrice = listing.price >= currentFilters.minPrice && 
+        listing.price <= currentFilters.maxPrice;
+      
+      const isFiltered = !matchesDestination || !matchesType || !matchesRating || 
+        !matchesAmenities || !matchesInstantBook || !matchesPrice;
+      
+      if (isFiltered) {
+        filteredCount++;
+        console.log(`❌ ${listing.title} est filtré car:`, {
+          destination: !matchesDestination,
+          type: !matchesType,
+          rating: !matchesRating && `rating=${listing.rating} < filtre=${currentFilters.rating}`,
+          amenities: !matchesAmenities,
+          instantBook: !matchesInstantBook,
+          price: !matchesPrice && `prix=${listing.price} hors [${currentFilters.minPrice}-${currentFilters.maxPrice}]`,
+          prixListing: listing.price,
+          prixMaxFiltre: currentFilters.maxPrice
+        });
+      }
+    });
+    
+    console.log(`📊 Total filtré: ${filteredCount}/${listings.length}`);
+  };
+
   const loadListings = async () => {
     try {
       setLoading(true);
       const response = await tourismeAPI.getListings();
+      console.log('📦 Réponse API listings:', response.data);
+      
       if (response.data.success) {
-        setListings(response.data.data);
-        setFilteredListings(response.data.data);
+        const listingsData = response.data.data;
+        setListings(listingsData);
+
+        // Réinitialiser les filtres pour montrer TOUT
+        resetAllFilters();
+        setFilteredListings(listingsData);
 
         const initialIndexes = {};
-        response.data.data.forEach((listing) => {
+        listingsData.forEach((listing) => {
           initialIndexes[listing.id] = 0;
         });
         setCurrentImageIndex(initialIndexes);
+        
+        console.log('✅ Listings chargés:', listingsData.length);
+        console.log('✅ Filtres réinitialisés - devrait montrer tous les listings');
       }
     } catch (error) {
       console.error('Erreur lors du chargement des hébergements:', error);
@@ -94,12 +185,18 @@ export default function TourismPage() {
 
   const loadStats = async () => {
     try {
+      setStatsLoading(true);
       const response = await tourismeAPI.getStats();
+      console.log('📊 Réponse API stats:', response.data);
+      
       if (response.data.success) {
         setStats(response.data.data);
+        console.log('✅ Stats mises à jour:', response.data.data);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -107,125 +204,211 @@ export default function TourismPage() {
   useEffect(() => {
     let results = listings;
 
+    console.log('🎯 DÉBUT FILTRAGE - Filtres actuels:', filters);
+    console.log('🎯 Listings avant filtrage:', listings.length);
+
     if (filters.destination) {
       results = results.filter(listing =>
         listing.city.toLowerCase().includes(filters.destination.toLowerCase()) ||
         listing.title.toLowerCase().includes(filters.destination.toLowerCase())
       );
+      console.log('🎯 Après filtre destination:', results.length);
     }
 
     if (filters.type.length > 0) {
       results = results.filter(listing => filters.type.includes(listing.type));
+      console.log('🎯 Après filtre type:', results.length);
     }
 
     if (filters.rating > 0) {
       results = results.filter(listing => listing.rating >= filters.rating);
+      console.log('🎯 Après filtre rating:', results.length);
     }
 
     if (filters.amenities.length > 0) {
       results = results.filter(listing =>
         filters.amenities.every(amenity => listing.amenities.includes(amenity))
       );
+      console.log('🎯 Après filtre amenities:', results.length);
     }
 
     if (filters.instantBook) {
       results = results.filter(listing => listing.instantBook);
+      console.log('🎯 Après filtre instantBook:', results.length);
     }
 
     results = results.filter(listing =>
       listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
+    console.log('🎯 Après filtre prix:', results.length);
+
+    // ANALYSE DES FILTRES
+    analyzeFiltering(listings, filters);
+
+    console.log('🔍 Filtrage appliqué:', {
+      total: listings.length,
+      filtrés: results.length,
+      filtres: filters
+    });
 
     setFilteredListings(results);
   }, [filters, listings]);
 
-  // Gestion Admin
+  // Gestion Admin - CORRIGÉE
   const handleAddListing = async (listingData) => {
     try {
+      console.log('📤 Envoi des données:', listingData);
+      
       const response = await tourismeAPI.createListing(listingData);
+      console.log('📥 Réponse API:', response.data);
+      
       if (response.data.success) {
-        setListings(prev => [...prev, response.data.data]);
+        const newListing = response.data.data;
+        
+        // Réinitialiser les filtres pour montrer TOUS les listings
+        resetAllFilters();
+        
         setShowAdminModal(false);
+        setEditingListing(null);
         toast.success('Hébergement créé avec succès');
-        loadStats();
+        
+        // Recharger toutes les données
+        await Promise.all([
+          loadListings(),
+          loadStats()
+        ]);
+        
+        console.log('✅ Ajout terminé - filtres réinitialisés et données rechargées');
       }
     } catch (error) {
-      console.error('Erreur création:', error);
+      console.error('❌ Erreur création:', error);
       toast.error(error.response?.data?.error || 'Erreur lors de la création');
     }
   };
 
   const handleEditListing = async (listingData) => {
     try {
+      console.log('✏️ Modification hébergement:', listingData);
+      
       const response = await tourismeAPI.updateListing(listingData.id, listingData);
+      console.log('📥 Réponse modification:', response.data);
+      
       if (response.data.success) {
+        // Mise à jour optimiste
         setListings(prev => prev.map(l =>
           l.id === listingData.id ? response.data.data : l
         ));
+        
+        setFilteredListings(prev => prev.map(l =>
+          l.id === listingData.id ? response.data.data : l
+        ));
+        
         setShowAdminModal(false);
         setEditingListing(null);
         toast.success('Hébergement modifié avec succès');
-        loadStats();
+        
+        // Recharger les données fraîches
+        await loadStats();
+        
+        console.log('✅ Modification terminée');
       }
     } catch (error) {
-      console.error('Erreur modification:', error);
+      console.error('❌ Erreur modification:', error);
       toast.error(error.response?.data?.error || 'Erreur lors de la modification');
     }
   };
 
-const handleDeleteListing = async (id) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer cet hébergement ?')) {
-    return;
-  }
-
-  try {
-    await tourismeAPI.deleteListing(id);
-    toast.success("Hébergement supprimé avec succès");
-    setListings(prev => prev.filter(listing => listing.id !== id));
-    loadStats();
-  } catch (error) {
-    const backendMessage = error.response?.data?.error;
-
-    if (backendMessage) {
-      // 🔥 Message envoyé par le backend
-      toast.error(backendMessage);
-    } else {
-      // Message par défaut
-      toast.error("Erreur lors de la suppression");
+  const handleDeleteListing = async (id) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet hébergement ?')) {
+      return;
     }
 
-    console.error("Erreur suppression:", error);
-  }
-};
+    try {
+      console.log('🗑️ Suppression hébergement:', id);
+      
+      await tourismeAPI.deleteListing(id);
+      toast.success("Hébergement supprimé avec succès");
+      
+      // Mise à jour optimiste des listings
+      setListings(prev => {
+        const updated = prev.filter(listing => listing.id !== id);
+        console.log('📊 Listings après suppression:', updated.length);
+        return updated;
+      });
+      
+      // RÉINITIALISATION COMPLÈTE DES FILTRES
+      resetAllFilters();
+      
+      // Recharger les stats
+      await loadStats();
+      
+      console.log('✅ Suppression terminée - filtres réinitialisés');
+      
+    } catch (error) {
+      const backendMessage = error.response?.data?.error;
+
+      if (backendMessage) {
+        toast.error(backendMessage);
+      } else {
+        toast.error("Erreur lors de la suppression");
+      }
+
+      console.error("❌ Erreur suppression:", error);
+    }
+  };
 
   const toggleAvailability = async (id) => {
     try {
+      console.log('🔄 Bascule disponibilité:', id);
+      
       const response = await tourismeAPI.toggleAvailability(id);
+      console.log('📥 Réponse disponibilité:', response.data);
+      
       if (response.data.success) {
+        // Mise à jour optimiste
         setListings(prev => prev.map(listing =>
           listing.id === id ? response.data.data : listing
         ));
+        
+        setFilteredListings(prev => prev.map(listing =>
+          listing.id === id ? response.data.data : listing
+        ));
+        
         toast.success(response.data.message);
-        loadStats();
+        await loadStats();
+        
+        console.log('✅ Disponibilité basculée');
       }
     } catch (error) {
-      console.error('Erreur bascule disponibilité:', error);
+      console.error('❌ Erreur bascule disponibilité:', error);
       toast.error(error.response?.data?.error || 'Erreur lors du changement de disponibilité');
     }
   };
 
   const toggleFeatured = async (id) => {
     try {
+      console.log('⭐ Bascule vedette:', id);
+      
       const response = await tourismeAPI.toggleFeatured(id);
+      console.log('📥 Réponse vedette:', response.data);
+      
       if (response.data.success) {
+        // Mise à jour optimiste
         setListings(prev => prev.map(listing =>
           listing.id === id ? response.data.data : listing
         ));
+        
+        setFilteredListings(prev => prev.map(listing =>
+          listing.id === id ? response.data.data : listing
+        ));
+        
         toast.success(response.data.message);
-        loadStats();
+        await loadStats();
+        
+        console.log('✅ Statut vedette basculé');
       }
     } catch (error) {
-      console.error('Erreur bascule vedette:', error);
+      console.error('❌ Erreur bascule vedette:', error);
       toast.error(error.response?.data?.error || 'Erreur lors du changement de statut vedette');
     }
   };
@@ -461,7 +644,7 @@ const handleDeleteListing = async (id) => {
               <Edit className="w-4 h-4" />
             </button>
             <button
-              onClick={() => handleDeleteListing(listing.id)}  // Utiliser listing.id, pas listing.idUnique
+              onClick={() => handleDeleteListing(listing.id)}
               className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
               title="Supprimer"
             >
@@ -655,7 +838,7 @@ const handleDeleteListing = async (id) => {
             <div className="flex items-center">
               <Star className="w-8 h-8 text-yellow-500 mr-4" />
               <div>
-                <div className="text-2xl font-bold">{stats.averageRating.toFixed(2)}</div>
+                <div className="text-2xl font-bold">{stats.averageRating?.toFixed(2) || '0.00'}</div>
                 <div className="text-gray-600">Note moyenne</div>
               </div>
             </div>
@@ -807,6 +990,8 @@ const handleDeleteListing = async (id) => {
 
     const handleSubmit = (e) => {
       e.preventDefault();
+      console.log('📝 Soumission formulaire:', formData);
+      
       if (editingListing) {
         handleEditListing(formData);
       } else {

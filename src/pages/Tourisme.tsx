@@ -96,7 +96,7 @@ export const TourismSection = () => {
     children: 0,
     infants: 0,
     minPrice: 0,
-    maxPrice: 1000,
+    maxPrice: 100000, // Augmenté pour inclure tous les listings
     type: [],
     rating: 0,
     amenities: [],
@@ -138,6 +138,86 @@ export const TourismSection = () => {
   const [popularDestinations, setPopularDestinations] = useState<
     { city: string; price: number; image: string }[]
   >([]);
+
+  // Fonction pour réinitialiser complètement les filtres
+  const resetAllFilters = () => {
+    const resetFilters = {
+      destination: '',
+      checkIn: '',
+      checkOut: '',
+      guests: 2,
+      adults: 2,
+      children: 0,
+      infants: 0,
+      minPrice: 0,
+      maxPrice: 100000,
+      type: [],
+      rating: 0,
+      amenities: [],
+      instantBook: false
+    };
+    
+    setFilters(resetFilters);
+    console.log('🔄 Filtres complètement réinitialisés');
+  };
+
+  // Debug useEffect pour surveiller la synchronisation
+  useEffect(() => {
+    console.log('🔍 État actuel - Listings:', listings.length);
+    console.log('🔍 État actuel - FilteredListings:', filteredListings.length);
+    
+    // FORCER la synchronisation si incohérence
+    if (listings.length !== filteredListings.length) {
+      console.warn('⚠️ INCOHÉRENCE DÉTECTÉE: listings != filteredListings');
+      console.warn('Forcer la synchronisation...');
+      setFilteredListings(listings);
+    }
+  }, [listings, filteredListings]);
+
+  // Fonction pour analyser pourquoi les listings sont filtrés
+  const analyzeFiltering = (listings: TourismListing[], currentFilters: SearchFilters) => {
+    console.log('🔍 ANALYSE DES FILTRES:');
+    
+    let filteredCount = 0;
+    
+    listings.forEach(listing => {
+      const matchesDestination = !currentFilters.destination || 
+        listing.city.toLowerCase().includes(currentFilters.destination.toLowerCase()) ||
+        listing.title.toLowerCase().includes(currentFilters.destination.toLowerCase());
+      
+      const matchesType = currentFilters.type.length === 0 || 
+        currentFilters.type.includes(listing.type);
+      
+      const matchesRating = listing.rating >= currentFilters.rating;
+      
+      const matchesAmenities = currentFilters.amenities.length === 0 ||
+        currentFilters.amenities.every(amenity => listing.amenities.includes(amenity));
+      
+      const matchesInstantBook = !currentFilters.instantBook || (listing.instantBook ?? false);
+      
+      const matchesPrice = listing.price >= currentFilters.minPrice && 
+        listing.price <= currentFilters.maxPrice;
+      
+      const isFiltered = !matchesDestination || !matchesType || !matchesRating || 
+        !matchesAmenities || !matchesInstantBook || !matchesPrice;
+      
+      if (isFiltered) {
+        filteredCount++;
+        console.log(`❌ ${listing.title} est filtré car:`, {
+          destination: !matchesDestination,
+          type: !matchesType,
+          rating: !matchesRating && `rating=${listing.rating} < filtre=${currentFilters.rating}`,
+          amenities: !matchesAmenities,
+          instantBook: !matchesInstantBook,
+          price: !matchesPrice && `prix=${listing.price} hors [${currentFilters.minPrice}-${currentFilters.maxPrice}]`,
+          prixListing: listing.price,
+          prixMaxFiltre: currentFilters.maxPrice
+        });
+      }
+    });
+    
+    console.log(`📊 Total filtré: ${filteredCount}/${listings.length}`);
+  };
 
   // TRACKING: Chargement des hébergements
   useEffect(() => {
@@ -213,8 +293,21 @@ export const TourismSection = () => {
         const response = await api.get("/tourisme");
 
         if (response.data.success && Array.isArray(response.data.data)) {
-          setListings(response.data.data);
-          setFilteredListings(response.data.data);
+          const listingsData = response.data.data;
+          setListings(listingsData);
+
+          // Réinitialiser les filtres pour montrer TOUT
+          resetAllFilters();
+          setFilteredListings(listingsData);
+
+          console.log('✅ Listings chargés:', listingsData.length);
+          console.log('✅ Filtres réinitialisés - devrait montrer tous les listings');
+
+          // ANALYSE: Vérifiez pourquoi certains listings sont filtrés
+          console.log('🔍 Analyse des listings:');
+          listingsData.forEach((listing: TourismListing) => {
+            console.log(`- ${listing.title}: prix=${listing.price}, rating=${listing.rating}, type=${listing.type}`);
+          });
         } else {
           console.error("Réponse inattendue :", response.data);
         }
@@ -240,34 +333,52 @@ export const TourismSection = () => {
   useEffect(() => {
     let results = listings;
 
+    console.log('🎯 DÉBUT FILTRAGE - Filtres actuels:', filters);
+    console.log('🎯 Listings avant filtrage:', listings.length);
+
     if (filters.destination) {
       results = results.filter(listing =>
         listing.city.toLowerCase().includes(filters.destination.toLowerCase()) ||
         listing.title.toLowerCase().includes(filters.destination.toLowerCase())
       );
+      console.log('🎯 Après filtre destination:', results.length);
     }
 
     if (filters.type.length > 0) {
       results = results.filter(listing => filters.type.includes(listing.type));
+      console.log('🎯 Après filtre type:', results.length);
     }
 
     if (filters.rating > 0) {
       results = results.filter(listing => listing.rating >= filters.rating);
+      console.log('🎯 Après filtre rating:', results.length);
     }
 
     if (filters.amenities.length > 0) {
       results = results.filter(listing =>
         filters.amenities.every(amenity => listing.amenities.includes(amenity))
       );
+      console.log('🎯 Après filtre amenities:', results.length);
     }
 
     if (filters.instantBook) {
-      results = results.filter(listing => listing.instantBook);
+      results = results.filter(listing => listing.instantBook ?? false);
+      console.log('🎯 Après filtre instantBook:', results.length);
     }
 
     results = results.filter(listing =>
       listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
+    console.log('🎯 Après filtre prix:', results.length);
+
+    // ANALYSE DES FILTRES
+    analyzeFiltering(listings, filters);
+
+    console.log('🔍 Filtrage appliqué:', {
+      total: listings.length,
+      filtrés: results.length,
+      filtres: filters
+    });
 
     setFilteredListings(results);
   }, [filters, listings]);
@@ -758,21 +869,7 @@ export const TourismSection = () => {
               <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  onClick={() => setFilters({
-                    destination: '',
-                    checkIn: '',
-                    checkOut: '',
-                    guests: 2,
-                    adults: 2,
-                    children: 0,
-                    infants: 0,
-                    minPrice: 0,
-                    maxPrice: 1000,
-                    type: [],
-                    rating: 0,
-                    amenities: [],
-                    instantBook: false
-                  })}
+                  onClick={resetAllFilters}
                   className="text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
                 >
                   Réinitialiser les filtres
