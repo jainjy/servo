@@ -20,8 +20,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-// Import des images pour les sections
-
 // Import des icônes
 import {
   Menu,
@@ -38,60 +36,59 @@ import {
   Eye,
   EyeOff,
   Trash2,
-  Package, // Icône pour Mes Commandes
+  Package,
   AlertCircle,
   Calendar1,
   FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import Cart from "@/components/Cart";
-
-// Authentification et Types
 import AuthService from "@/services/authService";
 import type { User as AuthUser } from "@/types/type";
-
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api.js";
-import { describe } from "node:test";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const navigate = useNavigate();
-  const [isDeletingAll, setIsDeletingAll] = useState(false);
-  const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>(
-    {}
-  );
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(
-    AuthService.getCurrentUser()
-  );
+  const [user, setUser] = useState<AuthUser | null>(AuthService.getCurrentUser());
   const { logout } = useAuth();
 
   // Utiliser le contexte panier
   const { getCartItemsCount } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  // Utiliser le hook WebSocket pour les notifications en temps réel
+  const { notificationCount, setNotificationCount } = useWebSocket();
+
+  // États pour les notifications
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<any>>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+
   useEffect(() => {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?$%*#";
-    const speed = 20; // <-- vitesse (ms) : plus petit = plus rapide
-    const step = 0.5; // <-- incrément d'itérations (plus grand = plus vite)
+    const speed = 20;
+    const step = 0.5;
     const activeIntervals = new Map<HTMLElement, number>();
-    const busy = new Set<HTMLElement>(); // empêche le retrigger pendant l'anim
+    const busy = new Set<HTMLElement>();
 
     function scrambleOnce(el: HTMLElement) {
       const original = el.dataset.original ?? el.textContent ?? "";
       el.dataset.original = original;
 
-      // si déjà en cours, on ignore
       if (busy.has(el)) return;
       busy.add(el);
 
-      // clear s'il y avait un interval pour cet élément
       const prev = activeIntervals.get(el);
       if (prev) {
         clearInterval(prev);
@@ -110,7 +107,6 @@ const Header = () => {
 
         iterations += step;
         if (iterations >= original.length) {
-          // assure le texte final exact
           el.innerText = original;
           clearInterval(id);
           activeIntervals.delete(el);
@@ -121,7 +117,6 @@ const Header = () => {
       activeIntervals.set(el, id);
     }
 
-    // délégation : un seul listener pour tous les .scramble, évite null ou éléments recréés
     function onPointerOver(e: Event) {
       const target = e.target as HTMLElement | null;
       if (!target) return;
@@ -132,7 +127,6 @@ const Header = () => {
 
     document.addEventListener("pointerover", onPointerOver);
 
-    // cleanup propre
     return () => {
       document.removeEventListener("pointerover", onPointerOver);
       activeIntervals.forEach((id) => clearInterval(id));
@@ -144,7 +138,186 @@ const Header = () => {
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
     setRole(user?.role);
-  }, []);
+  }, [user]);
+
+  // Charger les notifications au montage et quand l'utilisateur change
+  useEffect(() => {
+    if (user?.id) {
+      loadNotifications();
+    }
+  }, [user?.id]);
+
+  // Écouter les événements de rechargement des notifications
+  useEffect(() => {
+    const handler = () => {
+      if (user?.id) {
+        loadNotifications();
+      }
+    };
+    window.addEventListener("notifications:reload", handler);
+    return () => window.removeEventListener("notifications:reload", handler);
+  }, [user?.id]);
+
+  const loadNotifications = async () => {
+    if (!user?.id) return;
+
+    setNotifLoading(true);
+    try {
+      console.log('📨 Chargement des notifications...');
+      const response = await api.get(`/notifications/user/${user.id}`);
+      const { notifications = [], unreadCount = 0 } = response.data || {};
+      
+      console.log(`✅ ${notifications.length} notifications chargées, ${unreadCount} non lues`);
+      
+      setNotifications(notifications);
+      setNotificationCount(unreadCount);
+    } catch (error) {
+      console.error("❌ Error loading notifications:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les notifications",
+        variant: "destructive"
+      });
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    if (!user?.id) return;
+
+    try {
+      console.log(`📨 Marquer comme lu: ${notificationId}`);
+      await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
+      
+      // Mettre à jour localement
+      setNotifications(prev => 
+        prev.map(n => 
+          n.id === notificationId ? { ...n, isRead: true } : n
+        )
+      );
+      
+      // Mettre à jour le compteur WebSocket
+      setNotificationCount(prev => Math.max(0, prev - 1));
+      
+      toast({
+        description: "Notification marquée comme lue"
+      });
+      
+    } catch (error) {
+      console.error("❌ Error marking notification as read:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer comme lu",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleMarkAsUnread = async (notificationId: string) => {
+    if (!user?.id) return;
+
+    try {
+      console.log(`📨 Marquer comme non lu: ${notificationId}`);
+      await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
+      
+      // Mettre à jour localement
+      setNotifications(prev => 
+        prev.map(n => 
+          n.id === notificationId ? { ...n, isRead: false } : n
+        )
+      );
+      
+      // Mettre à jour le compteur WebSocket
+      setNotificationCount(prev => prev + 1);
+      
+      toast({
+        description: "Notification marquée comme non lue"
+      });
+      
+    } catch (error) {
+      console.error("❌ Error marking notification as unread:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer comme non lu",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (!user?.id) return;
+
+    try {
+      console.log('📨 Marquer toutes comme lues');
+      await api.post(`/notifications/user/${user.id}/read-all`);
+      
+      // Mettre à jour localement
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, isRead: true }))
+      );
+      
+      // Réinitialiser le compteur WebSocket
+      setNotificationCount(0);
+      
+      toast({
+        description: "Toutes les notifications ont été marquées comme lues"
+      });
+    } catch (error) {
+      console.error("❌ Error marking all as read:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer comme lu",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!user?.id) return;
+
+    try {
+      console.log('🗑️ Supprimer toutes les notifications');
+      await api.post(`/notifications/user/${user.id}/clear-all`);
+      
+      // Recharger les notifications
+      await loadNotifications();
+      
+      toast({
+        description: "Toutes les notifications ont été supprimées",
+      });
+    } catch (error) {
+      console.error("❌ Error clearing notifications:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer les notifications",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId: string) => {
+    if (!user?.id) return;
+
+    try {
+      console.log(`🗑️ Supprimer notification: ${notificationId}`);
+      await api.delete(`/notifications/user/${user.id}/delete/${notificationId}`);
+      
+      // Recharger les notifications
+      await loadNotifications();
+      
+      toast({
+        description: "Notification supprimée"
+      });
+    } catch (error) {
+      console.error('❌ Error deleting notification:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la notification",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleLogin = () => {
     navigate("/login");
@@ -163,6 +336,22 @@ const Header = () => {
     setIsLogoutDialogOpen(false);
   };
 
+  const handlePopoverOpenChange = (open: boolean) => {
+    setIsPopoverOpen(open);
+    if (open) {
+      const firstSectionWithItems = menuSections.find(
+        (s) => s.items && s.items.length > 0
+      );
+      setHoveredSection(firstSectionWithItems ? firstSectionWithItems.title : null);
+    } else {
+      setHoveredSection(null);
+    }
+  };
+
+  const toggleSubmenu = (title: string) => {
+    setOpenSubmenu(openSubmenu === title ? null : title);
+  };
+
   const menuSections = [
     {
       title: "IMMOBILIER",
@@ -171,29 +360,25 @@ const Header = () => {
           title: "Annonces immobilières",
           description: "Trouvez votre prochaine maison",
           href: "/immobilier",
-          image:
-            "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
+          image: "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
         {
           title: "Droit & formation immobilière",
           description: "Divorce, succession, donation, . . .",
           href: "/droitFamille",
-          image:
-            "https://i.pinimg.com/736x/a1/91/eb/a191ebeb94928180470add7e2e1284e2.jpg",
+          image: "https://i.pinimg.com/736x/a1/91/eb/a191ebeb94928180470add7e2e1284e2.jpg",
         },
         {
           title: "Gestion & services immobiliers",
           description: "Optimisez la gestion de vos biens",
           href: "/gestion-immobilier",
-          image:
-            "https://i.pinimg.com/1200x/a6/6e/47/a66e473e8ed32bb3d153017af507f83c.jpg",
+          image: "https://i.pinimg.com/1200x/a6/6e/47/a66e473e8ed32bb3d153017af507f83c.jpg",
         },
         {
           title: "Audit patrimonial & finance",
           description: "Optimisez votre patrimoine immobilier",
           href: "/immobilier-sections",
-          image:
-            "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
+          image: "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
         },
         // {
         //   title: "Estimation & expertise",
@@ -205,12 +390,9 @@ const Header = () => {
           title: "Podcasts",
           description: "Vidéos fournies par des experts",
           href: "/podcasts/immobilier",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
-      ],
-    },
-    // {
+               // {
     //   title: "TRAVAUX & CONSTRUCTION ",
     //   items: [
     //     {
@@ -256,8 +438,8 @@ const Header = () => {
     //       image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
 
     //     },
-    //   ],
-    // },
+      ],
+    },
     {
       title: "ENTREPRISE",
       items: [
@@ -268,54 +450,48 @@ const Header = () => {
         //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
 
         // },
+
         {
           title: "Création & reprise",
           description: "Accompagnement pour entrepreneurs",
           href: "/reprise",
-          image:
-            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
+          image: "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
         {
           title: "Audit & médiation",
           description: "Experts en audit & résolution de conflits",
           href: "/auditMediation",
-          image:
-            "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
+          image: "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
         },
         {
           title: "Aides & levées de fonds",
           description: " Soutien financier pour entreprises",
           href: "/aideFonds",
-          image:
-            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
+          image: "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
         },
         {
           title: "Juridique & liquidation",
           description: " Services juridiques pour entreprises",
           href: "/juridiqueLiquidation",
-          image:
-            "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
+          image: "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
         },
         {
           title: "Comptabilité",
           description: " Services comptables professionnels",
           href: "/comptabilite",
-          image:
-            "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
+          image: "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
         },
         {
           title: "Formation",
           description: "Formations pour entrepreneurs",
           href: "/entreprise#services",
-          image:
-            "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
+          image: "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
         },
         {
           title: "Podcasts",
           description: " Ressources pour entrepreneurs",
           href: "/podcast_service",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -326,36 +502,31 @@ const Header = () => {
           title: "Financement",
           description: "Solutions de crédit adaptées à votre projet",
           href: "/financement#partenaires",
-          image:
-            "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
+          image: "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
         },
         {
           title: "Assurance",
           description: "Protection complète pour votre logement",
           href: "/financement#assurances",
-          image:
-            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
+          image: "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
         },
         {
           title: "Aides",
           description: "Solutions d'aides au financement",
           href: "/aide_financement",
-          image:
-            "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg",
+          image: "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg",
         },
         {
           title: "Formations ",
           description: "Formations au financement et crédit",
           href: "/formation_finance",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+          image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
         },
         {
           title: "Podcasts",
           description: " Ressources sur le financement",
           href: "/podcasts/assurance-finance",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -374,26 +545,24 @@ const Header = () => {
         //   href: "/batiments#construction-plans",
         //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
         // },
+
         {
           title: "Rénovation & construction",
           description: " Services de rénovation et construction professionnels",
           href: "/travaux",
-          image:
-            "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg",
+          image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg",
         },
         {
           title: "Plan & administratifs",
           description: "Documents administratifs simplifiés",
           href: "/plan_administratif",
-          image:
-            "https://i.pinimg.com/736x/7d/05/6d/7d056d506f943d48a0ca9ad81b85e018.jpg",
+          image: "https://i.pinimg.com/736x/7d/05/6d/7d056d506f943d48a0ca9ad81b85e018.jpg",
         },
         {
           title: "Matériaux de construction",
           description: " Solutions durables pour vos projets",
           href: "/batiments#materiaux-viabilisations",
-          image:
-            "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
+          image: "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },
         // {
         //   title: "Division parcellaire",
@@ -405,15 +574,13 @@ const Header = () => {
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
           href: "/formation-batiment",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+          image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
         },
         {
           title: "Podcasts",
           description: " Ressources pour le secteur du bâtiment",
           href: "/batiments#podcasts-videos",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -424,43 +591,37 @@ const Header = () => {
           title: "Produits & commerces",
           description: " Trouvez tout pour votre maison",
           href: "/domicile#produits-commerces",
-          image:
-            "https://i.pinimg.com/1200x/e0/6a/9b/e06a9b44678d5ddd2a06c07ed8f1871f.jpg",
+          image: "https://i.pinimg.com/1200x/e0/6a/9b/e06a9b44678d5ddd2a06c07ed8f1871f.jpg",
         },
         {
           title: "Service maison",
           description: " Services à domicile de qualité",
           href: "/domicile#service-maison",
-          image:
-            "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
+          image: "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
         },
         {
           title: "Equipements & livraison",
           description: " Solutions pour un domicile moderne",
           href: "/domicile#équipements-livraison",
-          image:
-            "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
+          image: "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
         },
         {
           title: "Design & décoration (art)",
           description: " Inspirez-vous pour votre intérieur",
           href: "/domicile#design-decoration",
-          image:
-            "https://i.pinimg.com/1200x/db/1e/d6/db1ed633dae5dd89cf4610c3f93a8103.jpg",
+          image: "https://i.pinimg.com/1200x/db/1e/d6/db1ed633dae5dd89cf4610c3f93a8103.jpg",
         },
         {
           title: "Cours & formations",
           description: " Apprenez de nouvelles compétences",
           href: "/domicile#cours-formations",
-          image:
-            "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
+          image: "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
         },
         {
           title: "Utilities (eau, électricité, internet)",
           description: "Gestion efficace de votre domicile",
           href: "/domicile#utilities",
-          image:
-            "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg",
+          image: "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg",
         },
         // {
         //   title: "Matériaux",
@@ -472,8 +633,7 @@ const Header = () => {
           title: "Podcasts",
           description: "Ressources pour l'aménagement",
           href: "/podcasts/domicile",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -484,36 +644,31 @@ const Header = () => {
           title: "Cours à domicile",
           description: "Formations & ateliers personnalisés",
           href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+          image: "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
         },
         {
           title: "Arts & commerces",
           description: "Artisans & boutiques bien-être",
           href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+          image: "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
         },
         {
           title: "Thérapeutes & soins",
           description: "Professionnels du bien-être à domicile",
           href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+          image: "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
         },
         {
           title: "Boutique & produits naturels",
           description: "Produits pour le bien-être",
           href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+          image: "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
         },
         {
           title: "Podcasts",
           description: "Ressources pour le bien-être",
           href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -524,36 +679,31 @@ const Header = () => {
           title: "Courses & épicerie",
           description: "Livraison de produits frais & épicerie",
           href: "/alimentation",
-          image:
-            "https://i.pinimg.com/1200x/11/80/35/11803586e48bb4b954c93493a2fae78d.jpg",
+          image: "https://i.pinimg.com/1200x/11/80/35/11803586e48bb4b954c93493a2fae78d.jpg",
         },
         {
           title: "Boulangerie & charcuterie",
           description: "Produits artisanaux livrés chez vous",
           href: "/alimentation",
-          image:
-            "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
+          image: "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
         },
         {
           title: "Cave & vins",
           description: "Sélection de vins & spiritueux",
           href: "/alimentation",
-          image:
-            "https://i.pinimg.com/1200x/90/22/b3/9022b34f5669bf2657f32acb26d1d554.jpg",
+          image: "https://i.pinimg.com/1200x/90/22/b3/9022b34f5669bf2657f32acb26d1d554.jpg",
         },
         {
           title: "Restaurants",
           description: "Livraison de plats de vos restaurants favoris",
           href: "/alimentation",
-          image:
-            "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg",
+          image: "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg",
         },
         {
           title: "Podcasts ",
           description: " Ressources sur l'alimentation",
           href: "/podcasts/alimentation",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -564,30 +714,27 @@ const Header = () => {
           title: "SCPI & immobilier",
           description: "Investissez dans l'immobilier locatif",
           href: "/investir/scpi",
-          image:
-            "https://i.pinimg.com/1200x/20/79/83/207983f864b7c516a64be40bc990df17.jpg",
+          image: "https://i.pinimg.com/1200x/20/79/83/207983f864b7c516a64be40bc990df17.jpg",
         },
         {
           title: "Crowdfunding & actions ",
           description: "Investissez dans des projets innovants",
           href: "/investir/crowdfunding",
-          image:
-            "https://i.pinimg.com/736x/50/f9/69/50f969a3d27b9d0cb7dfc4bff0b8a80a.jpg",
+          image: "https://i.pinimg.com/736x/50/f9/69/50f969a3d27b9d0cb7dfc4bff0b8a80a.jpg",
         },
         {
           title: "Obligations & associations",
           description: "Soutenez des causes tout en investissant",
           href: "/investir/isr",
-          image:
-            "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg",
+          image: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg",
         },
         {
           title: "Podcasts",
           description: "Ressources sur l'investissement",
           href: "/podcasts/investissement",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
+
       ],
     },
     // {
@@ -609,36 +756,31 @@ const Header = () => {
           title: "Hôtels & gîtes",
           description: "Réservations d'hébergements",
           href: "/tourisme",
-          image:
-            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+          image: "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
         },
         {
           title: "Activités & loisirs",
           description: "Découvertes & aventures",
           href: "/activiteLoisirs",
-          image:
-            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+          image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
         },
         {
           title: "Lieux historiques & culturels",
           description: "Explorez le patrimoine local",
           href: "/lieux_historique",
-          image:
-            "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
+          image: "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
         },
         {
           title: "Formations",
           description: "Cours & ateliers locaux",
           href: "/formationTourisme",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+          image: "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
         },
         {
           title: "Podcasts",
           description: "Ressources sur le tourisme",
           href: "/podcasts/tourisme",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+          image: "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -648,410 +790,126 @@ const Header = () => {
     },
   ];
 
-  const toggleSubmenu = (title: string) => {
-    setOpenSubmenu(openSubmenu === title ? null : title);
-  };
+  const profilePath = role === "admin" ? "/admin" : role === "professional" ? "/pro" : "/mon-compte/profil";
 
-  const profilePath =
-    role === "admin"
-      ? "/admin"
-      : role === "professional"
-      ? "/pro"
-      : "/mon-compte/profil";
-
-  const initials = user
-    ? (() => {
-        let base = "";
-        if (user.firstName && user.firstName.trim().length > 0) {
-          base = user.firstName.trim();
-        } else if (user.email) {
-          base = user.email.split("@")[0];
-        }
-        base = base.replace(/[^A-Za-z0-9]/g, "");
-        const two = base.slice(0, 2).toUpperCase();
-        if (two && two.length === 2) return two;
-        if (!two && user.lastName)
-          return user.lastName.slice(0, 2).toUpperCase();
-        return two || "US";
-      })()
-    : "";
-
-  // État pour le popover et la section survolée
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Array<any>>([]);
-  const [notifCount, setNotifCount] = useState(0);
-  const [notifLoading, setNotifLoading] = useState(false);
-
-  // Écouter les événements de rechargement des notifications
-  useEffect(() => {
-    const handler = () => {
-      if (user?.id) {
-        loadNotifications();
-      }
-    };
-    window.addEventListener("notifications:reload", handler);
-    return () => window.removeEventListener("notifications:reload", handler);
-  }, [user?.id]);
-
-  const loadNotifications = async () => {
-    if (!user?.id) return;
-
-    setNotifLoading(true);
-    try {
-      const response = await api.get(`/notifications/user/${user.id}`);
-      const { notifications = [], unreadCount = 0 } = response.data || {};
-      setNotifications(notifications);
-      setNotifCount(unreadCount);
-    } catch (error) {
-      console.error("Error loading notifications:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les notifications",
-      });
-    } finally {
-      setNotifLoading(false);
+  const initials = user ? (() => {
+    let base = "";
+    if (user.firstName && user.firstName.trim().length > 0) {
+      base = user.firstName.trim();
+    } else if (user.email) {
+      base = user.email.split("@")[0];
     }
-  };
-
-  const handleMarkAsRead = async (notificationId: string) => {
-    if (!user?.id) return;
-
-    try {
-      await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
-      loadNotifications(); // Recharger les notifications
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de marquer comme lu",
-      });
-    }
-  };
-
-  const handleMarkAsUnread = async (notificationId: string) => {
-    if (!user?.id) return;
-
-    try {
-      await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
-      loadNotifications(); // Recharger les notifications
-    } catch (error) {
-      console.error("Error marking notification as unread:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de marquer comme non lu",
-      });
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    console.log("🟡 Marquage de toutes les notifications comme lues");
-
-    setIsDeletingAll(true);
-
-    // Animation avant la suppression réelle
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const unreadNotifications = notifications.filter((n) => !n.read);
-    let successCount = 0;
-
-    const results = await Promise.allSettled(
-      unreadNotifications.map((notif) =>
-        NotificationService.markAsRead(notif.id)
-      )
-    );
-
-    results.forEach((result, index) => {
-      if (result.status === "fulfilled" && result.value === true) {
-        successCount++;
-      } else {
-        console.warn(
-          `⚠️ Échec pour la notification ${unreadNotifications[index].id}`
-        );
-      }
-    });
-
-    if (successCount > 0) {
-      setNotifications([]);
-      setUnreadCount(0);
-      console.log(
-        `✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`
-      );
-    }
-
-    setIsDeletingAll(false);
-    setNotifications(false);
-  };
-
-  const handleClearAll = async () => {
-    if (!user?.id) return;
-
-    try {
-      await api.post(`/notifications/user/${user.id}/clear-all`);
-      loadNotifications(); // Recharger les notifications
-      toast({
-        description: "Toutes les notifications ont été supprimées",
-      });
-    } catch (error) {
-      console.error("Error clearing notifications:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer les notifications",
-      });
-    }
-  };
-
-  const handlePopoverOpenChange = (open: boolean) => {
-    setIsPopoverOpen(open);
-    if (open) {
-      // définir la section survolée par défaut (première section qui a des items)
-      const firstSectionWithItems = menuSections.find(
-        (s) => s.items && s.items.length > 0
-      );
-      setHoveredSection(
-        firstSectionWithItems ? firstSectionWithItems.title : null
-      );
-    } else {
-      setHoveredSection(null);
-    }
-  };
+    base = base.replace(/[^A-Za-z0-9]/g, "");
+    const two = base.slice(0, 2).toUpperCase();
+    if (two && two.length === 2) return two;
+    if (!two && user.lastName) return user.lastName.slice(0, 2).toUpperCase();
+    return two || "US";
+  })() : "";
 
   const MobileMenu = () => (
-    <div className="lg:hidden ">
-      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            className="h-10 w-10 rounded-lg border border-gray-200 hover:bg-gray-50 transition-all duration-200"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="w-[85vw] max-w-sm p-0 overflow-hidden bg-white border-r border-gray-200"
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="p-1 rounded-full bg-white border-black border-2">
+            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+          </div>
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="h-10 w-10 rounded-lg"
         >
-          <div className="flex flex-col h-full">
-            {/* Header Mobile */}
-            <div className="border-b border-gray-200 p-6 bg-white flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          <Menu className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <nav className="p-4 space-y-4">
+          {menuSections.map((section, index) => (
+            <div key={index} className="border-b border-gray-100 pb-4">
+              {section.items ? (
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-1 rounded-full bg-white border-black border-2">
-                      <img
-                        src={logo}
-                        alt="Servo Logo"
-                        className="w-10 h-10 rounded-full"
-                      />
-                    </div>
-                    <div className="text-xl font-bold text-gray-900">SERVO</div>
-                  </div>
-                  <div className="text-xs text-gray-500 font-medium">
-                    Solutions Immobilières
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Mobile */}
-            <nav className="flex-1 overflow-y-auto">
-              <div className="p-4 space-y-1">
-                {menuSections.map((section, index) => (
-                  <div key={index} className="group">
-                    {section.items ? (
-                      <div className="rounded-lg hover:bg-gray-50 transition-all duration-200">
-                        <button
-                          onClick={() => toggleSubmenu(section.title)}
-                          className="flex items-center justify-between w-full p-4 text-left rounded-lg transition-all duration-200 hover:bg-gray-100"
-                        >
-                          <span className="font-semibold text-gray-900 text-sm">
-                            {section.title}
-                          </span>
-                          <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              openSubmenu === section.title ? "rotate-180" : ""
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </button>
-
-                        <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            openSubmenu === section.title
-                              ? "max-h-96 opacity-100"
-                              : "max-h-0 opacity-0"
-                          }`}
-                        >
-                          <div className="pb-3 px-4 space-y-2">
-                            {section.items.map((item, itemIndex) => (
-                              <Link
-                                key={itemIndex}
-                                to={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-transparent"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {item.title}
-                                  </div>
-                                  <div className="text-xs text-gray-600 line-clamp-1">
-                                    {item.description}
-                                  </div>
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <Link
-                        to={section.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
-                      >
-                        <span className="font-semibold text-gray-900 text-sm">
-                          {section.title}
-                        </span>
-                      </Link>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </nav>
-
-            {/* Footer Mobile */}
-            <div className="border-t border-gray-200 bg-gray-50 p-6 space-y-4">
-              {!isAuthenticated ? (
-                <div className="space-y-3">
-                  <Button
-                    className="w-full bg-gray-900 hover:bg-gray-800 transition-all duration-200 text-white"
-                    size="lg"
-                    onClick={() => {
-                      handleLogin();
-                      setIsMobileMenuOpen(false);
-                    }}
+                  <button
+                    onClick={() => toggleSubmenu(section.title)}
+                    className="flex items-center justify-between w-full text-left text-sm font-semibold text-gray-900 hover:text-gray-700 py-2"
                   >
-                    <span className="font-semibold">Se connecter</span>
-                  </Button>
+                    {section.title}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        openSubmenu === section.title ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {openSubmenu === section.title && (
+                    <div className="mt-2 space-y-2 pl-4">
+                      {section.items.map((item, itemIndex) => (
+                        <Link
+                          key={itemIndex}
+                          to={item.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                        >
+                          {item.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-                  {/* Icône Panier dans le menu mobile */}
-                  <button
-                    onClick={() => {
-                      setIsCartOpen(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors w-full text-left"
-                  >
-                    <div className="relative">
-                      <ShoppingCart className="h-4 w-4 text-gray-700" />
-                      {getCartItemsCount() > 0 && (
-                        <Badge className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
-                          {getCartItemsCount()}
-                        </Badge>
-                      )}
-                    </div>
-                    <span className="text-sm font-medium">Panier</span>
-                  </button>
-
-                  <Link
-                    to={profilePath}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <UserIcon className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Profil</span>
-                  </Link>
-
-                  {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
-                  <Link
-                    to="/mon-compte/mes-commandes"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <Package className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Mes Commandes</span>
-                  </Link>
-
-                  <Link
-                    to="/mon-compte/reservation"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <Calendar className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Réservations</span>
-                  </Link>
-                  <Link
-                    to="/mon-compte/demandes"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <CheckCheck className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">
-                      Mes demandes de services{" "}
-                    </span>
-                  </Link>
-                  <Link
-                    to="/mon-compte/payement"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <CreditCard className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Paiements</span>
-                  </Link>
-                  <Link
-                    to="/mon-compte/agenda"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <Calendar1 className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Mon agenda</span>
-                  </Link>
-                  <Link
-                    to="/mon-compte/documents"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <Calendar1 className="h-4 w-4 text-gray-700" />
-                    <span className="text-sm font-medium">Mes documents</span>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsLogoutDialogOpen(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 p-3 hover:bg-red-50 transition-colors w-full text-left"
-                  >
-                    <LogOut className="h-4 w-4 text-red-600" />
-                    <span className="text-sm font-medium text-red-600">
-                      Déconnexion
-                    </span>
-                  </button>
-                </div>
+                <Link
+                  to={section.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-sm font-semibold text-gray-900 hover:text-gray-700 py-2"
+                >
+                  {section.title}
+                </Link>
               )}
             </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
+          ))}
+        </nav>
+      </div>
 
-  const sectionsWithItems = menuSections.filter(
-    (s) => s.items && s.items.length > 0
-  );
-  const sectionsNoItems = menuSections.filter(
-    (s) => !s.items || s.items.length === 0
+      <div className="p-4 border-t border-gray-200">
+        {!isAuthenticated ? (
+          <div className="space-y-3">
+            <Button
+              className="w-full bg-black hover:bg-gray-800 text-white"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                handleLogin();
+              }}
+            >
+              Se connecter
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Avatar className="w-8 h-8">
+                <AvatarFallback className="bg-gray-900 text-white text-xs">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full border-red-200 text-red-600 hover:bg-red-50"
+              onClick={() => setIsLogoutDialogOpen(true)}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Déconnexion
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 
   return (
@@ -1063,11 +921,7 @@ const Header = () => {
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/"}>
             <div className="p-1 rounded-full bg-white border-black border-2">
-              <img
-                src={logo}
-                alt="Servo Logo"
-                className="w-10 h-10 rounded-full"
-              />
+              <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
             </div>
           </Link>
 
@@ -1093,9 +947,7 @@ const Header = () => {
                             className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
                           >
                             <div className="font-semibold">{item.title}</div>
-                            <div className="text-xs text-gray-500">
-                              {item.description}
-                            </div>
+                            <div className="text-xs text-gray-500">{item.description}</div>
                           </Link>
                         ))}
                       </div>
@@ -1114,10 +966,7 @@ const Header = () => {
 
             {/* Desktop hamburger: Popover avec animation GSAP */}
             <div className="hidden lg:block">
-              <Popover
-                open={isPopoverOpen}
-                onOpenChange={handlePopoverOpenChange}
-              >
+              <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
                 <PopoverTrigger asChild>
                   <Button className="h-9 hover:bg-slate-800 bg-slate-900">
                     <Menu className="text-white" />
@@ -1129,51 +978,38 @@ const Header = () => {
                   className="relative -mt-16 w-screen max-w-full p-0 overflow-hidden z-50 rounded-none shadow-lg bg-black text-white border-none"
                 >
                   <button
-                    className="absolute  z-50 text-white text-5xl font-extralight right-10 top-4 "
+                    className="absolute z-50 text-white text-5xl font-extralight right-10 top-4"
                     onClick={() => setIsPopoverOpen(false)}
                     aria-label="Close popover"
                   >
                     &times;
                   </button>
 
-                  {/* Layout: titles column (left) + content area (right) on desktop. On smaller screens fallback to stacked layout. */}
                   <div className="w-full h-screen overflow-auto">
                     <div className="flex flex-col lg:flex-row h-full w-full">
                       {/* Left: Titles column */}
                       <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="p-1 rounded-full bg-white border-black border-2">
-                            <img
-                              src={logo}
-                              alt="Servo Logo"
-                              className="w-10 h-10 rounded-full"
-                            />
+                            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
                           </div>
-                          <div className="azonix text-lg font-bold text-slate-300">
-                            SERVO
-                          </div>
+                          <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
                         </div>
                         <nav className="space-y-1">
                           {menuSections.map((section, si) => {
-                            const hasItems =
-                              !!section.items && section.items.length > 0;
+                            const hasItems = !!section.items && section.items.length > 0;
                             const isActive = hoveredSection === section.title;
                             return (
                               <div
                                 key={si}
-                                onMouseEnter={() =>
-                                  hasItems && setHoveredSection(section.title)
-                                }
-                                onFocus={() =>
-                                  hasItems && setHoveredSection(section.title)
-                                }
-                                onMouseLeave={() => {}}
+                                onMouseEnter={() => hasItems && setHoveredSection(section.title)}
+                                onFocus={() => hasItems && setHoveredSection(section.title)}
                                 className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
                                   isActive ? "bg-white/10" : "hover:bg-white/5"
                                 }`}
                               >
                                 {hasItems ? (
-                                  <button className="scramble  w-full text-left text-xs font-semibold text-white">
+                                  <button className="scramble w-full text-left text-xs font-semibold text-white">
                                     {section.title}
                                   </button>
                                 ) : (
@@ -1195,9 +1031,7 @@ const Header = () => {
                       <div className="flex-1 p-6 relative">
                         {hoveredSection ? (
                           (() => {
-                            const current = menuSections.find(
-                              (s) => s.title === hoveredSection
-                            );
+                            const current = menuSections.find((s) => s.title === hoveredSection);
                             if (!current) return null;
                             if (!current.items || current.items.length === 0) {
                               return (
@@ -1216,7 +1050,6 @@ const Header = () => {
                             }
                             return (
                               <div className="relative">
-                                {/* Content Grid */}
                                 <div className="relative z-10 grid grid-cols-3 gap-6 p-6 mt-5">
                                   {current.items.map((item, idx) => (
                                     <Link
@@ -1257,23 +1090,12 @@ const Header = () => {
                         )}
                       </div>
                       <div className="absolute bottom-2 right-10 w-96 flex items-center justify-around z-50 gap-5 h-20">
-                        {/* <span>
-                          <Link
-                            to="/services-partners?section=partenaires"
-                            onClick={() => setIsPopoverOpen(false)}
-                            className="text-sm font-semibold hover:underline"
-                          >
-                            Consultations & aides
-                          </Link>
-                        </span> */}
                         {!isAuthenticated ? (
                           <Link
                             to="/login"
                             className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
                           >
-                            <span className="relative z-10 group-hover:text-white">
-                              Se connecter
-                            </span>
+                            <span className="relative z-10 group-hover:text-white">Se connecter</span>
                             <span className="absolute inset-0 bg-black border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
                           </Link>
                         ) : (
@@ -1282,9 +1104,7 @@ const Header = () => {
                             onClick={handleLogout}
                             className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
                           >
-                            <span className="relative z-10 group-hover:text-white">
-                              Se déconnecter
-                            </span>
+                            <span className="relative z-10 group-hover:text-white">Se déconnecter</span>
                             <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
                           </Link>
                         )}
@@ -1295,6 +1115,7 @@ const Header = () => {
               </Popover>
             </div>
           </nav>
+
           <div className="flex items-center gap-4">
             {/* Icône Panier pour utilisateurs connectés */}
             {isAuthenticated && (
@@ -1312,215 +1133,189 @@ const Header = () => {
                 )}
               </Button>
             )}
-            {/* notification icon for users — opens a modal (Sheet) with notifications */}
-            {role === "user" && (
-              <>
-                <Sheet
-                  open={notifOpen}
-                  onOpenChange={(open) => {
-                    setNotifOpen(open);
-                    if (open) loadNotifications();
-                  }}
-                >
-                  <SheetTrigger asChild>
-                    <button className="relative mr-3 hidden lg:flex items-center">
-                      <Bell className="w-5 h-5 text-gray-700" />
-                      {notifCount > 0 && (
-                        <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                          {notifCount}
-                        </span>
-                      )}
-                    </button>
-                  </SheetTrigger>
+            
+            {/* Icône Notifications avec WebSocket - CORRIGÉ */}
+            {isAuthenticated && role === "user" && (
+              <Sheet
+                open={notifOpen}
+                onOpenChange={(open) => {
+                  setNotifOpen(open);
+                  if (open) loadNotifications();
+                }}
+              >
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative hidden lg:flex">
+                    <Bell className="h-5 w-5" />
+                    {notificationCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
+                        {notificationCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
 
-                  <SheetContent side="right" className="w-[380px] p-4">
-                    <div className="flex flex-col gap-4 mb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <h4
-                            id="notifications-title"
-                            className="text-lg font-semibold"
-                          >
-                            Notifications
-                          </h4>
-                        </div>
+                <SheetContent side="right" className="w-[400px] p-0 overflow-hidden">
+                  <div className="flex flex-col h-full">
+                    {/* Header des notifications */}
+                    <div className="flex items-center justify-between p-4 border-b">
+                      <div className="space-y-1">
+                        <h4 className="text-lg font-semibold">
+                          Notifications {notificationCount > 0 && `(${notificationCount})`}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {notifications.length} notification{notifications.length !== 1 ? 's' : ''} au total
+                        </p>
                       </div>
                       {notifications.length > 0 && (
-                        <div className="flex items-center gap-2 justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleMarkAllAsRead}
-                            className="flex items-center gap-2 text-sm"
-                          >
-                            <Eye className="h-4 w-4" />
-                            <span className="hidden sm:inline">
-                              Tout marquer comme lu
-                            </span>
-                          </Button>
+                        <div className="flex items-center gap-1">
+                          
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={handleClearAll}
-                            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            title="Tout supprimer"
                           >
                             <Trash2 className="h-4 w-4" />
-                            <span className="hidden sm:inline">Vider</span>
                           </Button>
                         </div>
                       )}
                     </div>
 
-                    {notifLoading ? (
-                      <div className="text-center text-sm text-gray-500">
-                        <img src="/loading.gif" alt="" className="w-24 h-24" />
-                        Chargement...
-                      </div>
-                    ) : notifications.length === 0 ? (
-                      <div className="text-center text-sm text-gray-500">
-                        Aucune notification.
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {notifications.map((n) => (
-                          <div
-                            key={n.id}
-                            className={`p-3 rounded-lg border transition-colors ${
-                              n.isRead ? "bg-gray-50" : "bg-white"
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <div className="text-sm font-medium text-gray-800">
-                                    {n.titre || "Nouvelle notification"}
+                    {/* Contenu des notifications */}
+                    <div className="flex-1 overflow-y-auto">
+                      {notifLoading ? (
+                        <div className="flex flex-col items-center justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
+                          <div className="text-sm text-gray-500">Chargement des notifications...</div>
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                          <Bell className="w-12 h-12 text-gray-300 mb-3" />
+                          <div className="text-sm text-gray-500 mb-1">Aucune notification</div>
+                          <div className="text-xs text-gray-400">Les nouvelles notifications apparaîtront ici</div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 p-2">
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-3 rounded-lg border transition-colors ${
+                                notification.isRead ? "bg-gray-50" : "bg-white border-blue-200 shadow-sm"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className="text-sm font-medium text-gray-800 truncate">
+                                      {notification.titre || "Nouvelle notification"}
+                                    </div>
+                                    {!notification.isRead && (
+                                      <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+                                    )}
                                   </div>
-                                  {!n.isRead && (
-                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                  
+                                  {notification.message && (
+                                    <div className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                      {notification.message}
+                                    </div>
                                   )}
-                                </div>
-
-                                {/* Affichage du message si disponible */}
-                                {n.message && (
-                                  <div className="text-xs text-gray-600 mb-1">
-                                    {n.message}
-                                  </div>
-                                )}
-
-                                {/* Affichage du statut et type */}
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                  {n.statut && (
-                                    <span
-                                      className={`px-2 py-1 rounded-full ${
-                                        n.statut === "validée" ||
-                                        n.statut === "validee"
-                                          ? "bg-green-100 text-green-800"
-                                          : n.statut === "refusée"
-                                          ? "bg-red-100 text-red-800"
-                                          : "bg-gray-100 text-gray-800"
-                                      }`}
-                                    >
-                                      {n.statut}
+                                  
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    {notification.statut && (
+                                      <span className={`px-2 py-1 rounded-full text-xs ${
+                                        notification.statut === 'validée' || notification.statut === 'validee' 
+                                          ? 'bg-green-100 text-green-800'
+                                          : notification.statut === 'refusée'
+                                          ? 'bg-red-100 text-red-800'
+                                          : 'bg-gray-100 text-gray-800'
+                                      }`}>
+                                        {notification.statut}
+                                      </span>
+                                    )}
+                                    
+                                    <span className={`px-2 py-1 rounded-full text-xs ${
+                                      notification.source === 'demande' 
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-purple-100 text-purple-800'
+                                    }`}>
+                                      {notification.source === 'demande' ? 'Demande' : 'Système'}
                                     </span>
-                                  )}
-
-                                  {/* Badge pour le type de notification */}
-                                  <span
-                                    className={`px-2 py-1 rounded-full ${
-                                      n.type === "demande_immobilier"
-                                        ? "bg-blue-100 text-blue-800"
-                                        : n.type === "system"
-                                        ? "bg-purple-100 text-purple-800"
-                                        : "bg-gray-100 text-gray-800"
-                                    }`}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() =>
+                                      notification.isRead
+                                        ? handleMarkAsUnread(notification.id)
+                                        : handleMarkAsRead(notification.id)
+                                    }
+                                    title={notification.isRead ? "Marquer comme non lu" : "Marquer comme lu"}
                                   >
-                                    {n.type === "demande_immobilier"
-                                      ? "Demande"
-                                      : n.type === "system"
-                                      ? "Système"
-                                      : "Général"}
-                                  </span>
+                                    {notification.isRead ? (
+                                      <EyeOff className="h-3 w-3 text-gray-500" />
+                                    ) : (
+                                      <Eye className="h-3 w-3 text-blue-500" />
+                                    )}
+                                  </Button>
                                 </div>
                               </div>
-
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() =>
-                                    n.isRead
-                                      ? handleMarkAsUnread(n.id)
-                                      : handleMarkAsRead(n.id)
-                                  }
-                                  title={
-                                    n.isRead
-                                      ? "Marquer comme non lu"
-                                      : "Marquer comme lu"
-                                  }
-                                >
-                                  {n.isRead ? (
-                                    <EyeOff className="h-4 w-4 text-gray-500" />
-                                  ) : (
-                                    <Eye className="h-4 w-4 text-blue-500" />
-                                  )}
-                                </Button>
-
-                                <div className="text-xs text-gray-400 min-w-[70px] text-right">
-                                  {n.createdAt
-                                    ? new Date(n.createdAt).toLocaleDateString(
-                                        "fr-FR",
-                                        {
-                                          day: "numeric",
-                                          month: "short",
-                                          year: "numeric",
-                                        }
-                                      )
+                              
+                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+                                <div className="text-xs text-gray-400">
+                                  {notification.createdAt
+                                    ? new Date(notification.createdAt).toLocaleDateString("fr-FR", {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric'
+                                      })
                                     : ""}
                                 </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  {notification.source === 'demande' && notification.propertyId && (
+                                    <a
+                                      href={`/immobilier/${notification.propertyId}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-xs text-blue-600 hover:underline font-medium"
+                                    >
+                                      👁️ Voir le bien
+                                    </a>
+                                  )}
+                                  
+                                  {notification.source === 'demande' && (
+                                    <a
+                                      href={`/mon-compte/demandes-immobilier`}
+                                      className="text-xs text-green-600 hover:underline font-medium"
+                                    >
+                                      📋 Voir la demande
+                                    </a>
+                                  )}
+                                  
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => handleDeleteNotification(notification.id)}
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-1" />
+                                    Supprimer
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-
-                            {/* Actions supplémentaires selon le type de notification */}
-                            <div className="mt-3 flex items-center gap-2">
-                              {n.propertyId && (
-                                <a
-                                  href={`/immobilier/${n.propertyId}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-xs text-blue-600 hover:underline font-medium"
-                                >
-                                  👁️ Voir le bien
-                                </a>
-                              )}
-
-                              {n.demandeId && (
-                                <a
-                                  href={`/mon-compte/demandes-immobilier`}
-                                  className="text-xs text-green-600 hover:underline font-medium"
-                                >
-                                  📋 Voir la demande
-                                </a>
-                              )}
-
-                              {/* Bouton de suppression individuelle */}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 ml-auto"
-                                onClick={() => handleDeleteNotification(n.id)}
-                              >
-                                <Trash2 className="h-3 w-3 mr-1" />
-                                Supprimer
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </SheetContent>
-                </Sheet>
-              </>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             )}
 
             {!isAuthenticated ? (
@@ -1542,10 +1337,7 @@ const Header = () => {
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-64 z-[1050] shadow-lg"
-                >
+                <DropdownMenuContent align="end" className="w-64 z-[1050] shadow-lg">
                   <DropdownMenuLabel className="flex flex-col">
                     <span className="text-sm font-medium">
                       {user?.firstName} {user?.lastName}
@@ -1572,43 +1364,28 @@ const Header = () => {
                         Profil
                       </DropdownMenuItem>
 
-                      {/* Lien Mes Commandes - SEULEMENT pour les utilisateurs connectés */}
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/mes-commandes")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/mes-commandes")}>
                         <Package className="mr-2 h-4 w-4" />
                         Mes Commandes
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/demandes")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
                         <ListCheck className="mr-2 h-4 w-4" />
                         Mes demandes de services
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigate("/mon-compte/demandes-immobilier")
-                        }
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes-immobilier")}>
                         <BookDashed className="mr-2 h-4 w-4" />
                         Mes demandes immobilieres
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/reservation")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
                         <Calendar className="mr-2 h-4 w-4" />
                         Réservations
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/payement")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/documents")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/documents")}>
                         <FileText className="mr-2 h-4 w-4" />
                         Mes documents
                       </DropdownMenuItem>
@@ -1628,50 +1405,48 @@ const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <MobileMenu />
+            
+            {/* Mobile Menu */}
+            <div className="lg:hidden">
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="h-10 w-10 rounded-lg border border-gray-200 hover:bg-gray-50 transition-all duration-200"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[85vw] max-w-sm p-0 overflow-hidden bg-white border-r border-gray-200">
+                  <MobileMenu />
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </header>
-
-      {/* Composant Cart */}
 
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
       {/* Logout Confirmation Dialog */}
       {isLogoutDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={handleCancelLogout}
-          />
-
-          {/* Dialog Content */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCancelLogout} />
           <div className="relative z-50 w-full max-w-sm bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
             <div className="flex items-center gap-3 p-6 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
               <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
                 <AlertCircle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Confirmer la déconnexion
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Cette action ne peut pas être annulée
-                </p>
+                <h2 className="text-lg font-semibold text-gray-900">Confirmer la déconnexion</h2>
+                <p className="text-sm text-gray-500">Cette action ne peut pas être annulée</p>
               </div>
             </div>
-
-            {/* Body */}
             <div className="p-6">
               <p className="text-gray-700 text-sm leading-relaxed">
-                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous
-                reconnecter pour accéder à votre compte.
+                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous reconnecter pour accéder à votre compte.
               </p>
             </div>
-
-            {/* Footer */}
             <div className="flex gap-3 p-6 border-t border-gray-100 bg-gray-50">
               <Button
                 variant="outline"
@@ -1697,7 +1472,3 @@ const Header = () => {
 };
 
 export default Header;
-
-function setUnreadCount(arg0: number) {
-  throw new Error("Function not implemented.");
-}
