@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  Headphones, 
   Video, 
   Plus, 
   Edit, 
@@ -19,7 +18,8 @@ import {
   X,
   Play,
   Calendar,
-  FileText
+  FileText,
+  Headphones
 } from "lucide-react";
 import { MediaService } from "../../lib/api";
 import MediaUpload from "./MediaUpload";
@@ -35,15 +35,6 @@ interface MediaBase {
   thumbnailUrl?: string;
 }
 
-interface Podcast extends MediaBase {
-  listens: number;
-  audioUrl?: string;
-  duration?: string;
-  fileSize?: number;
-  mimeType?: string;
-  storagePath?: string;
-}
-
 interface Video extends MediaBase {
   views: number;
   videoUrl?: string;
@@ -55,14 +46,10 @@ interface Video extends MediaBase {
 }
 
 interface Stats {
-  totalPodcasts: number;
   totalVideos: number;
   totalViews: number;
-  totalListens: number;
   totalCategories: number;
 }
-
-type MediaType = 'podcasts' | 'videos';
 
 // Composant Modal de base
 const Modal: React.FC<{
@@ -103,11 +90,10 @@ const Modal: React.FC<{
 
 // Composant Modal de détails
 const MediaDetailModal: React.FC<{
-  media: Podcast | Video | null;
-  type: 'podcast' | 'video';
+  media: Video | null;
   isOpen: boolean;
   onClose: () => void;
-}> = ({ media, type, isOpen, onClose }) => {
+}> = ({ media, isOpen, onClose }) => {
   if (!media) return null;
 
   const formatFileSize = (bytes?: number) => {
@@ -122,14 +108,14 @@ const MediaDetailModal: React.FC<{
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Détails du média" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Détails du podcast vidéo" size="lg">
       <div className="p-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Image */}
           <div className="lg:w-1/3">
-            <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square">
+            <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video">
               <img
-                src={media.thumbnailUrl || `https://via.placeholder.com/400/400?text=${type === 'podcast' ? '🎧' : '🎬'}`}
+                src={media.thumbnailUrl || `https://via.placeholder.com/400/225?text=🎬`}
                 alt={media.title}
                 className="w-full h-full object-cover"
               />
@@ -157,14 +143,9 @@ const MediaDetailModal: React.FC<{
                 </span>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">
-                  {type === 'podcast' ? 'Écoutes' : 'Vues'}
-                </label>
+                <label className="text-sm font-medium text-gray-500">Vues</label>
                 <p className="text-gray-900">
-                  {type === 'podcast' 
-                    ? (media as Podcast).listens?.toLocaleString() || 0 
-                    : (media as Video).views?.toLocaleString() || 0
-                  }
+                  {media.views?.toLocaleString() || 0}
                 </p>
               </div>
               <div>
@@ -186,47 +167,33 @@ const MediaDetailModal: React.FC<{
                 <div>
                   <label className="text-gray-500">Taille du fichier</label>
                   <p className="text-gray-900">
-                    {formatFileSize(type === 'podcast' ? (media as Podcast).fileSize : (media as Video).fileSize)}
+                    {formatFileSize(media.fileSize)}
                   </p>
                 </div>
                 <div>
                   <label className="text-gray-500">Type MIME</label>
                   <p className="text-gray-900">{media.mimeType || 'N/A'}</p>
                 </div>
-                {type === 'video' && (
-                  <div>
-                    <label className="text-gray-500">Premium</label>
-                    <p className="text-gray-900">
-                      {(media as Video).isPremium ? 'Oui' : 'Non'}
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <label className="text-gray-500">Premium</label>
+                  <p className="text-gray-900">
+                    {media.isPremium ? 'Oui' : 'Non'}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
-              {type === 'podcast' ? (
-                <a
-                  href={(media as Podcast).audioUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Play size={16} />
-                  Écouter le podcast
-                </a>
-              ) : (
-                <a
-                  href={(media as Video).videoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <Play size={16} />
-                  Regarder la vidéo
-                </a>
-              )}
+              <a
+                href={media.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Play size={16} />
+                Regarder le podcast
+              </a>
             </div>
           </div>
         </div>
@@ -237,18 +204,18 @@ const MediaDetailModal: React.FC<{
 
 // Composant Modal d'édition
 const EditMediaModal: React.FC<{
-  media: Podcast | Video | null;
-  type: 'podcast' | 'video';
+  media: Video | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (id: string, data: any) => Promise<void>;
   categories: string[];
-}> = ({ media, type, isOpen, onClose, onSave, categories }) => {
+}> = ({ media, isOpen, onClose, onSave, categories }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
-    isActive: true
+    isActive: true,
+    isPremium: false
   });
   const [loading, setLoading] = useState(false);
 
@@ -258,7 +225,8 @@ const EditMediaModal: React.FC<{
         title: media.title || '',
         description: media.description || '',
         category: media.category || '',
-        isActive: media.isActive || true
+        isActive: media.isActive || true,
+        isPremium: media.isPremium || false
       });
     }
   }, [media]);
@@ -286,7 +254,7 @@ const EditMediaModal: React.FC<{
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Modifier le ${type === 'podcast' ? 'podcast' : 'vidéo'}`} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="Modifier le podcast vidéo" size="md">
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -331,17 +299,32 @@ const EditMediaModal: React.FC<{
           </select>
         </div>
 
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="isActive"
-            checked={formData.isActive}
-            onChange={(e) => handleChange('isActive', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
-            Média actif
-          </label>
+        <div className="space-y-3">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={formData.isActive}
+              onChange={(e) => handleChange('isActive', e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
+              Podcast vidéo actif
+            </label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="isPremium"
+              checked={formData.isPremium}
+              onChange={(e) => handleChange('isPremium', e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isPremium" className="ml-2 text-sm text-gray-700">
+              Contenu premium
+            </label>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
@@ -365,7 +348,7 @@ const EditMediaModal: React.FC<{
   );
 };
 
-// Composants de base (LoadingSpinner, ErrorMessage restent identiques)
+// Composants de base
 const LoadingSpinner: React.FC<{ message?: string }> = ({ 
   message = "Chargement..." 
 }) => (
@@ -403,21 +386,16 @@ const AdminMedia: React.FC = () => {
   const navigate = useNavigate();
   
   // États principaux
-  const [activeTab, setActiveTab] = useState<MediaType>('podcasts');
-  const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [uploadModalOpen, setUploadModalOpen] = useState<boolean>(false);
-  const [uploadType, setUploadType] = useState<'podcast' | 'video'>('podcast');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterCategory, setFilterCategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
   const [stats, setStats] = useState<Stats>({
-    totalPodcasts: 0,
     totalVideos: 0,
     totalViews: 0,
-    totalListens: 0,
     totalCategories: 0
   });
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -425,7 +403,7 @@ const AdminMedia: React.FC = () => {
   // États pour les modals
   const [detailModalOpen, setDetailModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
-  const [selectedMedia, setSelectedMedia] = useState<Podcast | Video | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Video | null>(null);
 
   // Fonction utilitaire pour extraire les données de la réponse API
   const extractData = (response: any) => {
@@ -444,36 +422,31 @@ const AdminMedia: React.FC = () => {
       setError('');
       setLoading(true);
       
-      const [podcastsResponse, videosResponse, categoriesResponse, statsResponse] = await Promise.all([
-        MediaService.getPodcasts({ limit: 100 }),
+      const [videosResponse, categoriesResponse, statsResponse] = await Promise.all([
         MediaService.getVideos({ limit: 100 }),
         MediaService.getCategories(),
         MediaService.getStats()
       ]);
 
       // Traiter les données
-      const podcastsData = extractData(podcastsResponse);
       const videosData = extractData(videosResponse);
       const categoriesData = extractData(categoriesResponse);
       const statsData = extractData(statsResponse);
 
-      setPodcasts(Array.isArray(podcastsData) ? podcastsData : []);
       setVideos(Array.isArray(videosData) ? videosData : []);
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
       
       if (statsData && typeof statsData === 'object') {
         setStats({
-          totalPodcasts: statsData.totalPodcasts || 0,
           totalVideos: statsData.totalVideos || 0,
           totalViews: statsData.totalViews || 0,
-          totalListens: statsData.totalListens || 0,
           totalCategories: statsData.totalCategories || 0
         });
       }
 
     } catch (err: any) {
-      console.error('Erreur chargement médias:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Erreur lors du chargement des médias';
+      console.error('Erreur chargement podcasts vidéo:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Erreur lors du chargement des podcasts vidéo';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -493,12 +466,12 @@ const AdminMedia: React.FC = () => {
   }, [fetchData]);
 
   // Gestion des modals
-  const handleViewDetails = (media: Podcast | Video) => {
+  const handleViewDetails = (media: Video) => {
     setSelectedMedia(media);
     setDetailModalOpen(true);
   };
 
-  const handleEdit = (media: Podcast | Video) => {
+  const handleEdit = (media: Video) => {
     setSelectedMedia(media);
     setEditModalOpen(true);
   };
@@ -512,28 +485,14 @@ const AdminMedia: React.FC = () => {
   // Sauvegarder les modifications
   const handleSaveMedia = async (id: string, data: any) => {
     try {
-      let response;
-      const mediaType = activeTab.slice(0, -1) as 'podcast' | 'video';
-      
-      if (mediaType === 'podcast') {
-        response = await MediaService.updatePodcast(id, data);
-      } else {
-        response = await MediaService.updateVideo(id, data);
-      }
-
+      const response = await MediaService.updateVideo(id, data);
       const responseData = extractData(response);
 
       if (responseData.success) {
         // Mettre à jour l'état local
-        if (mediaType === 'podcast') {
-          setPodcasts(prev => prev.map(p => 
-            p.id === id ? { ...p, ...data } : p
-          ));
-        } else {
-          setVideos(prev => prev.map(v => 
-            v.id === id ? { ...v, ...data } : v
-          ));
-        }
+        setVideos(prev => prev.map(v => 
+          v.id === id ? { ...v, ...data } : v
+        ));
       } else {
         throw new Error(responseData.message || 'Erreur lors de la modification');
       }
@@ -546,43 +505,28 @@ const AdminMedia: React.FC = () => {
   };
 
   // Gestion des uploads
-  const handleUploadClick = (type: 'podcast' | 'video'): void => {
-    setUploadType(type);
+  const handleUploadClick = (): void => {
     setUploadModalOpen(true);
   };
 
-  const handleUploadSuccess = (newMedia: Podcast | Video): void => {
-    if (uploadType === 'podcast') {
-      setPodcasts(prev => [newMedia as Podcast, ...prev]);
-    } else {
-      setVideos(prev => [newMedia as Video, ...prev]);
-    }
+  const handleUploadSuccess = (newMedia: Video): void => {
+    setVideos(prev => [newMedia, ...prev]);
     setUploadModalOpen(false);
     refreshData();
   };
 
   // Gestion de la suppression
-  const handleDeleteMedia = async (id: string, type: 'podcast' | 'video'): Promise<void> => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer ce ${type === 'podcast' ? 'podcast' : 'vidéo'} ?`)) {
+  const handleDeleteMedia = async (id: string): Promise<void> => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce podcast vidéo ?')) {
       return;
     }
 
     try {
-      let response;
-      if (type === 'podcast') {
-        response = await MediaService.deletePodcast(id);
-      } else {
-        response = await MediaService.deleteVideo(id);
-      }
-
+      const response = await MediaService.deleteVideo(id);
       const responseData = extractData(response);
       
       if (responseData.success) {
-        if (type === 'podcast') {
-          setPodcasts(prev => prev.filter(p => p.id !== id));
-        } else {
-          setVideos(prev => prev.filter(v => v.id !== id));
-        }
+        setVideos(prev => prev.filter(v => v.id !== id));
         refreshData();
       } else {
         alert(responseData.message || 'Erreur lors de la suppression');
@@ -597,29 +541,16 @@ const AdminMedia: React.FC = () => {
   // Gestion de la visibilité
   const handleToggleVisibility = async (
     id: string, 
-    type: 'podcast' | 'video', 
     currentStatus: boolean
   ): Promise<void> => {
     try {
-      let response;
-      if (type === 'podcast') {
-        response = await MediaService.updatePodcast(id, { isActive: !currentStatus });
-      } else {
-        response = await MediaService.updateVideo(id, { isActive: !currentStatus });
-      }
-
+      const response = await MediaService.updateVideo(id, { isActive: !currentStatus });
       const responseData = extractData(response);
 
       if (responseData.success) {
-        if (type === 'podcast') {
-          setPodcasts(prev => prev.map(p => 
-            p.id === id ? { ...p, isActive: !currentStatus } : p
-          ));
-        } else {
-          setVideos(prev => prev.map(v => 
-            v.id === id ? { ...v, isActive: !currentStatus } : v
-          ));
-        }
+        setVideos(prev => prev.map(v => 
+          v.id === id ? { ...v, isActive: !currentStatus } : v
+        ));
       } else {
         alert(responseData.message || 'Erreur lors de la mise à jour');
       }
@@ -633,62 +564,44 @@ const AdminMedia: React.FC = () => {
   // Gestion des erreurs d'image
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>): void => {
     const target = e.target as HTMLImageElement;
-    target.src = `https://via.placeholder.com/48/48?text=${activeTab === 'podcasts' ? '🎧' : '🎬'}`;
+    target.src = `https://via.placeholder.com/80/48?text=🎬`;
   };
 
   // Filtrage des données
-  const filteredPodcasts = podcasts.filter(podcast => 
-    podcast.title?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (filterCategory === '' || podcast.category === filterCategory)
-  );
-
   const filteredVideos = videos.filter(video => 
     video.title?.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterCategory === '' || video.category === filterCategory)
   );
 
-  const currentData = activeTab === 'podcasts' ? filteredPodcasts : filteredVideos;
-
-  // Composants d'affichage (renderStats, renderControls restent identiques)
   const renderStats = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Total Podcasts</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalPodcasts}</p>
-          </div>
-          <Headphones className="h-8 w-8 text-blue-600" />
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Total Vidéos</p>
+            <p className="text-sm font-medium text-gray-600">Total Podcasts Vidéo</p>
             <p className="text-2xl font-bold text-gray-900">{stats.totalVideos}</p>
           </div>
-          <Video className="h-8 w-8 text-red-600" />
+          <Video className="h-8 w-8 text-blue-600" />
         </div>
       </div>
 
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Écoutes Podcasts</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalListens.toLocaleString()}</p>
-          </div>
-          <BarChart3 className="h-8 w-8 text-green-600" />
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Vues Vidéos</p>
+            <p className="text-sm font-medium text-gray-600">Vues Total</p>
             <p className="text-2xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
           </div>
-          <Users className="h-8 w-8 text-purple-600" />
+          <Users className="h-8 w-8 text-blue-600" />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">Catégories</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.totalCategories}</p>
+          </div>
+          <BarChart3 className="h-8 w-8 text-blue-600" />
         </div>
       </div>
     </div>
@@ -698,29 +611,14 @@ const AdminMedia: React.FC = () => {
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8">
       <div className="p-6">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-            <button
-              onClick={() => setActiveTab('podcasts')}
-              className={`px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-2 ${
-                activeTab === 'podcasts'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Headphones className="w-4 h-4" />
-              Podcasts ({podcasts.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('videos')}
-              className={`px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-2 ${
-                activeTab === 'videos'
-                  ? 'bg-white text-red-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Video className="w-4 h-4" />
-              Vidéos ({videos.length})
-            </button>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-100 rounded-2xl">
+              <Video className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Gestion des Podcasts Vidéo</h2>
+              <p className="text-gray-600">Administrez votre bibliothèque de podcasts vidéo</p>
+            </div>
           </div>
 
           <div className="flex gap-3">
@@ -733,11 +631,11 @@ const AdminMedia: React.FC = () => {
               Actualiser
             </button>
             <button
-              onClick={() => handleUploadClick(activeTab === 'podcasts' ? 'podcast' : 'video')}
+              onClick={handleUploadClick}
               className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl"
             >
               <Plus size={20} />
-              Ajouter {activeTab === 'podcasts' ? 'Podcast' : 'Vidéo'}
+              Ajouter un Podcast Vidéo
             </button>
           </div>
         </div>
@@ -748,7 +646,7 @@ const AdminMedia: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder={`Rechercher un ${activeTab === 'podcasts' ? 'podcast' : 'vidéo'}...`}
+                placeholder="Rechercher un podcast vidéo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -782,16 +680,19 @@ const AdminMedia: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Média
+                Podcast Vidéo
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Catégorie
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {activeTab === 'podcasts' ? 'Écoutes' : 'Vues'}
+                Vues
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statut
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Premium
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
@@ -802,35 +703,35 @@ const AdminMedia: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {currentData.length === 0 ? (
+            {filteredVideos.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                  <Upload className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  <Video className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                   <p className="text-lg font-medium text-gray-900 mb-2">
-                    Aucun {activeTab === 'podcasts' ? 'podcast' : 'vidéo'} trouvé
+                    Aucun podcast vidéo trouvé
                   </p>
                   <p className="text-gray-600 mb-4">
-                    {searchTerm || filterCategory ? 'Essayez de modifier vos critères de recherche' : 'Commencez par ajouter votre premier média'}
+                    {searchTerm || filterCategory ? 'Essayez de modifier vos critères de recherche' : 'Commencez par ajouter votre premier podcast vidéo'}
                   </p>
                   <button
-                    onClick={() => handleUploadClick(activeTab === 'podcasts' ? 'podcast' : 'video')}
+                    onClick={handleUploadClick}
                     className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2"
                   >
                     <Plus size={20} />
-                    Ajouter le premier {activeTab === 'podcasts' ? 'podcast' : 'vidéo'}
+                    Ajouter le premier podcast vidéo
                   </button>
                 </td>
               </tr>
             ) : (
-              currentData.map((media) => (
+              filteredVideos.map((media) => (
                 <tr key={media.id} className="hover:bg-gray-50 transition-colors duration-150">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-12 w-12 bg-gray-200 rounded-lg overflow-hidden">
+                      <div className="flex-shrink-0 h-12 w-20 bg-gray-200 rounded-lg overflow-hidden">
                         <img
-                          src={media.thumbnailUrl || `https://via.placeholder.com/48/48?text=${activeTab === 'podcasts' ? '🎧' : '🎬'}`}
+                          src={media.thumbnailUrl || `https://via.placeholder.com/80/48?text=🎬`}
                           alt={media.title}
-                          className="h-12 w-12 object-cover"
+                          className="h-12 w-20 object-cover"
                           onError={handleImageError}
                         />
                       </div>
@@ -858,10 +759,7 @@ const AdminMedia: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                    {activeTab === 'podcasts' 
-                      ? (media as Podcast).listens?.toLocaleString() || 0 
-                      : (media as Video).views?.toLocaleString() || 0
-                    }
+                    {media.views?.toLocaleString() || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
@@ -870,6 +768,15 @@ const AdminMedia: React.FC = () => {
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {media.isActive ? 'Actif' : 'Inactif'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                      media.isPremium
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {media.isPremium ? 'Premium' : 'Standard'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -886,11 +793,7 @@ const AdminMedia: React.FC = () => {
                       </button>
                       
                       <button
-                        onClick={() => handleToggleVisibility(
-                          media.id, 
-                          activeTab.slice(0, -1) as 'podcast' | 'video', 
-                          media.isActive || false
-                        )}
+                        onClick={() => handleToggleVisibility(media.id, media.isActive || false)}
                         className={`p-2 rounded-lg transition-colors ${
                           media.isActive
                             ? 'text-yellow-600 hover:bg-yellow-50' 
@@ -910,10 +813,7 @@ const AdminMedia: React.FC = () => {
                       </button>
                       
                       <button
-                        onClick={() => handleDeleteMedia(
-                          media.id, 
-                          activeTab.slice(0, -1) as 'podcast' | 'video'
-                        )}
+                        onClick={() => handleDeleteMedia(media.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Supprimer"
                       >
@@ -932,7 +832,7 @@ const AdminMedia: React.FC = () => {
 
   // Rendu principal
   if (loading && !refreshing) {
-    return <LoadingSpinner message="Chargement des médias..." />;
+    return <LoadingSpinner message="Chargement des podcasts vidéo..." />;
   }
 
   return (
@@ -950,8 +850,8 @@ const AdminMedia: React.FC = () => {
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Administration Médias</h1>
-                <p className="text-gray-600 mt-2">Gérez vos podcasts et vidéos</p>
+                <h1 className="text-3xl font-bold text-slate-900">Administration Podcasts Vidéo</h1>
+                <p className="text-gray-600 mt-2">Gérez votre bibliothèque de podcasts vidéo</p>
               </div>
             </div>
           </div>
@@ -967,14 +867,12 @@ const AdminMedia: React.FC = () => {
         {/* Modals */}
         <MediaDetailModal
           media={selectedMedia}
-          type={activeTab.slice(0, -1) as 'podcast' | 'video'}
           isOpen={detailModalOpen}
           onClose={handleCloseModals}
         />
 
         <EditMediaModal
           media={selectedMedia}
-          type={activeTab.slice(0, -1) as 'podcast' | 'video'}
           isOpen={editModalOpen}
           onClose={handleCloseModals}
           onSave={handleSaveMedia}
@@ -984,7 +882,7 @@ const AdminMedia: React.FC = () => {
         {/* Modal d'upload */}
         {uploadModalOpen && (
           <MediaUpload
-            type={uploadType}
+            type="video"
             onUploadSuccess={handleUploadSuccess}
             onClose={() => setUploadModalOpen(false)}
           />

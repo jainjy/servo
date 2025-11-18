@@ -126,7 +126,7 @@ import CreationReprise from "./components/components/CreationReprise";
 import AuditMediation from "./components/components/AuditMediation";
 import AidesLeveesFonds from "./components/components/AideFonds";
 import JuridiqueLiquidation from "./components/components/JuridiqueLiquidation";
-import PodcastsServices from "./components/components/Podcast_services";
+import PodcastsServices from "./components/Podcast_services";
 import FormationsTourisme from "./components/components/ToursimeFormation";
 import ActivitesLoisirsFAQ from "./components/components/ActiviteLoisirs";
 import AdminMedia from "./pages/pro/adminMedia";
@@ -143,6 +143,8 @@ import PodcastsBienEtre from "./components/PodcastsBienEtre";
 import LieuxHistoriques from "./components/components/Tourisme_lieux";
 import ConstructionServicesPage from "./pages/BatimentPage";
 import PricingPacksDisplay from "./components/components/PackComplet";
+import AgendaPage from "./pages/mon-compte/AgendaPage";
+import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -200,7 +202,10 @@ const App = () => {
               <Layout>
                 <Routes>
                   {/* Section publiques Routes */}
-                  <Route path="/services-partners" element={<ServicesPartnersPage />} />
+                  <Route
+                    path="/services-partners"
+                    element={<ServicesPartnersPage />}
+                  />
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/cookies" element={<CookiesPolicy />} />
@@ -224,23 +229,46 @@ const App = () => {
                   />
                   <Route
                     path="/lieux_historique"
-                    element={<LieuxHistoriques
-                      ville="Paris"
-                      typeFiltre="tous"
-                    />}
+                    element={
+                      <LieuxHistoriques ville="Paris" typeFiltre="tous" />
+                    }
                   />
                   <Route
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
                   />
-                  <Route path="/podcasts/immobilier" element={<PodcastsImmobilier />} />
-                  <Route path="/podcasts/assurance-finance" element={<PodcastsAssuranceFinance />} />
-                  <Route path="/podcasts/alimentation" element={<PodcastsAlimentation />} />
-                  <Route path="/podcasts/investissement" element={<PodcastsInvestissement />} />
-                  <Route path="/podcasts/tourisme" element={<PodcastsTourisme />} />
-                  <Route path="/podcasts/domicile" element={<PodcastsDomicile />} />
-                  <Route path="/podcasts/bien-etre" element={<PodcastsBienEtre />} />
-                  <Route path="/formation-batiment" element={<ConstructionServicesPage />} />
+                  <Route
+                    path="/podcasts/immobilier"
+                    element={<PodcastsImmobilier />}
+                  />
+                  <Route
+                    path="/podcasts/assurance-finance"
+                    element={<PodcastsAssuranceFinance />}
+                  />
+                  <Route
+                    path="/podcasts/alimentation"
+                    element={<PodcastsAlimentation />}
+                  />
+                  <Route
+                    path="/podcasts/investissement"
+                    element={<PodcastsInvestissement />}
+                  />
+                  <Route
+                    path="/podcasts/tourisme"
+                    element={<PodcastsTourisme />}
+                  />
+                  <Route
+                    path="/podcasts/domicile"
+                    element={<PodcastsDomicile />}
+                  />
+                  <Route
+                    path="/podcasts/bien-etre"
+                    element={<PodcastsBienEtre />}
+                  />
+                  <Route
+                    path="/formation-batiment"
+                    element={<ConstructionServicesPage />}
+                  />
                   <Route
                     path="/activiteLoisirs"
                     element={<ActivitesLoisirsFAQ />}
@@ -292,11 +320,13 @@ const App = () => {
                   />
                   <Route
                     path="/comptabilite"
-                    element={<ComptabiliteServices
-                      entrepriseId="ENT-12345"
-                      typeEntreprise="sarl"
-                      chiffreAffaire={150000}
-                    />}
+                    element={
+                      <ComptabiliteServices
+                        entrepriseId="ENT-12345"
+                        typeEntreprise="sarl"
+                        chiffreAffaire={150000}
+                      />
+                    }
                   />
                   <Route path="/service-maison" element={<DomicileLayout />} />
                   <Route
@@ -403,18 +433,22 @@ const App = () => {
                   />
                   <Route
                     path="/aide_financement"
-                    element={<AidesFinancement
-                      entrepriseId="ENT-12345"
-                      secteurActivite="Technologie"
-                      localisation="Île-de-France"
-                    />}
+                    element={
+                      <AidesFinancement
+                        entrepriseId="ENT-12345"
+                        secteurActivite="Technologie"
+                        localisation="Île-de-France"
+                      />
+                    }
                   />
                   <Route
                     path="/formation_finance"
-                    element={<FormationsFinancement
-                      entrepriseId="ENT-12345"
-                      secteurActivite="Industrie"
-                    />}
+                    element={
+                      <FormationsFinancement
+                        entrepriseId="ENT-12345"
+                        secteurActivite="Industrie"
+                      />
+                    }
                   />
                   <Route
                     path="/investir/:type"
@@ -461,7 +495,6 @@ const App = () => {
                     />
 
                     <Route path="media" element={<AdminMedia />} />
-
                   </Route>
                   {/* Section Mon Compte Routes */}
                   <Route path="/mon-compte">
@@ -470,6 +503,11 @@ const App = () => {
                     <Route path="profil" element={<MonComptePage />} />
                     <Route path="reservation" element={<ReservationPage />} />
                     <Route path="demandes" element={<MesDemande />} />
+                    <Route path="agenda" element={<AgendaPage />} />
+                    <Route
+                      path="documents"
+                      element={<MesDocumentsPage />}
+                    />
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
@@ -496,9 +534,6 @@ const App = () => {
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
-
-
-
 
                     <Route
                       path="publicite"
