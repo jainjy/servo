@@ -28,7 +28,11 @@ const CheckoutForm = ({ formData, subscriptionData }) => {
 
     try {
       // 1️⃣ Créer le PaymentIntent avec signupPro
-      const response = await signupPro(formData, parseInt(subscriptionData.price), subscriptionData.planId);
+      const response = await signupPro(
+        formData,
+        parseInt(subscriptionData.price),
+        subscriptionData.truePlanId
+      );
       const { clientSecret, paymentIntentId } = response;
 
       if (!clientSecret) {
