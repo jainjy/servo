@@ -355,57 +355,72 @@ export const TourismSection = () => {
     setShowBookingModal(true);
   };
 
-  const confirmBooking = async () => {
-    setBookingLoading(true);
-    try {
-      // Vérifier que l'utilisateur est connecté avec le hook useAuth
-      if (!isAuthenticated || !currentUser) {
-        alert('Veuillez vous connecter pour effectuer une réservation');
-        setBookingLoading(false);
-        return;
-      }
-
-      // Inclure l'userId dans les données de réservation
-      const bookingData = {
-        ...bookingForm,
-        userId: currentUser.id
-      };
-
-      const response = await api.post("/tourisme-bookings", bookingData);
-
-      if (response.data.success) {
-        setBookingSuccess(response.data);
-
-        // TRACKING: Réservation confirmée
-        if (response.data.success && selectedListing) {
-          await trackTourismInteraction(selectedListing.id, selectedListing.title, 'booking_confirmed', {
-            bookingId: response.data.data.id,
-            totalAmount: response.data.data.totalAmount
-          });
-        }
-
-        // Réinitialiser le formulaire
-        setBookingForm({
-          listingId: '',
-          checkIn: '',
-          checkOut: '',
-          guests: 2,
-          adults: 2,
-          children: 0,
-          infants: 0,
-          specialRequests: '',
-          paymentMethod: 'card'
-        });
-      } else {
-        throw new Error(response.data.error);
-      }
-    } catch (error: any) {
-      console.error("Erreur lors de la réservation :", error);
-      alert(error.response?.data?.error || 'Erreur lors de la réservation. Veuillez réessayer.');
-    } finally {
+const confirmBooking = async () => {
+  setBookingLoading(true);
+  try {
+    if (!isAuthenticated || !currentUser) {
+      alert('Veuillez vous connecter pour effectuer une réservation');
       setBookingLoading(false);
+      return;
     }
-  };
+
+    // 🚨 On enlève userId du body !
+    const bookingData = {
+      listingId: bookingForm.listingId,
+      checkIn: bookingForm.checkIn,
+      checkOut: bookingForm.checkOut,
+      guests: bookingForm.guests,
+      adults: bookingForm.adults,
+      children: bookingForm.children,
+      infants: bookingForm.infants,
+      specialRequests: bookingForm.specialRequests,
+      paymentMethod: bookingForm.paymentMethod,
+    };
+
+    // 🔥 USER ID EST ENVOYÉ UNIQUEMENT DANS L'URL
+    const response = await api.post(
+      `/tourisme-bookings/${currentUser.id}`,
+      bookingData
+    );
+
+    if (response.data.success) {
+      setBookingSuccess(response.data);
+
+      // tracking (inchangé)
+      if (selectedListing) {
+        await trackTourismInteraction(
+          selectedListing.id,
+          selectedListing.title,
+          "booking_confirmed",
+          {
+            bookingId: response.data.data.id,
+            totalAmount: response.data.data.totalAmount,
+          }
+        );
+      }
+
+      // Réinitialiser
+      setBookingForm({
+        listingId: "",
+        checkIn: "",
+        checkOut: "",
+        guests: 2,
+        adults: 2,
+        children: 0,
+        infants: 0,
+        specialRequests: "",
+        paymentMethod: "card",
+      });
+    } else {
+      throw new Error(response.data.error);
+    }
+  } catch (error: any) {
+    console.error("Erreur lors de la réservation :", error);
+    alert(error.response?.data?.error || "Erreur lors de la réservation");
+  } finally {
+    setBookingLoading(false);
+  }
+};
 
   const closeBookingModal = () => {
     setShowBookingModal(false);
