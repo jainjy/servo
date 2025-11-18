@@ -17,7 +17,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "cuisine",
     title: "Cours de Cuisine",
-    icon: "🍳",
+    icon: "/domicile/cuisine.gif",
     color: "bg-orange-100 border-orange-300",
     description: "Cours de cuisine à domicile - Apprenez les secrets culinaires",
     price: "129€/session",
@@ -26,7 +26,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "decoration",
     title: "Cours de Décoration",
-    icon: "🎨",
+    icon: "/domicile/decoration.gif",
     color: "bg-pink-100 border-pink-300",
     description: "Formation à la décoration d'intérieur et stylisme",
     price: "99€/session",
@@ -35,7 +35,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "bricolage",
     title: "Ateliers Bricolage",
-    icon: "🔨",
+    icon: "/domicile/atelier.gif",
     color: "bg-blue-100 border-blue-300",
     description: "Apprenez les bases du bricolage et petits travaux",
     price: "79€/session",
@@ -44,7 +44,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "jardinage",
     title: "Formation Jardinage",
-    icon: "🌿",
+    icon: "/domicile/jardinnage.gif",
     color: "bg-green-100 border-green-300",
     description: "Maîtrisez l'art du jardinage et l'entretien des plantes",
     price: "89€/session",
@@ -53,7 +53,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "feng-shui",
     title: "Feng Shui & Harmonie",
-    icon: "☯️",
+    icon: "/domicile/harmony.gif",
     color: "bg-purple-100 border-purple-300",
     description: "Créez l'harmonie dans votre maison avec le Feng Shui",
     price: "159€/session",
@@ -62,7 +62,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "upcycling",
     title: "Recyclage Créatif",
-    icon: "♻️",
+    icon: "/domicile/recyclage.gif",
     color: "bg-cyan-100 border-cyan-300",
     description: "Transformez vos objets en créations uniques",
     price: "89€/session",
@@ -71,7 +71,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "domotique",
     title: "Formation Domotique",
-    icon: "🏠",
+    icon: "/domicile/domotique.png",
     color: "bg-indigo-100 border-indigo-300",
     description: "Transformez votre maison en habitation intelligente",
     price: "199€/session",
@@ -80,7 +80,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "design-salon",
     title: "Design & Aménagement",
-    icon: "✨",
+    icon: "/domicile/design.gif",
     color: "bg-yellow-100 border-yellow-300",
     description: "Services de design sur mesure pour tous vos espaces",
     price: "Sur devis",
@@ -89,7 +89,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "musique",
     title: "Cours de Musique",
-    icon: "🎵",
+    icon: "/domicile/music.gif",
     color: "bg-rose-100 border-rose-300",
     description: "Apprentissage d'instruments et technique musicale",
     price: "À partir de 60€",
@@ -98,7 +98,7 @@ const INTERESTS_SECTIONS: InterestSection[] = [
   {
     id: "fitness",
     title: "Sport & Fitness",
-    icon: "⚽",
+    icon: "/domicile/sport.gif",
     color: "bg-sky-100 border-sky-300",
     description: "Entraînement personnalisé à domicile",
     price: "À partir de 50€",
@@ -115,7 +115,9 @@ const InterestCard: React.FC<InterestSectionProps> = ({ section, onSelectItem })
   return (
     <Card className={`border-2 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-1 ${section.color}`}>
       <div className="flex items-start gap-4 mb-4">
-        <span className="text-5xl">{section.icon}</span>
+        <div className="h-20 w-20 rounded-full ring-2 ring-black/50 grid place-items-center overflow-hidden">
+          <img src={section.icon} alt="" className="w-16 h-16" />
+        </div>
         <div className="flex-1">
           <h3 className="text-xl font-bold text-gray-900 mb-1">{section.title}</h3>
           <p className="text-sm text-gray-700">{section.description}</p>

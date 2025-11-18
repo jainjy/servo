@@ -346,12 +346,12 @@ const Header = () => {
     }, {
       title: "BATIMENTS",
       items: [
-        {
-          title: "Rénovation & construction",
-          description: "Experts en rénovation de bâtiments",
-          href: "/batiments#renovation-chantiers",
-          image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
-        },
+        // {
+        //   title: "Rénovation & construction",
+        //   description: "Experts en rénovation de bâtiments",
+        //   href: "/batiments#renovation-chantiers",
+        //   image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
+        // },
         // {
         //   title: "Construction & plans",
         //   description: " De la conception à la réalisation",
@@ -359,9 +359,15 @@ const Header = () => {
         //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
         // },
         {
+          title: "Rénovation & construction",
+          description: " Services de rénovation et construction professionnels",
+          href: "/travaux",
+          image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
+        },
+        {
           title: "Plan & administratifs",
           description: "Documents administratifs simplifiés",
-          href: "/batiments#materiaux-viabilisations",
+          href: "/plan_administratif",
           image: "https://i.pinimg.com/736x/7d/05/6d/7d056d506f943d48a0ca9ad81b85e018.jpg"
         },
         {
@@ -376,12 +382,7 @@ const Header = () => {
         //   href: "/batiments#division-parcellaire",
         //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
         // },
-         {
-          title: "Travaux & construction",
-          description: " Services de construction professionnels",
-          href: "/travaux",
-          image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
-        }, {
+        {
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
           href: "/formation-batiment",
@@ -428,7 +429,7 @@ const Header = () => {
           description: "Gestion efficace de votre domicile",
           href: "/domicile#utilities",
           image: "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg"
-        }, 
+        },
         // {
         //   title: "Matériaux",
         //   description: "Matériaux de construction qualité premium",
@@ -1093,10 +1094,9 @@ const Header = () => {
                                 onFocus={() =>
                                   hasItems && setHoveredSection(section.title)
                                 }
-                                onMouseLeave={() => {}}
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
-                                  isActive ? "bg-white/10" : "hover:bg-white/5"
-                                }`}
+                                onMouseLeave={() => { }}
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"
+                                  }`}
                               >
                                 {hasItems ? (
                                   <button className="scramble  w-full text-left text-xs font-semibold text-white">
@@ -1192,15 +1192,30 @@ const Header = () => {
                             Consultations & aides
                           </Link>
                         </span> */}
-                        <Link
-                          to="/login"
-                          className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
-                        >
-                          <span className="relative z-10 group-hover:text-white">
-                            Se connecter
-                          </span>
-                          <span className="absolute inset-0 bg-black border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
-                        </Link>
+                        {!isAuthenticated ? (
+                          <Link
+                            to="/login"
+                            className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
+                          >
+                            <span className="relative z-10 group-hover:text-white">
+                              Se connecter
+                            </span>
+                            <span className="absolute inset-0 bg-black border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/"
+                            onClick={handleLogout}
+                            className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
+                          >
+                            <span className="relative z-10 group-hover:text-white">
+                              Se déconnecter
+                            </span>
+                            <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
+                          </Link>
+                        )
+                        }
+
                       </div>
                     </div>
                   </div>
@@ -1298,9 +1313,8 @@ const Header = () => {
                         {notifications.map((n) => (
                           <div
                             key={n.id}
-                            className={`p-3 rounded-lg border transition-colors ${
-                              n.isRead ? "bg-gray-50" : "bg-white"
-                            }`}
+                            className={`p-3 rounded-lg border transition-colors ${n.isRead ? "bg-gray-50" : "bg-white"
+                              }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
@@ -1332,8 +1346,8 @@ const Header = () => {
                                 <div className="text-xs text-gray-400">
                                   {n.createdAt
                                     ? new Date(n.createdAt).toLocaleDateString(
-                                        "fr-FR"
-                                      )
+                                      "fr-FR"
+                                    )
                                     : ""}
                                 </div>
                               </div>
