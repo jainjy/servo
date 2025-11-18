@@ -1,4 +1,3 @@
-
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,10 +36,22 @@ import {
   Save,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  Calendar,
+  PhoneCall,
+  Mail as MailIcon,
+  Navigation
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+
+const formatDateLocal = (d) => {
+  const date = d instanceof Date ? d : new Date(d);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}; 
 
 // Types de rendez-vous
 const STATUT_RENDEZ_VOUS = {
@@ -73,109 +84,113 @@ const creneauxRecurrentsInitiaux = [
 ];
 
 // Fonction pour transformer les données de l'API en format de rendez-vous
-const transformerDonneesAPI = (planningData) => {
-  if (!planningData || !Array.isArray(planningData)) {
-    console.warn("Données de planning invalides:", planningData);
+const transformerDonneesAPI = (apiData) => {
+  if (!apiData || !apiData.data || !Array.isArray(apiData.data.events)) {
+    console.warn("Données de planning invalides:", apiData);
     return [];
   }
 
-  console.log("Transformation des données:", planningData);
+  console.log("Transformation des données API:", apiData.data.events);
 
-  return planningData
-    .filter(item => {
-      if (!item.date) {
-        console.warn("Élément sans date ignoré:", item);
+  return apiData.data.events
+    .filter(event => {
+      if (!event.start) {
+        console.warn("Événement sans date ignoré:", event);
         return false;
       }
       return true;
     })
-    .map((item, index) => {
+    .map((event, index) => {
+      // Formater la date correctement
+      let dateFormatee;
+      let heureDebut = "09:00";
+      let heureFin = "10:00";
+      
+      try {
+        const startDate = new Date(event.start);
+          dateFormatee = formatDateLocal(startDate);
+        // Extraire l'heure du start
+        if (event.start.includes('T')) {
+          const timePart = event.start.split('T')[1];
+          heureDebut = timePart.substring(0, 5); // HH:MM
+        }
+        
+        // Calculer l'heure de fin
+        if (event.end && event.end.includes('T')) {
+          const endTimePart = event.end.split('T')[1];
+          heureFin = endTimePart.substring(0, 5);
+        } else {
+          // Si pas d'heure de fin, calculer +1h
+          const [heures, minutes] = heureDebut.split(':');
+          const heureFinNum = parseInt(heures) + 1;
+          heureFin = `${heureFinNum.toString().padStart(2, '0')}:${minutes}`;
+        }
+      } catch (error) {
+        console.warn("Erreur format date:", event.start, error);
+        dateFormatee = formatDateLocal(new Date());
+      }
+
       // Déterminer le type basé sur le type de l'API
       let type = "DEMANDE";
       let statut = "CONFIRME";
-      let couleur = "#8B5CF6";
+      let couleur = event.backgroundColor || "#8B5CF6";
       let icone = Users;
       
-      switch(item.type) {
+      switch(event.type) {
         case "appointment":
           type = "VISITE";
           couleur = "#3B82F6";
           icone = MapPin;
           break;
-        case "demande_creee":
+        case "tourisme":
+          type = "TOURISME";
+          couleur = "#6366F1";
+          icone = MapPin;
+          break;
+        case "demande":
           type = "DEMANDE";
           couleur = "#8B5CF6";
           icone = Users;
           break;
-        case "demande_artisan_direct":
+        case "demande_artisan":
           type = "AUDIT";
           couleur = "#EF4444";
           icone = Users;
-          break;
-        case "demande_artisan_rdv":
-          type = "AUDIT";
-          statut = "EN_ATTENTE";
-          couleur = "#F59E0B";
-          icone = Users;
-          break;
-        case "tourisme_booking":
-          type = "TOURISME";
-          couleur = "#6366F1";
-          icone = MapPin;
           break;
         default:
           type = "DEMANDE";
           icone = Clock;
       }
 
-      // Formater la date correctement
-      let dateFormatee;
-      try {
-        dateFormatee = new Date(item.date).toISOString().split('T')[0];
-      } catch (error) {
-        console.warn("Erreur format date:", item.date, error);
-        dateFormatee = new Date().toISOString().split('T')[0];
-      }
-      
-      // Gérer l'heure
-      let heureDebut = "09:00";
-      let heureFin = "10:00";
-      
-      if (item.time) {
-        heureDebut = item.time;
-        const [heures, minutes] = item.time.split(':');
-        const heureFinNum = parseInt(heures) + 1;
-        heureFin = `${heureFinNum.toString().padStart(2, '0')}:${minutes}`;
-      }
-
       // Créer un titre significatif
-      let titre = item.motif || "Rendez-vous sans titre";
+      let titre = event.title || "Rendez-vous sans titre";
       if (titre.length > 50) {
         titre = titre.substring(0, 50) + "...";
       }
 
       const rendezVous = {
-        id: item.id || `event_${index}`,
+        id: event.id || `event_${index}`,
         titre: titre,
-        client: { 
-          nom: "Client", 
-          email: "", 
+        client: event.client || event.createdBy || { 
+          nom: event.createdBy?.firstName || "Client", 
+          email: event.createdBy?.email || "", 
           telephone: "" 
         },
-        bien: { 
-          adresse: "", 
-          reference: "" 
+        bien: event.property || { 
+          adresse: event.property?.address || event.property?.adresse || "", 
+          reference: "",
+          ville: event.property?.city || ""
         },
         date: dateFormatee,
         heureDebut: heureDebut,
         heureFin: heureFin,
         type: type,
         statut: statut,
-        agent: "Utilisateur",
-        notes: item.motif || "",
+        agent: event.agent || "Utilisateur",
+        notes: event.description || event.notes || "",
         couleur: couleur,
         icone: icone,
-        sourceData: item // Garder les données originales
+        sourceData: event // Garder les données originales
       };
 
       console.log("Rendez-vous transformé:", rendezVous);
@@ -215,13 +230,216 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
   );
 };
 
-// Composant Modal Rendez-vous
+// Composant Modal Détails Rendez-vous (Lecture seule)
+const ModalDetailsRendezVous = ({ isOpen, onClose, rendezVous, onEdit, onDelete, onRefresh }) => {
+  if (!rendezVous) return null;
+
+  const TypeIcon = rendezVous.icone || TYPES_RENDEZ_VOUS[rendezVous.type]?.icon || Clock;
+  const StatutBadge = STATUT_RENDEZ_VOUS[rendezVous.statut];
+
+  const formaterDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const handleEdit = () => {
+    onEdit(rendezVous);
+    onClose();
+  };
+
+  const handleDelete = async () => {
+    if (!rendezVous?.id || rendezVous.id.startsWith('event_')) {
+      onDelete(rendezVous.id);
+      onClose();
+      return;
+    }
+
+    try {
+      await api.delete(`/planning/${rendezVous.id}`);
+      onDelete(rendezVous.id);
+      toast.success("Rendez-vous supprimé avec succès");
+      
+      if (onRefresh) {
+        onRefresh();
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      toast.error(error.response?.data?.message || "Erreur lors de la suppression du rendez-vous");
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Détails du rendez-vous"
+      size="lg"
+    >
+      <div className="space-y-6">
+        {/* En-tête avec type et statut */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div 
+              className="p-3 rounded-lg"
+              style={{ backgroundColor: `${rendezVous.couleur}20` }}
+            >
+              <TypeIcon size={24} style={{ color: rendezVous.couleur }} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold" style={{ color: '#0A0A0A' }}>
+                {rendezVous.titre}
+              </h3>
+              <Badge className={`mt-1 ${StatutBadge.color}`}>
+                {StatutBadge.label}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Informations date et heure */}
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Calendar size={20} className="text-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Date</div>
+                <div className="font-semibold" style={{ color: '#0A0A0A' }}>
+                  {formaterDate(rendezVous.date)}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Clock size={20} className="text-green-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Horaire</div>
+                <div className="font-semibold" style={{ color: '#0A0A0A' }}>
+                  {rendezVous.heureDebut} - {rendezVous.heureFin}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Informations client */}
+        <Card className="p-4">
+          <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <User size={20} />
+            Informations client
+          </h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-blue-100 text-blue-600">
+                  {rendezVous.client.nom ? rendezVous.client.nom.charAt(0).toUpperCase() : 'C'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-semibold" style={{ color: '#0A0A0A' }}>
+                  {rendezVous.client.nom || "Non spécifié"}
+                </div>
+                <div className="text-sm text-gray-500">Client</div>
+              </div>
+            </div>
+            
+            {(rendezVous.client.email || rendezVous.client.telephone) && (
+              <div className="flex gap-4">
+                {rendezVous.client.telephone && (
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <PhoneCall size={16} />
+                    {rendezVous.client.telephone}
+                  </Button>
+                )}
+                {rendezVous.client.email && (
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <MailIcon size={16} />
+                    {rendezVous.client.email}
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Informations bien */}
+        {rendezVous.bien && rendezVous.bien.adresse && (
+          <Card className="p-4">
+            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Home size={20} />
+              Informations bien
+            </h4>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Navigation size={20} className="text-purple-600" />
+              </div>
+              <div>
+                <div className="font-semibold" style={{ color: '#0A0A0A' }}>
+                  {rendezVous.bien.adresse}
+                </div>
+                {rendezVous.bien.ville && (
+                  <div className="text-sm text-gray-500">{rendezVous.bien.ville}</div>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Informations supplémentaires */}
+        <Card className="p-4">
+          <h4 className="text-lg font-semibold mb-3">Informations supplémentaires</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <div className="text-gray-500">Type de rendez-vous</div>
+              <div className="font-semibold" style={{ color: '#0A0A0A' }}>
+                {TYPES_RENDEZ_VOUS[rendezVous.type]?.label || rendezVous.type}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-500">Agent assigné</div>
+              <div className="font-semibold" style={{ color: '#0A0A0A' }}>
+                {rendezVous.agent}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Actions */}
+       
+        
+          <div className=" grid place-items-center  ">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} className="mx-auto  w-50 hover:bg-red-400 hover:text-white"
+            >
+              Fermer
+            </Button>
+          
+          </div>
+        </div>
+     
+    </Modal>
+  );
+};
+
+// Composant Modal Rendez-vous (Édition)
 const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete, onRefresh }) => {
   const [formData, setFormData] = useState({
     titre: "",
     client: { nom: "", email: "", telephone: "" },
-    bien: { adresse: "", reference: "" },
-    date: new Date().toISOString().split('T')[0],
+    bien: { adresse: "", reference: "", ville: "" },
+    date: formatDateLocal(new Date()),
     heureDebut: "10:00",
     heureFin: "11:00",
     type: "VISITE",
@@ -241,8 +459,8 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete, onRefr
       setFormData({
         titre: "",
         client: { nom: "", email: "", telephone: "" },
-        bien: { adresse: "", reference: "" },
-        date: new Date().toISOString().split('T')[0],
+        bien: { adresse: "", reference: "", ville: "" },
+        date: formatDateLocal(new Date()),
         heureDebut: "10:00",
         heureFin: "11:00",
         type: "VISITE",
@@ -255,61 +473,83 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete, onRefr
     }
   }, [rendezVous]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setEnregistrement(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Validation des champs requis
+  if (!formData.heureDebut) {
+    toast.error("L'heure de début est requise");
+    return;
+  }
+  
+  if (!formData.date) {
+    toast.error("La date est requise");
+    return;
+  }
 
-    try {
-      // Préparer les données pour l'API
-      const appointmentData = {
-        titre: formData.titre,
-        date: formData.date,
-        heureDebut: formData.heureDebut,
-        heureFin: formData.heureFin,
-        type: formData.type,
-        statut: formData.statut,
-        agent: formData.agent,
-        couleur: formData.couleur,
-        client: formData.client,
-        bien: formData.bien,
-        notes: formData.notes,
-        serviceId: formData.serviceId || 1
-      };
+  setEnregistrement(true);
 
-      if (rendezVous?.id) {
-        // Modification d'un rendez-vous existant
-        await api.put(`/planning/${rendezVous.id}`, appointmentData);
-        toast.success("Rendez-vous modifié avec succès");
-      } else {
-        // Création d'un nouveau rendez-vous
-        await api.post('/planning', appointmentData);
-        toast.success("Rendez-vous créé avec succès");
-      }
+  try {
+    // Préparer les données pour l'API
+    const appointmentData = {
+      titre: formData.titre,
+      date: formData.date,
+      heureDebut: formData.heureDebut, // Assurez-vous que ce champ est envoyé
+      heureFin: formData.heureFin,
+      type: formData.type,
+      statut: formData.statut,
+      agent: formData.agent,
+      client: formData.client,
+      bien: formData.bien,
+      notes: formData.notes,
+      serviceId: formData.serviceId || 1
+    };
 
-      onSave({
-        ...formData,
-        id: rendezVous?.id || Date.now()
-      });
+    console.log("Données envoyées:", appointmentData); // Pour debug
 
-      if (onRefresh) {
-        onRefresh();
-      }
-
-      onClose();
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
-      toast.error(error.response?.data?.message || "Erreur lors de la sauvegarde du rendez-vous");
-    } finally {
-      setEnregistrement(false);
+    if (rendezVous?.id && !rendezVous.id.startsWith('event_')) {
+      await api.put(`/planning/${rendezVous.id}`, appointmentData);
+      toast.success("Rendez-vous modifié avec succès");
+    } else {
+      await api.post('/planning', appointmentData);
+      toast.success("Rendez-vous créé avec succès");
     }
-  };
+
+    onSave({
+      ...formData,
+      id: rendezVous?.id || Date.now().toString()
+    });
+
+    if (onRefresh) {
+      onRefresh();
+    }
+
+    onClose();
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde:", error);
+    
+    // Message d'erreur plus détaillé
+    const errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error || 
+                        "Erreur lors de la sauvegarde du rendez-vous";
+    
+    toast.error(errorMessage);
+  } finally {
+    setEnregistrement(false);
+  }
+};
 
   const handleDelete = async () => {
-    if (!rendezVous?.id) return;
+    if (!rendezVous?.id || rendezVous.id.startsWith('event_')) {
+      // Ne pas supprimer les événements générés automatiquement
+      onDelete(rendezVous.id);
+      onClose();
+      return;
+    }
 
     try {
       setEnregistrement(true);
-      await api.delete(`/appointments/${rendezVous.id}`);
+      await api.delete(`/planning/${rendezVous.id}`);
       
       onDelete(rendezVous.id);
       toast.success("Rendez-vous supprimé avec succès");
@@ -559,12 +799,12 @@ const ModalRendezVous = ({ isOpen, onClose, rendezVous, onSave, onDelete, onRefr
               disabled={enregistrement}
             />
             <Input
-              placeholder="Référence bien"
-              value={formData.bien.reference}
+              placeholder="Ville"
+              value={formData.bien.ville}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  bien: { ...formData.bien, reference: e.target.value },
+                  bien: { ...formData.bien, ville: e.target.value },
                 })
               }
               disabled={enregistrement}
@@ -797,13 +1037,13 @@ const CalendarPage = () => {
     type: "",
     agent: ""
   });
+  const [showModalDetails, setShowModalDetails] = useState(false);
   const [showModalRendezVous, setShowModalRendezVous] = useState(false);
   const [showModalCreneaux, setShowModalCreneaux] = useState(false);
   const [rendezVousSelectionne, setRendezVousSelectionne] = useState(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState(null);
-  const [debugMode, setDebugMode] = useState(false);
-
+ 
   // Charger les rendez-vous depuis l'API
   useEffect(() => {
     chargerRendezVous();
@@ -820,7 +1060,7 @@ const CalendarPage = () => {
       console.log("Réponse API reçue:", response.data);
       
       if (response.data.success) {
-        const rendezVousTransformes = transformerDonneesAPI(response.data.planning);
+        const rendezVousTransformes = transformerDonneesAPI(response.data);
         console.log("Rendez-vous transformés:", rendezVousTransformes);
         setRendezVous(rendezVousTransformes);
         toast.success(`${rendezVousTransformes.length} rendez-vous chargés`);
@@ -894,6 +1134,16 @@ const CalendarPage = () => {
     setShowModalRendezVous(true);
   };
 
+  const ouvrirDetailsRendezVous = (rdv) => {
+    setRendezVousSelectionne(rdv);
+    setShowModalDetails(true);
+  };
+
+  const ouvrirEditionRendezVous = (rdv) => {
+    setRendezVousSelectionne(rdv);
+    setShowModalRendezVous(true);
+  };
+
   // Gestion des créneaux
   const sauvegarderCreneaux = (nouveauxCreneaux) => {
     setCreneauxRecurrents(nouveauxCreneaux);
@@ -911,7 +1161,7 @@ const CalendarPage = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `calendrier-immobilier-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `calendrier-immobilier-${formatDateLocal(new Date())}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Calendrier exporté avec succès");
@@ -946,7 +1196,8 @@ const CalendarPage = () => {
   };
 
   const getRendezVousPourJourHeure = (date, heure) => {
-    const dateStr = date.toISOString().split('T')[0];
+   const dateStr = formatDateLocal(date);
+
     
     return rendezVousFiltres.filter(rdv => {
       if (rdv.date !== dateStr) return false;
@@ -1033,50 +1284,13 @@ const CalendarPage = () => {
             </select>
             <Button
               style={{ backgroundColor: '#0052FF', color: 'white' }}
-              onClick={nouveauRendezVous}
+              onClick={nouveauRendezVous} className="left-5"
             >
               <Plus className="mr-2" size={16} />
               Nouveau rendez-vous
             </Button>
           </div>
         </div>
-
-        {/* Mode debug */}
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setDebugMode(!debugMode)}
-            className="flex items-center gap-2"
-          >
-            {debugMode ? <EyeOff size={16} /> : <Eye size={16} />}
-            Debug {debugMode ? "ON" : "OFF"}
-          </Button>
-        </div>
-
-        {debugMode && (
-          <Card className="p-4 mb-6 bg-yellow-50 border-yellow-200">
-            <h3 className="font-bold mb-3 text-yellow-800">Mode Debug Activé</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <strong>Données brutes API:</strong>
-                <pre className="mt-2 p-2 bg-white rounded border text-xs overflow-auto max-h-40">
-                  {JSON.stringify(rendezVous.slice(0, 3), null, 2)}
-                </pre>
-              </div>
-              <div>
-                <strong>Informations:</strong>
-                <div className="space-y-1 mt-2">
-                  <p>Total rendez-vous: {rendezVous.length}</p>
-                  <p>Filtres actifs: {JSON.stringify(filtres)}</p>
-                  <p>Date courante: {dateCourante.toDateString()}</p>
-                  <p>Semaine: {joursSemaine[0]?.toDateString()} - {joursSemaine[6]?.toDateString()}</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
-
         {/* Statistiques rapides */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="p-6">
@@ -1128,67 +1342,6 @@ const CalendarPage = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           {/* Colonne principale - Calendrier */}
           <div className="xl:col-span-3">
-            {/* Barre de filtres */}
-            <Card className="p-6 mb-6">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                <div className="flex-1 flex flex-wrap gap-4">
-                  <select
-                    className="p-2 border rounded-lg text-sm"
-                    value={filtres.statut}
-                    onChange={(e) => setFiltres({ ...filtres, statut: e.target.value })}
-                  >
-                    <option value="">Tous les statuts</option>
-                    {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
-                      <option key={key} value={key}>{statut.label}</option>
-                    ))}
-                  </select>
-                  
-                  <select
-                    className="p-2 border rounded-lg text-sm"
-                    value={filtres.type}
-                    onChange={(e) => setFiltres({ ...filtres, type: e.target.value })}
-                  >
-                    <option value="">Tous les types</option>
-                    {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
-                      <option key={key} value={key}>{type.label}</option>
-                    ))}
-                  </select>
-                  
-                  <select
-                    className="p-2 border rounded-lg text-sm"
-                    value={filtres.agent}
-                    onChange={(e) => setFiltres({ ...filtres, agent: e.target.value })}
-                  >
-                    <option value="">Tous les agents</option>
-                    <option value="Utilisateur">Utilisateur</option>
-                  </select>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={exporterCalendrier}>
-                    <Download size={16} />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={importerCalendrier}>
-                    <Upload size={16} />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowModalCreneaux(true)}
-                  >
-                    <Settings size={16} />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={chargerRendezVous}
-                  >
-                    <RefreshCw size={16} />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-
             {/* Calendrier Semaine */}
             {vue === "semaine" && (
               <Card className="p-6">
@@ -1240,10 +1393,7 @@ const CalendarPage = () => {
                                     backgroundColor: rdv.couleur,
                                     zIndex: 10 + rdvIndex
                                   }}
-                                  onClick={() => {
-                                    setRendezVousSelectionne(rdv);
-                                    setShowModalRendezVous(true);
-                                  }}
+                                  onClick={() => ouvrirDetailsRendezVous(rdv)}
                                 >
                                   <div className="font-semibold truncate mb-1">
                                     {rdv.titre}
@@ -1287,15 +1437,25 @@ const CalendarPage = () => {
                     </div>
                   ))}
                   
-                  {Array.from({ length: 35 }, (_, i) => {
-                    const date = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 1);
-                    date.setDate(i - date.getDay() + 2);
+                  {Array.from({ length: 42 }, (_, i) => {
+                    // Premier jour du mois courant
+                    const premierJourMois = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 1);
+                    // Dernier jour du mois précédent
+                    const dernierJourMoisPrecedent = new Date(dateCourante.getFullYear(), dateCourante.getMonth(), 0);
                     
-                    const estCeMois = date.getMonth() === dateCourante.getMonth();
-                    const estAujourdhui = date.toDateString() === new Date().toDateString();
-                    const rdvsDuJour = rendezVousFiltres.filter(rdv => 
-                      rdv.date === date.toISOString().split('T')[0]
-                    );
+                    // Calculer le premier jour à afficher (lundi de la semaine contenant le 1er du mois)
+                    const premierJourAffiche = new Date(premierJourMois);
+                    const decalageLundi = premierJourMois.getDay() === 0 ? -6 : 1 - premierJourMois.getDay();
+                    premierJourAffiche.setDate(premierJourMois.getDate() + decalageLundi);
+                    
+                    // Date pour cette cellule
+                    const dateCellule = new Date(premierJourAffiche);
+                    dateCellule.setDate(premierJourAffiche.getDate() + i);
+                    
+                    const estCeMois = dateCellule.getMonth() === dateCourante.getMonth();
+                    const estAujourdhui = dateCellule.toDateString() === new Date().toDateString();
+                   const dateStr = formatDateLocal(dateCellule);
+                    const rdvsDuJour = rendezVousFiltres.filter(rdv => rdv.date === dateStr);
                     
                     return (
                       <div
@@ -1309,21 +1469,26 @@ const CalendarPage = () => {
                         }`}
                       >
                         <div className={`text-sm font-semibold mb-1 ${
-                          estAujourdhui ? 'text-blue-600' : 'text-gray-700'
+                          estAujourdhui ? 'text-blue-600' : estCeMois ? 'text-gray-700' : 'text-gray-400'
                         }`}>
-                          {date.getDate()}
+                          {dateCellule.getDate()}
                         </div>
                         
                         <div className="space-y-1">
-                          {rdvsDuJour.slice(0, 2).map(rdv => (
-                            <div
-                              key={rdv.id}
-                              className="text-xs p-1 rounded text-white truncate"
-                              style={{ backgroundColor: rdv.couleur }}
-                            >
-                              {rdv.heureDebut} {rdv.titre}
-                            </div>
-                          ))}
+                          {rdvsDuJour.slice(0, 2).map(rdv => {
+                            const TypeIcon = rdv.icone || TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
+                            return (
+                              <div
+                                key={rdv.id}
+                                className="text-xs p-1 rounded text-white truncate cursor-pointer flex items-center gap-1"
+                                style={{ backgroundColor: rdv.couleur }}
+                                onClick={() => ouvrirDetailsRendezVous(rdv)}
+                              >
+                                <TypeIcon size={10} />
+                                <span>{rdv.heureDebut} {rdv.titre}</span>
+                              </div>
+                            );
+                          })}
                           
                           {rdvsDuJour.length > 2 && (
                             <div className="text-xs text-gray-500">
@@ -1350,7 +1515,7 @@ const CalendarPage = () => {
               
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {rendezVousFiltres
-                  .filter(rdv => rdv.date === new Date().toISOString().split('T')[0])
+                  .filter(rdv => rdv.date === formatDateLocal(new Date()))
                   .sort((a, b) => a.heureDebut.localeCompare(b.heureDebut))
                   .map(rdv => {
                     const TypeIcon = rdv.icone || TYPES_RENDEZ_VOUS[rdv.type]?.icon || Clock;
@@ -1358,10 +1523,7 @@ const CalendarPage = () => {
                       <div
                         key={rdv.id}
                         className="p-3 border rounded-lg cursor-pointer hover:border-blue-300 transition-colors"
-                        onClick={() => {
-                          setRendezVousSelectionne(rdv);
-                          setShowModalRendezVous(true);
-                        }}
+                        onClick={() => ouvrirDetailsRendezVous(rdv)}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -1386,7 +1548,7 @@ const CalendarPage = () => {
                     );
                   })}
                 
-                {rendezVousFiltres.filter(rdv => rdv.date === new Date().toISOString().split('T')[0]).length === 0 && (
+                {rendezVousFiltres.filter(rdv => rdv.date === formatDateLocal(new Date())).length === 0 && (
                   <div className="text-center py-4 text-gray-500">
                     Aucun rendez-vous aujourd'hui
                   </div>
@@ -1436,6 +1598,18 @@ const CalendarPage = () => {
       </div>
 
       {/* Modales */}
+      <ModalDetailsRendezVous
+        isOpen={showModalDetails}
+        onClose={() => {
+          setShowModalDetails(false);
+          setRendezVousSelectionne(null);
+        }}
+        rendezVous={rendezVousSelectionne}
+        onEdit={ouvrirEditionRendezVous}
+        onDelete={supprimerRendezVous}
+        onRefresh={chargerRendezVous}
+      />
+
       <ModalRendezVous
         isOpen={showModalRendezVous}
         onClose={() => {
