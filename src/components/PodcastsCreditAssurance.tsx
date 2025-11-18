@@ -1,6 +1,6 @@
-// components/PodcastsInvestissement.tsx
+// components/PodcastsCreditAssurance.tsx
 import React, { useState, useEffect } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download, Video, TrendingUp, BarChart3 } from 'lucide-react';
+import { Play, Headphones, Clock, Heart, Star, Download, Video, Shield, CreditCard } from 'lucide-react';
 import { MediaService } from '../lib/api';
 
 interface VideoEpisode {
@@ -19,7 +19,7 @@ interface VideoEpisode {
   fileSize?: number;
 }
 
-const PodcastsInvestissement: React.FC = () => {
+const PodcastsCreditAssurance: React.FC = () => {
   const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,28 +32,26 @@ const PodcastsInvestissement: React.FC = () => {
 
   // Images par défaut pour les vidéos sans thumbnail
   const defaultThumbnails = [
-    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1642790553125-4d2b55a43571?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
     "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+    "https://images.unsplash.com/photo-1563013546-7e5c7d0c94c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
   ];
 
   // Image de background pour le titre
-  const headerBackgroundImage = "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
+  const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
 
-  // Charger les vidéos de la catégorie Investissement
+  // Charger les vidéos de la catégorie Crédit & Assurance
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        console.log('🔄 Début du chargement des vidéos Investissement...');
+        console.log('🔄 Début du chargement des vidéos Crédit & Assurance...');
         
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({ 
-          category: 'Investissement', 
+          category: 'Crédit & Assurance', 
           limit: 50 
         });
         
@@ -80,9 +78,9 @@ const PodcastsInvestissement: React.FC = () => {
           console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
           console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
           
-          const investissementVideos: VideoEpisode[] = apiData.data
+          const creditAssuranceVideos: VideoEpisode[] = apiData.data
             .filter((video: any) => {
-              const isInvestissement = video.category === "Investissement";
+              const isCreditAssurance = video.category === "Crédit & Assurance";
               const isActive = video.isActive !== false;
               const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
               
@@ -90,13 +88,13 @@ const PodcastsInvestissement: React.FC = () => {
                 id: video.id,
                 title: video.title,
                 category: video.category,
-                isInvestissement: isInvestissement,
+                isCreditAssurance: isCreditAssurance,
                 isActive: isActive,
                 hasVideoUrl: hasVideoUrl,
                 videoUrl: video.videoUrl
               });
               
-              const shouldInclude = isInvestissement && isActive && hasVideoUrl;
+              const shouldInclude = isCreditAssurance && isActive && hasVideoUrl;
               console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
               
               return shouldInclude;
@@ -129,12 +127,12 @@ const PodcastsInvestissement: React.FC = () => {
               return mappedVideo;
             });
           
-          console.log('🎉 Vidéos Investissement après filtrage:', investissementVideos.length);
-          console.log('📺 Liste complète des vidéos filtrées:', investissementVideos);
+          console.log('🎉 Vidéos Crédit & Assurance après filtrage:', creditAssuranceVideos.length);
+          console.log('📺 Liste complète des vidéos filtrées:', creditAssuranceVideos);
           
-          setVideoEpisodes(investissementVideos);
+          setVideoEpisodes(creditAssuranceVideos);
           
-          if (investissementVideos.length === 0) {
+          if (creditAssuranceVideos.length === 0) {
             console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
             console.log('🔍 Contenu de apiData.data:', apiData.data);
           }
@@ -208,12 +206,12 @@ const PodcastsInvestissement: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500',
-      'Tourisme': 'bg-gradient-to-r from-cyan-500 to-blue-500',
+      'Crédit & Assurance': 'bg-gradient-to-r from-teal-500 to-blue-500',
+      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
       'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
       'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
       'Bien-être & Santé': 'bg-gradient-to-r from-green-500 to-teal-500',
-      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500'
+      'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500';
   };
@@ -232,11 +230,11 @@ const PodcastsInvestissement: React.FC = () => {
     return (
       <div
         className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
-          episode.featured ? 'border-2 border-blue-700' : 'border-gray-200'
+          episode.featured ? 'border-2 border-teal-600' : 'border-gray-200'
         }`}
       >
         {episode.featured && (
-          <div className="bg-blue-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
+          <div className="bg-teal-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
             ⭐ Vidéo en vedette
           </div>
         )}
@@ -256,14 +254,14 @@ const PodcastsInvestissement: React.FC = () => {
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
           
           {/* Badge vidéo */}
-          <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white bg-blue-600">
+          <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white bg-teal-600">
             📹 Vidéo
           </div>
           
           {/* Bouton play overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
-              <Video className="w-8 h-8 text-amber-600" />
+              <Video className="w-8 h-8 text-teal-600" />
             </div>
           </div>
         </div>
@@ -279,7 +277,7 @@ const PodcastsInvestissement: React.FC = () => {
             </div>
           </div>
 
-          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-amber-600 transition-colors line-clamp-2">
+          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-teal-600 transition-colors line-clamp-2">
             {episode.title}
           </h4>
 
@@ -301,7 +299,7 @@ const PodcastsInvestissement: React.FC = () => {
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
               }}
-              className="flex items-center px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors group/btn"
+              className="flex items-center px-4 py-2 rounded-lg text-white bg-teal-600 hover:bg-teal-700 transition-colors group/btn"
             >
               <Video className="w-4 h-4 mr-2" />
               Regarder
@@ -324,8 +322,8 @@ const PodcastsInvestissement: React.FC = () => {
       <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4"></div>
-            <div className="text-gray-600">Chargement des vidéos Investissement...</div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
+            <div className="text-gray-600">Chargement des vidéos Crédit & Assurance...</div>
           </div>
         </div>
       </div>
@@ -358,12 +356,12 @@ const PodcastsInvestissement: React.FC = () => {
           <div className="text-center text-white">
             {/* Titre Principal */}
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Podcast <span className="text-amber-400">Investissement</span>
+              Podcast <span className="text-teal-400">Crédit & Assurance</span>
             </h1>
 
             {/* Sous-titre */}
             <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
-              Maîtrisez les stratégies d'investissement, analysez les marchés financiers et développez votre patrimoine
+              Conseils pour optimiser vos financements et protéger votre patrimoine
             </p>
 
             {/* Statistiques */}
@@ -378,6 +376,11 @@ const PodcastsInvestissement: React.FC = () => {
                 <span className="text-2xl font-bold text-white">{videoEpisodes.length}</span>
                 <span className="ml-2">vidéos disponibles</span>
               </div>
+              <div className="flex items-center">
+                <Shield className="w-6 h-6 mr-2" />
+                <span className="text-2xl font-bold text-white">{videoEpisodes.filter(ep => ep.featured).length}</span>
+                <span className="ml-2">vidéos premium</span>
+              </div>
             </div>
           </div>
         </div>
@@ -389,12 +392,12 @@ const PodcastsInvestissement: React.FC = () => {
         <section className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-amber-100 rounded-2xl">
-                <Video className="w-8 h-8 text-amber-600" />
+              <div className="p-3 bg-teal-100 rounded-2xl">
+                <CreditCard className="w-8 h-8 text-teal-600" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Podcasts Investissement</h2>
-                <p className="text-gray-600">Formations vidéo, analyses de marché et stratégies d'investissement</p>
+                <h2 className="text-3xl font-bold text-gray-900">Podcasts Crédit & Assurance</h2>
+                <p className="text-gray-600">Conseils financement, optimisation des taux et protection assurantielle</p>
               </div>
             </div>
             <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
@@ -410,12 +413,12 @@ const PodcastsInvestissement: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
-              <Video className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+              <CreditCard className="w-20 h-20 mx-auto text-gray-300 mb-4" />
               <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
               <p className="text-gray-500">
                 {error 
                   ? "Une erreur est survenue lors du chargement des vidéos" 
-                  : "Aucune vidéo investissement n'est disponible pour le moment"
+                  : "Aucune vidéo Crédit & Assurance n'est disponible pour le moment"
                 }
               </p>
             </div>
@@ -472,8 +475,8 @@ const PodcastsInvestissement: React.FC = () => {
             <div className="flex p-4 border-b border-gray-200">
               {/* Icône */}
               <div className="flex-shrink-0 mr-4">
-                <div className="w-16 h-16 rounded-lg bg-blue-600 flex items-center justify-center">
-                  <Video className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 rounded-lg bg-teal-600 flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-white" />
                 </div>
               </div>
 
@@ -483,11 +486,11 @@ const PodcastsInvestissement: React.FC = () => {
                   <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
                     {selectedEpisode.category}
                   </span>
-                  <span className="px-2 py-1 rounded text-xs font-medium bg-amber-100 text-amber-600">
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-teal-100 text-teal-600">
                     Vidéo
                   </span>
                   {selectedEpisode.featured && (
-                    <span className="flex items-center text-amber-600 text-xs">
+                    <span className="flex items-center text-teal-600 text-xs">
                       <Star className="w-3 h-3 mr-1" />
                       Vedette
                     </span>
@@ -540,7 +543,7 @@ const PodcastsInvestissement: React.FC = () => {
               <div className="flex gap-3 mb-3">
                 <button
                   onClick={handlePlayMedia}
-                  className="flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 transition-colors"
+                  className="flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium bg-teal-600 hover:bg-teal-700 transition-colors"
                 >
                   {isPlaying ? (
                     <>
@@ -585,4 +588,4 @@ const PodcastsInvestissement: React.FC = () => {
   );
 };
 
-export default PodcastsInvestissement;
+export default PodcastsCreditAssurance;

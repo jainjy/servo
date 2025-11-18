@@ -1,83 +1,183 @@
 // components/PodcastsBatiment.tsx
 import React, { useState, useEffect } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download } from 'lucide-react';
+import { Play, Headphones, Clock, Heart, Star, Download, Video, Home } from 'lucide-react';
 import { MediaService } from '../lib/api';
 
-interface PodcastEpisode {
+interface VideoEpisode {
   id: string;
   title: string;
   description: string;
   duration: string;
   date: string;
   category: string;
-  listens: number;
+  views: number;
   featured: boolean;
-  audioUrl: string;
+  videoUrl: string;
   thumbnailUrl?: string;
   isActive?: boolean;
+  mimeType?: string;
+  fileSize?: number;
 }
 
 const PodcastsBatiment: React.FC = () => {
-  const [podcasts, setPodcasts] = useState<PodcastEpisode[]>([]);
+  const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedEpisode, setSelectedEpisode] = useState<PodcastEpisode | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<VideoEpisode | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const audioRef = React.useRef<HTMLAudioElement>(null);
 
-  // Charger les podcasts de la catégorie Bâtiment & Construction
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  // Images par défaut pour les vidéos sans thumbnail
+  const defaultThumbnails = [
+    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+  ];
+
+  // Image de background pour le titre
+  const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
+
+  // Charger les vidéos de la catégorie Bâtiment & Construction
   useEffect(() => {
-    const fetchPodcasts = async () => {
+    const fetchVideos = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const response = await MediaService.getPodcasts({ limit: 50 });
+        console.log('🔄 Début du chargement des vidéos Bâtiment & Construction...');
         
-        const podcastsData = response.data?.data || response.data || response;
+        // Utilisation de MediaService pour récupérer les vidéos
+        const response = await MediaService.getVideos({ 
+          category: 'Bâtiment & Construction', 
+          limit: 50 
+        });
         
-        if (Array.isArray(podcastsData)) {
-          const batimentPodcasts: PodcastEpisode[] = podcastsData
-            .filter((podcast: any) => 
-              podcast.isActive !== false && 
-              podcast.category === "Bâtiment & Construction"
-            )
-            .map((podcast: any) => ({
-              id: podcast.id,
-              title: podcast.title,
-              description: podcast.description || 'Aucune description disponible',
-              duration: podcast.duration || "00:00:00",
-              date: new Date(podcast.createdAt).toLocaleDateString('fr-FR'),
-              category: podcast.category,
-              listens: podcast.listens || 0,
-              featured: podcast.listens > 500,
-              audioUrl: podcast.audioUrl || '#',
-              thumbnailUrl: podcast.thumbnailUrl
-            }));
+        console.log('📦 Réponse COMPLÈTE de l\'API:', response);
+        console.log('🔍 Structure de la réponse Axios:', {
+          data: response.data,
+          status: response.status,
+          statusText: response.statusText
+        });
+        
+        // CORRECTION : Les données sont dans response.data (Axios)
+        const apiData = response.data;
+        
+        console.log('🔍 Structure des données API:', {
+          success: apiData.success,
+          hasData: !!apiData.data,
+          dataIsArray: Array.isArray(apiData.data),
+          dataLength: apiData.data?.length,
+          pagination: apiData.pagination
+        });
+        
+        if (apiData.success && Array.isArray(apiData.data)) {
+          console.log('✅ Structure de réponse valide');
+          console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
+          console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
           
-          setPodcasts(batimentPodcasts);
+          const batimentVideos: VideoEpisode[] = apiData.data
+            .filter((video: any) => {
+              const isBatiment = video.category === "Bâtiment & Construction";
+              const isActive = video.isActive !== false;
+              const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
+              
+              console.log('📋 Filtrage vidéo:', {
+                id: video.id,
+                title: video.title,
+                category: video.category,
+                isBatiment: isBatiment,
+                isActive: isActive,
+                hasVideoUrl: hasVideoUrl,
+                videoUrl: video.videoUrl
+              });
+              
+              const shouldInclude = isBatiment && isActive && hasVideoUrl;
+              console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
+              
+              return shouldInclude;
+            })
+            .map((video: any, index: number) => {
+              console.log(`🔄 Mapping de la vidéo "${video.title}":`, {
+                id: video.id,
+                videoUrl: video.videoUrl,
+                thumbnailUrl: video.thumbnailUrl,
+                createdAt: video.createdAt
+              });
+              
+              const mappedVideo = {
+                id: video.id,
+                title: video.title,
+                description: video.description || 'Aucune description disponible',
+                duration: video.duration || "00:00:00",
+                date: new Date(video.createdAt || new Date()).toLocaleDateString('fr-FR'),
+                category: video.category,
+                views: video.views || 0,
+                featured: video.featured || video.isPremium || false,
+                videoUrl: video.videoUrl,
+                thumbnailUrl: video.thumbnailUrl || defaultThumbnails[index % defaultThumbnails.length],
+                isActive: video.isActive !== false,
+                mimeType: video.mimeType || 'video/mp4',
+                fileSize: video.fileSize || 0
+              };
+              
+              console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
+              return mappedVideo;
+            });
+          
+          console.log('🎉 Vidéos Bâtiment & Construction après filtrage:', batimentVideos.length);
+          console.log('📺 Liste complète des vidéos filtrées:', batimentVideos);
+          
+          setVideoEpisodes(batimentVideos);
+          
+          if (batimentVideos.length === 0) {
+            console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
+            console.log('🔍 Contenu de apiData.data:', apiData.data);
+          }
+          
         } else {
-          setError('Format de données inattendu');
+          console.warn('⚠️ Structure de réponse inattendue:', {
+            success: apiData.success,
+            hasData: !!apiData.data,
+            dataIsArray: Array.isArray(apiData.data),
+            apiData: apiData
+          });
+          setVideoEpisodes([]);
         }
       } catch (err: any) {
-        console.error('Erreur lors du chargement des podcasts:', err);
-        setError(err.response?.data?.error || err.message || 'Erreur de chargement');
+        console.error('❌ Erreur lors du chargement des vidéos:', err);
+        console.error('📋 Détails de l\'erreur:', {
+          message: err.message,
+          stack: err.stack,
+          response: err.response
+        });
+        setError(err.message);
+        setVideoEpisodes([]);
       } finally {
+        console.log('🏁 Chargement terminé');
         setLoading(false);
       }
     };
 
-    fetchPodcasts();
+    fetchVideos();
   }, []);
 
-  const handlePlayAudio = () => {
-    if (audioRef.current) {
+  // Test de débogage supplémentaire
+  useEffect(() => {
+    console.log('📊 État actuel de videoEpisodes:', {
+      count: videoEpisodes.length,
+      videos: videoEpisodes
+    });
+  }, [videoEpisodes]);
+
+  const handlePlayMedia = () => {
+    if (selectedEpisode && videoRef.current) {
       if (isPlaying) {
-        audioRef.current.pause();
+        videoRef.current.pause();
       } else {
-        audioRef.current.play();
+        videoRef.current.play();
       }
       setIsPlaying(!isPlaying);
     }
@@ -86,8 +186,8 @@ const PodcastsBatiment: React.FC = () => {
   const handleDownload = () => {
     if (selectedEpisode) {
       const link = document.createElement('a');
-      link.href = selectedEpisode.audioUrl;
-      link.download = `${selectedEpisode.title}.mp3`;
+      link.href = selectedEpisode.videoUrl;
+      link.download = `${selectedEpisode.title}.mp4`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -107,16 +207,124 @@ const PodcastsBatiment: React.FC = () => {
   const getCategoryColor = (category: string) => {
     const colors = {
       'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
+      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
+      'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      'Crédit & Assurance': 'bg-gradient-to-r from-teal-500 to-blue-500',
+      'Bien-être & Santé': 'bg-gradient-to-r from-green-500 to-teal-500',
+      'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500';
   };
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Composant de carte vidéo
+  const VideoCard = ({ episode }: { episode: VideoEpisode }) => {
+    console.log('🎬 Rendu de VideoCard pour:', episode.title);
+    return (
+      <div
+        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
+          episode.featured ? 'border-2 border-blue-600' : 'border-gray-200'
+        }`}
+      >
+        {episode.featured && (
+          <div className="bg-blue-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
+            ⭐ Vidéo en vedette
+          </div>
+        )}
+        
+        {/* Thumbnail */}
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={episode.thumbnailUrl}
+            alt={episode.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              console.warn('❌ Erreur de chargement de l\'image:', episode.thumbnailUrl);
+              e.currentTarget.src = defaultThumbnails[0];
+            }}
+            onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
+          />
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+          
+          {/* Badge vidéo */}
+          <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white bg-blue-600">
+            📹 Vidéo
+          </div>
+          
+          {/* Bouton play overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
+              <Video className="w-8 h-8 text-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-3">
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getCategoryColor(episode.category)}`}>
+              {episode.category}
+            </span>
+            <div className="flex items-center text-gray-500 text-sm">
+              <Clock className="w-4 h-4 mr-1" />
+              {episode.duration}
+            </div>
+          </div>
+
+          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+            {episode.title}
+          </h4>
+
+          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+            {episode.description}
+          </p>
+
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center space-x-4 text-sm text-gray-500">
+              <div className="flex items-center">
+                <Headphones className="w-4 h-4 mr-1" />
+                {episode.views.toLocaleString()} vues
+              </div>
+              <div>{episode.date}</div>
+            </div>
+            <button
+              onClick={() => {
+                console.log('🎯 Clic sur Regarder pour:', episode.title);
+                setSelectedEpisode(episode);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-orange-700 transition-colors group/btn"
+            >
+              <Video className="w-4 h-4 mr-2" />
+              Regarder
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  console.log('📱 Rendu du composant principal:', {
+    loading,
+    error,
+    videoCount: videoEpisodes.length,
+    videos: videoEpisodes
+  });
+
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <div className="text-gray-600">Chargement des podcasts...</div>
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <div className="text-gray-600">Chargement des vidéos Bâtiment & Construction...</div>
+          </div>
         </div>
       </div>
     );
@@ -124,102 +332,55 @@ const PodcastsBatiment: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>Erreur:</strong> {error}
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Erreur:</strong> {error}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* En-tête */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
-          <Headphones className="w-10 h-10 mr-4 text-blue-600" />
-          Podcasts Bâtiment & Construction
-        </h1>
-        <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-          Découvrez nos podcasts spécialisés sur les nouvelles réglementations, 
-          les matériaux innovants et les meilleures pratiques du secteur du BTP.
-        </p>
-        <div className="mt-4 flex items-center justify-center space-x-4 text-sm text-gray-500">
-          <div className="flex items-center">
-            <Headphones className="w-4 h-4 mr-1" />
-            {podcasts.reduce((total, ep) => total + ep.listens, 0).toLocaleString()} écoutes totales
-          </div>
-          <div>{podcasts.length} épisodes</div>
-        </div>
-      </div>
-
-      {/* Liste des podcasts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {podcasts.map((podcast) => (
-          <div
-            key={podcast.id}
-            className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
-              podcast.featured ? 'border-2 border-blue-600' : 'border-gray-200'
-            }`}
-          >
-            {podcast.featured && (
-              <div className="bg-blue-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
-                ⭐ Épisode en vedette
-              </div>
-            )}
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getCategoryColor(podcast.category)}`}>
-                  {podcast.category}
-                </span>
-                <div className="flex items-center text-gray-500 text-sm">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {podcast.duration}
-                </div>
-              </div>
-
-              <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                {podcast.title}
-              </h4>
-
-              <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                {podcast.description}
-              </p>
-
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Headphones className="w-4 h-4 mr-1" />
-                    {podcast.listens.toLocaleString()}
-                  </div>
-                  <div>{podcast.date}</div>
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedEpisode(podcast);
-                    setIsModalOpen(true);
-                  }}
-                  className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors group/btn"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Écouter
-                </button>
+    <div className="min-h-screen bg-white">     
+      {/* Contenu Principal */}
+      <div className="container mx-auto px-4">
+        {/* Section Vidéos */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-4">
+              <div>
+                <p className="text-gray-600 text-2xl font-semibold">Expertises techniques, innovations matériaux et retours d'expérience chantier</p>
               </div>
             </div>
+            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
+              {videoEpisodes.length} vidéo(s) disponible(s)
+            </div>
           </div>
-        ))}
+
+          {videoEpisodes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {videoEpisodes.map((episode) => (
+                <VideoCard key={episode.id} episode={episode} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+              <Home className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+              <p className="text-gray-500">
+                {error 
+                  ? "Une erreur est survenue lors du chargement des vidéos" 
+                  : "Aucune vidéo Bâtiment & Construction n'est disponible pour le moment"
+                }
+              </p>
+            </div>
+          )}
+        </section>
       </div>
 
-      {/* Message si aucun podcast */}
-      {podcasts.length === 0 && (
-        <div className="text-center py-16">
-          <Headphones className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast disponible</h3>
-          <p className="text-gray-500">Revenez plus tard pour découvrir nos nouveaux épisodes</p>
-        </div>
-      )}
-
-      {/* Modal Podcast */}
+      {/* Modal Vidéo */}
       {isModalOpen && selectedEpisode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Overlay */}
@@ -228,20 +389,23 @@ const PodcastsBatiment: React.FC = () => {
             onClick={() => {
               setIsModalOpen(false);
               setIsPlaying(false);
-              if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
+              if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0;
               }
             }}
           />
 
           {/* Modal Content */}
-          <div className="relative z-50 w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Audio Element */}
-            <audio
-              ref={audioRef}
-              src={selectedEpisode.audioUrl}
+          <div className="relative z-50 w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Video Element */}
+            <video
+              ref={videoRef}
+              src={selectedEpisode.videoUrl}
               onEnded={() => setIsPlaying(false)}
+              className="w-full h-96 object-contain bg-black"
+              controls={false}
+              poster={selectedEpisode.thumbnailUrl}
             />
 
             {/* Bouton fermeture */}
@@ -249,12 +413,12 @@ const PodcastsBatiment: React.FC = () => {
               onClick={() => {
                 setIsModalOpen(false);
                 setIsPlaying(false);
-                if (audioRef.current) {
-                  audioRef.current.pause();
-                  audioRef.current.currentTime = 0;
+                if (videoRef.current) {
+                  videoRef.current.pause();
+                  videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-3 right-3 z-20 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1.5"
+              className="absolute top-3 right-3 z-20 text-white hover:text-gray-300 bg-black/50 rounded-full p-2"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -263,10 +427,10 @@ const PodcastsBatiment: React.FC = () => {
 
             {/* Header */}
             <div className="flex p-4 border-b border-gray-200">
-              {/* Image */}
+              {/* Icône */}
               <div className="flex-shrink-0 mr-4">
                 <div className="w-16 h-16 rounded-lg bg-blue-600 flex items-center justify-center">
-                  <Headphones className="w-8 h-8 text-white" />
+                  <Home className="w-8 h-8 text-white" />
                 </div>
               </div>
 
@@ -276,8 +440,11 @@ const PodcastsBatiment: React.FC = () => {
                   <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
                     {selectedEpisode.category}
                   </span>
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-orange-100 text-blue-600">
+                    Vidéo
+                  </span>
                   {selectedEpisode.featured && (
-                    <span className="flex items-center text-blue-600text-xs">
+                    <span className="flex items-center text-blue-600 text-xs">
                       <Star className="w-3 h-3 mr-1" />
                       Vedette
                     </span>
@@ -295,7 +462,7 @@ const PodcastsBatiment: React.FC = () => {
                   </span>
                   <span className="flex items-center">
                     <Headphones className="w-3 h-3 mr-1" />
-                    {selectedEpisode.listens.toLocaleString()}
+                    {selectedEpisode.views.toLocaleString()} vues
                   </span>
                   <span>{selectedEpisode.date}</span>
                 </div>
@@ -311,14 +478,26 @@ const PodcastsBatiment: React.FC = () => {
                   {selectedEpisode.description}
                 </p>
               </div>
+
+              {/* Informations techniques */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Format</h4>
+                  <p className="text-gray-600">{selectedEpisode.mimeType}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Taille</h4>
+                  <p className="text-gray-600">{formatFileSize(selectedEpisode.fileSize || 0)}</p>
+                </div>
+              </div>
             </div>
 
             {/* Footer - Actions */}
             <div className="p-4 border-t border-gray-200 bg-gray-50">
               <div className="flex gap-3 mb-3">
                 <button
-                  onClick={handlePlayAudio}
-                  className="flex-1 flex items-center justify-center bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors"
+                  onClick={handlePlayMedia}
+                  className="flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-orange-700 transition-colors"
                 >
                   {isPlaying ? (
                     <>
@@ -329,15 +508,15 @@ const PodcastsBatiment: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Écouter
+                      <Video className="w-4 h-4 mr-2" />
+                      Regarder
                     </>
                   )}
                 </button>
                 <button
                   onClick={handleDownload}
                   className="flex items-center justify-center border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors"
-                  title="Télécharger l'épisode"
+                  title="Télécharger la vidéo"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger
