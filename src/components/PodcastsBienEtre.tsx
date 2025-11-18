@@ -1,5 +1,5 @@
 // components/PodcastsBienEtre.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Play, Headphones, Clock, Heart, Star, Download, Video, Activity } from 'lucide-react';
 import { MediaService } from '../lib/api';
 
@@ -27,6 +27,7 @@ const PodcastsBienEtre: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -37,8 +38,60 @@ const PodcastsBienEtre: React.FC = () => {
     "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
   ];
 
-  // Image de background pour le titre
-  const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
+  // États pour la barre de progression
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+
+  // Formatage du temps
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Mise à jour du temps
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const current = videoRef.current.currentTime;
+      const total = videoRef.current.duration || 0;
+
+      setCurrentTime(current);
+      setDuration(total);
+      setProgress(total > 0 ? (current / total) * 100 : 0);
+    }
+  };
+
+  // Clic sur la barre de progression
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !progressBarRef.current) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const percentage = (clickX / width) * 100;
+
+    const newTime = (percentage / 100) * duration;
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+    setProgress(percentage);
+  };
+
+  // Plein écran
+  const toggleFullscreen = () => {
+    if (!videoRef.current) return;
+
+    if (!document.fullscreenElement) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   // Charger les vidéos de la catégorie Bien-être
   useEffect(() => {
@@ -253,11 +306,6 @@ const PodcastsBienEtre: React.FC = () => {
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
 
-          {/* Badge vidéo */}
-          <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white bg-green-600">
-            📹 Vidéo
-          </div>
-
           {/* Bouton play overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
@@ -356,25 +404,74 @@ const PodcastsBienEtre: React.FC = () => {
               </div>
             </div>
             <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
-              {videoEpisodes.length} vidéo(s) disponible(s)
+              {activeTab === 'all' ? videoEpisodes.length : favorites.length} vidéo(s) disponible(s)
             </div>
           </div>
 
-          {videoEpisodes.length > 0 ? (
+          {/* Onglets */}
+          <div className="flex gap-4 mb-8 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
+                activeTab === 'all'
+                  ? 'border-green-600 text-green-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Activity className="w-5 h-5" />
+                <span>Tous les podcasts ({videoEpisodes.length})</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('favorites')}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
+                activeTab === 'favorites'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Heart className="w-5 h-5" />
+                <span>Mes favoris ({favorites.length})</span>
+              </div>
+            </button>
+          </div>
+
+          {/* Contenu de l'onglet */}
+          {activeTab === 'all' ? (
+            videoEpisodes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {videoEpisodes.map((episode) => (
+                  <VideoCard key={episode.id} episode={episode} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+                <Activity className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+                <p className="text-gray-500">
+                  {error
+                    ? "Une erreur est survenue lors du chargement des vidéos"
+                    : "Aucune vidéo Bien-être n'est disponible pour le moment"
+                  }
+                </p>
+              </div>
+            )
+          ) : favorites.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {videoEpisodes.map((episode) => (
-                <VideoCard key={episode.id} episode={episode} />
-              ))}
+              {videoEpisodes
+                .filter((episode) => favorites.includes(episode.id))
+                .map((episode) => (
+                  <VideoCard key={episode.id} episode={episode} />
+                ))}
             </div>
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
-              <Activity className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+              <Heart className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast en favoris</h3>
               <p className="text-gray-500">
-                {error
-                  ? "Une erreur est survenue lors du chargement des vidéos"
-                  : "Aucune vidéo Bien-être n'est disponible pour le moment"
-                }
+                Cliquez sur le cœur d'un podcast pour l'ajouter à vos favoris
               </p>
             </div>
           )}
@@ -383,31 +480,9 @@ const PodcastsBienEtre: React.FC = () => {
 
       {/* Modal Vidéo */}
       {isModalOpen && selectedEpisode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => {
-              setIsModalOpen(false);
-              setIsPlaying(false);
-              if (videoRef.current) {
-                videoRef.current.pause();
-                videoRef.current.currentTime = 0;
-              }
-            }}
-          />
-
-          {/* Modal Content */}
-          <div className="relative z-50 w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Video Element */}
-            <video
-              ref={videoRef}
-              src={selectedEpisode.videoUrl}
-              onEnded={() => setIsPlaying(false)}
-              className="w-full h-96 object-contain bg-black"
-              controls={false}
-              poster={selectedEpisode.thumbnailUrl}
-            />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          {/* Modal Container - Layout horizontal YouTube */}
+          <div className="relative w-full max-w-7xl h-[90vh] bg-gray-900/50 rounded-2xl shadow-2xl overflow-hidden flex">
 
             {/* Bouton fermeture */}
             <button
@@ -419,120 +494,208 @@ const PodcastsBienEtre: React.FC = () => {
                   videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-3 right-3 z-20 text-white hover:text-gray-300 bg-black/50 rounded-full p-2"
+              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            {/* Header */}
-            <div className="flex p-4 border-b border-gray-200">
-              {/* Icône */}
-              <div className="flex-shrink-0 mr-4">
-                <div className="w-16 h-16 rounded-lg bg-green-600 flex items-center justify-center">
-                  <Activity className="w-8 h-8 text-white" />
+            {/* Colonne de gauche - Vidéo */}
+            <div className="flex-1 rounded-t-lg overflow-hidden mr-5 flex flex-col min-w-0">
+              {/* Container vidéo */}
+              <div className="relative flex-1 bg-black flex items-center justify-center">
+                <video
+                  ref={videoRef}
+                  src={selectedEpisode.videoUrl}
+                  onEnded={() => setIsPlaying(false)}
+                  onTimeUpdate={handleTimeUpdate}
+                  className="w-full h-full object-contain"
+                  controls={false}
+                  poster={selectedEpisode.thumbnailUrl}
+                />
+
+                {/* Overlay de contrôle custom */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+
+                  {/* Barre de progression */}
+                  <div className="mb-4 px-2">
+                    <div
+                      className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer group"
+                      onClick={handleProgressClick}
+                      ref={progressBarRef}
+                    >
+                      <div className="absolute inset-0 bg-gray-600 rounded-full"></div>
+                      <div
+                        className="absolute h-full bg-green-600 rounded-full transition-all duration-100"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                      <div
+                        className="absolute top-1/2 w-3 h-3 bg-green-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                        style={{ left: `calc(${progress}% - 6px)` }}
+                      ></div>
+                    </div>
+
+                    {/* Temps */}
+                    <div className="flex justify-between items-center mt-2 text-xs text-gray-300">
+                      <span>{formatTime(currentTime)}</span>
+                      <span>{formatTime(duration)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={handlePlayMedia}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                      >
+                        {isPlaying ? (
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      {/* Bouton plein écran */}
+                      <button
+                        onClick={toggleFullscreen}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all duration-200"
+                        title="Plein écran"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Informations */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
-                    {selectedEpisode.category}
-                  </span>
-                  <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-600">
-                    Vidéo
-                  </span>
-                  {selectedEpisode.featured && (
-                    <span className="flex items-center text-green-600 text-xs">
-                      <Star className="w-3 h-3 mr-1" />
-                      Vedette
-                    </span>
-                  )}
-                </div>
-
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
+              {/* Titre de la vidéo */}
+              <div className="p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+                <h1 className="text-lg font-bold text-white">
                   {selectedEpisode.title}
                 </h1>
-
-                <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                  <span className="flex items-center">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {selectedEpisode.duration}
-                  </span>
-                  <span className="flex items-center">
-                    <Headphones className="w-3 h-3 mr-1" />
-                    {selectedEpisode.views.toLocaleString()} vues
-                  </span>
+                <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
+                  <span>{selectedEpisode.views.toLocaleString()} vues</span>
                   <span>{selectedEpisode.date}</span>
                 </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {/* Description */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {selectedEpisode.description}
-                </p>
-              </div>
+            {/* Colonne de droite - Contenu */}
+            <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
 
-              {/* Informations techniques */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Format</h4>
-                  <p className="text-gray-600">{selectedEpisode.mimeType}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Taille</h4>
-                  <p className="text-gray-600">{formatFileSize(selectedEpisode.fileSize || 0)}</p>
-                </div>
-              </div>
-            </div>
+              {/* Contenu défilant */}
+              <div className="flex-1 overflow-y-auto">
 
-            {/* Footer - Actions */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex gap-3 mb-3">
-                <button
-                  onClick={handlePlayMedia}
-                  className="flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 transition-colors"
-                >
-                  {isPlaying ? (
-                    <>
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                      </svg>
-                      En pause
-                    </>
-                  ) : (
-                    <>
-                      <Video className="w-4 h-4 mr-2" />
-                      Regarder
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center justify-center border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors"
-                  title="Télécharger la vidéo"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Télécharger
-                </button>
-                <button
-                  onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                  className={`flex items-center justify-center border px-3 py-2 rounded-lg text-sm transition-colors ${selectedEpisode && isFavorite(selectedEpisode.id)
-                      ? 'border-red-300 bg-red-50 text-red-600'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  title="Ajouter aux favoris"
-                >
-                  <Heart className={`w-4 h-4 mr-2 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
-                  {selectedEpisode && isFavorite(selectedEpisode.id) ? 'Aimé' : 'J\'aime'}
-                </button>
+                {/* Informations de base */}
+                <div className="p-4 border-b border-gray-700">
+                  <div className="flex items-center space-x-3 mb-3">
+                    {/* Avatar */}
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Activity className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Bien-être</div>
+                      <div className="text-xs text-gray-400">Activités santé</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
+                      {selectedEpisode.category}
+                    </span>
+                    {selectedEpisode.featured && (
+                      <span className="flex items-center text-yellow-400 text-xs font-medium">
+                        <Star className="w-3 h-3 mr-1 fill-current" />
+                        Vedette
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-4 text-sm text-gray-400">
+                    <span className="flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {selectedEpisode.duration}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="p-4 border-b border-gray-700">
+                  <h3 className="text-sm font-semibold text-white mb-2">Description</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed">
+                    {selectedEpisode.description}
+                  </p>
+                </div>
+
+                {/* Infos techniques */}
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-white mb-3">Détails</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Format</span>
+                      <span className="text-white">{selectedEpisode.mimeType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Taille</span>
+                      <span className="text-white">{formatFileSize(selectedEpisode.fileSize || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Durée</span>
+                      <span className="text-white">{selectedEpisode.duration}</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Actions rapides */}
+                <div className="p-4 border-y border-gray-700">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handlePlayMedia}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition-all duration-200"
+                    >
+                      {isPlaying ? (
+                        <>
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                          <span className="text-sm">Pause</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                          <span className="text-sm">Lecture</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
+                      className={`p-2 rounded-lg transition-all duration-200 border ${selectedEpisode && isFavorite(selectedEpisode.id)
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                        : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
+                        }`}
+                    >
+                      <Heart className={`w-4 h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
+                    </button>
+
+                    <button
+                      onClick={handleDownload}
+                      className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
