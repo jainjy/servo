@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card"
 import { Calendar, Euro, Star, Users, Clock, TrendingUp } from "lucide-react"
 import api from "@/lib/api"
+import { useAuth } from "@/hooks/useAuth"
 
 interface TourismeBooking {
   id: string;
@@ -59,21 +60,24 @@ interface TrendResult {
 }
 
 export function ProStatsCards() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<StatsData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchBookingStats()
-  }, [])
+    if (user?.id) {
+      fetchBookingStats()
+    }
+  }, [user?.id])
 
   const fetchBookingStats = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Début du chargement des statistiques...')
-      
+      console.log('🔄 Début du chargement des statistiques pour le professionnel:', user?.id)
+
       const response = await api.get('/tourisme-bookings?limit=1000')
       console.log('📊 Réponse API complète:', response)
-      
+
       let bookings: TourismeBooking[] = []
       let averageRating = 0
       let activeClients = 0
@@ -81,10 +85,10 @@ export function ProStatsCards() {
 
       if (response.data.success) {
         console.log('✅ API retourne success: true')
-        
+
         if (response.data.data) {
           console.log('📁 Données dans response.data.data:', response.data.data)
-          
+
           if (Array.isArray(response.data.data)) {
             bookings = response.data.data
             console.log(`📚 ${bookings.length} réservations chargées (structure array directe)`)
@@ -105,14 +109,39 @@ export function ProStatsCards() {
         responseRate = response.data.responseRate || 0
       }
 
+      const filteredBookings = bookings.filter(booking => booking.listing.provider === user?.id)
+      console.log('📊 Réservations filtrées pour ce professionnel:', filteredBookings.length)
+
+      // Recalculate stats for this professional only
+      const proAverageRating = filteredBookings.length > 0
+        ? filteredBookings
+            .filter(b => b.listing.rating && b.listing.rating > 0)
+            .reduce((sum, b) => sum + (b.listing.rating || 0), 0) /
+          filteredBookings.filter(b => b.listing.rating && b.listing.rating > 0).length
+        : 0
+
+      const proActiveClients = new Set(
+        filteredBookings
+          .filter(b => b.user?.id)
+          .map(b => b.user!.id)
+      ).size
+
+      const proResponseRate = filteredBookings.filter(b => b.specialRequests && b.specialRequests.length > 0).length > 0
+        ? (filteredBookings.filter(b => b.specialRequests && b.specialRequests.length > 0).length / filteredBookings.length) * 100
+        : 0
+
       console.log('🎯 Données finales extraites:', {
-        bookingsCount: bookings.length,
-        averageRating,
-        activeClients,
-        responseRate
+        bookingsCount: filteredBookings.length,
+        averageRating: proAverageRating,
+        activeClients: proActiveClients,
+        responseRate: proResponseRate
       })
 
-      calculateRealStats(bookings, { averageRating, activeClients, responseRate })
+      calculateRealStats(filteredBookings, {
+        averageRating: proAverageRating,
+        activeClients: proActiveClients,
+        responseRate: proResponseRate
+      })
       
     } catch (error) {
       console.error('❌ Erreur chargement des statistiques:', error)
