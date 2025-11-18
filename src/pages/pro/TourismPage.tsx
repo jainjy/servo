@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  MapPin, Users, Star, 
+  MapPin, Users, Star,
   Heart, Bed, Wifi, Car, Utensils, Snowflake, Dumbbell, Tv,
-  CheckCircle, X, 
+  CheckCircle, X,
   Edit, Trash2, Eye, PlusCircle, Building, Bath, Square,
   TrendingUp, Home, Upload, Trash
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { tourismeAPI } from "@/lib/api";
 import api from "@/lib/api";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function TourismPage() {
+  const { user } = useAuth();
   const [listings, setListings] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,20 +68,25 @@ export default function TourismPage() {
 
   // Charger les données depuis l'API
   useEffect(() => {
-    loadListings();
-    loadStats();
-  }, []);
+    if (user?.id) {
+      loadListings();
+      loadStats();
+    }
+  }, [user?.id]);
 
   const loadListings = async () => {
     try {
       setLoading(true);
       const response = await tourismeAPI.getListings();
       if (response.data.success) {
-        setListings(response.data.data);
-        setFilteredListings(response.data.data);
+        const filteredByProvider = response.data.data.filter(
+          (listing) => listing.provider === user?.id
+        );
+        setListings(filteredByProvider);
+        setFilteredListings(filteredByProvider);
 
         const initialIndexes = {};
-        response.data.data.forEach((listing) => {
+        filteredByProvider.forEach((listing) => {
           initialIndexes[listing.id] = 0;
         });
         setCurrentImageIndex(initialIndexes);

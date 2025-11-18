@@ -7,6 +7,7 @@ import { Clock, CheckCircle, XCircle, MessageSquare, Eye, RefreshCw } from "luci
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import api from "@/lib/api"
+import { useAuth } from "@/hooks/useAuth"
 
 // Types pour nos données basés sur AdminBookings
 interface TourismeBooking {
@@ -45,10 +46,14 @@ interface TourismeBooking {
 }
 
 // Fonction pour récupérer les réservations depuis l'API
-async function fetchRecentBookings(): Promise<TourismeBooking[]> {
+async function fetchRecentBookings(providerId?: string): Promise<TourismeBooking[]> {
   const response = await api.get('/tourisme-bookings?limit=10&sort=createdAt&order=desc')
   if (response.data.success) {
-    return response.data.data
+    let bookings = response.data.data
+    if (providerId) {
+      bookings = bookings.filter((booking: TourismeBooking) => booking.listing.provider === providerId)
+    }
+    return bookings
   }
   throw new Error('Erreur lors de la récupération des réservations')
 }
@@ -105,10 +110,13 @@ const statusConfig = {
 }
 
 export function RecentBookings() {
+  const { user } = useAuth()
+
   const { data: bookings, isLoading, error, refetch } = useQuery({
-    queryKey: ['recentBookings'],
-    queryFn: fetchRecentBookings,
+    queryKey: ['recentBookings', user?.id],
+    queryFn: () => fetchRecentBookings(user?.id),
     refetchInterval: 30000, // Rafraîchissement automatique toutes les 30 secondes
+    enabled: !!user?.id,
   })
 
   const [actionLoading, setActionLoading] = useState<string | null>(null)
