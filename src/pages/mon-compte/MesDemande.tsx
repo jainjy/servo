@@ -60,7 +60,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
     const fetchData = async () => {
       try {
         const [metiersResponse, servicesResponse] = await Promise.all([
-          api.get('/metiers'),
+          api.get('/metiers/all'),
           api.get('/services')
         ]);
         setMetiers(metiersResponse.data);
