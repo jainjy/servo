@@ -74,6 +74,11 @@ export const tourismeAPI = {
   // Routes publiques (si nécessaire)
   getPublicListings: (params = {}) => api.get("/tourisme", { params }),
   getListingById: (id) => api.get(`/tourisme/${id}`),
+   getAccommodations: (params = {}) => 
+    api.get('/admin/tourisme/accommodations', { params }),
+  
+  getTouristicPlaces: (params = {}) => 
+    api.get('/admin/tourisme/places', { params })
 };
 
 // Services pour l'upload

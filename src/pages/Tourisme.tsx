@@ -16,7 +16,7 @@ interface TourismListing {
   idUnique: string;
   idPrestataire: string;
   title: string;
-  type: 'hotel' | 'apartment' | 'villa' | 'guesthouse';
+  type: 'hotel' | 'apartment' | 'villa' | 'guesthouse' | 'touristic_place';
   price: number;
   city: string;
   lat: number;
@@ -35,6 +35,7 @@ interface TourismListing {
   instantBook?: boolean;
   cancellationPolicy?: string;
   featured?: boolean;
+  isTouristicPlace?: boolean;
 }
 
 interface SearchFilters {
@@ -238,8 +239,13 @@ export const TourismSection = () => {
         const response = await api.get("/tourisme");
 
         if (response.data.success && Array.isArray(response.data.data)) {
+          // Filtrer pour n'avoir que les hébergements (pas les lieux touristiques)
+          const accommodationsOnly = response.data.data.filter((item: any) => 
+            !item.isTouristicPlace && item.type !== 'touristic_place'
+          );
+          
           // Regrouper les hébergements par ville
-          const grouped = response.data.data.reduce((acc: any, listing: any) => {
+          const grouped = accommodationsOnly.reduce((acc: any, listing: any) => {
             const city = listing.city || "Inconnue";
             if (!acc[city]) {
               acc[city] = {
@@ -285,42 +291,57 @@ export const TourismSection = () => {
     }
   };
 
-  // Récupération des données depuis l'API avec Axios
+  // Récupération des données depuis l'API avec Axios - UNIQUEMENT les hébergements
   useEffect(() => {
     const fetchTourismeData = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/tourisme");
+        // Utiliser le endpoint spécifique pour les hébergements
+        const response = await api.get("/admin/tourisme/accommodations");
 
         if (response.data.success && Array.isArray(response.data.data)) {
           const listingsData = response.data.data;
-          setListings(listingsData);
-
-          // Réinitialiser les filtres pour montrer TOUT
+          
+          // Filtrer une fois de plus côté client pour être sûr
+          const accommodationsOnly = listingsData.filter((listing: TourismListing) => 
+            !listing.isTouristicPlace && listing.type !== 'touristic_place'
+          );
+          
+          setListings(accommodationsOnly);
           resetAllFilters();
-          setFilteredListings(listingsData);
+          setFilteredListings(accommodationsOnly);
 
-          console.log('✅ Listings chargés:', listingsData.length);
-          console.log('✅ Filtres réinitialisés - devrait montrer tous les listings');
+          console.log('✅ Hébergements chargés:', accommodationsOnly.length);
+          console.log('✅ Filtres réinitialisés - devrait montrer tous les hébergements');
 
-          // ANALYSE: Vérifiez pourquoi certains listings sont filtrés
-          console.log('🔍 Analyse des listings:');
-          listingsData.forEach((listing: TourismListing) => {
-            console.log(`- ${listing.title}: prix=${listing.price}, rating=${listing.rating}, type=${listing.type}`);
+          // Initialiser les index d'images
+          const initialIndexes: { [key: string]: number } = {};
+          accommodationsOnly.forEach((listing: TourismListing) => {
+            initialIndexes[listing.id] = 0;
           });
+          setCurrentImageIndex(initialIndexes);
+
         } else {
           console.error("Réponse inattendue :", response.data);
         }
-
-        // Initialiser les index d'images
-        const initialIndexes: { [key: string]: number } = {};
-        (response.data.data || []).forEach((listing: any) => {
-          initialIndexes[listing.id] = 0;
-        });
-        setCurrentImageIndex(initialIndexes);
-
       } catch (error) {
         console.error("Erreur lors du chargement des hébergements :", error);
+        // Fallback: utiliser l'endpoint général avec filtrage côté client
+        try {
+          const fallbackResponse = await api.get("/tourisme");
+          if (fallbackResponse.data.success && Array.isArray(fallbackResponse.data.data)) {
+            const allData = fallbackResponse.data.data;
+            const accommodationsOnly = allData.filter((item: any) => 
+              !item.isTouristicPlace && item.type !== 'touristic_place'
+            );
+            setListings(accommodationsOnly);
+            resetAllFilters();
+            setFilteredListings(accommodationsOnly);
+            console.log('✅ Hébergements chargés (fallback):', accommodationsOnly.length);
+          }
+        } catch (fallbackError) {
+          console.error("Erreur fallback:", fallbackError);
+        }
       } finally {
         setLoading(false);
       }
@@ -388,16 +409,20 @@ export const TourismSection = () => {
     setLoading(true);
 
     try {
-      // Utilisation de l'API pour la recherche
-      const response = await api.get("/tourisme", {
+      // Utilisation de l'API pour la recherche DANS LES HÉBERGEMENTS SEULEMENT
+      const response = await api.get("/admin/tourisme/accommodations", {
         params: {
           destination: filters.destination,
-          // Ajouter d'autres paramètres de recherche si nécessaire
+          search: filters.destination,
+          city: filters.destination
         }
       });
 
       if (response.data.success) {
-        setListings(response.data.data);
+        const accommodationsOnly = response.data.data.filter((listing: TourismListing) => 
+          !listing.isTouristicPlace && listing.type !== 'touristic_place'
+        );
+        setListings(accommodationsOnly);
 
         // TRACKING: Recherche effectuée
         trackTourismInteraction('search', 'Recherche hébergements', 'search', {
@@ -409,6 +434,24 @@ export const TourismSection = () => {
       }
     } catch (error) {
       console.error("Erreur lors de la recherche :", error);
+      // Fallback: recherche sur l'endpoint général avec filtrage
+      try {
+        const fallbackResponse = await api.get("/tourisme", {
+          params: {
+            destination: filters.destination,
+            search: filters.destination
+          }
+        });
+        if (fallbackResponse.data.success) {
+          const allData = fallbackResponse.data.data;
+          const accommodationsOnly = allData.filter((item: any) => 
+            !item.isTouristicPlace && item.type !== 'touristic_place'
+          );
+          setListings(accommodationsOnly);
+        }
+      } catch (fallbackError) {
+        console.error("Erreur fallback recherche:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -661,7 +704,7 @@ const confirmBooking = async () => {
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            Tourisme & Hébergements
+            Hébergements Touristiques
           </h2>
           <p
             className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
