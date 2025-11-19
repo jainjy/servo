@@ -56,25 +56,51 @@ export class MapService {
     try {
       console.log('🔄 Récupération de tous les points...');
       
-      const response = await fetch(`${API_BASE_URL}/map/all`);
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+      // 🔥 SOLUTION : Utiliser les APIs séparées MAIS avec les données complètes
+      const [usersResponse, propertiesResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/map/users`),
+        fetch(`${API_BASE_URL}/map/properties`)
+      ]);
+
+      if (!usersResponse.ok || !propertiesResponse.ok) {
+        throw new Error('Erreur HTTP');
       }
-      
-      const data = await response.json();
-      
-      if (!data.success) {
+
+      const usersData = await usersResponse.json();
+      const propertiesData = await propertiesResponse.json();
+
+      if (!usersData.success || !propertiesData.success) {
         throw new Error('API returned error');
       }
-      
-      // Combiner utilisateurs et propriétés
-      const allPoints = [
-        ...(data.data.users || []),
-        ...(data.data.properties || [])
+
+      // 🔥 CORRECTION COMPLÈTE : 
+      // - Garder TOUTES les données des APIs séparées (qui ont les popups)
+      // - S'assurer que le type est correct pour les icônes
+      const allPoints: MapPoint[] = [
+        // Utilisateurs : s'assurer que le type est 'user'
+        ...(usersData.data || []).map((user: any) => ({
+          ...user,
+          type: 'user' as const // 🔥 Forcer le type user
+        })),
+        
+        // Propriétés : s'assurer que le type est 'property' et ajouter le nom
+        ...(propertiesData.data || []).map((property: any) => ({
+          ...property,
+          name: property.title || 'Propriété sans nom', // 🔥 Ajouter le nom manquant
+          type: 'property' as const // 🔥 Forcer le type property
+        }))
       ];
-      
-      console.log(`✅ ${allPoints.length} points chargés (${data.data.users?.length || 0} users, ${data.data.properties?.length || 0} properties)`);
+
+      // 🔥 DEBUG : Vérifier les données finales
+      console.log('🗺️ Points finaux:', allPoints.map(p => ({
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        hasPopup: !!p.popupContent,
+        coords: [p.latitude, p.longitude]
+      })));
+
+      console.log(`✅ ${allPoints.length} points chargés (${usersData.data?.length || 0} users, ${propertiesData.data?.length || 0} properties)`);
       return allPoints;
     } catch (error) {
       console.error('❌ Erreur lors du chargement des points:', error);
@@ -90,6 +116,6 @@ export class MapService {
     } catch (error) {
       console.error('❌ API non accessible:', error);
       return false;
-    }
+    }     
   }
 }
