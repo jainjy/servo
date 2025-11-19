@@ -385,7 +385,6 @@ const App = () => {
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
 
-
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"
