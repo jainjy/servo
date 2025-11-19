@@ -55,25 +55,37 @@ export class MapService {
     try {
       console.log('🔄 Récupération de tous les points...');
       
-      const response = await fetch(`${API_BASE_URL}/map/all`);
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+      // Utiliser les APIs séparées qui ont les popups
+      const [usersResponse, propertiesResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/map/users`),
+        fetch(`${API_BASE_URL}/map/properties`)
+      ]);
+
+      if (!usersResponse.ok || !propertiesResponse.ok) {
+        throw new Error('Erreur HTTP');
       }
-      
-      const data = await response.json();
-      
-      if (!data.success) {
+
+      const usersData = await usersResponse.json();
+      const propertiesData = await propertiesResponse.json();
+
+      if (!usersData.success || !propertiesData.success) {
         throw new Error('API returned error');
       }
-      
-      // Combiner utilisateurs et propriétés
+
+      // 🔥 CORRECTION : Normaliser les données
       const allPoints = [
-        ...(data.data.users || []),
-        ...(data.data.properties || [])
+        // Utilisateurs (déjà corrects)
+        ...(usersData.data || []),
+        
+        // Propriétés : corriger le nom et le type
+        ...(propertiesData.data || []).map((property: any) => ({
+          ...property,
+          name: property.title || 'Propriété sans nom', // 🔥 Ajouter le nom manquant
+          type: 'property' as const // 🔥 Forcer le type à 'property'
+        }))
       ];
-      
-      console.log(`✅ ${allPoints.length} points chargés (${data.data.users?.length || 0} users, ${data.data.properties?.length || 0} properties)`);
+
+      console.log(`✅ ${allPoints.length} points chargés (${usersData.data?.length || 0} users, ${propertiesData.data?.length || 0} properties)`);
       return allPoints;
     } catch (error) {
       console.error('❌ Erreur lors du chargement des points:', error);

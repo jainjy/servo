@@ -148,6 +148,8 @@ import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
 
 // 🗺️ IMPORT DE LA PAGE CARTE
 import MapPage from "./pages/MapPage";
+import MapDebug from "./components/MapDebug";
+
 
 const queryClient = new QueryClient();
 
@@ -379,6 +381,7 @@ const App = () => {
                   
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
+                  <Route path="/debug-map" element={<MapDebug />} />
                   
                   {/* Add redirect from /service to /services-partners */}
                   <Route

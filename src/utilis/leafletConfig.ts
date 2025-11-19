@@ -18,18 +18,18 @@ export const initializeLeaflet = () => {
   });
 };
 
-// Icônes personnalisées pour différents types
+// Icônes personnalisées avec meilleur contraste
 export const createCustomIcon = (type: 'user' | 'property' | 'default' = 'default') => {
   const iconColors = {
-    user: 'blue',
-    property: 'green', 
-    default: 'red'
+    user: 'red',        // 🔴 ROUGE pour les utilisateurs (meilleure visibilité)
+    property: 'green',  // 🟢 VERT pour les propriétés  
+    default: 'orange'   // 🟠 ORANGE par défaut
   };
 
   const color = iconColors[type];
 
   return new L.Icon({
-    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -40,8 +40,8 @@ export const createCustomIcon = (type: 'user' | 'property' | 'default' = 'defaul
 
 // Configuration de la carte par défaut
 export const defaultMapConfig = {
-  center: [46.6031, 1.8883] as [number, number], // Centre de la France
-  zoom: 6,
+  center: [-18.8792, 47.5079] as [number, number], // Centre sur Antananarivo
+  zoom: 10,
   minZoom: 3,
   maxZoom: 18
 };
