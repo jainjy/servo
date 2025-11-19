@@ -21,7 +21,12 @@ import {
   Utensils,
   Box,
   RefreshCw,
-  ChevronDown
+  ChevronDown,
+  Leaf,
+  Sparkles,
+  Heart,
+  Zap,
+  Flame
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,6 +118,40 @@ const ProOrders = () => {
     }
   };
 
+  // ✅ NOUVEAU : Configuration des types de produits naturels
+  const PRODUCT_TYPE_CONFIG = {
+    'all': { label: 'Tous les produits', icon: Package, color: 'bg-gray-100 text-gray-800 border-gray-200' },
+    'food': { label: 'Alimentation', icon: Utensils, color: 'bg-orange-100 text-orange-800 border-orange-200' },
+    'general': { label: 'Materiaux Généraux', icon: Box, color: 'bg-blue-100 text-blue-800 border-blue-200' },
+    'produitnaturel': { label: 'Produits Naturels', icon: Leaf, color: 'bg-green-100 text-green-800 border-green-200' },
+    'huiles-essentielles': { label: 'Huiles Essentielles', icon: Sparkles, color: 'bg-purple-100 text-purple-800 border-purple-200' },
+    'thes-infusions': { label: 'Thés & Infusions', icon: Heart, color: 'bg-red-100 text-red-800 border-red-200' },
+    'soins-bien-etre': { label: 'Soins Bien-être', icon: Zap, color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+    'complements-alimentaires': { label: 'Compléments', icon: Flame, color: 'bg-pink-100 text-pink-800 border-pink-200' },
+    'ambiance-relaxation': { label: 'Ambiance', icon: Heart, color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+    'accessoires': { label: 'Accessoires', icon: Package, color: 'bg-cyan-100 text-cyan-800 border-cyan-200' }
+  };
+
+  // ✅ NOUVEAU : Fonction pour obtenir la configuration d'un type de produit
+  const getProductTypeConfig = (productType) => {
+    return PRODUCT_TYPE_CONFIG[productType] || PRODUCT_TYPE_CONFIG.general;
+  };
+
+  // ✅ NOUVEAU : Fonction pour obtenir l'icône d'un type de produit
+  const getProductTypeIcon = (productType) => {
+    return getProductTypeConfig(productType).icon;
+  };
+
+  // ✅ NOUVEAU : Fonction pour obtenir le label d'un type de produit
+  const getProductTypeLabel = (productType) => {
+    return getProductTypeConfig(productType).label;
+  };
+
+  // ✅ NOUVEAU : Fonction pour obtenir la couleur d'un type de produit
+  const getProductTypeColor = (productType) => {
+    return getProductTypeConfig(productType).color;
+  };
+
   // Fonction pour déclencher la mise à jour des notifications
   const triggerNotificationsUpdate = () => {
     window.dispatchEvent(new Event('ordersUpdated'));
@@ -144,7 +183,7 @@ const ProOrders = () => {
     }
   };
 
-  // CORRIGÉ : Charger les commandes du pro avec une seule route
+  // ✅ AMÉLIORÉ : Charger les commandes du pro avec gestion des produits naturels
   const fetchOrders = async (productType = 'all', status = 'all') => {
     try {
       setLoading(true);
@@ -161,7 +200,27 @@ const ProOrders = () => {
       console.log('✅ Commandes reçues:', response.data);
       
       if (response.data.success) {
-        setOrders(response.data.orders || []);
+        // ✅ FILTRAGE SUPPLÉMENTAIRE POUR LES PRODUITS NATURELS
+        let filteredOrders = response.data.orders || [];
+        
+        if (productType === 'produitnaturel') {
+          // Filtrer pour n'avoir que les commandes contenant des produits naturels
+          filteredOrders = filteredOrders.filter(order => 
+            order.items?.some(item => 
+              item.productType === 'produitnaturel' || 
+              (item.productType && [
+                'huiles-essentielles', 
+                'thes-infusions', 
+                'soins-bien-etre', 
+                'complements-alimentaires',
+                'ambiance-relaxation',
+                'accessoires'
+              ].includes(item.productType))
+            )
+          );
+        }
+        
+        setOrders(filteredOrders);
         
         // Charger les stats seulement pour l'onglet "all"
         if (productType === 'all' && status === 'all') {
@@ -294,6 +353,36 @@ const ProOrders = () => {
     return statuses;
   };
 
+  // ✅ NOUVEAU : Fonction pour extraire les types de produits uniques d'une commande
+  const getUniqueProductTypes = (order) => {
+    if (!order.items || !Array.isArray(order.items)) return [];
+    
+    const productTypes = new Set();
+    
+    order.items.forEach(item => {
+      if (item.productType) {
+        productTypes.add(item.productType);
+      }
+    });
+    
+    return Array.from(productTypes);
+  };
+
+  // ✅ NOUVEAU : Fonction pour vérifier si une commande contient des produits naturels
+  const hasNaturalProducts = (order) => {
+    return order.items?.some(item => 
+      item.productType === 'produitnaturel' || 
+      (item.productType && [
+        'huiles-essentielles', 
+        'thes-infusions', 
+        'soins-bien-etre', 
+        'complements-alimentaires',
+        'ambiance-relaxation',
+        'accessoires'
+      ].includes(item.productType))
+    );
+  };
+
   // Filtrer les commandes (pour la recherche côté client)
   const filteredOrders = orders.filter(order => {
     if (!order) return false;
@@ -331,34 +420,6 @@ const ProOrders = () => {
       cancelled: 'border-l-red-500'
     };
     return colors[status] || 'border-l-gray-500';
-  };
-
-  // Obtenir la couleur pour les types de produits
-  const getProductTypeColor = (productType) => {
-    const colors = {
-      'food': 'bg-green-100 text-green-800 border-green-200',
-      'general': 'bg-blue-100 text-blue-800 border-blue-200',
-      'default': 'bg-gray-100 text-gray-800 border-gray-200'
-    };
-    return colors[productType] || colors.default;
-  };
-
-  // Obtenir l'icône pour le type de produit
-  const getProductTypeIcon = (productType) => {
-    const icons = {
-      'food': Utensils,
-      'general': Box
-    };
-    return icons[productType] || Package;
-  };
-
-  // Obtenir le label pour le type de produit
-  const getProductTypeLabel = (productType) => {
-    const labels = {
-      'food': 'Alimentation',
-      'general': 'Materiaux Généraux'
-    };
-    return labels[productType] || productType;
   };
 
   // Ouvrir les détails d'une commande
@@ -460,8 +521,8 @@ const ProOrders = () => {
     const dateInfo = formatDate(order.createdAt);
     const statusBorderColor = getStatusBorderColor(order.status);
 
-    // Obtenir les types de produits uniques dans la commande
-    const productTypes = [...new Set(order.items?.map(item => item.productType).filter(Boolean))];
+    // ✅ AMÉLIORÉ : Utiliser la nouvelle fonction pour les types de produits
+    const productTypes = getUniqueProductTypes(order);
 
     return (
       <Card className={`border-l-4 ${statusBorderColor} hover:shadow-md transition-shadow`}>
@@ -505,7 +566,7 @@ const ProOrders = () => {
               </span>
             </div>
             
-            {/* Affichage des types de produits */}
+            {/* ✅ AMÉLIORÉ : Affichage des types de produits avec nouvelles icônes */}
             {productTypes.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {productTypes.map((productType, index) => {
@@ -676,15 +737,16 @@ const ProOrders = () => {
           <CardContent className="p-4 lg:p-6 pt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {productTypeStats.slice(0, 6).map((productType, index) => {
-                const IconComponent = getProductTypeIcon(productType.productType);
+                const config = getProductTypeConfig(productType.productType);
+                const IconComponent = config.icon;
                 return (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${getProductTypeColor(productType.productType)}`}>
+                      <div className={`p-2 rounded-full ${config.color}`}>
                         <IconComponent className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="font-medium text-sm">{getProductTypeLabel(productType.productType)}</div>
+                        <div className="font-medium text-sm">{config.label}</div>
                         <div className="text-xs text-gray-600">{productType.itemsCount} articles</div>
                       </div>
                     </div>
@@ -700,11 +762,11 @@ const ProOrders = () => {
         </Card>
       )}
 
-      {/* Navigation par types de produits */}
+      {/* ✅ AMÉLIORÉ : Navigation par types de produits avec produits naturels */}
       <Card>
         <CardContent className="p-4 lg:p-6">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 mb-4">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-4">
               <TabsTrigger value="all" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 <span className="hidden sm:inline">Toutes</span>
@@ -721,9 +783,16 @@ const ProOrders = () => {
               </TabsTrigger>
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Box className="h-4 w-4" />
-                <span className="hidden sm:inline">Materiaux Généraux</span>
+                <span className="hidden sm:inline">Materiaux</span>
                 <Badge variant="secondary" className="text-xs">
                   {productTypeStats.find(stat => stat.productType === 'general')?.ordersCount || 0}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="produitnaturel" className="flex items-center gap-2">
+                <Leaf className="h-4 w-4" />
+                <span className="hidden sm:inline">Naturels</span>
+                <Badge variant="secondary" className="text-xs">
+                  {productTypeStats.find(stat => stat.productType === 'produitnaturel')?.ordersCount || 0}
                 </Badge>
               </TabsTrigger>
             </TabsList>
@@ -821,7 +890,7 @@ const ProOrders = () => {
                     ) : (
                       filteredOrders.map((order) => {
                         const dateInfo = formatDate(order.createdAt);
-                        const productTypes = [...new Set(order.items?.map(item => item.productType).filter(Boolean))];
+                        const productTypes = getUniqueProductTypes(order);
                         
                         return (
                           <TableRow key={order.id} className="hover:bg-gray-50">
