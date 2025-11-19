@@ -37,7 +37,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             answer: "Notre agence vous offre un large choix d'activités de plein air adaptées à tous les niveaux : randonnées guidées en montagne, VTT dans les sentiers forestiers, canoë-kayak sur les rivières locales, escalade initiatique, et bien plus. Chaque activité est encadrée par des guides diplômés qui partagent leur passion et leur connaissance du territoire.",
             category: "Plein Air",
             icon: <Mountain className="w-4 h-4" />,
-            image: "https://i.pinimg.com/736x/09/2e/fe/092efe462f2d3718e447d5d0e0c920d4.jpg",
+            image: "https://i.pinimg.com/1200x/91/e7/61/91e761120ecac64ef8187e657d49243a.jpg",
             stats: {
                 participants: "2-8 personnes",
                 duration: "3-8 heures",

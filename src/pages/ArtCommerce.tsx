@@ -79,9 +79,9 @@ const ArtCommerce: React.FC = () => {
     <div id="art_commerce" className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Section de recherche */}
       <section
-        className="relative py-24 rounded-lg text-white overflow-hidden"
+        className="relative mt-16 py-8 text-white overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(30, 58, 138, 0.8)), url('https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundAttachment: "fixed",
@@ -89,7 +89,7 @@ const ArtCommerce: React.FC = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-xl md:text-3xl font-bold mb-6 drop-shadow-2xl">
+          <h1 className="text-xl md:text-5xl font-bold mb-6 drop-shadow-2xl">
             Art & Commerces
           </h1>
           <p className="text-sm md:text-md mb-10 max-w-2xl mx-auto text-blue-100 font-light">
@@ -139,7 +139,7 @@ const ArtCommerce: React.FC = () => {
 
       {/* Grille des services */}
       <div className="flex justify-center bg-gradient-to-b from-gray-50 to-white">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 w-full max-w-6xl py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 w-full max-w-6xl py-10">
           {filteredServices.length > 0 ? (
             filteredServices.map((item) => (
               <div
@@ -153,7 +153,7 @@ const ArtCommerce: React.FC = () => {
                     backgroundImage: `url(${item.images?.[0] || ""})`,
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/40 transition-all duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent group-hover:from-black/40 transition-all duration-300"></div>
                 </div>
 
                 {/* Contenu */}
@@ -180,7 +180,7 @@ const ArtCommerce: React.FC = () => {
                   {/* Bouton gradient amélioré */}
                   <button
                     onClick={() => navigate(`/art-commerce/${item.id}`)}
-                    className="mt-5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white text-sm py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
+                    className="mt-5 w-full bg-slate-900 text-white text-sm py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-300"
                   >
                     Voir les détails
                   </button>
