@@ -21,9 +21,9 @@ export const initializeLeaflet = () => {
 // Icônes personnalisées avec meilleur contraste
 export const createCustomIcon = (type: 'user' | 'property' | 'default' = 'default') => {
   const iconColors = {
-    user: 'red',        // 🔴 ROUGE pour les utilisateurs (meilleure visibilité)
-    property: 'green',  // 🟢 VERT pour les propriétés  
-    default: 'orange'   // 🟠 ORANGE par défaut
+    user: 'blue',        // ROUGE pour les utilisateurs (meilleure visibilité)
+    property: 'green',  //  VERT pour les propriétés  
+    default: 'orange'   //  ORANGE par défaut
   };
 
   const color = iconColors[type];
