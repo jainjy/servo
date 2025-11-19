@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Users, Home, MapPin, Search, X, Loader } from "lucide-react";
 import GenericMap from "../components/GenericMap";
+import PointDetailsModal from "../components/PointDetailsModal";
 import { MapPoint } from "../types/map";
 import { MapService } from "../services/mapService";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +11,7 @@ const MapPage: React.FC = () => {
   const [filteredPoints, setFilteredPoints] = useState<MapPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [filters, setFilters] = useState({
     users: true,
     properties: true,
@@ -83,6 +85,15 @@ const MapPage: React.FC = () => {
 
   const handlePointClick = (point: MapPoint) => {
     console.log("Point cliqué:", point);
+    setSelectedPoint(point);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPoint(null);
+  };
+
+  const handleViewDetails = (point: MapPoint) => {
+    handleCloseModal();
 
     // Navigation vers les détails selon le type
     if (point.type === "property") {
@@ -239,13 +250,13 @@ const MapPage: React.FC = () => {
                 <Home className="h-4 w-4" />
                 Propriétés
               </button>
-              <button
+              {/* <button
                 onClick={handleGetUserLocation}
                 className="px-4 py-2 bg-purple-500 text-white rounded-lg border border-purple-500 hover:bg-purple-600 transition-colors flex items-center gap-2"
               >
                 <MapPin className="h-4 w-4" />
                 Ma position
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -259,6 +270,13 @@ const MapPage: React.FC = () => {
         className="rounded-lg shadow-lg border"
         onPointClick={handlePointClick}
         showRouting={true}
+      />
+
+      {/* Modal des détails */}
+      <PointDetailsModal
+        point={selectedPoint}
+        onClose={handleCloseModal}
+        onViewDetails={handleViewDetails}
       />
     </div>
   );

@@ -133,9 +133,16 @@ const GenericMap: React.FC<GenericMapProps> = ({
           }
         });
 
-        // Ajouter un effet de hover
+        // Ajouter un effet de hover avec popup simplifié
         marker.on("mouseover", function () {
+          this.setPopupContent(
+            `<div class="text-sm font-semibold">${point.name}</div>`
+          );
           this.openPopup();
+        });
+
+        marker.on("mouseout", function () {
+          this.closePopup();
         });
 
         markersRef.current.push(marker);
