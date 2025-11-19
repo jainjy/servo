@@ -1,8 +1,8 @@
 // hooks/useWebSocket.js
-import { useEffect, useRef, useState } from 'react';
-import { useAuth } from './useAuth';
-import { toast } from '@/hooks/use-toast';
-import { io } from 'socket.io-client';
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "./useAuth";
+import { toast } from "@/hooks/use-toast";
+import { io } from "socket.io-client";
 
 export const useWebSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -12,100 +12,72 @@ export const useWebSocket = () => {
 
   useEffect(() => {
     if (!user?.id) {
-      console.log('🚫 WebSocket: Aucun user ID, connexion annulée');
+      console.log("🚫 WebSocket: user ID manquant");
       return;
     }
 
-    // 🔥 CORRECTION: Utiliser le port 3001
-    const wsURL = process.env.NODE_ENV === 'production' 
-      ? window.location.origin
-      : 'http://localhost:3001';
+    const wsURL =
+      process.env.NODE_ENV === "production"
+        ? window.location.origin
+        : "http://localhost:3001";
 
-    console.log('🔗 Tentative de connexion WebSocket vers:', wsURL);
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
 
-    const connectWebSocket = () => {
-      try {
-        socketRef.current = io(wsURL, {
-          transports: ['websocket', 'polling'],
-          query: {
-            userId: user.id
-          },
-          timeout: 10000,
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000
-        });
+    console.log("🔗 Connexion WebSocket vers", wsURL);
 
-        // Événement de connexion
-        socketRef.current.on('connect', () => {
-          console.log('🔌 Connecté au serveur WebSocket');
-          setIsConnected(true);
-          // Rejoindre la room de l'utilisateur
-          socketRef.current.emit('join-user-room', user.id);
-        });
+    const socket = io(wsURL, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      query: { userId: user.id },
+    });
 
-        // Événement de déconnexion
-        socketRef.current.on('disconnect', (reason) => {
-          console.log('❌ Déconnecté du serveur WebSocket:', reason);
-          setIsConnected(false);
-        });
+    socketRef.current = socket;
 
-        // Erreur de connexion
-        socketRef.current.on('connect_error', (error) => {
-          console.error('❌ Erreur de connexion WebSocket:', error);
-          setIsConnected(false);
-        });
+    socket.on("connect", () => {
+      console.log("🔥 WebSocket connecté");
+      setIsConnected(true);
+      socket.emit("join-user-room", user.id);
+    });
 
-        // Tentative de reconnexion
-        socketRef.current.on('reconnect_attempt', (attempt) => {
-          console.log(`🔄 Tentative de reconnexion WebSocket: ${attempt}`);
-        });
+    socket.on("disconnect", () => {
+      console.log("❌ WebSocket déconnecté");
+      setIsConnected(false);
+    });
 
-        // Reconnexion réussie
-        socketRef.current.on('reconnect', (attempt) => {
-          console.log(`✅ Reconnexion WebSocket réussie après ${attempt} tentatives`);
-          setIsConnected(true);
-          socketRef.current.emit('join-user-room', user.id);
-        });
+    socket.on("new-notification", (data) => {
+      console.log("📨 Notification temps réel reçue :", data);
 
-        // Nouvelle notification reçue
-        socketRef.current.on('new-notification', (notification) => {
-          console.log('📨 Nouvelle notification reçue:', notification);
-          setNotificationCount(prev => prev + 1);
-          
-          toast({
-            title: "Nouvelle notification",
-            description: notification.titre || notification.message,
-            duration: 5000,
-          });
-          
-          window.dispatchEvent(new Event('notifications:reload'));
-        });
+      // 🔥 Mise à jour instantanée du compteur
+      setNotificationCount((prev) => prev + 1);
 
-        // Mise à jour du compteur de notifications
-        socketRef.current.on('notification-count-update', (data) => {
-          console.log('🔢 Mise à jour du compteur:', data.count);
-          setNotificationCount(data.count);
-        });
+      // Préviens le Header.js de recharger la LISTE si elle est ouverte
+      window.dispatchEvent(new CustomEvent("notifications:reload"));
 
-      } catch (error) {
-        console.error('❌ Erreur lors de la création de la connexion WebSocket:', error);
-      }
-    };
+      // Affichage toast
+      toast({
+        title: "Nouvelle notification",
+        description: data.titre || data.message,
+        duration: 4000,
+      });
+    });
 
-    connectWebSocket();
+    socket.on("notification-count-update", (payload) => {
+      console.log("🔢 Mise à jour compteur :", payload.count);
+      setNotificationCount(payload.count);
+    });
 
     return () => {
-      if (socketRef.current) {
-        console.log('🧹 Nettoyage WebSocket');
-        socketRef.current.disconnect();
-      }
+      console.log("🧹 Fermeture WebSocket");
+      socket.disconnect();
     };
   }, [user?.id]);
 
   return {
     isConnected,
     notificationCount,
-    setNotificationCount
+    setNotificationCount,
   };
 };
