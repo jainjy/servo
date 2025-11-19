@@ -679,7 +679,7 @@ const Header = () => {
         {
           title: "Arts & commerces",
           description: "Artisans & boutiques bien-être",
-          href: "/bien-etre",
+          href: "/art-commerce",
           image:
             "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
         },

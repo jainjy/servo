@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   Star,
   ShoppingCart,
-  Heart
+  Heart,
+  Search
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -32,7 +33,7 @@ const getCategoryIcon = (categoryName) => {
     "Compléments Alimentaires": Flame,
     "Accessoires": Package
   };
-  
+
   return icons[categoryName] || Package;
 };
 
@@ -47,6 +48,8 @@ const BoutiqueNaturel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [category, setCategory] = useState(null);
   const [addingProductId, setAddingProductId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProductType, setSelectedProductType] = useState("tous");
 
   useEffect(() => {
     // Si on est sur une page de catégorie spécifique
@@ -62,7 +65,7 @@ const BoutiqueNaturel = () => {
     try {
       setIsLoading(true);
       const response = await api.get('/produits-naturels');
-      
+
       if (response.data && response.data.products) {
         setProducts(response.data.products);
       } else {
@@ -133,80 +136,87 @@ const BoutiqueNaturel = () => {
   // Fonction pour extraire les bénéfices du nutritionalInfo
   const getProductBenefits = (product) => {
     if (!product.nutritionalInfo) return [];
-    
+
     if (Array.isArray(product.nutritionalInfo.benefits)) {
       return product.nutritionalInfo.benefits;
     }
-    
+
     // Si les bénéfices sont stockés différemment dans l'objet
     const benefits = [];
     if (product.nutritionalInfo.usage) benefits.push(product.nutritionalInfo.usage);
     if (product.nutritionalInfo.properties) benefits.push(product.nutritionalInfo.properties);
-    
+
     return benefits.slice(0, 3); // Limiter à 3 bénéfices maximum
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-32 h-32 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des produits naturels...</p>
-        </div>
+      <div className="min-h-screen flex-col pt-16 bg-[#F6F8FA] flex items-center justify-center">
+        <img src="/loading.gif" alt="" />
+        <p className="mt-4 text-gray-600">Chargement des produits naturels...</p>
+
       </div>
     );
   }
 
+  // Filtrer les produits selon la recherche
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (product.origin && product.origin.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Obtenir les catégories uniques des produits
+  const productCategories = [
+    { id: 'tous', name: 'Tous les produits', count: products.length }
+  ];
+
+  // Ajouter les catégories uniques
+  const uniqueCategories = [...new Set(products.map(p => p.origin))].filter(Boolean);
+  uniqueCategories.forEach(cat => {
+    productCategories.push({
+      id: cat,
+      name: cat,
+      count: products.filter(p => p.origin === cat).length
+    });
+  });
+
+  // Appliquer le filtre par type de produit
+  const finalFilteredProducts = selectedProductType === 'tous'
+    ? filteredProducts
+    : filteredProducts.filter(product => product.origin === selectedProductType);
+
   return (
-    <div className="min-h-screen pt-16 bg-[#F6F8FA]">
+    <div className="min-h-screen pt-16">
       <div className="container mx-auto px-4 py-8">
         {/* En-tête de la catégorie */}
-        <div className="mb-8">
-          <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate('/bien-etre')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Retour
-                </Button>
-                
-                <div className="p-2 rounded-xl bg-slate-900/10">
-                  {(() => {
-                    const IconComponent = getCategoryIcon(category?.name || categoryName);
-                    return <IconComponent className="h-6 w-6 text-slate-900" />;
-                  })()}
-                </div>
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" className='h-full object-cover w-full' alt="" />
+        </div>
+        <div className="mb-2">
+          <div className="flex flex-col gap-5 justify-between items-center">
+            <div className="flex flex-col  items-center gap-5">
 
-                <div>
-                  <h2 className="text-2xl font-bold text-[#0A0A0A]">
-                    {category?.name || decodeURIComponent(categoryName || "Produits Naturels").replace(/-/g, " ")}
-                  </h2>
-                  <p className="text-[#5A6470] text-xs">
-                    {category?.description || "Découvrez nos produits naturels et biologiques pour votre bien-être"}
-                  </p>
-                </div>
+              <h2 className="text-xl lg:text-5xl font-bold text-white tracking-widest">
+                {category?.name || decodeURIComponent(categoryName || "Produits Naturels").replace(/-/g, " ")}
+              </h2>
+              <p className="text-gray-200 text-xs lg:text-sm">
+                {category?.description || "Découvrez nos produits naturels et biologiques pour votre bien-être"}
+              </p>
+
+            </div>
+
+            {/* Badges d'information */}
+            <div className="hidden md:flex gap-3">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 backdrop-blur-lg border border-blue-400/40 shadow-lg hover:shadow-blue-500/25 transition-all duration-300 group">
+                <Truck className="h-3 w-3 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]" />
+                <span className="text-xs font-semibold text-blue-100 drop-shadow-[0_0_4px_rgba(96,165,250,0.4)]">Livraison 48h</span>
               </div>
 
-              {/* Badges d'information */}
-              <div className="hidden md:flex gap-2">
-                <Badge
-                  variant="outline"
-                  className="bg-slate-900/10 text-slate-900 border-0"
-                >
-                  <Truck className="h-3 w-3 mr-1" />
-                  Livraison 48h
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="bg-slate-900/10 text-slate-900 border-0"
-                >
-                  <ShieldCheck className="h-3 w-3 mr-1" />
-                  Naturel & Bio
-                </Badge>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 backdrop-blur-lg border border-green-400/40 shadow-lg hover:shadow-green-500/25 transition-all duration-300 group">
+                <ShieldCheck className="h-3 w-3 text-green-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                <span className="text-xs font-semibold text-green-100 drop-shadow-[0_0_4px_rgba(52,211,153,0.4)]">Naturel & Bio</span>
               </div>
             </div>
           </div>
@@ -214,11 +224,49 @@ const BoutiqueNaturel = () => {
 
         {/* Produits naturels */}
         <div className="bg-white rounded-3xl p-6">
-          {products && products.length > 0 ? (
+          {/* Barre de recherche */}
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher un produit..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Filtrage par type de produit */}
+          <div className="mb-8">
+            <div className="flex flex-wrap justify-center gap-3">
+              {productCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedProductType(cat.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedProductType === cat.id
+                    ? 'bg-slate-900 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                    }`}
+                >
+                  {cat.name}
+                  <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${selectedProductType === cat.id
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-gray-300 text-gray-700'
+                    }`}>
+                    {cat.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {finalFilteredProducts && finalFilteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => {
+              {finalFilteredProducts.map((product) => {
                 const benefits = getProductBenefits(product);
-                
+
                 return (
                   <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
                     {product.images && product.images.length > 0 ? (
@@ -367,17 +415,28 @@ const BoutiqueNaturel = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">Aucun produit trouvé</h3>
-              <p className="text-muted-foreground">
-                Aucun produit naturel disponible pour le moment.
+              <p className="text-muted-foreground mb-6">
+                {searchQuery
+                  ? `Aucun produit ne correspond à "${searchQuery}"`
+                  : 'Aucun produit naturel disponible pour le moment.'}
               </p>
-              <Button
-                onClick={() => navigate("/bien-etre")}
-                className="mt-4 bg-slate-900 hover:bg-slate-700"
-              >
-                Retour au bien-être
-              </Button>
+              {searchQuery ? (
+                <Button
+                  onClick={() => setSearchQuery("")}
+                  className="bg-slate-900 hover:bg-slate-700"
+                >
+                  Réinitialiser la recherche
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => navigate("/bien-etre")}
+                  className="bg-slate-900 hover:bg-slate-700"
+                >
+                  Retour au bien-être
+                </Button>
+              )}
             </div>
           )}
 
