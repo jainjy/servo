@@ -145,6 +145,7 @@ import AgendaPage from "./pages/mon-compte/AgendaPage";
 import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
 import PlanAdministratifServices from "./components/components/Plan_Administratifs";
 import MapPage from "./pages/MapPage";
+import BoutiqueNaturel from "./components/components/BoutiqueNaturel";
 
 const queryClient = new QueryClient();
 
@@ -323,6 +324,9 @@ const App = () => {
                     path="/produits-commerces"
                     element={<DomicileLayout />}
                   />
+                  // Dans App.jsx
+                  <Route path="/produits-naturels" element={<BoutiqueNaturel />} />
+                  <Route path="/produits-naturels/categorie/:categoryName" element={<BoutiqueNaturel />} />
                   <Route
                     path="/comptabilite"
                     element={
@@ -377,10 +381,11 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
-                  
+
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
-                  
+
+
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"

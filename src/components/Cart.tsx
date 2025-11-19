@@ -8,7 +8,6 @@ import { useCart } from "./contexts/CartContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { trackUserActivity } from '@/lib/suggestionApi';
-import axios from "axios";
 
 const Cart = ({ isOpen, onClose }) => {
   const {
@@ -17,7 +16,6 @@ const Cart = ({ isOpen, onClose }) => {
     removeFromCart,
     clearCart,
     getCartItemsCount,
-    validateCart,
     isLoading,
   } = useCart();
 
@@ -30,6 +28,7 @@ const Cart = ({ isOpen, onClose }) => {
 
   // Synchroniser avec les items du contexte
   useEffect(() => {
+    console.log("🔄 [CART] - Synchronisation des items du panier:", cartItems?.length);
     setLocalCartItems(cartItems || []);
   }, [cartItems]);
 
@@ -248,48 +247,70 @@ const Cart = ({ isOpen, onClose }) => {
     window.location.href = "/login";
   };
 
+  // ✅ NOUVELLE FONCTION : Validation réelle avec le backend
+  const validateCartWithBackend = async () => {
+    try {
+      console.log("🛒 [CART VALIDATION] - Début validation avec backend");
+      
+      // Préparer les données pour l'API
+      const cartData = {
+        items: localCartItems.map(item => ({
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          images: item.images || [],
+          productType: item.productType || 'general'
+        })),
+        shippingAddress: {}, // À compléter selon vos besoins
+        paymentMethod: "card" // Par défaut
+      };
+
+      console.log("📦 [CART VALIDATION] - Données envoyées:", cartData);
+
+      // Appel réel à l'API
+      const response = await api.post('/orders', cartData);
+      
+      console.log("✅ [CART VALIDATION] - Réponse backend:", response.data);
+      
+      return response.data;
+
+    } catch (error) {
+      console.error("💥 [CART VALIDATION] - Erreur validation panier:", error);
+      
+      // Gestion détaillée des erreurs
+      if (error.response) {
+        console.error("📡 [CART VALIDATION] - Détails erreur:", {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+        
+        if (error.response.status === 400 && error.response.data.errors) {
+          // Erreurs de stock
+          setValidationErrors(error.response.data.errors);
+          throw new Error("Problèmes de stock détectés");
+        } else if (error.response.status === 401) {
+          throw new Error("Authentification requise");
+        } else if (error.response.status === 500) {
+          throw new Error("Erreur serveur, veuillez réessayer");
+        }
+      }
+      
+      throw new Error(error.response?.data?.message || "Erreur lors de la validation du panier");
+    }
+  };
+
   // Valider le panier avant commande
   const validateCartBeforeCheckout = async () => {
     if (!localCartItems || localCartItems.length === 0) {
       toast.error("Votre panier est vide !");
       return false;
     }
-    return true; // ✅ Skip la validation serveur
+    return true;
   };
 
-  // ✅ CORRECTION : Fonction de validation SIMULÉE (remplace l'appel API qui n'existe pas)
-  const validateCarte = async () => {
-    try {
-      console.log("🛒 [CART VALIDATION] - Validation simulée du panier");
-      
-      // Simulation d'une validation réussie
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const simulatedResponse = {
-        success: true,
-        order: {
-          orderNumber: `CMD-${Date.now()}`,
-          total: calculateTotal(),
-          items: localCartItems.map(item => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        },
-        message: "Panier validé avec succès"
-      };
-      
-      console.log("✅ [CART VALIDATION] - Validation simulée réussie:", simulatedResponse);
-      return simulatedResponse;
-      
-    } catch (error) {
-      console.error("💥 [CART VALIDATION] - Erreur validation panier:", error);
-      throw new Error("Erreur lors de la validation du panier");
-    }
-  };
-
-  // Commander
+  // ✅ CORRECTION : Commander avec le backend réel
   const handleCheckout = async () => {
     console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
     console.log("🔐 [CART CHECKOUT] - Statut auth avant vérification:", isAuthenticated);
@@ -321,8 +342,8 @@ const Cart = ({ isOpen, onClose }) => {
     setIsCheckingOut(true);
 
     try {
-      // ✅ CORRECTION : Utiliser la fonction de validation simulée
-      const orderResult = await validateCarte();
+      // ✅ APPEL RÉEL AU BACKEND
+      const orderResult = await validateCartWithBackend();
 
       console.log("✅ [CART CHECKOUT] - Commande créée avec succès:", orderResult);
       
@@ -335,9 +356,13 @@ const Cart = ({ isOpen, onClose }) => {
       // Fermer le panier
       onClose();
 
-      // Afficher le succès
+      // Afficher le succès avec détails
       toast.success(
-        `🎉 Commande #${orderResult.order.orderNumber} passée avec succès !`
+        `🎉 Commande #${orderResult.order.orderNumber} passée avec succès !`,
+        {
+          description: `Total: €${orderResult.order.totalAmount.toFixed(2)}`,
+          duration: 5000,
+        }
       );
       
       console.log("🎉 [CART CHECKOUT] - Processus de commande terminé avec succès");
@@ -345,13 +370,14 @@ const Cart = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error("💥 [CART CHECKOUT] - Erreur lors de la commande:", error);
 
-      // Gestion spécifique des erreurs de stock
-      if (error.response?.data?.errors) {
-        const stockErrors = error.response.data.errors;
-        setValidationErrors(stockErrors);
+      // Gestion spécifique des erreurs
+      if (error.message.includes("stock")) {
         toast.error(
           `❌ Problèmes de stock détectés. Veuillez vérifier votre panier.`
         );
+      } else if (error.message.includes("Authentification")) {
+        toast.error("❌ Session expirée, veuillez vous reconnecter");
+        redirectToLogin();
       } else {
         toast.error(`❌ Erreur lors de la commande: ${error.message}`);
       }
@@ -382,6 +408,41 @@ const Cart = ({ isOpen, onClose }) => {
         console.error("❌ Test API Auth échoué:", error);
         toast.error("Test API Auth échoué - voir console");
       });
+  };
+
+  // Test de création de commande (debug)
+  const testOrderCreation = async () => {
+    try {
+      console.log("🧪 TEST création commande...");
+      const testData = {
+        items: [
+          {
+            productId: "test-product-1",
+            name: "Produit Test",
+            price: 25.99,
+            quantity: 2,
+            images: [],
+            productType: "general"
+          }
+        ],
+        shippingAddress: {
+          firstName: "Test",
+          lastName: "User",
+          address: "123 Test Street",
+          city: "Test City",
+          postalCode: "12345",
+          country: "France"
+        },
+        paymentMethod: "card"
+      };
+
+      const response = await api.post('/orders', testData);
+      console.log("✅ Test création commande réussi:", response.data);
+      toast.success("Test création commande réussi");
+    } catch (error) {
+      console.error("❌ Test création commande échoué:", error);
+      toast.error("Test création commande échoué");
+    }
   };
 
   if (!isOpen) return null;
@@ -436,6 +497,28 @@ const Cart = ({ isOpen, onClose }) => {
               >
                 Découvrir les produits
               </Button>
+
+              {/* Boutons de debug (seulement en développement) */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-6 space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={testAuthManually}
+                    className="text-xs"
+                  >
+                    Test Auth
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={testOrderCreation}
+                    className="text-xs"
+                  >
+                    Test Commande
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -577,6 +660,17 @@ const Cart = ({ isOpen, onClose }) => {
                 </div>
               </div>
             </div>
+
+            {/* Informations de debug (seulement en développement) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs">
+                <p className="font-semibold text-yellow-800">Debug Info:</p>
+                <p>Auth: {isAuthenticated ? '✅' : '❌'}</p>
+                <p>User: {user?.firstName || 'Non connecté'}</p>
+                <p>Items: {itemsCount}</p>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="space-y-3">
               <Button

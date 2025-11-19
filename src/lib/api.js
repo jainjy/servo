@@ -301,5 +301,42 @@ export const planningAPI = {
   // Supprimer un rendez-vous
   deleteAppointment: (id) => api.delete(`/planning/${id}`),
 };
+// Ajoutez cette section dans votre lib/api.js
+
+// Services pour les commandes
+export const ordersAPI = {
+  // Créer une commande
+  createOrder: (data) => api.post("/orders", data),
+  
+  // Récupérer les commandes de l'utilisateur
+  getUserOrders: (params = {}) => api.get("/orders/user/my-orders", { params }),
+  
+  // Récupérer les détails d'une commande
+  getOrderById: (id) => api.get(`/orders/user/${id}`),
+  
+  // Annuler une commande
+  cancelOrder: (id) => api.put(`/orders/user/${id}/cancel`),
+  
+  // Statistiques utilisateur
+  getUserStats: () => api.get("/orders/user/stats"),
+  
+  // Test d'authentification
+  testAuth: () => api.get("/orders/test/auth"),
+  
+  // Test de données
+  testData: () => api.get("/orders/test-data"),
+};
+
+// Services pour le panier
+export const cartAPI = {
+  // Valider le panier
+  validateCart: (data) => api.post("/cart/validate", data),
+  
+  // Vérifier le stock
+  checkStock: (data) => api.post("/cart/check-stock", data),
+  
+  // Vérifier la disponibilité
+  checkAvailability: (data) => api.post("/cart/check-availability", data),
+};
 
 export default api;

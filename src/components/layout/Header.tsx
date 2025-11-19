@@ -531,7 +531,7 @@ const Header = () => {
       ],
     },
     {
-      title: "BATIMENTS",
+      title: "BATIMENT",
       items: [
         // {
         //   title: "Rénovation & construction",
@@ -678,25 +678,25 @@ const Header = () => {
         {
           title: "Courses & épicerie",
           description: "Livraison de produits frais & épicerie",
-          href: "/alimentation",
+          href: "/alimentation#cours-epicerie",
           image: "https://i.pinimg.com/1200x/11/80/35/11803586e48bb4b954c93493a2fae78d.jpg",
         },
         {
           title: "Boulangerie & charcuterie",
           description: "Produits artisanaux livrés chez vous",
-          href: "/alimentation",
+          href: "/alimentation#boulangerie-charcuterie",
           image: "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
         },
         {
           title: "Cave & vins",
           description: "Sélection de vins & spiritueux",
-          href: "/alimentation",
+          href: "/alimentation#cave-vins",
           image: "https://i.pinimg.com/1200x/90/22/b3/9022b34f5669bf2657f32acb26d1d554.jpg",
         },
         {
           title: "Restaurants",
           description: "Livraison de plats de vos restaurants favoris",
-          href: "/alimentation",
+          href: "/alimentation#restaurant",
           image: "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg",
         },
         {
