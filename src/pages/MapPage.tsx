@@ -191,7 +191,7 @@ const MapPage: React.FC = () => {
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
           <div className="flex items-center">
             <Users className="w-3 h-3 text-blue-500 mr-2" />
-            Utilisateurs: {points.filter((p) => p.type === "user").length}
+            Partenaires: {points.filter((p) => p.type === "user").length}
           </div>
           <div className="flex items-center">
             <Home className="w-3 h-3 text-green-500 mr-2" />
@@ -237,7 +237,7 @@ const MapPage: React.FC = () => {
                 }`}
               >
                 <Users className="h-4 w-4" />
-                partenaires
+                Partenaires
               </button>
               <button
                 onClick={() => handleFilterChange("properties")}
