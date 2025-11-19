@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
-import { GenericMapProps } from "../types/map";
+import { GenericMapProps, MapPoint } from "../types/map";
 import {
   initializeLeaflet,
   createCustomIcon,

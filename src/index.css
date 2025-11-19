@@ -485,7 +485,6 @@ body:has(.radix-dialog[data-state="open"]) {
   isolation: isolate;
 }
 
-/* Fin des styles/globals.css */
 /* Ajouter dans votre fichier CSS global */
 .user-location-marker {
   background: transparent !important;
