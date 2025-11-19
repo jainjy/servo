@@ -31,6 +31,8 @@ import {
   Settings,
   Settings2,
   DollarSign,
+  FileText,
+  Calendar1,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
@@ -537,6 +539,20 @@ export default function MonComptePage() {
                       onClick={() => handleNavigation("/mon-compte/payement")}
                     >
                       <DollarSign /> Mes paiements
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/documents")}
+                    >
+                      <FileText /> Mes documents
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      onClick={() => handleNavigation("/mon-compte/agenda")}
+                    >
+                      <Calendar1 /> Mon Agenda
                     </Button>
                   </div>
                 </div>

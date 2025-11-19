@@ -28,6 +28,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
+import api from "@/lib/api";
 
 const ProRegisterPage = () => {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ const ProRegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { subscriptionData } = location.state || {};
   const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [metiersList, setMetiersList] = useState([]);
+  const [metiersLoading, setMetiersLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Informations de base
     firstName: "",
@@ -46,7 +49,7 @@ const ProRegisterPage = () => {
     confirmPassword: "",
 
     // Type d'utilisateur
-    userType: "CLIENT", // PRESTATAIRE | VENDEUR | CLIENT | ADMIN | AGENCE | BIEN ETRE
+    userType: subscriptionData.userTypes[0],// PRESTATAIRE | VENDEUR  | ADMIN | AGENCE | BIEN_ETRE
     role: "professional", // particular ou professional
     demandType: "", // agence immobilier, particulier ou syndicat
 
@@ -74,32 +77,31 @@ const ProRegisterPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
-  const { register } = useAuth();
-
-  // Types d'utilisateurs disponibles
-  const userTypes = [
-    { value: "CLIENT", label: "Client" },
-    { value: "PRESTATAIRE", label: "Prestataire" },
-    { value: "VENDEUR", label: "Vendeur" },
-    { value: "LOUEUR", label: "Loueur" },
-    { value: "BIEN_ETRE", label: "Bien etre" },
+  const bienEtreMetiers = [
+    "BoutiqueNaturels",
+    "Podcasteur",
+    "Thérapeute",
+    "Masseur",
+    "Formateur",
   ];
 
-  // Types de demandes
-  const demandTypes = [
-    { value: "particulier", label: "Particulier" },
-    { value: "agence immobilier", label: "Agence immobilière" },
-    { value: "syndicat", label: "Syndicat" },
-  ];
+  useEffect(() => {
+    // Charger les métiers depuis l'API
+    const loadMetiers = async () => {
+      try {
+        setMetiersLoading(true);
+        const response = await api.get("/metiers/all");
+        setMetiersList(response.data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des métiers:", error);
+        toast.error("Impossible de charger les métiers");
+      } finally {
+        setMetiersLoading(false);
+      }
+    };
 
-  // Liste des métiers (exemple)
-  const metiersList = [
-    { id: 1, libelle: "Plombier" },
-    { id: 2, libelle: "Électricien" },
-    { id: 3, libelle: "Peintre" },
-    { id: 4, libelle: "Menuisier" },
-    { id: 5, libelle: "Jardinier" },
-  ];
+    loadMetiers();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,14 +139,24 @@ const ProRegisterPage = () => {
         subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
     }
 
+    // Créer le mapping metiersLabel
+    const metiersLabel: { [key: number]: string } = {};
+    formData.metiers.forEach((metierId) => {
+      const metier = metiersList.find((m) => m.id === metierId);
+      if (metier) {
+        metiersLabel[metierId] = metier.libelle;
+      }
+    });
+
     // Redirection vers la page de paiement avec TOUTES les données
     navigate("/register/professional/payment", {
       state: {
         formData: {
           ...formData,
-          userType: finalUserType, // AJOUT: userType basé sur l'abonnement exact
+          userType: finalUserType,
         },
-        subscriptionData, // This now includes planId
+        metiersLabel,
+        subscriptionData,
       },
     });
   };
@@ -457,37 +469,55 @@ const ProRegisterPage = () => {
                     <>
                       {/* Étape 2 */}
                       {/* Métiers (si prestataire) */}
-                      {formData.userType === "PRESTATAIRE" && (
-                        <div className="space-y-4">
+                      {formData.userType != "VENDEUR" && (
+                        <div className="space-y-4 h-32 overflow-y-auto">
                           <label className="text-sm font-medium text-gray-700">
                             Sélectionnez vos métiers *
                           </label>
-                          <div className="grid grid-cols-2 gap-3">
-                            {metiersList.map((metier) => (
-                              <div
-                                key={metier.id}
-                                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                                  formData.metiers.includes(metier.id)
-                                    ? "border-blue-500 bg-blue-50"
-                                    : "border-gray-300 hover:border-gray-400"
-                                }`}
-                                onClick={() => handleMetierToggle(metier.id)}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    className={`w-5 h-5 rounded-full border-2 ${
-                                      formData.metiers.includes(metier.id)
-                                        ? "border-blue-500 bg-blue-500"
-                                        : "border-gray-400"
-                                    }`}
-                                  ></div>
-                                  <span className="text-sm font-medium">
-                                    {metier.libelle}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                          {metiersLoading ? (
+                            <div className="text-center text-gray-500">
+                              Chargement des métiers...
+                            </div>
+                          ) : metiersList.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-3">
+                              {metiersList.map(
+                                (metier) =>
+                                  (metier.libelle == bienEtreMetiers[0] ||
+                                    metier.libelle == bienEtreMetiers[1] ||
+                                    metier.libelle == bienEtreMetiers[2] ||
+                                    metier.libelle == bienEtreMetiers[3]) && (
+                                    <div
+                                      key={metier.id}
+                                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                                        formData.metiers.includes(metier.id)
+                                          ? "border-blue-500 bg-blue-50"
+                                          : "border-gray-300 hover:border-gray-400"
+                                      }`}
+                                      onClick={() =>
+                                        handleMetierToggle(metier.id)
+                                      }
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div
+                                          className={`w-5 h-5 rounded-full border-2 ${
+                                            formData.metiers.includes(metier.id)
+                                              ? "border-blue-500 bg-blue-500"
+                                              : "border-gray-400"
+                                          }`}
+                                        ></div>
+                                        <span className="text-sm font-medium">
+                                          {metier.libelle}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center text-gray-500">
+                              Aucun métier disponible
+                            </div>
+                          )}
                         </div>
                       )}
 

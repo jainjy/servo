@@ -1,12 +1,12 @@
 // components/AdminMedia.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Video, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import {
+  Video,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
   EyeOff,
   Upload,
   Search,
@@ -19,7 +19,10 @@ import {
   Play,
   Calendar,
   FileText,
-  Headphones
+  Headphones,
+  Clock,
+  Download,
+  MoreVertical
 } from "lucide-react";
 import { MediaService } from "../../lib/api";
 import MediaUpload from "./MediaUpload";
@@ -50,6 +53,11 @@ interface Stats {
   totalViews: number;
   totalCategories: number;
 }
+
+// Fonction utilitaire pour les placeholders d'image
+const getPlaceholderImage = (text: string = '🎬') => {
+  return `https://placehold.co/400x225/EFEFEF/AAAAAA?text=${encodeURIComponent(text)}`;
+};
 
 // Composant Modal de base
 const Modal: React.FC<{
@@ -115,9 +123,13 @@ const MediaDetailModal: React.FC<{
           <div className="lg:w-1/3">
             <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video">
               <img
-                src={media.thumbnailUrl || `https://via.placeholder.com/400/225?text=🎬`}
+                src={media.thumbnailUrl || getPlaceholderImage('🎬')}
                 alt={media.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = getPlaceholderImage('🎬');
+                }}
               />
             </div>
           </div>
@@ -136,9 +148,8 @@ const MediaDetailModal: React.FC<{
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">Statut</label>
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  media.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${media.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {media.isActive ? 'Actif' : 'Inactif'}
                 </span>
               </div>
@@ -202,7 +213,7 @@ const MediaDetailModal: React.FC<{
   );
 };
 
-// Composant Modal d'édition
+// Composant Modal d'édition AMÉLIORÉ
 const EditMediaModal: React.FC<{
   media: Video | null;
   isOpen: boolean;
@@ -218,6 +229,14 @@ const EditMediaModal: React.FC<{
     isPremium: false
   });
   const [loading, setLoading] = useState(false);
+  const [saveError, setSaveError] = useState<string>('');
+
+  // Reset les erreurs quand le modal s'ouvre
+  useEffect(() => {
+    if (isOpen) {
+      setSaveError('');
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (media) {
@@ -225,7 +244,7 @@ const EditMediaModal: React.FC<{
         title: media.title || '',
         description: media.description || '',
         category: media.category || '',
-        isActive: media.isActive || true,
+        isActive: media.isActive !== undefined ? media.isActive : true,
         isPremium: media.isPremium || false
       });
     }
@@ -236,11 +255,25 @@ const EditMediaModal: React.FC<{
     if (!media) return;
 
     setLoading(true);
+    setSaveError('');
+
     try {
-      await onSave(media.id, formData);
+      // Préparer les données exactement comme le backend les attend
+      const updateData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        isActive: formData.isActive.toString(), // Convertir boolean en string
+        isPremium: formData.isPremium // Pour les vidéos seulement
+      };
+
+      console.log('📤 Données envoyées au backend:', updateData);
+
+      await onSave(media.id, updateData);
       onClose();
-    } catch (error) {
-      console.error('Erreur lors de la modification:', error);
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la modification:', error);
+      setSaveError(error.message || 'Une erreur est survenue lors de la modification');
     } finally {
       setLoading(false);
     }
@@ -256,6 +289,16 @@ const EditMediaModal: React.FC<{
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Modifier le podcast vidéo" size="md">
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Afficher l'erreur si elle existe */}
+        {saveError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+              <span className="text-red-800 text-sm">{saveError}</span>
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Titre *
@@ -266,6 +309,7 @@ const EditMediaModal: React.FC<{
             value={formData.title}
             onChange={(e) => handleChange('title', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={loading}
           />
         </div>
 
@@ -278,6 +322,7 @@ const EditMediaModal: React.FC<{
             onChange={(e) => handleChange('description', e.target.value)}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={loading}
           />
         </div>
 
@@ -289,6 +334,7 @@ const EditMediaModal: React.FC<{
             value={formData.category}
             onChange={(e) => handleChange('category', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={loading}
           >
             <option value="">Sélectionner une catégorie</option>
             {categories.map((category, index) => (
@@ -307,12 +353,13 @@ const EditMediaModal: React.FC<{
               checked={formData.isActive}
               onChange={(e) => handleChange('isActive', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={loading}
             />
             <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
               Podcast vidéo actif
             </label>
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -320,6 +367,7 @@ const EditMediaModal: React.FC<{
               checked={formData.isPremium}
               onChange={(e) => handleChange('isPremium', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={loading}
             />
             <label htmlFor="isPremium" className="ml-2 text-sm text-gray-700">
               Contenu premium
@@ -331,16 +379,24 @@ const EditMediaModal: React.FC<{
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            disabled={loading}
+            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            {loading ? 'Enregistrement...' : 'Enregistrer'}
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Enregistrement...
+              </>
+            ) : (
+              'Enregistrer'
+            )}
           </button>
         </div>
       </form>
@@ -349,8 +405,8 @@ const EditMediaModal: React.FC<{
 };
 
 // Composants de base
-const LoadingSpinner: React.FC<{ message?: string }> = ({ 
-  message = "Chargement..." 
+const LoadingSpinner: React.FC<{ message?: string }> = ({
+  message = "Chargement..."
 }) => (
   <div className="min-h-screen bg-gray-50 flex items-center justify-center mt-20">
     <div className="flex justify-center items-center py-12">
@@ -360,9 +416,9 @@ const LoadingSpinner: React.FC<{ message?: string }> = ({
   </div>
 );
 
-const ErrorMessage: React.FC<{ message: string; onRetry?: () => void }> = ({ 
-  message, 
-  onRetry 
+const ErrorMessage: React.FC<{ message: string; onRetry?: () => void }> = ({
+  message,
+  onRetry
 }) => (
   <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
     <div className="flex items-center">
@@ -381,10 +437,74 @@ const ErrorMessage: React.FC<{ message: string; onRetry?: () => void }> = ({
   </div>
 );
 
-// Composant principal AdminMedia
+// Composant Dropdown pour les actions
+const ActionDropdown: React.FC<{
+  media: Video;
+  onView: (media: Video) => void;
+  onEdit: (media: Video) => void;
+  onToggleVisibility: (id: string, currentStatus: boolean) => void;
+  onDelete: (id: string) => void;
+}> = ({ media, onView, onEdit, onToggleVisibility, onDelete }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        <MoreVertical size={18} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+            <button
+              onClick={() => {
+                onView(media);
+                setIsOpen(false);
+              }}
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Eye size={16} />
+              Voir détails
+            </button>
+
+            <button
+              onClick={() => {
+                onEdit(media);
+                setIsOpen(false);
+              }}
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+            >
+              <Edit size={16} />
+              Modifier
+            </button>
+            <button
+              onClick={() => {
+                onDelete(media.id);
+                setIsOpen(false);
+              }}
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              Supprimer
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// Composant principal AdminMedia CORRIGÉ
 const AdminMedia: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // États principaux
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -421,7 +541,7 @@ const AdminMedia: React.FC = () => {
     try {
       setError('');
       setLoading(true);
-      
+
       const [videosResponse, categoriesResponse, statsResponse] = await Promise.all([
         MediaService.getVideos({ limit: 100 }),
         MediaService.getCategories(),
@@ -435,7 +555,7 @@ const AdminMedia: React.FC = () => {
 
       setVideos(Array.isArray(videosData) ? videosData : []);
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
-      
+
       if (statsData && typeof statsData === 'object') {
         setStats({
           totalVideos: statsData.totalVideos || 0,
@@ -482,25 +602,37 @@ const AdminMedia: React.FC = () => {
     setSelectedMedia(null);
   };
 
-  // Sauvegarder les modifications
+  // Sauvegarder les modifications - FONCTION CORRIGÉE
   const handleSaveMedia = async (id: string, data: any) => {
     try {
-      const response = await MediaService.updateVideo(id, data);
-      const responseData = extractData(response);
+      console.log('🔄 Début de la modification de la vidéo ID:', id);
+      console.log('📦 Données reçues du formulaire:', data);
 
-      if (responseData.success) {
-        // Mettre à jour l'état local
-        setVideos(prev => prev.map(v => 
-          v.id === id ? { ...v, ...data } : v
-        ));
-      } else {
-        throw new Error(responseData.message || 'Erreur lors de la modification');
-      }
+      // Utiliser la méthode avec retry pour plus de robustesse
+      const updatedVideo = await MediaService.updateVideoWithRetry(id, data);
+
+      console.log('✅ Modification réussie:', updatedVideo);
+
+      // Mettre à jour l'état local avec les données retournées par le backend
+      setVideos(prev => prev.map(v =>
+        v.id === id ? { ...v, ...updatedVideo } : v
+      ));
+
+      console.log('✅ État local mis à jour');
+      return updatedVideo;
+
     } catch (err: any) {
-      console.error('Erreur modification:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Erreur lors de la modification';
-      alert(errorMessage);
-      throw err;
+      console.error('❌ Erreur détaillée lors de la modification:');
+      console.error('📋 Message:', err.message);
+      console.error('🔧 Stack:', err.stack);
+
+      if (err.response) {
+        console.error('📊 Données de réponse erreur:', err.response.data);
+        console.error('🔢 Status erreur:', err.response.status);
+      }
+
+      const errorMessage = err.message || 'Erreur lors de la modification';
+      throw new Error(errorMessage);
     }
   };
 
@@ -524,7 +656,7 @@ const AdminMedia: React.FC = () => {
     try {
       const response = await MediaService.deleteVideo(id);
       const responseData = extractData(response);
-      
+
       if (responseData.success) {
         setVideos(prev => prev.filter(v => v.id !== id));
         refreshData();
@@ -540,7 +672,7 @@ const AdminMedia: React.FC = () => {
 
   // Gestion de la visibilité
   const handleToggleVisibility = async (
-    id: string, 
+    id: string,
     currentStatus: boolean
   ): Promise<void> => {
     try {
@@ -548,7 +680,7 @@ const AdminMedia: React.FC = () => {
       const responseData = extractData(response);
 
       if (responseData.success) {
-        setVideos(prev => prev.map(v => 
+        setVideos(prev => prev.map(v =>
           v.id === id ? { ...v, isActive: !currentStatus } : v
         ));
       } else {
@@ -564,11 +696,11 @@ const AdminMedia: React.FC = () => {
   // Gestion des erreurs d'image
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>): void => {
     const target = e.target as HTMLImageElement;
-    target.src = `https://via.placeholder.com/80/48?text=🎬`;
+    target.src = getPlaceholderImage('🎬');
   };
 
   // Filtrage des données
-  const filteredVideos = videos.filter(video => 
+  const filteredVideos = videos.filter(video =>
     video.title?.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterCategory === '' || video.category === filterCategory)
   );
@@ -621,7 +753,7 @@ const AdminMedia: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
             <button
               onClick={refreshData}
               disabled={refreshing}
@@ -653,7 +785,7 @@ const AdminMedia: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <div className="sm:w-64">
             <select
               value={filterCategory}
@@ -673,160 +805,126 @@ const AdminMedia: React.FC = () => {
     </div>
   );
 
-  const renderMediaTable = () => (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Podcast Vidéo
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Catégorie
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Vues
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Statut
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Premium
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredVideos.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                  <Video className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                  <p className="text-lg font-medium text-gray-900 mb-2">
-                    Aucun podcast vidéo trouvé
-                  </p>
-                  <p className="text-gray-600 mb-4">
-                    {searchTerm || filterCategory ? 'Essayez de modifier vos critères de recherche' : 'Commencez par ajouter votre premier podcast vidéo'}
-                  </p>
-                  <button
-                    onClick={handleUploadClick}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2"
-                  >
-                    <Plus size={20} />
-                    Ajouter le premier podcast vidéo
-                  </button>
-                </td>
-              </tr>
-            ) : (
-              filteredVideos.map((media) => (
-                <tr key={media.id} className="hover:bg-gray-50 transition-colors duration-150">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-12 w-20 bg-gray-200 rounded-lg overflow-hidden">
-                        <img
-                          src={media.thumbnailUrl || `https://via.placeholder.com/80/48?text=🎬`}
-                          alt={media.title}
-                          className="h-12 w-20 object-cover"
-                          onError={handleImageError}
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div 
-                          className="text-sm font-medium text-gray-900 max-w-xs truncate cursor-pointer hover:text-blue-600"
-                          onClick={() => handleViewDetails(media)}
-                        >
-                          {media.title}
-                        </div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {media.description || 'Aucune description'}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      media.category === 'Danse' ? 'bg-purple-100 text-purple-800' :
-                      media.category === 'Yoga' ? 'bg-green-100 text-green-800' :
+  const renderMediaCards = () => (
+    <div className=" rounded-2xl  ">
+      {filteredVideos.length === 0 ? (
+        <div className="text-center py-12">
+          <Video className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+          <p className="text-lg font-medium text-gray-900 mb-2">
+            Aucun podcast vidéo trouvé
+          </p>
+          <p className="text-gray-600 mb-4">
+            {searchTerm || filterCategory ? 'Essayez de modifier vos critères de recherche' : 'Commencez par ajouter votre premier podcast vidéo'}
+          </p>
+          <button
+            onClick={handleUploadClick}
+            className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Ajouter le premier podcast vidéo
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredVideos.map((media) => (
+            <div
+              key={media.id}
+              className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+            >
+              {/* Image et overlay */}
+              <div className="relative aspect-video overflow-hidden rounded-t-xl">
+                <img
+                  src={media.thumbnailUrl || getPlaceholderImage('🎬')}
+                  alt={media.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={handleImageError}
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
+
+                {/* Badges overlay */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${media.category === 'Danse' ? 'bg-purple-100 text-purple-800' :
+                    media.category === 'Yoga' ? 'bg-green-100 text-green-800' :
                       media.category === 'Méditation' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
+                        'bg-gray-100 text-gray-800'
                     }`}>
-                      {media.category || 'Non catégorisé'}
+                    {media.category || 'Non catégorisé'}
+                  </span>
+                  {media.isPremium && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Premium
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                    {media.views?.toLocaleString() || 0}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      media.isActive
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                  )}
+                </div>
+
+                {/* Statut overlay */}
+                <div className="absolute top-3 right-3">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${media.isActive
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
                     }`}>
-                      {media.isActive ? 'Actif' : 'Inactif'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      media.isPremium
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {media.isPremium ? 'Premium' : 'Standard'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {media.createdAt ? new Date(media.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => handleViewDetails(media)}
-                        className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                        title="Voir les détails"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      
-                      <button
-                        onClick={() => handleToggleVisibility(media.id, media.isActive || false)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          media.isActive
-                            ? 'text-yellow-600 hover:bg-yellow-50' 
-                            : 'text-green-600 hover:bg-green-50'
-                        }`}
-                        title={media.isActive ? 'Désactiver' : 'Activer'}
-                      >
-                        {media.isActive ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                      
-                      <button
-                        onClick={() => handleEdit(media)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Éditer"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      
-                      <button
-                        onClick={() => handleDeleteMedia(media.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Supprimer"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    {media.isActive ? 'Actif' : 'Inactif'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Contenu */}
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                  {media.title}
+                </h3>
+
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  {media.description || 'Aucune description'}
+                </p>
+
+                {/* Métriques */}
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <div className="flex items-center gap-1">
+                    <Headphones size={14} />
+                    <span>{media.views?.toLocaleString() || 0} vues</span>
+                  </div>
+                  {media.duration && (
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} />
+                      <span>{media.duration}</span>
                     </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                  )}
+                </div>
+
+                {/* Date */}
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                  <div className="flex items-center gap-1">
+                    <Calendar size={12} />
+                    <span>
+                      {media.createdAt ? new Date(media.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <button
+                    onClick={() => handleViewDetails(media)}
+                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    <Play size={14} />
+                    Voir
+                  </button>
+
+                  <ActionDropdown
+                    media={media}
+                    onView={handleViewDetails}
+                    onEdit={handleEdit}
+                    onToggleVisibility={handleToggleVisibility}
+                    onDelete={handleDeleteMedia}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
@@ -836,9 +934,9 @@ const AdminMedia: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-20">
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 ">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* En-tête */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
@@ -857,12 +955,12 @@ const AdminMedia: React.FC = () => {
           </div>
 
           {error && <ErrorMessage message={error} onRetry={fetchData} />}
-          
+
           {renderStats()}
         </div>
 
         {renderControls()}
-        {renderMediaTable()}
+        {renderMediaCards()}
 
         {/* Modals */}
         <MediaDetailModal

@@ -41,7 +41,7 @@ export default function LoadingSpinner({
   };
 
   const spinner = (
-    <div className="flex flex-col items-center justify-center space-y-4">
+    <div className="flex flex-col items-center justify-center space-y-4 min-h-screen">
       {/* Spinner animé */}
       <motion.div
         className={`

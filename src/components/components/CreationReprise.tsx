@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Briefcase, Users, TrendingUp, Target } from 'lucide-react';
-import {motion} from 'framer-motion';
+import { motion } from 'framer-motion';
 interface ServiceCardProps {
   icon: React.ReactNode;
   title: string;
@@ -49,34 +49,34 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
   ];
 
   const AnimatedCounter = ({ value, duration = 2 }) => {
-  const [count, setCount] = useState(0);
-  
-  useEffect(() => {
-    const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
-    let startTimestamp: number | null = null;
-    
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
-      
-      setCount(Math.floor(progress * numericValue));
-      
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    
-    requestAnimationFrame(step);
-  }, [value, duration]);
+    const [count, setCount] = useState(0);
 
-  return (
-    <>
-      {value.includes('%') ? `${count}%` : 
-       value.includes('+') ? `${count}+` : 
-       count}
-    </>
-  );
-};
+    useEffect(() => {
+      const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
+      let startTimestamp: number | null = null;
+
+      const step = (timestamp: number) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
+
+        setCount(Math.floor(progress * numericValue));
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      };
+
+      requestAnimationFrame(step);
+    }, [value, duration]);
+
+    return (
+      <>
+        {value.includes('%') ? `${count}%` :
+          value.includes('+') ? `${count}+` :
+            count}
+      </>
+    );
+  };
 
   const stats = [
     { number: "95%", label: "Réussite" },
@@ -91,14 +91,14 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
         {/* En-tête */}
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
           <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-            <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" alt="" />
+          <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" className='h-full object-cover w-full' alt="" />
         </div>
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
             Création & Reprise
           </h2>
           <p className="text-md text-gray-200 max-w-3xl mx-auto leading-relaxed">
-            Accompagnement personnalisé pour entrepreneurs ambitieux. De l'idée à la réalisation, 
+            Accompagnement personnalisé pour entrepreneurs ambitieux. De l'idée à la réalisation,
             nous vous guidons à chaque étape de votre aventure entrepreneuriale.
           </p>
         </div>
@@ -119,20 +119,20 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-        <motion.div
-          key={index}
-          className="text-center"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: index * 0.1 }}
-        >
-          <div className="text-3xl md:text-4xl font-bold text-slate-950 mb-2">
-            <AnimatedCounter value={stat.number} duration={2} />
-          </div>
-          <div className="text-gray-600 font-medium">{stat.label}</div>
-        </motion.div>
-      ))}
+              <motion.div
+                key={index}
+                className="text-center"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <div className="text-3xl md:text-4xl font-bold text-slate-950 mb-2">
+                  <AnimatedCounter value={stat.number} duration={2} />
+                </div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
+              </motion.div>
+            ))}
           </div>
         </div>
 
@@ -143,7 +143,7 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
               Prêt à concrétiser votre projet ?
             </h3>
             <p className="text-blue-100 text-sm mb-6 max-w-2xl mx-auto">
-              Prenez rendez-vous pour une consultation gratuite et découvrez comment 
+              Prenez rendez-vous pour une consultation gratuite et découvrez comment
               nous pouvons vous aider à réussir votre création ou reprise d'entreprise.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

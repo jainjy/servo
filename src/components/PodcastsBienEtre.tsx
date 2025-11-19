@@ -1,268 +1,232 @@
 // components/PodcastsBienEtre.tsx
-import React, { useState, useEffect } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download, Video, Music } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Headphones, Clock, Heart, Star, Download, Video, Activity } from 'lucide-react';
 import { MediaService } from '../lib/api';
 
-interface MediaEpisode {
+interface VideoEpisode {
   id: string;
   title: string;
   description: string;
   duration: string;
   date: string;
   category: string;
-  listens: number;
+  views: number;
   featured: boolean;
-  audioUrl: string;
-  videoUrl?: string;
+  videoUrl: string;
   thumbnailUrl?: string;
   isActive?: boolean;
-  type: 'audio' | 'video';
+  mimeType?: string;
+  fileSize?: number;
 }
 
 const PodcastsBienEtre: React.FC = () => {
-  const [mediaEpisodes, setMediaEpisodes] = useState<MediaEpisode[]>([]);
+  const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedEpisode, setSelectedEpisode] = useState<MediaEpisode | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<VideoEpisode | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [activeSection, setActiveSection] = useState<'audio' | 'video'>('audio');
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
 
-  const audioRef = React.useRef<HTMLAudioElement>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
-  // URLs audio et vidéo gratuites qui fonctionnent
-  const freeAudioUrls = [
-    "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
-    "https://www.soundjay.com/misc/sounds/bell-ringing-04.wav",
-    "https://www.soundjay.com/button/sounds/button-09.wav",
-    "https://www.soundjay.com/button/sounds/button-10.wav",
-    "https://www.soundjay.com/nature/sounds/forest-ambience-1.wav",
-    "https://www.soundjay.com/ambient/sounds/office-ambience-1.wav",
-    "https://www.soundjay.com/weather/sounds/light-rain-1.wav",
-    "https://www.soundjay.com/weather/sounds/ocean-waves-1.wav",
-    "https://www.soundjay.com/mechanical/sounds/wind-chimes-1.wav",
-    "https://www.soundjay.com/mechanical/sounds/wind-chimes-2.wav"
-  ];
-
-  const freeVideoUrls = [
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
-  ];
-
-  // Images pour les vidéos
-  const videoThumbnails = [
+  // Images par défaut pour les vidéos sans thumbnail
+  const defaultThumbnails = [
     "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
     "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1545389336-cf090694435e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1518607692856-c6d6d39d8e82?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
   ];
 
-  // Images pour les podcasts audio
-  const audioThumbnails = [
-    "https://images.unsplash.com/photo-1590658165737-15a047b8b5e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
-  ];
+  // États pour la barre de progression
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
-  // Charger les médias de la catégorie Bien-être
+  // Formatage du temps
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Mise à jour du temps
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const current = videoRef.current.currentTime;
+      const total = videoRef.current.duration || 0;
+
+      setCurrentTime(current);
+      setDuration(total);
+      setProgress(total > 0 ? (current / total) * 100 : 0);
+    }
+  };
+
+  // Clic sur la barre de progression
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !progressBarRef.current) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const percentage = (clickX / width) * 100;
+
+    const newTime = (percentage / 100) * duration;
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+    setProgress(percentage);
+  };
+
+  // Plein écran
+  const toggleFullscreen = () => {
+    if (!videoRef.current) return;
+
+    if (!document.fullscreenElement) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  // Charger les vidéos de la catégorie Bien-être
   useEffect(() => {
-    const fetchMedia = async () => {
+    const fetchVideos = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await MediaService.getPodcasts({ limit: 50 });
+        console.log('🔄 Début du chargement des vidéos Bien-être...');
 
-        const mediaData = response.data?.data || response.data || response;
+        // Utilisation de MediaService pour récupérer les vidéos
+        const response = await MediaService.getVideos({
+          category: 'Bien-être',
+          limit: 50
+        });
 
-        if (Array.isArray(mediaData)) {
-          const bienEtreMedia: MediaEpisode[] = mediaData
-            .filter((media: any) =>
-              media.isActive !== false &&
-              media.category === "Bien-être"  // Changé de "Bien-être & Santé" à "Bien-être"
-            )
-            .map((media: any, index: number) => ({
-              id: media.id,
-              title: media.title,
-              description: media.description || 'Aucune description disponible',
-              duration: media.duration || "00:00:00",
-              date: new Date(media.createdAt).toLocaleDateString('fr-FR'),
-              category: media.category,
-              listens: media.listens || Math.floor(Math.random() * 1000) + 100,
-              featured: media.listens > 500,
-              audioUrl: media.audioUrl || freeAudioUrls[index % freeAudioUrls.length],
-              videoUrl: freeVideoUrls[index % freeVideoUrls.length],
-              thumbnailUrl: media.thumbnailUrl || getThumbnailByType(media.type || (index % 2 === 0 ? 'audio' : 'video'), index),
-              type: media.type || (index % 2 === 0 ? 'audio' : 'video')
-            }));
+        console.log('📦 Réponse COMPLÈTE de l\'API:', response);
+        console.log('🔍 Structure de la réponse Axios:', {
+          data: response.data,
+          status: response.status,
+          statusText: response.statusText
+        });
 
-          setMediaEpisodes(bienEtreMedia);
+        // CORRECTION : Les données sont dans response.data (Axios)
+        const apiData = response.data;
+
+        console.log('🔍 Structure des données API:', {
+          success: apiData.success,
+          hasData: !!apiData.data,
+          dataIsArray: Array.isArray(apiData.data),
+          dataLength: apiData.data?.length,
+          pagination: apiData.pagination
+        });
+
+        if (apiData.success && Array.isArray(apiData.data)) {
+          console.log('✅ Structure de réponse valide');
+          console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
+          console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
+
+          const bienEtreVideos: VideoEpisode[] = apiData.data
+            .filter((video: any) => {
+              const isBienEtre = video.category === "Bien-être";
+              const isActive = video.isActive !== false;
+              const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
+
+              console.log('📋 Filtrage vidéo:', {
+                id: video.id,
+                title: video.title,
+                category: video.category,
+                isBienEtre: isBienEtre,
+                isActive: isActive,
+                hasVideoUrl: hasVideoUrl,
+                videoUrl: video.videoUrl
+              });
+
+              const shouldInclude = isBienEtre && isActive && hasVideoUrl;
+              console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
+
+              return shouldInclude;
+            })
+            .map((video: any, index: number) => {
+              console.log(`🔄 Mapping de la vidéo "${video.title}":`, {
+                id: video.id,
+                videoUrl: video.videoUrl,
+                thumbnailUrl: video.thumbnailUrl,
+                createdAt: video.createdAt
+              });
+
+              const mappedVideo = {
+                id: video.id,
+                title: video.title,
+                description: video.description || 'Aucune description disponible',
+                duration: video.duration || "00:00:00",
+                date: new Date(video.createdAt || new Date()).toLocaleDateString('fr-FR'),
+                category: video.category,
+                views: video.views || 0,
+                featured: video.featured || video.isPremium || false,
+                videoUrl: video.videoUrl,
+                thumbnailUrl: video.thumbnailUrl || defaultThumbnails[index % defaultThumbnails.length],
+                isActive: video.isActive !== false,
+                mimeType: video.mimeType || 'video/mp4',
+                fileSize: video.fileSize || 0
+              };
+
+              console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
+              return mappedVideo;
+            });
+
+          console.log('🎉 Vidéos Bien-être après filtrage:', bienEtreVideos.length);
+          console.log('📺 Liste complète des vidéos filtrées:', bienEtreVideos);
+
+          setVideoEpisodes(bienEtreVideos);
+
+          if (bienEtreVideos.length === 0) {
+            console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
+            console.log('🔍 Contenu de apiData.data:', apiData.data);
+          }
+
         } else {
-          // Fallback si l'API ne retourne pas de données
-          setMediaEpisodes(getFallbackMedia());
+          console.warn('⚠️ Structure de réponse inattendue:', {
+            success: apiData.success,
+            hasData: !!apiData.data,
+            dataIsArray: Array.isArray(apiData.data),
+            apiData: apiData
+          });
+          setVideoEpisodes([]);
         }
       } catch (err: any) {
-        console.error('Erreur lors du chargement des médias:', err);
-        // Fallback en cas d'erreur
-        setMediaEpisodes(getFallbackMedia());
+        console.error('❌ Erreur lors du chargement des vidéos:', err);
+        console.error('📋 Détails de l\'erreur:', {
+          message: err.message,
+          stack: err.stack,
+          response: err.response
+        });
+        setError(err.message);
+        setVideoEpisodes([]);
       } finally {
+        console.log('🏁 Chargement terminé');
         setLoading(false);
       }
     };
 
-    fetchMedia();
+    fetchVideos();
   }, []);
 
-  const getThumbnailByType = (type: 'audio' | 'video', index: number) => {
-    if (type === 'video') {
-      return videoThumbnails[index % videoThumbnails.length];
-    } else {
-      return audioThumbnails[index % audioThumbnails.length];
-    }
-  };
-
-  // Données de fallback pour Bien-être
-  const getFallbackMedia = (): MediaEpisode[] => {
-    return [
-      // Podcasts Audio - Bien-être
-      {
-        id: '1',
-        title: "Méditation guidée : retrouvez votre paix intérieure",
-        description: "Séance de méditation complète pour se recentrer et apaiser l'esprit. Techniques de respiration et visualisation pour un bien-être profond.",
-        duration: "00:25:30",
-        date: "15/03/2024",
-        category: "Bien-être",
-        listens: 1250,
-        featured: true,
-        audioUrl: freeAudioUrls[0],
-        videoUrl: freeVideoUrls[0],
-        thumbnailUrl: audioThumbnails[0],
-        type: 'audio'
-      },
-      {
-        id: '2',
-        title: "Yoga du matin : énergie et vitalité",
-        description: "Routine de yoga douce pour bien commencer la journée. Postures adaptées à tous les niveaux pour réveiller le corps en douceur.",
-        duration: "00:32:15",
-        date: "14/03/2024",
-        category: "Bien-être",
-        listens: 980,
-        featured: false,
-        audioUrl: freeAudioUrls[1],
-        videoUrl: freeVideoUrls[1],
-        thumbnailUrl: audioThumbnails[1],
-        type: 'audio'
-      },
-      {
-        id: '3',
-        title: "Nutrition consciente : mangez en pleine conscience",
-        description: "Découvrez comment transformer votre relation avec la nourriture. Techniques pour une alimentation intuitive et équilibrée.",
-        duration: "00:28:45",
-        date: "13/03/2024",
-        category: "Bien-être",
-        listens: 870,
-        featured: false,
-        audioUrl: freeAudioUrls[2],
-        videoUrl: freeVideoUrls[2],
-        thumbnailUrl: audioThumbnails[2],
-        type: 'audio'
-      },
-      {
-        id: '4',
-        title: "Gestion du stress : techniques au quotidien",
-        description: "Méthodes pratiques pour réduire le stress et l'anxiété dans votre vie quotidienne. Outils concrets et faciles à appliquer.",
-        duration: "00:35:20",
-        date: "12/03/2024",
-        category: "Bien-être",
-        listens: 1120,
-        featured: true,
-        audioUrl: freeAudioUrls[3],
-        videoUrl: freeVideoUrls[3],
-        thumbnailUrl: audioThumbnails[3],
-        type: 'audio'
-      },
-      // Vidéos - Bien-être
-      {
-        id: '5',
-        title: "Séance de yoga complète en vidéo",
-        description: "Pratique guidée de yoga flow pour tous niveaux. Instructions détaillées et modifications pour chaque posture.",
-        duration: "00:45:20",
-        date: "12/03/2024",
-        category: "Bien-être",
-        listens: 1560,
-        featured: true,
-        audioUrl: freeAudioUrls[4],
-        videoUrl: freeVideoUrls[4],
-        thumbnailUrl: videoThumbnails[0],
-        type: 'video'
-      },
-      {
-        id: '6',
-        title: "Méditation en pleine nature",
-        description: "Séance de méditation immersive au cœur de la forêt. Sons naturels et guidance douce pour une connexion profonde.",
-        duration: "00:35:15",
-        date: "11/03/2024",
-        category: "Bien-être",
-        listens: 1120,
-        featured: false,
-        audioUrl: freeAudioUrls[5],
-        videoUrl: freeVideoUrls[5],
-        thumbnailUrl: videoThumbnails[1],
-        type: 'video'
-      },
-      {
-        id: '7',
-        title: "Cours de pilates débutant",
-        description: "Découverte du pilates avec des exercices fondamentaux. Renforcement musculaire en douceur et amélioration de la posture.",
-        duration: "00:38:40",
-        date: "10/03/2024",
-        category: "Bien-être",
-        listens: 890,
-        featured: false,
-        audioUrl: freeAudioUrls[6],
-        videoUrl: freeVideoUrls[6],
-        thumbnailUrl: videoThumbnails[2],
-        type: 'video'
-      },
-      {
-        id: '8',
-        title: "Auto-massage détente : techniques simples",
-        description: "Apprenez à vous masser pour relâcher les tensions du cou, des épaules et du dos. Techniques accessibles à tous.",
-        duration: "00:28:30",
-        date: "09/03/2024",
-        category: "Bien-être",
-        listens: 1340,
-        featured: true,
-        audioUrl: freeAudioUrls[7],
-        videoUrl: freeVideoUrls[7],
-        thumbnailUrl: videoThumbnails[3],
-        type: 'video'
-      }
-    ];
-  };
+  // Test de débogage supplémentaire
+  useEffect(() => {
+    console.log('📊 État actuel de videoEpisodes:', {
+      count: videoEpisodes.length,
+      videos: videoEpisodes
+    });
+  }, [videoEpisodes]);
 
   const handlePlayMedia = () => {
-    if (selectedEpisode?.type === 'audio' && audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    } else if (selectedEpisode?.type === 'video' && videoRef.current) {
+    if (selectedEpisode && videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
@@ -274,10 +238,9 @@ const PodcastsBienEtre: React.FC = () => {
 
   const handleDownload = () => {
     if (selectedEpisode) {
-      const url = selectedEpisode.type === 'audio' ? selectedEpisode.audioUrl : selectedEpisode.videoUrl;
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `${selectedEpisode.title}.${selectedEpisode.type === 'audio' ? 'mp3' : 'mp4'}`;
+      link.href = selectedEpisode.videoUrl;
+      link.download = `${selectedEpisode.title}.mp4`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -297,20 +260,119 @@ const PodcastsBienEtre: React.FC = () => {
   const getCategoryColor = (category: string) => {
     const colors = {
       'Bien-être': 'bg-gradient-to-r from-green-500 to-teal-500',
+      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
+      'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
+      'Crédit & Assurance': 'bg-gradient-to-r from-teal-500 to-blue-500',
+      'Domicile': 'bg-gradient-to-r from-pink-500 to-rose-500',
+      'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500'
     };
     return colors[category as keyof typeof colors] || 'bg-gray-500';
   };
 
-  // Filtrer les médias par type
-  const audioEpisodes = mediaEpisodes.filter(episode => episode.type === 'audio');
-  const videoEpisodes = mediaEpisodes.filter(episode => episode.type === 'video');
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Composant de carte vidéo
+  const VideoCard = ({ episode }: { episode: VideoEpisode }) => {
+    console.log('🎬 Rendu de VideoCard pour:', episode.title);
+    return (
+      <div
+        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-green-600' : 'border-gray-200'
+          }`}
+      >
+        {episode.featured && (
+          <div className="bg-green-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
+            ⭐ Vidéo en vedette
+          </div>
+        )}
+
+        {/* Thumbnail */}
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={episode.thumbnailUrl}
+            alt={episode.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              console.warn('❌ Erreur de chargement de l\'image:', episode.thumbnailUrl);
+              e.currentTarget.src = defaultThumbnails[0];
+            }}
+            onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
+          />
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+
+          {/* Bouton play overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
+              <Video className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-3">
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getCategoryColor(episode.category)}`}>
+              {episode.category}
+            </span>
+            <div className="flex items-center text-gray-500 text-sm">
+              <Clock className="w-4 h-4 mr-1" />
+              {episode.duration}
+            </div>
+          </div>
+
+          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-green-600 transition-colors line-clamp-2">
+            {episode.title}
+          </h4>
+
+          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+            {episode.description}
+          </p>
+
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center space-x-4 text-sm text-gray-500">
+              <div className="flex items-center">
+                <Headphones className="w-4 h-4 mr-1" />
+                {episode.views.toLocaleString()} vues
+              </div>
+              <div>{episode.date}</div>
+            </div>
+            <button
+              onClick={() => {
+                console.log('🎯 Clic sur Regarder pour:', episode.title);
+                setSelectedEpisode(episode);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors group/btn"
+            >
+              <Video className="w-4 h-4 mr-2" />
+              Regarder
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  console.log('📱 Rendu du composant principal:', {
+    loading,
+    error,
+    videoCount: videoEpisodes.length,
+    videos: videoEpisodes
+  });
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <div className="text-gray-600">Chargement des contenus bien-être...</div>
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+            <div className="text-gray-600">Chargement des vidéos Bien-être...</div>
+          </div>
         </div>
       </div>
     );
@@ -318,366 +380,322 @@ const PodcastsBienEtre: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <strong>Erreur:</strong> {error}
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Erreur:</strong> {error}
+          </div>
         </div>
       </div>
     );
   }
 
-  // Composant de carte média réutilisable
-  const MediaCard = ({ episode }: { episode: MediaEpisode }) => (
-    <div
-      className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-green-500' : 'border-gray-200'
-        }`}
-    >
-      {episode.featured && (
-        <div className="bg-blue-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl flex items-center justify-center">
-          <Star className="w-3 h-3 mr-1" />
-          {episode.type === 'video' ? ' Vidéo en vedette' : ' Audio en vedette'}
-        </div>
-      )}
-
-      {/* Image/Thumbnail */}
-      <div className="relative h-48 overflow-hidden rounded-t-2xl">
-        <img
-          src={episode.thumbnailUrl}
-          alt={episode.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
-
-        {/* Badge type */}
-        <div className="absolute top-3 left-3">
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${episode.type === 'video'
-              ? 'bg-purple-500 text-white'
-              : 'bg-blue-500 text-white'
-            }`}>
-            {episode.type === 'video' ? 'VIDÉO' : 'AUDIO'}
-          </span>
-        </div>
-
-        {/* Bouton play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
-            {episode.type === 'video' ? (
-              <Video className="w-8 h-8 text-blue-600" />
-            ) : (
-              <Play className="w-8 h-8 text-blue-600" />
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getCategoryColor(episode.category)}`}>
-            {episode.category}
-          </span>
-          <div className="flex items-center text-gray-500 text-sm">
-            <Clock className="w-4 h-4 mr-1" />
-            {episode.duration}
-          </div>
-        </div>
-
-        <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-          {episode.title}
-        </h4>
-
-        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-          {episode.description}
-        </p>
-
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
-            <div className="flex items-center">
-              <Headphones className="w-4 h-4 mr-1" />
-              {episode.listens.toLocaleString()}
-            </div>
-            <div>{episode.date}</div>
-          </div>
-          <button
-            onClick={() => {
-              setSelectedEpisode(episode);
-              setIsModalOpen(true);
-            }}
-            className={`flex items-center px-4 py-2 rounded-lg text-white transition-colors group/btn ${episode.type === 'video'
-                ? 'bg-blue-600 hover:bg-green-700'
-                : 'bg-blue-600 hover:bg-green-700'
-              }`}
-          >
-            {episode.type === 'video' ? (
-              <Video className="w-4 h-4 mr-2" />
-            ) : (
-              <Play className="w-4 h-4 mr-2" />
-            )}
-            {episode.type === 'video' ? 'Regarder' : 'Écouter'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* En-tête */}
+    <div className="min-h-screen bg-white">
+      {/* Contenu Principal */}
+      <div className="container mx-auto px-4 py-12">
+        {/* Section Vidéos */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-4">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Podcasts Bien-être</h2>
+                <p className="text-gray-600">Pratiques de bien-être, méditations guidées et conseils pour une vie équilibrée</p>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
+              {activeTab === 'all' ? videoEpisodes.length : favorites.length} vidéo(s) disponible(s)
+            </div>
+          </div>
 
-      {/* Navigation par sections */}
-      <div className="flex justify-center mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-2 flex space-x-2">
-          <button
-            onClick={() => setActiveSection('audio')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${activeSection === 'audio'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-gray-700 hover:bg-gray-100'
+          {/* Onglets */}
+          <div className="flex gap-4 mb-8 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
+                activeTab === 'all'
+                  ? 'border-green-600 text-green-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
-          >
-            <Music className="w-5 h-5" />
-            <span>Podcasts Audio ({audioEpisodes.length})</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('video')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${activeSection === 'video'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-gray-700 hover:bg-gray-100'
+            >
+              <div className="flex items-center space-x-2">
+                <Activity className="w-5 h-5" />
+                <span>Tous les podcasts ({videoEpisodes.length})</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('favorites')}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
+                activeTab === 'favorites'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
-          >
-            <Video className="w-5 h-5" />
-            <span>Vidéos ({videoEpisodes.length})</span>
-          </button>
-        </div>
+            >
+              <div className="flex items-center space-x-2">
+                <Heart className="w-5 h-5" />
+                <span>Mes favoris ({favorites.length})</span>
+              </div>
+            </button>
+          </div>
+
+          {/* Contenu de l'onglet */}
+          {activeTab === 'all' ? (
+            videoEpisodes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {videoEpisodes.map((episode) => (
+                  <VideoCard key={episode.id} episode={episode} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+                <Activity className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+                <p className="text-gray-500">
+                  {error
+                    ? "Une erreur est survenue lors du chargement des vidéos"
+                    : "Aucune vidéo Bien-être n'est disponible pour le moment"
+                  }
+                </p>
+              </div>
+            )
+          ) : favorites.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {videoEpisodes
+                .filter((episode) => favorites.includes(episode.id))
+                .map((episode) => (
+                  <VideoCard key={episode.id} episode={episode} />
+                ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+              <Heart className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast en favoris</h3>
+              <p className="text-gray-500">
+                Cliquez sur le cœur d'un podcast pour l'ajouter à vos favoris
+              </p>
+            </div>
+          )}
+        </section>
       </div>
 
-      {/* Section Audio */}
-      {activeSection === 'audio' && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Music className="w-8 h-8 mr-3 text-blue-600" />
-              Podcasts Bien-être
-            </h2>
-            <div className="text-sm text-gray-500">
-              {audioEpisodes.length} contenu(s) disponible(s)
-            </div>
-          </div>
-
-          {audioEpisodes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {audioEpisodes.map((episode) => (
-                <MediaCard key={episode.id} episode={episode} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl">
-              <Music className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast audio disponible</h3>
-              <p className="text-gray-500">Revenez plus tard pour découvrir nos nouveaux podcasts</p>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Section Vidéo */}
-      {activeSection === 'video' && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Video className="w-8 h-8 mr-3 text-blue-600" />
-              Vidéos Bien-être
-            </h2>
-            <div className="text-sm text-gray-500">
-              {videoEpisodes.length} vidéo(s) disponible(s)
-            </div>
-          </div>
-
-          {videoEpisodes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videoEpisodes.map((episode) => (
-                <MediaCard key={episode.id} episode={episode} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-gray-50 rounded-2xl">
-              <Video className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
-              <p className="text-gray-500">Revenez plus tard pour découvrir nos nouvelles vidéos</p>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Modal Audio/Video */}
+      {/* Modal Vidéo */}
       {isModalOpen && selectedEpisode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => {
-              setIsModalOpen(false);
-              setIsPlaying(false);
-              if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
-              }
-              if (videoRef.current) {
-                videoRef.current.pause();
-                videoRef.current.currentTime = 0;
-              }
-            }}
-          />
-
-          {/* Modal Content */}
-          <div className="relative z-50 w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Audio/Video Element */}
-            {selectedEpisode.type === 'audio' ? (
-              <audio
-                ref={audioRef}
-                src={selectedEpisode.audioUrl}
-                onEnded={() => setIsPlaying(false)}
-              />
-            ) : (
-              <video
-                ref={videoRef}
-                src={selectedEpisode.videoUrl}
-                onEnded={() => setIsPlaying(false)}
-                className="w-full h-64 object-cover"
-                controls={false}
-                poster={selectedEpisode.thumbnailUrl}
-              />
-            )}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          {/* Modal Container - Layout horizontal YouTube */}
+          <div className="relative w-full max-w-7xl h-[90vh] bg-gray-900/50 rounded-2xl shadow-2xl overflow-hidden flex">
 
             {/* Bouton fermeture */}
             <button
               onClick={() => {
                 setIsModalOpen(false);
                 setIsPlaying(false);
-                if (audioRef.current) {
-                  audioRef.current.pause();
-                  audioRef.current.currentTime = 0;
-                }
                 if (videoRef.current) {
                   videoRef.current.pause();
                   videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-3 right-3 z-20 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1.5"
+              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            {/* Header */}
-            <div className="flex p-4 border-b border-gray-200">
-              {/* Image */}
-              <div className="flex-shrink-0 mr-4">
-                <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${selectedEpisode.type === 'video' ? 'bg-blue-600' : 'bg-blue-600'
-                  }`}>
-                  {selectedEpisode.type === 'video' ? (
-                    <Video className="w-8 h-8 text-white" />
-                  ) : (
-                    <Headphones className="w-8 h-8 text-white" />
-                  )}
+            {/* Colonne de gauche - Vidéo */}
+            <div className="flex-1 rounded-t-lg overflow-hidden mr-5 flex flex-col min-w-0">
+              {/* Container vidéo */}
+              <div className="relative flex-1 bg-black flex items-center justify-center">
+                <video
+                  ref={videoRef}
+                  src={selectedEpisode.videoUrl}
+                  onEnded={() => setIsPlaying(false)}
+                  onTimeUpdate={handleTimeUpdate}
+                  className="w-full h-full object-contain"
+                  controls={false}
+                  poster={selectedEpisode.thumbnailUrl}
+                />
+
+                {/* Overlay de contrôle custom */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+
+                  {/* Barre de progression */}
+                  <div className="mb-4 px-2">
+                    <div
+                      className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer group"
+                      onClick={handleProgressClick}
+                      ref={progressBarRef}
+                    >
+                      <div className="absolute inset-0 bg-gray-600 rounded-full"></div>
+                      <div
+                        className="absolute h-full bg-green-600 rounded-full transition-all duration-100"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                      <div
+                        className="absolute top-1/2 w-3 h-3 bg-green-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                        style={{ left: `calc(${progress}% - 6px)` }}
+                      ></div>
+                    </div>
+
+                    {/* Temps */}
+                    <div className="flex justify-between items-center mt-2 text-xs text-gray-300">
+                      <span>{formatTime(currentTime)}</span>
+                      <span>{formatTime(duration)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={handlePlayMedia}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                      >
+                        {isPlaying ? (
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      {/* Bouton plein écran */}
+                      <button
+                        onClick={toggleFullscreen}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all duration-200"
+                        title="Plein écran"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Informations */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
-                    {selectedEpisode.category}
-                  </span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${selectedEpisode.type === 'video'
-                      ? 'bg-purple-100 text-purple-600'
-                      : 'bg-blue-100 text-blue-600'
-                    }`}>
-                    {selectedEpisode.type === 'video' ? 'Vidéo' : 'Audio'}
-                  </span>
-                  {selectedEpisode.featured && (
-                    <span className="flex items-center text-yellow-600 text-xs">
-                      <Star className="w-3 h-3 mr-1" />
-                      Vedette
-                    </span>
-                  )}
-                </div>
-
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
+              {/* Titre de la vidéo */}
+              <div className="p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+                <h1 className="text-lg font-bold text-white">
                   {selectedEpisode.title}
                 </h1>
-
-                <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                  <span className="flex items-center">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {selectedEpisode.duration}
-                  </span>
-                  <span className="flex items-center">
-                    <Headphones className="w-3 h-3 mr-1" />
-                    {selectedEpisode.listens.toLocaleString()}
-                  </span>
+                <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
+                  <span>{selectedEpisode.views.toLocaleString()} vues</span>
                   <span>{selectedEpisode.date}</span>
                 </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {/* Description */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {selectedEpisode.description}
-                </p>
-              </div>
-            </div>
+            {/* Colonne de droite - Contenu */}
+            <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
 
-            {/* Footer - Actions */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex gap-3 mb-3">
-                <button
-                  onClick={handlePlayMedia}
-                  className={`flex-1 flex items-center justify-center text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedEpisode.type === 'video'
-                      ? 'bg-blue-600 hover:bg-green-700'
-                      : 'bg-blue-600 hover:bg-green-700'
-                    }`}
-                >
-                  {isPlaying ? (
-                    <>
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                      </svg>
-                      En pause
-                    </>
-                  ) : (
-                    <>
-                      {selectedEpisode.type === 'video' ? (
-                        <Video className="w-4 h-4 mr-2" />
+              {/* Contenu défilant */}
+              <div className="flex-1 overflow-y-auto">
+
+                {/* Informations de base */}
+                <div className="p-4 border-b border-gray-700">
+                  <div className="flex items-center space-x-3 mb-3">
+                    {/* Avatar */}
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Activity className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Bien-être</div>
+                      <div className="text-xs text-gray-400">Activités santé</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
+                      {selectedEpisode.category}
+                    </span>
+                    {selectedEpisode.featured && (
+                      <span className="flex items-center text-yellow-400 text-xs font-medium">
+                        <Star className="w-3 h-3 mr-1 fill-current" />
+                        Vedette
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-4 text-sm text-gray-400">
+                    <span className="flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {selectedEpisode.duration}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="p-4 border-b border-gray-700">
+                  <h3 className="text-sm font-semibold text-white mb-2">Description</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed">
+                    {selectedEpisode.description}
+                  </p>
+                </div>
+
+                {/* Infos techniques */}
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-white mb-3">Détails</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Format</span>
+                      <span className="text-white">{selectedEpisode.mimeType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Taille</span>
+                      <span className="text-white">{formatFileSize(selectedEpisode.fileSize || 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Durée</span>
+                      <span className="text-white">{selectedEpisode.duration}</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Actions rapides */}
+                <div className="p-4 border-y border-gray-700">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handlePlayMedia}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition-all duration-200"
+                    >
+                      {isPlaying ? (
+                        <>
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                          <span className="text-sm">Pause</span>
+                        </>
                       ) : (
-                        <Play className="w-4 h-4 mr-2" />
+                        <>
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                          <span className="text-sm">Lecture</span>
+                        </>
                       )}
-                      {selectedEpisode.type === 'video' ? 'Regarder' : 'Écouter'}
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center justify-center border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors"
-                  title={`Télécharger le ${selectedEpisode.type === 'video' ? 'vidéo' : 'podcast'}`}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Télécharger
-                </button>
-                <button
-                  onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                  className={`flex items-center justify-center border px-3 py-2 rounded-lg text-sm transition-colors ${selectedEpisode && isFavorite(selectedEpisode.id)
-                      ? 'border-red-300 bg-red-50 text-red-600'
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  title="Ajouter aux favoris"
-                >
-                  <Heart className={`w-4 h-4 mr-2 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
-                  {selectedEpisode && isFavorite(selectedEpisode.id) ? 'Aimé' : 'J\'aime'}
-                </button>
+                    </button>
+
+                    <button
+                      onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
+                      className={`p-2 rounded-lg transition-all duration-200 border ${selectedEpisode && isFavorite(selectedEpisode.id)
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                        : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
+                        }`}
+                    >
+                      <Heart className={`w-4 h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
+                    </button>
+
+                    <button
+                      onClick={handleDownload}
+                      className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

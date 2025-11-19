@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import  api  from "@/lib/api";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 // Types d'événements basés sur votre base de données
 const TYPES_EVENEMENTS = {
@@ -679,17 +680,7 @@ const AgendaPage = () => {
   };
 
   if (chargement) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw
-            className="animate-spin mx-auto mb-4 text-blue-500"
-            size={32}
-          />
-          <p className="text-gray-600">Chargement de l'agenda...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Chargement de l'agenda" />;
   }
 
   return (

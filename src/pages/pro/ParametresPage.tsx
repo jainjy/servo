@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { professionalSettingsService } from "@/services/professionalSettings";
 import { useAuth } from "@/hooks/useAuth";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 const ParametresPage = () => {
   const { user } = useAuth();
@@ -132,14 +133,7 @@ const ParametresPage = () => {
   };
 
   if (chargement) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des paramètres...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Chargement des paramètres" />;
   }
 
   if (!parametres) {

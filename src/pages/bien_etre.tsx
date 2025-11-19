@@ -1,15 +1,17 @@
+// pages/BienEtre.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api"
-import { Headphones, Home, Video, MessageCircle, Activity, PencilIcon } from "lucide-react";
+import { Headphones, Home, Video, MessageCircle, Activity, PencilIcon, Sparkles, Leaf, Heart, Flame, Zap, Package } from "lucide-react";
 import PodcastCard from "@/components/PodcastCard";
-import BoutiqueBienEtre from "@/components/components/BoutiqueNaturel";
-//import Podcast from "@/pages/podcast";
+import BoutiqueNaturel from "@/components/components/BoutiqueNaturel";
 import ArtCommerce from "./ArtCommerce";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 import PodcastsBienEtre from "@/components/PodcastsBienEtre";
 import FormateurTabContent from "@/components/FormateurTabContent";
-
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 // Composant d'animation personnalisé
 const SlideIn = ({ children, direction = "left", delay = 0 }) => {
@@ -64,7 +66,7 @@ const SlideIn = ({ children, direction = "left", delay = 0 }) => {
   );
 };
 
-// Composant formulaire de rendez-vous - AGRANDI AVEC BOUTON FERMER EN CERCLE
+// Composant formulaire de rendez-vous
 const AppointmentForm = ({ isOpen, onClose, service }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -124,10 +126,8 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      {/* Modal agrandi - max-w-2xl au lieu de max-w-md */}
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
         <div className="p-8">
-          {/* En-tête avec bouton fermer en cercle */}
           <div className="flex justify-between items-start mb-8">
             <div className="flex-1">
               <h2 className="text-3xl font-bold text-gray-900">
@@ -137,7 +137,6 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
                 {service?.libelle}
               </p>
             </div>
-            {/* Bouton fermer en cercle */}
             <button
               onClick={onClose}
               className="h-12 w-12 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-200 flex items-center justify-center flex-shrink-0 ml-4"
@@ -149,7 +148,6 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
             </button>
           </div>
 
-          {/* Formulaire avec plus d'espace */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-6">
               <div>
@@ -249,7 +247,6 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
               </div>
             </div>
 
-            {/* Actions avec boutons plus grands */}
             <div className="flex gap-4 pt-6">
               <button
                 type="submit"
@@ -286,7 +283,7 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
   );
 };
 
-// Composant de petite carte moderne - SANS LE MODAL INTÉGRÉ
+// Composant de petite carte moderne
 const ServiceCard = ({ service, index, onOpenModal }) => {
   const { trackBienEtreServiceClick } = useBienEtreTracking();
 
@@ -298,7 +295,6 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
   return (
     <div className="group relative bg-white dark:bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-primary transform hover:-translate-y-2">
 
-      {/* Image */}
       <div className="relative h-56 overflow-hidden">
         <img
           src={service.images[0]}
@@ -307,25 +303,20 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-        {/* Prix badge */}
         <div className="absolute top-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-full shadow-xl font-bold">
           {service.price ? `${service.price}€` : "N/A"}
         </div>
       </div>
 
-      {/* Contenu */}
       <div className="p-6 space-y-4">
-        {/* Titre */}
         <h3 className="text-xl font-bold text-gray-800 dark:text-foreground group-hover:text-blue-600 dark:group-hover:text-primary transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
           {service.libelle || "Titre non disponible"}
         </h3>
 
-        {/* Description */}
         <p className="text-gray-600 dark:text-muted-foreground text-sm leading-relaxed line-clamp-3 min-h-[4rem]">
           {service.description || "Description non disponible"}
         </p>
 
-        {/* Bouton */}
         <button
           onClick={handleCardClick}
           className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 transform hover:scale-105 shadow-lg hover:shadow-xl"
@@ -337,7 +328,6 @@ const ServiceCard = ({ service, index, onOpenModal }) => {
         </button>
       </div>
 
-      {/* Effet de brillance au survol */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
     </div>
   );
@@ -347,18 +337,15 @@ const BienEtre = () => {
   const navigate = useNavigate();
   const section2Ref = useRef(null);
 
-  // États pour gérer le modal
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Initialisation du tracking
   const {
     trackBienEtreView,
     trackBienEtreSearch,
     trackBienEtreTabChange
   } = useBienEtreTracking();
 
-  // Track le chargement de la page
   useEffect(() => {
     trackBienEtreView();
   }, []);
@@ -370,7 +357,6 @@ const BienEtre = () => {
     });
   };
 
-  // Fonctions pour gérer le modal
   const handleOpenModal = (service) => {
     setSelectedService(service);
     setIsModalOpen(true);
@@ -381,10 +367,8 @@ const BienEtre = () => {
     setSelectedService(null);
   };
 
-  // State pour la tabulation
   const [activeTab, setActiveTab] = useState('Formateur');
 
-  // Configuration des tabs avec icônes SVG
   const tabs = [
     {
       id: 'Formateur',
@@ -403,13 +387,13 @@ const BienEtre = () => {
     },
     {
       id: 'Podcasteur',
-      label: 'Podcasts & Vidéos',
+      label: 'Podcasts',
       icon: <MessageCircle className="w-5 h-5" />
     },
     {
       id: 'BoutiqueNaturels',
       label: 'Boutique & produits naturels',
-      icon: <MessageCircle className="w-5 h-5" />
+      icon: <Package className="w-5 h-5" />
     },
   ];
 
@@ -421,7 +405,6 @@ const BienEtre = () => {
     BoutiqueNaturels: []
   });
 
-  // Track les changements d'onglet
   useEffect(() => {
     if (activeTab) {
       trackBienEtreTabChange(activeTab);
@@ -436,27 +419,12 @@ const BienEtre = () => {
       console.log("🎯 RÉPONSE COMPLÈTE DE L'API:", response);
       console.log("📦 DONNÉES BRUTES:", response.data);
 
-      // Debug détaillé de chaque catégorie
       if (response.data) {
         console.log("🔍 DÉTAIL PAR CATÉGORIE:");
         console.log("Formateur:", response.data.Formateur);
         console.log("Masseur:", response.data.Masseur);
         console.log("Thérapeute:", response.data.Thérapeute);
         console.log("Podcasteur:", response.data.Podcasteur);
-
-        // Vérifier la structure des données
-        if (response.data.Formateur && response.data.Formateur.length > 0) {
-          console.log("📝 STRUCTURE DU PREMIER SERVICE Formateur:", response.data.Formateur[0]);
-        }
-        if (response.data.Masseur && response.data.Masseur.length > 0) {
-          console.log("📝 STRUCTURE DU PREMIER SERVICE Masseur:", response.data.Masseur[0]);
-        }
-        if (response.data.Thérapeute && response.data.Thérapeute.length > 0) {
-          console.log("📝 STRUCTURE DU PREMIER SERVICE Thérapeute:", response.data.Thérapeute[0]);
-        }
-        if (response.data.Podcasteur && response.data.Podcasteur.length > 0) {
-          console.log("📝 STRUCTURE DU PREMIER SERVICE Podcasteur:", response.data.Podcasteur[0]);
-        }
       } else {
         console.warn("⚠️ AUCUNE DONNÉE DANS LA RÉPONSE");
       }
@@ -477,19 +445,16 @@ const BienEtre = () => {
     fetchServices();
   }, []);
 
-  // Ajouter un useEffect pour surveiller les changements de state
   useEffect(() => {
     console.log("🔄 SERVICES BY CATEGORY MIS À JOUR:", servicesByCategory);
   }, [servicesByCategory]);
 
-  // Ajouter un log quand on change d'onglet
   useEffect(() => {
     console.log(`📌 ONGLET ACTIF: ${activeTab}`);
     console.log(`📊 DONNÉES POUR ${activeTab}:`, servicesByCategory[activeTab]);
     console.log(`🔢 NOMBRE DE SERVICES: ${servicesByCategory[activeTab]?.length || 0}`);
   }, [activeTab, servicesByCategory]);
 
-  // Fonction pour obtenir tous les services
   const getAllServices = () => {
     const allServices = [
       ...(servicesByCategory.Formateur || []),
@@ -500,7 +465,6 @@ const BienEtre = () => {
     return allServices;
   };
 
-  // Fonction pour obtenir les services selon l'onglet actif
   const getCurrentServices = () => {
     if (activeTab === 'all') {
       return getAllServices();
@@ -508,10 +472,8 @@ const BienEtre = () => {
     return servicesByCategory[activeTab] || [];
   };
 
-  // Track la recherche
   const handleSearch = (query: string) => {
     trackBienEtreSearch(query);
-    // Implémentez votre logique de recherche ici
   };
 
   return (
@@ -555,7 +517,7 @@ const BienEtre = () => {
 
           {/* Menu de tabulation moderne */}
           <SlideIn direction="down">
-            <div className="bg-white dark:bg-card rounded-2xl shadow-lg px-2 py-5 mb-12 grid place-items-center grid-cols-2 lg:grid-cols-6 justify-center items-center w-full mx-auto">
+            <div className="bg-white dark:bg-card rounded-2xl shadow-lg px-2 py-5 mb-12 grid place-items-center grid-cols-2 lg:grid-cols-5 justify-center items-center w-full mx-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -588,7 +550,6 @@ const BienEtre = () => {
                 <FormateurTabContent 
                   onSelectCourse={(category, course) => {
                     console.log(`Formation sélectionnée: ${category} - ${course}`);
-                    // Vous pouvez ajouter la logique pour réserver ou afficher plus de détails
                   }}
                 />
               </SlideIn>
@@ -636,23 +597,73 @@ const BienEtre = () => {
                 </SlideIn>
               </section>
             )}
+
+            {/* PODCASTS */}
             {activeTab === 'Podcasteur' && (
-              <>
-                <PodcastsBienEtre />
-              </>
+              <section className="mb-20">
+                <SlideIn direction="right">
+                  <PodcastsBienEtre />
+                </SlideIn>
+              </section>
             )}
 
+            {/* BOUTIQUE NATURELS */}
             {activeTab === 'BoutiqueNaturels' && (
-              <>
-                <BoutiqueBienEtre />
-              </>
+              <section className="mb-20">
+                <SlideIn direction="left">
+                  <div className="mb-12">
+                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                      Boutique & Produits Naturels
+                    </h2>
+                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
+                      Découvrez notre sélection de produits naturels et biologiques pour votre bien-être au quotidien. 
+                      Huiles essentielles, thés bio, compléments alimentaires et accessoires de qualité.
+                    </p>
+
+                    {/* Navigation rapide vers les catégories */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                      {[
+                        { name: "Huiles Essentielles", icon: Sparkles, route: "huiles-essentielles" },
+                        { name: "Thés & Infusions", icon: Leaf, route: "thes-infusions" },
+                        { name: "Soins Bien-être", icon: Heart, route: "soins-bien-etre" },
+                        { name: "Compléments", icon: Flame, route: "complements-alimentaires" },
+                        { name: "Ambiance", icon: Zap, route: "ambiance-relaxation" },
+                        { name: "Accessoires", icon: Package, route: "accessoires" }
+                      ].map((cat) => (
+                        <button
+                          key={cat.name}
+                          onClick={() => navigate(`/produits-naturels/categorie/${cat.route}`)}
+                          className="bg-white dark:bg-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-border hover:border-slate-900 group"
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <cat.icon className="h-6 w-6 text-slate-900 dark:text-foreground group-hover:text-slate-700" />
+                            <span className="text-xs font-medium text-gray-700 dark:text-foreground group-hover:text-slate-900">
+                              {cat.name}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Bouton pour voir tous les produits */}
+                    <div className="text-center mt-8">
+                      <Button
+                        onClick={() => navigate('/produits-naturels')}
+                        className="bg-slate-900 hover:bg-slate-700 text-white px-8 py-3"
+                      >
+                        Voir tous les produits naturels
+                      </Button>
+                    </div>
+                  </div>
+                </SlideIn>
+              </section>
             )}
 
           </div>
         </div>
       </div>
 
-      {/* MODAL AU NIVEAU RACINE - AGRANDI AVEC BOUTON FERMER EN CERCLE */}
+      {/* MODAL AU NIVEAU RACINE */}
       <AppointmentForm
         isOpen={isModalOpen}
         onClose={handleCloseModal}

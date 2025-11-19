@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import api from "@/lib/api"
+import { useAuth } from "@/hooks/useAuth"
 
 interface TourismeBooking {
   id: string;
@@ -69,22 +70,25 @@ interface RatingData {
 }
 
 export function ProPerformanceCharts() {
+  const { user } = useAuth()
   const [revenueData, setRevenueData] = useState<RevenueData[]>([])
   const [ratingData, setRatingData] = useState<RatingData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchChartData()
-  }, [])
+    if (user?.id) {
+      fetchChartData()
+    }
+  }, [user?.id])
 
   const fetchChartData = async () => {
     try {
       setLoading(true)
-      
+
       // Récupérer les réservations pour les revenus
       const bookingsResponse = await api.get('/tourisme-bookings?limit=1000')
       let bookings: TourismeBooking[] = []
-      
+
       if (bookingsResponse.data.success) {
         if (bookingsResponse.data.data) {
           if (Array.isArray(bookingsResponse.data.data)) {
@@ -99,7 +103,8 @@ export function ProPerformanceCharts() {
         bookings = bookingsResponse.data.bookings
       }
 
-      console.log('Bookings chargés:', bookings.length)
+      const filteredBookings = bookings.filter(booking => booking.listing.provider === user?.id)
+      console.log('Bookings chargés:', filteredBookings.length, 'sur', bookings.length)
 
       // Récupérer les avis pour les notes
       let reviews: Review[] = []
@@ -124,12 +129,16 @@ export function ProPerformanceCharts() {
 
       console.log('Reviews chargés:', reviews.length)
 
+      // Filter reviews to only include those for the current professional's listings
+      const proListingIds = new Set(filteredBookings.map(b => b.listing.id))
+      const filteredReviews = reviews.filter(review => proListingIds.has(review.listingId))
+
       // Calcul des données de revenus pour les 7 derniers jours
-      const revenueChartData = calculateRevenueData(bookings)
+      const revenueChartData = calculateRevenueData(filteredBookings)
       setRevenueData(revenueChartData)
 
       // Calcul des données de notation pour les 6 derniers mois
-      const ratingChartData = calculateRatingData(reviews, bookings)
+      const ratingChartData = calculateRatingData(filteredReviews, filteredBookings)
       setRatingData(ratingChartData)
 
     } catch (error) {

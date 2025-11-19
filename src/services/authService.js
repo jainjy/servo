@@ -1,4 +1,3 @@
-
 import api from "@/lib/api";
 
 // Rôles d'utilisateur
@@ -86,7 +85,7 @@ class AuthService {
       this.setAuthData(user, token);
       this.startTokenRefresh();
 
-      return { user, token };
+      return { user, token,route: AuthService.getRoleBasedRedirect() };
     } catch (error) {
       throw this.handleError(error, "Erreur lors de l'inscription");
     }
@@ -96,7 +95,10 @@ class AuthService {
   static async signupPro(userData, amount, planId) {
     try {
       const response = await api.post("/auth/signup-pro", {
-        utilisateur: userData,
+        utilisateur: {
+          ...userData,
+          metiers: userData.metiers || [], // AJOUT: Inclure les métiers
+        },
         amount,
         planId,
       });

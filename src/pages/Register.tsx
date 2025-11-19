@@ -110,33 +110,47 @@ const RegisterPage = () => {
     // 🎯 LOGIQUE DE L'ÉTAPE 1 : Validation de base et passage à l'étape 2
     if (step === 1) {
       // 1. Vérification des champs de base
-      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-        toast.error("Veuillez remplir toutes les informations personnelles requises");
+      if (
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.email ||
+        !formData.phone
+      ) {
+        toast.error(
+          "Veuillez remplir toutes les informations personnelles requises"
+        );
         return;
       }
-      
+
       // 🛑 NOTA BENE : La vérification des conditions (acceptTerms) est maintenant ignorée ici.
-      
+
       // 2. Si tout est bon, on passe à l'étape 2
       setStep(2);
       return;
     }
-    
-//     if (step === 1) {
-//   // Vérifie les champs de base
-//   if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-//     toast.error("Veuillez remplir toutes les informations requises");
-//     return;
-//   }
-//   // Passe à l'étape 2 (les conditions RGPD seront ici)
-//   setStep(2);
-//   return;
-// }
 
-// if (!formData.acceptTerms) {
-//   toast.error("Veuillez accepter les conditions d'utilisation et la politique de confidentialité");
-//   return;
-// }
+    if (step === 1) {
+      // Vérifie les champs de base
+      if (
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.email ||
+        !formData.phone
+      ) {
+        toast.error("Veuillez remplir toutes les informations requises");
+        return;
+      }
+      // Passe à l'étape 2 (les conditions RGPD seront ici)
+      setStep(2);
+      return;
+    }
+
+    if (!formData.acceptTerms) {
+      toast.error(
+        "Veuillez accepter les conditions d'utilisation et la politique de confidentialité"
+      );
+      return;
+    }
 
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
@@ -250,13 +264,17 @@ const RegisterPage = () => {
                     alt="Logo"
                   />
                 </div>
-                <h1 className="text-2xl redhawk tracking-wide font-bold">SERVO</h1>
+                <h1 className="text-2xl redhawk tracking-wide font-bold">
+                  SERVO
+                </h1>
               </div>
               <p className="text-md font-semibold">
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
               </p>
               <p className="text-blue-100 text-sm mt-2">
-                Des biens immobiliers, ses services additionnels, produits adaptés à vos besoins et vos locations au sein d'une seule plateforme
+                Des biens immobiliers, ses services additionnels, produits
+                adaptés à vos besoins et vos locations au sein d'une seule
+                plateforme
               </p>
             </div>
 
@@ -309,12 +327,14 @@ const RegisterPage = () => {
 
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${step === 1 ? "bg-blue-600" : "bg-green-500"
-                        }`}
+                      className={`w-3 h-3 rounded-full ${
+                        step === 1 ? "bg-blue-600" : "bg-green-500"
+                      }`}
                     ></div>
                     <div
-                      className={`w-3 h-3 rounded-full ${step === 2 ? "bg-blue-600" : "bg-gray-300"
-                        }`}
+                      className={`w-3 h-3 rounded-full ${
+                        step === 2 ? "bg-blue-600" : "bg-gray-300"
+                      }`}
                     ></div>
                   </div>
                 </div>
@@ -354,7 +374,7 @@ const RegisterPage = () => {
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
-                              }
+                            }
                             required
                           />
                         </div>
@@ -422,8 +442,6 @@ const RegisterPage = () => {
                           </Select>
                         </div>
                       )}
-
-                      
                     </>
                   ) : (
                     <>
@@ -438,18 +456,20 @@ const RegisterPage = () => {
                             {metiersList.map((metier) => (
                               <div
                                 key={metier.id}
-                                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${formData.metiers.includes(metier.id)
+                                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                                  formData.metiers.includes(metier.id)
                                     ? "border-blue-500 bg-blue-50"
                                     : "border-gray-300 hover:border-gray-400"
-                                  }`}
+                                }`}
                                 onClick={() => handleMetierToggle(metier.id)}
                               >
                                 <div className="flex items-center gap-3">
                                   <div
-                                    className={`w-5 h-5 rounded-full border-2 ${formData.metiers.includes(metier.id)
+                                    className={`w-5 h-5 rounded-full border-2 ${
+                                      formData.metiers.includes(metier.id)
                                         ? "border-blue-500 bg-blue-500"
                                         : "border-gray-400"
-                                      }`}
+                                    }`}
                                   ></div>
                                   <span className="text-sm font-medium">
                                     {metier.libelle}
@@ -564,8 +584,8 @@ const RegisterPage = () => {
                             </Button>
                           </div>
                           <p className="text-[10px] text-gray-500">
-                           * Minimum 8 caractères avec majuscules, minuscules et
-                            chiffres
+                            * Minimum 8 caractères avec majuscules, minuscules
+                            et chiffres
                           </p>
                         </div>
 
@@ -647,14 +667,18 @@ const RegisterPage = () => {
                             id="importedContactsConsent"
                             checked={formData.importedContactsConsent || false}
                             onCheckedChange={(checked) =>
-                              handleInputChange("importedContactsConsent", checked as boolean)
+                              handleInputChange(
+                                "importedContactsConsent",
+                                checked as boolean
+                              )
                             }
                           />
                           <label
                             htmlFor="importedContactsConsent"
                             className="text-xs text-gray-600 leading-snug cursor-pointer"
                           >
-                            Les personnes qui utilisent notre service ont pu importer vos coordonnées sur{" "}
+                            Les personnes qui utilisent notre service ont pu
+                            importer vos coordonnées sur{" "}
                             <span className="font-semibold">Servo</span>.{" "}
                             <a
                               href="/en-savoir-plus"
@@ -684,8 +708,9 @@ const RegisterPage = () => {
                     )}
                     <Button
                       type="submit"
-                      className={`${step === 2 ? "flex-1" : "w-full"
-                        } h-11 bg-gradient-to-r from-slate-500 to-slate-900 hover:from-slate-600 hover:to-blue-700 text-white font-semibold`}
+                      className={`${
+                        step === 2 ? "flex-1" : "w-full"
+                      } h-11 bg-gradient-to-r from-slate-500 to-slate-900 hover:from-slate-600 hover:to-blue-700 text-white font-semibold`}
                       disabled={isLoading}
                     >
                       {isLoading ? (

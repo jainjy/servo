@@ -107,9 +107,8 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
-import RenovationChantiers from "./pages/batiments/RenovationChantiers";
 import PodcastsBatiment from './components/PodcastsBatiment';
-import PodcastsAssuranceFinance from "./components/PodcastsAssuranceFinance";
+import PodcastsAssuranceFinance from "./components/PodcastsCreditAssurance";
 import PodcastsAlimentation from "./components/PodcastsAlimentation";
 import PodcastsInvestissement from "./components/PodcastsInvestissement";
 import PodcastsTourisme from "./components/PodcastsTourisme";
@@ -136,20 +135,17 @@ import AuditsPage from "./pages/admin/AdminAuditPage";
 import AidesFinancement from "./components/components/Aide_finance";
 import FormationsFinancement from "./components/components/Formation_finance";
 import ComptabiliteServices from "./components/components/Comptabilite";
-import ComptabiliteEntrepreneur from "./components/components/Comptabilite";
 import PodcastsImmobilier from "./components/PodcastsImmobilier";
-import PodcastsDomicile from "./components/components/PodcastsDomicil";
+import PodcastsDomicile from "./components/PodcastsDomicil";
 import PodcastsBienEtre from "./components/PodcastsBienEtre";
 import LieuxHistoriques from "./components/components/Tourisme_lieux";
 import ConstructionServicesPage from "./pages/BatimentPage";
 import PricingPacksDisplay from "./components/components/PackComplet";
 import AgendaPage from "./pages/mon-compte/AgendaPage";
 import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
-
-// 🗺️ IMPORT DE LA PAGE CARTE
+import PlanAdministratifServices from "./components/components/Plan_Administratifs";
 import MapPage from "./pages/MapPage";
-import MapDebug from "./components/MapDebug";
-
+import BoutiqueNaturel from "./components/components/BoutiqueNaturel";
 
 const queryClient = new QueryClient();
 
@@ -244,6 +240,10 @@ const App = () => {
                     element={<FormationsTourisme />}
                   />
                   <Route
+                    path="/plan_administratif"
+                    element={<PlanAdministratifServices />}
+                  />
+                  <Route
                     path="/podcasts/immobilier"
                     element={<PodcastsImmobilier />}
                   />
@@ -324,6 +324,9 @@ const App = () => {
                     path="/produits-commerces"
                     element={<DomicileLayout />}
                   />
+                  // Dans App.jsx
+                  <Route path="/produits-naturels" element={<BoutiqueNaturel />} />
+                  <Route path="/produits-naturels/categorie/:categoryName" element={<BoutiqueNaturel />} />
                   <Route
                     path="/comptabilite"
                     element={
@@ -378,11 +381,11 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
-                  
+
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
-                  <Route path="/debug-map" element={<MapDebug />} />
-                  
+
+
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"

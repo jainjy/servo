@@ -27,6 +27,7 @@ const ProfessionalSubscriptionPage = () => {
       const response = await subscriptionPlansAPI.getAllPlans();
 
       if (response.success) {
+        console.log("Plans récupérés:", response.data);
         // Mapper les données de l'API avec les icônes appropriées
         const plansWithIcons = response.data.map((plan) => {
           let icon;
@@ -87,7 +88,7 @@ const ProfessionalSubscriptionPage = () => {
         "Certification vérifiée",
         "Mise en avant des annonces",
       ],
-      userTypes: ["VENDEUR", "LOUEUR"],
+      userTypes: ["AGENCE"],
     },
     {
       id: "services",
@@ -214,12 +215,14 @@ const ProfessionalSubscriptionPage = () => {
     // Redirection vers la page d'inscription avec les données de l'abonnement
     navigate("/register/professional/form", {
       state: {
-        subscriptionData: { // The API should return the numeric ID as `id`
+        subscriptionData: {
+          // The API should return the numeric ID as `id`
           planId: selectedPlan,
           planTitle: selectedPlanData?.title,
           price: selectedPlanData?.price,
           period: selectedPlanData?.period,
           userTypes: selectedPlanData?.userTypes,
+          truePlanId: selectedPlanData?.truePlanId,
         },
       },
     });

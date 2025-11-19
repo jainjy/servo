@@ -16,7 +16,7 @@ interface TourismListing {
   idUnique: string;
   idPrestataire: string;
   title: string;
-  type: 'hotel' | 'apartment' | 'villa' | 'guesthouse';
+  type: 'hotel' | 'apartment' | 'villa' | 'guesthouse' | 'touristic_place';
   price: number;
   city: string;
   lat: number;
@@ -35,6 +35,7 @@ interface TourismListing {
   instantBook?: boolean;
   cancellationPolicy?: string;
   featured?: boolean;
+  isTouristicPlace?: boolean;
 }
 
 interface SearchFilters {
@@ -96,7 +97,7 @@ export const TourismSection = () => {
     children: 0,
     infants: 0,
     minPrice: 0,
-    maxPrice: 1000,
+    maxPrice: 100000, // Augmenté pour inclure tous les listings
     type: [],
     rating: 0,
     amenities: [],
@@ -139,6 +140,86 @@ export const TourismSection = () => {
     { city: string; price: number; image: string }[]
   >([]);
 
+  // Fonction pour réinitialiser complètement les filtres
+  const resetAllFilters = () => {
+    const resetFilters = {
+      destination: '',
+      checkIn: '',
+      checkOut: '',
+      guests: 2,
+      adults: 2,
+      children: 0,
+      infants: 0,
+      minPrice: 0,
+      maxPrice: 100000,
+      type: [],
+      rating: 0,
+      amenities: [],
+      instantBook: false
+    };
+    
+    setFilters(resetFilters);
+    console.log('🔄 Filtres complètement réinitialisés');
+  };
+
+  // Debug useEffect pour surveiller la synchronisation
+  useEffect(() => {
+    console.log('🔍 État actuel - Listings:', listings.length);
+    console.log('🔍 État actuel - FilteredListings:', filteredListings.length);
+    
+    // FORCER la synchronisation si incohérence
+    if (listings.length !== filteredListings.length) {
+      console.warn('⚠️ INCOHÉRENCE DÉTECTÉE: listings != filteredListings');
+      console.warn('Forcer la synchronisation...');
+      setFilteredListings(listings);
+    }
+  }, [listings, filteredListings]);
+
+  // Fonction pour analyser pourquoi les listings sont filtrés
+  const analyzeFiltering = (listings: TourismListing[], currentFilters: SearchFilters) => {
+    console.log('🔍 ANALYSE DES FILTRES:');
+    
+    let filteredCount = 0;
+    
+    listings.forEach(listing => {
+      const matchesDestination = !currentFilters.destination || 
+        listing.city.toLowerCase().includes(currentFilters.destination.toLowerCase()) ||
+        listing.title.toLowerCase().includes(currentFilters.destination.toLowerCase());
+      
+      const matchesType = currentFilters.type.length === 0 || 
+        currentFilters.type.includes(listing.type);
+      
+      const matchesRating = listing.rating >= currentFilters.rating;
+      
+      const matchesAmenities = currentFilters.amenities.length === 0 ||
+        currentFilters.amenities.every(amenity => listing.amenities.includes(amenity));
+      
+      const matchesInstantBook = !currentFilters.instantBook || (listing.instantBook ?? false);
+      
+      const matchesPrice = listing.price >= currentFilters.minPrice && 
+        listing.price <= currentFilters.maxPrice;
+      
+      const isFiltered = !matchesDestination || !matchesType || !matchesRating || 
+        !matchesAmenities || !matchesInstantBook || !matchesPrice;
+      
+      if (isFiltered) {
+        filteredCount++;
+        console.log(`❌ ${listing.title} est filtré car:`, {
+          destination: !matchesDestination,
+          type: !matchesType,
+          rating: !matchesRating && `rating=${listing.rating} < filtre=${currentFilters.rating}`,
+          amenities: !matchesAmenities,
+          instantBook: !matchesInstantBook,
+          price: !matchesPrice && `prix=${listing.price} hors [${currentFilters.minPrice}-${currentFilters.maxPrice}]`,
+          prixListing: listing.price,
+          prixMaxFiltre: currentFilters.maxPrice
+        });
+      }
+    });
+    
+    console.log(`📊 Total filtré: ${filteredCount}/${listings.length}`);
+  };
+
   // TRACKING: Chargement des hébergements
   useEffect(() => {
     if (listings.length > 0) {
@@ -158,8 +239,13 @@ export const TourismSection = () => {
         const response = await api.get("/tourisme");
 
         if (response.data.success && Array.isArray(response.data.data)) {
+          // Filtrer pour n'avoir que les hébergements (pas les lieux touristiques)
+          const accommodationsOnly = response.data.data.filter((item: any) => 
+            !item.isTouristicPlace && item.type !== 'touristic_place'
+          );
+          
           // Regrouper les hébergements par ville
-          const grouped = response.data.data.reduce((acc: any, listing: any) => {
+          const grouped = accommodationsOnly.reduce((acc: any, listing: any) => {
             const city = listing.city || "Inconnue";
             if (!acc[city]) {
               acc[city] = {
@@ -205,29 +291,57 @@ export const TourismSection = () => {
     }
   };
 
-  // Récupération des données depuis l'API avec Axios
+  // Récupération des données depuis l'API avec Axios - UNIQUEMENT les hébergements
   useEffect(() => {
     const fetchTourismeData = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/tourisme");
+        // Utiliser le endpoint spécifique pour les hébergements
+        const response = await api.get("/admin/tourisme/accommodations");
 
         if (response.data.success && Array.isArray(response.data.data)) {
-          setListings(response.data.data);
-          setFilteredListings(response.data.data);
+          const listingsData = response.data.data;
+          
+          // Filtrer une fois de plus côté client pour être sûr
+          const accommodationsOnly = listingsData.filter((listing: TourismListing) => 
+            !listing.isTouristicPlace && listing.type !== 'touristic_place'
+          );
+          
+          setListings(accommodationsOnly);
+          resetAllFilters();
+          setFilteredListings(accommodationsOnly);
+
+          console.log('✅ Hébergements chargés:', accommodationsOnly.length);
+          console.log('✅ Filtres réinitialisés - devrait montrer tous les hébergements');
+
+          // Initialiser les index d'images
+          const initialIndexes: { [key: string]: number } = {};
+          accommodationsOnly.forEach((listing: TourismListing) => {
+            initialIndexes[listing.id] = 0;
+          });
+          setCurrentImageIndex(initialIndexes);
+
         } else {
           console.error("Réponse inattendue :", response.data);
         }
-
-        // Initialiser les index d'images
-        const initialIndexes: { [key: string]: number } = {};
-        (response.data.data || []).forEach((listing: any) => {
-          initialIndexes[listing.id] = 0;
-        });
-        setCurrentImageIndex(initialIndexes);
-
       } catch (error) {
         console.error("Erreur lors du chargement des hébergements :", error);
+        // Fallback: utiliser l'endpoint général avec filtrage côté client
+        try {
+          const fallbackResponse = await api.get("/tourisme");
+          if (fallbackResponse.data.success && Array.isArray(fallbackResponse.data.data)) {
+            const allData = fallbackResponse.data.data;
+            const accommodationsOnly = allData.filter((item: any) => 
+              !item.isTouristicPlace && item.type !== 'touristic_place'
+            );
+            setListings(accommodationsOnly);
+            resetAllFilters();
+            setFilteredListings(accommodationsOnly);
+            console.log('✅ Hébergements chargés (fallback):', accommodationsOnly.length);
+          }
+        } catch (fallbackError) {
+          console.error("Erreur fallback:", fallbackError);
+        }
       } finally {
         setLoading(false);
       }
@@ -240,34 +354,52 @@ export const TourismSection = () => {
   useEffect(() => {
     let results = listings;
 
+    console.log('🎯 DÉBUT FILTRAGE - Filtres actuels:', filters);
+    console.log('🎯 Listings avant filtrage:', listings.length);
+
     if (filters.destination) {
       results = results.filter(listing =>
         listing.city.toLowerCase().includes(filters.destination.toLowerCase()) ||
         listing.title.toLowerCase().includes(filters.destination.toLowerCase())
       );
+      console.log('🎯 Après filtre destination:', results.length);
     }
 
     if (filters.type.length > 0) {
       results = results.filter(listing => filters.type.includes(listing.type));
+      console.log('🎯 Après filtre type:', results.length);
     }
 
     if (filters.rating > 0) {
       results = results.filter(listing => listing.rating >= filters.rating);
+      console.log('🎯 Après filtre rating:', results.length);
     }
 
     if (filters.amenities.length > 0) {
       results = results.filter(listing =>
         filters.amenities.every(amenity => listing.amenities.includes(amenity))
       );
+      console.log('🎯 Après filtre amenities:', results.length);
     }
 
     if (filters.instantBook) {
-      results = results.filter(listing => listing.instantBook);
+      results = results.filter(listing => listing.instantBook ?? false);
+      console.log('🎯 Après filtre instantBook:', results.length);
     }
 
     results = results.filter(listing =>
       listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
+    console.log('🎯 Après filtre prix:', results.length);
+
+    // ANALYSE DES FILTRES
+    analyzeFiltering(listings, filters);
+
+    console.log('🔍 Filtrage appliqué:', {
+      total: listings.length,
+      filtrés: results.length,
+      filtres: filters
+    });
 
     setFilteredListings(results);
   }, [filters, listings]);
@@ -277,16 +409,20 @@ export const TourismSection = () => {
     setLoading(true);
 
     try {
-      // Utilisation de l'API pour la recherche
-      const response = await api.get("/tourisme", {
+      // Utilisation de l'API pour la recherche DANS LES HÉBERGEMENTS SEULEMENT
+      const response = await api.get("/admin/tourisme/accommodations", {
         params: {
           destination: filters.destination,
-          // Ajouter d'autres paramètres de recherche si nécessaire
+          search: filters.destination,
+          city: filters.destination
         }
       });
 
       if (response.data.success) {
-        setListings(response.data.data);
+        const accommodationsOnly = response.data.data.filter((listing: TourismListing) => 
+          !listing.isTouristicPlace && listing.type !== 'touristic_place'
+        );
+        setListings(accommodationsOnly);
 
         // TRACKING: Recherche effectuée
         trackTourismInteraction('search', 'Recherche hébergements', 'search', {
@@ -298,6 +434,24 @@ export const TourismSection = () => {
       }
     } catch (error) {
       console.error("Erreur lors de la recherche :", error);
+      // Fallback: recherche sur l'endpoint général avec filtrage
+      try {
+        const fallbackResponse = await api.get("/tourisme", {
+          params: {
+            destination: filters.destination,
+            search: filters.destination
+          }
+        });
+        if (fallbackResponse.data.success) {
+          const allData = fallbackResponse.data.data;
+          const accommodationsOnly = allData.filter((item: any) => 
+            !item.isTouristicPlace && item.type !== 'touristic_place'
+          );
+          setListings(accommodationsOnly);
+        }
+      } catch (fallbackError) {
+        console.error("Erreur fallback recherche:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -355,57 +509,72 @@ export const TourismSection = () => {
     setShowBookingModal(true);
   };
 
-  const confirmBooking = async () => {
-    setBookingLoading(true);
-    try {
-      // Vérifier que l'utilisateur est connecté avec le hook useAuth
-      if (!isAuthenticated || !currentUser) {
-        alert('Veuillez vous connecter pour effectuer une réservation');
-        setBookingLoading(false);
-        return;
-      }
-
-      // Inclure l'userId dans les données de réservation
-      const bookingData = {
-        ...bookingForm,
-        userId: currentUser.id
-      };
-
-      const response = await api.post("/tourisme-bookings", bookingData);
-
-      if (response.data.success) {
-        setBookingSuccess(response.data);
-
-        // TRACKING: Réservation confirmée
-        if (response.data.success && selectedListing) {
-          await trackTourismInteraction(selectedListing.id, selectedListing.title, 'booking_confirmed', {
-            bookingId: response.data.data.id,
-            totalAmount: response.data.data.totalAmount
-          });
-        }
-
-        // Réinitialiser le formulaire
-        setBookingForm({
-          listingId: '',
-          checkIn: '',
-          checkOut: '',
-          guests: 2,
-          adults: 2,
-          children: 0,
-          infants: 0,
-          specialRequests: '',
-          paymentMethod: 'card'
-        });
-      } else {
-        throw new Error(response.data.error);
-      }
-    } catch (error: any) {
-      console.error("Erreur lors de la réservation :", error);
-      alert(error.response?.data?.error || 'Erreur lors de la réservation. Veuillez réessayer.');
-    } finally {
+const confirmBooking = async () => {
+  setBookingLoading(true);
+  try {
+    if (!isAuthenticated || !currentUser) {
+      alert('Veuillez vous connecter pour effectuer une réservation');
       setBookingLoading(false);
+      return;
     }
-  };
+
+    // 🚨 On enlève userId du body !
+    const bookingData = {
+      listingId: bookingForm.listingId,
+      checkIn: bookingForm.checkIn,
+      checkOut: bookingForm.checkOut,
+      guests: bookingForm.guests,
+      adults: bookingForm.adults,
+      children: bookingForm.children,
+      infants: bookingForm.infants,
+      specialRequests: bookingForm.specialRequests,
+      paymentMethod: bookingForm.paymentMethod,
+    };
+
+    // 🔥 USER ID EST ENVOYÉ UNIQUEMENT DANS L'URL
+    const response = await api.post(
+      `/tourisme-bookings/${currentUser.id}`,
+      bookingData
+    );
+
+    if (response.data.success) {
+      setBookingSuccess(response.data);
+
+      // tracking (inchangé)
+      if (selectedListing) {
+        await trackTourismInteraction(
+          selectedListing.id,
+          selectedListing.title,
+          "booking_confirmed",
+          {
+            bookingId: response.data.data.id,
+            totalAmount: response.data.data.totalAmount,
+          }
+        );
+      }
+
+      // Réinitialiser
+      setBookingForm({
+        listingId: "",
+        checkIn: "",
+        checkOut: "",
+        guests: 2,
+        adults: 2,
+        children: 0,
+        infants: 0,
+        specialRequests: "",
+        paymentMethod: "card",
+      });
+    } else {
+      throw new Error(response.data.error);
+    }
+  } catch (error: any) {
+    console.error("Erreur lors de la réservation :", error);
+    alert(error.response?.data?.error || "Erreur lors de la réservation");
+  } finally {
+    setBookingLoading(false);
+  }
+};
 
   const closeBookingModal = () => {
     setShowBookingModal(false);
@@ -535,7 +704,7 @@ export const TourismSection = () => {
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            Tourisme & Hébergements
+            Hébergements Touristiques
           </h2>
           <p
             className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
@@ -758,21 +927,7 @@ export const TourismSection = () => {
               <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
                 <button
                   type="button"
-                  onClick={() => setFilters({
-                    destination: '',
-                    checkIn: '',
-                    checkOut: '',
-                    guests: 2,
-                    adults: 2,
-                    children: 0,
-                    infants: 0,
-                    minPrice: 0,
-                    maxPrice: 1000,
-                    type: [],
-                    rating: 0,
-                    amenities: [],
-                    instantBook: false
-                  })}
+                  onClick={resetAllFilters}
                   className="text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
                 >
                   Réinitialiser les filtres

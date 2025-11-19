@@ -1,6 +1,6 @@
-// components/PodcastsEntreprise.tsx
+// components/PodcastsCreditAssurance.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download, Video, Building } from 'lucide-react';
+import { Play, Headphones, Clock, Heart, Star, Download, Video, Shield, CreditCard } from 'lucide-react';
 import { MediaService } from '../lib/api';
 
 interface VideoEpisode {
@@ -19,7 +19,7 @@ interface VideoEpisode {
   fileSize?: number;
 }
 
-const PodcastsEntreprise: React.FC = () => {
+const PodcastsCreditAssurance: React.FC = () => {
   const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,17 +30,6 @@ const PodcastsEntreprise: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
-
-  // Images par défaut pour les vidéos sans thumbnail
-  const defaultThumbnails = [
-    "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-    "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-  ];
-
-  // Image de background pour le titre
-  const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
-
 
   // États pour la barre de progression
   const [currentTime, setCurrentTime] = useState(0);
@@ -97,18 +86,28 @@ const PodcastsEntreprise: React.FC = () => {
     }
   };
 
-  // Charger les vidéos de la catégorie Entreprise
+  // Images par défaut pour les vidéos sans thumbnail
+  const defaultThumbnails = [
+    "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+    "https://images.unsplash.com/photo-1563013546-7e5c7d0c94c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+  ];
+
+  // Image de background pour le titre
+  const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
+
+  // Charger les vidéos de la catégorie Crédit & Assurance
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        console.log('🔄 Début du chargement des vidéos Entreprise...');
+        console.log('🔄 Début du chargement des vidéos Crédit & Assurance...');
 
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({
-          category: 'Entreprise',
+          category: 'Crédit & Assurance',
           limit: 50
         });
 
@@ -135,9 +134,9 @@ const PodcastsEntreprise: React.FC = () => {
           console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
           console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
 
-          const entrepriseVideos: VideoEpisode[] = apiData.data
+          const creditAssuranceVideos: VideoEpisode[] = apiData.data
             .filter((video: any) => {
-              const isEntreprise = video.category === "Entreprise";
+              const isCreditAssurance = video.category === "Crédit & Assurance";
               const isActive = video.isActive !== false;
               const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
 
@@ -145,13 +144,13 @@ const PodcastsEntreprise: React.FC = () => {
                 id: video.id,
                 title: video.title,
                 category: video.category,
-                isEntreprise: isEntreprise,
+                isCreditAssurance: isCreditAssurance,
                 isActive: isActive,
                 hasVideoUrl: hasVideoUrl,
                 videoUrl: video.videoUrl
               });
 
-              const shouldInclude = isEntreprise && isActive && hasVideoUrl;
+              const shouldInclude = isCreditAssurance && isActive && hasVideoUrl;
               console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
 
               return shouldInclude;
@@ -184,12 +183,12 @@ const PodcastsEntreprise: React.FC = () => {
               return mappedVideo;
             });
 
-          console.log('🎉 Vidéos Entreprise après filtrage:', entrepriseVideos.length);
-          console.log('📺 Liste complète des vidéos filtrées:', entrepriseVideos);
+          console.log('🎉 Vidéos Crédit & Assurance après filtrage:', creditAssuranceVideos.length);
+          console.log('📺 Liste complète des vidéos filtrées:', creditAssuranceVideos);
 
-          setVideoEpisodes(entrepriseVideos);
+          setVideoEpisodes(creditAssuranceVideos);
 
-          if (entrepriseVideos.length === 0) {
+          if (creditAssuranceVideos.length === 0) {
             console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
             console.log('🔍 Contenu de apiData.data:', apiData.data);
           }
@@ -263,6 +262,7 @@ const PodcastsEntreprise: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
+      'Crédit & Assurance': 'bg-gradient-to-r from-teal-500 to-blue-500',
       'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
       'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
       'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
@@ -285,11 +285,11 @@ const PodcastsEntreprise: React.FC = () => {
     console.log('🎬 Rendu de VideoCard pour:', episode.title);
     return (
       <div
-        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-purple-600' : 'border-gray-200'
+        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-teal-600' : 'border-gray-200'
           }`}
       >
         {episode.featured && (
-          <div className="bg-purple-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
+          <div className="bg-teal-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
             ⭐ Vidéo en vedette
           </div>
         )}
@@ -308,10 +308,11 @@ const PodcastsEntreprise: React.FC = () => {
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
 
+
           {/* Bouton play overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
-              <Video className="w-8 h-8 text-purple-600" />
+              <Video className="w-8 h-8 text-teal-600" />
             </div>
           </div>
         </div>
@@ -327,7 +328,7 @@ const PodcastsEntreprise: React.FC = () => {
             </div>
           </div>
 
-          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-purple-600 transition-colors line-clamp-2">
+          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-teal-600 transition-colors line-clamp-2">
             {episode.title}
           </h4>
 
@@ -349,7 +350,7 @@ const PodcastsEntreprise: React.FC = () => {
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
               }}
-              className="flex items-center px-4 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition-colors group/btn"
+              className="flex items-center px-4 py-2 rounded-lg text-white bg-teal-600 hover:bg-teal-700 transition-colors group/btn"
             >
               <Video className="w-4 h-4 mr-2" />
               Regarder
@@ -372,8 +373,8 @@ const PodcastsEntreprise: React.FC = () => {
       <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col justify-center items-center h-64">
-            <img src="/loading.gif" alt="" />
-            <div className="text-gray-600">Chargement des vidéos Entreprise...</div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
+            <div className="text-gray-600">Chargement des vidéos Crédit & Assurance...</div>
           </div>
         </div>
       </div>
@@ -406,12 +407,12 @@ const PodcastsEntreprise: React.FC = () => {
           <div className="text-center text-white">
             {/* Titre Principal */}
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Podcast <span className="text-purple-400">Entreprise</span>
+              Podcast <span className="text-teal-400">Crédit & Assurance</span>
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-md md:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
-              Stratégies de croissance, management, innovation et conseils pour entrepreneurs
+            <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
+              Conseils pour optimiser vos financements et protéger votre patrimoine
             </p>
 
             {/* Statistiques */}
@@ -427,7 +428,7 @@ const PodcastsEntreprise: React.FC = () => {
                 <span className="ml-2">vidéos disponibles</span>
               </div>
               <div className="flex items-center">
-                <Building className="w-6 h-6 mr-2" />
+                <Shield className="w-6 h-6 mr-2" />
                 <span className="text-2xl font-bold text-white">{videoEpisodes.filter(ep => ep.featured).length}</span>
                 <span className="ml-2">vidéos premium</span>
               </div>
@@ -442,12 +443,12 @@ const PodcastsEntreprise: React.FC = () => {
         <section className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-purple-100 rounded-2xl">
-                <Building className="w-8 h-8 text-purple-600" />
+              <div className="p-3 bg-teal-100 rounded-2xl">
+                <CreditCard className="w-8 h-8 text-teal-600" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Podcasts Entreprise</h2>
-                <p className="text-gray-600">Conseils stratégiques, études de cas et expertises business</p>
+                <h2 className="text-3xl font-bold text-gray-900">Podcasts Crédit & Assurance</h2>
+                <p className="text-gray-600">Conseils financement, optimisation des taux et protection assurantielle</p>
               </div>
             </div>
             <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
@@ -461,12 +462,12 @@ const PodcastsEntreprise: React.FC = () => {
               onClick={() => setActiveTab('all')}
               className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
                 activeTab === 'all'
-                  ? 'border-purple-600 text-purple-600'
+                  ? 'border-teal-600 text-teal-600'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
               }`}
             >
               <div className="flex items-center space-x-2">
-                <Building className="w-5 h-5" />
+                <CreditCard className="w-5 h-5" />
                 <span>Tous les podcasts ({videoEpisodes.length})</span>
               </div>
             </button>
@@ -495,12 +496,12 @@ const PodcastsEntreprise: React.FC = () => {
               </div>
             ) : (
               <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
-                <Building className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+                <CreditCard className="w-20 h-20 mx-auto text-gray-300 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
                 <p className="text-gray-500">
                   {error
                     ? "Une erreur est survenue lors du chargement des vidéos"
-                    : "Aucune vidéo entreprise n'est disponible pour le moment"
+                    : "Aucune vidéo Crédit & Assurance n'est disponible pour le moment"
                   }
                 </p>
               </div>
@@ -529,7 +530,7 @@ const PodcastsEntreprise: React.FC = () => {
       {isModalOpen && selectedEpisode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           {/* Modal Container - Layout horizontal YouTube */}
-          <div className="relative w-full max-w-7xl h-[90vh] bg-gray-900/40 rounded-2xl shadow-2xl overflow-hidden flex">
+          <div className="relative w-full max-w-7xl h-[90vh] bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex">
 
             {/* Bouton fermeture */}
             <button
@@ -549,7 +550,7 @@ const PodcastsEntreprise: React.FC = () => {
             </button>
 
             {/* Colonne de gauche - Vidéo */}
-            <div className="flex-1 overflow-hidden mr-5 rounded-t-lg flex flex-col min-w-0">
+            <div className="flex-1 rounded-t-lg mr-5 overflow-hidden flex flex-col min-w-0">
               {/* Container vidéo */}
               <div className="relative flex-1 bg-black flex items-center justify-center">
                 <video
@@ -574,11 +575,11 @@ const PodcastsEntreprise: React.FC = () => {
                     >
                       <div className="absolute inset-0 bg-gray-600 rounded-full"></div>
                       <div
-                        className="absolute h-full bg-red-600 rounded-full transition-all duration-100"
+                        className="absolute h-full bg-teal-600 rounded-full transition-all duration-100"
                         style={{ width: `${progress}%` }}
                       ></div>
                       <div
-                        className="absolute top-1/2 w-3 h-3 bg-red-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                        className="absolute top-1/2 w-3 h-3 bg-teal-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
                         style={{ left: `calc(${progress}% - 6px)` }}
                       ></div>
                     </div>
@@ -639,7 +640,6 @@ const PodcastsEntreprise: React.FC = () => {
             {/* Colonne de droite - Contenu */}
             <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
 
-              {/* Actions rapides */}
 
 
               {/* Contenu défilant */}
@@ -647,6 +647,17 @@ const PodcastsEntreprise: React.FC = () => {
 
                 {/* Informations de base */}
                 <div className="p-4 border-b border-gray-700">
+                  <div className="flex items-center space-x-3 mb-3">
+                    {/* Avatar */}
+                    <div className="w-10 h-10 bg-gradient-to-br from-teal-600 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Sécurité</div>
+                      <div className="text-xs text-gray-400">Contenu expert</div>
+                    </div>
+                  </div>
+
                   <div className="flex items-center space-x-2 mb-3">
                     <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
                       {selectedEpisode.category}
@@ -693,11 +704,12 @@ const PodcastsEntreprise: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                {/* Actions rapides */}
                 <div className="p-4 border-y border-gray-700">
                   <div className="flex space-x-2">
                     <button
                       onClick={handlePlayMedia}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold transition-all duration-200"
+                      className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-all duration-200"
                     >
                       {isPlaying ? (
                         <>
@@ -743,4 +755,4 @@ const PodcastsEntreprise: React.FC = () => {
   );
 };
 
-export default PodcastsEntreprise;
+export default PodcastsCreditAssurance;

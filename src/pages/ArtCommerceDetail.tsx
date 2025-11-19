@@ -6,6 +6,7 @@ import { useCart } from '@/components/contexts/CartContext';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "@/lib/api"
+import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 
 const ArtCommerceDetail = () => {
   const { id } = useParams();
@@ -336,12 +337,7 @@ const ArtCommerceDetail = () => {
   // Affichage du chargement
   if (loadingService) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Chargement du service...</p>
-        </div>
-      </div>
+      <LoadingSpinner text='Chargement du service' />
     );
   }
 
