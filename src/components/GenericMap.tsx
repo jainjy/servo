@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { MapPoint, GenericMapProps } from '../types/map';
+import { GenericMapProps } from '../types/map';
 import { initializeLeaflet, createCustomIcon, defaultMapConfig } from '../utilis/leafletConfig';
 
 const GenericMap: React.FC<GenericMapProps> = ({ 
