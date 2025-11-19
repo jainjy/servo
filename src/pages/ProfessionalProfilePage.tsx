@@ -6,29 +6,20 @@ import {
   MapPin,
   Phone,
   Mail,
-  Calendar,
   Clock,
   Award,
-  Users,
   TrendingUp,
   FileText,
   CheckCircle,
   ArrowLeft,
-  Share2,
   MessageCircle,
   Building,
   Briefcase,
   Euro,
   Zap,
   Target,
-  Heart,
-  Send,
-  ExternalLink,
   Copy,
-  ThumbsUp,
   AlertCircle,
-  Shield,
-  Clock4,
   Sparkles,
   BadgeCheck,
   CalendarDays,
@@ -121,6 +112,17 @@ interface ProfessionalStats {
   revenusTotaux: number;
 }
 
+// Fonction utilitaire accessible à tous les composants
+const getInitials = (firstName: string, lastName: string) => {
+  return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
+};
+
+const formatHoraires = (horaires: any) => {
+  if (!horaires) return "Non renseigné";
+  if (!horaires.ouvert) return "Fermé";
+  return `${horaires.debut} - ${horaires.fin}`;
+};
+
 const ProfessionalProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -162,10 +164,6 @@ const ProfessionalProfilePage = () => {
     }
   };
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  };
-
   const renderStars = (rating: number, size = "w-4 h-4") => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -176,12 +174,6 @@ const ProfessionalProfilePage = () => {
           }`}
       />
     ));
-  };
-
-  const formatHoraires = (horaires: any) => {
-    if (!horaires) return "Non renseigné";
-    if (!horaires.ouvert) return "Fermé";
-    return `${horaires.debut} - ${horaires.fin}`;
   };
 
   const getHoraires = () => {
