@@ -117,5 +117,5 @@ export class MapService {
       console.error('❌ API non accessible:', error);
       return false;
     }     
-  }
+  }     
 }
