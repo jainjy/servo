@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   X,
   Save,
@@ -60,6 +61,7 @@ const TYPE_BIEN = {
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
+  both: "Vente et Location",
 };
 
 const TYPE_LOCATION = {
@@ -93,10 +95,35 @@ interface ListingModalProps {
   };
   mode: "create" | "edit";
   onSuccess?: () => void;
+  currentUser?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+  };
+}
+
+// Interface pour les images temporaires
+interface TemporaryImage {
+  file: File;
+  previewUrl: string;
+  id: string;
 }
 
 // Composant Modal
-const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  children,
+  title,
+  size = "md",
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  title: string;
+  size?: "sm" | "md" | "lg" | "xl";
+}) => {
   if (!isOpen) return null;
 
   const sizeClasses = {
@@ -128,19 +155,13 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
   );
 };
 
-// Interface pour les images temporaires
-interface TemporaryImage {
-  file: File;
-  previewUrl: string;
-  id: string;
-}
-
 export function ListingModal({
   open,
   onOpenChange,
   listing,
   mode,
   onSuccess,
+  currentUser,
 }: ListingModalProps) {
   const [etape, setEtape] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -166,13 +187,13 @@ export function ListingModal({
     // Étape 3 - Options
     listingType: "sale",
     rentType: "longue_duree",
-    features: [],
+    features: [] as string[],
     // Étape 4 - Médias
-    images: [],
+    images: [] as string[],
     // Étape 5 - Publication
     status: "draft",
-    latitude: null,
-    longitude: null,
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   const etapes = [
@@ -316,6 +337,37 @@ export function ListingModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation des champs requis avant soumission
+    if (!formData.title.trim()) {
+      toast.error("Veuillez entrer un titre pour l'annonce");
+      return;
+    }
+    if (!formData.description.trim()) {
+      toast.error("Veuillez entrer une description");
+      return;
+    }
+    if (!formData.price) {
+      toast.error("Veuillez entrer un prix");
+      return;
+    }
+    if (!formData.surface) {
+      toast.error("Veuillez entrer la surface");
+      return;
+    }
+    if (!formData.address.trim()) {
+      toast.error("Veuillez entrer une adresse");
+      return;
+    }
+    if (!formData.city.trim()) {
+      toast.error("Veuillez entrer une ville");
+      return;
+    }
+    if (allImages.length === 0) {
+      toast.error("Veuillez ajouter au moins une image");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -346,7 +398,7 @@ export function ListingModal({
         status: formData.status,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        ownerId: listing?.ownerId || "default-owner-id",
+        ownerId: listing?.ownerId || currentUser?.id || "default-owner-id",
       };
 
       if (mode === "create") {
@@ -374,6 +426,48 @@ export function ListingModal({
   };
 
   const etapeSuivante = () => {
+    // Validation avant de passer à l'étape suivante
+    if (etape === 1) {
+      if (!formData.title.trim()) {
+        toast.error("Veuillez entrer un titre");
+        return;
+      }
+      if (!formData.description.trim()) {
+        toast.error("Veuillez entrer une description");
+        return;
+      }
+      if (!formData.price) {
+        toast.error("Veuillez entrer un prix");
+        return;
+      }
+    } else if (etape === 2) {
+      if (!formData.surface) {
+        toast.error("Veuillez entrer la surface");
+        return;
+      }
+      if (!formData.rooms) {
+        toast.error("Veuillez entrer le nombre de pièces");
+        return;
+      }
+      if (!formData.bedrooms) {
+        toast.error("Veuillez entrer le nombre de chambres");
+        return;
+      }
+      if (!formData.address.trim()) {
+        toast.error("Veuillez entrer une adresse");
+        return;
+      }
+      if (!formData.city.trim()) {
+        toast.error("Veuillez entrer une ville");
+        return;
+      }
+    } else if (etape === 4) {
+      if (allImages.length === 0) {
+        toast.error("Veuillez ajouter au moins une image");
+        return;
+      }
+    }
+
     if (etape < 5) setEtape(etape + 1);
   };
 
@@ -431,7 +525,7 @@ export function ListingModal({
         title={mode === "create" ? "Nouvelle annonce" : "Modifier l'annonce"}
         size="xl"
       >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           {/* Barre de progression */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
@@ -704,7 +798,10 @@ export function ListingModal({
                 <Label className="block mb-4">Équipements et commodités</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {equipementsDisponibles.map((equipement) => (
-                    <div key={equipement} className="flex items-center space-x-2">
+                    <div
+                      key={equipement}
+                      className="flex items-center space-x-2"
+                    >
                       <input
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
@@ -750,7 +847,9 @@ export function ListingModal({
                     className="text-lg font-semibold mb-2"
                     style={{ color: "#0A0A0A" }}
                   >
-                    {uploadingImages ? "Upload en cours..." : "Ajouter des photos"}
+                    {uploadingImages
+                      ? "Upload en cours..."
+                      : "Ajouter des photos"}
                   </div>
                   <div className="text-sm mb-4" style={{ color: "#5A6470" }}>
                     Glissez-déposez vos photos ou cliquez pour parcourir
@@ -789,9 +888,7 @@ export function ListingModal({
               {allImages.length > 0 && (
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <Label>
-                      Images sélectionnées ({allImages.length})
-                    </Label>
+                    <Label>Images sélectionnées ({allImages.length})</Label>
                     {temporaryImages.length > 0 && (
                       <span className="text-sm text-blue-600">
                         {temporaryImages.length} nouvelle(s) image(s) à uploader
@@ -824,9 +921,9 @@ export function ListingModal({
                         </div>
                         {image.type === "temporary" && (
                           <div className="absolute top-2 left-2">
-                            <div className="bg-green-500 text-white text-xs px-2 py-1 rounded">
+                            <Badge className="bg-green-500 text-white text-xs">
                               Nouveau
-                            </div>
+                            </Badge>
                           </div>
                         )}
                       </div>
@@ -907,8 +1004,13 @@ export function ListingModal({
                   {(formData.listingType === "rent" ||
                     formData.listingType === "both") && (
                     <div className="flex justify-between">
-                      <span style={{ color: "#5A6470" }}>Type de location:</span>
-                      <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      <span style={{ color: "#5A6470" }}>
+                        Type de location:
+                      </span>
+                      <span
+                        className="font-medium"
+                        style={{ color: "#0A0A0A" }}
+                      >
                         {TYPE_LOCATION[formData.rentType]}
                       </span>
                     </div>
