@@ -78,7 +78,6 @@ const TYPE_BIEN = {
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
-  both: "Les deux",
 };
 
 const TYPE_LOCATION = {
@@ -224,9 +223,9 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
   }, []);
 
   const etapes = [
-    { numero: 1, titre: "Informations générales" },
+    { numero: 1, titre: "Type et prix" },
     { numero: 2, titre: "Caractéristiques" },
-    { numero: 3, titre: "Options" },
+    { numero: 3, titre: "Équipements" },
     { numero: 4, titre: "Médias" },
     { numero: 5, titre: "Publication" },
   ];
@@ -442,9 +441,87 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
             </div>
           </div>
 
-          {/* Étape 1 - Informations générales */}
+          {/* Étape 1 - Type et prix */}
           {etape === 1 && (
             <div className="space-y-6 animate-fadeIn">
+              <div>
+                <Label className="block mb-2">Type d'annonce *</Label>
+                <select
+                  className="w-full p-3 border rounded-lg"
+                  value={formData.listingType}
+                  onChange={(e) =>
+                    setFormData({ ...formData, listingType: e.target.value })
+                  }
+                  required
+                >
+                  {Object.entries(LISTING_TYPE).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Ajouter le champ rentType si le type est location */}
+              {(formData.listingType === "rent" ||
+                formData.listingType === "both") && (
+                <div className="mt-4">
+                  <Label className="block mb-2">Type de location *</Label>
+                  <select
+                    className="w-full p-3 border rounded-lg"
+                    value={formData.rentType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rentType: e.target.value })
+                    }
+                    required
+                  >
+                    {Object.entries(TYPE_LOCATION).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <Label className="block mb-2">Type de bien *</Label>
+                <select
+                  className="w-full p-3 border rounded-lg"
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: e.target.value })
+                  }
+                  required
+                >
+                  {Object.entries(TYPE_BIEN).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <Label className="block mb-2">Prix *</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    required
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    placeholder="Ex: 450000"
+                    className="pl-8"
+                  />
+                  <Euro
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
+                </div>
+              </div>
+
               <div>
                 <Label className="block mb-2">Titre de l'annonce *</Label>
                 <Input
@@ -455,46 +532,6 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
                   }
                   placeholder="Ex: Superbe appartement vue panoramique..."
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="block mb-2">Type de bien *</Label>
-                  <select
-                    className="w-full p-3 border rounded-lg"
-                    value={formData.type}
-                    onChange={(e) =>
-                      setFormData({ ...formData, type: e.target.value })
-                    }
-                    required
-                  >
-                    {Object.entries(TYPE_BIEN).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <Label className="block mb-2">Prix *</Label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      required
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      placeholder="Ex: 450000"
-                      className="pl-8"
-                    />
-                    <Euro
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      size={16}
-                    />
-                  </div>
-                </div>
               </div>
 
               <div>
@@ -637,49 +674,9 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
             </div>
           )}
 
-          {/* Étape 3 - Options */}
+          {/* Étape 3 - Équipements */}
           {etape === 3 && (
             <div className="space-y-6 animate-fadeIn">
-              <div>
-                <Label className="block mb-2">Type d'annonce *</Label>
-                <select
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.listingType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, listingType: e.target.value })
-                  }
-                  required
-                >
-                  {Object.entries(LISTING_TYPE).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Ajouter le champ rentType si le type est location */}
-              {(formData.listingType === "rent" ||
-                formData.listingType === "both") && (
-                <div className="mt-4">
-                  <Label className="block mb-2">Type de location *</Label>
-                  <select
-                    className="w-full p-3 border rounded-lg"
-                    value={formData.rentType}
-                    onChange={(e) =>
-                      setFormData({ ...formData, rentType: e.target.value })
-                    }
-                    required
-                  >
-                    {Object.entries(TYPE_LOCATION).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               <div>
                 <Label className="block mb-4">Équipements et commodités</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

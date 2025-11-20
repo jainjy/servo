@@ -42,7 +42,6 @@ const TYPE_BIEN = {
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
-  both: "Les deux"
 };
 
 // Interface
