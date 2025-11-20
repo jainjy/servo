@@ -17,9 +17,16 @@ export function ListingsStats() {
     const fetchStats = async () => {
       try {
         const response = await api.get('/properties/stats')
-        const data = response.data
+        const statsData = response.data
         
-        setStats(data)
+        setStats({
+          total: statsData.total || 0,
+          published: statsData.published || 0,
+          pending: statsData.pending || 0,
+          archived: statsData.archived || 0,
+          totalViews: statsData.totalViews || 0,
+          avgViews: statsData.avgViews || 0
+        })
       } catch (error) {
         console.error("Error fetching stats:", error)
       }

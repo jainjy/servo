@@ -34,6 +34,7 @@ import {
   Upload,
   Star,
   Loader2,
+  MoreVertical,
 } from "lucide-react";
 import api from "@/lib/api";
 import AuthService from "@/services/authService";
@@ -50,11 +51,28 @@ const STATUT_ANNONCE = {
 };
 
 const TYPE_BIEN = {
-  house: "Maison",
+  house: "Maison / Villa",
   apartment: "Appartement",
   villa: "Villa",
   land: "Terrain",
   studio: "Studio",
+  commercial: "Local commercial",
+  professionnel: "Local professionnel",
+  fonds_de_commerce: "Fonds de commerce",
+  appartements_neufs: "Appartement neufs (VEFA)",
+  scpi: "SCPI",
+  villa_d_exception: "Villa d'exception",
+  villas_neuves: "Villas neuves (VEFA)",
+  parking: "Parking",
+  hotel: "Hotel",
+  gite: "Gite",
+  maison_d_hote: "Maison d'hote",
+  domaine: "Domaine",
+  appartement_meuble: "Appartement meublée",
+  villa_meuble: "Villa meublée",
+  villa_non_meuble: "Villa non meublée",
+  cellier: "Cellier",
+  cave: "Cave",
 };
 
 const LISTING_TYPE = {
@@ -340,7 +358,10 @@ const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
         });
         toast.success("Annonce modifiée avec succès");
       } else {
-        await api.post("/properties", { ...payload, images: finalImageUrls });
+        await api.post("/properties/professional/all", {
+          ...payload,
+          images: finalImageUrls,
+        });
         toast.success("Annonce créée avec succès");
       }
 
@@ -1013,6 +1034,7 @@ const ListingsPage = () => {
   const [annonceSelectionnee, setAnnonceSelectionnee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [statsGlobales, setStatsGlobales] = useState({
     total: 0,
     published: 0,
@@ -1256,38 +1278,40 @@ const ListingsPage = () => {
         </Card>
 
         {/* Liste des annonces */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {annoncesFiltrees.map((annonce) => {
             const disponibilite = getListingType(annonce);
 
             return (
               <Card
                 key={annonce.id}
-                className="overflow-hidden hover:shadow-xl transition-all duration-300"
+                className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
               >
                 {/* Image et badge statut */}
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   {annonce.images && annonce.images.length > 0 ? (
                     <img
                       src={annonce.images[0]}
                       alt={annonce.title}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-32 sm:h-40 lg:h-48 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <Home className="text-gray-400" size={48} />
+                    <div className="w-full h-32 sm:h-40 lg:h-48 bg-gray-200 flex items-center justify-center">
+                      <Home className="text-gray-400" size={40} />
                     </div>
                   )}
-                  <div className="absolute top-3 left-3">
-                    <Badge className={STATUT_ANNONCE[annonce.status]?.color}>
+                  <div className="absolute top-2 left-2">
+                    <Badge 
+                      className={`${STATUT_ANNONCE[annonce.status]?.color} text-xs`}
+                    >
                       {STATUT_ANNONCE[annonce.status]?.label}
                     </Badge>
                   </div>
-                  <div className="absolute top-3 right-3 flex gap-1">
+                  <div className="absolute top-2 right-2 flex gap-1 flex-wrap">
                     {disponibilite.vente && (
                       <Badge
                         variant="secondary"
-                        className="bg-green-100 text-green-800"
+                        className="bg-green-100 text-green-800 text-xs"
                       >
                         Vente
                       </Badge>
@@ -1295,7 +1319,7 @@ const ListingsPage = () => {
                     {disponibilite.location && (
                       <Badge
                         variant="secondary"
-                        className="bg-blue-100 text-blue-800"
+                        className="bg-blue-100 text-blue-800 text-xs"
                       >
                         Location
                       </Badge>
@@ -1304,53 +1328,53 @@ const ListingsPage = () => {
                 </div>
 
                 {/* Contenu */}
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
+                <div className="p-4 sm:p-6 flex flex-col flex-grow">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
                     <h3
-                      className="font-bold text-lg line-clamp-2 flex-1 mr-3"
+                      className="font-bold text-base sm:text-lg line-clamp-2 flex-1"
                       style={{ color: "#0A0A0A" }}
                     >
                       {annonce.title}
                     </h3>
-                    <div className="text-xl font-bold text-blue-600 whitespace-nowrap">
+                    <div className="text-lg sm:text-xl font-bold text-blue-600 whitespace-nowrap">
                       {annonce.price?.toLocaleString()} €
                       {disponibilite.location &&
                         !disponibilite.vente &&
-                        "/mois"}
+                        <span className="text-xs">/mois</span>}
                     </div>
                   </div>
 
                   <div
-                    className="flex items-center gap-1 mb-3 text-sm"
+                    className="flex items-center gap-1 mb-2 text-xs sm:text-sm"
                     style={{ color: "#5A6470" }}
                   >
-                    <MapPin size={14} />
+                    <MapPin size={12} />
                     <span className="line-clamp-1">
                       {annonce.address}, {annonce.city}
                     </span>
                   </div>
 
                   <div
-                    className="flex items-center gap-4 mb-4 text-sm"
+                    className="flex flex-wrap items-center gap-3 mb-3 text-xs sm:text-sm"
                     style={{ color: "#5A6470" }}
                   >
                     <div className="flex items-center gap-1">
-                      <Ruler size={14} />
+                      <Ruler size={12} />
                       <span>{annonce.surface} m²</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Home size={14} />
+                      <Home size={12} />
                       <span>{annonce.rooms} pièces</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Users size={14} />
-                      <span>{annonce.bedrooms} chambres</span>
+                      <Users size={12} />
+                      <span>{annonce.bedrooms} ch.</span>
                     </div>
                   </div>
 
                   {/* Statistiques rapides */}
-                  <div className="flex justify-between mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div className="text-center">
+                  <div className="flex justify-between mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg gap-2">
+                    <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
                         style={{ color: "#0A0A0A" }}
@@ -1361,7 +1385,7 @@ const ListingsPage = () => {
                         Vues
                       </div>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
                         style={{ color: "#0A0A0A" }}
@@ -1374,8 +1398,8 @@ const ListingsPage = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2">
+                  {/* Actions - Boutons principaux */}
+                  <div className="flex gap-2 mb-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -1383,6 +1407,8 @@ const ListingsPage = () => {
                         setAnnonceSelectionnee(annonce);
                         setShowModalStatistiques(true);
                       }}
+                      className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                      title="Statistiques"
                     >
                       <TrendingUp size={14} />
                     </Button>
@@ -1394,74 +1420,101 @@ const ListingsPage = () => {
                         setAnnonceSelectionnee(annonce);
                         setShowModalCreation(true);
                       }}
+                      className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                      title="Éditer"
                     >
                       <Edit size={14} />
                     </Button>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => supprimerAnnonce(annonce.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-
-                    {/* Actions statut */}
-                    {annonce.status === "for_sale" ||
-                    annonce.status === "for_rent" ? (
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => changerStatut(annonce.id, "draft")}
-                          className="flex-1"
-                        >
-                          <Archive className="h-4 w-4 mr-2" />
-                          Dépublier
-                        </Button>
-                        {annonce.listingType === "sale" ||
-                        annonce.listingType === "both" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => changerStatut(annonce.id, "sold")}
-                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Vendu
-                          </Button>
-                        ) : null}
-                        {annonce.listingType === "rent" ||
-                        annonce.listingType === "both" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => changerStatut(annonce.id, "rented")}
-                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Loué
-                          </Button>
-                        ) : null}
-                      </div>
-                    ) : (
+                    {/* Menu Popup */}
+                    <div className="relative">
                       <Button
+                        variant="outline"
                         size="sm"
-                        onClick={() =>
-                          changerStatut(
-                            annonce.id,
-                            annonce.listingType === "rent"
-                              ? "for_rent"
-                              : "for_sale"
-                          )
+                        onClick={() => 
+                          setOpenMenu(openMenu === annonce.id ? null : annonce.id)
                         }
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white mt-2"
+                        className="border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                        title="Plus d'actions"
                       >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Publier
+                        <MoreVertical size={14} />
                       </Button>
-                    )}
+
+                      {openMenu === annonce.id && (
+                        <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                          <button
+                            onClick={() => {
+                              supprimerAnnonce(annonce.id);
+                              setOpenMenu(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 border-b border-gray-100 text-red-600"
+                          >
+                            <Trash2 size={14} />
+                            Supprimer
+                          </button>
+
+                          {annonce.status === "for_sale" ||
+                          annonce.status === "for_rent" ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  changerStatut(annonce.id, "draft");
+                                  setOpenMenu(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+                              >
+                                <Archive size={14} />
+                                Dépublier
+                              </button>
+
+                              {annonce.listingType === "sale" ||
+                              annonce.listingType === "both" ? (
+                                <button
+                                  onClick={() => {
+                                    changerStatut(annonce.id, "sold");
+                                    setOpenMenu(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+                                >
+                                  <CheckCircle size={14} />
+                                  Marquer comme vendu
+                                </button>
+                              ) : null}
+
+                              {annonce.listingType === "rent" ||
+                              annonce.listingType === "both" ? (
+                                <button
+                                  onClick={() => {
+                                    changerStatut(annonce.id, "rented");
+                                    setOpenMenu(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <CheckCircle size={14} />
+                                  Marquer comme loué
+                                </button>
+                              ) : null}
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                changerStatut(
+                                  annonce.id,
+                                  annonce.listingType === "rent"
+                                    ? "for_rent"
+                                    : "for_sale"
+                                );
+                                setOpenMenu(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 flex items-center gap-2 text-green-600"
+                            >
+                              <CheckCircle size={14} />
+                              Publier
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -1470,10 +1523,10 @@ const ListingsPage = () => {
         </div>
 
         {annoncesFiltrees.length === 0 && (
-          <Card className="p-12 text-center">
+          <Card className="p-8 sm:p-12 text-center">
             <Home className="mx-auto mb-4 text-gray-400" size={48} />
             <h3
-              className="text-xl font-semibold mb-2"
+              className="text-lg sm:text-xl font-semibold mb-2"
               style={{ color: "#0A0A0A" }}
             >
               Aucune annonce trouvée

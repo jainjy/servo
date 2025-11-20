@@ -18,7 +18,8 @@ import {
   MapPin,
   Ruler,
   Users,
-  TrendingUp} from "lucide-react";
+  TrendingUp,
+  MoreVertical} from "lucide-react";
 import api from "@/lib/api";
 
 // Types et statuts alignés avec le backend
@@ -86,6 +87,7 @@ export function ListingsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   
   useEffect(() => {
     fetchListings();
@@ -95,17 +97,20 @@ export function ListingsTable() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/properties');
-      setListings(response.data);
+      const response = await api.get("/properties/admin/all");
+      // Extraire le tableau de données
+      const data = Array.isArray(response.data) ? response.data : response.data.data || [];
+      setListings(data);
     } catch (error: any) {
       console.error("Error fetching listings:", error);
       setError(`Erreur lors du chargement des annonces: ${error.response?.data?.error || error.message}`);
+      setListings([]); // Important : initialiser avec un tableau vide
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredListings = listings.filter((listing) => {
+  const filteredListings = listings && Array.isArray(listings) ? listings.filter((listing) => {
     const matchRecherche = !searchQuery || 
       listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       listing.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -118,7 +123,7 @@ export function ListingsTable() {
     const matchType = !typeFilter || listing.type === typeFilter;
     
     return matchRecherche && matchStatut && matchType;
-  });
+  }) : [];
 
   const handleEdit = (listing: Listing) => {
     setSelectedListing(listing);
@@ -226,7 +231,7 @@ export function ListingsTable() {
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
           {/* Barre de filtres */}
-          <Card className="p-6 mb-8">
+          <Card className="p-4 mb-8">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -274,38 +279,38 @@ export function ListingsTable() {
           </Card>
 
           {/* Liste des annonces */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
             {filteredListings.map((listing) => {
               const disponibilite = getListingTypeInfo(listing);
               
               return (
-                <Card key={listing.id} className="overflow-hidden hover:shadow-xl transition-all duration-300">
+                <Card key={listing.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
                   {/* Image et badge statut */}
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     {listing.images && listing.images.length > 0 ? (
                       <img 
                         src={listing.images[0]} 
                         alt={listing.title}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-32 sm:h-40 lg:h-48 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                        <Home className="text-gray-400" size={48} />
+                      <div className="w-full h-32 sm:h-40 lg:h-48 bg-gray-200 flex items-center justify-center">
+                        <Home className="text-gray-400" size={40} />
                       </div>
                     )}
-                    <div className="absolute top-3 left-3">
-                      <Badge className={STATUT_ANNONCE[listing.status]?.color}>
+                    <div className="absolute top-2 left-2">
+                      <Badge className={`${STATUT_ANNONCE[listing.status]?.color} text-xs`}>
                         {STATUT_ANNONCE[listing.status]?.label}
                       </Badge>
                     </div>
-                    <div className="absolute top-3 right-3 flex gap-1">
+                    <div className="absolute top-2 right-2 flex gap-1 flex-wrap">
                       {disponibilite.vente && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                           Vente
                         </Badge>
                       )}
                       {disponibilite.location && (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
                           Location
                         </Badge>
                       )}
@@ -313,51 +318,51 @@ export function ListingsTable() {
                   </div>
 
                   {/* Contenu */}
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-lg line-clamp-2 flex-1 mr-3">
+                  <div className="p-4 sm:p-6 flex flex-col flex-grow">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+                      <h3 className="font-bold text-base sm:text-lg line-clamp-2 flex-1">
                         {listing.title}
                       </h3>
-                      <div className="text-xl font-bold text-blue-600 whitespace-nowrap">
+                      <div className="text-lg sm:text-xl font-bold text-blue-600 whitespace-nowrap">
                         {listing.price?.toLocaleString()} €
-                        {disponibilite.location && !disponibilite.vente && "/mois"}
+                        {disponibilite.location && !disponibilite.vente && <span className="text-xs">/mois</span>}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 mb-3 text-sm text-gray-600">
-                      <MapPin size={14} />
+                    <div className="flex items-center gap-1 mb-2 text-xs sm:text-sm text-gray-600">
+                      <MapPin size={12} />
                       <span className="line-clamp-1">{listing.address}, {listing.city}</span>
                     </div>
 
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center gap-3 mb-3 text-xs sm:text-sm text-gray-600">
                       <div className="flex items-center gap-1">
-                        <Ruler size={14} />
+                        <Ruler size={12} />
                         <span>{listing.surface} m²</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Home size={14} />
+                        <Home size={12} />
                         <span>{listing.rooms} pièces</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Users size={14} />
-                        <span>{listing.bedrooms} chambres</span>
+                        <Users size={12} />
+                        <span>{listing.bedrooms} ch.</span>
                       </div>
                     </div>
 
-                    <div className="text-sm text-gray-600 mb-4">
+                    <div className="text-xs sm:text-sm text-gray-600 mb-3">
                       <span className="font-medium">Propriétaire: </span>
-                      {listing.owner.firstName} {listing.owner.lastName}
+                      <span className="line-clamp-1">{listing.owner.firstName} {listing.owner.lastName}</span>
                     </div>
 
                     {/* Statistiques rapides */}
-                    <div className="flex justify-between mb-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="text-center">
+                    <div className="flex justify-between mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg gap-2">
+                      <div className="text-center flex-1">
                         <div className="font-bold text-sm">
                           {listing.views || 0}
                         </div>
                         <div className="text-xs text-gray-600">Vues</div>
                       </div>
-                      <div className="text-center">
+                      <div className="text-center flex-1">
                         <div className="font-bold text-sm">
                           {listing.favorites?.length || 0}
                         </div>
@@ -366,12 +371,13 @@ export function ListingsTable() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex gap-2 mb-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleStats(listing)}
-                        className="flex-1 border-gray-300 hover:bg-gray-50"
+                        className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                        title="Statistiques"
                       >
                         <TrendingUp size={14} />
                       </Button>
@@ -380,7 +386,8 @@ export function ListingsTable() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleView(listing)}
-                        className="flex-1 border-gray-300 hover:bg-gray-50"
+                        className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                        title="Voir l'annonce"
                       >
                         <Eye size={14} />
                       </Button>
@@ -389,85 +396,96 @@ export function ListingsTable() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(listing)}
-                        className="flex-1 border-gray-300 hover:bg-gray-50"
+                        className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                        title="Éditer"
                       >
                         <Edit size={14} />
                       </Button>
-                    </div>
 
-                    <div className="flex gap-2 mt-2">
-                      {(listing.status === 'for_sale' || listing.status === 'for_rent') ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUnpublish(listing)}
-                            disabled={actionLoading === listing.id}
-                            className="flex-1 border-gray-300 hover:bg-gray-50"
-                          >
-                            {actionLoading === listing.id ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <XCircle className="h-4 w-4 mr-2" />
-                            )}
-                            Dépublier
-                          </Button>
-                          {/* Ajouter les boutons Vendu/Loué */}
-                          {listing.listingType === 'sale' || listing.listingType === 'both' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePublish(listing, 'sold')}
-                              disabled={actionLoading === listing.id}
-                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Vendu
-                            </Button>
-                          ) : null}
-                          {listing.listingType === 'rent' || listing.listingType === 'both' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePublish(listing, 'rented')}
-                              disabled={actionLoading === listing.id}
-                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Loué
-                            </Button>
-                          ) : null}
-                        </>
-                      ) : (
+                      {/* Menu Popup */}
+                      <div className="relative">
                         <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => handlePublish(listing)}
-                          disabled={actionLoading === listing.id}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => setOpenMenu(openMenu === listing.id ? null : listing.id)}
+                          className="border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                          title="Plus d'actions"
                         >
-                          {actionLoading === listing.id ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                          )}
-                          Publier
+                          <MoreVertical size={14} />
                         </Button>
-                      )}
-                      
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(listing)}
-                        disabled={actionLoading === listing.id}
-                        className="flex-1"
-                      >
-                        {actionLoading === listing.id ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-4 w-4 mr-2" />
+
+                        {openMenu === listing.id && (
+                          <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            {(listing.status === 'for_sale' || listing.status === 'for_rent') ? (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    handleUnpublish(listing);
+                                    setOpenMenu(null);
+                                  }}
+                                  disabled={actionLoading === listing.id}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100 disabled:opacity-50"
+                                >
+                                  <XCircle size={14} />
+                                  Dépublier
+                                </button>
+
+                                {listing.listingType === 'sale' || listing.listingType === 'both' ? (
+                                  <button
+                                    onClick={() => {
+                                      handlePublish(listing, 'sold');
+                                      setOpenMenu(null);
+                                    }}
+                                    disabled={actionLoading === listing.id}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100 disabled:opacity-50"
+                                  >
+                                    <CheckCircle size={14} />
+                                    Marquer comme vendu
+                                  </button>
+                                ) : null}
+
+                                {listing.listingType === 'rent' || listing.listingType === 'both' ? (
+                                  <button
+                                    onClick={() => {
+                                      handlePublish(listing, 'rented');
+                                      setOpenMenu(null);
+                                    }}
+                                    disabled={actionLoading === listing.id}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100 disabled:opacity-50"
+                                  >
+                                    <CheckCircle size={14} />
+                                    Marquer comme loué
+                                  </button>
+                                ) : null}
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  handlePublish(listing);
+                                  setOpenMenu(null);
+                                }}
+                                disabled={actionLoading === listing.id}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 flex items-center gap-2 border-b border-gray-100 text-green-600 disabled:opacity-50"
+                              >
+                                <CheckCircle size={14} />
+                                Publier
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => {
+                                handleDelete(listing);
+                                setOpenMenu(null);
+                              }}
+                              disabled={actionLoading === listing.id}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 text-red-600 disabled:opacity-50"
+                            >
+                              <Trash2 size={14} />
+                              Supprimer
+                            </button>
+                          </div>
                         )}
-                        Supprimer
-                      </Button>
+                      </div>
                     </div>
                   </div>
                 </Card>

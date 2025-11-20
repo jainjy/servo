@@ -27,7 +27,7 @@ import ProLayout from "./pages/pro/ProLayout";
 import Dashboard from "./pages/pro/Dashboard";
 import ListingsPage from "./pages/pro/ListingsPage";
 import CalendarPage from "./pages/pro/CalendarPage";
-import ServicesPartnersPage from './pages/ServicesPartnersPage';
+import ServicesPartnersPage from "./pages/ServicesPartnersPage";
 import DocumentsPage from "./pages/pro/DocumentsPage";
 import ReviewsPage from "./pages/pro/ReviewsPage";
 import TourismPage from "./pages/pro/TourismPage";
@@ -107,7 +107,7 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
-import PodcastsBatiment from './components/PodcastsBatiment';
+import PodcastsBatiment from "./components/PodcastsBatiment";
 import PodcastsAssuranceFinance from "./components/PodcastsCreditAssurance";
 import PodcastsAlimentation from "./components/PodcastsAlimentation";
 import PodcastsInvestissement from "./components/PodcastsInvestissement";
@@ -324,9 +324,14 @@ const App = () => {
                     path="/produits-commerces"
                     element={<DomicileLayout />}
                   />
-                  // Dans App.jsx
-                  <Route path="/produits-naturels" element={<BoutiqueNaturel />} />
-                  <Route path="/produits-naturels/categorie/:categoryName" element={<BoutiqueNaturel />} />
+                  <Route
+                    path="/produits-naturels"
+                    element={<BoutiqueNaturel />}
+                  />
+                  <Route
+                    path="/produits-naturels/categorie/:categoryName"
+                    element={<BoutiqueNaturel />}
+                  />
                   <Route
                     path="/comptabilite"
                     element={
@@ -362,7 +367,6 @@ const App = () => {
                   {/* <Route path="/produits-generaux" element={<ProduitsGeneraux />} /> */}
                   {/* <Route path="/services-maison" element={<ServicesMaison />} />
                   <Route path="/utilitie" element={<UtilitiesProduits />} /> */}
-
                   <Route
                     path="/stripe-create"
                     element={<StripeConnectButton user={user} />}
@@ -381,10 +385,8 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
-
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
-
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"
@@ -489,7 +491,7 @@ const App = () => {
                     <Route path="settings" element={<ParametresPage />} />
                     <Route
                       path="Art-commerce-services"
-                      element={<ParametresPage />} 
+                      element={<ParametresPage />}
                     />
                     <Route path="orders" element={<ProOrders />} />
                     <Route
@@ -517,10 +519,7 @@ const App = () => {
                     <Route path="reservation" element={<ReservationPage />} />
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
-                    <Route
-                      path="documents"
-                      element={<MesDocumentsPage />}
-                    />
+                    <Route path="documents" element={<MesDocumentsPage />} />
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
