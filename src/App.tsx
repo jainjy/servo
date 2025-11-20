@@ -534,7 +534,8 @@ const App = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="blog" element={<Blog />} />
-                    <Route path="bookings" element={<Bookings />} />
+                    {/* <Route path="bookings" element={<Bookings />} /> */}
+                    <Route path="bookings" element={<ProBookings />} />
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
@@ -542,7 +543,8 @@ const App = () => {
                     <Route path="profile" element={<Profile />} />
                     <Route path="reports" element={<Reports />} />
                     <Route path="services" element={<Services />} />
-                    <Route path="tourism" element={<Tourism />} />
+                    {/* <Route path="tourism" element={<Tourism />} /> */}
+                    <Route path="tourism" element={<TourismPage />} />
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
