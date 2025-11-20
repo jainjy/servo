@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import AdvertisementPopup from '@/components/AdvertisementPopup';
+import CardCarte from '@/components/components/CardCarte';
 
 const Hero = lazy(() => import("@/components/Hero"));
 const ServiceCards = lazy(() => import("@/components/ServiceCards"));
@@ -85,6 +86,7 @@ const Index = () => {
           {/* <EmplacementPub /> */}
 
           {/* Section biens immobiliers */}
+          <CardCarte />
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
               <h2 className="text-3xl font-bold ml-8 text-slate-900 my-6">Nos biens immobiliers</h2>
