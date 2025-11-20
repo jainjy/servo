@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Search, Eye, CheckCircle, XCircle, MessageSquare, Calendar, MapPin, User, Building, Loader2, Send } from "lucide-react"
 import api from "@/lib/api"
-import { toast } from "@/components/ui/sonner"
+import { toast } from "sonner"
 
 interface Booking {
   id: string
@@ -47,6 +47,7 @@ export function BookingsTable() {
   const [contactMessage, setContactMessage] = useState("")
   const [contactSending, setContactSending] = useState(false)
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null)
+  const [confirmingBooking, setConfirmingBooking] = useState<string | null>(null)
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -133,8 +134,30 @@ export function BookingsTable() {
     setIsDetailModalOpen(true)
   }
 
-  const handleConfirm = (booking: Booking) => {
-    console.log("Confirmer la réservation:", booking)
+  const handleConfirm = async (booking: Booking) => {
+    try {
+      setConfirmingBooking(booking.id)
+      console.log("✅ Confirmation de la réservation:", booking.id)
+
+      await api.put(`/tourisme-bookings/${booking.id}/status`, {
+        status: 'confirmed'
+      })
+
+      setBookings(bookings.map(b =>
+        b.id === booking.id ? { ...b, status: 'confirmed' } : b
+      ))
+      
+      toast.success("Réservation confirmée avec succès")
+
+      if (isDetailModalOpen && selectedBooking?.id === booking.id) {
+        setSelectedBooking({ ...selectedBooking, status: 'confirmed' })
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors de la confirmation:", error)
+      toast.error("Erreur lors de la confirmation de la réservation")
+    } finally {
+      setConfirmingBooking(null)
+    }
   }
 
   const handleContact = (booking: Booking) => {
@@ -401,34 +424,44 @@ export function BookingsTable() {
                         variant="default"
                         size="sm"
                         onClick={() => handleConfirm(booking)}
+                        disabled={confirmingBooking === booking.id}
                         className="flex-1 bg-success hover:bg-success/90"
                       >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Confirmer
+                        {confirmingBooking === booking.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Confirmation...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Confirmer
+                          </>
+                        )}
                       </Button>
                     )}
                     
                     {booking.status !== "cancelled" && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleCancel(booking)}
-                      disabled={cancellingBooking === booking.id}
-                      className="flex-1"
-                    >
-                      {cancellingBooking === booking.id ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Annulation...
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Annuler
-                        </>
-                      )}
-                    </Button>
-                  )}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleCancel(booking)}
+                        disabled={cancellingBooking === booking.id}
+                        className="flex-1"
+                      >
+                        {cancellingBooking === booking.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Annulation...
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Annuler
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </Card>
               ))}
@@ -560,10 +593,20 @@ export function BookingsTable() {
                     <Button
                       variant="default"
                       onClick={() => handleConfirm(selectedBooking)}
+                      disabled={confirmingBooking === selectedBooking.id}
                       className="flex-1 bg-success hover:bg-success/90"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Confirmer
+                      {confirmingBooking === selectedBooking.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Confirmation...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Confirmer
+                        </>
+                      )}
                     </Button>
                   )}
                   
