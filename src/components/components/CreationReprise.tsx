@@ -146,6 +146,7 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
               Prenez rendez-vous pour une consultation gratuite et découvrez comment
               nous pouvons vous aider à réussir votre création ou reprise d'entreprise.
             </p>
+             {/* 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-slate-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300 shadow-lg">
                 Prendre rendez-vous
@@ -153,7 +154,7 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
               <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-slate-600 transition-colors duration-300">
                 Télécharger notre brochure
               </button>
-            </div>
+            </div>*/}
           </div>
         </div>
       </div>

@@ -303,6 +303,7 @@ const AidesLeveesFonds: React.FC<AidesLeveesFondsProps> = ({ className = '' }) =
               Évaluez votre éligibilité aux aides et découvrez le potentiel de levée 
               de fonds de votre entreprise avec notre diagnostic gratuit.
             </p>
+              {/* 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="flex items-center gap-2 bg-white text-green-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm">
                 <LayoutDashboard /> Diagnostic Gratuit
@@ -313,7 +314,7 @@ const AidesLeveesFonds: React.FC<AidesLeveesFondsProps> = ({ className = '' }) =
             </div>
             <p className="text-green-200 text-sm mt-4">
               Analyse complète sous 48h - Sans engagement
-            </p>
+            </p>*/}
           </div>
         </div>
       </div>

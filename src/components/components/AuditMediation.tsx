@@ -230,6 +230,7 @@ const AuditMediation: React.FC<AuditMediationProps> = ({ className = '' }) => {
               Notre cellule d'urgence est disponible pour intervenir rapidement
               dans les situations de crise nécessitant une médiation immédiate.
             </p>
+             {/*
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="flex gap-2 items-center bg-white text-red-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm">
                 <Phone  /> Contact Urgence - 24h/24
@@ -240,7 +241,7 @@ const AuditMediation: React.FC<AuditMediationProps> = ({ className = '' }) => {
             </div>
             <p className="text-red-200 text-sm mt-4">
               Réponse garantie sous 2 heures pour les situations critiques
-            </p>
+            </p>*/}
           </div>
         </div>
       </div>
