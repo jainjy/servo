@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, X, Navigation } from "lucide-react";
+import { MapPin, Search, X, Navigation, Satellite } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -64,6 +64,7 @@ export function LocationPickerModal({
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [tileLayer, setTileLayer] = useState<"standard" | "satellite">("standard");
 
   const markerRef = useRef<L.Marker | null>(null);
 
@@ -220,6 +221,10 @@ export function LocationPickerModal({
     onOpenChange(false);
   };
 
+  const toggleTileLayer = (layer: "standard" | "satellite") => {
+    setTileLayer(layer);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] p-0 gap-0 bg-white border border-gray-200 shadow-xl rounded-lg overflow-hidden flex flex-col">
@@ -272,7 +277,7 @@ export function LocationPickerModal({
               </Button>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button
                 onClick={handleUseCurrentLocation}
                 variant="outline"
@@ -290,6 +295,23 @@ export function LocationPickerModal({
               >
                 <MapPin className="h-4 w-4" />
                 La Réunion
+              </Button>
+              <Button
+                onClick={() => toggleTileLayer("standard")}
+                variant={tileLayer === "standard" ? "default" : "outline"}
+                size="sm"
+                className="flex items-center gap-2 text-sm"
+              >
+                Carte
+              </Button>
+              <Button
+                onClick={() => toggleTileLayer("satellite")}
+                variant={tileLayer === "satellite" ? "default" : "outline"}
+                size="sm"
+                className="flex items-center gap-2 text-sm"
+              >
+                <Satellite className="h-4 w-4" />
+                Satellite
               </Button>
             </div>
           </div>
@@ -353,22 +375,27 @@ export function LocationPickerModal({
                 showSearchResults ? "hidden md:block" : "block"
               }`}
             >
-          
-                <MapContainer
-                  center={selectedPosition}
-                  zoom={15}
-                  style={{ height: "100%", width: "100%" }}
-                  ref={setMap}
-                  className="z-0"
-                >
+              <MapContainer
+                center={selectedPosition}
+                zoom={15}
+                style={{ height: "100%", width: "100%" }}
+                ref={setMap}
+                className="z-0"
+              >
+                {tileLayer === "standard" ? (
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  <MapEvents onLocationChange={handleMapClick} />
-                  {selectedPosition && <Marker position={selectedPosition} />}
-                </MapContainer>
-         
+                ) : (
+                  <TileLayer
+                    attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                  />
+                )}
+                <MapEvents onLocationChange={handleMapClick} />
+                {selectedPosition && <Marker position={selectedPosition} />}
+              </MapContainer>
 
               {/* Bouton pour afficher les résultats sur mobile */}
               {searchResults.length > 0 && !showSearchResults && (
