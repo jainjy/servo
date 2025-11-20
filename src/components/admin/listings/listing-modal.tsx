@@ -337,7 +337,7 @@ export function ListingModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation des champs requis avant soumission
     if (!formData.title.trim()) {
       toast.error("Veuillez entrer un titre pour l'annonce");
@@ -1055,25 +1055,36 @@ export function ListingModal({
                 {uploadingImages ? "Upload..." : "Suivant"}
               </Button>
             ) : (
-              <Button
-                type="submit"
-                style={{ backgroundColor: "#0052FF", color: "white" }}
-                disabled={loading || uploadingImages}
-              >
-                {loading || uploadingImages ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2" size={16} />
-                )}
-                {loading || uploadingImages
-                  ? uploadingImages
-                    ? "Upload..."
-                    : "Sauvegarde..."
-                  : mode === "create"
-                  ? "Publier"
-                  : "Modifier"}{" "}
-                l'annonce
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={etapePrecedente}
+                  disabled={loading || uploadingImages}
+                >
+                  <ChevronLeft className="mr-2" size={16} />
+                  Précédent
+                </Button>
+                <Button
+                  type="submit"
+                  style={{ backgroundColor: "#0052FF", color: "white" }}
+                  disabled={loading || uploadingImages}
+                >
+                  {loading || uploadingImages ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2" size={16} />
+                  )}
+                  {loading || uploadingImages
+                    ? uploadingImages
+                      ? "Upload..."
+                      : "Sauvegarde..."
+                    : mode === "create"
+                    ? "Publier"
+                    : "Modifier"}{" "}
+                  l'annonce
+                </Button>
+              </div>
             )}
           </div>
         </form>

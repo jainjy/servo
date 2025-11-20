@@ -93,7 +93,7 @@ import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
 import { SocketProvider } from "./contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
-import AdminBookings from "./components/admin/tourism/AdminBookings";
+import ProBookings from "./components/admin/tourism/ProBookings";
 import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
 //tracking page
@@ -478,7 +478,7 @@ const App = () => {
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
-                    <Route path="reservations" element={<AdminBookings />} />
+                    <Route path="reservations" element={<ProBookings />} />
                     <Route
                       path="services"
                       element={<ProfessionalServicesPage />}
