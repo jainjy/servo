@@ -6,8 +6,60 @@ import { Link } from 'react-router-dom';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-gray-300 py-10">
-      <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between">
+      <div className="container w-full flex flex-col md:flex-row justify-between">
+        <div className='lg:pb-0 pb-4 flex flex-col gap-2'>
+          {/* Titre */}
+          <h1 className="text-3xl lg:text-2xl font-bold text-gray-400 ">
+            Nos <span className="bg-white  bg-clip-text text-transparent">Partenaires</span>
+          </h1>
+
+          {/* Liste des partenaires */}
+          <div className='ml-4 flex-col grid grid-cols-2 lg:flex  max-w-md mx-auto w-full'>
+            <div className='relative group cursor-pointer'>
+              <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
+                Partenaire 1
+              </span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
+            </div>
+
+            <div className='relative group cursor-pointer'>
+              <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
+                Partenaire 2
+              </span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
+            </div>
+
+            <div className='relative group cursor-pointer'>
+              <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
+                Partenaire 3
+              </span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
+            </div>
+
+            <div className='relative group cursor-pointer'>
+              <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
+                Partenaire 4
+              </span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
+            </div>
+
+            <div className='relative group cursor-pointer'>
+              <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
+                Partenaire 5
+              </span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
+            </div>
+
+            <div className='relative group cursor-pointer'>
+              <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
+                Partenaire 6
+              </span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
         {/* Logo et description */}
+
         <div className="mb-8 md:mb-0 md:w-1/3">
           <div className='flex gap-4 items-center mb-4'>
             <div className="p-1 w-12 rounded-full bg-black border-black border-2">
@@ -26,7 +78,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Contacts et réseaux sociaux */}
-        <div className="md:w-1/3">
+        <div className="">
           <h3 className="font-semibold text-white mb-3">Contact</h3>
           <p>123 Rue de l'Immobilier</p>
           <p>75000 Paris, France</p>
@@ -48,14 +100,14 @@ const Footer: React.FC = () => {
         </div>
       </div>
       <div className="text-center text-gray-500 text-sm">
-      &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
-      <Link
-       to="/cookies"
-       className="ml-4 underline text-slate-400 hover:text-white transition"
-       >
-       Cookies
-      </Link>
-</div>
+        &copy; {new Date().getFullYear()} Servo. Tous droits réservés.
+        <Link
+          to="/cookies"
+          className="ml-4 underline text-slate-400 hover:text-white transition"
+        >
+          Cookies
+        </Link>
+      </div>
 
 
 
