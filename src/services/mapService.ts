@@ -125,25 +125,4 @@ export class MapService {
       return false;
     }
   }
-  // services/mapService.ts - Ajouter cette méthode
-  static async calculateRoute(
-    from: [number, number],
-    to: [number, number]
-  ): Promise<any> {
-    try {
-      const response = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`
-      );
-
-      if (!response.ok) {
-        throw new Error("Erreur lors du calcul de l'itinéraire");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Erreur calcul itinéraire:", error);
-      throw error;
-    }
-  }
-  
 }

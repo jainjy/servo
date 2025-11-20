@@ -10,6 +10,7 @@ const MapPage: React.FC = () => {
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [filteredPoints, setFilteredPoints] = useState<MapPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [geoLoading, setGeoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [filters, setFilters] = useState({
@@ -109,18 +110,18 @@ const MapPage: React.FC = () => {
       return;
     }
 
-    setLoading(true);
+    setGeoLoading(true);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
-        setLoading(false);
+        setGeoLoading(false);
       },
       (error) => {
         console.error("Erreur de géolocalisation:", error);
         setError("Impossible d'obtenir votre position");
-        setLoading(false);
+        setGeoLoading(false);
       },
       {
         enableHighAccuracy: true,
@@ -128,6 +129,25 @@ const MapPage: React.FC = () => {
         maximumAge: 60000,
       }
     );
+  };
+
+  const handleCenterToUserLocation = () => {
+    if (!userLocation) {
+      setError("Votre position n'est pas disponible. Cliquez sur 'Ma position' d'abord.");
+      return;
+    }
+    // Événement personnalisé pour centrer la carte
+    window.dispatchEvent(new CustomEvent('centerMap', { detail: { location: userLocation } }));
+  };
+
+  const handleCenterToReunion = () => {
+    // Centrer sur la Réunion avec les bonnes coordonnées
+    window.dispatchEvent(new CustomEvent('centerMap', { 
+      detail: { 
+        location: [-21.1351, 55.2471],
+        zoom: 10
+      } 
+    }));
   };
 
   const handleFilterChange = (filterType: keyof typeof filters) => {
@@ -227,36 +247,64 @@ const MapPage: React.FC = () => {
             </div>
 
             {/* Boutons de filtre */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => handleFilterChange("users")}
-                className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
+                className={`flex-1 min-w-[120px] sm:flex-none px-4 py-2 rounded-lg border transition-colors flex items-center justify-center gap-2 ${
                   filters.users
                     ? "bg-blue-500 text-white border-blue-500"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                 }`}
               >
                 <Users className="h-4 w-4" />
-                Partenaires
+                <span className="hidden sm:inline">Partenaires</span>
+                <span className="sm:hidden text-xs">Partenaires</span>
               </button>
               <button
                 onClick={() => handleFilterChange("properties")}
-                className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
+                className={`flex-1 min-w-[120px] sm:flex-none px-4 py-2 rounded-lg border transition-colors flex items-center justify-center gap-2 ${
                   filters.properties
                     ? "bg-green-500 text-white border-green-500"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                 }`}
               >
                 <Home className="h-4 w-4" />
-                Propriétés
+                <span className="hidden sm:inline">Propriétés</span>
+                <span className="sm:hidden text-xs">Propriétés</span>
               </button>
-              {/* <button
+              <button
                 onClick={handleGetUserLocation}
-                className="px-4 py-2 bg-purple-500 text-white rounded-lg border border-purple-500 hover:bg-purple-600 transition-colors flex items-center gap-2"
+                disabled={geoLoading}
+                className="flex-1 min-w-[120px] sm:flex-none px-4 py-2 bg-purple-500 text-white rounded-lg border border-purple-500 hover:bg-purple-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {geoLoading ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                    <span className="hidden sm:inline text-sm">Localisation...</span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-4 w-4" />
+                    <span className="hidden sm:inline">Ma position</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleCenterToUserLocation}
+                disabled={!userLocation}
+                className="px-3 py-2 sm:px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                title="Centrer sur votre position"
               >
                 <MapPin className="h-4 w-4" />
-                Ma position
-              </button> */}
+              </button>
+              <button
+                onClick={handleCenterToReunion}
+                className="px-3 py-2 sm:px-4 bg-orange-500 text-white rounded-lg border border-orange-500 hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                title="Centrer sur la Réunion"
+              >
+                🏝️
+                <span className="hidden sm:inline ml-1">Réunion</span>
+              </button>
             </div>
           </div>
         </div>
@@ -269,7 +317,6 @@ const MapPage: React.FC = () => {
         height="600px"
         className="rounded-lg shadow-lg border"
         onPointClick={handlePointClick}
-        showRouting={true}
       />
 
       {/* Modal des détails */}

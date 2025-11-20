@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+import "leaflet/dist/leaflet.css";
 import { GenericMapProps, MapPoint } from "../types/map";
 import {
   initializeLeaflet,
@@ -17,17 +16,32 @@ const GenericMap: React.FC<GenericMapProps> = ({
   height = "500px",
   className = "",
   onPointClick,
-  showRouting = false,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const userLocationMarkerRef = useRef<L.Marker | null>(null);
-  const routingControlRef = useRef<L.Routing.Control | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
 
   useEffect(() => {
     initializeLeaflet();
+  }, []);
+
+  // Écouteur pour centrer la carte via événement personnalisé
+  useEffect(() => {
+    const handleCenterMap = (event: Event) => {
+      const customEvent = event as CustomEvent<{ location: [number, number]; zoom?: number }>;
+      if (mapInstanceRef.current && customEvent.detail.location) {
+        const [lat, lng] = customEvent.detail.location;
+        const zoomLevel = customEvent.detail.zoom || 15;
+        mapInstanceRef.current.setView([lat, lng], zoomLevel);
+      }
+    };
+
+    window.addEventListener("centerMap", handleCenterMap);
+    return () => {
+      window.removeEventListener("centerMap", handleCenterMap);
+    };
   }, []);
 
   useEffect(() => {
@@ -156,79 +170,9 @@ const GenericMap: React.FC<GenericMapProps> = ({
     }
   }, [points, onPointClick]);
 
-  // Gérer le calcul d'itinéraire
-  useEffect(() => {
-    if (
-      !mapInstanceRef.current ||
-      !showRouting ||
-      !selectedPoint ||
-      !userLocation
-    )
-      return;
-
-    const map = mapInstanceRef.current;
-
-    // Supprimer l'ancien contrôle d'itinéraire
-    if (routingControlRef.current) {
-      map.removeControl(routingControlRef.current);
-    }
-
-    // Créer un nouvel itinéraire
-    routingControlRef.current = L.Routing.control({
-      waypoints: [
-        L.latLng(userLocation[0], userLocation[1]),
-        L.latLng(selectedPoint.latitude!, selectedPoint.longitude!),
-      ],
-      routeWhileDragging: true,
-      showAlternatives: true,
-      lineOptions: {
-        styles: [
-          { color: "#3B82F6", opacity: 0.7, weight: 5 },
-          { color: "#60A5FA", opacity: 0.7, weight: 5 },
-        ],
-      },
-      altLineOptions: {
-        styles: [{ color: "#6B7280", opacity: 0.5, weight: 3 }],
-      },
-      createMarker: () => null, // Ne pas créer de marqueurs supplémentaires
-    }).addTo(map);
-
-    return () => {
-      if (routingControlRef.current) {
-        map.removeControl(routingControlRef.current);
-        routingControlRef.current = null;
-      }
-    };
-  }, [selectedPoint, userLocation, showRouting]);
-
-  const clearRoute = () => {
-    if (mapInstanceRef.current && routingControlRef.current) {
-      mapInstanceRef.current.removeControl(routingControlRef.current);
-      routingControlRef.current = null;
-    }
-  };
-
   return (
     <div className="relative">
       <div ref={mapRef} className={`w-full ${className}`} style={{ height }} />
-
-      {/* Contrôles personnalisés */}
-      {selectedPoint && userLocation && showRouting && (
-        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-[1000] min-w-64">
-          <h3 className="font-bold text-lg mb-2">
-            Itinéraire vers {selectedPoint.name}
-          </h3>
-          <p className="text-sm text-gray-600 mb-3">
-            L'itinéraire est calculé depuis votre position actuelle
-          </p>
-          <button
-            onClick={clearRoute}
-            className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-          >
-            Effacer l'itinéraire
-          </button>
-        </div>
-      )}
     </div>
   );
 };

@@ -53,7 +53,6 @@ export interface GenericMapProps {
   height?: string;
   className?: string;
   onPointClick?: (point: MapPoint) => void;
-  showRouting?: boolean;
 }
 
 // Réponse API
