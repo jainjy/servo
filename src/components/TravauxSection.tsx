@@ -730,7 +730,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               navigate({ search: currentParams.toString() }, { replace: true });
             }}
           >
-            <TabsList className="grid w-1/2 grid-cols-3 bg-white/80 backdrop-blur-sm rounded-xl h-auto mb-8">
+            <TabsList className="grid md:w-1/2 w-full md:grid-cols-3 grid-cols-1 bg-white/80 backdrop-blur-sm rounded-xl h-auto mb-8 mx-auto shadow-md border border-white/30">
               {sections.map((section) => (
                 <TabsTrigger
                   key={section.id}
@@ -750,17 +750,17 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 <div className="bg-white/90 backdrop-blur-md rounded-3xl px-8 py-4 mb-12 shadow-sm border border-white/20 flex flex-col gap-6">
 
                   {/* Section Recherche */}
-                  <div className="relative flex-1 min-w-[300px] mx-auto">
+                  <div className="relative flex-1 md:min-w-[300px] w-24 mx-auto">
                     <Input
                       placeholder="Rechercher une prestation..."
-                      className="w-96 p-4 pl-12 pr-4  bg-white border-2 border-slate-800 rounded-2xl shadow-sm 
+                      className="md:w-96 w-60  p-4 pl-12 pr-4 md:ml-0 -ml-12    bg-white border-2 border-slate-800 rounded-2xl shadow-sm 
                transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200
                disabled:opacity-50 disabled:cursor-not-allowed"
                       value={searchFilter}
                       onChange={search}
                       disabled={isLoadingServices}
                     />
-                    <Search className="absolute top-2 left-4 transform h-5 w-5 text-slate-800" />
+                    <Search className="absolute top-2 md:left-4 -left-8 transform h-5 w-5 text-slate-800" />
                   </div>
 
                   {/* Section Filtres par type */}
