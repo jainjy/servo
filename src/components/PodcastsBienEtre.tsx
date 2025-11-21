@@ -367,10 +367,10 @@ const PodcastsBienEtre: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen ">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+            <img src="/loading.gif" alt="" />
             <div className="text-gray-600">Chargement des vidéos Bien-être...</div>
           </div>
         </div>
@@ -391,19 +391,24 @@ const PodcastsBienEtre: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen mt-10 ">
       {/* Contenu Principal */}
+      <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+        <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+        <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" className='h-full object-cover w-full' alt="" />
+      </div>
       <div className="container mx-auto px-4 py-12">
         {/* Section Vidéos */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">Podcasts Bien-être</h2>
-                <p className="text-gray-600">Pratiques de bien-être, méditations guidées et conseils pour une vie équilibrée</p>
-              </div>
+
+        <section className="mb-16 ">
+          <div className="flex relative items-center justify-center mb-8">
+            <div className="flex mb-10 items-center flex-col justify-center space-x-4">
+            
+                <h2 className="text-xl lg:text-4xl text-center pb-10 font-bold text-gray-100">Podcasts Bien-être</h2>
+                <p className="text-gray-300">Pratiques de bien-être, méditations guidées et conseils pour une vie équilibrée</p>
+              
             </div>
-            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
+            <div className="absolute bottom-0 left-0 text-sm text-gray-100 bg-slate-900 px-4 py-2 rounded-full border">
               {activeTab === 'all' ? videoEpisodes.length : favorites.length} vidéo(s) disponible(s)
             </div>
           </div>
@@ -412,11 +417,10 @@ const PodcastsBienEtre: React.FC = () => {
           <div className="flex gap-4 mb-8 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('all')}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
-                activeTab === 'all'
-                  ? 'border-green-600 text-green-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'all'
+                ? 'border-green-600 text-green-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
             >
               <div className="flex items-center space-x-2">
                 <Activity className="w-5 h-5" />
@@ -425,11 +429,10 @@ const PodcastsBienEtre: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('favorites')}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
-                activeTab === 'favorites'
-                  ? 'border-red-600 text-red-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'favorites'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
             >
               <div className="flex items-center space-x-2">
                 <Heart className="w-5 h-5" />

@@ -1,35 +1,35 @@
 export default function Test() {
   const imageSrc = [
     {
-      src: "/logo1.png",
+      src: "https://i.pinimg.com/736x/f7/63/03/f7630358b6c2e058381a34be8d2736d8.jpg",
       alt: "Image",
     },
     {
-      src: "/logo2.png",
+      src: "https://i.pinimg.com/736x/cc/3c/db/cc3cdb8498f8d4135b87f8501f3faa31.jpg",
       alt: "Image",
     },
     {
-      src: "/logo1.png",
+      src: "https://i.pinimg.com/1200x/9d/1b/af/9d1baf24622b6c568ed6f41f826c7105.jpg",
       alt: "Image",
     },
     {
-      src: "/logo2.png",
+      src: "https://i.pinimg.com/1200x/4d/7a/ec/4d7aecb5e539968fec979b35f5618527.jpg",
       alt: "Image",
     },
     {
-      src: "/logo1.png",
+      src: "https://i.pinimg.com/736x/f0/64/d7/f064d7192801ed944991351e99efdbf2.jpg",
       alt: "Image",
     },
     {
-      src: "/logo2.png",
+      src: "https://i.pinimg.com/736x/bb/d6/2a/bbd62ab19fe388ef4dac11d2f21be3f7.jpg",
       alt: "Image",
     },
     {
-      src: "/logo1.png",
+      src: "https://i.pinimg.com/1200x/83/5d/9d/835d9d7c0f06a49b079418cd59914762.jpg",
       alt: "Image",
     },
     {
-      src: "/logo2.png",
+      src: "https://i.pinimg.com/736x/52/52/5c/52525c7b87e0600a27bf66a9ec1e04f2.jpg",
       alt: "Image",
     }
   ];
@@ -41,10 +41,10 @@ export default function Test() {
       <div className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/70 to-transparent opacity-80 z-10"></div>
       <div className="absolute -top-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/60 to-transparent opacity-80 z-10"></div>
       <div className="absolute -bottom-2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-black/60 to-transparent opacity-80 z-10"></div>
-      
+
       {/* Effet de surbrillance blanc */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/10 pointer-events-none z-0"></div>
-      
+
       <div
         className="
           relative
@@ -74,32 +74,20 @@ export default function Test() {
               className="
                 flex-none py-7 flex justify-center items-center h-full w-28 lg:w-52
                 transition-all duration-500 ease-in-out
-                group-hover:scale-105
-                hover:!scale-110
+                
+                
               "
             >
-              <div className="
-                p-4 
-                backdrop-blur-2xl
-                bg-white/10
-                border border-white/20
-                rounded-2xl
-                
-                shadow-black/20
-                transition-all duration-500
-                hover:bg-white/15
-                hover:border-white/30
-                hover:shadow-2xl hover:shadow-white/10
-              ">
-                <img
-                  className="object-contain filter  hover:grayscale transition-all duration-500 brightness-110 contrast-110"
-                  src={image.src}
-                  alt={image.alt} 
-                  width={130} 
-                  height={130}
-                />
-              </div>
+
+              <img
+                className="object-cover w-full h-full filter rounded-lg  hover:grayscale hover:scale-105 transition-all duration-500 brightness-110 contrast-110"
+                src={image.src}
+                alt={image.alt}
+                width={130}
+                height={130}
+              />
             </div>
+
           ))}
         </div>
 
@@ -116,31 +104,22 @@ export default function Test() {
               className="
                 flex-none py-7 flex justify-center items-center h-full w-28 lg:w-52
                 transition-all duration-500 ease-in-out
-                group-hover:scale-105
+               
               "
             >
-              <div className="
-                p-4 
-                backdrop-blur-2xl
-                bg-white/10
-                border border-white/20
-                rounded-2xl
-                
-                shadow-black/20
-                transition-all duration-500
-              ">
-                <img
-                  className="object-contain filter hover:grayscale brightness-110 contrast-110"
-                  src={image.src}
-                  alt={image.alt} 
-                  width={130} 
-                  height={130}
-                />
-              </div>
+
+              <img
+                className="object-cover rounded-lg w-full h-full filter hover:scale-105 hover:grayscale brightness-110 contrast-110"
+                src={image.src}
+                alt={image.alt}
+                width={130}
+                height={130}
+              />
             </div>
+
           ))}
         </div>
-        
+
         <style>{`
           @keyframes move {
             0% {
