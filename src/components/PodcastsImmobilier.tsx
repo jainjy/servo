@@ -509,7 +509,7 @@ const PodcastsImmobilier: React.FC = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Section Vidéos */}
         <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
+          <div className="hidden lg:flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-purple-100 rounded-2xl">
                 <Video className="w-8 h-8 text-purple-600" />
@@ -529,25 +529,25 @@ const PodcastsImmobilier: React.FC = () => {
             <button
               onClick={() => setActiveTab('all')}
               className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'all'
-                  ? 'border-purple-600 text-purple-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-purple-600 text-purple-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
             >
               <div className="flex items-center space-x-2">
                 <Video className="w-5 h-5" />
-                <span>Tous les podcasts ({videoEpisodes.length})</span>
+                <span className='text-xs'>Tous les podcasts ({videoEpisodes.length})</span>
               </div>
             </button>
             <button
               onClick={() => setActiveTab('favorites')}
               className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'favorites'
-                  ? 'border-red-600 text-red-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
             >
               <div className="flex items-center space-x-2">
                 <Heart className="w-5 h-5" />
-                <span>Mes favoris ({favorites.length})</span>
+                <span className='text-xs'>Mes favoris ({favorites.length})</span>
               </div>
             </button>
           </div>
@@ -595,8 +595,8 @@ const PodcastsImmobilier: React.FC = () => {
       {/* Modal Vidéo */}
       {isModalOpen && selectedEpisode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          {/* Modal Container - Layout horizontal */}
-          <div className="relative w-full max-w-7xl h-[90vh] bg-slate-900/50 rounded-2xl shadow-2xl overflow-hidden flex">
+          {/* Modal Container - Layout vertical sur mobile */}
+          <div className="relative w-full max-w-7xl h-[90vh] bg-slate-900/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
 
             {/* Bouton fermeture */}
             <button
@@ -608,17 +608,17 @@ const PodcastsImmobilier: React.FC = () => {
                   videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
+              className="absolute top-2 right-2 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200 hover:scale-110 backdrop-blur-sm lg:top-4 lg:right-4 lg:p-3"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
             {/* Colonne de gauche - Vidéo */}
-            <div className="flex-1 flex mr-5 rounded-lg flex-col min-w-0">
+            <div className="flex-1 flex lg:mr-5 rounded-lg flex-col min-w-0">
               {/* Container vidéo */}
-              <div className="relative flex-1 rounded-t-lg overflow-hidden bg-black/60 flex items-center justify-center">
+              <div className="relative flex-1 rounded-t-lg overflow-hidden bg-black/60 flex items-center justify-center min-h-[200px] lg:min-h-0">
                 <video
                   ref={videoRef}
                   src={selectedEpisode.videoUrl}
@@ -630,10 +630,10 @@ const PodcastsImmobilier: React.FC = () => {
                 />
 
                 {/* Overlay de contrôle custom */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 lg:p-4">
 
                   {/* Barre de progression */}
-                  <div className="mb-4 px-2">
+                  <div className="mb-3 lg:mb-4 px-1 lg:px-2">
                     <div
                       className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer group"
                       onClick={handleProgressClick}
@@ -664,63 +664,63 @@ const PodcastsImmobilier: React.FC = () => {
                     </div>
 
                     {/* Temps actuel et total */}
-                    <div className="flex justify-between items-center mt-2 text-xs text-gray-300">
+                    <div className="flex justify-between items-center mt-1 lg:mt-2 text-xs text-gray-300">
                       <span>{formatTime(currentTime)}</span>
                       <span>{formatTime(duration)}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3 lg:space-x-4">
                       <button
                         onClick={handlePlayMedia}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 lg:p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
                       >
                         {isPlaying ? (
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                           </svg>
                         ) : (
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         )}
                       </button>
 
                       <div className="text-white">
-                        <div className="text-sm font-medium">
+                        <div className="text-xs lg:text-sm font-medium">
                           {isPlaying ? 'En lecture' : 'En pause'}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 lg:space-x-3">
                       {/* Bouton plein écran */}
                       <button
                         onClick={toggleFullscreen}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all duration-200"
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 lg:p-2 transition-all duration-200"
                         title="Plein écran"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                         </svg>
                       </button>
 
                       <button
                         onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                        className={`p-2 rounded-full transition-all duration-200 ${selectedEpisode && isFavorite(selectedEpisode.id)
-                          ? 'bg-red-500 text-white hover:bg-red-600'
-                          : 'bg-white/10 text-white hover:bg-white/20'
+                        className={`p-1.5 lg:p-2 rounded-full transition-all duration-200 ${selectedEpisode && isFavorite(selectedEpisode.id)
+                            ? 'bg-red-500 text-white hover:bg-red-600'
+                            : 'bg-white/10 text-white hover:bg-white/20'
                           }`}
                       >
-                        <Heart className={`w-5 h-5 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
+                        <Heart className={`w-4 h-4 lg:w-5 lg:h-5 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
                       </button>
 
                       <button
                         onClick={handleDownload}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all duration-200"
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 lg:p-2 transition-all duration-200"
                       >
-                        <Download className="w-5 h-5" />
+                        <Download className="w-4 h-4 lg:w-5 lg:h-5" />
                       </button>
                     </div>
                   </div>
@@ -728,17 +728,17 @@ const PodcastsImmobilier: React.FC = () => {
               </div>
 
               {/* Titre de la vidéo sous la vidéo */}
-              <div className="p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
-                <h1 className="text-lg font-bold text-white truncate">
+              <div className="p-3 lg:p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+                <h1 className="text-base lg:text-lg font-bold text-white line-clamp-2">
                   {selectedEpisode.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
+                <div className="flex items-center space-x-3 lg:space-x-4 text-xs lg:text-sm text-gray-400 mt-1">
                   <span className="flex items-center">
-                    <Clock className="w-4 h-4 mr-1" />
+                    <Clock className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
                     {selectedEpisode.duration}
                   </span>
                   <span className="flex items-center">
-                    <Headphones className="w-4 h-4 mr-1" />
+                    <Headphones className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
                     {selectedEpisode.views.toLocaleString()} vues
                   </span>
                 </div>
@@ -746,13 +746,13 @@ const PodcastsImmobilier: React.FC = () => {
             </div>
 
             {/* Colonne de droite - Contenu */}
-            <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col">
+            <div className="w-full lg:w-96 bg-gray-800 border-t lg:border-l border-gray-700 flex flex-col max-h-[50vh] lg:max-h-none">
               {/* En-tête avec informations */}
-              <div className="p-6 border-b border-gray-700">
-                <div className="flex items-center space-x-3 mb-4">
+              <div className="p-4 lg:p-6 border-b border-gray-700">
+                <div className="flex items-center space-x-3 mb-3 lg:mb-4">
                   {/* Avatar */}
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                    <Video className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Video className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-white">Ma Chaîne</div>
@@ -780,17 +780,17 @@ const PodcastsImmobilier: React.FC = () => {
               {/* Contenu défilant */}
               <div className="flex-1 overflow-y-auto">
                 {/* Description */}
-                <div className="p-6 border-b border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-3">Description</h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                <div className="p-4 lg:p-6 border-b border-gray-700">
+                  <h3 className="text-base lg:text-lg font-semibold text-white mb-2 lg:mb-3">Description</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed line-clamp-4 lg:line-clamp-none">
                     {selectedEpisode.description}
                   </p>
                 </div>
 
                 {/* Informations techniques */}
-                <div className="p-6 border-b border-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Informations techniques</h3>
-                  <div className="space-y-4">
+                <div className="p-4 lg:p-6 border-b border-gray-700">
+                  <h3 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Informations techniques</h3>
+                  <div className="space-y-3 lg:space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Format</span>
                       <span className="text-white font-medium text-sm">{selectedEpisode.mimeType}</span>
@@ -811,9 +811,9 @@ const PodcastsImmobilier: React.FC = () => {
                 </div>
 
                 {/* Statistiques */}
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Statistiques</h3>
-                  <div className="space-y-3">
+                <div className="p-4 lg:p-6">
+                  <h3 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Statistiques</h3>
+                  <div className="space-y-2 lg:space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Vues totales</span>
                       <span className="text-white font-medium text-sm">{selectedEpisode.views.toLocaleString()}</span>
@@ -827,22 +827,22 @@ const PodcastsImmobilier: React.FC = () => {
               </div>
 
               {/* Actions footer */}
-              <div className="p-6 border-t border-gray-700 bg-gray-900/50">
+              <div className="p-4 lg:p-6 border-t border-gray-700 bg-gray-900/50">
                 <div className="space-y-3">
                   <button
                     onClick={handlePlayMedia}
-                    className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
+                    className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white py-2 lg:py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm lg:text-base"
                   >
                     {isPlaying ? (
                       <>
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                         </svg>
                         <span>Mettre en pause</span>
                       </>
                     ) : (
                       <>
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M8 5v14l11-7z" />
                         </svg>
                         <span>Lire la vidéo</span>
@@ -850,24 +850,24 @@ const PodcastsImmobilier: React.FC = () => {
                     )}
                   </button>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 lg:gap-3">
                     <button
                       onClick={handleDownload}
-                      className="flex items-center justify-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg font-medium transition-all duration-200 border border-gray-600"
+                      className="flex items-center justify-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg font-medium transition-all duration-200 border border-gray-600 text-xs lg:text-sm"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3 h-3 lg:w-4 lg:h-4" />
                       <span>Télécharger</span>
                     </button>
 
                     <button
                       onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                      className={`flex items-center justify-center space-x-2 py-2 rounded-lg font-medium transition-all duration-200 border ${selectedEpisode && isFavorite(selectedEpisode.id)
-                        ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
-                        : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
+                      className={`flex items-center justify-center space-x-2 py-2 rounded-lg font-medium transition-all duration-200 border text-xs lg:text-sm ${selectedEpisode && isFavorite(selectedEpisode.id)
+                          ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
+                          : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
                         }`}
                     >
-                      <Heart className={`w-4 h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
-                      <span className="text-sm">{selectedEpisode && isFavorite(selectedEpisode.id) ? 'Favori' : 'J\'aime'}</span>
+                      <Heart className={`w-3 h-3 lg:w-4 lg:h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
+                      <span>{selectedEpisode && isFavorite(selectedEpisode.id) ? 'Favori' : 'J\'aime'}</span>
                     </button>
                   </div>
                 </div>

@@ -230,6 +230,10 @@ const App = () => {
                     element={<PodcastsBatiment />}
                   />
                   <Route
+                    path="/podcasts-bien_etre"
+                    element={<PodcastsBienEtre />}
+                  />
+                  <Route
                     path="/lieux_historique"
                     element={
                       <LieuxHistoriques ville="Paris" typeFiltre="tous" />

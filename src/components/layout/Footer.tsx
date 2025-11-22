@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
             </div>
 
-            <div className='relative group cursor-pointer'>
+            {/* <div className='relative group cursor-pointer'>
               <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
                 Partenaire 4
               </span>
@@ -55,13 +55,13 @@ const Footer: React.FC = () => {
                 Partenaire 6
               </span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
-            </div>
+            </div> */}
           </div>
         </div>
         {/* Logo et description */}
 
         <div className="mb-8 md:mb-0 md:w-1/3">
-          <div className='flex gap-4 items-center mb-4'>
+          <div className='flex gap-4 items-center justify-center mb-4'>
             <div className="p-1 w-12 rounded-full bg-black border-black border-2">
               {/* Remplacement de <Image> par <img> */}
               <img
@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
             </div>
             <h2 className="text-2xl azonix font-bold text-white ">Servo</h2>
           </div>
-          <p className="text-gray-400">
+          <p className="text-gray-400 text-center">
             Votre partenaire de confiance pour trouver le bien immobilier de vos rêves.
           </p>
         </div>
