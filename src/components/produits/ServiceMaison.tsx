@@ -140,12 +140,12 @@ const ServicesMaison = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4">
+      <div className="">
         {/* En-tête de la page */}
         <div className="mb-8">
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
+              <div className="flex  items-center gap-3">
                 <div className="p-2 rounded-xl bg-[#0052FF]/10">
                   <Home className="h-6 w-6 text-slate-900" />
                 </div>

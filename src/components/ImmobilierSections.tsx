@@ -127,7 +127,7 @@ const ImmobilierSections = () => {
             content: (
                 <div className="p-6">
                     {/* Section en-tête avec bouton aligné à droite */}
-                    <div className="flex justify-between mb-8">
+                    <div className="flex justify-between flex-col md:flex-row mb-8">
                         <div className="space-y-2">
                             <h3 className="text-2xl font-semibold">Optimisez votre patrimoine</h3>
                             <p className="text-gray-600">
