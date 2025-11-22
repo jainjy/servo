@@ -139,6 +139,7 @@ import PodcastsImmobilier from "./components/PodcastsImmobilier";
 import PodcastsDomicile from "./components/PodcastsDomicil";
 import PodcastsBienEtre from "./components/PodcastsBienEtre";
 import LieuxHistoriques from "./components/components/Tourisme_lieux";
+import Voyages from "./components/components/voyages";
 import ConstructionServicesPage from "./pages/BatimentPage";
 import PricingPacksDisplay from "./components/components/PackComplet";
 import AgendaPage from "./pages/mon-compte/AgendaPage";
@@ -242,6 +243,10 @@ const App = () => {
                   <Route
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
+                  />
+                  <Route
+                    path="/voyages"
+                    element={<Voyages />}
                   />
                   <Route
                     path="/plan_administratif"

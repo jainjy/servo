@@ -826,6 +826,13 @@ useEffect(() => {
             "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
         },
         {
+          title: "Voyages",
+          description: "Cours & ateliers locaux",
+          href: "/voyages",
+          image:
+            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+        },
+        {
           title: "Podcasts",
           description: "Ressources sur le tourisme",
           href: "/podcasts/tourisme",
