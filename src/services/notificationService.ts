@@ -18,25 +18,9 @@ class NotificationService {
   private listeners: ((notif: Notification) => void)[] = [];
 
   private getBackendUrl(): string {
-    // 1) si tu as défini VITE_API_URL -> utilise
-    if (import.meta.env.VITE_API_URL) {
-      // strip trailing slash
-      return (import.meta.env.VITE_API_URL as string).replace(/\/$/, "");
-    }
+    const VITE_API_URL =import.meta.env.VITE_API_URL2 || "http://localhost:3001";
+    return VITE_API_URL;
 
-    // 2) pas envie d'utiliser .env ? essaye de deviner depuis la fenêtre (dev)
-    try {
-      const loc = window.location;
-      // si front en dev sur 5173 -> backend souvent sur 3001
-      const isLocalhost = /localhost|127\.0\.0\.1/.test(loc.hostname);
-      if (isLocalhost) {
-        return "http://localhost:3001"; // fallback commun
-      }
-      // sinon appeler le même host (production)
-      return `${loc.protocol}//${loc.host}`;
-    } catch (e) {
-      return "http://localhost:3001";
-    }
   }
 
   connect(): void {
