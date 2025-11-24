@@ -340,6 +340,7 @@ export default function UserDiscussions() {
       const response = await api.post(`/demande-actions/${id}/signer-devis`, {
         artisanId,
       });
+      console.log("Response signature devis:", response.data);
 
       toast.success("Devis signé avec succès ! L'artisan a été sélectionné.");
 

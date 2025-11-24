@@ -211,12 +211,14 @@ export default function ProDiscussions() {
         {[1, 2, 3, 4, 5].map((star) => (
           <div
             key={star}
-            className={`p-1 rounded ${star <= rating ? "bg-yellow-400" : "bg-gray-300"
-              }`}
+            className={`p-1 rounded ${
+              star <= rating ? "bg-yellow-400" : "bg-gray-300"
+            }`}
           >
             <Star
-              className={`w-5 h-5 ${star <= rating ? "text-yellow-600" : "text-gray-500"
-                }`}
+              className={`w-5 h-5 ${
+                star <= rating ? "text-yellow-600" : "text-gray-500"
+              }`}
               fill="currentColor"
             />
           </div>
@@ -414,8 +416,8 @@ export default function ProDiscussions() {
           const response = await api.get(`/demandes/${id}`);
           setDemande(response.data);
           setNotAssignedMe(
-            (response.data.artisanId != user.id &&
-              response.data.artisanId != null)
+            response.data.artisanId != user.id &&
+              response.data.artisanId != null
           );
         }
       } catch (error) {
@@ -579,6 +581,38 @@ export default function ProDiscussions() {
 
   if (!demande) {
     return <div className="p-8 text-center">Demande non trouvée</div>;
+  }
+
+  // NOUVEAU: Afficher le message si la demande est assignée à un autre artisan
+  if (notAssignedMe) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-red-50 to-red-100 p-4">
+        <div className="flex flex-col items-center justify-center py-12 px-6 bg-white rounded-2xl border-2 border-red-300 shadow-lg max-w-2xl">
+          <div className="mb-6 p-8 bg-red-500 rounded-full">
+            <img
+              src="/unauthorized.gif"
+              alt="Non assignée"
+              className="w-100 h-100 object-cover rounded-full"
+            />
+          </div>
+          <h3 className="text-4xl font-bold text-red-900 mb-4">
+            Accès non autorisé
+          </h3>
+          <p className="text-red-700 text-center mb-2 text-lg">
+            Cette demande a été assignée à un autre artisan
+          </p>
+          <p className="text-base text-red-600 mb-6">
+            Vous n'avez plus accès à cette conversation
+          </p>
+          <div className="mt-4 flex items-center gap-2 text-red-700">
+            <Lock className="w-5 h-5" />
+            <span className="text-base font-medium">
+              Conversation verrouillée
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -796,7 +830,9 @@ export default function ProDiscussions() {
               <div className="space-y-4">
                 {messages.map((message, index) => {
                   // Vérifier si le message doit être affiché
+                  // Les messages système s'affichent toujours
                   if (
+                    message.type !== "SYSTEM" &&
                     message.expediteurId !== currentUserId &&
                     conversation?.creatorId !== currentUserId
                   ) {
@@ -884,7 +920,9 @@ export default function ProDiscussions() {
                           {message.evenementType === "AVIS_LAISSE" && (
                             <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                               <RatingStars
-                                rating={extractRatingFromMessage(message.contenu)}
+                                rating={extractRatingFromMessage(
+                                  message.contenu
+                                )}
                               />
                             </div>
                           )}
@@ -1326,7 +1364,9 @@ export default function ProDiscussions() {
                   <div className="space-y-4">
                     {messages.map((message, index) => {
                       // Vérifier si le message doit être affiché
+                      // Les messages système s'affichent toujours
                       if (
+                        message.type !== "SYSTEM" &&
                         message.expediteurId !== currentUserId &&
                         conversation?.creatorId !== currentUserId
                       ) {
