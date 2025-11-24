@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
+
 interface Category {
   id: string;
   name: string;
@@ -26,15 +28,21 @@ const mainCategoryNames = [
   "boutique",
 ];
 
+
+
 const ArtCommerce: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [services, setServices] = useState<Service[]>([]);
+  // 1. Nouvel état pour gérer l'état de chargement
+  const [loading, setLoading] = useState(true);
 
   // Charger les services
   useEffect(() => {
     const fetchServices = async () => {
+      // Début du chargement
+      setLoading(true);
       try {
         const res = await api.get("/oeuvre/all");
         const data = await res.data;
@@ -42,6 +50,9 @@ const ArtCommerce: React.FC = () => {
         console.log(data);
       } catch (err) {
         console.error("Erreur de chargement des services :", err);
+      } finally {
+        // Fin du chargement, que ce soit un succès ou une erreur
+        setLoading(false);
       }
     };
     fetchServices();
@@ -76,7 +87,10 @@ const ArtCommerce: React.FC = () => {
   });
 
   return (
-    <div id="art_commerce" className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div
+      id="art_commerce"
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50"
+    >
       {/* Section de recherche */}
       <section
         className="relative mt-16 py-8 text-white overflow-hidden"
@@ -115,10 +129,11 @@ const ArtCommerce: React.FC = () => {
       <div className="flex flex-wrap gap-3 justify-center mb-8 mt-6">
         <button
           onClick={() => setSelectedCategory("all")}
-          className={`px-6 py-3 rounded-xl ${selectedCategory === "all"
+          className={`px-6 py-3 rounded-xl ${
+            selectedCategory === "all"
               ? "bg-slate-900 text-white shadow-lg"
               : "bg-white text-slate-700 border border-gray-200"
-            }`}
+          }`}
         >
           Tous
         </button>
@@ -127,10 +142,11 @@ const ArtCommerce: React.FC = () => {
           <button
             key={catName}
             onClick={() => setSelectedCategory(catName)}
-            className={`px-6 py-3 rounded-xl ${selectedCategory.toLowerCase() === catName.toLowerCase()
+            className={`px-6 py-3 rounded-xl ${
+              selectedCategory.toLowerCase() === catName.toLowerCase()
                 ? "bg-slate-800 text-white shadow-lg"
                 : "bg-white text-slate-700 border border-gray-200"
-              }`}
+            }`}
           >
             {catName.charAt(0).toUpperCase() + catName.slice(1)}
           </button>
@@ -140,7 +156,12 @@ const ArtCommerce: React.FC = () => {
       {/* Grille des services */}
       <div className="flex justify-center bg-gradient-to-b from-gray-50 to-white">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 w-full max-w-6xl py-10">
-          {filteredServices.length > 0 ? (
+          {/* 2. Affichage conditionnel : Spinner ou Contenu */}
+          {loading ? (
+            <div className="col-span-full">
+              <LoadingSpinner text="Chargement des arts" />
+            </div>
+          ) : filteredServices.length > 0 ? (
             filteredServices.map((item) => (
               <div
                 key={item.id}
@@ -184,7 +205,6 @@ const ArtCommerce: React.FC = () => {
                   >
                     Voir les détails
                   </button>
-
                 </div>
               </div>
             ))
@@ -198,11 +218,6 @@ const ArtCommerce: React.FC = () => {
           )}
         </div>
       </div>
-
-
-
-
-
     </div>
   );
 };
