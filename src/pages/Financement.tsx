@@ -25,9 +25,14 @@ import {
   Heart,
   X,
   ArrowRight,
-  LucideIcon
+  LucideIcon,
+  CreditCard,
+  PieChart,
+  Car,
+  Plane
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+
 // Types
 interface FinancementPartenaire {
   id: number;
@@ -37,6 +42,7 @@ interface FinancementPartenaire {
   avantages: string[];
   icon?: LucideIcon;
   type: string;
+  services: string[];
 }
 
 interface AssuranceService {
@@ -47,6 +53,7 @@ interface AssuranceService {
   icon?: LucideIcon;
   obligatoire: boolean;
   public: string;
+  categorie: string;
 }
 
 interface ModalData {
@@ -62,6 +69,20 @@ interface FormData {
   message: string;
   montant: string;
   duree: string;
+  revenus: string;
+  charges: string;
+  apport: string;
+  taux: string;
+  revenus_annuels: string;
+  patrimoine: string;
+  objectif: string;
+  profil_risque: string;
+}
+
+interface SimulationResult {
+  capacite?: number;
+  mensualite?: number;
+  estimation?: number;
 }
 
 // Données de fallback en cas d'erreur API
@@ -72,6 +93,7 @@ const partenairesFinancementFallback: FinancementPartenaire[] = [
     description: "Banque leader en financement immobilier et professionnel",
     rating: 4.7,
     avantages: ["Taux préférentiels", "Accompagnement personnalisé", "Réseau national"],
+    services: ["Prêt immobilier", "Rachat de crédit", "Crédit consommation", "Analyse patrimoniale"],
     icon: Building2,
     type: "banque"
   },
@@ -81,6 +103,7 @@ const partenairesFinancementFallback: FinancementPartenaire[] = [
     description: "Réseau de courtiers experts en financement",
     rating: 4.9,
     avantages: ["Comparaison multi-banques", "Négociation des taux", "Service gratuit"],
+    services: ["Prêt immobilier", "Rachat de crédit", "Crédit consommation", "Analyse patrimoniale"],
     icon: Users,
     type: "courtier"
   },
@@ -90,6 +113,7 @@ const partenairesFinancementFallback: FinancementPartenaire[] = [
     description: "Experts en financement de projets immobiliers",
     rating: 4.8,
     avantages: ["Prêts sur mesure", "Expertise sectorielle", "Délais optimisés"],
+    services: ["Prêt immobilier", "Rachat de crédit", "Analyse patrimoniale"],
     icon: Home,
     type: "expert"
   }
@@ -103,7 +127,8 @@ const servicesAssuranceFallback: AssuranceService[] = [
     icon: Shield,
     details: "Couverture des dommages affectant la solidité de l'ouvrage",
     obligatoire: true,
-    public: "Professionnels construction"
+    public: "Professionnels construction",
+    categorie: "professionnelle"
   },
   {
     id: 2,
@@ -112,7 +137,8 @@ const servicesAssuranceFallback: AssuranceService[] = [
     icon: FileText,
     details: "Protection dès la réception des travaux",
     obligatoire: true,
-    public: "Maîtres d'ouvrage"
+    public: "Maîtres d'ouvrage",
+    categorie: "construction"
   },
   {
     id: 3,
@@ -121,7 +147,8 @@ const servicesAssuranceFallback: AssuranceService[] = [
     icon: Home,
     details: "Incendie, dégâts des eaux, vol, responsabilité civile",
     obligatoire: false,
-    public: "Particuliers"
+    public: "Particuliers",
+    categorie: "habitation"
   },
   {
     id: 4,
@@ -130,7 +157,8 @@ const servicesAssuranceFallback: AssuranceService[] = [
     icon: BadgeDollarSign,
     details: "Décès, invalidité, perte d'emploi",
     obligatoire: false,
-    public: "Emprunteurs"
+    public: "Emprunteurs",
+    categorie: "pret"
   },
   {
     id: 5,
@@ -139,7 +167,8 @@ const servicesAssuranceFallback: AssuranceService[] = [
     icon: Users,
     details: "Dommages causés aux tiers dans le cadre professionnel",
     obligatoire: true,
-    public: "Professionnels"
+    public: "Professionnels",
+    categorie: "professionnelle"
   },
   {
     id: 6,
@@ -148,7 +177,48 @@ const servicesAssuranceFallback: AssuranceService[] = [
     icon: Heart,
     details: "Couverture santé optimale",
     obligatoire: false,
-    public: "Entreprises & Particuliers"
+    public: "Entreprises & Particuliers",
+    categorie: "sante"
+  },
+  {
+    id: 7,
+    nom: "Garantie Loyer Impayé",
+    description: "Protection contre les impayés de loyers",
+    icon: Shield,
+    details: "Couverture des loyers impayés et des frais de contentieux",
+    obligatoire: false,
+    public: "Propriétaires bailleurs",
+    categorie: "immobilier"
+  },
+  {
+    id: 8,
+    nom: "Assurance Voiture",
+    description: "Protection complète pour votre véhicule",
+    icon: Car,
+    details: "Tous risques, au tiers, assistance routière",
+    obligatoire: true,
+    public: "Propriétaires de véhicules",
+    categorie: "automobile"
+  },
+  {
+    id: 9,
+    nom: "Assurance Voyage",
+    description: "Protection lors de vos déplacements",
+    icon: Plane,
+    details: "Annulation, rapatriement, frais médicaux à l'étranger",
+    obligatoire: false,
+    public: "Voyageurs",
+    categorie: "voyage"
+  },
+  {
+    id: 10,
+    nom: "GFA",
+    description: "Garantie des Fonctions d'Architecte",
+    icon: FileText,
+    details: "Protection juridique pour les architectes",
+    obligatoire: true,
+    public: "Architectes",
+    categorie: "professionnelle"
   }
 ];
 
@@ -183,7 +253,6 @@ export default function Financement() {
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
         setError('Impossible de charger les données. Affichage des données de démonstration.');
-        // Fallback sur les données statiques
         setPartenairesFinancement(partenairesFinancementFallback);
         setServicesAssurance(servicesAssuranceFallback);
       } finally {
@@ -216,13 +285,12 @@ export default function Financement() {
     if (isAuthenticated) {
       openModal("contact", { selectedPartenaire: partenaire });
     } else {
-      alert("veuiller vous connecter ou vous inscrire pour contacter un partenaire.")
+      alert("Veuillez vous connecter ou vous inscrire pour contacter un partenaire.");
     }
   };
 
   const handleSimulationSubmit = async (simulationData: any) => {
     try {
-      // Préparer les données pour l'API
       const demandeData = {
         nom: simulationData.nom,
         email: simulationData.email,
@@ -234,7 +302,6 @@ export default function Financement() {
         estimation: simulationData.estimation
       };
 
-      // Envoyer à l'API
       const response = await financementAPI.submitDemande(demandeData);
 
       if (response.data.success) {
@@ -247,15 +314,12 @@ export default function Financement() {
     }
   };
 
-  // Afficher le loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-
         <div className="flex-col flex-1 flex items-center justify-center">
-
-            <img src="/loading.gif" alt="" className='w-24 h-24' />
-            <p className="text-slate-600">Chargement des données...</p>
+          <img src="/loading.gif" alt="" className='w-24 h-24' />
+          <p className="text-slate-600">Chargement des données...</p>
         </div>
       </div>
     );
@@ -263,7 +327,6 @@ export default function Financement() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
-
       {/* Message d'erreur */}
       {error && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mx-4 mt-4">
@@ -276,7 +339,7 @@ export default function Financement() {
         </div>
       )}
 
-      {/* Hero Section avec background image */}
+      {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -301,8 +364,7 @@ export default function Financement() {
             </p>
 
             <div className="flex flex-wrap gap-5 justify-center">
-              <motion.div
-              >
+              <motion.div>
                 <Button
                   className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
                   onClick={() => openModal('service')}
@@ -312,8 +374,7 @@ export default function Financement() {
                 </Button>
               </motion.div>
 
-              <motion.div
-              >
+              <motion.div>
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
                   onClick={() => openModal('simulation')}
@@ -324,6 +385,89 @@ export default function Financement() {
               </motion.div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Section Financement détaillé */}
+      <section className="py-8 lg:py-20 bg-slate-50" id="financement-detail">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 lg:mb-16"
+          >
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
+              Nos Solutions de <span className="text-blue-600">Financement</span>
+            </h2>
+            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
+              Des solutions adaptées à tous vos projets financiers
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {[
+              {
+                icon: Home,
+                title: "Prêt Immobilier",
+                description: "Financez votre projet immobilier",
+                features: ["Calcul capacité d'emprunt", "Taux compétitifs", "Simulation en ligne"],
+                onClick: () => openModal('simulation-immobilier')
+              },
+              {
+                icon: TrendingUp,
+                title: "Rachat de Crédit",
+                description: "Regroupez vos crédits",
+                features: ["Baisse des mensualités", "Taux unique", "Allègement du budget"],
+                onClick: () => openModal('simulation-rachat')
+              },
+              {
+                icon: CreditCard,
+                title: "Crédit Consommation",
+                description: "Financez vos projets personnels",
+                features: ["Taux fixe", "Délais flexibles", "Dossier simplifié"],
+                onClick: () => openModal('simulation-consommation')
+              },
+              {
+                icon: PieChart,
+                title: "Analyse Patrimoniale",
+                description: "Optimisez votre patrimoine",
+                features: ["Bilan complet", "Conseils personnalisés", "Stratégie long terme"],
+                onClick: () => openModal('analyse-patrimoniale')
+              }
+            ].map((service, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+              >
+                <Card 
+                  className="p-6 h-full border border-slate-200 rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer bg-white group"
+                  onClick={service.onClick}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300">
+                    <service.icon className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
+                  <p className="text-slate-600 mb-4 text-sm leading-relaxed">{service.description}</p>
+                  <ul className="space-y-2">
+                    {service.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center text-sm text-slate-600">
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:text-blue-700 transition-colors duration-300">
+                    Simuler mon projet
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -373,13 +517,24 @@ export default function Financement() {
 
                   <p className="text-slate-600 mb-6 leading-relaxed">{partenaire.description}</p>
 
-                  <div className="space-y-3 mb-8">
+                  <div className="space-y-3 mb-4">
                     {partenaire.avantages && partenaire.avantages.map((avantage, idx) => (
                       <div key={idx} className="flex items-center text-sm">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
                         <span className="text-slate-700">{avantage}</span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-slate-900 mb-2">Services proposés :</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {partenaire.services && partenaire.services.map((service, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full border border-blue-200">
+                          {service}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   <Button
@@ -473,8 +628,7 @@ export default function Financement() {
             <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans votre financement et vos assurances
             </p>
-            <motion.div
-            >
+            <motion.div>
               <Button
                 className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
                 onClick={() => openModal('contact')}
@@ -496,7 +650,6 @@ export default function Financement() {
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
-
     </div>
   );
 }
@@ -516,35 +669,52 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
     telephone: "",
     message: "",
     montant: "",
-    duree: ""
+    duree: "",
+    revenus: "",
+    charges: "",
+    apport: "",
+    taux: "",
+    revenus_annuels: "",
+    patrimoine: "",
+    objectif: "",
+    profil_risque: ""
   });
   const { isAuthenticated } = useAuth();
-  const [estimation, setEstimation] = useState<number | null>(null);
+  const [estimation, setEstimation] = useState<SimulationResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-
-    if ((name === 'montant' || name === 'duree') && formData.montant && formData.duree) {
-      const montant = name === 'montant' ? value : formData.montant;
-      const duree = name === 'duree' ? value : formData.duree;
-      if (montant && duree) {
-        const mensualite = Math.round((parseInt(montant) / (parseInt(duree) * 12)) * 100) / 100;
-        setEstimation(mensualite);
-      }
-    }
+    calculateEstimation(name, value);
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+    calculateEstimation(name, value);
+  };
 
-    if ((name === 'montant' || name === 'duree') && formData.montant && formData.duree) {
+  const calculateEstimation = (name: string, value: string) => {
+    // Simulation prêt immobilier
+    if (type === 'simulation-immobilier') {
+      const revenus = name === 'revenus' ? parseFloat(value) : parseFloat(formData.revenus);
+      const charges = name === 'charges' ? parseFloat(value) : parseFloat(formData.charges);
+      const duree = name === 'duree' ? parseInt(value) : parseInt(formData.duree);
+      const taux = name === 'taux' ? parseFloat(value) : parseFloat(formData.taux);
+
+      if (revenus && charges && duree && taux) {
+        const capacite = Math.round((revenus - charges) * 0.33 * duree * 12);
+        const mensualite = Math.round((capacite * (taux / 100) / 12) / (1 - Math.pow(1 + (taux / 100) / 12, -duree * 12)));
+        setEstimation({ capacite, mensualite });
+      }
+    }
+    // Simulation classique
+    else if (type === 'simulation') {
       const montant = name === 'montant' ? value : formData.montant;
       const duree = name === 'duree' ? value : formData.duree;
       if (montant && duree) {
         const mensualite = Math.round((parseInt(montant) / (parseInt(duree) * 12)) * 100) / 100;
-        setEstimation(mensualite);
+        setEstimation({ estimation: mensualite });
       }
     }
   };
@@ -563,14 +733,12 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
         email: formData.email,
         telephone: formData.telephone,
         message: formData.message || getDefaultMessage(),
-        type: type === 'simulation' ? 'simulation' : 'contact'
+        type: type.includes('simulation') ? 'simulation' : 'contact'
       };
 
       // Ajouter les données spécifiques
-      if (type === 'simulation' && estimation) {
-        demandeData.montant = parseFloat(formData.montant);
-        demandeData.duree = parseInt(formData.duree);
-        demandeData.estimation = estimation;
+      if (type.includes('simulation') && estimation) {
+        Object.assign(demandeData, estimation);
       }
 
       if (data.selectedAssurance) {
@@ -587,14 +755,21 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
       if (response.data.success) {
         alert("Votre demande a été envoyée avec succès !");
         onClose();
-        // Réinitialiser le formulaire
         setFormData({
           nom: "",
           email: "",
           telephone: "",
           message: "",
           montant: "",
-          duree: ""
+          duree: "",
+          revenus: "",
+          charges: "",
+          apport: "",
+          taux: "",
+          revenus_annuels: "",
+          patrimoine: "",
+          objectif: "",
+          profil_risque: ""
         });
         setEstimation(null);
       }
@@ -612,6 +787,14 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
         return "Nos services de financement";
       case 'simulation':
         return "Simulation de financement";
+      case 'simulation-immobilier':
+        return "Simulation prêt immobilier";
+      case 'simulation-rachat':
+        return "Rachat de crédit";
+      case 'simulation-consommation':
+        return "Crédit consommation";
+      case 'analyse-patrimoniale':
+        return "Analyse patrimoniale";
       case 'contact':
         if (data.selectedAssurance) return `Devis ${data.selectedAssurance.nom}`;
         if (data.selectedPartenaire) return `Contact ${data.selectedPartenaire.nom}`;
@@ -720,15 +903,192 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
           </Select>
         </div>
 
-        {estimation && (
+        {estimation?.estimation && (
           <Card className="p-6 bg-green-50 border-green-200 rounded-xl">
             <h4 className="font-semibold text-green-800 mb-3 text-lg">Estimation mensuelle</h4>
             <p className="text-3xl font-bold text-green-600">
-              {estimation} €/mois*
+              {estimation.estimation} €/mois*
             </p>
             <p className="text-sm text-green-600 mt-3">*Estimation hors assurance et frais</p>
           </Card>
         )}
+      </div>
+    </>
+  );
+
+  const renderSimulationImmobilier = () => (
+    <>
+      <p className="text-slate-600 mb-8 text-lg leading-relaxed">
+        Calculez votre capacité d'emprunt et simulez votre prêt immobilier
+      </p>
+
+      <div className="space-y-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+              Revenus mensuels nets (€)
+            </label>
+            <Input
+              name="revenus"
+              type="number"
+              placeholder="Ex: 3000"
+              value={formData.revenus}
+              onChange={handleInputChange}
+              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+              Charges mensuelles (€)
+            </label>
+            <Input
+              name="charges"
+              type="number"
+              placeholder="Ex: 800"
+              value={formData.charges}
+              onChange={handleInputChange}
+              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+            Apport personnel (€)
+          </label>
+          <Input
+            name="apport"
+            type="number"
+            placeholder="Ex: 20000"
+            value={formData.apport}
+            onChange={handleInputChange}
+            className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+              Durée du prêt
+            </label>
+            <Select 
+              value={formData.duree} 
+              onValueChange={(value) => handleSelectChange('duree', value)}
+            >
+              <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+                <SelectValue placeholder="Sélectionnez la durée" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15">15 ans</SelectItem>
+                <SelectItem value="20">20 ans</SelectItem>
+                <SelectItem value="25">25 ans</SelectItem>
+                <SelectItem value="30">30 ans</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+              Taux d'intérêt (%)
+            </label>
+            <Input
+              name="taux"
+              type="number"
+              step="0.01"
+              placeholder="Ex: 3.5"
+              value={formData.taux}
+              onChange={handleInputChange}
+              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            />
+          </div>
+        </div>
+
+        {estimation && (
+          <Card className="p-6 bg-blue-50 border-blue-200 rounded-xl">
+            <h4 className="font-semibold text-blue-800 mb-3 text-lg">Résultats de simulation</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-blue-600">Capacité d'emprunt</p>
+                <p className="text-2xl font-bold text-blue-800">{estimation.capacite} €</p>
+              </div>
+              <div>
+                <p className="text-sm text-blue-600">Mensualité estimée</p>
+                <p className="text-2xl font-bold text-blue-800">{estimation.mensualite} €/mois</p>
+              </div>
+            </div>
+          </Card>
+        )}
+      </div>
+    </>
+  );
+
+  const renderAnalysePatrimoniale = () => (
+    <>
+      <p className="text-slate-600 mb-8 text-lg leading-relaxed">
+        Analyse complète de votre situation patrimoniale
+      </p>
+
+      <div className="space-y-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+              Revenus annuels (€)
+            </label>
+            <Input
+              name="revenus_annuels"
+              type="number"
+              placeholder="Ex: 50000"
+              value={formData.revenus_annuels}
+              onChange={handleInputChange}
+              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+              Patrimoine existant (€)
+            </label>
+            <Input
+              name="patrimoine"
+              type="number"
+              placeholder="Ex: 150000"
+              value={formData.patrimoine}
+              onChange={handleInputChange}
+              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+            Objectifs patrimoniaux
+          </label>
+          <Select onValueChange={(value) => handleSelectChange('objectif', value)}>
+            <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+              <SelectValue placeholder="Sélectionnez votre objectif" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="retraite">Préparation retraite</SelectItem>
+              <SelectItem value="transmission">Transmission patrimoine</SelectItem>
+              <SelectItem value="investissement">Investissement locatif</SelectItem>
+              <SelectItem value="diversification">Diversification</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
+            Profil de risque
+          </label>
+          <Select onValueChange={(value) => handleSelectChange('profil_risque', value)}>
+            <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+              <SelectValue placeholder="Sélectionnez votre profil" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="prudent">Prudent</SelectItem>
+              <SelectItem value="equilibre">Équilibré</SelectItem>
+              <SelectItem value="dynamique">Dynamique</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </>
   );
@@ -796,7 +1156,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
               Envoi en cours...
             </>
-          ) : type === 'simulation' ? (
+          ) : type.includes('simulation') ? (
             <>
               <Calculator className="h-5 w-5 mr-3" />
               Obtenir un devis précis
@@ -854,24 +1214,17 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
           {/* Contenu dynamique */}
           {type === 'service' && renderServiceContent()}
           {type === 'simulation' && renderSimulationContent()}
+          {type === 'simulation-immobilier' && renderSimulationImmobilier()}
+          {type === 'analyse-patrimoniale' && renderAnalysePatrimoniale()}
 
           {/* Formulaire de contact pour tous les types */}
-          {(type === 'contact' || type === 'simulation') && renderContactForm()}
+          {(type === 'contact' || type.includes('simulation') || type === 'analyse-patrimoniale') && renderContactForm()}
 
           {/* Bouton de contact pour le modal service */}
           {type === 'service' && (
             <div className="flex gap-4 mt-8">
               <Button
-                onClick={() => {
-                  // Utilisez une fonction pour ouvrir le modal contact
-                  const openContactModal = () => {
-                    const event = new CustomEvent('openModal', {
-                      detail: { type: 'contact' }
-                    });
-                    window.dispatchEvent(event);
-                  };
-                  openContactModal();
-                }}
+                onClick={() => openModal('contact')}
                 className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
               >
                 <Phone className="h-5 w-5 mr-3" />
