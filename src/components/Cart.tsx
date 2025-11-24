@@ -498,6 +498,27 @@ const Cart = ({ isOpen, onClose }) => {
                 Découvrir les produits
               </Button>
 
+              {/* Boutons de debug (seulement en développement)
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-6 space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={testAuthManually}
+                    className="text-xs"
+                  >
+                    Test Auth
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={testOrderCreation}
+                    className="text-xs"
+                  >
+                    Test Commande
+                  </Button>
+                </div>
+              )} */}
               
             </div>
           ) : (

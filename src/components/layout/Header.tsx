@@ -146,19 +146,19 @@ const Header = () => {
       loadNotifications();
     }
   }, [user?.id]);
-// Écouter les événements de rechargement des notifications 
-useEffect(() => {
-  if (!user?.id) return;
+  // Écouter les événements de rechargement des notifications 
+  useEffect(() => {
+    if (!user?.id) return;
 
-  const handler = () => {
-    if (notifOpen) {
-      loadNotifications(); // Recharge la listes des notifications
-    }
-  };
+    const handler = () => {
+      if (notifOpen) {
+        loadNotifications(); // Recharge la listes des notifications
+      }
+    };
 
-  window.addEventListener("notifications:reload", handler);
-  return () => window.removeEventListener("notifications:reload", handler);
-}, [user?.id, notifOpen]);
+    window.addEventListener("notifications:reload", handler);
+    return () => window.removeEventListener("notifications:reload", handler);
+  }, [user?.id, notifOpen]);
 
 
   const loadNotifications = async () => {
@@ -169,9 +169,9 @@ useEffect(() => {
       console.log('📨 Chargement des notifications...');
       const response = await api.get(`/notifications/user/${user.id}`);
       const { notifications = [], unreadCount = 0 } = response.data || {};
-      
+
       console.log(`✅ ${notifications.length} notifications chargées, ${unreadCount} non lues`);
-      
+
       setNotifications(notifications);
       setNotificationCount(unreadCount);
     } catch (error) {
@@ -192,21 +192,21 @@ useEffect(() => {
     try {
       console.log(`📨 Marquer comme lu: ${notificationId}`);
       await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
-      
+
       // Mettre à jour localement
-      setNotifications(prev => 
-        prev.map(n => 
+      setNotifications(prev =>
+        prev.map(n =>
           n.id === notificationId ? { ...n, isRead: true } : n
         )
       );
-      
+
       // Mettre à jour le compteur WebSocket
       setNotificationCount(prev => Math.max(0, prev - 1));
-      
+
       toast({
         description: "Notification marquée comme lue"
       });
-      
+
     } catch (error) {
       console.error("❌ Error marking notification as read:", error);
       toast({
@@ -223,21 +223,21 @@ useEffect(() => {
     try {
       console.log(`📨 Marquer comme non lu: ${notificationId}`);
       await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
-      
+
       // Mettre à jour localement
-      setNotifications(prev => 
-        prev.map(n => 
+      setNotifications(prev =>
+        prev.map(n =>
           n.id === notificationId ? { ...n, isRead: false } : n
         )
       );
-      
+
       // Mettre à jour le compteur WebSocket
       setNotificationCount(prev => prev + 1);
-      
+
       toast({
         description: "Notification marquée comme non lue"
       });
-      
+
     } catch (error) {
       console.error("❌ Error marking notification as unread:", error);
       toast({
@@ -254,15 +254,15 @@ useEffect(() => {
     try {
       console.log('📨 Marquer toutes comme lues');
       await api.post(`/notifications/user/${user.id}/read-all`);
-      
+
       // Mettre à jour localement
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => ({ ...n, isRead: true }))
       );
-      
+
       // Réinitialiser le compteur WebSocket
       setNotificationCount(0);
-      
+
       toast({
         description: "Toutes les notifications ont été marquées comme lues"
       });
@@ -282,10 +282,10 @@ useEffect(() => {
     try {
       console.log('🗑️ Supprimer toutes les notifications');
       await api.post(`/notifications/user/${user.id}/clear-all`);
-      
+
       // Recharger les notifications
       await loadNotifications();
-      
+
       toast({
         description: "Toutes les notifications ont été supprimées",
       });
@@ -305,10 +305,10 @@ useEffect(() => {
     try {
       console.log(`🗑️ Supprimer notification: ${notificationId}`);
       await api.delete(`/notifications/user/${user.id}/delete/${notificationId}`);
-      
+
       // Recharger les notifications
       await loadNotifications();
-      
+
       toast({
         description: "Notification supprimée"
       });
@@ -824,7 +824,7 @@ useEffect(() => {
         },
       ],
     },
-    
+
     {
       title: "INVESTISSEMENT",
       items: [
@@ -870,7 +870,7 @@ useEffect(() => {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
     // },
-    
+
     {
       title: "NOS OFFRES EXCLUSIVES",
       href: "/pack",
@@ -923,9 +923,8 @@ useEffect(() => {
                   >
                     {section.title}
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        openSubmenu === section.title ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 transition-transform ${openSubmenu === section.title ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   {openSubmenu === section.title && (
@@ -954,6 +953,8 @@ useEffect(() => {
               )}
             </div>
           ))}
+
+
         </nav>
       </div>
 
@@ -1049,7 +1050,10 @@ useEffect(() => {
                   )}
                 </li>
               ))}
+
+
             </ul>
+
 
             {/* Desktop hamburger: Popover avec animation GSAP */}
             <div className="hidden lg:block">
@@ -1091,9 +1095,8 @@ useEffect(() => {
                                 key={si}
                                 onMouseEnter={() => hasItems && setHoveredSection(section.title)}
                                 onFocus={() => hasItems && setHoveredSection(section.title)}
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
-                                  isActive ? "bg-white/10" : "hover:bg-white/5"
-                                }`}
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"
+                                  }`}
                               >
                                 {hasItems ? (
                                   <button className="scramble w-full text-left text-xs font-semibold text-white">
@@ -1111,6 +1114,26 @@ useEffect(() => {
                               </div>
                             );
                           })}
+                          <div className=" absolute bottom-2 left-10 w-auto flex items-start justify-start z-50 gap-5 h-20">
+                            {!isAuthenticated ? (
+                              <Link
+                                to="/login"
+                                className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
+                              >
+                                <span className="relative z-10 group-hover:text-white">Se connecter</span>
+                                <span className="absolute inset-0 bg-black border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
+                              </Link>
+                            ) : (
+                              <Link
+                                to="/"
+                                onClick={handleLogout}
+                                className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
+                              >
+                                <span className="relative z-10 group-hover:text-white">Déconnexion</span>
+                                <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
+                              </Link>
+                            )}
+                          </div>
                         </nav>
                       </div>
 
@@ -1176,26 +1199,7 @@ useEffect(() => {
                           </div>
                         )}
                       </div>
-                      <div className="absolute bottom-2 right-10 w-96 flex items-center justify-around z-50 gap-5 h-20">
-                        {!isAuthenticated ? (
-                          <Link
-                            to="/login"
-                            className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
-                          >
-                            <span className="relative z-10 group-hover:text-white">Se connecter</span>
-                            <span className="absolute inset-0 bg-black border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
-                          </Link>
-                        ) : (
-                          <Link
-                            to="/"
-                            onClick={handleLogout}
-                            className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
-                          >
-                            <span className="relative z-10 group-hover:text-white">Se déconnecter</span>
-                            <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
-                          </Link>
-                        )}
-                      </div>
+
                     </div>
                   </div>
                 </PopoverContent>
@@ -1220,7 +1224,7 @@ useEffect(() => {
                 )}
               </Button>
             )}
-            
+
             {/* Icône Notifications avec WebSocket - CORRIGÉ */}
             {isAuthenticated && role === "user" && (
               <Sheet
@@ -1255,7 +1259,7 @@ useEffect(() => {
                       </div>
                       {notifications.length > 0 && (
                         <div className="flex items-center gap-1">
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1287,9 +1291,8 @@ useEffect(() => {
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-3 rounded-lg border transition-colors ${
-                                notification.isRead ? "bg-gray-50" : "bg-white border-blue-200 shadow-sm"
-                              }`}
+                              className={`p-3 rounded-lg border transition-colors ${notification.isRead ? "bg-gray-50" : "bg-white border-blue-200 shadow-sm"
+                                }`}
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1 min-w-0">
@@ -1301,36 +1304,34 @@ useEffect(() => {
                                       <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
                                     )}
                                   </div>
-                                  
+
                                   {notification.message && (
                                     <div className="text-xs text-gray-600 mb-2 line-clamp-2">
                                       {notification.message}
                                     </div>
                                   )}
-                                  
+
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {notification.statut && (
-                                      <span className={`px-2 py-1 rounded-full text-xs ${
-                                        notification.statut === 'validée' || notification.statut === 'validee' 
-                                          ? 'bg-green-100 text-green-800'
-                                          : notification.statut === 'refusée'
+                                      <span className={`px-2 py-1 rounded-full text-xs ${notification.statut === 'validée' || notification.statut === 'validee'
+                                        ? 'bg-green-100 text-green-800'
+                                        : notification.statut === 'refusée'
                                           ? 'bg-red-100 text-red-800'
                                           : 'bg-gray-100 text-gray-800'
-                                      }`}>
+                                        }`}>
                                         {notification.statut}
                                       </span>
                                     )}
-                                    
-                                    <span className={`px-2 py-1 rounded-full text-xs ${
-                                      notification.source === 'demande' 
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-purple-100 text-purple-800'
-                                    }`}>
+
+                                    <span className={`px-2 py-1 rounded-full text-xs ${notification.source === 'demande'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : 'bg-purple-100 text-purple-800'
+                                      }`}>
                                       {notification.source === 'demande' ? 'Demande' : 'Système'}
                                     </span>
                                   </div>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                   <Button
                                     variant="ghost"
@@ -1351,18 +1352,18 @@ useEffect(() => {
                                   </Button>
                                 </div>
                               </div>
-                              
+
                               <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
                                 <div className="text-xs text-gray-400">
                                   {notification.createdAt
                                     ? new Date(notification.createdAt).toLocaleDateString("fr-FR", {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric'
-                                      })
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric'
+                                    })
                                     : ""}
                                 </div>
-                                
+
                                 <div className="flex items-center gap-2">
                                   {notification.source === 'demande' && notification.propertyId && (
                                     <a
@@ -1374,7 +1375,7 @@ useEffect(() => {
                                       👁️ Voir le bien
                                     </a>
                                   )}
-                                  
+
                                   {notification.source === 'demande' && (
                                     <a
                                       href={`/mon-compte/demandes-immobilier`}
@@ -1383,7 +1384,7 @@ useEffect(() => {
                                       📋 Voir la demande
                                     </a>
                                   )}
-                                  
+
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -1490,7 +1491,7 @@ useEffect(() => {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            
+
             {/* Mobile Menu */}
             <div className="lg:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

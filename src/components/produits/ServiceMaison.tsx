@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Package,
   ShoppingCart,
   Star,
@@ -98,24 +98,24 @@ const ServicesMaison = () => {
       );
       return;
     }
-    
+
     try {
       setAddingProductId(product.id);
-      
+
       // Ajouter le produit au panier
       addToCart(product);
-      
+
       // Petit délai pour laisser le temps à l'état de se mettre à jour
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Trouver l'article dans le panier pour afficher la bonne quantité
       const cartItem = cartItems.find(item => item.id === product.id);
       const quantity = cartItem ? cartItem.quantity : 1;
       const totalItems = getCartItemsCount();
-      
+
       // Afficher une confirmation détaillée
       toast.info(`${product.name} ajouté au panier !`);
-      
+
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error("Erreur lors de l'ajout au panier");
@@ -130,8 +130,8 @@ const ServicesMaison = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052FF] mx-auto"></div>
+        <div className="text-center flex flex-col items-center justify-center">
+          <img src="/loading.gif" alt="" />
           <p className="mt-4 text-gray-600">Chargement des services maison...</p>
         </div>
       </div>
@@ -158,7 +158,7 @@ const ServicesMaison = () => {
                   </p>
                 </div>
               </div>
-              
+
               {/* Badge de comptage */}
               <Badge variant="secondary" className="px-3 py-1">
                 {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
@@ -174,11 +174,10 @@ const ServicesMaison = () => {
               <Button
                 key={subcategory}
                 variant={selectedSubcategory === subcategory ? "default" : "outline"}
-                className={`flex items-center gap-2 ${
-                  selectedSubcategory === subcategory 
-                    ? "bg-slate-900 hover:bg-slate-700 text-white" 
+                className={`flex items-center gap-2 ${selectedSubcategory === subcategory
+                    ? "bg-slate-900 hover:bg-slate-700 text-white"
                     : "bg-white hover:bg-gray-50"
-                }`}
+                  }`}
                 onClick={() => setSelectedSubcategory(subcategory)}
               >
                 {subcategoryIcons[subcategory]}
@@ -227,11 +226,10 @@ const ServicesMaison = () => {
                   {/* Badge de sous-catégorie */}
                   {product.subcategory && (
                     <div className="mb-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs flex items-center gap-1 w-fit ${
-                          subcategoryColors[product.subcategory] || "bg-gray-100 text-gray-800 border-gray-200"
-                        }`}
+                      <Badge
+                        variant="outline"
+                        className={`text-xs flex items-center gap-1 w-fit ${subcategoryColors[product.subcategory] || "bg-gray-100 text-gray-800 border-gray-200"
+                          }`}
                       >
                         {subcategoryIcons[product.subcategory]}
                         {product.subcategory}
@@ -293,8 +291,8 @@ const ServicesMaison = () => {
             <div className="text-center py-12">
               <Wrench className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">
-                {selectedSubcategory === "Toutes" 
-                  ? "Aucun service maison trouvé" 
+                {selectedSubcategory === "Toutes"
+                  ? "Aucun service maison trouvé"
                   : `Aucun produit dans ${selectedSubcategory}`
                 }
               </h3>
@@ -305,15 +303,15 @@ const ServicesMaison = () => {
                 }
               </p>
               {selectedSubcategory !== "Toutes" && (
-                <Button 
-                  onClick={() => setSelectedSubcategory("Toutes")} 
+                <Button
+                  onClick={() => setSelectedSubcategory("Toutes")}
                   className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
                 >
                   Voir tous les services maison
                 </Button>
               )}
-              <Button 
-                onClick={() => navigate('/produits')} 
+              <Button
+                onClick={() => navigate('/produits')}
                 variant="outline"
                 className="mt-4 ml-2"
               >

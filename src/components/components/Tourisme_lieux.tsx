@@ -101,11 +101,11 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
             try {
                 const response = await tourismeAPI.getTouristicPlaces();
                 console.log('✅ Réponse API lieux touristiques:', response.data);
-                
+
                 if (response.data.success) {
                     const placesData = response.data.data;
                     console.log('📊 Lieux touristiques reçus:', placesData.length);
-                    
+
                     // Transformer les données pour correspondre à l'interface
                     const transformedData = placesData.map((place: any) => ({
                         id: place.id,
@@ -140,14 +140,14 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                 }
             } catch (specificError) {
                 console.log('🔄 Route spécifique échouée, utilisation de la méthode de secours...');
-                
+
                 // Méthode de secours : utiliser la route principale et filtrer
                 const fallbackResponse = await tourismeAPI.getListings();
-                
+
                 if (fallbackResponse.data.success) {
                     const allData = fallbackResponse.data.data;
                     const placesData = allData.filter((item: any) => item.isTouristicPlace);
-                    
+
                     // Transformer les données pour correspondre à l'interface
                     const transformedData = placesData.map((place: any) => ({
                         id: place.id,
@@ -181,11 +181,11 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                     return;
                 }
             }
-            
+
         } catch (error) {
             console.error('❌ Erreur lors du chargement des lieux touristiques:', error);
             setError('Erreur lors du chargement des lieux touristiques');
-            
+
             // Données de démonstration en cas d'erreur
             setLieux(getDemoData());
         } finally {
@@ -408,10 +408,12 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
 
     if (loading) {
         return (
-            <div className="min-h-screen mt-16 py-8 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Chargement des lieux touristiques...</p>
+            <div className="min-h-screen bg-white">
+                <div className="min-h-screen flex items-center justify-center">
+                    <div className="text-center flex flex-col items-center justify-center">
+                        <img src="/loading.gif" alt="" />
+                        <p className="text-gray-600">Chargement des lieux touristiques...</p>
+                    </div>
                 </div>
             </div>
         );
@@ -582,8 +584,8 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                     <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                                         <div className="flex items-center space-x-4">
                                             {lieu.website && (
-                                                <a href={lieu.website} target="_blank" rel="noopener noreferrer" 
-                                                   className="text-blue-600 hover:text-blue-700 flex items-center">
+                                                <a href={lieu.website} target="_blank" rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:text-blue-700 flex items-center">
                                                     <Globe className="w-4 h-4 mr-1" />
                                                     Site web
                                                 </a>
@@ -604,7 +606,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                         <Ticket className="w-4 h-4 inline mr-2" />
                                         {lieu.entranceFee ? 'Acheter billet' : 'Visiter'}
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setIsMapOpen(true)}
                                         className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-colors duration-200"
                                     >
@@ -637,7 +639,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                 <p className="text-gray-600 mb-4">
                                     Carte interactive des lieux touristiques
                                 </p>
-                                <button 
+                                <button
                                     onClick={() => setIsMapOpen(true)}
                                     className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors duration-200">
                                     Ouvrir la carte
@@ -673,9 +675,9 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
 
                             {/* Map Container */}
                             <div className="flex-1 relative">
-                                <MapContainer 
-                                    center={[48.8566, 2.3522]} 
-                                    zoom={12} 
+                                <MapContainer
+                                    center={[48.8566, 2.3522]}
+                                    zoom={12}
                                     scrollWheelZoom={true}
                                     className="w-full h-full"
                                 >
