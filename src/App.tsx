@@ -10,6 +10,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Immobilier from "./pages/Immobilier";
+import CartesBiensImmobiliers from "@/components/PSLA";
 import CategorieProduits from "./components/CategorieProduits";
 import BienEtre from "./pages/bien_etre";
 import Travaux from "./pages/Travaux";
@@ -238,18 +239,12 @@ const App = () => {
                     path="/podcasts-bien_etre"
                     element={<PodcastsBienEtre />}
                   />
-                  <Route
-                    path="/programme-neuf"
-                    element={<ProgrammeNeuf />}
-                  />
+                  <Route path="/programme-neuf" element={<ProgrammeNeuf />} />
                   <Route
                     path="/investir-etranger"
                     element={<InvestirEtranger />}
                   />
-                  <Route
-                    path="/SHLMR"
-                    element={<SHLMR />}
-                  />
+                  <Route path="/SHLMR" element={<SHLMR />} />
                   <Route
                     path="/lieux_historique"
                     element={
@@ -260,10 +255,7 @@ const App = () => {
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
                   />
-                  <Route
-                    path="/voyages"
-                    element={<Voyages />}
-                  />
+                  <Route path="/voyages" element={<Voyages />} />
                   <Route
                     path="/plan_administratif"
                     element={<PlanAdministratifServices />}
@@ -401,9 +393,9 @@ const App = () => {
                     path="/alimentation/food-category/:categoryName"
                     element={<AlimentationCategorie />}
                   />
-                 < Route
-                  path="/medecine-plantes"
-                    element={<MedecinePlants /> }
+                  <Route
+                    path="/medecine-plantes"
+                    element={<MedecinePlants />}
                   />
 
                   <Route
@@ -417,6 +409,7 @@ const App = () => {
                   <Route path="/pack" element={<PricingPacksDisplay />} />
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
+                  <Route path="/PSLA" element={<CartesBiensImmobiliers />} />
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"

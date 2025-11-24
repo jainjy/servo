@@ -10,6 +10,7 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+export default api;
 
 // Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use(
@@ -355,4 +356,3 @@ export const offresExclusivesAPI = {
   getCategories: () => api.get("/offres-exclusives/categories")
 }; 
 
-export default api;
