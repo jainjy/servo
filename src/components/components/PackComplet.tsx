@@ -56,7 +56,7 @@ const OffresExclusives = () => {
   const [loading, setLoading] = useState(true);
   const [modalDevisOpen, setModalDevisOpen] = useState(false);
   const [selectedOffre, setSelectedOffre] = useState<Offre | null>(null);
-  
+
   // Utilisation du contexte panier
   const { addToCart } = useCart();
 
@@ -154,10 +154,10 @@ const OffresExclusives = () => {
     try {
       // Logique d'envoi du devis
       console.log('Demande de devis pour:', selectedOffre?.title, formData);
-      
+
       // Simulation d'envoi à l'API
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       toast.success(`Votre demande de devis pour ${selectedOffre?.title} a été envoyée avec succès !`);
       setModalDevisOpen(false);
       setSelectedOffre(null);
@@ -269,15 +269,19 @@ const OffresExclusives = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen">
       {/* Hero Section */}
+      <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+        <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+        <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" className='h-full object-cover w-full' alt="" />
+      </div>
       <section className="container mx-auto px-4 py-16 text-center">
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
           <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-          <img 
-            src="https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg" 
-            className='h-full object-cover w-full' 
-            alt="Offres exclusives" 
+          <img
+            src="https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg"
+            className='h-full object-cover w-full'
+            alt="Offres exclusives"
           />
           <Badge variant="secondary" className="absolute left-2 bottom-0 mb-4 px-4 py-1 text-sm">
             <Star className="w-4 h-4 mr-1" />
@@ -289,8 +293,8 @@ const OffresExclusives = () => {
             Offres Exclusives
             <span className="text-yellow-400 block">Soldes & Promotions</span>
           </h1>
-          <p className="text-md text-gray-300 mb-8 max-w-2xl mx-auto">
-            Découvrez nos deals exceptionnels : billets d'avion, meubles soldés, 
+          <p className="text-md text-gray-700 mb-8 max-w-2xl mx-auto">
+            Découvrez nos deals exceptionnels : billets d'avion, meubles soldés,
             activités touristiques, hôtels et soirées électro à prix imbattables !
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -304,7 +308,7 @@ const OffresExclusives = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-5 mx-auto">
             {statistiques.map((stat, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm border">
-                <div className='text-3xl font-bold text-blue-600'>
+                <div className='azonix text-3xl font-bold text-slate-900'>
                   <AnimatedCounter value={stat.number} duration={2} />
                 </div>
                 <div className="text-gray-600 text-sm">{stat.text}</div>
@@ -315,7 +319,7 @@ const OffresExclusives = () => {
       </section>
 
       {/* Section Catégories */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Nos Catégories Exclusives
@@ -374,12 +378,12 @@ const OffresExclusives = () => {
               {offresFlash.map((offre) => {
                 const buttonConfig = getButtonConfig(offre.category);
                 const ButtonIcon = buttonConfig.icon;
-                
+
                 return (
                   <Card key={offre.id} className="group hover:shadow-xl transition-all duration-300">
                     <div className="relative overflow-hidden">
-                      <img 
-                        src={offre.images[0] || "https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg"} 
+                      <img
+                        src={offre.images[0] || "https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg"}
                         alt={offre.title}
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                       />
@@ -391,7 +395,7 @@ const OffresExclusives = () => {
                           {offre.category}
                         </Badge>
                       </div>
-                      
+
                       <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                         {offre.title}
                       </h3>
@@ -435,9 +439,9 @@ const OffresExclusives = () => {
                       </ul>
 
                       <div className="flex gap-2">
-                        <Button 
-                          className="flex-1" 
-                          size="sm" 
+                        <Button
+                          className="flex-1"
+                          size="sm"
                           variant={buttonConfig.variant}
                           onClick={() => handleButtonAction(offre, buttonConfig.action)}
                         >
