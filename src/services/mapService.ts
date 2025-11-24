@@ -51,7 +51,7 @@ export class MapService {
       throw error;
     }
   }
-
+  
   static async getAllMapPoints(): Promise<MapPoint[]> {
     try {
       console.log("🔄 Récupération de tous les points...");
@@ -123,6 +123,6 @@ export class MapService {
     } catch (error) {
       console.error("❌ API non accessible:", error);
       return false;
-    }
+    }     
   }
 }
