@@ -503,6 +503,17 @@ export default function ProDiscussions() {
     return message.expediteurId === currentUserId;
   };
 
+  const renderMessageContent = (message) => {
+    // Vérifier si l'utilisateur a le droit de voir ce message
+    if (
+      message.expediteurId !== currentUserId &&
+      conversation?.creatorId !== currentUserId
+    ) {
+      return null;
+    }
+    return message;
+  };
+
   const getInitials = (user) => {
     if (!user) return "?";
     const firstName = user.firstName?.[0] ?? "";
@@ -783,115 +794,125 @@ export default function ProDiscussions() {
               </div>
             ) : (
               <div className="space-y-4">
-                {messages.map((message, index) => (
-                  <div
-                    key={message.id}
-                    className={`flex gap-4 ${
-                      isCurrentUser(message) ? "justify-end" : ""
-                    }`}
-                  >
-                    {!isCurrentUser(message) && (
-                      <div className="flex flex-col items-center">
-                        {renderAvatar(message)}
-                        {index < messages.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                        )}
-                      </div>
-                    )}
+                {messages.map((message, index) => {
+                  // Vérifier si le message doit être affiché
+                  if (
+                    message.expediteurId !== currentUserId &&
+                    conversation?.creatorId !== currentUserId
+                  ) {
+                    return null;
+                  }
 
+                  return (
                     <div
-                      className={`max-w-[70%] ${
-                        isCurrentUser(message) ? "order-first" : ""
+                      key={message.id}
+                      className={`flex gap-4 ${
+                        isCurrentUser(message) ? "justify-end" : ""
                       }`}
                     >
-                      {/* Nom de l'expéditeur pour les messages des autres */}
                       {!isCurrentUser(message) && (
-                        <div className="text-xs font-medium text-gray-600 mb-1">
-                          {getSenderName(message)}
+                        <div className="flex flex-col items-center">
+                          {renderAvatar(message)}
+                          {index < messages.length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          )}
                         </div>
                       )}
 
                       <div
-                        className={`rounded-2xl p-4 ${
-                          isCurrentUser(message)
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                        className={`max-w-[70%] ${
+                          isCurrentUser(message) ? "order-first" : ""
                         }`}
                       >
-                        {/* Fichier joint */}
-                        {message.urlFichier && (
-                          <div className="mb-2">
-                            <a
-                              href={message.urlFichier}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`flex items-center gap-2 text-sm underline ${
-                                isCurrentUser(message)
-                                  ? "text-blue-200"
-                                  : "text-blue-600"
-                              }`}
-                            >
-                              <FileText className="w-4 h-4" />
-                              {message.nomFichier}
-                            </a>
+                        {/* Nom de l'expéditeur pour les messages des autres */}
+                        {!isCurrentUser(message) && (
+                          <div className="text-xs font-medium text-gray-600 mb-1">
+                            {getSenderName(message)}
                           </div>
                         )}
 
-                        <p className="text-sm whitespace-pre-wrap">
-                          {message.contenu}
-                        </p>
-                        {message.evenementType == "FACTURE_PAYEE" && (
-                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                            <p className="text-sm font-medium mb-2">
-                              Paiement effectué par le client.
-                            </p>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleConfirmerPaiement(true)}
-                                className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                        <div
+                          className={`rounded-2xl p-4 ${
+                            isCurrentUser(message)
+                              ? "bg-blue-600 text-white rounded-br-none"
+                              : "bg-gray-100 text-gray-900 rounded-bl-none"
+                          }`}
+                        >
+                          {/* Fichier joint */}
+                          {message.urlFichier && (
+                            <div className="mb-2">
+                              <a
+                                href={message.urlFichier}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`flex items-center gap-2 text-sm underline ${
+                                  isCurrentUser(message)
+                                    ? "text-blue-200"
+                                    : "text-blue-600"
+                                }`}
                               >
-                                Confirmer
-                              </button>
-                              <button
-                                onClick={() => handleConfirmerPaiement(false)}
-                                className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                              >
-                                Refuser
-                              </button>
+                                <FileText className="w-4 h-4" />
+                                {message.nomFichier}
+                              </a>
                             </div>
-                          </div>
-                        )}
-                        {message.evenementType === "AVIS_LAISSE" && (
-                          <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
-                            <RatingStars
-                              rating={extractRatingFromMessage(message.contenu)}
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <div
-                        className={`text-xs mt-1 flex items-center gap-1 ${
-                          isCurrentUser(message)
-                            ? "text-gray-500 text-right"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {formatMessageTime(message.createdAt)}
-                        {message.lu && " • Lu"}
-                        {message.type === "SYSTEM" && " • Système"}
-                      </div>
-                    </div>
+                          )}
 
-                    {isCurrentUser(message) && (
-                      <div className="flex flex-col items-center">
-                        {renderAvatar(message)}
-                        {index < messages.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                        )}
+                          <p className="text-sm whitespace-pre-wrap">
+                            {message.contenu}
+                          </p>
+                          {message.evenementType == "FACTURE_PAYEE" && (
+                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                              <p className="text-sm font-medium mb-2">
+                                Paiement effectué par le client.
+                              </p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleConfirmerPaiement(true)}
+                                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                >
+                                  Confirmer
+                                </button>
+                                <button
+                                  onClick={() => handleConfirmerPaiement(false)}
+                                  className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                                >
+                                  Refuser
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          {message.evenementType === "AVIS_LAISSE" && (
+                            <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                              <RatingStars
+                                rating={extractRatingFromMessage(message.contenu)}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          className={`text-xs mt-1 flex items-center gap-1 ${
+                            isCurrentUser(message)
+                              ? "text-gray-500 text-right"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {formatMessageTime(message.createdAt)}
+                          {message.lu && " • Lu"}
+                          {message.type === "SYSTEM" && " • Système"}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {isCurrentUser(message) && (
+                        <div className="flex flex-col items-center">
+                          {renderAvatar(message)}
+                          {index < messages.length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
 
                 {messages.length === 0 && !messagesLoading && (
                   <div className="text-center text-gray-500 py-8">
@@ -1303,25 +1324,20 @@ export default function ProDiscussions() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {messages.map((message, index) => (
-                      <div
-                        key={message.id}
-                        className={`flex gap-4 ${
-                          isCurrentUser(message) ? "justify-end" : ""
-                        }`}
-                      >
-                        {!isCurrentUser(message) && (
-                          <div className="flex flex-col items-center">
-                            {renderAvatar(message)}
-                            {index < messages.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                            )}
-                          </div>
-                        )}
+                    {messages.map((message, index) => {
+                      // Vérifier si le message doit être affiché
+                      if (
+                        message.expediteurId !== currentUserId &&
+                        conversation?.creatorId !== currentUserId
+                      ) {
+                        return null;
+                      }
 
+                      return (
                         <div
-                          className={`max-w-[70%] ${
-                            isCurrentUser(message) ? "order-first" : ""
+                          key={message.id}
+                          className={`flex gap-4 ${
+                            isCurrentUser(message) ? "justify-end" : ""
                           }`}
                         >
                           {/* Nom de l'expéditeur pour les messages des autres */}
@@ -1407,17 +1423,8 @@ export default function ProDiscussions() {
                             {message.type === "SYSTEM" && " • Système"}
                           </div>
                         </div>
-
-                        {isCurrentUser(message) && (
-                          <div className="flex flex-col items-center">
-                            {renderAvatar(message)}
-                            {index < messages.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     {messages.length === 0 && !messagesLoading && (
                       <div className="text-center text-gray-500 py-8">
