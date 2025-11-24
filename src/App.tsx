@@ -147,6 +147,7 @@ import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
 import PlanAdministratifServices from "./components/components/Plan_Administratifs";
 import MapPage from "./pages/MapPage";
 import BoutiqueNaturel from "./components/components/BoutiqueNaturel";
+import MedecinePlants from "./pages/MedecinePlantes";
 
 const queryClient = new QueryClient();
 
@@ -385,6 +386,11 @@ const App = () => {
                     path="/alimentation/food-category/:categoryName"
                     element={<AlimentationCategorie />}
                   />
+                 < Route
+                  path="/medecine-plantes"
+                    element={<MedecinePlants /> }
+                  />
+
                   <Route
                     path="/produits/categorie/:categoryName"
                     element={<CategorieProduits />}

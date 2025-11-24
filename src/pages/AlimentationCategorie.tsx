@@ -135,6 +135,24 @@ const AlimentationCategorie = () => {
     }
   };
 
+  // Fonction pour obtenir la couleur du badge santé
+  const getHealthScoreColor = (score) => {
+    if (score >= 9) return "bg-green-500 text-white";
+    if (score >= 7) return "bg-green-400 text-white";
+    if (score >= 5) return "bg-yellow-500 text-white";
+    if (score >= 3) return "bg-orange-500 text-white";
+    return "bg-red-500 text-white";
+  };
+
+  // Fonction pour obtenir le texte du badge santé
+  const getHealthScoreText = (score) => {
+    if (score >= 9) return "Très sain";
+    if (score >= 7) return "Sain";
+    if (score >= 5) return "Modéré";
+    if (score >= 3) return "Occasionnel";
+    return "À limiter";
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen pt-16 bg-[#F6F8FA] flex items-center justify-center">
@@ -157,7 +175,7 @@ const AlimentationCategorie = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate('/alimentation')}
-                  className=" flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Retour
@@ -182,7 +200,7 @@ const AlimentationCategorie = () => {
               </div>
 
               {/* Badges d'information */}
-              <div className="hidden md:flex gap-2 animate-pulse">
+              <div className="hidden md:flex gap-2">
                 <Badge
                   variant="outline"
                   className="bg-[#00C2A8]/10 text-[#00C2A8] border-0"
@@ -215,21 +233,54 @@ const AlimentationCategorie = () => {
                         style={{ backgroundImage: `url(${product.images[0]})` }}
                       />
                       {/* Badges sur l'image */}
-                      <div className="absolute top-2 left-2 flex gap-2">
+                      <div className="absolute top-2 left-2 flex flex-wrap gap-2 max-w-[70%]">
                         {product.isOrganic && (
-                          <Badge className="bg-green-500 text-white">
+                          <Badge className="bg-green-500 text-white text-xs">
                             <Leaf className="h-3 w-3 mr-1" />
                             Bio
                           </Badge>
                         )}
+                        
+                        {/* Badges Vegan/Végétarien */}
+                        {product.isVegan && (
+                          <Badge className="bg-green-600 text-white text-xs">
+                            <Leaf className="h-3 w-3 mr-1" />
+                            Vegan
+                          </Badge>
+                        )}
+                        {!product.isVegan && product.isVegetarian && (
+                          <Badge className="bg-lime-500 text-white text-xs">
+                            <Leaf className="h-3 w-3 mr-1" />
+                            Végétarien
+                          </Badge>
+                        )}
+                        
+                        {/* Badge Santé */}
+                        {product.healthScore && product.healthScore >= 7 && (
+                          <Badge className="bg-blue-500 text-white text-xs">
+                            <Heart className="h-3 w-3 mr-1" />
+                            Sain
+                          </Badge>
+                        )}
+
                         {product.origin && (
                           <Badge
                             variant="secondary"
-                            className="bg-white/90 text-gray-700"
+                            className="bg-white/90 text-gray-700 text-xs"
                           >
                             {product.origin}
                           </Badge>
                         )}
+                      </div>
+
+                      {/* Badge stock en haut à droite */}
+                      <div className="absolute top-2 right-2">
+                        <Badge
+                          variant={product.quantity > 0 ? "default" : "destructive"}
+                          className="text-xs"
+                        >
+                          {product.quantity > 0 ? "En stock" : "Rupture"}
+                        </Badge>
                       </div>
                     </div>
                   ) : (
@@ -245,6 +296,27 @@ const AlimentationCategorie = () => {
                   <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
+
+                  {/* Badges supplémentaires sous la description */}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {/* Score santé détaillé */}
+                    {product.healthScore && (
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getHealthScoreColor(product.healthScore)} border-0`}
+                      >
+                        <Heart className="h-3 w-3 mr-1" />
+                        {getHealthScoreText(product.healthScore)} ({product.healthScore}/10)
+                      </Badge>
+                    )}
+
+                    {/* Badge Non-végétarien si applicable */}
+                    {!product.isVegan && !product.isVegetarian && (
+                      <Badge variant="outline" className="text-xs text-gray-600 border-gray-300">
+                        Non-végétarien
+                      </Badge>
+                    )}
+                  </div>
 
                   {/* Informations supplémentaires */}
                   <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
@@ -275,6 +347,7 @@ const AlimentationCategorie = () => {
                     </div>
                   )}
 
+                  {/* Prix et stock */}
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <span className="text-2xl font-bold text-[#00C2A8]">
@@ -286,11 +359,13 @@ const AlimentationCategorie = () => {
                         </span>
                       )}
                     </div>
-                    <Badge
-                      variant={product.quantity > 0 ? "default" : "destructive"}
-                    >
-                      {product.quantity > 0 ? "En stock" : "Rupture"}
-                    </Badge>
+                    
+                    {/* Indicateur de quantité en stock */}
+                    {product.quantity > 0 && product.quantity <= 10 && (
+                      <Badge variant="outline" className="text-xs bg-orange-50 text-orange-600 border-orange-200">
+                        Plus que {product.quantity}
+                      </Badge>
+                    )}
                   </div>
 
                   {product.vendor?.companyName && (
@@ -338,7 +413,7 @@ const AlimentationCategorie = () => {
           )}
 
           {/* Section Informations importantes */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-[#00C2A8]/5 rounded-xl p-4 text-center">
               <Truck className="h-8 w-8 text-slate-900 mx-auto mb-2" />
               <h4 className="font-semibold text-slate-900">Livraison Rapide</h4>
@@ -359,6 +434,44 @@ const AlimentationCategorie = () => {
               <p className="text-sm text-gray-600">
                 Large sélection de produits biologiques
               </p>
+            </div>
+            <div className="bg-[#00C2A8]/5 rounded-xl p-4 text-center">
+              <Heart className="h-8 w-8 text-slate-900 mx-auto mb-2" />
+              <h4 className="font-semibold text-slate-900">Alimentation Saine</h4>
+              <p className="text-sm text-gray-600">
+                Produits vegan et végétariens identifiés
+              </p>
+            </div>
+          </div>
+
+          {/* Légende des badges */}
+          <div className="mt-8 p-4 bg-gray-50 rounded-xl">
+            <h4 className="font-semibold text-gray-800 mb-3">Légende des badges :</h4>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-green-600 text-white text-xs">
+                  <Leaf className="h-3 w-3" />
+                </Badge>
+                <span className="text-sm text-gray-600">Vegan</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-lime-500 text-white text-xs">
+                  <Leaf className="h-3 w-3" />
+                </Badge>
+                <span className="text-sm text-gray-600">Végétarien</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-green-500 text-white text-xs">
+                  <Leaf className="h-3 w-3" />
+                </Badge>
+                <span className="text-sm text-gray-600">Bio</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-blue-500 text-white text-xs">
+                  <Heart className="h-3 w-3" />
+                </Badge>
+                <span className="text-sm text-gray-600">Sain</span>
+              </div>
             </div>
           </div>
         </div>
