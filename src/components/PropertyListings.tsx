@@ -244,6 +244,30 @@ const normalizeAddress = (address: string) => {
     .trim();
 };
 
+// Fonction pour détecter si une propriété est hors de La Réunion
+const isHorsDuPays = (property: any) => {
+  if (!property) return false;
+  
+  const reunionCities = [
+    'saint-denis', 'saint-paul', 'saint-pierre', 'saint-gilles-les-bains', 
+    'saint-leu', 'saint-benoit', 'saint-andre', 'saint-joseph', 'saint-louis',
+    'saint-philippe', 'saint-marie', 'saint-rose', 'le tampon', 'la possession', 
+    'le port', 'les avirons', 'entre-deux', 'etang-sale', 'petite-ile', 
+    'plaine-des-palmistes', 'plaine-des-cafres', 'salazie', 'cilaos', 'trois-bassins',
+    'bras-panon', 'la plaine-des-palmistes', 'sainte-marie', 'sainte-suzanne',
+    'sainte-rose'
+  ];
+  
+  const city = normalizeAddress(property.city || '');
+  const address = normalizeAddress(property.address || '');
+  
+  // Si la ville n'est pas dans la liste des villes de La Réunion, c'est "hors du pays"
+  return !reunionCities.some(reunionCity => 
+    city.includes(normalizeAddress(reunionCity)) || 
+    address.includes(normalizeAddress(reunionCity))
+  );
+};
+
 // Composant Modal pour la demande de visite
 export const ModalDemandeVisite = ({
   open,
@@ -547,7 +571,7 @@ export const ModalDemandeVisite = ({
 
 interface PropertyListingsProps {
   cardsOnly?: boolean;
-  initialTab?: 'tous' | 'achat' | 'location' | 'saisonniere';
+  initialTab?: 'tous' | 'achat' | 'location' | 'saisonniere' | 'hors_pays';
   maxItems?: number;
   onPropertyView?: (property: any) => void;
   onPropertyClick?: (property: any) => void;
@@ -578,7 +602,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   } = useImmobilierTracking();
 
   const [showCard, setShowCard] = useState(false);
-  const [activeTab, setActiveTab] = useState<'achat' | 'location' | 'saisonniere' | 'tous'>(initialTab ?? 'tous');
+  const [activeTab, setActiveTab] = useState<'achat' | 'location' | 'saisonniere' | 'tous' | 'hors_pays'>(initialTab ?? 'tous');
   const [radiusKm, setRadiusKm] = useState(5);
   const [priceMin, setPriceMin] = useState<number | undefined>(undefined);
   const [priceMax, setPriceMax] = useState<number | undefined>(undefined);
@@ -814,24 +838,26 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
       arr.filter((p) => {
         if (!p) return false;
 
-        // FILTRE LOCALISATION AMÉLIORÉ
-        if (localisation && localisation.trim()) {
-          const searchTerm = normalizeAddress(localisation);
+        // FILTRE HORS DU PAYS
+        if (activeTab === 'hors_pays') {
+          if (!isHorsDuPays(p)) return false;
+        } else {
+          // FILTRE LOCALISATION NORMAL (uniquement pour les autres onglets)
+          if (localisation && localisation.trim()) {
+            const searchTerm = normalizeAddress(localisation);
+            const city = normalizeAddress(p.city || '');
+            const address = normalizeAddress(p.address || '');
+            const zipCode = normalizeAddress(p.zipCode || '');
 
-          // Normaliser aussi les adresses des propriétés
-          const city = normalizeAddress(p.city || '');
-          const address = normalizeAddress(p.address || '');
-          const zipCode = normalizeAddress(p.zipCode || '');
+            const matchesLocation =
+              city.includes(searchTerm) ||
+              address.includes(searchTerm) ||
+              zipCode.includes(searchTerm) ||
+              searchTerm.includes(city) ||
+              searchTerm.includes(address);
 
-          // Vérifier la correspondance dans les deux sens
-          const matchesLocation =
-            city.includes(searchTerm) ||
-            address.includes(searchTerm) ||
-            zipCode.includes(searchTerm) ||
-            searchTerm.includes(city) ||
-            searchTerm.includes(address);
-
-          if (!matchesLocation) return false;
+            if (!matchesLocation) return false;
+          }
         }
 
         // Filtres prix
@@ -867,6 +893,15 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     if (activeTab === 'achat') base = buyProperties;
     else if (activeTab === 'location') base = rentProperties;
     else if (activeTab === 'saisonniere') base = seasonalProperties;
+    else if (activeTab === 'hors_pays') {
+      // Pour "hors du pays", on prend toutes les propriétés et on filtre
+      const all = [...buyProperties, ...rentProperties, ...seasonalProperties];
+      const map = new Map<string, any>();
+      all.forEach((p) => {
+        if (!map.has(p.id)) map.set(p.id, p);
+      });
+      base = Array.from(map.values());
+    }
     else {
       const all = [...buyProperties, ...rentProperties, ...seasonalProperties];
       const map = new Map<string, any>();
@@ -1050,17 +1085,6 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                           </div>
                           {/* Boutons d'action */}
                           <div className="flex gap-1">
-                            {/* <button
-                              className={`w-full px-4 py-2 rounded-lg font-semibold transition ${
-                              sentRequests?.[property?.id] 
-                                ? 'bg-orange-500 text-white cursor-not-allowed' 
-                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                            }`}
-                              onClick={(e) => handleDemanderVisite(property, e)}
-                              disabled={!!sentRequests?.[property?.id]}
-                            >
-                              {sentRequests?.[property?.id] ? 'Demande déjà envoyée' : 'Demander visite'}
-                            </button> */}
                             <button
                               className="relative border-2 p-2 mx-auto border-slate-900 flex items-center gap-2 overflow-hidden rounded-md group transition-all duration-500 hover:shadow-lg"
                               onClick={() => handlePropertyClick(property)}
@@ -1081,8 +1105,6 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                   );
                 })}
               </div>
-
-
             </>
           )}
         </div>
@@ -1134,41 +1156,18 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
               onClick={() => setActiveTab('saisonniere')}
             >
               LOCATION SAISONNIÈRE
-            </Button >
+            </Button>
+            {/* NOUVEL ONGLET HORS DU PAYS */}
+            <Button
+              variant={activeTab === 'hors_pays' ? 'default' : 'outline'}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === 'hors_pays' ? 'bg-slate-900 text-primary-foreground hover:bg-transparent' : 'border-2'}`}
+              onClick={() => setActiveTab('hors_pays')}
+            >
+              HORS DU PAYS
+            </Button>
           </div>
           <div>
-
             <div className="relative z-10">
-              {/* Bouton principal
-              <motion.button
-                onClick={() => setShowCard(true)}
-                className="p-2 text-xs lg:p-4 lg:text-sm flex items-center justify-center rounded-lg bg-gradient-to-r from-slate-900 to-blue-950 text-white font-semibold shadow-md"
-                style={{
-                  backgroundSize: "200% 100%",
-                  backgroundPosition: "50% 50%",
-                }}
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%"],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  ease: "linear",
-                }}
-              >
-                <Star className="h-4 w-4 mr-2 text-yellow-500" />
-                VENDRE / LOUER SON BIEN
-              </motion.button> */}
-
-              {/* {demandesLoading && (
-                <div className="inline-flex items-center ml-3 text-sm text-muted-foreground">
-                  <img src="/loading.gif" alt="" className='w-24 h-24' />
-                  Chargement demandes...
-                </div>
-              )} */}
-
-              {/* Overlay flouté + Card */}
               <AnimatePresence>
                 {showCard && (
                   <motion.div

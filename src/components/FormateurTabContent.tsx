@@ -103,6 +103,56 @@ const INTERESTS_SECTIONS: InterestSection[] = [
     description: "Entraînement personnalisé à domicile",
     price: "À partir de 50€",
     items: ["Yoga", "Pilates", "Fitness", "Musculation", "Cardio", "Stretching"]
+  },
+  {
+    id: "soutien-scolaire",
+    title: "Soutien Scolaire Enfant",
+    icon: "/domicile/soutien.gif",
+    color: "bg-red-100 border-red-300",
+    description: "Accompagnement scolaire vacances et après l'école - Toutes matières",
+    price: "45€/h",
+    items: [
+      "Aide aux devoirs",
+      "Soutien vacances", 
+      "Accompagnement après l'école",
+      "Mathématiques",
+      "Français",
+      "Langues étrangères",
+      "Révisions examens",
+      "Méthodologie d'apprentissage"
+    ]
+  },
+  {
+    id: "atelier-enfant",
+    title: "Atelier Enfant",
+    icon: "/domicile/atelier-enfant.gif",
+    color: "bg-purple-100 border-purple-300", 
+    description: "Ateliers créatifs et ludiques pour les enfants - Développement de la créativité",
+    price: "30€/session",
+    items: [
+      "Peinture enfant",
+      "Sculpture modelage",
+      "Création de bracelets",
+      "Bricolage créatif",
+      "Dessin et coloriage",
+      "Activités manuelles"
+    ]
+  },
+  {
+    id: "atelier-adulte",
+    title: "Atelier Adulte", 
+    icon: "/domicile/atelier-adulte.gif",
+    color: "bg-indigo-100 border-indigo-300",
+    description: "Ateliers créatifs pour adultes - Détente et création",
+    price: "40€/session",
+    items: [
+      "Peinture sur toile",
+      "Sculpture terre",
+      "Création bijoux",
+      "Atelier créatif surprise",
+      "Art-thérapie",
+      "Loisirs créatifs"
+    ]
   }
 ];
 
