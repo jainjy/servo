@@ -92,6 +92,7 @@ interface ListingModalProps {
     ownerId: string;
     longitude: number | null;
     latitude: number | null;
+    socialLoan?: boolean;
   };
   mode: "create" | "edit";
   onSuccess?: () => void;
@@ -194,6 +195,8 @@ export function ListingModal({
     status: "draft",
     latitude: null as number | null,
     longitude: null as number | null,
+    // Nouveau champ
+    socialLoan: false,
   });
 
   const etapes = [
@@ -224,6 +227,7 @@ export function ListingModal({
         status: listing.status || "draft",
         latitude: listing.latitude ?? null,
         longitude: listing.longitude ?? null,
+        socialLoan: listing.socialLoan || false,
       });
       setExistingImages(listing.images || []);
       setTemporaryImages([]);
@@ -248,6 +252,7 @@ export function ListingModal({
         status: "draft",
         latitude: null,
         longitude: null,
+        socialLoan: false,
       });
       setExistingImages([]);
       setTemporaryImages([]);
@@ -398,8 +403,11 @@ export function ListingModal({
         status: formData.status,
         latitude: formData.latitude,
         longitude: formData.longitude,
+        socialLoan: formData.socialLoan, // Champ correctement ajouté
         ownerId: listing?.ownerId || currentUser?.id || "default-owner-id",
       };
+
+      console.log("Payload envoyé:", payload); // Pour debug
 
       if (mode === "create") {
         await api.post("/properties", payload);
@@ -532,19 +540,17 @@ export function ListingModal({
               {etapes.map((step, index) => (
                 <div key={step.numero} className="flex items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                      etape >= step.numero
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${etape >= step.numero
                         ? "bg-blue-600 border-blue-600 text-white"
                         : "border-gray-300 text-gray-500"
-                    }`}
+                      }`}
                   >
                     {step.numero}
                   </div>
                   {index < etapes.length - 1 && (
                     <div
-                      className={`w-12 h-1 mx-2 ${
-                        etape > step.numero ? "bg-blue-600" : "bg-gray-300"
-                      }`}
+                      className={`w-12 h-1 mx-2 ${etape > step.numero ? "bg-blue-600" : "bg-gray-300"
+                        }`}
                     />
                   )}
                 </div>
@@ -582,24 +588,24 @@ export function ListingModal({
               {/* Ajouter le champ rentType si le type est location */}
               {(formData.listingType === "rent" ||
                 formData.listingType === "both") && (
-                <div className="mt-4">
-                  <Label className="block mb-2">Type de location *</Label>
-                  <select
-                    className="w-full p-3 border rounded-lg"
-                    value={formData.rentType}
-                    onChange={(e) =>
-                      setFormData({ ...formData, rentType: e.target.value })
-                    }
-                    required
-                  >
-                    {Object.entries(TYPE_LOCATION).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+                  <div className="mt-4">
+                    <Label className="block mb-2">Type de location *</Label>
+                    <select
+                      className="w-full p-3 border rounded-lg"
+                      value={formData.rentType}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rentType: e.target.value })
+                      }
+                      required
+                    >
+                      {Object.entries(TYPE_LOCATION).map(([key, value]) => (
+                        <option key={key} value={key}>
+                          {value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
               <div>
                 <Label className="block mb-2">Type de bien *</Label>
@@ -788,6 +794,25 @@ export function ListingModal({
                   Permet d'afficher le bien sur la carte.
                 </div>
               </div>
+
+              {/* Checkbox Prêt Social Location Accession - CORRIGÉ */}
+              <div className="mt-4 flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="socialLoan"
+                  checked={formData.socialLoan}
+                  onChange={(e) => 
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      socialLoan: e.target.checked 
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <Label htmlFor="socialLoan" className="text-sm font-medium">
+                  Prêt Social Location Accession
+                </Label>
+              </div>
             </div>
           )}
 
@@ -838,9 +863,8 @@ export function ListingModal({
               <div>
                 <Label className="block mb-2">Photos du bien</Label>
                 <div
-                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
-                    uploadingImages ? "opacity-50" : "hover:border-blue-400"
-                  }`}
+                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${uploadingImages ? "opacity-50" : "hover:border-blue-400"
+                    }`}
                 >
                   <Upload className="mx-auto mb-3 text-gray-400" size={48} />
                   <div
@@ -869,11 +893,10 @@ export function ListingModal({
                   />
                   <Label
                     htmlFor="property-images"
-                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${
-                      uploadingImages
+                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${uploadingImages
                         ? "opacity-50 cursor-not-allowed"
                         : "cursor-pointer hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     {uploadingImages ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1003,18 +1026,24 @@ export function ListingModal({
                   </div>
                   {(formData.listingType === "rent" ||
                     formData.listingType === "both") && (
-                    <div className="flex justify-between">
-                      <span style={{ color: "#5A6470" }}>
-                        Type de location:
-                      </span>
-                      <span
-                        className="font-medium"
-                        style={{ color: "#0A0A0A" }}
-                      >
-                        {TYPE_LOCATION[formData.rentType]}
-                      </span>
-                    </div>
-                  )}
+                      <div className="flex justify-between">
+                        <span style={{ color: "#5A6470" }}>
+                          Type de location:
+                        </span>
+                        <span
+                          className="font-medium"
+                          style={{ color: "#0A0A0A" }}
+                        >
+                          {TYPE_LOCATION[formData.rentType]}
+                        </span>
+                      </div>
+                    )}
+                  <div className="flex justify-between">
+                    <span style={{ color: "#5A6470" }}>Prêt Social:</span>
+                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                      {formData.socialLoan ? "Oui" : "Non"}
+                    </span>
+                  </div>
                   <div className="flex justify-between">
                     <span style={{ color: "#5A6470" }}>Images:</span>
                     <span className="font-medium" style={{ color: "#0A0A0A" }}>
@@ -1080,8 +1109,8 @@ export function ListingModal({
                       ? "Upload..."
                       : "Sauvegarde..."
                     : mode === "create"
-                    ? "Publier"
-                    : "Modifier"}{" "}
+                      ? "Publier"
+                      : "Modifier"}{" "}
                   l'annonce
                 </Button>
               </div>
