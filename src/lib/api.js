@@ -339,4 +339,20 @@ export const cartAPI = {
   checkAvailability: (data) => api.post("/cart/check-availability", data),
 };
 
+
+// Ajouter dans lib/api.js
+export const offresExclusivesAPI = {
+  // Récupérer toutes les offres
+  getOffres: (params = {}) => api.get("/offres-exclusives", { params }),
+  
+  // Récupérer les offres flash
+  getOffresFlash: () => api.get("/offres-exclusives/flash"),
+  
+  // Récupérer les statistiques
+  getStats: () => api.get("/offres-exclusives/stats"),
+  
+  // Récupérer les catégories
+  getCategories: () => api.get("/offres-exclusives/categories")
+}; 
+
 export default api;

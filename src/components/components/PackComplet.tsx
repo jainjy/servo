@@ -1,174 +1,226 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Star, Crown, Zap, Shield, Users, Target, TrendingUp, ArrowRight, Calendar, FileText, MessageCircle, BarChart3, Settings, Heart } from 'lucide-react';
+import { Check, Star, Plane, Hotel, Sofa, Music, MapPin, ArrowRight, Calendar, Heart, ShoppingCart, Zap, FileText } from 'lucide-react';
+import { offresExclusivesAPI } from '@/lib/api';
+import { useCart } from '@/components/contexts/CartContext';
+import { toast } from 'sonner';
+import { ModalDemandeDevisPack } from '@/components/components/ModalDemandeDevisPack';
 
-const PacksExclusifs = () => {
-  const packsSectionRef = useRef<HTMLDivElement>(null);
+interface Offre {
+  id: string;
+  title: string;
+  originalPrice: number;
+  price: number;
+  discount: number;
+  category: string;
+  type: string;
+  city?: string;
+  rating?: number;
+  reviewCount?: number;
+  images: string[];
+  description?: string;
+  provider: string;
+  features: string[];
+  timeLeft?: string;
+  brand?: string;
+}
 
-  const scrollToPacks = () => {
-    packsSectionRef.current?.scrollIntoView({
+interface Categorie {
+  id: string;
+  name: string;
+  description: string;
+  count: number;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: string;
+}
+
+interface Stats {
+  totalOffres: number;
+  reductionMoyenne: string;
+  offresFlash: number;
+  membresSatisfaits: number;
+}
+
+const OffresExclusives = () => {
+  const offresSectionRef = useRef<HTMLDivElement>(null);
+  const [offresFlash, setOffresFlash] = useState<Offre[]>([]);
+  const [categories, setCategories] = useState<Categorie[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalOffres: 0,
+    reductionMoyenne: '0%',
+    offresFlash: 0,
+    membresSatisfaits: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [modalDevisOpen, setModalDevisOpen] = useState(false);
+  const [selectedOffre, setSelectedOffre] = useState<Offre | null>(null);
+  
+  // Utilisation du contexte panier
+  const { addToCart } = useCart();
+
+  const scrollToOffres = () => {
+    offresSectionRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     });
   };
 
-  const packsExclusifs = [
-    {
-      id: 'starter',
-      name: 'Starter',
-      description: 'Parfait pour débuter et tester nos services',
-      price: 'Gratuit',
-      period: '',
-      popular: false,
-      icon: Target,
-      color: 'gray',
-      features: [
-        'Gestion basique des documents',
-        '5 contrats types',
-        'Stockage 1GB',
-        'Support par email',
-        '1 utilisateur',
-        'Audit basique mensuel'
-      ],
-      limitations: [
-        'Documents limités à 50',
-        'Pas de signature électronique',
-        'Archivage limité à 1 an'
-      ],
-      buttonText: 'Commencer gratuitement',
-      buttonVariant: 'outline' as const
-    },
-    {
-      id: 'pro',
-      name: 'Professionnel',
-      description: 'Idéal pour les artisans et petites entreprises',
-      price: '49',
-      period: '/mois',
-      popular: true,
-      icon: Zap,
-      color: 'blue',
-      features: [
-        'Gestion illimitée des documents',
-        '50+ contrats types',
-        'Stockage 10GB',
-        'Support prioritaire',
-        '3 utilisateurs inclus',
-        'Audit complet mensuel',
-        'Signature électronique',
-        'Archivage 5 ans',
-        'Modèles de devis personnalisables',
-        'Rapports analytiques basiques'
-      ],
-      highlights: [
-        'Plus populaire',
-        'Rentable pour PME'
-      ],
-      buttonText: 'Essayer 30 jours',
-      buttonVariant: 'default' as const
-    },
-    {
-      id: 'business',
-      name: 'Business',
-      description: 'Solution complète pour les entreprises en croissance',
-      price: '99',
-      period: '/mois',
-      popular: false,
-      icon: TrendingUp,
-      color: 'purple',
-      features: [
-        'Toutes fonctionnalités Pro',
-        'Contrats types illimités',
-        'Stockage 50GB',
-        'Support dédié 24/7',
-        '10 utilisateurs inclus',
-        'Audit avancé hebdomadaire',
-        'Workflows automatisés',
-        'Intégrations API',
-        'Analyses avancées',
-        'Formation équipe',
-        'Gestion multi-sociétés',
-        'Backup quotidien'
-      ],
-      highlights: [
-        'Solution complète',
-        'Évolutif'
-      ],
-      buttonText: 'Démarrer maintenant',
-      buttonVariant: 'outline' as const
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      description: 'Solution sur mesure pour les grandes organisations',
-      price: 'Sur mesure',
-      period: '',
-      popular: false,
-      icon: Crown,
-      color: 'amber',
-      features: [
-        'Toutes fonctionnalités Business',
-        'Stockage illimité',
-        'Support manager dédié',
-        'Utilisateurs illimités',
-        'Audit en temps réel',
-        'Développements sur mesure',
-        'SLA 99.9%',
-        'Conformité RGPD avancée',
-        'Formations personnalisées',
-        'Migration données assistée',
-        'SSO et sécurité avancée',
-        'Rapports executive'
-      ],
-      highlights: [
-        'Solution sur mesure',
-        'Support premium'
-      ],
-      buttonText: 'Contactez-nous',
-      buttonVariant: 'outline' as const
+  // Fonction pour déterminer le texte et l'icône du bouton selon la catégorie
+  const getButtonConfig = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'immobilier':
+        return {
+          text: 'Devis Gratuit',
+          icon: FileText,
+          variant: 'default' as const,
+          action: 'devis'
+        };
+      case 'voyages':
+      case 'tourisme':
+      case 'loisirs':
+        return {
+          text: 'Réserver',
+          icon: Calendar,
+          variant: 'default' as const,
+          action: 'reserver'
+        };
+      case 'shopping':
+      case 'soirees':
+      default:
+        return {
+          text: 'Acheter',
+          icon: ShoppingCart,
+          variant: 'default' as const,
+          action: 'acheter'
+        };
     }
-  ];
+  };
 
-  const fonctionnalitesPremium = [
-    {
-      icon: FileText,
-      title: 'Gestion Documentaire Avancée',
-      description: 'Centralisez tous vos documents avec classement intelligent et recherche avancée',
-      features: ['OCR intégré', 'Workflows automatisés', 'Versioning']
-    },
-    {
-      icon: MessageCircle,
-      title: 'Communication Unifiée',
-      description: 'Messagerie intégrée avec vos clients et partenaires',
-      features: ['Chat en temps réel', 'Notifications push', 'Historique complet']
-    },
-    {
-      icon: BarChart3,
-      title: 'Analytics & Reporting',
-      description: 'Tableaux de bord complets pour piloter votre activité',
-      features: ['KPI personnalisés', 'Rapports automatiques', 'Export Excel/PDF']
-    },
-    {
-      icon: Shield,
-      title: 'Sécurité Maximale',
-      description: 'Protection de vos données avec les standards les plus élevés',
-      features: ['Chiffrement AES-256', 'Sauvegardes automatiques', 'Conformité RGPD']
-    },
-    {
-      icon: Users,
-      title: 'Gestion d\'Équipe',
-      description: 'Collaborez efficacement avec votre équipe et vos partenaires',
-      features: ['Rôles personnalisés', 'Permissions granulaires', 'Activité en temps réel']
-    },
-    {
-      icon: Settings,
-      title: 'Intégrations Avancées',
-      description: 'Connectez tous vos outils métiers favoris',
-      features: ['API REST complète', 'Webhooks', 'Connecteurs prêts à l\'emploi']
+  // Fonction pour gérer l'action du bouton
+  const handleButtonAction = (offre: Offre, action: string) => {
+    switch (action) {
+      case 'acheter':
+        handleAddToCart(offre);
+        break;
+      case 'reserver':
+        handleReservation(offre);
+        break;
+      case 'devis':
+        handleDevis(offre);
+        break;
+      default:
+        handleAddToCart(offre);
     }
-  ];
-  const AnimatedCounter = ({ value, duration = 2 }) => {
+  };
+
+  // Fonction pour ajouter au panier
+  const handleAddToCart = (offre: Offre) => {
+    const cartItem = {
+      id: offre.id,
+      name: offre.title,
+      price: offre.price,
+      quantity: 1,
+      images: offre.images,
+      productType: offre.category,
+      features: offre.features,
+      originalPrice: offre.originalPrice,
+      discount: offre.discount,
+      brand: offre.brand,
+      provider: offre.provider
+    };
+
+    addToCart(cartItem);
+    toast.success(`${offre.title} ajouté au panier`);
+  };
+
+  // Fonction pour gérer les réservations
+  const handleReservation = (offre: Offre) => {
+    // Logique pour la réservation
+    console.log('Réservation pour:', offre.title);
+    toast.success(`Réservation initiée pour ${offre.title}`);
+    // Ici vous pouvez rediriger vers une page de réservation ou ouvrir un modal
+  };
+
+  // Fonction pour gérer les devis
+  const handleDevis = (offre: Offre) => {
+    setSelectedOffre(offre);
+    setModalDevisOpen(true);
+  };
+
+  // Fonction de soumission du devis
+  const handleDevisSubmit = async (formData: any) => {
+    try {
+      // Logique d'envoi du devis
+      console.log('Demande de devis pour:', selectedOffre?.title, formData);
+      
+      // Simulation d'envoi à l'API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success(`Votre demande de devis pour ${selectedOffre?.title} a été envoyée avec succès !`);
+      setModalDevisOpen(false);
+      setSelectedOffre(null);
+    } catch (error) {
+      toast.error('Erreur lors de l\'envoi du devis');
+    }
+  };
+
+  // Icônes pour les catégories
+  const categoryIcons: { [key: string]: React.ComponentType<React.SVGProps<SVGSVGElement>> } = {
+    'voyages': Plane,
+    'shopping': Sofa,
+    'loisirs': MapPin,
+    'immobilier': Hotel,
+    'soirees': Music
+  };
+
+  const categoryColors: { [key: string]: string } = {
+    'voyages': 'blue',
+    'shopping': 'green',
+    'loisirs': 'purple',
+    'immobilier': 'orange',
+    'soirees': 'pink'
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [flashResponse, categoriesResponse, statsResponse] = await Promise.all([
+          offresExclusivesAPI.getOffresFlash(),
+          offresExclusivesAPI.getCategories(),
+          offresExclusivesAPI.getStats()
+        ]);
+
+        if (flashResponse.data.success) {
+          setOffresFlash(flashResponse.data.data);
+        }
+
+        if (categoriesResponse.data.success) {
+          const categoriesWithIcons = categoriesResponse.data.data.map((cat: Categorie) => ({
+            ...cat,
+            icon: categoryIcons[cat.id] || MapPin,
+            color: categoryColors[cat.id] || 'blue'
+          }));
+          setCategories(categoriesWithIcons);
+        }
+
+        if (statsResponse.data.success) {
+          setStats(statsResponse.data.data);
+        }
+
+      } catch (error) {
+        console.error('Erreur chargement données:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const AnimatedCounter = ({ value, duration = 2 }: { value: string, duration?: number }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -197,37 +249,52 @@ const PacksExclusifs = () => {
       </>
     );
   };
+
   const statistiques = [
-    { number: '98%', text: 'de satisfaction client' },
-    { number: '24/7', text: 'support disponible' },
-    { number: '5min', text: 'de mise en place' },
-    { number: '10k+', text: 'utilisateurs actifs' }
+    { number: stats.reductionMoyenne, text: 'de réduction moyenne' },
+    { number: `${stats.offresFlash}h`, text: 'offres flash quotidiennes' },
+    { number: `${stats.membresSatisfaits}+`, text: 'membres satisfaits' },
+    { number: `${stats.totalOffres}+`, text: 'nouvelles offres' }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des offres exclusives...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
           <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-          <img src="https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg" className='h-full object-cover w-full' alt="" />
+          <img 
+            src="https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg" 
+            className='h-full object-cover w-full' 
+            alt="Offres exclusives" 
+          />
           <Badge variant="secondary" className="absolute left-2 bottom-0 mb-4 px-4 py-1 text-sm">
             <Star className="w-4 h-4 mr-1" />
-            Offres Exclusives
+            Offres Flash
           </Badge>
         </div>
         <div className="max-w-4xl mx-auto">
-
           <h1 className="text-xl lg:text-5xl py-12 font-bold text-gray-200 mb-6">
-            Des Packs Sur Mesure
-            <span className="text-blue-600 block">Pour Votre Réussite</span>
+            Offres Exclusives
+            <span className="text-yellow-400 block">Soldes & Promotions</span>
           </h1>
-          <p className="text-md text-gray-600 mb-8 max-w-2xl mx-auto">
-            Découvrez nos solutions complètes qui s'adaptent à tous vos besoins métier.
-            De la gestion simple à la solution enterprise, nous avons ce qu'il vous faut.
+          <p className="text-md text-gray-300 mb-8 max-w-2xl mx-auto">
+            Découvrez nos deals exceptionnels : billets d'avion, meubles soldés, 
+            activités touristiques, hôtels et soirées électro à prix imbattables !
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" onClick={scrollToPacks} className="px-8">
+            <Button size="lg" onClick={scrollToOffres} className="px-8 bg-yellow-500 hover:bg-yellow-600">
               Voir les offres
               <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
@@ -236,8 +303,8 @@ const PacksExclusifs = () => {
           {/* Statistiques */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-5 mx-auto">
             {statistiques.map((stat, index) => (
-              <div key={index} className="bg-white p-10 rounded-lg shadow-sm">
-                <div className='text-4xl azonix'>
+              <div key={index} className="bg-white p-6 rounded-lg shadow-sm border">
+                <div className='text-3xl font-bold text-blue-600'>
                   <AnimatedCounter value={stat.number} duration={2} />
                 </div>
                 <div className="text-gray-600 text-sm">{stat.text}</div>
@@ -247,156 +314,161 @@ const PacksExclusifs = () => {
         </div>
       </section>
 
-      {/* Section des Packs */}
-      <section ref={packsSectionRef} className="container mx-auto px-4 scroll-mt-20">
+      {/* Section Catégories */}
+      <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Choisissez Votre Pack
+            Nos Catégories Exclusives
           </h2>
           <p className="text-md text-gray-600 max-w-2xl mx-auto">
-            Des solutions évolutives qui grandissent avec vous.
-            Tous nos packs incluent un essai gratuit de 30 jours.
+            Explorez nos différentes catégories d'offres et trouvez les deals qui vous correspondent
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {packsExclusifs.map((pack) => (
-            <Card
-              key={pack.id}
-              className={`relative transition-all duration-300 hover:scale-105 hover:shadow-xl ${pack.popular ? 'border-2 border-blue-500 shadow-lg' : 'border'
-                }`}
-            >
-              {pack.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-600 text-white px-4 py-1">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    Populaire
-                  </Badge>
-                </div>
-              )}
-
-              <CardHeader className="text-center pb-4">
-                <div className={`w-12 h-12 mx-auto mb-4 rounded-full bg-${pack.color}-100 flex items-center justify-center`}>
-                  <pack.icon className={`w-6 h-6 text-${pack.color}-600`} />
-                </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">
-                  {pack.name}
-                </CardTitle>
-                <p className="text-gray-600 text-sm mt-2">
-                  {pack.description}
-                </p>
-
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">
-                    {pack.price}
-                  </span>
-                  {pack.period && (
-                    <span className="text-gray-600 text-lg">{pack.period}</span>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  {pack.features.map((feature, index) => (
-                    <div key={index} className="flex items-start">
-                      <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {pack.limitations && (
-                  <div className="pt-4 border-t">
-                    <p className="text-sm font-medium text-gray-500 mb-2">Limitations :</p>
-                    <div className="space-y-2">
-                      {pack.limitations.map((limitation, index) => (
-                        <div key={index} className="flex items-start">
-                          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3 mt-1.5 flex-shrink-0" />
-                          <span className="text-gray-500 text-sm">{limitation}</span>
-                        </div>
-                      ))}
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {categories.map((categorie) => {
+            const IconComponent = categorie.icon || MapPin;
+            return (
+              <Card key={categorie.id} className="hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <CardContent className="p-6 text-center">
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-${categorie.color}-100 flex items-center justify-center`}>
+                    <IconComponent className={`w-8 h-8 text-${categorie.color}-600`} />
                   </div>
-                )}
-              </CardContent>
-
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={pack.buttonVariant}
-                  size="lg"
-                >
-                  {pack.buttonText}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    {categorie.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {categorie.description}
+                  </p>
+                  <div className="text-sm text-gray-500 mb-4">
+                    {categorie.count} offres disponibles
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
-      {/* Fonctionnalités Premium */}
-      <section className="bg-gray-50 py-16">
+      {/* Section Offres Flash */}
+      <section ref={offresSectionRef} className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Fonctionnalités Premium
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Découvrez toutes les fonctionnalités avancées incluses dans nos packs
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Zap className="w-6 h-6 text-yellow-500" />
+              <h2 className="text-4xl font-bold text-gray-900">
+                Offres Flash du Jour
+              </h2>
+            </div>
+            <p className="text-md text-gray-600 max-w-2xl mx-auto">
+              Des deals exceptionnels qui partent vite ! Dépêchez-vous avant qu'il ne soit trop tard.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {fonctionnalitesPremium.map((feature, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    {feature.description}
-                  </p>
-                  <ul className="space-y-2">
-                    {feature.features.map((feat, featIndex) => (
-                      <li key={featIndex} className="flex items-center text-sm text-gray-700">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3" />
-                        {feat}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {offresFlash.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Aucune offre flash disponible pour le moment</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+              {offresFlash.map((offre) => {
+                const buttonConfig = getButtonConfig(offre.category);
+                const ButtonIcon = buttonConfig.icon;
+                
+                return (
+                  <Card key={offre.id} className="group hover:shadow-xl transition-all duration-300">
+                    <div className="relative overflow-hidden">
+                      <img 
+                        src={offre.images[0] || "https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg"} 
+                        alt={offre.title}
+                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-xs">
+                          {offre.category}
+                        </Badge>
+                      </div>
+                      
+                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {offre.title}
+                      </h3>
+
+                      {offre.rating && (
+                        <div className="flex items-center gap-1 mb-2">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-gray-600">{offre.rating}</span>
+                          {offre.reviewCount && (
+                            <span className="text-sm text-gray-500">({offre.reviewCount})</span>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl font-bold text-gray-900">
+                          {offre.price}€
+                        </span>
+                        <span className="text-sm text-gray-500 line-through">
+                          {offre.originalPrice}€
+                        </span>
+                        <Badge variant="destructive" className="ml-2">
+                          -{offre.discount}%
+                        </Badge>
+                      </div>
+
+                      {offre.city && (
+                        <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
+                          <MapPin className="w-4 h-4" />
+                          {offre.city}
+                        </div>
+                      )}
+
+                      <ul className="space-y-1 mb-4">
+                        {offre.features.slice(0, 3).map((feature, index) => (
+                          <li key={index} className="flex items-center text-xs text-gray-600">
+                            <Check className="w-3 h-3 text-green-500 mr-2" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1" 
+                          size="sm" 
+                          variant={buttonConfig.variant}
+                          onClick={() => handleButtonAction(offre, buttonConfig.action)}
+                        >
+                          <ButtonIcon className="w-4 h-4 mr-2" />
+                          {buttonConfig.text}
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Heart className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 text-center">
-          <Card className="max-w-full mx-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-            <CardContent className="p-12">
-              <h2 className="text-3xl font-bold mb-4">
-                Prêt à Transformer Votre Business ?
-              </h2>
-              <p className="text-sm lg:text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-                Rejoignez des milliers de professionnels qui font confiance à nos solutions
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" className="px-8">
-                  Commencer
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      {/* Modal de demande de devis */}
+      <ModalDemandeDevisPack
+        open={modalDevisOpen}
+        onClose={() => {
+          setModalDevisOpen(false);
+          setSelectedOffre(null);
+        }}
+        property={selectedOffre}
+        onSuccess={handleDevisSubmit}
+      />
     </div>
   );
 };
 
-export default PacksExclusifs;
+export default OffresExclusives;
