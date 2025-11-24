@@ -8,6 +8,8 @@ import {
   Eye,
   Calendar,
   Loader,
+  AlertTriangle, // Remplacement de l'émoji ⚠️
+  Home, // Remplacement de l'émoji 🏠
 } from "lucide-react";
 import api from "../lib/api"; // Adjust the path according to your project structure
 
@@ -183,7 +185,8 @@ const CartesBiensImmobiliers = () => {
     return (
       <div className="min-h-screen bg-gray-50 py-8 mt-16 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />{" "}
+          {/* Icône pour l'erreur */}
           <h3 className="text-xl font-semibold text-gray-600 mb-2">
             Erreur de chargement
           </h3>
@@ -212,8 +215,9 @@ const CartesBiensImmobiliers = () => {
             Location Accession
           </p>
           <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 inline-block">
-            <p className="text-green-800 font-semibold">
-              🏠 Prêt Social Location Accession - Accessibilité facilitée
+            <p className="text-green-800 font-semibold flex items-center justify-center gap-2">
+              <Home className="w-5 h-5" /> {/* Icône pour la maison */}
+              Prêt Social Location Accession - Accessibilité facilitée
             </p>
           </div>
         </div>
@@ -306,8 +310,9 @@ const CartesBiensImmobiliers = () => {
                   </span>
                   {/* Badge PSLA */}
                   {bien.isPSLA && (
-                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-600 text-white">
-                      🏠 PSLA
+                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-600 text-white flex items-center gap-1">
+                      <Home className="w-4 h-4" /> {/* Icône pour la maison */}
+                      PSLA
                     </span>
                   )}
                 </div>
@@ -418,7 +423,8 @@ const CartesBiensImmobiliers = () => {
         {/* Message si aucun résultat */}
         {biensFiltres.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🏠</div>
+            <Home className="w-16 h-16 text-gray-400 mx-auto mb-4" />{" "}
+            {/* Icône pour la maison */}
             <h3 className="text-xl font-semibold text-gray-600 mb-2">
               Aucun bien PSLA trouvé
             </h3>
