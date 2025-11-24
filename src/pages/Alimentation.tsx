@@ -356,12 +356,12 @@ const Alimentation = () => {
       ],
       "restaurant": [
         {
-  name: "Plats Préparés",
-  foodCategory: "plats-prepares",
-  iconName: "ChefHat",
-  description: "Plats frais préparés par nos chefs",
-  image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-},
+          name: "Plats Préparés",
+          foodCategory: "plats-prepares",
+          iconName: "ChefHat",
+          description: "Plats frais préparés par nos chefs",
+          image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        },
         {
           name: "Sandwichs & Salades",
           foodCategory: "sandwichs",
@@ -430,7 +430,7 @@ const Alimentation = () => {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
           style={{
             backgroundImage: `url("https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")`,
-          backgroundAttachment: "fixed"
+            backgroundAttachment: "fixed"
           }}
         />
         <div className="absolute inset-0 bg-black bg-opacity-40" />
@@ -438,7 +438,7 @@ const Alimentation = () => {
 
       <div className="absolute inset-0 bg-gradient-to-br from-[#00C2A8]/20 to-[#F6F8FA]/30 z-1" />
 
-      
+
 
       <div className="relative z-10">
         <section className="container mx-auto px-4 py-8">
@@ -569,45 +569,45 @@ const Alimentation = () => {
                       );
                     })
                     .map((category, index) => {
-                    const CategoryIcon = getIconByName(category.iconName);
-                    const productCount = getProductCount(category.name);
+                      const CategoryIcon = getIconByName(category.iconName);
+                      const productCount = getProductCount(category.name);
 
-                    return (
-                      <Card
-                        key={category.name}
-                        className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
-                        style={{
-                          animationDelay: `${parseFloat(animationDelays.cards) + index * 0.1}s`,
-                        }}
-                      >
-                        <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                          <img
-                            src={category.image}
-                            alt={category.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="flex justify-end absolute rounded-full text-white bottom-2 right-2">
-                            <Badge className="bg-black text-white">
-                              {productCount} produit{productCount !== 1 ? "s" : ""}
-                            </Badge>
-                          </div>
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-blue-600 transition-colors duration-300">
-                          {category.name}
-                        </h3>
-                        <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
-                          {category.description}
-                        </p>
-                        <Button
-                          className="w-full bg-slate-900 hover:bg-slate-700 hover:text-white text-white border-0 transition-all duration-300"
-                          onClick={() => handleCategoryClick(category)}
+                      return (
+                        <Card
+                          key={category.name}
+                          className="group p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
+                          style={{
+                            animationDelay: `${parseFloat(animationDelays.cards) + index * 0.1}s`,
+                          }}
                         >
-                          Explorer
-                          <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
-                        </Button>
-                      </Card>
-                    );
-                  })}
+                          <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
+                            <img
+                              src={category.image}
+                              alt={category.name}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <div className="flex justify-end absolute rounded-full text-white bottom-2 right-2">
+                              <Badge className="bg-black text-white">
+                                {productCount} produit{productCount !== 1 ? "s" : ""}
+                              </Badge>
+                            </div>
+                          </div>
+                          <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-blue-600 transition-colors duration-300">
+                            {category.name}
+                          </h3>
+                          <p className="text-[#5A6470] text-sm mb-2 leading-relaxed">
+                            {category.description}
+                          </p>
+                          <Button
+                            className="w-full bg-slate-900 hover:bg-slate-700 hover:text-white text-white border-0 transition-all duration-300"
+                            onClick={() => handleCategoryClick(category)}
+                          >
+                            Explorer
+                            <ArrowRight className="ml-2 h-4 w-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                          </Button>
+                        </Card>
+                      );
+                    })}
 
                   {section.categories.filter((category) => {
                     const searchQuery = sectionSearchQueries[section.id] || "";
@@ -616,20 +616,37 @@ const Alimentation = () => {
                       category.description.toLowerCase().includes(searchQuery.toLowerCase())
                     );
                   }).length === 0 && sectionSearchQueries[section.id] && (
-                    <div className="col-span-full text-center py-8">
-                      <p className="text-gray-500 text-lg">
-                        Aucune catégorie ne correspond à "{sectionSearchQueries[section.id]}"
-                      </p>
-                    </div>
-                  )}
+                      <div className="col-span-full text-center py-8">
+                        <p className="text-gray-500 text-lg">
+                          Aucune catégorie ne correspond à "{sectionSearchQueries[section.id]}"
+                        </p>
+                      </div>
+                    )}
                 </div>
               </div>
             );
           })}
-
-          {/* Section CTA */}
+          <div className="text-center mt-12">
+            <Card className="bg-white/80 backdrop-blur-md rounded-3xl p-8 border-0">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                Découvrez la médecine par les plantes
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                Explorez notre section dédiée à la phytothérapie et apprenez à utiliser les plantes
+                pour prendre soin de votre santé naturellement.
+              </p>
+              <Button
+                onClick={() => navigate('/medecine-plantes')}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Leaf className="h-5 w-5 mr-2" />
+                Explorer la médecine des plantes
+              </Button>
+            </Card>
+          </div>
+          {/* Section CTA 
           <div
-            className="text-center animate-bounce-in"
+            className="text-center animate-bounce-in "
             style={{ animationDelay: "0.8s" }}
           >
             <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 lg:p-12 border border-white/20 shadow-2xl">
@@ -657,7 +674,7 @@ const Alimentation = () => {
                 </Button>
               </div>
             </div>
-          </div>
+          </div>*/}
         </section>
       </div>
 
