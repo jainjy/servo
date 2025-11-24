@@ -427,23 +427,61 @@ const PodcastsDomicile: React.FC = () => {
             </p>
 
             {/* Statistiques */}
-            <div className="flex flex-wrap justify-center items-center gap-8 text-gray-200">
-              <div className="flex items-center">
-                <Headphones className="w-6 h-6 mr-2" />
-                <span className="text-2xl font-bold text-white">{mediaEpisodes.reduce((total, ep) => total + ep.views, 0).toLocaleString()}</span>
-                <span className="ml-2">vues totales</span>
-              </div>
-              <div className="flex items-center">
-                <Video className="w-6 h-6 mr-2" />
-                <span className="text-2xl font-bold text-white">{mediaEpisodes.filter(ep => ep.mediaType === 'video').length}</span>
-                <span className="ml-2">vidéos</span>
-              </div>
-              <div className="flex items-center">
-                <ImageIcon className="w-6 h-6 mr-2" />
-                <span className="text-2xl font-bold text-white">{mediaEpisodes.filter(ep => ep.mediaType === 'image').length}</span>
-                <span className="ml-2">images</span>
-              </div>
-            </div>
+            <div className="flex flex-wrap justify-center items-center gap-4 lg:gap-6 text-gray-200">
+  {/* Vues totales */}
+  <div className="group relative">
+    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500"></div>
+    <div className="relative glass-card p-4 lg:p-5 rounded-2xl backdrop-blur-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl min-w-[160px]">
+      <div className="flex items-center space-x-3">
+        <div className="p-2 lg:p-2.5 rounded-xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-purple-400/30 group-hover:from-purple-500/40 group-hover:to-blue-500/40 transition-all duration-300 shadow-lg">
+          <Headphones className="w-5 h-5 lg:w-6 lg:h-6 text-purple-300" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+            {mediaEpisodes.reduce((total, ep) => total + ep.views, 0).toLocaleString()}
+          </span>
+          <span className="text-xs lg:text-sm text-gray-300/80 mt-1">vues totales</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Vidéos */}
+  <div className="group relative">
+    <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500"></div>
+    <div className="relative glass-card p-4 lg:p-5 rounded-2xl backdrop-blur-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl min-w-[160px]">
+      <div className="flex items-center space-x-3">
+        <div className="p-2 lg:p-2.5 rounded-xl bg-gradient-to-br from-red-500/30 to-pink-500/30 border border-red-400/30 group-hover:from-red-500/40 group-hover:to-pink-500/40 transition-all duration-300 shadow-lg">
+          <Video className="w-5 h-5 lg:w-6 lg:h-6 text-red-300" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+            {mediaEpisodes.filter(ep => ep.mediaType === 'video').length}
+          </span>
+          <span className="text-xs lg:text-sm text-gray-300/80 mt-1">vidéos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Images */}
+  <div className="group relative">
+    <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500"></div>
+    <div className="relative glass-card p-4 lg:p-5 rounded-2xl backdrop-blur-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:shadow-2xl min-w-[160px]">
+      <div className="flex items-center space-x-3">
+        <div className="p-2 lg:p-2.5 rounded-xl bg-gradient-to-br from-green-500/30 to-emerald-500/30 border border-green-400/30 group-hover:from-green-500/40 group-hover:to-emerald-500/40 transition-all duration-300 shadow-lg">
+          <ImageIcon className="w-5 h-5 lg:w-6 lg:h-6 text-green-300" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+            {mediaEpisodes.filter(ep => ep.mediaType === 'image').length}
+          </span>
+          <span className="text-xs lg:text-sm text-gray-300/80 mt-1">images</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
           </div>
         </div>
       </div>
