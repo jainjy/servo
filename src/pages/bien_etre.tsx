@@ -1,6 +1,7 @@
 // pages/BienEtre.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, LayoutGroup, AnimatePresence } from "framer-motion";
 import api from "@/lib/api"
 import { Headphones, Home, Video, MessageCircle, Activity, PencilIcon } from "lucide-react";
 import PodcastCard from "@/components/PodcastCard";
@@ -379,11 +380,11 @@ const BienEtre = () => {
       label: 'Thérapeutes & soins',
       icon: <Video className="w-5 h-5" />
     },
-    {
-      id: 'Podcasteur',
-      label: 'Podcasts',
-      icon: <MessageCircle className="w-5 h-5" />
-    },
+    // {
+    //   id: 'Podcasteur',
+    //   label: 'Podcasts',
+    //   icon: <MessageCircle className="w-5 h-5" />
+    // },
   ];
 
   const [servicesByCategory, setServicesByCategory] = useState({
@@ -505,32 +506,72 @@ const BienEtre = () => {
 
           {/* Menu de tabulation moderne */}
           <SlideIn direction="down">
-            <div className="bg-white dark:bg-card rounded-2xl shadow-lg px-2 py-5 mb-12 grid place-items-center grid-cols-2 lg:grid-cols-5 justify-center items-center w-full mx-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`group relative flex items-center gap-2 sm:gap-3 px-2 sm:px-2 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${activeTab === tab.id
-                    ? 'text-white shadow-md'
-                    : 'text-gray-700 dark:text-foreground hover:bg-gray-100 dark:hover:bg-muted/50'
+            <LayoutGroup>
+              <div className="bg-gradient-to-r from-white to-slate-50 dark:from-card dark:to-card/80 rounded-3xl shadow-xl px-4 py-6 mb-12 w-full mx-auto border border-slate-200/40 dark:border-slate-700/40">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                {tabs.map((tab, index) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`group relative flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-300 overflow-hidden flex-1 sm:flex-none justify-center ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg hover:shadow-xl'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60'
                     }`}
-                >
-                  {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-slate-900 animate-shimmer bg-[length:200%_100%]" />
-                  )}
-                  <span className="relative z-10 group-hover:scale-110 transition-transform duration-300">
-                    {tab.icon}
-                  </span>
-                  <span className="text-xs sm:text-xs font-bold relative z-10">
-                    {tab.label}
-                  </span>
-                </button>
-              ))}
+                  >
+                    {/* Fond animé pour l'onglet actif */}
+                    {activeTab === tab.id && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl -z-10"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    
+                    {/* Icône animée */}
+                    <motion.span
+                      animate={{
+                        scale: activeTab === tab.id ? 1.15 : 1,
+                        rotate: activeTab === tab.id ? 5 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
+                      className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'}`}
+                    >
+                      {tab.icon}
+                    </motion.span>
+
+                    {/* Label */}
+                    <motion.span
+                      animate={{
+                        x: activeTab === tab.id ? 2 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
+                      className="text-sm sm:text-base font-bold relative z-10 whitespace-nowrap"
+                    >
+                      {tab.label}
+                    </motion.span>
+
+                    {/* Indicateur de sélection sous l'onglet inactif */}
+                    {activeTab !== tab.id && (
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full group-hover:w-1/2 transition-all duration-300" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
+            </LayoutGroup>
           </SlideIn>
 
           {/* Contenu des tabs */}
-          <div className="px-10 min-h-[500px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="bg-white dark:bg-card rounded-3xl shadow-xl p-8 md:p-12 min-h-[500px] border border-slate-200/40 dark:border-slate-700/40"
+            >
 
             {/* FORMATEUR */}
             {activeTab === 'Formateur' && (
@@ -576,17 +617,16 @@ const BienEtre = () => {
                 </SlideIn>
               </section>
             )}
-
-            {/* PODCASTS */}
+            {/* PODCASTS
             {activeTab === 'Podcasteur' && (
               <section className="mb-20">
                 <SlideIn direction="right">
                   <PodcastsBienEtre />
                 </SlideIn>
               </section>
-            )}
-
-          </div>
+            )} */}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 

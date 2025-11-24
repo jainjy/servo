@@ -1,4 +1,4 @@
-// components/admin/AdminBookings.tsx
+// components/admin/ProBookings.tsx
 import { useState, useEffect } from 'react';
 import {
   Search, Filter, Calendar, Users, MapPin, DollarSign,
@@ -57,9 +57,11 @@ interface BookingStats {
   averageBooking: number;
 }
 
-export const AdminBookings = () => {
+export const ProBookings = () => {
   const [bookings, setBookings] = useState<TourismeBooking[]>([]);
-  const [filteredBookings, setFilteredBookings] = useState<TourismeBooking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<TourismeBooking[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<BookingStats>({
@@ -69,21 +71,22 @@ export const AdminBookings = () => {
     cancelled: 0,
     completed: 0,
     revenue: 0,
-    averageBooking: 0
+    averageBooking: 0,
   });
-  const [selectedBooking, setSelectedBooking] = useState<TourismeBooking | null>(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState<TourismeBooking | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [filters, setFilters] = useState({
-    search: '',
-    status: 'all',
-    paymentStatus: 'all',
-    dateRange: 'all',
-    provider: 'all'
+    search: "",
+    status: "all",
+    paymentStatus: "all",
+    dateRange: "all",
+    provider: "all",
   });
   const [sortConfig, setSortConfig] = useState<{
     key: keyof TourismeBooking;
-    direction: 'asc' | 'desc';
-  }>({ key: 'createdAt', direction: 'desc' });
+    direction: "asc" | "desc";
+  }>({ key: "createdAt", direction: "desc" });
 
   // Charger les réservations
   useEffect(() => {
@@ -93,16 +96,16 @@ export const AdminBookings = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/tourisme-bookings?limit=1000');
-      
+      const response = await api.get("/tourisme-bookings?limit=1000");
+
       if (response.data.success) {
         setBookings(response.data.data);
         setFilteredBookings(response.data.data);
         calculateStats(response.data.data);
       }
     } catch (error) {
-      console.error('Erreur chargement réservations:', error);
-      alert('Erreur lors du chargement des réservations');
+      console.error("Erreur chargement réservations:", error);
+      alert("Erreur lors du chargement des réservations");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -116,18 +119,24 @@ export const AdminBookings = () => {
 
   const calculateStats = (bookingsData: TourismeBooking[]) => {
     const confirmedAndCompleted = bookingsData.filter(
-      b => b.status === 'confirmed' || b.status === 'completed'
+      (b) => b.status === "confirmed" || b.status === "completed"
     );
-    const totalRevenue = confirmedAndCompleted.reduce((sum, b) => sum + b.totalAmount, 0);
-    
+    const totalRevenue = confirmedAndCompleted.reduce(
+      (sum, b) => sum + b.totalAmount,
+      0
+    );
+
     const statsData: BookingStats = {
       total: bookingsData.length,
-      pending: bookingsData.filter(b => b.status === 'pending').length,
-      confirmed: bookingsData.filter(b => b.status === 'confirmed').length,
-      cancelled: bookingsData.filter(b => b.status === 'cancelled').length,
-      completed: bookingsData.filter(b => b.status === 'completed').length,
+      pending: bookingsData.filter((b) => b.status === "pending").length,
+      confirmed: bookingsData.filter((b) => b.status === "confirmed").length,
+      cancelled: bookingsData.filter((b) => b.status === "cancelled").length,
+      completed: bookingsData.filter((b) => b.status === "completed").length,
       revenue: totalRevenue,
-      averageBooking: confirmedAndCompleted.length > 0 ? totalRevenue / confirmedAndCompleted.length : 0
+      averageBooking:
+        confirmedAndCompleted.length > 0
+          ? totalRevenue / confirmedAndCompleted.length
+          : 0,
     };
     setStats(statsData);
   };
@@ -138,43 +147,48 @@ export const AdminBookings = () => {
 
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      results = results.filter(booking =>
-        booking.confirmationNumber.toLowerCase().includes(searchLower) ||
-        booking.listing?.title?.toLowerCase().includes(searchLower) ||
-        booking.user?.firstName?.toLowerCase().includes(searchLower) ||
-        booking.user?.lastName?.toLowerCase().includes(searchLower) ||
-        booking.user?.email?.toLowerCase().includes(searchLower) ||
-        booking.listing?.city?.toLowerCase().includes(searchLower)
+      results = results.filter(
+        (booking) =>
+          booking.confirmationNumber.toLowerCase().includes(searchLower) ||
+          booking.listing?.title?.toLowerCase().includes(searchLower) ||
+          booking.user?.firstName?.toLowerCase().includes(searchLower) ||
+          booking.user?.lastName?.toLowerCase().includes(searchLower) ||
+          booking.user?.email?.toLowerCase().includes(searchLower) ||
+          booking.listing?.city?.toLowerCase().includes(searchLower)
       );
     }
 
-    if (filters.status !== 'all') {
-      results = results.filter(booking => booking.status === filters.status);
+    if (filters.status !== "all") {
+      results = results.filter((booking) => booking.status === filters.status);
     }
 
-    if (filters.paymentStatus !== 'all') {
-      results = results.filter(booking => booking.paymentStatus === filters.paymentStatus);
+    if (filters.paymentStatus !== "all") {
+      results = results.filter(
+        (booking) => booking.paymentStatus === filters.paymentStatus
+      );
     }
 
-    if (filters.provider !== 'all') {
-      results = results.filter(booking => booking.listing?.provider === filters.provider);
+    if (filters.provider !== "all") {
+      results = results.filter(
+        (booking) => booking.listing?.provider === filters.provider
+      );
     }
 
     // Filtrer par date
-    if (filters.dateRange !== 'all') {
+    if (filters.dateRange !== "all") {
       const now = new Date();
-      results = results.filter(booking => {
+      results = results.filter((booking) => {
         const checkIn = new Date(booking.checkIn);
         switch (filters.dateRange) {
-          case 'today':
+          case "today":
             return checkIn.toDateString() === now.toDateString();
-          case 'week':
+          case "week":
             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             return checkIn >= weekAgo;
-          case 'month':
+          case "month":
             const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
             return checkIn >= monthAgo;
-          case 'future':
+          case "future":
             return checkIn > now;
           default:
             return true;
@@ -189,12 +203,12 @@ export const AdminBookings = () => {
   const sortedBookings = [...filteredBookings].sort((a, b) => {
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
-    
+
     if (aValue < bValue) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
+      return sortConfig.direction === "asc" ? -1 : 1;
     }
     if (aValue > bValue) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
+      return sortConfig.direction === "asc" ? 1 : -1;
     }
     return 0;
   });
@@ -202,117 +216,138 @@ export const AdminBookings = () => {
   const handleSort = (key: keyof TourismeBooking) => {
     setSortConfig({
       key,
-      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+      direction:
+        sortConfig.key === key && sortConfig.direction === "asc"
+          ? "desc"
+          : "asc",
     });
   };
 
-  const updateBookingStatus = async (bookingId: string, status: TourismeBooking['status']) => {
+  const updateBookingStatus = async (
+    bookingId: string,
+    status: TourismeBooking["status"]
+  ) => {
     try {
-      const response = await api.put(`/tourisme-bookings/${bookingId}/status`, { status });
-      
+      const response = await api.put(`/tourisme-bookings/${bookingId}/status`, {
+        status,
+      });
+
       if (response.data.success) {
-        setBookings(prev => prev.map(booking =>
-          booking.id === bookingId ? response.data.data : booking
-        ));
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking.id === bookingId ? response.data.data : booking
+          )
+        );
         if (selectedBooking?.id === bookingId) {
           setSelectedBooking(response.data.data);
         }
         // Recalculer les stats sans recharger toutes les données
-        calculateStats(bookings.map(b => b.id === bookingId ? response.data.data : b));
+        calculateStats(
+          bookings.map((b) => (b.id === bookingId ? response.data.data : b))
+        );
       }
     } catch (error) {
-      console.error('Erreur mise à jour statut:', error);
-      alert('Erreur lors de la mise à jour du statut');
+      console.error("Erreur mise à jour statut:", error);
+      alert("Erreur lors de la mise à jour du statut");
     }
   };
 
-  const updatePaymentStatus = async (bookingId: string, paymentStatus: TourismeBooking['paymentStatus']) => {
+  const updatePaymentStatus = async (
+    bookingId: string,
+    paymentStatus: TourismeBooking["paymentStatus"]
+  ) => {
     try {
-      const response = await api.put(`/tourisme-bookings/${bookingId}/status`, { paymentStatus });
-      
+      const response = await api.put(`/tourisme-bookings/${bookingId}/status`, {
+        paymentStatus,
+      });
+
       if (response.data.success) {
-        setBookings(prev => prev.map(booking =>
-          booking.id === bookingId ? response.data.data : booking
-        ));
+        setBookings((prev) =>
+          prev.map((booking) =>
+            booking.id === bookingId ? response.data.data : booking
+          )
+        );
         if (selectedBooking?.id === bookingId) {
           setSelectedBooking(response.data.data);
         }
       }
     } catch (error) {
-      console.error('Erreur mise à jour paiement:', error);
-      alert('Erreur lors de la mise à jour du statut de paiement');
+      console.error("Erreur mise à jour paiement:", error);
+      alert("Erreur lors de la mise à jour du statut de paiement");
     }
   };
 
   const sendReminder = async (bookingId: string) => {
     try {
-      const response = await api.post(`/tourisme-bookings/${bookingId}/reminder`);
+      const response = await api.post(
+        `/tourisme-bookings/${bookingId}/reminder`
+      );
       if (response.data.success) {
-        alert('Rappel envoyé avec succès');
+        alert("Rappel envoyé avec succès");
       }
     } catch (error) {
-      console.error('Erreur envoi rappel:', error);
-      alert('Erreur lors de l\'envoi du rappel');
+      console.error("Erreur envoi rappel:", error);
+      alert("Erreur lors de l'envoi du rappel");
     }
   };
 
-  const getStatusIcon = (status: TourismeBooking['status']) => {
+  const getStatusIcon = (status: TourismeBooking["status"]) => {
     switch (status) {
-      case 'confirmed':
+      case "confirmed":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'pending':
+      case "pending":
         return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'cancelled':
+      case "cancelled":
         return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'completed':
+      case "completed":
         return <CheckCircle className="w-4 h-4 text-blue-500" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getStatusColor = (status: TourismeBooking['status']) => {
+  const getStatusColor = (status: TourismeBooking["status"]) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'completed':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case "confirmed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "cancelled":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "completed":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-  const getPaymentStatusColor = (status: TourismeBooking['paymentStatus']) => {
+  const getPaymentStatusColor = (status: TourismeBooking["paymentStatus"]) => {
     switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'failed':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'refunded':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case "paid":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "failed":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "refunded":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getProviderColor = (provider: string) => {
     switch (provider) {
-      case 'direct':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'partner':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'airbnb':
-        return 'bg-pink-100 text-pink-800 border-pink-200';
-      case 'booking':
-        return 'bg-teal-100 text-teal-800 border-teal-200';
+      case "direct":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "partner":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "airbnb":
+        return "bg-pink-100 text-pink-800 border-pink-200";
+      case "booking":
+        return "bg-teal-100 text-teal-800 border-teal-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -325,38 +360,40 @@ export const AdminBookings = () => {
 
   const exportToCSV = () => {
     const headers = [
-      'Numéro Confirmation',
-      'Client',
-      'Email',
-      'Téléphone',
-      'Hébergement',
-      'Type',
-      'Destination',
-      'Provider',
-      'Arrivée',
-      'Départ',
-      'Nuits',
-      'Adultes',
-      'Enfants',
-      'Bébés',
-      'Total Voyageurs',
-      'Montant Total',
-      'Frais Service',
-      'Statut',
-      'Paiement',
-      'Méthode Paiement',
-      'Date Réservation'
+      "Numéro Confirmation",
+      "Client",
+      "Email",
+      "Téléphone",
+      "Hébergement",
+      "Type",
+      "Destination",
+      "Provider",
+      "Arrivée",
+      "Départ",
+      "Nuits",
+      "Adultes",
+      "Enfants",
+      "Bébés",
+      "Total Voyageurs",
+      "Montant Total",
+      "Frais Service",
+      "Statut",
+      "Paiement",
+      "Méthode Paiement",
+      "Date Réservation",
     ];
 
-    const csvData = sortedBookings.map(booking => [
+    const csvData = sortedBookings.map((booking) => [
       booking.confirmationNumber,
-      booking.user ? `${booking.user.firstName} ${booking.user.lastName}` : 'Non renseigné',
-      booking.user?.email || '',
-      booking.user?.phone || '',
-      booking.listing?.title || 'Non spécifié',
-      booking.listing?.type || 'Non spécifié',
-      booking.listing?.city || 'Non spécifié',
-      booking.listing?.provider || 'Non spécifié',
+      booking.user
+        ? `${booking.user.firstName} ${booking.user.lastName}`
+        : "Non renseigné",
+      booking.user?.email || "",
+      booking.user?.phone || "",
+      booking.listing?.title || "Non spécifié",
+      booking.listing?.type || "Non spécifié",
+      booking.listing?.city || "Non spécifié",
+      booking.listing?.provider || "Non spécifié",
       new Date(booking.checkIn).toLocaleDateString(),
       new Date(booking.checkOut).toLocaleDateString(),
       calculateNights(booking.checkIn, booking.checkOut),
@@ -369,38 +406,40 @@ export const AdminBookings = () => {
       booking.status,
       booking.paymentStatus,
       booking.paymentMethod,
-      new Date(booking.createdAt).toLocaleDateString()
+      new Date(booking.createdAt).toLocaleDateString(),
     ]);
 
     const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => row.map(field => `"${field}"`).join(','))
-    ].join('\n');
+      headers.join(","),
+      ...csvData.map((row) => row.map((field) => `"${field}"`).join(",")),
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `reservations-tourisme-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `reservations-tourisme-${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
   const getUniqueProviders = () => {
     const providers = bookings
-      .map(b => b.listing?.provider)
-      .filter(provider => provider !== undefined && provider !== null);
-    
-    return ['all', ...Array.from(new Set(providers))];
+      .map((b) => b.listing?.provider)
+      .filter((provider) => provider !== undefined && provider !== null);
+
+    return ["all", ...Array.from(new Set(providers))];
   };
 
   const getUpcomingBookings = () => {
     const today = new Date();
-    return sortedBookings.filter(booking => {
+    return sortedBookings.filter((booking) => {
       const checkIn = new Date(booking.checkIn);
       const timeDiff = checkIn.getTime() - today.getTime();
       const daysDiff = timeDiff / (1000 * 3600 * 24);
-      return daysDiff <= 7 && daysDiff >= 0 && booking.status === 'confirmed';
+      return daysDiff <= 7 && daysDiff >= 0 && booking.status === "confirmed";
     }).length;
   };
 
@@ -432,7 +471,8 @@ export const AdminBookings = () => {
               Gestion des Réservations Tourisme
             </h1>
             <p className="text-gray-600">
-              Gérez et suivez toutes les réservations d'hébergements touristiques
+              Gérez et suivez toutes les réservations d'hébergements
+              touristiques
             </p>
           </div>
           <button
@@ -440,8 +480,10 @@ export const AdminBookings = () => {
             disabled={refreshing}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`w-5 h-5 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Rafraîchissement...' : 'Rafraîchir'}
+            <RefreshCw
+              className={`w-5 h-5 mr-2 ${refreshing ? "animate-spin" : ""}`}
+            />
+            {refreshing ? "Rafraîchissement..." : "Rafraîchir"}
           </button>
         </div>
 
@@ -450,10 +492,15 @@ export const AdminBookings = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Réservations</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Réservations
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {((stats.confirmed / stats.total) * 100 || 0).toFixed(1)}% confirmées
+                  {((stats.confirmed / stats.total) * 100 || 0).toFixed(1)}%
+                  confirmées
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-xl">
@@ -466,9 +513,12 @@ export const AdminBookings = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">En Attente</p>
-                <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
+                <p className="text-3xl font-bold text-yellow-600">
+                  {stats.pending}
+                </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {((stats.pending / stats.total) * 100 || 0).toFixed(1)}% du total
+                  {((stats.pending / stats.total) * 100 || 0).toFixed(1)}% du
+                  total
                 </p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-xl">
@@ -480,8 +530,12 @@ export const AdminBookings = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Revenu Total</p>
-                <p className="text-3xl font-bold text-green-600">{stats.revenue.toFixed(2)}€</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Revenu Total
+                </p>
+                <p className="text-3xl font-bold text-green-600">
+                  {stats.revenue.toFixed(2)}€
+                </p>
                 <p className="text-sm text-gray-500 mt-1">
                   Moyenne: {stats.averageBooking.toFixed(2)}€
                 </p>
@@ -495,9 +549,15 @@ export const AdminBookings = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Taux Conversion</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Taux Conversion
+                </p>
                 <p className="text-3xl font-bold text-blue-600">
-                  {(((stats.confirmed + stats.completed) / stats.total) * 100 || 0).toFixed(1)}%
+                  {(
+                    ((stats.confirmed + stats.completed) / stats.total) * 100 ||
+                    0
+                  ).toFixed(1)}
+                  %
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   {stats.cancelled} annulations
@@ -512,11 +572,13 @@ export const AdminBookings = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Prochaines 7j</p>
-                <p className="text-3xl font-bold text-purple-600">{getUpcomingBookings()}</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Arrivées à venir
+                <p className="text-sm font-medium text-gray-600">
+                  Prochaines 7j
                 </p>
+                <p className="text-3xl font-bold text-purple-600">
+                  {getUpcomingBookings()}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">Arrivées à venir</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-xl">
                 <Calendar className="w-6 h-6 text-purple-600" />
@@ -536,7 +598,9 @@ export const AdminBookings = () => {
                   placeholder="Rechercher par numéro, client, hébergement, ville..."
                   className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  onChange={(e) =>
+                    setFilters({ ...filters, search: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -545,7 +609,9 @@ export const AdminBookings = () => {
               <select
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, status: e.target.value })
+                }
               >
                 <option value="all">Tous statuts</option>
                 <option value="pending">En attente</option>
@@ -557,7 +623,9 @@ export const AdminBookings = () => {
               <select
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 value={filters.paymentStatus}
-                onChange={(e) => setFilters({ ...filters, paymentStatus: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, paymentStatus: e.target.value })
+                }
               >
                 <option value="all">Tous paiements</option>
                 <option value="pending">En attente</option>
@@ -569,20 +637,28 @@ export const AdminBookings = () => {
               <select
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 value={filters.provider}
-                onChange={(e) => setFilters({ ...filters, provider: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, provider: e.target.value })
+                }
               >
                 <option value="all">Tous providers</option>
-                {getUniqueProviders().filter(p => p !== 'all').map(provider => (
-                  <option key={provider} value={provider}>
-                    {provider && provider.charAt ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'Inconnu'}
-                  </option>
-                ))}
+                {getUniqueProviders()
+                  .filter((p) => p !== "all")
+                  .map((provider) => (
+                    <option key={provider} value={provider}>
+                      {provider && provider.charAt
+                        ? provider.charAt(0).toUpperCase() + provider.slice(1)
+                        : "Inconnu"}
+                    </option>
+                  ))}
               </select>
 
               <select
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 value={filters.dateRange}
-                onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, dateRange: e.target.value })
+                }
               >
                 <option value="all">Toutes dates</option>
                 <option value="today">Aujourd'hui</option>
@@ -619,43 +695,52 @@ export const AdminBookings = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th 
+                  <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('confirmationNumber')}
+                    onClick={() => handleSort("confirmationNumber")}
                   >
                     <div className="flex items-center">
                       N° Confirmation
-                      {sortConfig.key === 'confirmationNumber' && (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
-                      )}
+                      {sortConfig.key === "confirmationNumber" &&
+                        (sortConfig.direction === "asc" ? (
+                          <ChevronUp className="w-4 h-4 ml-1" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Client / Hébergement
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('checkIn')}
+                    onClick={() => handleSort("checkIn")}
                   >
                     <div className="flex items-center">
                       Séjour
-                      {sortConfig.key === 'checkIn' && (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
-                      )}
+                      {sortConfig.key === "checkIn" &&
+                        (sortConfig.direction === "asc" ? (
+                          <ChevronUp className="w-4 h-4 ml-1" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Voyageurs
                   </th>
-                  <th 
+                  <th
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort('totalAmount')}
+                    onClick={() => handleSort("totalAmount")}
                   >
                     <div className="flex items-center">
                       Montant
-                      {sortConfig.key === 'totalAmount' && (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
-                      )}
+                      {sortConfig.key === "totalAmount" &&
+                        (sortConfig.direction === "asc" ? (
+                          <ChevronUp className="w-4 h-4 ml-1" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                        ))}
                     </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -668,7 +753,10 @@ export const AdminBookings = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {sortedBookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-gray-50 transition-colors group">
+                  <tr
+                    key={booking.id}
+                    className="hover:bg-gray-50 transition-colors group"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono font-bold text-gray-900">
                         {booking.confirmationNumber}
@@ -677,9 +765,13 @@ export const AdminBookings = () => {
                         {new Date(booking.createdAt).toLocaleDateString()}
                       </div>
                       <div className="mt-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getProviderColor(booking.listing?.provider || 'unknown')} border`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getProviderColor(
+                            booking.listing?.provider || "unknown"
+                          )} border`}
+                        >
                           <Building className="w-3 h-3 mr-1" />
-                          {booking.listing?.provider || 'inconnu'}
+                          {booking.listing?.provider || "inconnu"}
                         </span>
                       </div>
                     </td>
@@ -694,21 +786,21 @@ export const AdminBookings = () => {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 line-clamp-2">
-                            {booking.listing?.title || 'Titre non disponible'}
+                            {booking.listing?.title || "Titre non disponible"}
                           </div>
                           <div className="text-sm text-gray-500 flex items-center mt-1">
                             <MapPin className="w-3 h-3 mr-1" />
-                            {booking.listing?.city || 'Ville non spécifiée'}
+                            {booking.listing?.city || "Ville non spécifiée"}
                           </div>
                           <div className="text-xs text-gray-400 capitalize">
-                            {booking.listing?.type || 'Non spécifié'}
+                            {booking.listing?.type || "Non spécifié"}
                           </div>
                           {booking.user ? (
                             <div className="flex items-center mt-2 text-xs text-gray-600">
                               <UserIcon className="w-3 h-3 mr-1" />
                               {booking.user.firstName} {booking.user.lastName}
                               {booking.user.email && (
-                                <a 
+                                <a
                                   href={`mailto:${booking.user.email}`}
                                   className="ml-2 text-blue-600 hover:text-blue-800 transition-colors"
                                   title="Envoyer un email"
@@ -733,24 +825,29 @@ export const AdminBookings = () => {
                         {new Date(booking.checkOut).toLocaleDateString()}
                       </div>
                       <div className="text-xs text-gray-400 font-medium">
-                        {calculateNights(booking.checkIn, booking.checkOut)} nuit(s)
+                        {calculateNights(booking.checkIn, booking.checkOut)}{" "}
+                        nuit(s)
                       </div>
-                      {new Date(booking.checkIn) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && 
-                       new Date(booking.checkIn) >= new Date() && 
-                       booking.status === 'confirmed' && (
-                        <div className="text-xs text-orange-600 font-medium mt-1">
-                          ⚠️ Arrive bientôt
-                        </div>
-                      )}
+                      {new Date(booking.checkIn) <=
+                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
+                        new Date(booking.checkIn) >= new Date() &&
+                        booking.status === "confirmed" && (
+                          <div className="text-xs text-orange-600 font-medium mt-1">
+                            ⚠️ Arrive bientôt
+                          </div>
+                        )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {booking.guests} {booking.guests > 1 ? 'voyageurs' : 'voyageur'}
+                        {booking.guests}{" "}
+                        {booking.guests > 1 ? "voyageurs" : "voyageur"}
                       </div>
                       <div className="text-xs text-gray-500 space-y-1">
                         <div>👤 {booking.adults} adulte(s)</div>
                         <div>🧒 {booking.children} enfant(s)</div>
-                        {booking.infants > 0 && <div>👶 {booking.infants} bébé(s)</div>}
+                        {booking.infants > 0 && (
+                          <div>👶 {booking.infants} bébé(s)</div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -761,17 +858,31 @@ export const AdminBookings = () => {
                         Dont {booking.serviceFee}€ de frais
                       </div>
                       <div className="text-xs text-gray-400">
-                        {booking.paymentMethod === 'card' ? '💳 Carte' : '📱 PayPal'}
+                        {booking.paymentMethod === "card"
+                          ? "💳 Carte"
+                          : "📱 PayPal"}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="space-y-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)} border`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                            booking.status
+                          )} border`}
+                        >
                           {getStatusIcon(booking.status)}
-                          <span className="ml-1 capitalize">{booking.status}</span>
+                          <span className="ml-1 capitalize">
+                            {booking.status}
+                          </span>
                         </span>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(booking.paymentStatus)} border`}>
-                          <span className="capitalize">{booking.paymentStatus}</span>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(
+                            booking.paymentStatus
+                          )} border`}
+                        >
+                          <span className="capitalize">
+                            {booking.paymentStatus}
+                          </span>
                         </span>
                       </div>
                     </td>
@@ -787,33 +898,38 @@ export const AdminBookings = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {booking.status === 'pending' && (
+                        {booking.status === "pending" && (
                           <button
-                            onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                            onClick={() =>
+                              updateBookingStatus(booking.id, "confirmed")
+                            }
                             className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                             title="Confirmer"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
                         )}
-                        {booking.status !== 'cancelled' && (
+                        {booking.status !== "cancelled" && (
                           <button
-                            onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                            onClick={() =>
+                              updateBookingStatus(booking.id, "cancelled")
+                            }
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Annuler"
                           >
                             <XCircle className="w-4 h-4" />
                           </button>
                         )}
-                        {booking.user?.email && booking.status === 'confirmed' && (
-                          <button
-                            onClick={() => sendReminder(booking.id)}
-                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                            title="Envoyer un rappel"
-                          >
-                            <MessageCircle className="w-4 h-4" />
-                          </button>
-                        )}
+                        {booking.user?.email &&
+                          booking.status === "confirmed" && (
+                            <button
+                              onClick={() => sendReminder(booking.id)}
+                              className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                              title="Envoyer un rappel"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </button>
+                          )}
                       </div>
                     </td>
                   </tr>
@@ -825,8 +941,12 @@ export const AdminBookings = () => {
           {sortedBookings.length === 0 && (
             <div className="text-center py-12">
               <Filter className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">Aucune réservation trouvée</p>
-              <p className="text-gray-400">Essayez de modifier vos filtres de recherche</p>
+              <p className="text-gray-500 text-lg">
+                Aucune réservation trouvée
+              </p>
+              <p className="text-gray-400">
+                Essayez de modifier vos filtres de recherche
+              </p>
             </div>
           )}
         </div>
@@ -1160,4 +1280,4 @@ const StatusBadge = ({ status, type }: { status: string; type: 'booking' | 'paym
   );
 };
 
-export default AdminBookings;
+export default ProBookings;

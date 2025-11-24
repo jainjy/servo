@@ -93,13 +93,13 @@ const ProduitsGeneraux = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4">
+      <div className="">
         {/* En-tête de la page */}
         <div className="mb-8">
           <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#0052FF]/10">
+              <div className="flex items-center flex-col md:flex-row  gap-3">
+                <div className="p-2 rounded-xl hidden md:block bg-[#0052FF]/10">
                   <Tag className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
@@ -110,20 +110,19 @@ const ProduitsGeneraux = () => {
                     Découvrez tous nos produits généraux - une sélection variée pour tous vos besoins
                   </p>
                 </div>
-              </div>
-
-              {/* Badge de comptage */}
-              <Badge variant="secondary" className="px-3 py-1">
+                 {/* Badge de comptage */}
+                 <Badge variant="secondary" className="px-3 py-1 ml-0 md:ml-96">
                 {products.length} produit{products.length > 1 ? 's' : ''}
               </Badge>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Produits généraux */}
-        <div className="bg-white rounded-3xl p-6">
+        <div className="bg-white rounded-3xl  ">
           {products && products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
               {products.map((product) => (
                 <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
                   {/* Image du produit */}

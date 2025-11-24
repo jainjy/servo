@@ -34,11 +34,13 @@ import {
   Upload,
   Star,
   Loader2,
+  MoreVertical,
 } from "lucide-react";
 import api from "@/lib/api";
 import AuthService from "@/services/authService";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
+import { ListingModal } from "@/components/admin/listings/listing-modal";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
@@ -50,17 +52,33 @@ const STATUT_ANNONCE = {
 };
 
 const TYPE_BIEN = {
-  house: "Maison",
+  house: "Maison / Villa",
   apartment: "Appartement",
   villa: "Villa",
   land: "Terrain",
   studio: "Studio",
+  commercial: "Local commercial",
+  professionnel: "Local professionnel",
+  fonds_de_commerce: "Fonds de commerce",
+  appartements_neufs: "Appartement neufs (VEFA)",
+  scpi: "SCPI",
+  villa_d_exception: "Villa d'exception",
+  villas_neuves: "Villas neuves (VEFA)",
+  parking: "Parking",
+  hotel: "Hotel",
+  gite: "Gite",
+  maison_d_hote: "Maison d'hote",
+  domaine: "Domaine",
+  appartement_meuble: "Appartement meublée",
+  villa_meuble: "Villa meublée",
+  villa_non_meuble: "Villa non meublée",
+  cellier: "Cellier",
+  cave: "Cave",
 };
 
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
-  both: "Les deux",
 };
 
 const TYPE_LOCATION = {
@@ -102,839 +120,6 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
   );
 };
 
-// Composant Modal Création Annonce (Étapes)
-const ModalCreationAnnonce = ({ isOpen, onClose, onSave, annonce }) => {
-  const [etape, setEtape] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [uploadingImages, setUploadingImages] = useState(false);
-  const [user, setUser] = useState(null);
-  // Ajout du state pour le modal de sélection de position
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    // Étape 1 - Informations générales
-    title: "",
-    type: "apartment",
-    description: "",
-    price: "",
-    // Étape 2 - Caractéristiques
-    surface: "",
-    rooms: "",
-    bedrooms: "",
-    bathrooms: "",
-    address: "",
-    city: "",
-    // Étape 3 - Options
-    listingType: "sale",
-    rentType: "longue_duree",
-    features: [],
-    // Étape 4 - Médias
-    images: [],
-    // Étape 5 - Publication
-    status: "draft",
-    latitude: null,
-    longitude: null,
-  });
-
-  useEffect(() => {
-    const currentUser = AuthService.getCurrentUser();
-    setUser(currentUser);
-  }, []);
-
-  // Initialiser les données existantes lors de l'édition
-  useEffect(() => {
-    if (annonce) {
-      const existingImages = annonce.images
-        ? annonce.images.map((url) => ({
-            url,
-            preview: url,
-            isNew: false,
-          }))
-        : [];
-
-      setFormData({
-        title: annonce.title || "",
-        type: annonce.type || "apartment",
-        description: annonce.description || "",
-        price: annonce.price || "",
-        surface: annonce.surface || "",
-        rooms: annonce.rooms || "",
-        bedrooms: annonce.bedrooms || "",
-        bathrooms: annonce.bathrooms || "",
-        address: annonce.address || "",
-        city: annonce.city || "",
-        listingType: annonce.listingType || "sale",
-        rentType: annonce.rentType || "longue_duree",
-        features: annonce.features || [],
-        images: existingImages,
-        status: annonce.status || "draft",
-        latitude: annonce.latitude ?? null,
-        longitude: annonce.longitude ?? null,
-      });
-    } else {
-      // Réinitialiser pour une nouvelle annonce
-      setFormData({
-        title: "",
-        type: "apartment",
-        description: "",
-        price: "",
-        surface: "",
-        rooms: "",
-        bedrooms: "",
-        bathrooms: "",
-        address: "",
-        city: "",
-        listingType: "sale",
-        rentType: "longue_duree",
-        features: [],
-        images: [],
-        status: "draft",
-        latitude: null,
-        longitude: null,
-      });
-    }
-  }, [annonce]);
-
-  // Nettoyer les URLs d'object à la fermeture
-  useEffect(() => {
-    return () => {
-      formData.images.forEach((img) => {
-        if (img.isNew && img.preview) {
-          URL.revokeObjectURL(img.preview);
-        }
-      });
-    };
-  }, []);
-
-  const etapes = [
-    { numero: 1, titre: "Informations générales" },
-    { numero: 2, titre: "Caractéristiques" },
-    { numero: 3, titre: "Options" },
-    { numero: 4, titre: "Médias" },
-    { numero: 5, titre: "Publication" },
-  ];
-
-  // Fonction pour uploader les images
-  const handleImageUpload = async (files) => {
-    setUploadingImages(true);
-    const uploadedUrls = [];
-
-    try {
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await api.post("/upload/property-image", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        if (response.data.url) {
-          uploadedUrls.push(response.data.url);
-        }
-      }
-    } catch (error) {
-      console.error("Error uploading images:", error);
-      toast.error("Erreur lors de l'upload des images");
-    } finally {
-      setUploadingImages(false);
-    }
-
-    return uploadedUrls;
-  };
-
-  // Gestion du changement de fichiers - stockage temporaire
-  const handleFileChange = async (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files);
-
-      // Stocker les fichiers temporairement
-      const fileObjects = files.map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-        isNew: true, // Marquer comme nouvelle image
-      }));
-
-      setFormData({
-        ...formData,
-        images: [...formData.images, ...fileObjects],
-      });
-
-      // Réinitialiser l'input file
-      e.target.value = "";
-    }
-  };
-
-  // Supprimer une image
-  const removeImage = (index) => {
-    const imageToRemove = formData.images[index];
-
-    // Si c'est une nouvelle image (fichier), libérer l'URL d'object
-    if (imageToRemove.isNew && imageToRemove.preview) {
-      URL.revokeObjectURL(imageToRemove.preview);
-    }
-
-    const newImages = formData.images.filter((_, i) => i !== index);
-    setFormData({ ...formData, images: newImages });
-  };
-
-  // Fonction pour uploader toutes les images avant soumission
-  const uploadAllImages = async () => {
-    const newImages = formData.images.filter((img) => img.isNew);
-    const existingImages = formData.images.filter((img) => !img.isNew);
-
-    if (newImages.length === 0) {
-      return existingImages.map((img) => img.url || img);
-    }
-
-    const files = newImages.map((img) => img.file);
-    const uploadedUrls = await handleImageUpload(files);
-
-    // Libérer les URLs d'object
-    newImages.forEach((img) => {
-      if (img.preview) {
-        URL.revokeObjectURL(img.preview);
-      }
-    });
-
-    return [...existingImages.map((img) => img.url || img), ...uploadedUrls];
-  };
-
-  // Callback pour la sélection de position
-  const handleLocationChange = (lat, lng) => {
-    setFormData((prev) => ({
-      ...prev,
-      latitude: lat,
-      longitude: lng,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Uploader toutes les images d'abord
-      const finalImageUrls = await uploadAllImages();
-
-      const payload = {
-        ...formData,
-        images: finalImageUrls,
-        price: formData.price ? parseFloat(formData.price) : null,
-        surface: formData.surface ? parseInt(formData.surface) : null,
-        rooms: formData.rooms ? parseInt(formData.rooms) : null,
-        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
-        bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
-        ownerId: user.id,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-      };
-
-      // Supprimer les propriétés temporaires des images
-      delete payload.images;
-
-      if (annonce) {
-        await api.put(`/properties/${annonce.id}`, {
-          ...payload,
-          images: finalImageUrls,
-        });
-        toast.success("Annonce modifiée avec succès");
-      } else {
-        await api.post("/properties", { ...payload, images: finalImageUrls });
-        toast.success("Annonce créée avec succès");
-      }
-
-      onSave();
-      onClose();
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast.error("Erreur lors de la sauvegarde");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const etapeSuivante = () => {
-    if (etape < 5) setEtape(etape + 1);
-  };
-
-  const etapePrecedente = () => {
-    if (etape > 1) setEtape(etape - 1);
-  };
-
-  const equipementsDisponibles = [
-    "pool",
-    "garden",
-    "parking",
-    "terrace",
-    "balcony",
-    "elevator",
-    "fireplace",
-    "air_conditioning",
-    "fiber_optic",
-  ];
-
-  return (
-    <>
-      {/* Modal de sélection de position */}
-      <LocationPickerModal
-        open={locationModalOpen}
-        onOpenChange={setLocationModalOpen}
-        latitude={formData.latitude}
-        longitude={formData.longitude}
-        onLocationChange={handleLocationChange}
-      />
-
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={annonce ? "Modifier l'annonce" : "Nouvelle annonce"}
-        size="xl"
-      >
-        <form onSubmit={handleSubmit}>
-          {/* Barre de progression */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              {etapes.map((step, index) => (
-                <div key={step.numero} className="flex items-center">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                      etape >= step.numero
-                        ? "bg-blue-600 border-blue-600 text-white"
-                        : "border-gray-300 text-gray-500"
-                    }`}
-                  >
-                    {step.numero}
-                  </div>
-                  {index < etapes.length - 1 && (
-                    <div
-                      className={`w-12 h-1 mx-2 ${
-                        etape > step.numero ? "bg-blue-600" : "bg-gray-300"
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="text-center font-medium" style={{ color: "#0A0A0A" }}>
-              {etapes.find((s) => s.numero === etape)?.titre}
-            </div>
-          </div>
-
-          {/* Étape 1 - Informations générales */}
-          {etape === 1 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <Label className="block mb-2">Titre de l'annonce *</Label>
-                <Input
-                  required
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  placeholder="Ex: Superbe appartement vue panoramique..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="block mb-2">Type de bien *</Label>
-                  <select
-                    className="w-full p-3 border rounded-lg"
-                    value={formData.type}
-                    onChange={(e) =>
-                      setFormData({ ...formData, type: e.target.value })
-                    }
-                    required
-                  >
-                    {Object.entries(TYPE_BIEN).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <Label className="block mb-2">Prix *</Label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      required
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      placeholder="Ex: 450000"
-                      className="pl-8"
-                    />
-                    <Euro
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      size={16}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <Label className="block mb-2">Description *</Label>
-                <Textarea
-                  required
-                  rows={6}
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Décrivez votre bien en détail..."
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Étape 2 - Caractéristiques */}
-          {etape === 2 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label className="block mb-2">Surface (m²) *</Label>
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      required
-                      value={formData.surface}
-                      onChange={(e) =>
-                        setFormData({ ...formData, surface: e.target.value })
-                      }
-                      placeholder="Ex: 75"
-                      className="pl-8"
-                    />
-                    <Ruler
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      size={16}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="block mb-2">Nombre de pièces *</Label>
-                  <Input
-                    type="number"
-                    required
-                    value={formData.rooms}
-                    onChange={(e) =>
-                      setFormData({ ...formData, rooms: e.target.value })
-                    }
-                    placeholder="Ex: 3"
-                  />
-                </div>
-
-                <div>
-                  <Label className="block mb-2">Nombre de chambres *</Label>
-                  <Input
-                    type="number"
-                    required
-                    value={formData.bedrooms}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bedrooms: e.target.value })
-                    }
-                    placeholder="Ex: 2"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="block mb-2">Salles de bain</Label>
-                  <Input
-                    type="number"
-                    value={formData.bathrooms}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bathrooms: e.target.value })
-                    }
-                    placeholder="Ex: 1"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <Label className="block mb-2">Adresse complète *</Label>
-                  <div className="relative">
-                    <Input
-                      required
-                      value={formData.address}
-                      onChange={(e) =>
-                        setFormData({ ...formData, address: e.target.value })
-                      }
-                      placeholder="Ex: 123 Avenue des Champs-Élysées"
-                      className="pl-8"
-                    />
-                    <MapPin
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      size={16}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="block mb-2">Ville *</Label>
-                  <Input
-                    required
-                    value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
-                    placeholder="Ex: Paris"
-                  />
-                </div>
-              </div>
-
-              {/* Sélection de la position */}
-              <div>
-                <Label className="block mb-2">Position sur la carte</Label>
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setLocationModalOpen(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <MapPin size={16} />
-                    Sélectionner sur la carte
-                  </Button>
-                  {formData.latitude && formData.longitude && (
-                    <span className="text-xs text-gray-600 ml-2">
-                      <strong>Lat:</strong> {formData.latitude.toFixed(6)},{" "}
-                      <strong>Lng:</strong> {formData.longitude.toFixed(6)}
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Permet d'afficher le bien sur la carte.
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Étape 3 - Options */}
-          {etape === 3 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <Label className="block mb-2">Type d'annonce *</Label>
-                <select
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.listingType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, listingType: e.target.value })
-                  }
-                  required
-                >
-                  {Object.entries(LISTING_TYPE).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Ajouter le champ rentType si le type est location */}
-              {(formData.listingType === "rent" ||
-                formData.listingType === "both") && (
-                <div className="mt-4">
-                  <Label className="block mb-2">Type de location *</Label>
-                  <select
-                    className="w-full p-3 border rounded-lg"
-                    value={formData.rentType}
-                    onChange={(e) =>
-                      setFormData({ ...formData, rentType: e.target.value })
-                    }
-                    required
-                  >
-                    {Object.entries(TYPE_LOCATION).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <Label className="block mb-4">Équipements et commodités</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {equipementsDisponibles.map((equipement) => (
-                    <div key={equipement} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        checked={formData.features.includes(equipement)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFormData({
-                              ...formData,
-                              features: [...formData.features, equipement],
-                            });
-                          } else {
-                            setFormData({
-                              ...formData,
-                              features: formData.features.filter(
-                                (e) => e !== equipement
-                              ),
-                            });
-                          }
-                        }}
-                      />
-                      <Label className="text-sm capitalize">
-                        {equipement.replace("_", " ")}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Étape 4 - Médias */}
-          {etape === 4 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <Label className="block mb-2">Photos du bien</Label>
-                <div
-                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
-                    uploadingImages ? "opacity-50" : "hover:border-blue-400"
-                  }`}
-                >
-                  <Upload className="mx-auto mb-3 text-gray-400" size={48} />
-                  <div
-                    className="text-lg font-semibold mb-2"
-                    style={{ color: "#0A0A0A" }}
-                  >
-                    {uploadingImages
-                      ? "Upload en cours..."
-                      : "Ajouter des photos"}
-                  </div>
-                  <div className="text-sm mb-4" style={{ color: "#5A6470" }}>
-                    Glissez-déposez vos photos ou cliquez pour parcourir
-                    <br />
-                    <span className="text-xs">
-                      Formats supportés: JPG, PNG, WEBP (max 5MB par image)
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="property-images"
-                    disabled={uploadingImages}
-                  />
-                  <Label
-                    htmlFor="property-images"
-                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${
-                      uploadingImages
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer hover:bg-gray-50"
-                    }`}
-                  >
-                    {uploadingImages ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="mr-2" size={16} />
-                    )}
-                    {uploadingImages ? "Upload..." : "Choisir des fichiers"}
-                  </Label>
-                </div>
-              </div>
-
-              {formData.images.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <Label>Images sélectionnées ({formData.images.length})</Label>
-                    {formData.images.some((img) => img.isNew) && (
-                      <span className="text-sm text-blue-600">
-                        {formData.images.filter((img) => img.isNew).length}{" "}
-                        nouvelle(s) image(s) à uploader
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {formData.images.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={image.preview || image.url}
-                          alt={`Image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 rounded-lg flex items-center justify-center">
-                          <button
-                            type="button"
-                            className="bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity transform scale-0 group-hover:scale-100 duration-300"
-                            onClick={() => removeImage(index)}
-                            disabled={uploadingImages}
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                        {image.isNew && (
-                          <div className="absolute top-2 left-2">
-                            <Badge className="bg-green-500 text-white text-xs">
-                              Nouveau
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {formData.images.length === 0 && !uploadingImages && (
-                <div className="text-center py-8 text-gray-500">
-                  <Home className="mx-auto mb-3 text-gray-300" size={48} />
-                  <p>Aucune image sélectionnée</p>
-                  <p className="text-sm">
-                    Ajoutez au moins une photo pour rendre votre annonce plus
-                    attractive
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Étape 5 - Publication */}
-          {etape === 5 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <Label className="block mb-2">Statut de publication</Label>
-                <select
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                >
-                  {Object.entries(STATUT_ANNONCE).map(([key, statut]) => (
-                    <option key={key} value={key}>
-                      {statut.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <Card className="p-6 bg-blue-50 border-blue-200">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <CheckCircle className="text-blue-600" size={20} />
-                  Récapitulatif
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Titre:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {formData.title}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Type:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {TYPE_BIEN[formData.type]}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Prix:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {formData.price} €
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Surface:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {formData.surface} m²
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Type d'annonce:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {LISTING_TYPE[formData.listingType]}
-                    </span>
-                  </div>
-                  {(formData.listingType === "rent" ||
-                    formData.listingType === "both") && (
-                    <div className="flex justify-between">
-                      <span style={{ color: "#5A6470" }}>Type de location:</span>
-                      <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                        {TYPE_LOCATION[formData.rentType]}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Images:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {formData.images.length} image(s)
-                      {formData.images.some((img) => img.isNew) &&
-                        ` (${
-                          formData.images.filter((img) => img.isNew).length
-                        } nouvelle(s))`}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* Navigation entre étapes */}
-          <div className="flex justify-between pt-6 mt-6 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={etapePrecedente}
-              disabled={etape === 1 || loading || uploadingImages}
-            >
-              <ChevronLeft className="mr-2" size={16} />
-              Précédent
-            </Button>
-
-            {etape < 5 ? (
-              <Button
-                type="button"
-                onClick={etapeSuivante}
-                style={{ backgroundColor: "#0052FF", color: "white" }}
-                disabled={loading || uploadingImages}
-              >
-                {uploadingImages ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <ChevronRight className="ml-2" size={16} />
-                )}
-                {uploadingImages ? "Upload..." : "Suivant"}
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                style={{ backgroundColor: "#0052FF", color: "white" }}
-                disabled={loading || uploadingImages}
-              >
-                {loading || uploadingImages ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2" size={16} />
-                )}
-                {loading || uploadingImages
-                  ? uploadingImages
-                    ? "Upload..."
-                    : "Sauvegarde..."
-                  : annonce
-                  ? "Modifier"
-                  : "Publier"}{" "}
-                l'annonce
-              </Button>
-            )}
-          </div>
-        </form>
-      </Modal>
-    </>
-  );
-};
 
 // Composant Modal Statistiques
 const ModalStatistiques = ({ isOpen, onClose, annonce }) => {
@@ -1013,6 +198,7 @@ const ListingsPage = () => {
   const [annonceSelectionnee, setAnnonceSelectionnee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [statsGlobales, setStatsGlobales] = useState({
     total: 0,
     published: 0,
@@ -1256,38 +442,42 @@ const ListingsPage = () => {
         </Card>
 
         {/* Liste des annonces */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {annoncesFiltrees.map((annonce) => {
             const disponibilite = getListingType(annonce);
 
             return (
               <Card
                 key={annonce.id}
-                className="overflow-hidden hover:shadow-xl transition-all duration-300"
+                className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
               >
                 {/* Image et badge statut */}
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   {annonce.images && annonce.images.length > 0 ? (
                     <img
                       src={annonce.images[0]}
                       alt={annonce.title}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-32 sm:h-40 lg:h-48 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <Home className="text-gray-400" size={48} />
+                    <div className="w-full h-32 sm:h-40 lg:h-48 bg-gray-200 flex items-center justify-center">
+                      <Home className="text-gray-400" size={40} />
                     </div>
                   )}
-                  <div className="absolute top-3 left-3">
-                    <Badge className={STATUT_ANNONCE[annonce.status]?.color}>
+                  <div className="absolute top-2 left-2">
+                    <Badge
+                      className={`${
+                        STATUT_ANNONCE[annonce.status]?.color
+                      } text-xs`}
+                    >
                       {STATUT_ANNONCE[annonce.status]?.label}
                     </Badge>
                   </div>
-                  <div className="absolute top-3 right-3 flex gap-1">
+                  <div className="absolute top-2 right-2 flex gap-1 flex-wrap">
                     {disponibilite.vente && (
                       <Badge
                         variant="secondary"
-                        className="bg-green-100 text-green-800"
+                        className="bg-green-100 text-green-800 text-xs"
                       >
                         Vente
                       </Badge>
@@ -1295,7 +485,7 @@ const ListingsPage = () => {
                     {disponibilite.location && (
                       <Badge
                         variant="secondary"
-                        className="bg-blue-100 text-blue-800"
+                        className="bg-blue-100 text-blue-800 text-xs"
                       >
                         Location
                       </Badge>
@@ -1304,53 +494,53 @@ const ListingsPage = () => {
                 </div>
 
                 {/* Contenu */}
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
+                <div className="p-4 sm:p-6 flex flex-col flex-grow">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
                     <h3
-                      className="font-bold text-lg line-clamp-2 flex-1 mr-3"
+                      className="font-bold text-base sm:text-lg line-clamp-2 flex-1"
                       style={{ color: "#0A0A0A" }}
                     >
                       {annonce.title}
                     </h3>
-                    <div className="text-xl font-bold text-blue-600 whitespace-nowrap">
+                    <div className="text-lg sm:text-xl font-bold text-blue-600 whitespace-nowrap">
                       {annonce.price?.toLocaleString()} €
-                      {disponibilite.location &&
-                        !disponibilite.vente &&
-                        "/mois"}
+                      {disponibilite.location && !disponibilite.vente && (
+                        <span className="text-xs">/mois</span>
+                      )}
                     </div>
                   </div>
 
                   <div
-                    className="flex items-center gap-1 mb-3 text-sm"
+                    className="flex items-center gap-1 mb-2 text-xs sm:text-sm"
                     style={{ color: "#5A6470" }}
                   >
-                    <MapPin size={14} />
+                    <MapPin size={12} />
                     <span className="line-clamp-1">
                       {annonce.address}, {annonce.city}
                     </span>
                   </div>
 
                   <div
-                    className="flex items-center gap-4 mb-4 text-sm"
+                    className="flex flex-wrap items-center gap-3 mb-3 text-xs sm:text-sm"
                     style={{ color: "#5A6470" }}
                   >
                     <div className="flex items-center gap-1">
-                      <Ruler size={14} />
+                      <Ruler size={12} />
                       <span>{annonce.surface} m²</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Home size={14} />
+                      <Home size={12} />
                       <span>{annonce.rooms} pièces</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Users size={14} />
-                      <span>{annonce.bedrooms} chambres</span>
+                      <Users size={12} />
+                      <span>{annonce.bedrooms} ch.</span>
                     </div>
                   </div>
 
                   {/* Statistiques rapides */}
-                  <div className="flex justify-between mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div className="text-center">
+                  <div className="flex justify-between mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg gap-2">
+                    <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
                         style={{ color: "#0A0A0A" }}
@@ -1361,7 +551,7 @@ const ListingsPage = () => {
                         Vues
                       </div>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
                         style={{ color: "#0A0A0A" }}
@@ -1374,8 +564,8 @@ const ListingsPage = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2">
+                  {/* Actions - Boutons principaux */}
+                  <div className="flex gap-2 mb-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -1383,6 +573,8 @@ const ListingsPage = () => {
                         setAnnonceSelectionnee(annonce);
                         setShowModalStatistiques(true);
                       }}
+                      className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                      title="Statistiques"
                     >
                       <TrendingUp size={14} />
                     </Button>
@@ -1394,74 +586,103 @@ const ListingsPage = () => {
                         setAnnonceSelectionnee(annonce);
                         setShowModalCreation(true);
                       }}
+                      className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                      title="Éditer"
                     >
                       <Edit size={14} />
                     </Button>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => supprimerAnnonce(annonce.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-
-                    {/* Actions statut */}
-                    {annonce.status === "for_sale" ||
-                    annonce.status === "for_rent" ? (
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => changerStatut(annonce.id, "draft")}
-                          className="flex-1"
-                        >
-                          <Archive className="h-4 w-4 mr-2" />
-                          Dépublier
-                        </Button>
-                        {annonce.listingType === "sale" ||
-                        annonce.listingType === "both" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => changerStatut(annonce.id, "sold")}
-                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Vendu
-                          </Button>
-                        ) : null}
-                        {annonce.listingType === "rent" ||
-                        annonce.listingType === "both" ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => changerStatut(annonce.id, "rented")}
-                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Loué
-                          </Button>
-                        ) : null}
-                      </div>
-                    ) : (
+                    {/* Menu Popup */}
+                    <div className="relative">
                       <Button
+                        variant="outline"
                         size="sm"
                         onClick={() =>
-                          changerStatut(
-                            annonce.id,
-                            annonce.listingType === "rent"
-                              ? "for_rent"
-                              : "for_sale"
+                          setOpenMenu(
+                            openMenu === annonce.id ? null : annonce.id
                           )
                         }
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white mt-2"
+                        className="border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                        title="Plus d'actions"
                       >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Publier
+                        <MoreVertical size={14} />
                       </Button>
-                    )}
+
+                      {openMenu === annonce.id && (
+                        <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                          <button
+                            onClick={() => {
+                              supprimerAnnonce(annonce.id);
+                              setOpenMenu(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 border-b border-gray-100 text-red-600"
+                          >
+                            <Trash2 size={14} />
+                            Supprimer
+                          </button>
+
+                          {annonce.status === "for_sale" ||
+                          annonce.status === "for_rent" ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  changerStatut(annonce.id, "draft");
+                                  setOpenMenu(null);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+                              >
+                                <Archive size={14} />
+                                Dépublier
+                              </button>
+
+                              {annonce.listingType === "sale" ||
+                              annonce.listingType === "both" ? (
+                                <button
+                                  onClick={() => {
+                                    changerStatut(annonce.id, "sold");
+                                    setOpenMenu(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+                                >
+                                  <CheckCircle size={14} />
+                                  Marquer comme vendu
+                                </button>
+                              ) : null}
+
+                              {annonce.listingType === "rent" ||
+                              annonce.listingType === "both" ? (
+                                <button
+                                  onClick={() => {
+                                    changerStatut(annonce.id, "rented");
+                                    setOpenMenu(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <CheckCircle size={14} />
+                                  Marquer comme loué
+                                </button>
+                              ) : null}
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                changerStatut(
+                                  annonce.id,
+                                  annonce.listingType === "rent"
+                                    ? "for_rent"
+                                    : "for_sale"
+                                );
+                                setOpenMenu(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 flex items-center gap-2 text-green-600"
+                            >
+                              <CheckCircle size={14} />
+                              Publier
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -1470,10 +691,10 @@ const ListingsPage = () => {
         </div>
 
         {annoncesFiltrees.length === 0 && (
-          <Card className="p-12 text-center">
+          <Card className="p-8 sm:p-12 text-center">
             <Home className="mx-auto mb-4 text-gray-400" size={48} />
             <h3
-              className="text-xl font-semibold mb-2"
+              className="text-lg sm:text-xl font-semibold mb-2"
               style={{ color: "#0A0A0A" }}
             >
               Aucune annonce trouvée
@@ -1487,15 +708,13 @@ const ListingsPage = () => {
         )}
       </div>
 
-      {/* Modales */}
-      <ModalCreationAnnonce
-        isOpen={showModalCreation}
-        onClose={() => {
-          setShowModalCreation(false);
-          setAnnonceSelectionnee(null);
-        }}
-        onSave={sauvegarderAnnonce}
-        annonce={annonceSelectionnee}
+      <ListingModal
+        open={showModalCreation}
+        onOpenChange={setShowModalCreation}
+        listing={annonceSelectionnee}
+        mode={annonceSelectionnee ? "edit" : "create"}
+        onSuccess={sauvegarderAnnonce}
+        currentUser={user}
       />
 
       <ModalStatistiques

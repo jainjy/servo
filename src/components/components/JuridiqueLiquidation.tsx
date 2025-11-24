@@ -346,6 +346,7 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
               Notre cellule d'urgence juridique est disponible 24h/24 pour les situations 
               de crise nécessitant une intervention immédiate (cessation de paiement, saisie, contrôle).
             </p>
+             {/*
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="gap-2 bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm flex items-center justify-center">
                 <AlertTriangle /> Urgence Juridique - 24h/24
@@ -356,7 +357,7 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
             </div>
             <p className="text-purple-200 text-sm mt-4">
               Avocats spécialisés disponibles immédiatement - Secret professionnel garanti
-            </p>
+            </p>*/}
           </div>
         </div>
       </div>

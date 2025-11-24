@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth";
 import { toast } from "@/hooks/use-toast";
 import { io } from "socket.io-client";
+const VITE_API_URL = import.meta.env.VITE_API_URL2 || "http://localhost:3001";
 
 export const useWebSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -16,10 +17,7 @@ export const useWebSocket = () => {
       return;
     }
 
-    const wsURL =
-      process.env.NODE_ENV === "production"
-        ? window.location.origin
-        : "http://localhost:3001";
+    const wsURL = VITE_API_URL;
 
     if (socketRef.current) {
       socketRef.current.disconnect();

@@ -1,7 +1,7 @@
 // Contexts/SocketContext.tsx
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
-
+const VITE_API_URL=import.meta.env.VITE_API_URL2 || "http://localhost:3001"
 // 1️⃣ Définir le type du contexte
 interface SocketContextType {
   socket: Socket | null;
@@ -37,7 +37,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children, userId
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_API_URL || "http://localhost:3001", {
+    const newSocket = io(VITE_API_URL, {
       query: { userId },
     });
 

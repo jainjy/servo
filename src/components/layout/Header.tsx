@@ -703,7 +703,7 @@ useEffect(() => {
         {
           title: "Podcasts",
           description: "Ressources pour le bien-être",
-          href: "/bien-etre",
+          href: "/podcasts-bien_etre",
           image:
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
@@ -822,6 +822,13 @@ useEffect(() => {
           title: "Formations",
           description: "Cours & ateliers locaux",
           href: "/formationTourisme",
+          image:
+            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+        },
+        {
+          title: "Voyages",
+          description: "Cours & ateliers locaux",
+          href: "/voyages",
           image:
             "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
         },
@@ -1478,7 +1485,7 @@ useEffect(() => {
 
       {/* Logout Confirmation Dialog */}
       {isLogoutDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCancelLogout} />
           <div className="relative z-50 w-full max-w-sm bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 p-6 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">

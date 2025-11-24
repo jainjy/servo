@@ -248,11 +248,27 @@ const handleClose = () => {
                                 disabled={loading}
                             >
                                 <option value="appartement">Appartement</option>
-                                <option value="maison">Maison</option>
+                                <option value="maison">Maison / Villa</option>
                                 <option value="villa">Villa</option>
                                 <option value="studio">Studio</option>
                                 <option value="terrain">Terrain</option>
-                                <option value="commercial">Commercial</option>
+                                <option value="commercial">Local commercial</option>
+                                <option value="professionnel">Local professionnel</option>
+                                <option value="fonds_de_commerce">Fonds de commerce</option>
+                                <option value="appartements_neufs">Appartement neufs (VEFA)</option>
+                                <option value="scpi">SCPI</option>
+                                <option value="villa_d_exception">Villa d'exception</option>
+                                <option value="villas_neuves">Villas neuves (VEFA)</option>
+                                <option value="parking">Parking</option>
+                                <option value="hotel">Hotel</option>
+                                <option value="gite">Gite</option>
+                                <option value="maison_d_hote">Maison d'hote</option>
+                                <option value="domaine">Domaine</option>
+                                <option value="appartement_meuble">Appartement meublée</option>
+                                <option value="villa_meuble">Villa meublée</option>
+                                <option value="villa_non_meuble">Villa non meublée</option>
+                                <option value="cellier">Cellier</option>
+                                <option value="cave">Cave</option>
                             </select>
                         </div>
 

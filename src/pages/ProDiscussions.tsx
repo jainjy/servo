@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function ProDiscussions() {
   const { id } = useParams();
   const [demande, setDemande] = useState(null);
+  const [notAssignedMe, setNotAssignedMe] = useState(false);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -412,6 +413,10 @@ export default function ProDiscussions() {
         if (id) {
           const response = await api.get(`/demandes/${id}`);
           setDemande(response.data);
+          setNotAssignedMe(
+            (response.data.artisanId != user.id &&
+              response.data.artisanId != null)
+          );
         }
       } catch (error) {
         console.error("Erreur chargement demande:", error);
@@ -1064,7 +1069,10 @@ export default function ProDiscussions() {
                   className="hidden"
                   onChange={handleFileUpload}
                   disabled={
-                    uploadingFile || sending || demande?.statut == "terminée"
+                    uploadingFile ||
+                    sending ||
+                    demande?.statut == "terminée" ||
+                    notAssignedMe
                   }
                 />
               </label>
@@ -1085,7 +1093,8 @@ export default function ProDiscussions() {
                   sending ||
                   uploadingFile ||
                   artisanDetails?.recruited === false ||
-                  demande?.statut == "terminée"
+                  demande?.statut == "terminée" ||
+                  notAssignedMe
                 }
               />
 
@@ -1096,7 +1105,8 @@ export default function ProDiscussions() {
                   sending ||
                   uploadingFile ||
                   !input.trim() ||
-                  demande?.statut == "terminée"
+                  demande?.statut == "terminée" ||
+                  notAssignedMe
                 }
               >
                 {sending ? (

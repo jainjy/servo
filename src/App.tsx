@@ -27,7 +27,7 @@ import ProLayout from "./pages/pro/ProLayout";
 import Dashboard from "./pages/pro/Dashboard";
 import ListingsPage from "./pages/pro/ListingsPage";
 import CalendarPage from "./pages/pro/CalendarPage";
-import ServicesPartnersPage from './pages/ServicesPartnersPage';
+import ServicesPartnersPage from "./pages/ServicesPartnersPage";
 import DocumentsPage from "./pages/pro/DocumentsPage";
 import ReviewsPage from "./pages/pro/ReviewsPage";
 import TourismPage from "./pages/pro/TourismPage";
@@ -93,7 +93,7 @@ import { ToastContainer } from "react-toastify";
 import ArtCommerceService from "./pages/pro/ArtCommerceService";
 import { SocketProvider } from "./contexts/SocketContext";
 import { useAuth } from "./hooks/useAuth";
-import AdminBookings from "./components/admin/tourism/AdminBookings";
+import ProBookings from "./components/admin/tourism/ProBookings";
 import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
 //tracking page
@@ -107,7 +107,7 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
 
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
-import PodcastsBatiment from './components/PodcastsBatiment';
+import PodcastsBatiment from "./components/PodcastsBatiment";
 import PodcastsAssuranceFinance from "./components/PodcastsCreditAssurance";
 import PodcastsAlimentation from "./components/PodcastsAlimentation";
 import PodcastsInvestissement from "./components/PodcastsInvestissement";
@@ -139,6 +139,7 @@ import PodcastsImmobilier from "./components/PodcastsImmobilier";
 import PodcastsDomicile from "./components/PodcastsDomicil";
 import PodcastsBienEtre from "./components/PodcastsBienEtre";
 import LieuxHistoriques from "./components/components/Tourisme_lieux";
+import Voyages from "./components/components/voyages";
 import ConstructionServicesPage from "./pages/BatimentPage";
 import PricingPacksDisplay from "./components/components/PackComplet";
 import AgendaPage from "./pages/mon-compte/AgendaPage";
@@ -230,6 +231,10 @@ const App = () => {
                     element={<PodcastsBatiment />}
                   />
                   <Route
+                    path="/podcasts-bien_etre"
+                    element={<PodcastsBienEtre />}
+                  />
+                  <Route
                     path="/lieux_historique"
                     element={
                       <LieuxHistoriques ville="Paris" typeFiltre="tous" />
@@ -238,6 +243,10 @@ const App = () => {
                   <Route
                     path="/formationTourisme"
                     element={<FormationsTourisme />}
+                  />
+                  <Route
+                    path="/voyages"
+                    element={<Voyages />}
                   />
                   <Route
                     path="/plan_administratif"
@@ -324,9 +333,14 @@ const App = () => {
                     path="/produits-commerces"
                     element={<DomicileLayout />}
                   />
-                  // Dans App.jsx
-                  <Route path="/produits-naturels" element={<BoutiqueNaturel />} />
-                  <Route path="/produits-naturels/categorie/:categoryName" element={<BoutiqueNaturel />} />
+                  <Route
+                    path="/produits-naturels"
+                    element={<BoutiqueNaturel />}
+                  />
+                  <Route
+                    path="/produits-naturels/categorie/:categoryName"
+                    element={<BoutiqueNaturel />}
+                  />
                   <Route
                     path="/comptabilite"
                     element={
@@ -362,7 +376,6 @@ const App = () => {
                   {/* <Route path="/produits-generaux" element={<ProduitsGeneraux />} /> */}
                   {/* <Route path="/services-maison" element={<ServicesMaison />} />
                   <Route path="/utilitie" element={<UtilitiesProduits />} /> */}
-
                   <Route
                     path="/stripe-create"
                     element={<StripeConnectButton user={user} />}
@@ -381,10 +394,8 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
-
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
-
                   {/* Add redirect from /service to /services-partners */}
                   <Route
                     path="/service"
@@ -476,7 +487,7 @@ const App = () => {
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
-                    <Route path="reservations" element={<AdminBookings />} />
+                    <Route path="reservations" element={<ProBookings />} />
                     <Route
                       path="services"
                       element={<ProfessionalServicesPage />}
@@ -517,10 +528,7 @@ const App = () => {
                     <Route path="reservation" element={<ReservationPage />} />
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
-                    <Route
-                      path="documents"
-                      element={<MesDocumentsPage />}
-                    />
+                    <Route path="documents" element={<MesDocumentsPage />} />
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
@@ -535,7 +543,8 @@ const App = () => {
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="blog" element={<Blog />} />
-                    <Route path="bookings" element={<Bookings />} />
+                    {/* <Route path="bookings" element={<Bookings />} /> */}
+                    <Route path="bookings" element={<ProBookings />} />
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
@@ -543,7 +552,8 @@ const App = () => {
                     <Route path="profile" element={<Profile />} />
                     <Route path="reports" element={<Reports />} />
                     <Route path="services" element={<Services />} />
-                    <Route path="tourism" element={<Tourism />} />
+                    {/* <Route path="tourism" element={<Tourism />} /> */}
+                    <Route path="tourism" element={<TourismPage />} />
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
