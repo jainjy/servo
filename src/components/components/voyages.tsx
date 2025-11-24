@@ -552,12 +552,12 @@ const VoyagesAeriens: React.FC = () => {
         
         <div className="min-h-screen mt-10 py-8 bg-gray-50">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="relative shadow-xl rounded-lg overflow-hidden mt-10">
+    <div className="relative shadow-xl rounded-lg overflow-hidden mt-4">
       {/* Conteneur principal avec bordure blanche */}
       <div 
         className="relative py-16 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url("https://i.pinimg.com/736x/22/95/e4/2295e42a259c2a69564f9c58cf9c60d2.jpg")'
+          backgroundImage: 'url("https://i.pinimg.com/1200x/79/94/5c/79945cc369cdb035eadcc41efc866a4c.jpg")'
         }}
       >
         {/* Overlay sombre pour meilleure lisibilité */}

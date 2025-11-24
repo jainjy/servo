@@ -372,9 +372,9 @@ const PodcastsInvestissement: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4"></div>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center flex flex-col items-center justify-center">
+            <img src="/loading.gif" alt="" />
             <div className="text-gray-600">Chargement des vidéos Investissement...</div>
           </div>
         </div>
