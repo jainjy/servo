@@ -498,27 +498,7 @@ const Cart = ({ isOpen, onClose }) => {
                 Découvrir les produits
               </Button>
 
-              {/* Boutons de debug (seulement en développement) */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-6 space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testAuthManually}
-                    className="text-xs"
-                  >
-                    Test Auth
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testOrderCreation}
-                    className="text-xs"
-                  >
-                    Test Commande
-                  </Button>
-                </div>
-              )}
+              
             </div>
           ) : (
             <div className="space-y-4">
@@ -661,16 +641,7 @@ const Cart = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Informations de debug (seulement en développement) */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs">
-                <p className="font-semibold text-yellow-800">Debug Info:</p>
-                <p>Auth: {isAuthenticated ? '✅' : '❌'}</p>
-                <p>User: {user?.firstName || 'Non connecté'}</p>
-                <p>Items: {itemsCount}</p>
-              </div>
-            )}
-
+            
             {/* Actions */}
             <div className="space-y-3">
               <Button
