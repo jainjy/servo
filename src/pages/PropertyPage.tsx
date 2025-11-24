@@ -90,7 +90,7 @@ const PropertyPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center justify-center">
           <img src="/loading.gif" alt="" className='w-24 h-24' />
           <p className="mt-4 text-muted-foreground">Chargement de la propriété...</p>
         </div>
