@@ -464,7 +464,7 @@ const PodcastsTourisme: React.FC = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Section Vidéos */}
         <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
+          <div className="hidden lg:flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-cyan-100 rounded-2xl">
                 <Video className="w-8 h-8 text-cyan-600" />
@@ -483,9 +483,9 @@ const PodcastsTourisme: React.FC = () => {
           <div className="flex gap-4 mb-8 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('all')}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'all'
-                  ? 'border-cyan-600 text-cyan-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              className={`pb-4 px-1 lg:px-6 font-semibold text-sm lg:text-lg transition-all duration-300 border-b-2 ${activeTab === 'all'
+                ? 'border-cyan-600 text-cyan-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
             >
               <div className="flex items-center space-x-2">
@@ -495,9 +495,9 @@ const PodcastsTourisme: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('favorites')}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'favorites'
-                  ? 'border-red-600 text-red-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              className={`pb-4 px-1 lg:px-6 font-semibold text-sm lg:text-lg transition-all duration-300 border-b-2 ${activeTab === 'favorites'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
             >
               <div className="flex items-center space-x-2">
@@ -549,9 +549,9 @@ const PodcastsTourisme: React.FC = () => {
 
       {/* Modal Vidéo */}
       {isModalOpen && selectedEpisode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          {/* Modal Container - Layout horizontal YouTube */}
-          <div className="relative w-full max-w-7xl h-[90vh] bg-gray-900/50 rounded-2xl shadow-2xl overflow-hidden flex">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md">
+          {/* Modal Container - Layout vertical sur mobile */}
+          <div className="relative w-full max-w-7xl h-[95vh] sm:h-[90vh] bg-gray-900/50 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
 
             {/* Bouton fermeture */}
             <button
@@ -563,17 +563,17 @@ const PodcastsTourisme: React.FC = () => {
                   videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 sm:p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
             {/* Colonne de gauche - Vidéo */}
-            <div className="flex-1 mr-5 overflow-hidden rounded-t-lg flex flex-col min-w-0">
+            <div className="flex-1 lg:mr-5 overflow-hidden rounded-t-xl sm:rounded-t-2xl flex flex-col min-w-0">
               {/* Container vidéo */}
-              <div className="relative flex-1 bg-black flex items-center justify-center">
+              <div className="relative flex-1 bg-black flex items-center justify-center min-h-[200px] sm:min-h-0">
                 <video
                   ref={videoRef}
                   src={selectedEpisode.videoUrl}
@@ -585,10 +585,10 @@ const PodcastsTourisme: React.FC = () => {
                 />
 
                 {/* Overlay de contrôle custom */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
 
                   {/* Barre de progression */}
-                  <div className="mb-4 px-2">
+                  <div className="mb-3 sm:mb-4 px-1 sm:px-2">
                     <div
                       className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer group"
                       onClick={handleProgressClick}
@@ -606,38 +606,38 @@ const PodcastsTourisme: React.FC = () => {
                     </div>
 
                     {/* Temps */}
-                    <div className="flex justify-between items-center mt-2 text-xs text-gray-300">
+                    <div className="flex justify-between items-center mt-1 sm:mt-2 text-xs text-gray-300">
                       <span>{formatTime(currentTime)}</span>
                       <span>{formatTime(duration)}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
                       <button
                         onClick={handlePlayMedia}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 sm:p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
                       >
                         {isPlaying ? (
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                           </svg>
                         ) : (
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         )}
                       </button>
                     </div>
 
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
                       {/* Bouton plein écran */}
                       <button
                         onClick={toggleFullscreen}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all duration-200"
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 sm:p-2 transition-all duration-200"
                         title="Plein écran"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                         </svg>
                       </button>
@@ -647,11 +647,11 @@ const PodcastsTourisme: React.FC = () => {
               </div>
 
               {/* Titre de la vidéo */}
-              <div className="p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
-                <h1 className="text-lg font-bold text-white">
+              <div className="p-3 sm:p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+                <h1 className="text-base sm:text-lg font-bold text-white line-clamp-2">
                   {selectedEpisode.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
+                <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400 mt-1">
                   <span>{selectedEpisode.views.toLocaleString()} vues</span>
                   <span>{selectedEpisode.date}</span>
                 </div>
@@ -659,17 +659,16 @@ const PodcastsTourisme: React.FC = () => {
             </div>
 
             {/* Colonne de droite - Contenu */}
-            <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
-
+            <div className="w-full lg:w-80 bg-gray-800 border-t lg:border-l border-gray-700 flex flex-col max-h-[40vh] sm:max-h-none">
               {/* Contenu défilant */}
               <div className="flex-1 overflow-y-auto">
 
                 {/* Informations de base */}
-                <div className="p-4 border-b border-gray-700">
+                <div className="p-3 sm:p-4 border-b border-gray-700">
                   <div className="flex items-center space-x-3 mb-3">
                     {/* Avatar */}
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
-                      <Video className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-cyan-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Video className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-white">Contenu</div>
@@ -677,7 +676,7 @@ const PodcastsTourisme: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2 mb-3">
+                  <div className="flex items-center space-x-2 mb-2 sm:mb-3">
                     <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
                       {selectedEpisode.category}
                     </span>
@@ -692,26 +691,26 @@ const PodcastsTourisme: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-4 text-sm text-gray-400">
+                  <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400">
                     <span className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                       {selectedEpisode.duration}
                     </span>
                   </div>
                 </div>
 
                 {/* Description */}
-                <div className="p-4 border-b border-gray-700">
+                <div className="p-3 sm:p-4 border-b border-gray-700">
                   <h3 className="text-sm font-semibold text-white mb-2">Description</h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-none">
                     {selectedEpisode.description}
                   </p>
                 </div>
 
                 {/* Infos techniques */}
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-white mb-3">Détails</h3>
-                  <div className="space-y-2 text-sm">
+                <div className="p-3 sm:p-4">
+                  <h3 className="text-sm font-semibold text-white mb-2 sm:mb-3">Détails</h3>
+                  <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Format</span>
                       <span className="text-white">{selectedEpisode.mimeType}</span>
@@ -726,45 +725,46 @@ const PodcastsTourisme: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
                 {/* Actions rapides */}
-                <div className="p-4 border-y border-gray-700">
+                <div className="p-3 sm:p-4 border-t border-gray-700 bg-gray-900/50">
                   <div className="flex space-x-2">
                     <button
                       onClick={handlePlayMedia}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg font-semibold transition-all duration-200"
+                      className="flex-1 flex items-center justify-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm"
                     >
                       {isPlaying ? (
                         <>
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                           </svg>
-                          <span className="text-sm">Pause</span>
+                          <span>Pause</span>
                         </>
                       ) : (
                         <>
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                           </svg>
-                          <span className="text-sm">Lecture</span>
+                          <span>Lecture</span>
                         </>
                       )}
                     </button>
 
                     <button
                       onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                      className={`p-2 rounded-lg transition-all duration-200 border ${selectedEpisode && isFavorite(selectedEpisode.id)
+                      className={`p-2 rounded-lg transition-all duration-200 border text-xs ${selectedEpisode && isFavorite(selectedEpisode.id)
                         ? 'bg-red-500/20 border-red-500/50 text-red-400'
                         : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
                         }`}
                     >
-                      <Heart className={`w-4 h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
+                      <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
                     </button>
 
                     <button
                       onClick={handleDownload}
-                      className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600"
+                      className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600 text-xs"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                 </div>
