@@ -31,7 +31,7 @@ const ProduitsGeneraux = () => {
   const fetchGeneralProducts = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/products', {
+      const response = await api.get('/products/all', {
         params: {
           productType: 'general',
           status: 'active'
