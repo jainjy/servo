@@ -378,7 +378,7 @@ useEffect(() => {
           description: "Logements intermédiaires abordables",
           href: "/SHLMR",
           image:
-            "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
+            "https://i.pinimg.com/1200x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg",
         },
         {
           title: "Droit & formation immobilière",
