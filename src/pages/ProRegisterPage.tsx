@@ -482,10 +482,11 @@ const ProRegisterPage = () => {
                             <div className="grid grid-cols-2 gap-3">
                               {metiersList.map(
                                 (metier) =>
-                                  (metier.libelle == bienEtreMetiers[0] ||
+                                  (formData.userType== "BIEN_ETRE"?
+                                    (metier.libelle == bienEtreMetiers[0] ||
                                     metier.libelle == bienEtreMetiers[1] ||
                                     metier.libelle == bienEtreMetiers[2] ||
-                                    metier.libelle == bienEtreMetiers[3]) && (
+                                    metier.libelle == bienEtreMetiers[3]): true) && (
                                     <div
                                       key={metier.id}
                                       className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
