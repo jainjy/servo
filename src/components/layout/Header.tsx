@@ -367,11 +367,39 @@ useEffect(() => {
             "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
         {
+          title: "PSLA",
+          description: "Profitez du Prêt Social Location Accession",
+          href: "/PSLA",
+          image:
+            "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
+        },
+        {
+          title: "SHLMR",
+          description: "Logements intermédiaires abordables",
+          href: "/SHLMR",
+          image:
+            "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
+        },
+        {
           title: "Droit & formation immobilière",
           description: "Divorce, succession, donation, . . .",
           href: "/droitFamille",
           image:
             "https://i.pinimg.com/736x/a1/91/eb/a191ebeb94928180470add7e2e1284e2.jpg",
+        },
+        {
+          title: "Programme neuf",
+          description: "Investissez dans du neuf",
+          href: "/programme-neuf",
+          image:
+            "https://i.pinimg.com/1200x/8c/c1/22/8cc122eb07f85e3b4881b3d20b318bd2.jpg",
+        },
+        {
+          title: "Investir à l'etranger",
+          description: "Découvrez des opportunités mondiales",
+          href: "/investir-etranger",
+          image:
+            "https://i.pinimg.com/1200x/46/bb/5d/46bb5df4d9ca65648383226b41de80ec.jpg",
         },
         {
           title: "Gestion & services immobiliers",
@@ -446,108 +474,6 @@ useEffect(() => {
         //       image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
 
         //     },
-      ],
-    },
-    {
-      title: "ENTREPRISE",
-      items: [
-        // {
-        //   title: "Devenir partenaire",
-        //   description: "Rejoignez notre réseau d'experts",
-        //   href: "/entreprise#partenaire",
-        //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
-
-        // },
-
-        {
-          title: "Création & reprise",
-          description: "Accompagnement pour entrepreneurs",
-          href: "/reprise",
-          image:
-            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
-        },
-        {
-          title: "Audit & médiation",
-          description: "Experts en audit & résolution de conflits",
-          href: "/auditMediation",
-          image:
-            "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
-        },
-        {
-          title: "Aides & levées de fonds",
-          description: " Soutien financier pour entreprises",
-          href: "/aideFonds",
-          image:
-            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
-        },
-        {
-          title: "Juridique & liquidation",
-          description: " Services juridiques pour entreprises",
-          href: "/juridiqueLiquidation",
-          image:
-            "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
-        },
-        {
-          title: "Comptabilité",
-          description: " Services comptables professionnels",
-          href: "/comptabilite",
-          image:
-            "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
-        },
-        {
-          title: "Formation",
-          description: "Formations pour entrepreneurs",
-          href: "/entreprise#services",
-          image:
-            "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: " Ressources pour entrepreneurs",
-          href: "/podcast_service",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
-    {
-      title: "CREDIT & ASSURANCE",
-      items: [
-        {
-          title: "Financement",
-          description: "Solutions de crédit adaptées à votre projet",
-          href: "/financement#partenaires",
-          image:
-            "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
-        },
-        {
-          title: "Assurance",
-          description: "Protection complète pour votre logement",
-          href: "/financement#assurances",
-          image:
-            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
-        },
-        {
-          title: "Aides",
-          description: "Solutions d'aides au financement",
-          href: "/aide_financement",
-          image:
-            "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg",
-        },
-        {
-          title: "Formations ",
-          description: "Formations au financement et crédit",
-          href: "/formation_finance",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: " Ressources sur le financement",
-          href: "/podcasts/assurance-finance",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
       ],
     },
     {
@@ -670,40 +596,149 @@ useEffect(() => {
       ],
     },
     {
-      title: "BIEN-ÊTRE",
+      title: "CREDIT & ASSURANCE",
       items: [
         {
-          title: "Cours à domicile",
-          description: "Formations & ateliers personnalisés",
-          href: "/bien-etre",
+          title: "Financement",
+          description: "Solutions de crédit adaptées à votre projet",
+          href: "/financement#partenaires",
           image:
-            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+            "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
         },
         {
-          title: "Arts & commerces",
-          description: "Artisans & boutiques bien-être",
-          href: "/art-commerce",
+          title: "Assurance",
+          description: "Protection complète pour votre logement",
+          href: "/financement#assurances",
           image:
-            "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
         },
         {
-          title: "Thérapeutes & soins",
-          description: "Professionnels du bien-être à domicile",
-          href: "/bien-etre",
+          title: "Aides",
+          description: "Solutions d'aides au financement",
+          href: "/aide_financement",
           image:
-            "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+            "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg",
         },
         {
-          title: "Boutique & produits naturels",
-          description: "Produits pour le bien-être",
-          href: "/produits-naturels",
+          title: "Formations ",
+          description: "Formations au financement et crédit",
+          href: "/formation_finance",
           image:
-            "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
         },
         {
           title: "Podcasts",
-          description: "Ressources pour le bien-être",
-          href: "/podcasts-bien_etre",
+          description: " Ressources sur le financement",
+          href: "/podcasts/assurance-finance",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
+      ],
+    },
+    {
+      title: "ENTREPRISE",
+      items: [
+        // {
+        //   title: "Devenir partenaire",
+        //   description: "Rejoignez notre réseau d'experts",
+        //   href: "/entreprise#partenaire",
+        //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
+
+        // },
+
+        {
+          title: "Création & reprise",
+          description: "Accompagnement pour entrepreneurs",
+          href: "/reprise",
+          image:
+            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
+        },
+        {
+          title: "Audit & médiation",
+          description: "Experts en audit & résolution de conflits",
+          href: "/auditMediation",
+          image:
+            "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
+        },
+        {
+          title: "Aides & levées de fonds",
+          description: " Soutien financier pour entreprises",
+          href: "/aideFonds",
+          image:
+            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
+        },
+        {
+          title: "Juridique & liquidation",
+          description: " Services juridiques pour entreprises",
+          href: "/juridiqueLiquidation",
+          image:
+            "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
+        },
+        {
+          title: "Comptabilité",
+          description: " Services comptables professionnels",
+          href: "/comptabilite",
+          image:
+            "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
+        },
+        {
+          title: "Formation",
+          description: "Formations pour entrepreneurs",
+          href: "/entreprise#services",
+          image:
+            "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
+        },
+        {
+          title: "Podcasts",
+          description: " Ressources pour entrepreneurs",
+          href: "/podcast_service",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
+      ],
+    },
+    {
+      title: "TOURISME",
+      items: [
+        {
+          title: "Hôtels & gîtes",
+          description: "Réservations d'hébergements",
+          href: "/tourisme",
+          image:
+            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+        },
+        {
+          title: "Activités & loisirs",
+          description: "Découvertes & aventures",
+          href: "/activiteLoisirs",
+          image:
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
+        {
+          title: "Lieux historiques & culturels",
+          description: "Explorez le patrimoine local",
+          href: "/lieux_historique",
+          image:
+            "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
+        },
+        {
+          title: "Formations",
+          description: "Cours & ateliers locaux",
+          href: "/formationTourisme",
+          image:
+            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+        },
+        {
+          title: "Voyages",
+          description: "Cours & ateliers locaux",
+          href: "/voyages",
+          image:
+            "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
+        },
+        {
+          title: "Podcasts",
+          description: "Ressources sur le tourisme",
+          href: "/podcasts/tourisme",
           image:
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
@@ -750,6 +785,47 @@ useEffect(() => {
       ],
     },
     {
+      title: "BIEN-ÊTRE",
+      items: [
+        {
+          title: "Cours à domicile",
+          description: "Formations & ateliers personnalisés",
+          href: "/bien-etre",
+          image:
+            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+        },
+        {
+          title: "Arts & commerces",
+          description: "Artisans & boutiques bien-être",
+          href: "/art-commerce",
+          image:
+            "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+        },
+        {
+          title: "Thérapeutes & soins",
+          description: "Professionnels du bien-être à domicile",
+          href: "/bien-etre",
+          image:
+            "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+        },
+        {
+          title: "Boutique & produits naturels",
+          description: "Produits pour le bien-être",
+          href: "/produits-naturels",
+          image:
+            "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+        },
+        {
+          title: "Podcasts",
+          description: "Ressources pour le bien-être",
+          href: "/podcasts-bien_etre",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
+      ],
+    },
+    
+    {
       title: "INVESTISSEMENT",
       items: [
         {
@@ -794,53 +870,7 @@ useEffect(() => {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
     // },
-    {
-      title: "TOURISME",
-      items: [
-        {
-          title: "Hôtels & gîtes",
-          description: "Réservations d'hébergements",
-          href: "/tourisme",
-          image:
-            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
-        },
-        {
-          title: "Activités & loisirs",
-          description: "Découvertes & aventures",
-          href: "/activiteLoisirs",
-          image:
-            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
-        },
-        {
-          title: "Lieux historiques & culturels",
-          description: "Explorez le patrimoine local",
-          href: "/lieux_historique",
-          image:
-            "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
-        },
-        {
-          title: "Formations",
-          description: "Cours & ateliers locaux",
-          href: "/formationTourisme",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
-          title: "Voyages",
-          description: "Cours & ateliers locaux",
-          href: "/voyages",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: "Ressources sur le tourisme",
-          href: "/podcasts/tourisme",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
+    
     {
       title: "NOS OFFRES EXCLUSIVES",
       href: "/pack",

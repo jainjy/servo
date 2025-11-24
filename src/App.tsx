@@ -147,6 +147,9 @@ import MesDocumentsPage from "./pages/mon-compte/MesDocumentsPage";
 import PlanAdministratifServices from "./components/components/Plan_Administratifs";
 import MapPage from "./pages/MapPage";
 import BoutiqueNaturel from "./components/components/BoutiqueNaturel";
+import ProgrammeNeuf from "./components/components/Programme_neuf";
+import InvestirEtranger from "./components/components/Investir_etrangert";
+import SHLMR from "./components/components/SHLMR";
 
 const queryClient = new QueryClient();
 
@@ -233,6 +236,18 @@ const App = () => {
                   <Route
                     path="/podcasts-bien_etre"
                     element={<PodcastsBienEtre />}
+                  />
+                  <Route
+                    path="/programme-neuf"
+                    element={<ProgrammeNeuf />}
+                  />
+                  <Route
+                    path="/investir-etranger"
+                    element={<InvestirEtranger />}
+                  />
+                  <Route
+                    path="/SHLMR"
+                    element={<SHLMR />}
                   />
                   <Route
                     path="/lieux_historique"
