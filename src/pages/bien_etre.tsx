@@ -2,9 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api"
-import { Headphones, Home, Video, MessageCircle, Activity, PencilIcon, Sparkles, Leaf, Heart, Flame, Zap, Package } from "lucide-react";
+import { Headphones, Home, Video, MessageCircle, Activity, PencilIcon } from "lucide-react";
 import PodcastCard from "@/components/PodcastCard";
-import BoutiqueNaturel from "@/components/components/BoutiqueNaturel";
 import ArtCommerce from "./ArtCommerce";
 import { useBienEtreTracking } from '@/hooks/useBienEtreTracking';
 import PodcastsBienEtre from "@/components/PodcastsBienEtre";
@@ -376,11 +375,6 @@ const BienEtre = () => {
       icon: <Activity className="w-5 h-5" />
     },
     {
-      id: 'Masseur',
-      label: 'Arts & commerces',
-      icon: <PencilIcon className="w-5 h-5" />
-    },
-    {
       id: 'Thérapeute',
       label: 'Thérapeutes & soins',
       icon: <Video className="w-5 h-5" />
@@ -390,19 +384,13 @@ const BienEtre = () => {
       label: 'Podcasts',
       icon: <MessageCircle className="w-5 h-5" />
     },
-    {
-      id: 'BoutiqueNaturels',
-      label: 'Boutique & produits naturels',
-      icon: <Package className="w-5 h-5" />
-    },
   ];
 
   const [servicesByCategory, setServicesByCategory] = useState({
     Formateur: [],
     Masseur: [],
     Thérapeute: [],
-    Podcasteur: [],
-    BoutiqueNaturels: []
+    Podcasteur: []
   });
 
   useEffect(() => {
@@ -555,15 +543,6 @@ const BienEtre = () => {
               </SlideIn>
             )}
 
-            {/* MASSEUR */}
-            {activeTab === 'Masseur' && (
-              <section className="mb-20">
-                <SlideIn direction="right">
-                  <ArtCommerce />
-                </SlideIn>
-              </section>
-            )}
-
             {/* THERAPEUTE */}
             {activeTab === 'Thérapeute' && (
               <section className="mb-20">
@@ -603,58 +582,6 @@ const BienEtre = () => {
               <section className="mb-20">
                 <SlideIn direction="right">
                   <PodcastsBienEtre />
-                </SlideIn>
-              </section>
-            )}
-
-            {/* BOUTIQUE NATURELS */}
-            {activeTab === 'BoutiqueNaturels' && (
-              <section className="mb-20">
-                <SlideIn direction="left">
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                      Boutique & Produits Naturels
-                    </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
-                      Découvrez notre sélection de produits naturels et biologiques pour votre bien-être au quotidien. 
-                      Huiles essentielles, thés bio, compléments alimentaires et accessoires de qualité.
-                    </p>
-
-                    {/* Navigation rapide vers les catégories */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                      {[
-                        { name: "Huiles Essentielles", icon: Sparkles, route: "huiles-essentielles" },
-                        { name: "Thés & Infusions", icon: Leaf, route: "thes-infusions" },
-                        { name: "Soins Bien-être", icon: Heart, route: "soins-bien-etre" },
-                        { name: "Compléments", icon: Flame, route: "complements-alimentaires" },
-                        { name: "Ambiance", icon: Zap, route: "ambiance-relaxation" },
-                        { name: "Accessoires", icon: Package, route: "accessoires" }
-                      ].map((cat) => (
-                        <button
-                          key={cat.name}
-                          onClick={() => navigate(`/produits-naturels/categorie/${cat.route}`)}
-                          className="bg-white dark:bg-card rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-border hover:border-slate-900 group"
-                        >
-                          <div className="flex flex-col items-center gap-2">
-                            <cat.icon className="h-6 w-6 text-slate-900 dark:text-foreground group-hover:text-slate-700" />
-                            <span className="text-xs font-medium text-gray-700 dark:text-foreground group-hover:text-slate-900">
-                              {cat.name}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Bouton pour voir tous les produits */}
-                    <div className="text-center mt-8">
-                      <Button
-                        onClick={() => navigate('/produits-naturels')}
-                        className="bg-slate-900 hover:bg-slate-700 text-white px-8 py-3"
-                      >
-                        Voir tous les produits naturels
-                      </Button>
-                    </div>
-                  </div>
                 </SlideIn>
               </section>
             )}

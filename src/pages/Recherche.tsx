@@ -847,7 +847,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
             {stage === "idle" && (
               <div className="text-center py-20">
                 <div className="max-w-2xl mx-auto">
-                  <h1 className="redhawk -tracking-tighter text-3xl md:text-5xl font-bold text-black/90 mb-4">
+                  <h1 className="-tracking-tighter text-3xl md:text-5xl font-bold text-black/90 mb-4">
                     Recherche avancée
                   </h1>
                   <p className="text-sm text-gray-600 mb-8">

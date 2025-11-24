@@ -146,17 +146,20 @@ const Header = () => {
       loadNotifications();
     }
   }, [user?.id]);
+// Écouter les événements de rechargement des notifications 
+useEffect(() => {
+  if (!user?.id) return;
 
-  // Écouter les événements de rechargement des notifications
-  useEffect(() => {
-    const handler = () => {
-      if (user?.id) {
-        loadNotifications();
-      }
-    };
-    window.addEventListener("notifications:reload", handler);
-    return () => window.removeEventListener("notifications:reload", handler);
-  }, [user?.id]);
+  const handler = () => {
+    if (notifOpen) {
+      loadNotifications(); // Recharge la listes des notifications
+    }
+  };
+
+  window.addEventListener("notifications:reload", handler);
+  return () => window.removeEventListener("notifications:reload", handler);
+}, [user?.id, notifOpen]);
+
 
   const loadNotifications = async () => {
     if (!user?.id) return;
@@ -679,7 +682,7 @@ const Header = () => {
         {
           title: "Arts & commerces",
           description: "Artisans & boutiques bien-être",
-          href: "/bien-etre",
+          href: "/art-commerce",
           image:
             "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
         },
@@ -1436,9 +1439,7 @@ const Header = () => {
                         <FileText className="mr-2 h-4 w-4" />
                         Mes documents
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/mon-compte/agenda")}
-                      >
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/agenda")}>
                         <Calendar1 className="mr-2 h-4 w-4" />
                         Mon agenda
                       </DropdownMenuItem>

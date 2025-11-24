@@ -174,7 +174,7 @@ const FormateurTabContent: React.FC<FormateurTabContentProps> = ({ onSelectCours
         ))}
       </div>
 
-      {/* Section de recommandation */}
+      {/*
       <div className="mt-16 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200">
         <h3 className="text-2xl font-bold text-gray-900 mb-4">Formation sur Mesure</h3>
         <p className="text-gray-700 mb-6">
@@ -183,7 +183,7 @@ const FormateurTabContent: React.FC<FormateurTabContentProps> = ({ onSelectCours
         <button className="bg-slate-900 text-white px-8 py-3 rounded-xl hover:bg-slate-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl">
           Demander une formation personnalisée
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

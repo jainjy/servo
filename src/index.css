@@ -484,3 +484,31 @@ body:has(.radix-dialog[data-state="open"]) {
 .leaflet-isolated {
   isolation: isolate;
 }
+
+/* Ajouter dans votre fichier CSS global */
+.user-location-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-routing-container {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  max-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.leaflet-routing-alt {
+  max-height: 200px;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}

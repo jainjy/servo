@@ -96,7 +96,7 @@ interface PropertyDetailPageProps {
 
 const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   gsap.registerPlugin(ScrollTrigger);
-
+  console.log("Détails de la propriété:", property);
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -253,7 +253,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   };
 
   const statusBadge = getStatusBadge();
-  const isAvailable = property.status === "published" && property.isActive;
+  const isAvailable = (property.isActive);
   const mm = gsap.matchMedia();
   useEffect(() => {
     mm.add("(min-width: 1024px)", () => {

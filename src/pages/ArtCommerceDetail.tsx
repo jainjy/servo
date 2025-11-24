@@ -591,7 +591,7 @@ const ArtCommerceDetail = () => {
               {/* Contact & Actions */}
               <div className="lg:w-1/3">
 
-                <div className="bg-white rounded-xl p-6 sticky top-6 border border-gray-200 shadow-lg">
+                <div className=" rounded-xl p-6 border border-gray-200 shadow-lg">
 
                   <h3 className="text-lg font-semibold mb-6 text-slate-900">Contact & Actions</h3>
 

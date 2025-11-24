@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Leaf, Heart, Sparkles, Star, ShoppingCart, Plus, Minus, Eye, ArrowRight, Truck, Shield, Clock, ShoppingCartIcon, AlertTriangle } from 'lucide-react';
+import { Leaf, Heart, Sparkles, Star, ShoppingCart, Plus, Minus, Eye, ArrowRight, Truck, Shield, Clock, ShoppingCartIcon, AlertTriangle, Search } from 'lucide-react';
 
 interface Product {
     id: number;
@@ -130,6 +130,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
  */
 /*******  fa6afbdf-4435-41c0-b7fb-23033d190e5a  *******/const BoutiqueBienEtre: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('tous');
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -230,6 +231,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
         ? products
         : products.filter(product => product.category === selectedCategory);
 
+    // Appliquer le filtre de recherche sur les produits filtrés par catégorie
+    const searchFilteredProducts = filteredProducts.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.benefits.some(benefit => benefit.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
     const features = [
         {
             icon: <Leaf className="w-6 h-6" />,
@@ -292,6 +300,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                         <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
                             Nos Catégories
                         </h2>
+                        
+                        {/* Barre de recherche */}
+                        <div className="mb-8 max-w-md mx-auto">
+                            <div className="relative">
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Rechercher un produit..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                                />
+                            </div>
+                        </div>
+
                         <div className="flex flex-wrap justify-center gap-3 mb-8">
                             {categories.map((category) => (
                                 <button
@@ -315,14 +338,38 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                     </div>
 
                     {/* Products Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-                        {filteredProducts.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                onQuickView={setQuickViewProduct}
-                            />
-                        ))}
+                    <div className="mb-16">
+                        {searchFilteredProducts.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {searchFilteredProducts.map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                        onQuickView={setQuickViewProduct}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-16">
+                                <Search className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                                <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                                    Aucun produit trouvé
+                                </h3>
+                                <p className="text-gray-500 mb-6">
+                                    {searchQuery 
+                                        ? `Aucun produit ne correspond à "${searchQuery}"` 
+                                        : 'Aucun produit disponible dans cette catégorie'}
+                                </p>
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                                    >
+                                        Réinitialiser la recherche
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
                 {/* Newsletter */}

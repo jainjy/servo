@@ -28,9 +28,10 @@ import {
   Plane,
   Zap,
   Calendar,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
-import  api  from "@/lib/api";
+import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 // Types d'événements basés sur votre base de données
@@ -180,6 +181,17 @@ const PopupDateMultiple = ({
                       </span>
                     )}
                   </div>
+                  
+                  {/* NOM DE L'UTILISATEUR BIEN VISIBLE */}
+                  {evenement.client?.nom && (
+                    <div className="flex items-center gap-2 mb-2 p-1 bg-blue-50 rounded-md border border-blue-100">
+                      <User size={12} className="text-blue-600 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-blue-700 truncate">
+                        {evenement.client.nom}
+                      </span>
+                    </div>
+                  )}
+                  
                   <div className="flex items-center gap-2 mb-1">
                     <TypeIcon size={12} className="text-gray-400" />
                     <span className="text-xs text-gray-600">
@@ -433,6 +445,66 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
   );
 };
 
+// Composant Événement du Calendrier
+const EventItem = ({ evenement, isMobile = false }) => {
+  const TypeIcon = TYPES_EVENEMENTS[evenement.type]?.icon || CalendarIcon;
+
+  return (
+    <div
+      className={`w-full text-white cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 rounded-lg ${
+        isMobile ? 'p-2 mb-1 text-xs' : 'p-2 mb-1 text-sm'
+      }`}
+      style={{
+        backgroundColor: evenement.couleur,
+        borderLeftColor: "rgba(255,255,255,0.5)",
+        minHeight: isMobile ? '50px' : '70px',
+      }}
+    >
+      {/* Version Bureau - Structure complète */}
+      {!isMobile && (
+        <>
+          <div className="font-semibold truncate mb-1 leading-tight">
+            {evenement.titre}
+          </div>
+          <div className="flex items-center gap-1 text-xs opacity-90 mb-1">
+            <TypeIcon size={12} />
+            <span>{evenement.heureDebut}</span>
+          </div>
+          {/* NOM DU CLIENT BIEN VISIBLE - BUREAU */}
+          {evenement.client?.nom && (
+            <div className="flex items-center gap-1 text-xs font-semibold bg-white/20 rounded px-1 py-0.5 mt-1">
+              <User size={10} />
+              <span className="truncate">{evenement.client.nom}</span>
+            </div>
+          )}
+        </>
+      )}
+      
+      {/* Version Mobile - Structure simplifiée */}
+      {isMobile && (
+        <>
+          <div className="font-semibold truncate mb-1 leading-tight text-[10px]">
+            {evenement.titre}
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 text-[10px] opacity-90">
+              <TypeIcon size={10} />
+              <span>{evenement.heureDebut}</span>
+            </div>
+            {/* NOM DU CLIENT BIEN VISIBLE - MOBILE */}
+            {evenement.client?.nom && (
+              <div className="flex items-center gap-1 text-[10px] font-semibold bg-white/20 rounded px-1">
+                <User size={8} />
+                <span className="truncate max-w-[60px]">{evenement.client.nom}</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const AgendaPage = () => {
   const [vue, setVue] = useState("semaine");
   const [dateCourante, setDateCourante] = useState(new Date());
@@ -453,6 +525,7 @@ const AgendaPage = () => {
     evenements: [],
     position: { x: 0, y: 0 },
   });
+  const [menuMobileOuvert, setMenuMobileOuvert] = useState(false);
 
   // Charger les événements depuis l'API
   const chargerEvenements = async () => {
@@ -685,34 +758,47 @@ const AgendaPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pt-16">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* En-tête */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
-          <div className="flex items-center gap-4 mb-4 lg:mb-0">
-            <div className="p-3 rounded-xl bg-white shadow-lg border border-blue-100">
-              <CalendarIcon size={32} className="text-blue-500" />
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 lg:mb-0">
+            <div className="p-2 sm:p-3 rounded-xl bg-white shadow-lg border border-blue-100">
+              <CalendarIcon size={24} className="sm:w-8 sm:h-8 text-blue-500" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Agenda Global
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-sm sm:text-lg text-gray-600">
                 Tous vos événements et rendez-vous en un seul endroit
               </p>
             </div>
           </div>
+          
+          {/* Menu mobile */}
+          <div className="lg:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
+              className="flex items-center gap-2"
+            >
+              <Menu size={16} />
+              Menu
+            </Button>
+          </div>
         </div>
 
         {/* Filtres par type de date */}
-        <Card className="p-6 mb-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
-          <div className="flex flex-col gap-4">
+        <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
-              <Filter size={20} className="text-gray-500" />
-              <h3 className="font-semibold text-gray-900">
+              <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                 Filtrer par période
               </h3>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
               {Object.entries(FILTRES_DATE).map(([key, filtre]) => {
                 const FiltreIcon = filtre.icon;
                 const isActive = filtres.filtreDate === key;
@@ -725,14 +811,17 @@ const AgendaPage = () => {
                     onClick={() =>
                       setFiltres((prev) => ({ ...prev, filtreDate: key }))
                     }
-                    className={`flex items-center gap-2 ${
+                    className={`flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
                       isActive
                         ? "bg-blue-500 text-white border-blue-500"
                         : "border-gray-300 text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    <FiltreIcon size={14} />
-                    {filtre.label}
+                    <FiltreIcon size={12} className="sm:w-3 sm:h-3" />
+                    <span className="hidden xs:inline">{filtre.label}</span>
+                    <span className="xs:hidden">
+                      {filtre.label.split(' ')[filtre.label.split(' ').length - 1]}
+                    </span>
                   </Button>
                 );
               })}
@@ -741,10 +830,10 @@ const AgendaPage = () => {
         </Card>
 
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
             {
-              label: "Événements total",
+              label: "Total",
               value: statistiques.total,
               color: "blue",
               icon: CalendarIcon,
@@ -756,7 +845,7 @@ const AgendaPage = () => {
               icon: Star,
             },
             {
-              label: "Cette semaine",
+              label: "Semaine",
               value: statistiques.cetteSemaine,
               color: "purple",
               icon: Clock,
@@ -770,51 +859,51 @@ const AgendaPage = () => {
           ].map((stat, index) => (
             <Card
               key={index}
-              className="p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:shadow-lg transition-shadow"
+              className="p-3 sm:p-4 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <div
-                    className={`text-2xl font-bold text-${stat.color}-600 mb-2`}
+                    className={`text-lg sm:text-2xl font-bold text-${stat.color}-600 mb-1 sm:mb-2`}
                   >
                     {stat.value}
                   </div>
-                  <div className="text-gray-600">{stat.label}</div>
+                  <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
                 </div>
                 <div
-                  className={`p-3 rounded-xl bg-${stat.color}-100 text-${stat.color}-600`}
+                  className={`p-2 sm:p-3 rounded-xl bg-${stat.color}-100 text-${stat.color}-600`}
                 >
-                  <stat.icon size={24} />
+                  <stat.icon size={18} className="sm:w-6 sm:h-6" />
                 </div>
               </div>
             </Card>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
           {/* Colonne principale - Calendrier */}
-          <div className="xl:col-span-3">
+          <div className={`xl:col-span-3 ${menuMobileOuvert ? 'hidden lg:block' : 'block'}`}>
             {/* Barre de filtres avancés */}
-            <Card className="p-6 mb-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex flex-wrap gap-3">
+            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 sm:gap-4">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   <Button
                     variant="outline"
                     onClick={aujourdhui}
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                    className="border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm"
                   >
                     Aujourd'hui
                   </Button>
-                  <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-gray-200">
-                    <Button variant="ghost" size="icon" onClick={precedenteSemaine}>
-                      <ChevronLeft size={16} />
+                  <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-lg p-1 border border-gray-200">
+                    <Button variant="ghost" size="icon" onClick={precedenteSemaine} className="w-8 h-8">
+                      <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={semaineSuivante}>
-                      <ChevronRight size={16} />
+                    <Button variant="ghost" size="icon" onClick={semaineSuivante} className="w-8 h-8">
+                      <ChevronRight size={14} className="sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                   <select
-                    className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm"
+                    className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm text-xs sm:text-sm"
                     value={vue}
                     onChange={(e) => setVue(e.target.value)}
                   >
@@ -825,17 +914,17 @@ const AgendaPage = () => {
                   <Button
                     variant="outline"
                     onClick={chargerEvenements}
-                    className="border-green-200 text-green-600 hover:bg-green-50"
+                    className="border-green-200 text-green-600 hover:bg-green-50 text-xs sm:text-sm"
                   >
-                    <RefreshCw size={16} className="mr-2" />
+                    <RefreshCw size={14} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Actualiser
                   </Button>
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center pt-4 border-t border-gray-200/50">
-                <div className="flex-1 flex flex-wrap gap-4">
+              <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-start md:items-center pt-4 border-t border-gray-200/50">
+                <div className="flex-1 grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
                   <select
-                    className="p-2 border border-gray-200 rounded-lg text-sm bg-white shadow-sm"
+                    className="p-2 border border-gray-200 rounded-lg text-xs sm:text-sm bg-white shadow-sm"
                     value={filtres.type}
                     onChange={(e) =>
                       setFiltres({ ...filtres, type: e.target.value })
@@ -850,7 +939,7 @@ const AgendaPage = () => {
                   </select>
 
                   <select
-                    className="p-2 border border-gray-200 rounded-lg text-sm bg-white shadow-sm"
+                    className="p-2 border border-gray-200 rounded-lg text-xs sm:text-sm bg-white shadow-sm"
                     value={filtres.statut}
                     onChange={(e) =>
                       setFiltres({ ...filtres, statut: e.target.value })
@@ -867,7 +956,7 @@ const AgendaPage = () => {
                   <Input
                     type="date"
                     placeholder="Date début"
-                    className="text-sm bg-white"
+                    className="text-xs sm:text-sm bg-white"
                     value={filtres.dateDebut}
                     onChange={(e) =>
                       setFiltres({ ...filtres, dateDebut: e.target.value })
@@ -877,7 +966,7 @@ const AgendaPage = () => {
                   <Input
                     type="date"
                     placeholder="Date fin"
-                    className="text-sm bg-white"
+                    className="text-xs sm:text-sm bg-white"
                     value={filtres.dateFin}
                     onChange={(e) =>
                       setFiltres({ ...filtres, dateFin: e.target.value })
@@ -897,20 +986,20 @@ const AgendaPage = () => {
                       filtreDate: "TOUT",
                     })
                   }
-                  className="border-red-200 text-red-600 hover:bg-red-50"
+                  className="border-red-200 text-red-600 hover:bg-red-50 text-xs sm:text-sm mt-2 sm:mt-0"
                 >
-                  <Filter size={16} className="mr-2" />
+                  <Filter size={14} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Réinitialiser
                 </Button>
               </div>
             </Card>
 
-            {/* Calendrier Semaine */}
+            {/* Calendrier Semaine - Version Responsive */}
             {vue === "semaine" && (
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
-                {/* En-tête des jours */}
-                <div className="grid grid-cols-8 gap-2 mb-6">
-                  <div className="p-3"></div>
+              <Card className="p-3 sm:p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50 overflow-x-auto">
+                {/* En-tête des jours - Version mobile compacte */}
+                <div className="grid grid-cols-8 gap-1 sm:gap-2 mb-4 sm:mb-6 min-w-[800px]">
+                  <div className="p-2 sm:p-3"></div>
                   {joursSemaine.map((date, index) => {
                     const estAujourdhui =
                       date.toDateString() === new Date().toDateString();
@@ -921,11 +1010,11 @@ const AgendaPage = () => {
                     return (
                       <div
                         key={index}
-                        className={`p-4 text-center rounded-xl transition-all cursor-pointer ${
+                        className={`p-2 sm:p-3 sm:p-4 text-center rounded-lg sm:rounded-xl transition-all cursor-pointer ${
                           estAujourdhui
                             ? "bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-lg transform -translate-y-1"
                             : "bg-white border border-gray-200 hover:shadow-md"
-                        } ${hasMultipleEvents ? "ring-2 ring-yellow-400" : ""}`}
+                        } ${hasMultipleEvents ? "ring-1 sm:ring-2 ring-yellow-400" : ""}`}
                         onClick={(e) => {
                           if (hasMultipleEvents) {
                             ouvrirPopupDate(
@@ -937,7 +1026,7 @@ const AgendaPage = () => {
                         }}
                       >
                         <div
-                          className={`font-semibold capitalize mb-1 ${
+                          className={`font-semibold capitalize mb-1 text-xs sm:text-sm ${
                             estAujourdhui ? "text-white" : "text-gray-600"
                           }`}
                         >
@@ -946,7 +1035,7 @@ const AgendaPage = () => {
                           })}
                         </div>
                         <div
-                          className={`text-2xl font-bold ${
+                          className={`text-lg sm:text-2xl font-bold ${
                             estAujourdhui ? "text-white" : "text-gray-900"
                           }`}
                         >
@@ -954,13 +1043,13 @@ const AgendaPage = () => {
                         </div>
                         {hasMultipleEvents && (
                           <div
-                            className={`text-xs mt-2 px-2 py-1 rounded-full ${
+                            className={`text-xs mt-1 sm:mt-2 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full ${
                               estAujourdhui
                                 ? "bg-white/20 text-white"
                                 : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
-                            {evenementsDuJour.length} événements
+                            {evenementsDuJour.length}
                           </div>
                         )}
                       </div>
@@ -968,14 +1057,14 @@ const AgendaPage = () => {
                   })}
                 </div>
 
-                {/* Grille horaire améliorée */}
-                <div className="relative">
+                {/* Grille horaire améliorée et responsive */}
+                <div className="relative min-w-[800px]">
                   {heuresJournee.map((heure) => (
                     <div
                       key={heure}
                       className="flex border-t border-gray-200/50"
                     >
-                      <div className="w-20 py-4 pr-4 text-right text-sm text-gray-500 font-medium">
+                      <div className="w-16 sm:w-20 py-3 sm:py-4 pr-2 sm:pr-4 text-right text-xs sm:text-sm text-gray-500 font-medium">
                         {heure.toString().padStart(2, "0")}:00
                       </div>
 
@@ -992,40 +1081,25 @@ const AgendaPage = () => {
                         return (
                           <div
                             key={jourIndex}
-                            className="flex-1 min-h-20 border-l border-gray-200/50 relative group"
+                            className="flex-1 min-h-16 sm:min-h-20 border-l border-gray-200/50 relative group"
                           >
-                            {evenementsDuJour.map((evenement, eventIndex) => {
-                              const TypeIcon =
-                                TYPES_EVENEMENTS[evenement.type]?.icon ||
-                                CalendarIcon;
-                              return (
-                                <div
-                                  key={evenement.id}
-                                  className="absolute left-1 right-1 rounded-lg p-3 text-white text-sm cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4"
-                                  style={{
-                                    backgroundColor: evenement.couleur,
-                                    borderLeftColor: "rgba(255,255,255,0.5)",
-                                    top: `${eventIndex * 70}px`,
-                                    height: "65px",
-                                    zIndex: 10 + eventIndex,
-                                  }}
-                                  onClick={() =>
-                                    ouvrirDetailsEvenement(evenement)
-                                  }
-                                >
-                                  <div className="font-semibold truncate text-sm mb-1">
-                                    {evenement.titre}
-                                  </div>
-                                  <div className="flex items-center gap-2 text-xs opacity-90">
-                                    <TypeIcon size={12} />
-                                    <span>{evenement.heureDebut}</span>
-                                  </div>
-                                  <div className="text-xs opacity-80 truncate mt-1">
-                                    {evenement.client?.nom}
-                                  </div>
-                                </div>
-                              );
-                            })}
+                            {evenementsDuJour.map((evenement, eventIndex) => (
+                              <div
+                                key={evenement.id}
+                                className="absolute left-0.5 right-0.5 sm:left-1 sm:right-1"
+                                style={{
+                                  top: `${eventIndex * (window.innerWidth < 640 ? 55 : 75)}px`,
+                                  height: window.innerWidth < 640 ? '50px' : '70px',
+                                  zIndex: 10 + eventIndex,
+                                }}
+                                onClick={() => ouvrirDetailsEvenement(evenement)}
+                              >
+                                <EventItem 
+                                  evenement={evenement} 
+                                  isMobile={window.innerWidth < 640}
+                                />
+                              </div>
+                            ))}
                           </div>
                         );
                       })}
@@ -1034,21 +1108,18 @@ const AgendaPage = () => {
                 </div>
               </Card>
             )}
-
-            {/* Autres vues (Mois et Liste) restent similaires mais avec le nouveau design */}
-            {/* ... Le code pour les vues Mois et Liste reste le même que précédemment ... */}
           </div>
 
-          {/* Colonne latérale */}
-          <div className="space-y-6">
+          {/* Colonne latérale - Cachée sur mobile quand le menu est fermé */}
+          <div className={`space-y-4 sm:space-y-6 ${menuMobileOuvert ? 'block' : 'hidden lg:block'}`}>
             {/* Événements du jour */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900">
-                <Star size={20} className="text-yellow-500" />
+            <Card className="p-4 sm:p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 text-gray-900">
+                <Star size={18} className="sm:w-5 sm:h-5 text-yellow-500" />
                 Aujourd'hui
               </h3>
 
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
                 {evenementsFiltres
                   .filter(
                     (evenement) =>
@@ -1063,38 +1134,45 @@ const AgendaPage = () => {
                     return (
                       <div
                         key={evenement.id}
-                        className="p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-white"
+                        className="p-2 sm:p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-white"
                         onClick={() => ouvrirDetailsEvenement(evenement)}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-start justify-between mb-1 sm:mb-2">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <TypeIcon
-                              size={16}
+                              size={14}
+                              className="sm:w-4 sm:h-4"
                               style={{ color: evenement.couleur }}
                             />
-                            <span className="font-semibold text-sm text-gray-900">
+                            <span className="font-semibold text-xs sm:text-sm text-gray-900">
                               {evenement.heureDebut || "Toute la journée"}
                             </span>
                           </div>
                           <Badge
-                            className={
-                              STATUT_EVENEMENT[evenement.statut]?.color
-                            }
+                            className={`text-xs ${STATUT_EVENEMENT[evenement.statut]?.color}`}
                           >
                             {STATUT_EVENEMENT[evenement.statut]?.label ||
                               evenement.statut}
                           </Badge>
                         </div>
 
-                        <div className="text-sm font-medium mb-1 text-gray-900">
+                        <div className="text-xs sm:text-sm font-medium mb-1 text-gray-900">
                           {evenement.titre}
                         </div>
+
+                        {/* NOM DU CLIENT BIEN VISIBLE DANS LA COLONNE LATÉRALE */}
+                        {evenement.client?.nom && (
+                          <div className="flex items-center gap-2 mb-1 p-1 bg-blue-50 rounded border border-blue-100">
+                            <User size={12} className="text-blue-600 flex-shrink-0" />
+                            <span className="text-xs font-semibold text-blue-700">
+                              {evenement.client.nom}
+                            </span>
+                          </div>
+                        )}
 
                         <div className="text-xs text-gray-600">
                           {TYPES_EVENEMENTS[evenement.type]?.label ||
                             evenement.type}
-                          {evenement.client?.nom &&
-                            ` • ${evenement.client.nom}`}
                         </div>
                       </div>
                     );
@@ -1104,24 +1182,24 @@ const AgendaPage = () => {
                   (evenement) =>
                     evenement.date === new Date().toISOString().split("T")[0]
                 ).length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-6 sm:py-8 text-gray-500">
                     <CalendarIcon
-                      size={32}
-                      className="mx-auto mb-2 text-gray-300"
+                      size={24}
+                      className="sm:w-8 sm:h-8 mx-auto mb-2 text-gray-300"
                     />
-                    <p>Aucun événement aujourd'hui</p>
+                    <p className="text-sm sm:text-base">Aucun événement aujourd'hui</p>
                   </div>
                 )}
               </div>
             </Card>
 
             {/* Types d'événements */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
-              <h3 className="text-xl font-bold mb-4 text-gray-900">
+            <Card className="p-4 sm:p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900">
                 Types d'événements
               </h3>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {Object.entries(TYPES_EVENEMENTS).map(([key, type]) => {
                   const count = evenements.filter((e) => e.type === key).length;
                   const isActive = filtres.type === key;
@@ -1129,7 +1207,7 @@ const AgendaPage = () => {
                   return (
                     <div
                       key={key}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                      className={`flex items-center justify-between p-2 sm:p-3 rounded-lg cursor-pointer transition-all ${
                         isActive
                           ? "bg-blue-50 border border-blue-200"
                           : "hover:bg-gray-50 border border-transparent"
@@ -1141,22 +1219,22 @@ const AgendaPage = () => {
                         }))
                       }
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div
-                          className="w-3 h-3 rounded-full"
+                          className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
                           style={{
                             backgroundColor: type.color
                               .replace("bg-", "#")
                               .replace("-500", ""),
                           }}
                         />
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">
                           {type.label}
                         </span>
                       </div>
                       <Badge
                         variant="secondary"
-                        className={isActive ? "bg-blue-500 text-white" : ""}
+                        className={`text-xs ${isActive ? "bg-blue-500 text-white" : ""}`}
                       >
                         {count}
                       </Badge>
@@ -1190,7 +1268,7 @@ const AgendaPage = () => {
         evenement={evenementSelectionne}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
