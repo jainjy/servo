@@ -361,14 +361,17 @@ export default function MonComptePage() {
     <>
       <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-16">
         {/* Couverture style Facebook */}
-        <div className="h-64 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 relative">
-          <div className="absolute inset-0 opacity-30">
-            <div className="w-full h-full" style={{
-              backgroundImage: 'url(/metal.jpg)',
-              backgroundSize: '100% 100%',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center center',
-            }} />
+        <div className="h-64 relative">
+          <div className="absolute flex justify-around inset-0 opacity-50 ">
+            <img src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
+            className="w-64 h-64 overflow-hidden rounded-full"
+            alt="" />
+            <img src="https://i.pinimg.com/736x/43/b9/1c/43b91c953ebadc481316a2f9230ddf8a.jpg"
+            className="w-64 h-64"
+            alt="" />
+            <img src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
+            className="w-64 h-64"
+            alt="" />
           </div>
         </div>
 
@@ -386,7 +389,7 @@ export default function MonComptePage() {
                     {/* Avatar */}
                     <div className="flex flex-col items-center mb-6">
                       <div className="relative mb-4">
-                        <div className="p-1 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full shadow-lg">
+                        <div className="p-1 bg-purple-400 rounded-full shadow-lg">
                           <Avatar
                             className="w-32 h-32 cursor-pointer border-4 border-white"
                             onClick={handleAvatarClick}

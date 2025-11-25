@@ -938,7 +938,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
         {/* AFFICHAGE CONDITIONNEL : SPINNER OU GRILLE DES PRESTATIONS */}
         {isLoadingServices ? (
-          <div className="text-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
+          <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
           <img src="/loading.gif" alt="" className='w-24 h-24'/>
             <p className="mt-4 text-xl font-semibold text-gray-700">
               Chargement des prestations...

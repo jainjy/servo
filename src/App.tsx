@@ -152,6 +152,7 @@ import ProgrammeNeuf from "./components/components/Programme_neuf";
 import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
+import Donation from "./components/components/Don";
 
 const queryClient = new QueryClient();
 
@@ -407,6 +408,7 @@ const App = () => {
                   <Route path="/actualites" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
+                  <Route path="/don" element={<Donation />} />
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
                   <Route path="/PSLA" element={<CartesBiensImmobiliers />} />
@@ -543,6 +545,7 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
+                    {/* <Route path="/mes-reservations-cours" element={<UserReservations />} /> */}
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
