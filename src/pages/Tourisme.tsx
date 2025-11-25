@@ -1008,7 +1008,7 @@ const confirmBooking = async () => {
                   </div>
                 ))
               ) : (
-                <div className='flex flex-col gap-4'>
+                <div className='flex flex-col items-center justify-center gap-4'>
                   <img src="/loading.gif" alt="" className='w-24 h-24' />
                   <p className="text-gray-500 italic px-4">Chargement des destinations...</p>
                 </div>

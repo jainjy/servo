@@ -160,6 +160,7 @@ import UserReservations from "./pages/UserReservations";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
 import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import Donation from "./components/components/Don";
 
 const queryClient = new QueryClient();
 
@@ -415,6 +416,7 @@ const App = () => {
                   <Route path="/blog" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
+                  <Route path="/don" element={<Donation />} />
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
                   <Route path="/carte" element={<MapPage />} />
                   <Route path="/PSLA" element={<CartesBiensImmobiliers />} />

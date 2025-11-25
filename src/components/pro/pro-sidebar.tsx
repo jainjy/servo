@@ -184,15 +184,17 @@ export function ProSidebar() {
     <>
       {/* Logo & header */}
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-        <div className="p-1 rounded-full bg-white border-black border-2">
-          <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-sidebar-foreground">
-            SERVO
-          </h1>
-          <p className="text-xs text-muted-foreground">Espace Pro</p>
-        </div>
+        <Link to='/pro' className="flex items-center gap-2">
+          <div className="p-1 rounded-full bg-white border-black border-2">
+            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-sidebar-foreground">
+              SERVO
+            </h1>
+            <p className="text-xs text-muted-foreground">Espace Pro</p>
+          </div>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -254,15 +256,17 @@ export function ProSidebar() {
       {/* Mobile: header */}
       <div className="flex md:hidden  items-center h-16 border-b border-sidebar-border px-4  w-screen fixed top-0 left-0 z-40">
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-full bg-white border-black border-2">
-            <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold text-sidebar-foreground">
-              SERVO
-            </h1>
-            <p className="text-xs text-muted-foreground">Espace Pro</p>
-          </div>
+          <Link to='/pro'>
+            <div className="p-1 rounded-full bg-white border-black border-2">
+              <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-sidebar-foreground">
+                SERVO
+              </h1>
+              <p className="text-xs text-muted-foreground">Espace Pro</p>
+            </div>
+          </Link>
         </div>
 
 
