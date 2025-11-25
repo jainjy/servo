@@ -406,7 +406,7 @@ const App = () => {
                   />
                   <Route path="/entreprise" element={<Entreprise />} />
                   <Route path="/financement" element={<Financement />} />
-                  <Route path="/actualites" element={<Actualites />} />
+                  <Route path="/blog" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
                   {/* 🗺️ NOUVELLE ROUTE POUR LA CARTE */}
