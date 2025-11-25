@@ -79,7 +79,9 @@ export const tourismeAPI = {
     api.get('/admin/tourisme/accommodations', { params }),
   
   getTouristicPlaces: (params = {}) => 
-    api.get('/admin/tourisme/places', { params })
+    api.get('/admin/tourisme/places', { params }),
+   getFlights: (params = {}) => 
+    api.get('/Vol/flights', { params }),
 };
 
 // Services pour l'upload
