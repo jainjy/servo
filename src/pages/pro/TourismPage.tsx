@@ -4,19 +4,24 @@ import {
   Heart, Bed, Wifi, Car, Utensils, Snowflake, Dumbbell, Tv,
   CheckCircle, X, 
   Edit, Trash2, Eye, PlusCircle, Building, Bath, Square,
-  TrendingUp, Home, Upload, Trash, Landmark, Camera, Clock, Globe
+  TrendingUp, Home, Upload, Trash, Landmark, Camera, Clock, Globe,
+  Plane, Hotel, Mountain, ChevronDown, Calendar, Clock3
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { tourismeAPI } from "../../lib/api";
-import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+import AjoutVolModal from '../../components/components/AjoutVol'; 
 
 export default function TourismPage() {
-  const [contentType, setContentType] = useState('accommodations'); // 'accommodations' ou 'touristic_places'
+  const [contentType, setContentType] = useState('accommodations');
   const [listings, setListings] = useState([]);
+  const [flights, setFlights] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [flightsLoading, setFlightsLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [stats, setStats] = useState(null);
+  const { user } = useAuth();
   const [filters, setFilters] = useState({
     destination: '',
     checkIn: '',
@@ -52,6 +57,13 @@ export default function TourismPage() {
     specialRequests: '',
     paymentMethod: 'card'
   });
+  
+  // États pour les dropdowns
+  const [showAddDropdown, setShowAddDropdown] = useState(false);
+  const [showContentTypeDropdown, setShowContentTypeDropdown] = useState(false);
+  const [showFlightModal, setShowFlightModal] = useState(false);
+  const [showAirlineModal, setShowAirlineModal] = useState(false);
+  
   const sliderRef = useRef(null);
 
   // Amenities disponibles avec icônes
@@ -73,11 +85,68 @@ export default function TourismPage() {
     { id: 'museum', label: 'Musée', icon: Building },
     { id: 'park', label: 'Parc/Jardin', icon: null },
     { id: 'beach', label: 'Plage', icon: null },
-    { id: 'mountain', label: 'Montagne', icon: null },
+    { id: 'mountain', label: 'Montagne', icon: Mountain },
     { id: 'religious', label: 'Site religieux', icon: null },
     { id: 'historical', label: 'Site historique', icon: Landmark },
     { id: 'cultural', label: 'Site culturel', icon: Camera },
     { id: 'natural', label: 'Site naturel', icon: null }
+  ];
+
+  // Options pour le dropdown d'ajout
+  const addOptions = [
+    {
+      id: 'accommodation',
+      label: 'Ajouter un hébergement',
+      icon: Hotel,
+      action: () => {
+        setContentType('accommodations');
+        setEditingListing(null);
+        setShowAdminModal(true);
+        setShowAddDropdown(false);
+      }
+    },
+    {
+      id: 'touristic_place',
+      label: 'Ajouter un lieu touristique',
+      icon: Landmark,
+      action: () => {
+        setContentType('touristic_places');
+        setEditingListing(null);
+        setShowAdminModal(true);
+        setShowAddDropdown(false);
+      }
+    },
+    {
+      id: 'flight',
+      label: 'Ajouter un vol',
+      icon: Plane,
+      action: () => {
+        setShowFlightModal(true);
+        setShowAddDropdown(false);
+      }
+    },
+  ];
+
+  // Options pour le dropdown de type de contenu
+  const contentTypeOptions = [
+    {
+      id: 'accommodations',
+      label: '🏨 Hébergements',
+      icon: Hotel,
+      description: 'Gérer vos hébergements et propriétés'
+    },
+    {
+      id: 'touristic_places',
+      label: '🗼 Lieux Touristiques',
+      icon: Landmark,
+      description: 'Gérer vos lieux touristiques'
+    },
+    {
+      id: 'flights',
+      label: '✈️ Services de Vol',
+      icon: Plane,
+      description: 'Gérer vos vols et compagnies aériennes'
+    }
   ];
 
   // Fonction pour réinitialiser complètement les filtres
@@ -107,8 +176,10 @@ export default function TourismPage() {
   useEffect(() => {
     if (contentType === 'accommodations') {
       loadAccommodations();
-    } else {
+    } else if (contentType === 'touristic_places') {
       loadTouristicPlaces();
+    } else if (contentType === 'flights') {
+      loadFlights();
     }
     loadStats();
   }, [contentType]);
@@ -167,6 +238,25 @@ export default function TourismPage() {
     }
   };
 
+  const loadFlights = async () => {
+    try {
+      setFlightsLoading(true);
+      const response = await tourismeAPI.getFlights();
+      console.log('✈️ Réponse API vols:', response.data);
+      
+      if (response.data.success) {
+        const flightsData = response.data.data;
+        setFlights(flightsData);
+        console.log('✅ Vols chargés:', flightsData.length);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des vols:', error);
+      toast.error('Erreur lors du chargement des vols');
+    } finally {
+      setFlightsLoading(false);
+    }
+  };
+
   const loadStats = async () => {
     try {
       setStatsLoading(true);
@@ -184,8 +274,10 @@ export default function TourismPage() {
     }
   };
 
-  // Filtrer les résultats
+  // Filtrer les résultats (pour hébergements et lieux touristiques)
   useEffect(() => {
+    if (contentType === 'flights') return;
+
     let results = listings;
 
     console.log('🎯 DÉBUT FILTRAGE - Filtres actuels:', filters);
@@ -428,7 +520,31 @@ export default function TourismPage() {
     }
   };
 
-  // Composant Carte
+  const toggleFavorite = (id) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+        toast.success('Retiré des favoris');
+      } else {
+        newFavorites.add(id);
+        toast.success('Ajouté aux favoris');
+      }
+      return newFavorites;
+    });
+  };
+
+  const handleBooking = (listing) => {
+    setSelectedListing(listing);
+    setBookingForm(prev => ({
+      ...prev,
+      listingId: listing.id,
+      guests: listing.maxGuests || 2
+    }));
+    setShowBookingModal(true);
+  };
+
+  // Composant Carte pour Hébergements et Lieux Touristiques
   const ListingCard = ({ listing }) => {
     const isTouristicPlace = listing.isTouristicPlace;
     const TypeIcon = getTypeIcon(listing.type, isTouristicPlace, listing.category);
@@ -496,18 +612,20 @@ export default function TourismPage() {
           )}
 
           {/* Statut disponibilité */}
-          <div className="absolute bottom-3 right-3">
-            <button
-              onClick={() => toggleAvailability(listing.id)}
-              className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${
-                listing.available
-                  ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-red-500 text-white hover:bg-red-600'
-              }`}
-            >
-              {listing.available ? '✓ Disponible' : '✗ Indisponible'}
-            </button>
-          </div>
+          {user?.role === 'professional' && (
+            <div className="absolute bottom-3 right-3">
+              <button
+                onClick={() => toggleAvailability(listing.id)}
+                className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${
+                  listing.available
+                    ? 'bg-green-500 text-white hover:bg-green-600'
+                    : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
+              >
+                {listing.available ? '✓ Disponible' : '✗ Indisponible'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Contenu */}
@@ -528,17 +646,20 @@ export default function TourismPage() {
               <span className="font-semibold text-gray-900">{listing.rating}</span>
               <span className="text-gray-500 ml-1">({listing.reviewCount} avis)</span>
             </div>
-            <button
-              onClick={() => toggleFeatured(listing.id)}
-              className={`p-1 rounded-full transition-all duration-300 ${
-                listing.featured
-                  ? 'text-yellow-500 bg-yellow-50'
-                  : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-              }`}
-              title={listing.featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
-            >
-              <Star className={`w-4 h-4 ${listing.featured ? 'fill-current' : ''}`} />
-            </button>
+            
+            {user?.role === 'professional' && (
+              <button
+                onClick={() => toggleFeatured(listing.id)}
+                className={`p-1 rounded-full transition-all duration-300 ${
+                  listing.featured
+                    ? 'text-yellow-500 bg-yellow-50'
+                    : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+                }`}
+                title={listing.featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
+              >
+                <Star className={`w-4 h-4 ${listing.featured ? 'fill-current' : ''}`} />
+              </button>
+            )}
           </div>
 
           {/* Informations spécifiques */}
@@ -616,20 +737,87 @@ export default function TourismPage() {
               <Eye className="w-4 h-4 mr-1" />
               Détails
             </button>
-            <button
-              onClick={() => openEditModal(listing)}
-              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
-              title="Modifier"
-            >
-              <Edit className="w-4 h-4" />
+            
+            {user?.role === 'professional' && (
+              <>
+                <button
+                  onClick={() => openEditModal(listing)}
+                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
+                  title="Modifier"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteListing(listing.id)}
+                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Composant Carte pour Vols
+  const FlightCard = ({ flight }) => {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">
+                {flight.departureCity} → {flight.arrivalCity}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {flight.airline} • {flight.flightNumber}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-600">{flight.price}€</div>
+              <div className="text-sm text-gray-500">par personne</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <div className="text-sm text-gray-600">Départ</div>
+              <div className="font-semibold">{new Date(flight.departureTime).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-600">Arrivée</div>
+              <div className="font-semibold">{new Date(flight.arrivalTime).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+            <div className="flex items-center">
+              <Clock3 className="w-4 h-4 mr-1" />
+              <span>Durée: {flight.duration}</span>
+            </div>
+            <div className="flex items-center">
+              <Users className="w-4 h-4 mr-1" />
+              <span>Places: {flight.availableSeats}</span>
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg font-medium text-sm transition-all duration-300">
+              Réserver
             </button>
-            <button
-              onClick={() => handleDeleteListing(listing.id)}
-              className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
-              title="Supprimer"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {user?.role === 'professional' && (
+              <>
+                <button className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300">
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -821,262 +1009,384 @@ export default function TourismPage() {
   };
 
   // Interface Admin avec cartes
-  const AdminInterface = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">
-            {contentType === 'accommodations' ? 'Gestion des Hébergements' : 'Gestion des Lieux Touristiques'}
-          </h1>
-          <p className="text-gray-600">
-            {contentType === 'accommodations' 
-              ? 'Administrez vos propriétés et réservations' 
-              : 'Administrez vos lieux touristiques et attractions'}
-          </p>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {/* Sélecteur de type de contenu */}
-          <div className="flex bg-gray-100 rounded-xl p-1">
-            <button
-              onClick={() => setContentType('accommodations')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                contentType === 'accommodations'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              🏨 Hébergements
-            </button>
-            <button
-              onClick={() => setContentType('touristic_places')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                contentType === 'touristic_places'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              🗼 Lieux Touristiques
-            </button>
+  const AdminInterface = () => {
+    const currentContentType = contentTypeOptions.find(opt => opt.id === contentType);
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">
+              {currentContentType?.label || 'Gestion du Tourisme'}
+            </h1>
+            <p className="text-gray-600">
+              {currentContentType?.description || 'Administrez vos services touristiques'}
+            </p>
           </div>
-
-          <button
-            onClick={() => {
-              setEditingListing(null);
-              setShowAdminModal(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-          >
-            <PlusCircle className="w-5 h-5 mr-2" />
-            {contentType === 'accommodations' ? 'Ajouter un hébergement' : 'Ajouter un lieu touristique'}
-          </button>
-        </div>
-      </div>
-
-      {/* Statistiques */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-            <div className="flex items-center">
-              <Building className="w-8 h-8 text-blue-600 mr-4" />
-              <div>
-                <div className="text-2xl font-bold">
-                  {contentType === 'accommodations' ? stats.totalAccommodations : stats.totalTouristicPlaces}
+          
+          <div className="flex items-center space-x-4">
+            {/* Dropdown de sélection du type de contenu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
+                className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
+              >
+                <div className="flex items-center">
+                  {currentContentType?.icon && <currentContentType.icon className="w-5 h-5 mr-3" />}
+                  <span>{currentContentType?.label || 'Sélectionner'}</span>
                 </div>
-                <div className="text-gray-600">
-                  {contentType === 'accommodations' ? 'Hébergements' : 'Lieux touristiques'}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </button>
+
+              {showContentTypeDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                  <div className="p-2">
+                    {contentTypeOptions.map((option) => {
+                      const IconComponent = option.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            setContentType(option.id);
+                            setShowContentTypeDropdown(false);
+                          }}
+                          className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                        >
+                          <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
+                          <div className="flex-1">
+                            <div className="font-semibold">{option.label}</div>
+                            <div className="text-sm text-gray-500">{option.description}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-            <div className="flex items-center">
-              <Star className="w-8 h-8 text-yellow-500 mr-4" />
-              <div>
-                <div className="text-2xl font-bold">{stats.averageRating?.toFixed(2) || '0.00'}</div>
-                <div className="text-gray-600">Note moyenne</div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-            <div className="flex items-center">
-              <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
-              <div>
-                <div className="text-2xl font-bold">{stats.availableListings}</div>
-                <div className="text-gray-600">Disponibles</div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-            <div className="flex items-center">
-              <Users className="w-8 h-8 text-purple-600 mr-4" />
-              <div>
-                <div className="text-2xl font-bold">{stats.totalBookings}</div>
-                <div className="text-gray-600">Réservations</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Grille de cartes */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-600 mt-4">Chargement...</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
-          </div>
-
-          {filteredListings.length === 0 && (
-            <div className="text-center py-12">
-              {contentType === 'accommodations' ? (
-                <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              ) : (
-                <Landmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               )}
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {contentType === 'accommodations' 
-                  ? 'Aucun hébergement trouvé' 
-                  : 'Aucun lieu touristique trouvé'}
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {listings.length === 0
-                  ? `Commencez par ajouter votre premier ${contentType === 'accommodations' ? 'hébergement' : 'lieu touristique'}.`
-                  : "Aucun élément ne correspond à vos critères de recherche."
-                }
-              </p>
-              {listings.length === 0 && (
+            </div>
+
+            {/* Afficher le dropdown d'ajout uniquement pour les professionnels */}
+            {user?.role === 'professional' && contentType !== 'flights' && (
+              <div className="relative">
                 <button
-                  onClick={() => {
-                    setEditingListing(null);
-                    setShowAdminModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                  onClick={() => setShowAddDropdown(!showAddDropdown)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
                 >
                   <PlusCircle className="w-5 h-5 mr-2" />
-                  {contentType === 'accommodations' ? 'Ajouter un hébergement' : 'Ajouter un lieu touristique'}
+                  Ajouter
+                  <ChevronDown className="w-4 h-4 ml-2" />
                 </button>
-              )}
+
+                {/* Dropdown d'ajout */}
+                {showAddDropdown && (
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                    <div className="p-2">
+                      {addOptions.map((option) => {
+                        const IconComponent = option.icon;
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={option.action}
+                            className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300"
+                          >
+                            <IconComponent className="w-5 h-5 mr-3" />
+                            <span className="font-medium">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Bouton spécifique pour ajouter un vol */}
+            {user?.role === 'professional' && contentType === 'flights' && (
+              <button
+                onClick={() => setShowFlightModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+              >
+                <PlusCircle className="w-5 h-5 mr-2" />
+                Ajouter un vol
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Statistiques */}
+        {stats && contentType !== 'flights' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Building className="w-8 h-8 text-blue-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {contentType === 'accommodations' ? stats.totalAccommodations : stats.totalTouristicPlaces}
+                  </div>
+                  <div className="text-gray-600">
+                    {contentType === 'accommodations' ? 'Hébergements' : 'Lieux touristiques'}
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </>
-      )}
-    </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Star className="w-8 h-8 text-yellow-500 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.averageRating?.toFixed(2) || '0.00'}</div>
+                  <div className="text-gray-600">Note moyenne</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.availableListings}</div>
+                  <div className="text-gray-600">Disponibles</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Users className="w-8 h-8 text-purple-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">{stats.totalBookings}</div>
+                  <div className="text-gray-600">Réservations</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Statistiques pour les vols */}
+        {contentType === 'flights' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Plane className="w-8 h-8 text-blue-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">{flights.length}</div>
+                  <div className="text-gray-600">Vols actifs</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {flights.reduce((total, flight) => total + flight.availableSeats, 0)}
+                  </div>
+                  <div className="text-gray-600">Places disponibles</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Star className="w-8 h-8 text-yellow-500 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {flights.length > 0 ? Math.min(...flights.map(f => f.price)) : 0}€
+                  </div>
+                  <div className="text-gray-600">Prix minimum</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Users className="w-8 h-8 text-purple-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {flights.reduce((total, flight) => total + (flight.bookedSeats || 0), 0)}
+                  </div>
+                  <div className="text-gray-600">Réservations</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Grille de contenu */}
+        {loading || flightsLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 mt-4">Chargement...</p>
+          </div>
+        ) : (
+          <>
+            {/* Affichage des hébergements et lieux touristiques */}
+            {(contentType === 'accommodations' || contentType === 'touristic_places') && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {filteredListings.map((listing) => (
+                    <ListingCard key={listing.id} listing={listing} />
+                  ))}
+                </div>
+
+                {filteredListings.length === 0 && (
+                  <div className="text-center py-12">
+                    {contentType === 'accommodations' ? (
+                      <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    ) : (
+                      <Landmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    )}
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {contentType === 'accommodations' 
+                        ? 'Aucun hébergement trouvé' 
+                        : 'Aucun lieu touristique trouvé'}
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      {listings.length === 0
+                        ? `Commencez par ajouter votre premier ${contentType === 'accommodations' ? 'hébergement' : 'lieu touristique'}.`
+                        : "Aucun élément ne correspond à vos critères de recherche."
+                      }
+                    </p>
+                    {listings.length === 0 && user?.role === 'professional' && (
+                      <button
+                        onClick={() => {
+                          setEditingListing(null);
+                          setShowAdminModal(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                      >
+                        <PlusCircle className="w-5 h-5 mr-2" />
+                        {contentType === 'accommodations' ? 'Ajouter un hébergement' : 'Ajouter un lieu touristique'}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Affichage des vols */}
+            {contentType === 'flights' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {flights.map((flight) => (
+                    <FlightCard key={flight.id} flight={flight} />
+                  ))}
+                </div>
+
+                {flights.length === 0 && (
+                  <div className="text-center py-12">
+                    <Plane className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Aucun vol trouvé
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      {user?.role === 'professional' 
+                        ? 'Commencez par ajouter votre premier vol.'
+                        : 'Aucun vol disponible pour le moment.'
+                      }
+                    </p>
+                    {user?.role === 'professional' && (
+                      <button
+                        onClick={() => setShowFlightModal(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                      >
+                        <PlusCircle className="w-5 h-5 mr-2" />
+                        Ajouter un vol
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const defaultForm = {
+    title: '',
+    type: 'hotel',
+    category: '',
+    price: 0,
+    city: '',
+    lat: 0,
+    lng: 0,
+    images: [],
+    amenities: [],
+    maxGuests: 2,
+    available: true,
+    featured: false,
+    description: '',
+    bedrooms: 1,
+    bathrooms: 1,
+    instantBook: false,
+    cancellationPolicy: 'moderate',
+    rating: 0,
+    reviewCount: 0,
+    isTouristicPlace: contentType === 'touristic_places',
+    openingHours: '',
+    entranceFee: '',
+    website: '',
+    contactInfo: ''
+  };
+
+  const [formData, setFormData] = useState(() =>
+    editingListing ? { ...defaultForm, ...editingListing } : { ...defaultForm }
   );
 
-  // Modal d'administration
+  const [uploading, setUploading] = useState(false);
+
+  // Sync form when editingListing or contentType changes
+  useEffect(() => {
+    if (editingListing) {
+      setFormData(prev => ({ ...defaultForm, ...editingListing }));
+    } else {
+      setFormData(prev => ({ ...defaultForm, isTouristicPlace: contentType === 'touristic_places' }));
+    }
+  }, [editingListing, contentType]);
+  
+  // Admin modal component
   const AdminModal = () => {
-    const [formData, setFormData] = useState(
-      editingListing || {
-        title: '',
-        type: 'hotel',
-        category: '',
-        price: 0,
-        city: '',
-        lat: 0,
-        lng: 0,
-        images: [],
-        amenities: [],
-        maxGuests: 2,
-        available: true,
-        featured: false,
-        description: '',
-        bedrooms: 1,
-        bathrooms: 1,
-        instantBook: false,
-        cancellationPolicy: 'moderate',
-        rating: 0,
-        reviewCount: 0,
-        isTouristicPlace: contentType === 'touristic_places',
-        openingHours: '',
-        entranceFee: '',
-        website: '',
-        contactInfo: ''
-      }
-    );
-
-    const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
-
+  
     const handleImageUpload = async (event) => {
-      const files = Array.from(event.target.files);
+      const files = Array.from(event.target.files || []);
       if (files.length === 0) return;
-
       setUploading(true);
-
       try {
-        const uploadFormData = new FormData();
-        files.forEach(file => {
-          uploadFormData.append('files', file);
-        });
-        
-        const response = await api.post(`/upload/tourism-multiple`, uploadFormData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        console.log('📤 Réponse upload:', response);
-
-        if (response.data.success) {
-          const newImageUrls = response.data.results
-            .filter(item => item.success)
-            .map(item => item.url);
-
-          setFormData(prev => ({
-            ...prev,
-            images: [...prev.images, ...newImageUrls]
-          }));
-
-          toast.success(`${newImageUrls.length} image(s) uploadée(s) avec succès`);
-        } else {
-          toast.error(response.data.error || 'Erreur lors de l\'upload des images');
-        }
+        const newImageUrls = files.map(file => URL.createObjectURL(file));
+        setFormData(prev => ({ ...prev, images: [...(prev.images || []), ...newImageUrls] }));
+        toast.success(`${newImageUrls.length} image(s) ajoutée(s)`);
       } catch (error) {
-        console.error('❌ Erreur upload:', error);
-        toast.error('Erreur lors de l\'upload des images: ' + (error.response?.data?.error || error.message));
+        console.error('❌ Erreur upload local:', error);
+        toast.error('Erreur lors de l\'ajout des images: ' + (error?.message || ''));
       } finally {
         setUploading(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
       }
     };
-
+  
     const handleRemoveImage = (index) => {
-      setFormData(prev => ({
-        ...prev,
-        images: prev.images.filter((_, i) => i !== index)
-      }));
+      setFormData(prev => ({ ...prev, images: (prev.images || []).filter((_, i) => i !== index) }));
     };
-
+  
     const handleSubmit = (e) => {
       e.preventDefault();
       console.log('📝 Soumission formulaire:', formData);
-      
       if (editingListing) {
         handleEditListing(formData);
       } else {
         handleAddListing(formData);
       }
     };
-
+  
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-bold text-gray-900">
-                {editingListing 
-                  ? `Modifier ${formData.isTouristicPlace ? 'le lieu touristique' : 'l\'hébergement'}` 
-                  : contentType === 'accommodations' ? 'Nouvel hébergement' : 'Nouveau lieu touristique'
-                }
+                {editingListing
+                  ? `Modifier ${formData.isTouristicPlace ? 'le lieu touristique' : 'l\'hébergement'}`
+                  : contentType === 'accommodations'
+                  ? 'Nouvel hébergement'
+                  : 'Nouveau lieu touristique'}
               </h3>
               <button
                 onClick={() => {
@@ -1089,7 +1399,7 @@ export default function TourismPage() {
               </button>
             </div>
           </div>
-
+  
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Sélecteur de type principal */}
             {!editingListing && (
@@ -1100,11 +1410,7 @@ export default function TourismPage() {
                   value={formData.isTouristicPlace ? 'touristic_place' : formData.type}
                   onChange={(e) => {
                     const isTouristic = e.target.value === 'touristic_place';
-                    setFormData(prev => ({
-                      ...prev,
-                      isTouristicPlace: isTouristic,
-                      type: isTouristic ? 'touristic_place' : e.target.value
-                    }));
+                    setFormData(prev => ({ ...prev, isTouristicPlace: isTouristic, type: isTouristic ? 'touristic_place' : e.target.value }));
                   }}
                 >
                   <optgroup label="Hébergements">
@@ -1119,7 +1425,7 @@ export default function TourismPage() {
                 </select>
               </div>
             )}
-
+  
             {/* Champs conditionnels pour lieux touristiques */}
             {formData.isTouristicPlace && (
               <>
@@ -1137,7 +1443,7 @@ export default function TourismPage() {
                     ))}
                   </select>
                 </div>
-
+  
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Horaires d'ouverture</label>
@@ -1160,7 +1466,7 @@ export default function TourismPage() {
                     />
                   </div>
                 </div>
-
+  
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Site web</label>
@@ -1184,7 +1490,7 @@ export default function TourismPage() {
                 </div>
               </>
             )}
-
+  
             {/* Champs pour hébergements */}
             {!formData.isTouristicPlace && (
               <>
@@ -1216,7 +1522,7 @@ export default function TourismPage() {
                     />
                   </div>
                 </div>
-
+  
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Chambres</label>
@@ -1250,7 +1556,7 @@ export default function TourismPage() {
                     />
                   </div>
                 </div>
-
+  
                 <div className="grid grid-cols-2 gap-4">
                   <label className="flex items-center">
                     <input
@@ -1276,14 +1582,10 @@ export default function TourismPage() {
                 </div>
               </>
             )}
-
+  
             {/* Section Images */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-4">
-                Images
-              </label>
-
-              {/* Zone d'upload */}
+              <label className="block text-sm font-semibold text-gray-700 mb-4">Images</label>
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-4">
                 <input
                   type="file"
@@ -1302,7 +1604,7 @@ export default function TourismPage() {
                 >
                   {uploading ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
                       Upload en cours...
                     </>
                   ) : (
@@ -1312,21 +1614,15 @@ export default function TourismPage() {
                     </>
                   )}
                 </button>
-                <p className="text-sm text-gray-500 mt-2">
-                  Formats supportés: JPG, PNG, WebP. Maximum 10 images, 10MB par image.
-                </p>
+                <p className="text-sm text-gray-500 mt-2">Formats supportés: JPG, PNG, WebP. Maximum 10 images, 10MB par image.</p>
               </div>
-
+  
               {/* Aperçu des images */}
-              {formData.images.length > 0 && (
+              {(formData.images || []).length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
+                  {(formData.images || []).map((image, index) => (
                     <div key={index} className="relative group">
-                      <img
-                        src={image}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
+                      <img src={image} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(index)}
@@ -1339,7 +1635,7 @@ export default function TourismPage() {
                 </div>
               )}
             </div>
-
+  
             {/* Champs communs */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -1363,7 +1659,7 @@ export default function TourismPage() {
                 />
               </div>
             </div>
-
+  
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
               <textarea
@@ -1373,7 +1669,7 @@ export default function TourismPage() {
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-
+  
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Note</label>
@@ -1398,7 +1694,7 @@ export default function TourismPage() {
                 />
               </div>
             </div>
-
+  
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Équipements</label>
               <div className="grid grid-cols-3 gap-2">
@@ -1407,7 +1703,7 @@ export default function TourismPage() {
                     <input
                       type="checkbox"
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={formData.amenities?.includes(amenity.id) || false}
+                      checked={(formData.amenities || []).includes(amenity.id)}
                       onChange={(e) => {
                         const currentAmenities = formData.amenities || [];
                         if (e.target.checked) {
@@ -1422,7 +1718,7 @@ export default function TourismPage() {
                 ))}
               </div>
             </div>
-
+  
             <div className="grid grid-cols-2 gap-4">
               <label className="flex items-center">
                 <input
@@ -1443,14 +1739,11 @@ export default function TourismPage() {
                 <span className="ml-2 text-sm text-gray-700">Mettre en vedette</span>
               </label>
             </div>
-
+  
             <div className="flex space-x-4 pt-6">
               <button
                 type="button"
-                onClick={() => {
-                  setShowAdminModal(false);
-                  setEditingListing(null);
-                }}
+                onClick={() => { setShowAdminModal(false); setEditingListing(null); }}
                 className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
               >
                 Annuler
@@ -1460,6 +1753,104 @@ export default function TourismPage() {
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
               >
                 {editingListing ? 'Modifier' : 'Créer'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal pour compagnie aérienne
+  const AirlineModal = () => {
+    const [formData, setFormData] = useState({
+      name: '',
+      code: '',
+      country: '',
+      website: '',
+      logo: ''
+    });
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      console.log('Données compagnie aérienne:', formData);
+      toast.success('Compagnie aérienne ajoutée avec succès');
+      setShowAirlineModal(false);
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-2xl font-bold text-gray-900">Nouvelle compagnie aérienne</h3>
+              <button
+                onClick={() => setShowAirlineModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Nom *</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Code *</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={formData.code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Pays</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={formData.country}
+                  onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Site web</label>
+                <input
+                  type="url"
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={formData.website}
+                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-4 pt-6">
+              <button
+                type="button"
+                onClick={() => setShowAirlineModal(false)}
+                className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
+              >
+                Créer
               </button>
             </div>
           </form>
@@ -1478,6 +1869,19 @@ export default function TourismPage() {
       {/* Modals */}
       {showAdminModal && <AdminModal />}
       {showDetailModal && <DetailModal />}
+      {showFlightModal && (
+        <AjoutVolModal
+          isOpen={showFlightModal}
+          onClose={() => setShowFlightModal(false)}
+          onSubmit={(flightData) => {
+            console.log('Nouveau vol:', flightData);
+            toast.success('Vol ajouté avec succès');
+            setShowFlightModal(false);
+            loadFlights();
+          }}
+        />
+      )}
+      {showAirlineModal && <AirlineModal />}
     </div>
   );
 }

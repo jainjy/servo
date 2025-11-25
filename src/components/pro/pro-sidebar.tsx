@@ -17,6 +17,7 @@ import {
   Leaf,
   ShoppingCart,
   Video,
+  Plane,
   BookOpen,
   Plus,
   WalletCards,
@@ -38,7 +39,7 @@ const navigation = [
   { name: "Abonnements", href: "/pro/subscription", icon: WalletCards },
   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-  // { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
+  { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
   // { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
   {
