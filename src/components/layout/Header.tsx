@@ -418,7 +418,7 @@ const Header = () => {
         },{
           title: "Blogs et conseils",
           description: "Actualités et astuces immobilières",
-          href: "/actualites",
+          href: "/blog",
           image:
             "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
         },
