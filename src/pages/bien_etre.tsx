@@ -337,6 +337,8 @@ const BienEtre = () => {
   const navigate = useNavigate();
   const section2Ref = useRef(null);
 
+  // DÉPLACER LE USESTATE ICI, À L'INTÉRIEUR DU COMPOSANT
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -508,57 +510,56 @@ const BienEtre = () => {
           <SlideIn direction="down">
             <LayoutGroup>
               <div className="bg-gradient-to-r from-white to-slate-50 dark:from-card dark:to-card/80 rounded-3xl shadow-xl px-4 py-6 mb-12 w-full mx-auto border border-slate-200/40 dark:border-slate-700/40">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                {tabs.map((tab, index) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`group relative flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-300 overflow-hidden flex-1 sm:flex-none justify-center ${
-                      activeTab === tab.id
-                        ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg hover:shadow-xl'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60'
-                    }`}
-                  >
-                    {/* Fond animé pour l'onglet actif */}
-                    {activeTab === tab.id && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl -z-10"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    
-                    {/* Icône animée */}
-                    <motion.span
-                      animate={{
-                        scale: activeTab === tab.id ? 1.15 : 1,
-                        rotate: activeTab === tab.id ? 5 : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'}`}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  {tabs.map((tab, index) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`group relative flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-300 overflow-hidden flex-1 sm:flex-none justify-center ${activeTab === tab.id
+                          ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg hover:shadow-xl'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60'
+                        }`}
                     >
-                      {tab.icon}
-                    </motion.span>
+                      {/* Fond animé pour l'onglet actif */}
+                      {activeTab === tab.id && (
+                        <motion.div
+                          layoutId="activeTab"
+                          className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl -z-10"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
 
-                    {/* Label */}
-                    <motion.span
-                      animate={{
-                        x: activeTab === tab.id ? 2 : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className="text-sm sm:text-base font-bold relative z-10 whitespace-nowrap"
-                    >
-                      {tab.label}
-                    </motion.span>
+                      {/* Icône animée */}
+                      <motion.span
+                        animate={{
+                          scale: activeTab === tab.id ? 1.15 : 1,
+                          rotate: activeTab === tab.id ? 5 : 0,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className={`relative z-10 ${activeTab === tab.id ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'}`}
+                      >
+                        {tab.icon}
+                      </motion.span>
 
-                    {/* Indicateur de sélection sous l'onglet inactif */}
-                    {activeTab !== tab.id && (
-                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full group-hover:w-1/2 transition-all duration-300" />
-                    )}
-                  </button>
-                ))}
+                      {/* Label */}
+                      <motion.span
+                        animate={{
+                          x: activeTab === tab.id ? 2 : 0,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className="text-sm sm:text-base font-bold relative z-10 whitespace-nowrap"
+                      >
+                        {tab.label}
+                      </motion.span>
+
+                      {/* Indicateur de sélection sous l'onglet inactif */}
+                      {activeTab !== tab.id && (
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full group-hover:w-1/2 transition-all duration-300" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
             </LayoutGroup>
           </SlideIn>
 
@@ -573,58 +574,49 @@ const BienEtre = () => {
               className="bg-white dark:bg-card rounded-3xl shadow-xl p-8 md:p-12 min-h-[500px] border border-slate-200/40 dark:border-slate-700/40"
             >
 
-            {/* FORMATEUR */}
-            {activeTab === 'Formateur' && (
-              <SlideIn direction="left">
-                <FormateurTabContent 
-                  onSelectCourse={(category, course) => {
-                    console.log(`Formation sélectionnée: ${category} - ${course}`);
-                  }}
-                />
-              </SlideIn>
-            )}
-
-            {/* THERAPEUTE */}
-            {activeTab === 'Thérapeute' && (
-              <section className="mb-20">
+              {/* FORMATEUR */}
+              {activeTab === 'Formateur' && (
                 <SlideIn direction="left">
-                  <div className="mb-12">
-                    <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
-                      Consultation en visio
-                    </h2>
-                    <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
-                      Accédez à l'expertise où que vous soyez. Nos consultations à distance maintiennent la qualité d'un accompagnement personnalisé avec une flexibilité totale. Idéal pour un suivi régulier ou des conseils ponctuels.
-                    </p>
+                  <FormateurTabContent
+                    onSelectCourse={setSelectedCourse}
+                    selectedCourse={selectedCourse}
+                  />
+                </SlideIn>
+              )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                      {getCurrentServices().length > 0 ? (
-                        getCurrentServices().map((service, index) => (
-                          <SlideIn key={service.id || index} direction="up" delay={index * 100}>
-                            <ServiceCard
-                              service={service}
-                              index={index}
-                              onOpenModal={handleOpenModal}
-                            />
-                          </SlideIn>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
-                          Aucun service disponible pour cette catégorie
-                        </div>
-                      )}
+              {/* THERAPEUTE */}
+              {activeTab === 'Thérapeute' && (
+                <section className="mb-20">
+                  <SlideIn direction="left">
+                    <div className="mb-12">
+                      <h2 className="text-2xl lg:text-3xl mb-4 font-bold text-slate-900 dark:text-foreground">
+                        Consultation en visio
+                      </h2>
+                      <p className="text-gray-700 dark:text-muted-foreground mb-8 text-base lg:text-md leading-relaxed max-w-3xl">
+                        Accédez à l'expertise où que vous soyez. Nos consultations à distance maintiennent la qualité d'un accompagnement personnalisé avec une flexibilité totale. Idéal pour un suivi régulier ou des conseils ponctuels.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                        {getCurrentServices().length > 0 ? (
+                          getCurrentServices().map((service, index) => (
+                            <SlideIn key={service.id || index} direction="up" delay={index * 100}>
+                              <ServiceCard
+                                service={service}
+                                index={index}
+                                onOpenModal={handleOpenModal}
+                              />
+                            </SlideIn>
+                          ))
+                        ) : (
+                          <div className="text-center py-8 text-gray-500 dark:text-muted-foreground col-span-full">
+                            Aucun service disponible pour cette catégorie
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </SlideIn>
-              </section>
-            )}
-            {/* PODCASTS
-            {activeTab === 'Podcasteur' && (
-              <section className="mb-20">
-                <SlideIn direction="right">
-                  <PodcastsBienEtre />
-                </SlideIn>
-              </section>
-            )} */}
+                  </SlideIn>
+                </section>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
