@@ -26,6 +26,7 @@ import {
   UserCheck,
   Filter,
   Download,
+  Calendar,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -133,6 +134,7 @@ export function UsersTable() {
 
     try {
       await api.delete(`/users/${user.id}`);
+      console.log("User deleted successfully");
       toast.success("Utilisateur supprimé avec succès");
       fetchUsers();
     } catch (error) {
@@ -349,10 +351,6 @@ export function UsersTable() {
                         <DropdownMenuItem onClick={() => handleEdit(user)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Envoyer un email
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => navigator.clipboard.writeText(user.id)}

@@ -154,6 +154,7 @@ import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
 import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 
 const queryClient = new QueryClient();
 
@@ -571,6 +572,7 @@ const App = () => {
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
+                    <Route path="subscriptions" element={<AdminSubscriptions />} />
                     <Route path="products" element={<Products />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="reports" element={<Reports />} />

@@ -11,6 +11,7 @@ import {
   Ruler,
   Tag,
   FileText,
+  WalletCards,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
@@ -18,6 +19,7 @@ import logo from '../../assets/logo.png';
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Utilisateurs", href: "/admin/users", icon: Users },
+  { name: "Abonnement Pro", href: "/admin/subscriptions", icon: WalletCards },
   // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Audit", href: "/admin/audits", icon: ShieldCheck },

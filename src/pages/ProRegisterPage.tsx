@@ -110,6 +110,10 @@ const ProRegisterPage = () => {
       toast.error("Veuillez accepter les conditions d'utilisation");
       return;
     }
+    if (formData.metiers.length ==0) {
+      toast.error("Veuillez accepter ajouters au moins un metiers");
+      return;
+    }
     // DÉTERMINER userType BASÉ SUR L'ABONNEMENT EXACT
     let finalUserType = "CLIENT"; // Valeur par défaut
     if (subscriptionData) {
