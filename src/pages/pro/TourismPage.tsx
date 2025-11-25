@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import { tourismeAPI } from "../../lib/api";
 import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function TourismPage() {
   const [contentType, setContentType] = useState('accommodations'); // 'accommodations' ou 'touristic_places'
@@ -17,6 +18,7 @@ export default function TourismPage() {
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(false);
   const [stats, setStats] = useState(null);
+    const { user } = useAuth();
   const [filters, setFilters] = useState({
     destination: '',
     checkIn: '',
@@ -496,6 +498,8 @@ export default function TourismPage() {
           )}
 
           {/* Statut disponibilité */}
+         {/* Statut disponibilité - uniquement pour les professionnels */}
+        {user?.role === 'professional' && (
           <div className="absolute bottom-3 right-3">
             <button
               onClick={() => toggleAvailability(listing.id)}
@@ -508,6 +512,7 @@ export default function TourismPage() {
               {listing.available ? '✓ Disponible' : '✗ Indisponible'}
             </button>
           </div>
+        )}
         </div>
 
         {/* Contenu */}
@@ -521,25 +526,30 @@ export default function TourismPage() {
             </p>
           </div>
 
-          {/* Note et Avis */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-              <span className="font-semibold text-gray-900">{listing.rating}</span>
-              <span className="text-gray-500 ml-1">({listing.reviewCount} avis)</span>
-            </div>
-            <button
-              onClick={() => toggleFeatured(listing.id)}
-              className={`p-1 rounded-full transition-all duration-300 ${
-                listing.featured
-                  ? 'text-yellow-500 bg-yellow-50'
-                  : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-              }`}
-              title={listing.featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
-            >
-              <Star className={`w-4 h-4 ${listing.featured ? 'fill-current' : ''}`} />
-            </button>
-          </div>
+            {/* Note et Avis */}
+          {/* Dans la section Note et Avis du ListingCard */}
+<div className="flex items-center justify-between mb-4">
+  <div className="flex items-center">
+    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+    <span className="font-semibold text-gray-900">{listing.rating}</span>
+    <span className="text-gray-500 ml-1">({listing.reviewCount} avis)</span>
+  </div>
+  
+  {/* Afficher le bouton vedette uniquement pour les professionnels */}
+  {user?.role === 'professional' && (
+    <button
+      onClick={() => toggleFeatured(listing.id)}
+      className={`p-1 rounded-full transition-all duration-300 ${
+        listing.featured
+          ? 'text-yellow-500 bg-yellow-50'
+          : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+      }`}
+      title={listing.featured ? 'Retirer des vedettes' : 'Mettre en vedette'}
+    >
+      <Star className={`w-4 h-4 ${listing.featured ? 'fill-current' : ''}`} />
+    </button>
+  )}
+</div>
 
           {/* Informations spécifiques */}
           {isTouristicPlace ? (
@@ -608,29 +618,36 @@ export default function TourismPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex space-x-2">
-            <button
-              onClick={() => openDetailModal(listing)}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center"
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              Détails
-            </button>
-            <button
-              onClick={() => openEditModal(listing)}
-              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
-              title="Modifier"
-            >
-              <Edit className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleDeleteListing(listing.id)}
-              className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
-              title="Supprimer"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Dans le composant ListingCard, modifier la section Actions */}
+<div className="flex space-x-2">
+  <button
+    onClick={() => openDetailModal(listing)}
+    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center"
+  >
+    <Eye className="w-4 h-4 mr-1" />
+    Détails
+  </button>
+  
+  {/* Afficher les boutons Modifier et Supprimer uniquement pour les professionnels */}
+  {user?.role === 'professional' && (
+    <>
+      <button
+        onClick={() => openEditModal(listing)}
+        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
+        title="Modifier"
+      >
+        <Edit className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDeleteListing(listing.id)}
+        className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
+        title="Supprimer"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </>
+  )}
+</div>
         </div>
       </div>
     );
@@ -821,7 +838,9 @@ export default function TourismPage() {
   };
 
   // Interface Admin avec cartes
-  const AdminInterface = () => (
+// Interface Admin avec cartes
+const AdminInterface = () => {
+  return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -860,16 +879,19 @@ export default function TourismPage() {
             </button>
           </div>
 
-          <button
-            onClick={() => {
-              setEditingListing(null);
-              setShowAdminModal(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-          >
-            <PlusCircle className="w-5 h-5 mr-2" />
-            {contentType === 'accommodations' ? 'Ajouter un hébergement' : 'Ajouter un lieu touristique'}
-          </button>
+          {/* Afficher le bouton d'ajout uniquement pour les professionnels */}
+          {user?.role === 'professional' && (
+            <button
+              onClick={() => {
+                setEditingListing(null);
+                setShowAdminModal(true);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+            >
+              <PlusCircle className="w-5 h-5 mr-2" />
+              {contentType === 'accommodations' ? 'Ajouter un hébergement' : 'Ajouter un lieu touristique'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -951,7 +973,8 @@ export default function TourismPage() {
                   : "Aucun élément ne correspond à vos critères de recherche."
                 }
               </p>
-              {listings.length === 0 && (
+              {/* Afficher le bouton d'ajout uniquement pour les professionnels */}
+              {listings.length === 0 && user?.role === 'professional' && (
                 <button
                   onClick={() => {
                     setEditingListing(null);
@@ -969,6 +992,7 @@ export default function TourismPage() {
       )}
     </div>
   );
+};
 
   // Modal d'administration
   const AdminModal = () => {
@@ -1341,7 +1365,7 @@ export default function TourismPage() {
             </div>
 
             {/* Champs communs */}
-            <div className="grid grid-cols-2 gap-4">
+           <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Titre *</label>
                 <input
@@ -1349,9 +1373,15 @@ export default function TourismPage() {
                   required
                   className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      title: e.target.value
+                    }))
+                  }
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Ville *</label>
                 <input
@@ -1359,11 +1389,15 @@ export default function TourismPage() {
                   required
                   className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={formData.city}
-                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      city: e.target.value
+                    }))
+                  }
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
               <textarea
