@@ -240,6 +240,7 @@ const App = () => {
                     element={<PodcastsBienEtre />}
                   />
                   <Route path="/programme-neuf" element={<ProgrammeNeuf />} />
+                  {/* 🆕 ROUTE POUR INVESTISSEMENT INTERNATIONAL */}
                   <Route
                     path="/investir-etranger"
                     element={<InvestirEtranger />}
@@ -587,6 +588,12 @@ const App = () => {
                     <Route
                       path="financement-demandes"
                       element={<FinancementDemandes />}
+                    />
+
+                    {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
+                    <Route
+                      path="investissement-demandes"
+                      element={<div>Interface admin pour les demandes d'investissement international (à créer)</div>}
                     />
                   </Route>
                   {/* Section not found Routes */}
