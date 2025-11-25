@@ -29,6 +29,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import api from "@/lib/api";
+import { formatDate } from "date-fns";
 
 const ProRegisterPage = () => {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ const ProRegisterPage = () => {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [metiersList, setMetiersList] = useState([]);
   const [metiersLoading, setMetiersLoading] = useState(false);
+  const { signupPro } = useAuth();
   const [formData, setFormData] = useState({
     // Informations de base
     firstName: "",
@@ -47,34 +49,27 @@ const ProRegisterPage = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-
     // Type d'utilisateur
-    userType: subscriptionData.userTypes[0],// PRESTATAIRE | VENDEUR  | ADMIN | AGENCE | BIEN_ETRE
+    userType: subscriptionData.userTypes[0], // PRESTATAIRE | VENDEUR | ADMIN | AGENCE | BIEN_ETRE
     role: "professional", // particular ou professional
     demandType: "", // agence immobilier, particulier ou syndicat
-
     // Informations entreprise (si professionnel)
     companyName: "",
     commercialName: "",
     siret: "",
-
     // Adresse
     address: "",
     addressComplement: "",
     zipCode: "",
     city: "",
-
     // Coordonnées GPS
     latitude: "",
     longitude: "",
-
     // Métiers (si prestataire)
     metiers: [] as number[],
-
     acceptTerms: false,
     dataImported: false,
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const bienEtreMetiers = [
@@ -84,7 +79,6 @@ const ProRegisterPage = () => {
     "Masseur",
     "Formateur",
   ];
-
   useEffect(() => {
     // Charger les métiers depuis l'API
     const loadMetiers = async () => {
@@ -99,32 +93,25 @@ const ProRegisterPage = () => {
         setMetiersLoading(false);
       }
     };
-
     loadMetiers();
   }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (step === 1) {
       setStep(2);
       return;
     }
-
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
       return;
     }
-
     if (!formData.acceptTerms) {
       toast.error("Veuillez accepter les conditions d'utilisation");
       return;
     }
-
     // DÉTERMINER userType BASÉ SUR L'ABONNEMENT EXACT
     let finalUserType = "CLIENT"; // Valeur par défaut
-
     if (subscriptionData) {
       // Mapping exact basé sur les abonnements de vos images
       console.log(subscriptionData);
@@ -134,11 +121,9 @@ const ProRegisterPage = () => {
         "Espace Annonceur": "VENDEUR",
         "Bien-être": "BIEN_ETRE",
       };
-
       finalUserType =
         subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
     }
-
     // Créer le mapping metiersLabel
     const metiersLabel: { [key: number]: string } = {};
     formData.metiers.forEach((metierId) => {
@@ -147,25 +132,32 @@ const ProRegisterPage = () => {
         metiersLabel[metierId] = metier.libelle;
       }
     });
-
-    // Redirection vers la page de paiement avec TOUTES les données
-    navigate("/register/professional/payment", {
-      state: {
-        formData: {
-          ...formData,
-          userType: finalUserType,
+    // Appel à l'API d'inscription sans paiement
+    setIsLoading(true);
+    formData.userType = finalUserType;
+    formData.metiers = formData.metiers || [];
+    try {
+      const response = await signupPro(formData, subscriptionData.truePlanId);
+      toast.success("Inscription réussie ! Essai gratuit de 2 mois activé.");
+      // Redirection vers la page de succès
+      navigate("/register/success", {
+        state: {
+          user: response.user,
+          metiersLabel: metiersLabel,
+          plan: subscriptionData,
+          metiers: formData.metiers,
         },
-        metiersLabel,
-        subscriptionData,
-      },
-    });
+      });
+    } catch (error) {
+      toast.error("Erreur lors de l'inscription");
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   // Afficher l'abonnement sélectionné dans le formulaire
   useEffect(() => {
     if (subscriptionData) {
       console.log("Subscription selected:", subscriptionData);
-
       // Pré-remplir userType basé sur l'abonnement exact
       const subscriptionToUserType: { [key: string]: string } = {
         "Pro Immobilier Complet": "AGENCE",
@@ -173,7 +165,6 @@ const ProRegisterPage = () => {
         "Espace Annonceur": "VENDEUR",
         "Bien-être": "BIEN_ETRE",
       };
-
       const userTypeFromSubscription =
         subscriptionToUserType[subscriptionData.name];
       if (userTypeFromSubscription) {
@@ -184,14 +175,12 @@ const ProRegisterPage = () => {
       }
     }
   }, [subscriptionData]);
-
   const handleInputChange = (
     field: string,
     value: string | boolean | number[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
   const handleMetierToggle = (metierId: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -200,7 +189,6 @@ const ProRegisterPage = () => {
         : [...prev.metiers, metierId],
     }));
   };
-
   const features = [
     {
       icon: <Home className="h-6 w-6" />,
@@ -223,7 +211,6 @@ const ProRegisterPage = () => {
       description: "Tout votre habitat géré depuis une seule plateforme",
     },
   ];
-
   return (
     <div className="min-h-screen flex">
       {/* Background reste identique */}
@@ -235,13 +222,11 @@ const ProRegisterPage = () => {
           className="w-full h-full object-cover"
         />
       </div>
-
       <div className="w-[80vw] lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
         {/* Sidebar reste identique */}
-        <div className="hidden lg:flex lg:flex-1  bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
+        <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
-
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
             <div className="mb-8">
               <div className="flex items-center gap-3">
@@ -265,7 +250,6 @@ const ProRegisterPage = () => {
                 plateforme
               </p>
             </div>
-
             <div className="space-y-6 ">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-4">
@@ -281,7 +265,6 @@ const ProRegisterPage = () => {
                 </div>
               ))}
             </div>
-
             <div className="mt-2 pt-8 border-t border-white/20">
               <div className="flex items-center gap-2 text-green-300 mb-2">
                 <CheckCircle className="h-4 w-4" />
@@ -296,7 +279,6 @@ const ProRegisterPage = () => {
             </div>
           </div>
         </div>
-
         <div className="relative flex-1 flex bg-white overflow-y-auto">
           <div className="w-full max-w-2xl">
             <Card className="border-0 p-0 m-0 h-full rounded-none">
@@ -312,7 +294,6 @@ const ProRegisterPage = () => {
                         : "Finalisez votre inscription"}
                     </CardDescription>
                   </div>
-
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
                       className={`w-3 h-3 rounded-full ${
@@ -327,7 +308,6 @@ const ProRegisterPage = () => {
                   </div>
                 </div>
               </CardHeader>
-
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-2">
                   {step === 1 ? (
@@ -351,7 +331,6 @@ const ProRegisterPage = () => {
                             />
                           </div>
                         </div>
-
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Nom *
@@ -367,7 +346,6 @@ const ProRegisterPage = () => {
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
                           Email *
@@ -386,7 +364,6 @@ const ProRegisterPage = () => {
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
                           Téléphone *
@@ -404,7 +381,6 @@ const ProRegisterPage = () => {
                           />
                         </div>
                       </div>
-
                       {/* Informations entreprise (si professionnel) */}
                       {formData.role === "professional" && (
                         <>
@@ -428,7 +404,6 @@ const ProRegisterPage = () => {
                               />
                             </div>
                           </div>
-
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Nom commercial
@@ -445,7 +420,6 @@ const ProRegisterPage = () => {
                               }
                             />
                           </div>
-
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Numéro SIRET
@@ -482,11 +456,12 @@ const ProRegisterPage = () => {
                             <div className="grid grid-cols-2 gap-3">
                               {metiersList.map(
                                 (metier) =>
-                                  (formData.userType== "BIEN_ETRE"?
-                                    (metier.libelle == bienEtreMetiers[0] ||
-                                    metier.libelle == bienEtreMetiers[1] ||
-                                    metier.libelle == bienEtreMetiers[2] ||
-                                    metier.libelle == bienEtreMetiers[3]): true) && (
+                                  (formData.userType == "BIEN_ETRE"
+                                    ? metier.libelle == bienEtreMetiers[0] ||
+                                      metier.libelle == bienEtreMetiers[1] ||
+                                      metier.libelle == bienEtreMetiers[2] ||
+                                      metier.libelle == bienEtreMetiers[3]
+                                    : true) && (
                                     <div
                                       key={metier.id}
                                       className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
@@ -521,7 +496,6 @@ const ProRegisterPage = () => {
                           )}
                         </div>
                       )}
-
                       {/* Adresse */}
                       <div className="space-y-2">
                         <div className="space-y-2">
@@ -541,7 +515,6 @@ const ProRegisterPage = () => {
                             />
                           </div>
                         </div>
-
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Complément d'adresse
@@ -558,7 +531,6 @@ const ProRegisterPage = () => {
                             }
                           />
                         </div>
-
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
@@ -574,7 +546,6 @@ const ProRegisterPage = () => {
                               required
                             />
                           </div>
-
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Ville *
@@ -590,7 +561,6 @@ const ProRegisterPage = () => {
                             />
                           </div>
                         </div>
-
                         {/* Coordonnées GPS (optionnelles) */}
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -617,7 +587,6 @@ const ProRegisterPage = () => {
                               pour être localisé par les clients
                             </p>
                           </div>
-
                           {/* Modal de sélection de position */}
                           <LocationPickerModal
                             open={locationModalOpen}
@@ -639,7 +608,6 @@ const ProRegisterPage = () => {
                           />
                         </div>
                       </div>
-
                       {/* Mot de passe */}
                       <div className="space-y-4">
                         <div className="space-y-2">
@@ -677,7 +645,6 @@ const ProRegisterPage = () => {
                             chiffres
                           </p>
                         </div>
-
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Confirmer le mot de passe *
@@ -715,7 +682,6 @@ const ProRegisterPage = () => {
                           </div>
                         </div>
                       </div>
-
                       {/* Conditions et importation de données */}
                       <div className="space-y-3">
                         {/* Conditions d'utilisation */}
@@ -752,7 +718,6 @@ const ProRegisterPage = () => {
                             .
                           </label>
                         </div>
-
                         {/* Importation de données */}
                         <div className="flex items-start space-x-2">
                           <Checkbox
@@ -785,7 +750,6 @@ const ProRegisterPage = () => {
                       </div>
                     </>
                   )}
-
                   {/* Boutons de navigation */}
                   <div className="flex gap-4">
                     {step === 2 && (
@@ -819,7 +783,6 @@ const ProRegisterPage = () => {
                       )}
                     </Button>
                   </div>
-
                   <div className="text-center text-sm text-gray-600 mb-4">
                     Déjà un compte ?{" "}
                     <a
@@ -838,5 +801,4 @@ const ProRegisterPage = () => {
     </div>
   );
 };
-
 export default ProRegisterPage;

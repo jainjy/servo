@@ -152,6 +152,8 @@ import ProgrammeNeuf from "./components/components/Programme_neuf";
 import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
+import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
+import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
 
 const queryClient = new QueryClient();
 
@@ -502,6 +504,14 @@ const App = () => {
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
                     <Route path="reservations" element={<ProBookings />} />
+                    <Route
+                      path="subscription"
+                      element={<SubscriptionStatusPage />}
+                    />
+                    <Route
+                      path="subscription/payment"
+                      element={<SubscriptionPaymentPage />}
+                    />
                     <Route
                       path="services"
                       element={<ProfessionalServicesPage />}

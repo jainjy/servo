@@ -18,7 +18,6 @@ import {
   BadgeCheck,
   Clock,
 } from "lucide-react";
-import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Progress } from "@/components/ui/progress";
 

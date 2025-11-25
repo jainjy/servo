@@ -17,6 +17,7 @@ import {
   Leaf,
   ShoppingCart,
   Video,
+  WalletCards,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -32,6 +33,7 @@ const navigation = [
   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
+  { name: "Abonnements", href: "/pro/subscription", icon: WalletCards },
   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   // { name: "Tourisme", href: "/pro/tourisme", icon: FileText },
