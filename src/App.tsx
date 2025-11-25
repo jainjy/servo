@@ -152,7 +152,11 @@ import ProgrammeNeuf from "./components/components/Programme_neuf";
 import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
-
+import CoursDomicile from "./pages/pro/CoursDomicil";
+import CourseForm from "./pages/pro/CoursForm";
+import CoursForm from "./pages/pro/CoursForm";
+import ProReservations from "./pages/ProReservations";
+import UserReservations from "./pages/UserReservations";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -531,7 +535,8 @@ const App = () => {
                       path="demandes-devis"
                       element={<ListeDemandesDevis />}
                     />
-
+                    <Route path="cours-domicile" element={<CoursDomicile />} />
+                    <Route path="reservations-cours" element={<ProReservations />} />
                     <Route path="media" element={<AdminMedia />} />
                   </Route>
                   {/* Section Mon Compte Routes */}
@@ -543,6 +548,7 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
+                    <Route path="mes-reservations-cours" element={<UserReservations />} />
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
