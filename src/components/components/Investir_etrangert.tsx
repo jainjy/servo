@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 const InvestirEtranger = () => {
     const [paysActive, setPaysActive] = useState('maurice');
     const [typeBien, setTypeBien] = useState('vente');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    
     const [formData, setFormData] = useState({
         nom: '',
         email: '',
@@ -134,12 +137,73 @@ const InvestirEtranger = () => {
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Effacer l'erreur quand l'utilisateur tape
+        if (error) setError(null);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Formulaire soumis:', formData);
-        alert('Merci ! Notre équipe internationale vous contacte sous 24h.');
+        setLoading(true);
+        setError(null);
+
+        // Validation
+        if (!formData.nom || !formData.email || !formData.telephone) {
+            setError('Veuillez remplir tous les champs obligatoires');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            console.log('📤 Envoi des données au backend:', formData);
+            
+            const response = await fetch('http://localhost:3001/api/investissement/demande', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nom: formData.nom,
+                    email: formData.email,
+                    telephone: formData.telephone,
+                    paysInteret: paysActive,
+                    typeInvestissement: formData.typeInvestissement,
+                    budget: formData.budget,
+                    message: formData.message
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Erreur serveur');
+            }
+
+            if (result.success) {
+                // Réinitialiser le formulaire
+                setFormData({
+                    nom: '',
+                    email: '',
+                    telephone: '',
+                    paysInteret: 'maurice',
+                    typeInvestissement: 'residentiel',
+                    budget: '',
+                    message: ''
+                });
+                
+                alert('✅ ' + result.message);
+                console.log('🎉 Demande créée avec succès:', result.data);
+                
+            } else {
+                throw new Error(result.error || 'Erreur inconnue');
+            }
+
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'envoi:', error);
+            setError(error.message);
+            alert('❌ Erreur: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const paysActuel = paysData[paysActive];
@@ -249,7 +313,8 @@ const InvestirEtranger = () => {
                                             value={formData.nom}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                                            disabled={loading}
+                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white disabled:opacity-50"
                                         />
                                     </div>
 
@@ -262,7 +327,8 @@ const InvestirEtranger = () => {
                                                 value={formData.email}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                                                disabled={loading}
+                                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white disabled:opacity-50"
                                             />
                                         </div>
                                         <div>
@@ -273,7 +339,8 @@ const InvestirEtranger = () => {
                                                 value={formData.telephone}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                                                disabled={loading}
+                                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white disabled:opacity-50"
                                             />
                                         </div>
                                     </div>
@@ -284,7 +351,8 @@ const InvestirEtranger = () => {
                                             name="typeInvestissement"
                                             value={formData.typeInvestissement}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                                            disabled={loading}
+                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white disabled:opacity-50"
                                         >
                                             <option value="residentiel">Résidentiel</option>
                                             <option value="commercial">Commercial</option>
@@ -299,7 +367,8 @@ const InvestirEtranger = () => {
                                             name="budget"
                                             value={formData.budget}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                                            disabled={loading}
+                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white disabled:opacity-50"
                                         >
                                             <option value="">Sélectionnez...</option>
                                             <option value="100-300k">100 000 - 300 000 €</option>
@@ -316,16 +385,37 @@ const InvestirEtranger = () => {
                                             rows={3}
                                             value={formData.message}
                                             onChange={handleChange}
+                                            disabled={loading}
                                             placeholder="Décrivez votre projet..."
-                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white disabled:opacity-50"
                                         ></textarea>
                                     </div>
 
+                                    {/* Affichage des erreurs */}
+                                    {error && (
+                                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                            <strong>Erreur:</strong> {error}
+                                        </div>
+                                    )}
+
                                     <button
                                         type="submit"
-                                        className="w-full bg-slate-950 hover:bg-slate-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform"
+                                        disabled={loading}
+                                        className={`w-full bg-slate-950 hover:bg-slate-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform ${
+                                            loading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+                                        }`}
                                     >
-                                        Recevoir les opportunités {paysActuel.nom}
+                                        {loading ? (
+                                            <span className="flex items-center justify-center">
+                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Envoi en cours...
+                                            </span>
+                                        ) : (
+                                            `Recevoir les opportunités ${paysActuel.nom}`
+                                        )}
                                     </button>
                                 </div>
                             </form>
