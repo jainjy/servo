@@ -95,6 +95,18 @@ export const tourismeAPI = {
   getTouristicPlaces: (params = {}) =>
     api.get("/admin/tourisme/places", { params }),
   getFlights: (params = {}) => api.get("/Vol/flights", { params }),
+   checkPlaceAvailability: (placeId, visitDate) => 
+    touristicPlaceBookingsAPI.checkAvailability(placeId, visitDate),
+
+  createPlaceBooking: (userId, bookingData) =>
+    touristicPlaceBookingsAPI.createBooking(userId, bookingData),
+
+  // Utilisez la méthode existante getTouristicPlaces
+  getTouristicPlaces: (params = {}) => 
+    api.get("/admin/tourisme/places", { params }),
+
+  // Méthode de secours
+  getListings: (params = {}) => api.get("/admin/tourisme", { params }),
 };
 
 // Services pour l'upload
@@ -420,6 +432,7 @@ export const touristicPlaceBookingsAPI = {
     api.get("/touristic-place-bookings", {
       params: { placeId, ...params },
     }),
+    
 };
 
 // Service utilitaire pour les réservations
