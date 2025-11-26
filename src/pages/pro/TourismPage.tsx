@@ -2046,76 +2046,75 @@ const loadStats = async () => {
             </p>
           </div>
 
-          // Dans le composant TourismPage, remplacez la section des boutons d'action par ceci :
+      
+        <div className="flex items-center space-x-4">
+          {/* Dropdown de sélection du type de contenu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
+              className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
+            >
+              <div className="flex items-center">
+                {currentContentType?.icon && (
+                  <currentContentType.icon className="w-5 h-5 mr-3" />
+                )}
+                <span>{currentContentType?.label || "Sélectionner"}</span>
+              </div>
+              <ChevronDown className="w-4 h-4 ml-2" />
+            </button>
 
-<div className="flex items-center space-x-4">
-  {/* Dropdown de sélection du type de contenu */}
-  <div className="relative">
-    <button
-      onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
-      className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
-    >
-      <div className="flex items-center">
-        {currentContentType?.icon && (
-          <currentContentType.icon className="w-5 h-5 mr-3" />
-        )}
-        <span>{currentContentType?.label || "Sélectionner"}</span>
-      </div>
-      <ChevronDown className="w-4 h-4 ml-2" />
-    </button>
-
-    {showContentTypeDropdown && (
-      <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
-        <div className="p-2">
-          {contentTypeOptions.map((option) => {
-            const IconComponent = option.icon;
-            return (
-              <button
-                key={option.id}
-                onClick={() => {
-                  setContentType(option.id);
-                  setShowContentTypeDropdown(false);
-                }}
-                className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
-              >
-                <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
-                <div className="flex-1">
-                  <div className="font-semibold">{option.label}</div>
-                  <div className="text-sm text-gray-500">
-                    {option.description}
-                  </div>
+            {showContentTypeDropdown && (
+              <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                <div className="p-2">
+                  {contentTypeOptions.map((option) => {
+                    const IconComponent = option.icon;
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => {
+                          setContentType(option.id);
+                          setShowContentTypeDropdown(false);
+                        }}
+                        className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                      >
+                        <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
+                        <div className="flex-1">
+                          <div className="font-semibold">{option.label}</div>
+                          <div className="text-sm text-gray-500">
+                            {option.description}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    )}
-  </div>
+              </div>
+            )}
+          </div>
 
-  {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
-  {user?.role === "professional" && (
-    <button
-      onClick={() => {
-        if (contentType === "accommodations") {
-          setEditingListing(null);
-          setShowAdminModal(true);
-        } else if (contentType === "touristic_places") {
-          setEditingListing(null);
-          setShowAdminModal(true);
-        } else if (contentType === "flights") {
-          setShowFlightModal(true);
-        }
-      }}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-    >
-      <PlusCircle className="w-5 h-5 mr-2" />
-      {contentType === "accommodations" && "Ajouter un hébergement"}
-      {contentType === "touristic_places" && "Ajouter un lieu touristique"}
-      {contentType === "flights" && "Ajouter un vol"}
-    </button>
-  )}
-</div>
+          {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
+          {user?.role === "professional" && (
+            <button
+              onClick={() => {
+                if (contentType === "accommodations") {
+                  setEditingListing(null);
+                  setShowAdminModal(true);
+                } else if (contentType === "touristic_places") {
+                  setEditingListing(null);
+                  setShowAdminModal(true);
+                } else if (contentType === "flights") {
+                  setShowFlightModal(true);
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+            >
+              <PlusCircle className="w-5 h-5 mr-2" />
+              {contentType === "accommodations" && "Ajouter un hébergement"}
+              {contentType === "touristic_places" && "Ajouter un lieu touristique"}
+              {contentType === "flights" && "Ajouter un vol"}
+            </button>
+          )}
+        </div>
         </div>
 
         {/* Statistiques pour hébergements et lieux touristiques */}

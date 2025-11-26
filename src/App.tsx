@@ -103,7 +103,8 @@ import GlobalTracking from "@/components/GlobalTracking";
 //import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
-
+ 
+import ReservationTable from "./pages/pro/ReservationBien-etre"
 // Import des nouveaux composants immobilier
 
 // Import des composants bâtiments
@@ -505,9 +506,11 @@ const App = () => {
                   />
                   {/* Section pro Routes */}
                   <Route path="/pro" element={<ProLayout />}>
+                 
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
+                     <Route path="reservationbien-etre" element={<ReservationTable />} />
                     {/* <Route path="clients" element={<ClientSection />} /> */}
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
