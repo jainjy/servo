@@ -148,6 +148,20 @@ const AdminModal = ({
   const [uploadedFiles, setUploadedFiles] = useState([]); // Fichiers à uploader
   const fileInputRef = useRef(null);
 
+  // CORRECTION : Améliorer la gestion du changement de type
+  const handleTypeChange = (e) => {
+    const selectedValue = e.target.value;
+    const isTouristic = selectedValue === "touristic_place";
+
+    setFormData((prev) => ({
+      ...prev,
+      isTouristicPlace: isTouristic,
+      type: isTouristic ? "touristic_place" : selectedValue,
+      // Réinitialiser les champs spécifiques si nécessaire
+      category: isTouristic ? "" : prev.category,
+      price: isTouristic ? 0 : prev.price,
+    }));
+  };
   // Réinitialiser le formulaire quand les props changent
   useEffect(() => {
     if (editingListing) {
@@ -229,13 +243,19 @@ const AdminModal = ({
       // Créer FormData pour l'upload des fichiers
       const submitData = new FormData();
 
-      // Ajouter les champs du formulaire
       Object.keys(formData).forEach((key) => {
         if (key !== "images" && key !== "removedImages") {
-          if (Array.isArray(formData[key])) {
-            submitData.append(key, JSON.stringify(formData[key]));
+          let value = formData[key];
+
+          // Convertir les boolean en string pour FormData
+          if (typeof value === "boolean") {
+            value = value.toString();
+          }
+
+          if (Array.isArray(value)) {
+            submitData.append(key, JSON.stringify(value));
           } else {
-            submitData.append(key, formData[key]);
+            submitData.append(key, value);
           }
         }
       });
@@ -333,14 +353,7 @@ const AdminModal = ({
                 value={
                   formData.isTouristicPlace ? "touristic_place" : formData.type
                 }
-                onChange={(e) => {
-                  const isTouristic = e.target.value === "touristic_place";
-                  setFormData((prev) => ({
-                    ...prev,
-                    isTouristicPlace: isTouristic,
-                    type: isTouristic ? "touristic_place" : e.target.value,
-                  }));
-                }}
+                onChange={handleTypeChange}
               >
                 <optgroup label="Hébergements">
                   <option value="hotel">Hôtel</option>
@@ -1440,84 +1453,6 @@ export default function TourismPage() {
     setFilteredListings(results);
   }, [filters, listings, contentType]);
 
-  // Gestion Admin
-  const handleAddListing = async (listingData) => {
-    try {
-      console.log("📤 Envoi des données:", listingData);
-
-      const response = await tourismeAPI.createListing(listingData);
-      console.log("📥 Réponse API:", response.data);
-
-      if (response.data.success) {
-        const newListing = response.data.data;
-
-        // Réinitialiser les filtres
-        resetAllFilters();
-
-        setShowAdminModal(false);
-        setEditingListing(null);
-        toast.success(
-          listingData.isTouristicPlace
-            ? "Lieu touristique créé avec succès"
-            : "Hébergement créé avec succès"
-        );
-
-        // Recharger les données
-        if (listingData.isTouristicPlace) {
-          await loadTouristicPlaces();
-        } else {
-          await loadAccommodations();
-        }
-        await loadStats();
-
-        console.log("✅ Ajout terminé");
-      }
-    } catch (error) {
-      console.error("❌ Erreur création:", error);
-      toast.error(error.response?.data?.error || "Erreur lors de la création");
-    }
-  };
-
-  const handleEditListing = async (listingData) => {
-    try {
-      console.log("✏️ Modification:", listingData);
-
-      const response = await tourismeAPI.updateListing(
-        listingData.id,
-        listingData
-      );
-      console.log("📥 Réponse modification:", response.data);
-
-      if (response.data.success) {
-        // Mise à jour optimiste
-        setListings((prev) =>
-          prev.map((l) => (l.id === listingData.id ? response.data.data : l))
-        );
-
-        setFilteredListings((prev) =>
-          prev.map((l) => (l.id === listingData.id ? response.data.data : l))
-        );
-
-        setShowAdminModal(false);
-        setEditingListing(null);
-        toast.success(
-          listingData.isTouristicPlace
-            ? "Lieu touristique modifié avec succès"
-            : "Hébergement modifié avec succès"
-        );
-
-        await loadStats();
-
-        console.log("✅ Modification terminée");
-      }
-    } catch (error) {
-      console.error("❌ Erreur modification:", error);
-      toast.error(
-        error.response?.data?.error || "Erreur lors de la modification"
-      );
-    }
-  };
-
   const handleDeleteListing = async (id) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
       return;
@@ -2086,7 +2021,7 @@ export default function TourismPage() {
   // Interface Admin avec cartes
   const AdminInterface = () => {
     const currentContentType = contentTypeOptions.find(
-      (opt) => opt.id === contentType
+      (opt) => opt.id == contentType
     );
 
     return (
@@ -2102,76 +2037,77 @@ export default function TourismPage() {
             </p>
           </div>
 
-          // Dans le composant TourismPage, remplacez la section des boutons d'action par ceci :
-
-<div className="flex items-center space-x-4">
-  {/* Dropdown de sélection du type de contenu */}
-  <div className="relative">
-    <button
-      onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
-      className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
-    >
-      <div className="flex items-center">
-        {currentContentType?.icon && (
-          <currentContentType.icon className="w-5 h-5 mr-3" />
-        )}
-        <span>{currentContentType?.label || "Sélectionner"}</span>
-      </div>
-      <ChevronDown className="w-4 h-4 ml-2" />
-    </button>
-
-    {showContentTypeDropdown && (
-      <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
-        <div className="p-2">
-          {contentTypeOptions.map((option) => {
-            const IconComponent = option.icon;
-            return (
+          <div className="flex items-center space-x-4">
+            {/* Dropdown de sélection du type de contenu */}
+            <div className="relative">
               <button
-                key={option.id}
-                onClick={() => {
-                  setContentType(option.id);
-                  setShowContentTypeDropdown(false);
-                }}
-                className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                onClick={() =>
+                  setShowContentTypeDropdown(!showContentTypeDropdown)
+                }
+                className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
               >
-                <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
-                <div className="flex-1">
-                  <div className="font-semibold">{option.label}</div>
-                  <div className="text-sm text-gray-500">
-                    {option.description}
+                <div className="flex items-center">
+                  {currentContentType?.icon && (
+                    <currentContentType.icon className="w-5 h-5 mr-3" />
+                  )}
+                  <span>{currentContentType?.label || "Sélectionner"}</span>
+                </div>
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </button>
+
+              {showContentTypeDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                  <div className="p-2">
+                    {contentTypeOptions.map((option) => {
+                      const IconComponent = option.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            setContentType(option.id);
+                            setShowContentTypeDropdown(false);
+                          }}
+                          className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                        >
+                          <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
+                          <div className="flex-1">
+                            <div className="font-semibold">{option.label}</div>
+                            <div className="text-sm text-gray-500">
+                              {option.description}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    )}
-  </div>
+              )}
+            </div>
 
-  {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
-  {user?.role === "professional" && (
-    <button
-      onClick={() => {
-        if (contentType === "accommodations") {
-          setEditingListing(null);
-          setShowAdminModal(true);
-        } else if (contentType === "touristic_places") {
-          setEditingListing(null);
-          setShowAdminModal(true);
-        } else if (contentType === "flights") {
-          setShowFlightModal(true);
-        }
-      }}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-    >
-      <PlusCircle className="w-5 h-5 mr-2" />
-      {contentType === "accommodations" && "Ajouter un hébergement"}
-      {contentType === "touristic_places" && "Ajouter un lieu touristique"}
-      {contentType === "flights" && "Ajouter un vol"}
-    </button>
-  )}
-</div>
+            {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
+            {user?.role === "professional" && (
+              <button
+                onClick={() => {
+                  if (contentType === "accommodations") {
+                    setEditingListing(null);
+                    setShowAdminModal(true);
+                  } else if (contentType === "touristic_places") {
+                    setEditingListing(null);
+                    setShowAdminModal(true);
+                  } else if (contentType === "flights") {
+                    setShowFlightModal(true);
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+              >
+                <PlusCircle className="w-5 h-5 mr-2" />
+                {contentType === "accommodations" && "Ajouter un hébergement"}
+                {contentType === "touristic_places" &&
+                  "Ajouter un lieu touristique"}
+                {contentType === "flights" && "Ajouter un vol"}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Statistiques */}

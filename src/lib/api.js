@@ -86,56 +86,16 @@ export const tourismeAPI = {
     api.patch(`/admin/tourisme/${id}/toggle-availability`),
   toggleFeatured: (id) => api.patch(`/admin/tourisme/${id}/toggle-featured`),
 
-  // Routes publiques
+  // Routes publiques (si nécessaire)
   getPublicListings: (params = {}) => api.get("/tourisme", { params }),
   getListingById: (id) => api.get(`/tourisme/${id}`),
-  getAccommodations: (params = {}) => 
-    api.get('/admin/tourisme/accommodations', { params }),
-  getTouristicPlaces: (params = {}) => 
-    api.get('/tourisme', { 
-      params: { ...params, isTouristicPlace: true } 
-    }),
-  
-  // CORRECTION : Utiliser la bonne route qui existe dans le backend
-  getTouristicPlaces: (params = {}) => 
-    api.get('/touristic-place-bookings', { params }), // Route corrigée
-  
-  getTouristicPlacesByPrestataire: (prestataireId) => 
-    api.get(`/tourisme/prestataire/${prestataireId}/touristic-places`),
-  
-  // RÉSERVATIONS LIEUX TOURISTIQUES
-  checkPlaceAvailability: (placeId, visitDate) => 
-    api.get(`/touristic-place-bookings/place/${placeId}/availability`, {
-      params: { visitDate }
-    }),
-  
-  createPlaceBooking: (userId, bookingData) => 
-    api.post(`/touristic-place-bookings/${userId}`, bookingData),
-  
-  getUserPlaceBookings: (userId, params = {}) => 
-    api.get(`/touristic-place-bookings`, {
-      params: { userId, ...params }
-    }),
-  
-  getPlaceBookingById: (id) => 
-    api.get(`/touristic-place-bookings/${id}`),
-  
-  cancelPlaceBooking: (bookingId) => 
-    api.delete(`/touristic-place-bookings/${bookingId}`),
-  
-  updateBookingStatus: (id, statusData) => 
-    api.put(`/touristic-place-bookings/${id}/status`, statusData),
-  
-  // Statistiques pour prestataires
-  getPrestataireStats: (prestataireId, period = 'month') => 
-    api.get(`/touristic-place-bookings/prestataire/${prestataireId}/stats`, {
-      params: { period }
-    }),
-  
-  getFlights: (params = {}) => 
-    api.get('/Vol/flights', { params }),
-};
+  getAccommodations: (params = {}) =>
+    api.get("/admin/tourisme/accommodations", { params }),
 
+  getTouristicPlaces: (params = {}) =>
+    api.get("/admin/tourisme/places", { params }),
+  getFlights: (params = {}) => api.get("/Vol/flights", { params }),
+};
 
 // Services pour l'upload
 export const uploadAPI = {
