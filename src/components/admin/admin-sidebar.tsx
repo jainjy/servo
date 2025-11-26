@@ -11,6 +11,7 @@ import {
   Ruler,
   Tag,
   FileText,
+  Globe,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
@@ -35,6 +36,7 @@ const navigation = [
   { name: "Demandes", href: "/admin/demandes", icon: FileCheck },
   { name: "Métiers", href: "/admin/metiers", icon: Ruler },
   { name: "Financements", href: "/admin/financement-demandes", icon: FileText },
+  { name: "Investissement International", href: "/admin/investissement-demandes", icon: Globe },
   { name: "Publicité", href: "/admin/publicite", icon: MessageCircle },
 ];
 

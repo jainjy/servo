@@ -152,6 +152,7 @@ import ProgrammeNeuf from "./components/components/Programme_neuf";
 import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
+import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
 
 const queryClient = new QueryClient();
 
@@ -591,11 +592,10 @@ const App = () => {
                     />
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
-                    <Route
-                      path="investissement-demandes"
-                      element={<div>Interface admin pour les demandes d'investissement international (à créer)</div>}
-                    />
-                  </Route>
+
+                     <Route path="investissement-demandes" element={<InvestmentDemandesPage />} />
+
+                  </Route>=
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
