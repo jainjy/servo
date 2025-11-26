@@ -159,6 +159,7 @@ import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
 import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import Donation from "./components/components/Don";
+import ProTouristicPlaceBookings from "./components/pro/ProTouristicPlaceBookings";
 import AccountSuspended from "./pages/AccountSuspended";
 import AccountStatusGuard from "./components/AccountStatusGuard";
 import UserLayout from "./pages/UserLayout";
@@ -525,6 +526,7 @@ const App = () => {
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
                     <Route path="reservations" element={<ProBookings />} />
+                    < Route path="reservationPro" element={<ProTouristicPlaceBookings />} />
                     <Route
                       path="subscription"
                       element={<SubscriptionStatusPage />}
