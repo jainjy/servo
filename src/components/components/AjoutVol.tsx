@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Plane, 
@@ -49,6 +49,86 @@ const AjoutVolModal = ({ isOpen, onClose, onSubmit }) => {
     { value: 'first', label: 'Première' }
   ];
 
+  // Fonction pour obtenir la date/heure minimale (maintenant)
+  const getMinDateTime = () => {
+    const now = new Date();
+    // Format YYYY-MM-DDTHH:MM
+    return now.toISOString().slice(0, 16);
+  };
+
+  // Fonction pour obtenir la date/heure minimale pour l'arrivée (départ + 1 minute)
+  const getMinArrivalDateTime = () => {
+    if (!formData.departDateHeure) return getMinDateTime();
+    
+    const departDate = new Date(formData.departDateHeure);
+    const minArrival = new Date(departDate.getTime() + 60000); // +1 minute
+    return minArrival.toISOString().slice(0, 16);
+  };
+
+  // Fonction pour calculer la durée automatiquement
+  const calculerDuree = (depart, arrivee) => {
+    if (!depart || !arrivee) return '';
+
+    const dateDepart = new Date(depart);
+    const dateArrivee = new Date(arrivee);
+    
+    // Vérifier que les dates sont valides
+    if (isNaN(dateDepart.getTime()) || isNaN(dateArrivee.getTime())) {
+      return '';
+    }
+
+    // Vérifier que la date d'arrivée est après la date de départ
+    if (dateArrivee <= dateDepart) {
+      return 'Date d\'arrivée doit être après le départ';
+    }
+
+    const differenceMs = dateArrivee - dateDepart;
+    const heures = Math.floor(differenceMs / (1000 * 60 * 60));
+    const minutes = Math.floor((differenceMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    // Formater la durée
+    if (heures === 0) {
+      return `${minutes}min`;
+    } else if (minutes === 0) {
+      return `${heures}h`;
+    } else {
+      return `${heures}h ${minutes}min`;
+    }
+  };
+
+  // Effet pour recalculer la durée quand les dates changent
+  useEffect(() => {
+    if (formData.departDateHeure && formData.arriveeDateHeure) {
+      const nouvelleDuree = calculerDuree(formData.departDateHeure, formData.arriveeDateHeure);
+      setFormData(prev => ({
+        ...prev,
+        duree: nouvelleDuree
+      }));
+    } else if (formData.departDateHeure && !formData.arriveeDateHeure) {
+      // Réinitialiser la durée si l'arrivée est vide
+      setFormData(prev => ({
+        ...prev,
+        duree: ''
+      }));
+    }
+  }, [formData.departDateHeure, formData.arriveeDateHeure]);
+
+  // Réinitialiser l'arrivée si la date de départ change et que l'arrivée n'est plus valide
+  useEffect(() => {
+    if (formData.departDateHeure && formData.arriveeDateHeure) {
+      const dateDepart = new Date(formData.departDateHeure);
+      const dateArrivee = new Date(formData.arriveeDateHeure);
+      
+      if (dateArrivee <= dateDepart) {
+        setFormData(prev => ({
+          ...prev,
+          arriveeDateHeure: '',
+          duree: ''
+        }));
+      }
+    }
+  }, [formData.departDateHeure]);
+
   const handleServiceChange = (serviceId) => {
     setFormData(prev => ({
       ...prev,
@@ -60,6 +140,21 @@ const AjoutVolModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation supplémentaire de la durée
+    if (!formData.duree || formData.duree === 'Date d\'arrivée doit être après le départ') {
+      alert('Veuillez vérifier les dates de départ et d\'arrivée');
+      return;
+    }
+
+    // Validation que l'arrivée est après le départ
+    const dateDepart = new Date(formData.departDateHeure);
+    const dateArrivee = new Date(formData.arriveeDateHeure);
+    if (dateArrivee <= dateDepart) {
+      alert('La date d\'arrivée doit être après la date de départ');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -272,8 +367,12 @@ const AjoutVolModal = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleChange}
                 required
                 disabled={loading}
+                min={getMinDateTime()}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Impossible de sélectionner une date passée
+              </p>
             </div>
           </div>
 
@@ -308,8 +407,12 @@ const AjoutVolModal = ({ isOpen, onClose, onSubmit }) => {
                 onChange={handleChange}
                 required
                 disabled={loading}
+                min={getMinArrivalDateTime()}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Doit être après la date de départ
+              </p>
             </div>
           </div>
 
@@ -324,12 +427,25 @@ const AjoutVolModal = ({ isOpen, onClose, onSubmit }) => {
                 type="text"
                 name="duree"
                 value={formData.duree}
-                onChange={handleChange}
-                required
+                readOnly
                 disabled={loading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder="2h 30min"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                  formData.duree === 'Date d\'arrivée doit être après le départ' 
+                    ? 'border-red-300 bg-red-50 text-red-700' 
+                    : 'border-gray-300 bg-gray-50'
+                }`}
+                placeholder="La durée sera calculée automatiquement"
               />
+              <p className={`text-xs mt-1 ${
+                formData.duree === 'Date d\'arrivée doit être après le départ' 
+                  ? 'text-red-600' 
+                  : 'text-gray-500'
+              }`}>
+                {formData.duree === 'Date d\'arrivée doit être après le départ' 
+                  ? 'Veuillez corriger la date d\'arrivée'
+                  : ''
+                }
+              </p>
             </div>
 
             <div>
@@ -484,7 +600,7 @@ const AjoutVolModal = ({ isOpen, onClose, onSubmit }) => {
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !formData.duree || formData.duree === 'Date d\'arrivée doit être après le départ'}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {loading ? (

@@ -17,7 +17,7 @@ import {
 import { flightsAPI } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 
-// Interfaces (inchangées)
+// Interfaces
 interface Prestataire {
     id: string;
     firstName: string;
@@ -175,6 +175,27 @@ const VoyagesAeriens: React.FC = () => {
         loadVols();
     }, []);
 
+    // Recherche dynamique avec debounce
+    useEffect(() => {
+        if (!rechercheTerm.trim()) {
+            setVols(volsOriginaux);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            const termeMinuscule = rechercheTerm.toLowerCase();
+            const volsFiltres = volsOriginaux.filter(vol => 
+                vol.depart.ville.toLowerCase().includes(termeMinuscule) ||
+                vol.arrivee.ville.toLowerCase().includes(termeMinuscule) ||
+                vol.compagnie.toLowerCase().includes(termeMinuscule) ||
+                vol.numeroVol.toLowerCase().includes(termeMinuscule)
+            );
+            setVols(volsFiltres);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [rechercheTerm, volsOriginaux]);
+
     // Données pour les filtres
     const compagnies = ['toutes', ...Array.from(new Set(volsOriginaux.map(v => v.compagnie)))];
     const classes = ['toutes', ...Array.from(new Set(volsOriginaux.map(v => v.classe)))];
@@ -187,28 +208,9 @@ const VoyagesAeriens: React.FC = () => {
         { value: 'rating', label: 'Meilleures notes' }
     ];
 
-    // Fonction de recherche
-    const effectuerRecherche = () => {
-        if (!rechercheTerm.trim()) {
-            setVols(volsOriginaux);
-            return;
-        }
-
-        setLoading(true);
-        const volsFiltres = volsOriginaux.filter(vol => 
-            vol.depart.ville.toLowerCase().includes(rechercheTerm.toLowerCase()) ||
-            vol.arrivee.ville.toLowerCase().includes(rechercheTerm.toLowerCase()) ||
-            vol.compagnie.toLowerCase().includes(rechercheTerm.toLowerCase()) ||
-            vol.numeroVol.toLowerCase().includes(rechercheTerm.toLowerCase())
-        );
-        setVols(volsFiltres);
-        setLoading(false);
-    };
-
     // Réinitialiser la recherche
     const reinitialiserRecherche = () => {
         setRechercheTerm('');
-        setVols(volsOriginaux);
     };
 
     // Fonctions de réservation dynamiques
@@ -429,7 +431,7 @@ const VoyagesAeriens: React.FC = () => {
                             backgroundImage: 'url("https://i.pinimg.com/1200x/79/94/5c/79945cc369cdb035eadcc41efc866a4c.jpg")'
                         }}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-purple-900/70"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r "></div>
                         <div className="relative z-10 text-center text-white">
                             <h1 className="text-5xl font-bold mb-4">Explorer le Monde</h1>
                             <p className="text-xl max-w-2xl mx-auto">
@@ -449,7 +451,6 @@ const VoyagesAeriens: React.FC = () => {
                                     type="text"
                                     value={rechercheTerm}
                                     onChange={(e) => setRechercheTerm(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && effectuerRecherche()}
                                     placeholder="Rechercher par compagnie, vol, ville de départ ou d'arrivée..."
                                     className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
@@ -462,15 +463,16 @@ const VoyagesAeriens: React.FC = () => {
                                     </button>
                                 )}
                             </div>
+                            
+                            {/* Indicateur de recherche active */}
+                            {rechercheTerm && (
+                                <div className="mt-2 text-sm text-gray-600">
+                                    <span className="font-semibold">{vols.length}</span> vol(s) correspondant à "{rechercheTerm}"
+                                </div>
+                            )}
                         </div>
+                        
                         <div className="flex gap-3">
-                            <button
-                                onClick={effectuerRecherche}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center"
-                            >
-                                <Search className="w-5 h-5 mr-2" />
-                                Rechercher
-                            </button>
                             <button
                                 onClick={reinitialiserRecherche}
                                 className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center"
@@ -673,9 +675,7 @@ const VoyagesAeriens: React.FC = () => {
                                         <div className="space-y-3">
                                             <div className="flex justify-between text-sm text-gray-600">
                                                 <span>Appareil: {vol.aircraft}</span>
-                                                <span className="text-green-600 font-medium">
-                                                    {vol.disponibilite} places restantes
-                                                </span>
+                                               
                                             </div>
 
                                             {/* Services */}
@@ -814,9 +814,7 @@ const VoyagesAeriens: React.FC = () => {
                                                 <span className="text-sm font-semibold">+</span>
                                             </button>
                                         </div>
-                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                            {volSelectionne.disponibilite} dispo.
-                                        </span>
+                                      
                                     </div>
                                 </div>
 
