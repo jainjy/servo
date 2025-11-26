@@ -1,4 +1,4 @@
-// app/pro/layout.tsx
+//pages/pro/layout.tsx
 import type React from "react"
 import { ProRoute } from "@/components/protected-route"
 import { ProSidebar } from "@/components/pro/pro-sidebar"
