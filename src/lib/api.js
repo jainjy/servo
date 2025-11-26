@@ -72,17 +72,56 @@ export const tourismeAPI = {
     api.patch(`/admin/tourisme/${id}/toggle-availability`),
   toggleFeatured: (id) => api.patch(`/admin/tourisme/${id}/toggle-featured`),
 
-  // Routes publiques (si nécessaire)
+  // Routes publiques
   getPublicListings: (params = {}) => api.get("/tourisme", { params }),
   getListingById: (id) => api.get(`/tourisme/${id}`),
-   getAccommodations: (params = {}) => 
+  getAccommodations: (params = {}) => 
     api.get('/admin/tourisme/accommodations', { params }),
-  
   getTouristicPlaces: (params = {}) => 
-    api.get('/admin/tourisme/places', { params }),
-   getFlights: (params = {}) => 
+    api.get('/tourisme', { 
+      params: { ...params, isTouristicPlace: true } 
+    }),
+  
+  // CORRECTION : Utiliser la bonne route qui existe dans le backend
+  getTouristicPlaces: (params = {}) => 
+    api.get('/touristic-place-bookings', { params }), // Route corrigée
+  
+  getTouristicPlacesByPrestataire: (prestataireId) => 
+    api.get(`/tourisme/prestataire/${prestataireId}/touristic-places`),
+  
+  // RÉSERVATIONS LIEUX TOURISTIQUES
+  checkPlaceAvailability: (placeId, visitDate) => 
+    api.get(`/touristic-place-bookings/place/${placeId}/availability`, {
+      params: { visitDate }
+    }),
+  
+  createPlaceBooking: (userId, bookingData) => 
+    api.post(`/touristic-place-bookings/${userId}`, bookingData),
+  
+  getUserPlaceBookings: (userId, params = {}) => 
+    api.get(`/touristic-place-bookings`, {
+      params: { userId, ...params }
+    }),
+  
+  getPlaceBookingById: (id) => 
+    api.get(`/touristic-place-bookings/${id}`),
+  
+  cancelPlaceBooking: (bookingId) => 
+    api.delete(`/touristic-place-bookings/${bookingId}`),
+  
+  updateBookingStatus: (id, statusData) => 
+    api.put(`/touristic-place-bookings/${id}/status`, statusData),
+  
+  // Statistiques pour prestataires
+  getPrestataireStats: (prestataireId, period = 'month') => 
+    api.get(`/touristic-place-bookings/prestataire/${prestataireId}/stats`, {
+      params: { period }
+    }),
+  
+  getFlights: (params = {}) => 
     api.get('/Vol/flights', { params }),
 };
+
 
 // Services pour l'upload
 export const uploadAPI = {
@@ -357,4 +396,89 @@ export const offresExclusivesAPI = {
   // Récupérer les catégories
   getCategories: () => api.get("/offres-exclusives/categories")
 }; 
+export const touristicPlaceBookingsAPI = {
+  // Créer une réservation
+  createBooking: (userId, data) => 
+    api.post(`/touristic-place-bookings/${userId}`, data),
+  
+  // Récupérer les réservations
+  getBookings: (params = {}) => 
+    api.get("/touristic-place-bookings", { params }),
+  
+  // Récupérer une réservation spécifique
+  getBookingById: (id) => 
+    api.get(`/touristic-place-bookings/${id}`),
+  
+  // Récupérer par numéro de confirmation
+  getBookingByConfirmation: (confirmationNumber) => 
+    api.get(`/touristic-place-bookings/confirmation/${confirmationNumber}`),
+  
+  // Mettre à jour le statut
+  updateStatus: (id, statusData) => 
+    api.put(`/touristic-place-bookings/${id}/status`, statusData),
+  
+  // Vérifier la disponibilité
+  checkAvailability: (placeId, visitDate) => 
+    api.get(`/touristic-place-bookings/place/${placeId}/availability`, {
+      params: { visitDate }
+    }),
+  
+  // Annuler une réservation
+  cancelBooking: (id) => 
+    api.delete(`/touristic-place-bookings/${id}`),
+  
+  // Statistiques pour prestataires
+  getPrestataireStats: (prestataireId, period = 'month') => 
+    api.get(`/touristic-place-bookings/prestataire/${prestataireId}/stats`, {
+      params: { period }
+    }),
+  
+  // Récupérer les réservations d'un lieu spécifique
+  getBookingsByPlace: (placeId, params = {}) => 
+    api.get("/touristic-place-bookings", {
+      params: { placeId, ...params }
+    }),
+};
+
+// Service utilitaire pour les réservations
+export const bookingService = {
+  // Calculer le prix total
+  calculateTotalPrice: (basePrice, ticketType, numberOfTickets) => {
+    const multipliers = {
+      adult: 1,
+      child: 0.5,
+      student: 0.7,
+      senior: 0.8
+    };
+    
+    const multiplier = multipliers[ticketType] || 1;
+    return basePrice * multiplier * numberOfTickets;
+  },
+  
+  // Formater la date pour l'affichage
+  formatVisitDate: (dateString, timeString) => {
+    const date = new Date(dateString);
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return `${date.toLocaleDateString('fr-FR', options)} à ${timeString}`;
+  },
+  
+  // Générer un QR code data URL (simulé)
+  generateQRCodeData: (bookingData) => {
+    const data = {
+      confirmationNumber: bookingData.confirmationNumber,
+      placeTitle: bookingData.place?.title,
+      visitDate: bookingData.visitDate,
+      visitTime: bookingData.visitTime,
+      numberOfTickets: bookingData.numberOfTickets
+    };
+    
+    // En production, vous utiliseriez une vraie librairie QR code
+    return `data:image/svg+xml;base64,${btoa(JSON.stringify(data))}`;
+  }
+};
 
