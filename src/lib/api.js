@@ -358,3 +358,26 @@ export const offresExclusivesAPI = {
   getCategories: () => api.get("/offres-exclusives/categories")
 }; 
 
+export const flightsAPI = {
+  // Récupérer tous les vols
+  getFlights: (params = {}) => api.get("/vol", { params }),
+  
+  // Récupérer un vol par ID
+  getFlightById: (id) => api.get(`/vol/${id}`),
+  
+  // Créer un vol
+  createFlight: (data) => api.post("/vol", data),
+  
+  // Modifier un vol
+  updateFlight: (id, data) => api.put(`/vol/${id}`, data),
+  
+  // Supprimer un vol
+  deleteFlight: (id) => api.delete(`/vol/${id}`),
+  
+  // Statistiques des vols
+  getFlightStats: () => api.get("/vol/stats"),
+  // Créer une réservation de vol
+   createReservation: (flightId, data) => 
+        api.post(`/Vol/reservation/${flightId}/reserver`, data),
+    
+};

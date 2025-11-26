@@ -131,19 +131,19 @@ export default function TourismPage() {
   const contentTypeOptions = [
     {
       id: 'accommodations',
-      label: '🏨 Hébergements',
+      label: 'Hébergements',
       icon: Hotel,
       description: 'Gérer vos hébergements et propriétés'
     },
     {
       id: 'touristic_places',
-      label: '🗼 Lieux Touristiques',
+      label: 'Lieux Touristiques',
       icon: Landmark,
       description: 'Gérer vos lieux touristiques'
     },
     {
       id: 'flights',
-      label: '✈️ Services de Vol',
+      label: 'Services de Vol',
       icon: Plane,
       description: 'Gérer vos vols et compagnies aériennes'
     }
@@ -242,7 +242,7 @@ export default function TourismPage() {
     try {
       setFlightsLoading(true);
       const response = await tourismeAPI.getFlights();
-      console.log('✈️ Réponse API vols:', response.data);
+      console.log('Réponse API vols:', response.data);
       
       if (response.data.success) {
         const flightsData = response.data.data;
