@@ -510,7 +510,7 @@ const BienEtre = () => {
           <SlideIn direction="down">
             <LayoutGroup>
               <div className="bg-gradient-to-r from-white to-slate-50 dark:from-card dark:to-card/80 rounded-3xl shadow-xl px-4 py-6 mb-12 w-full mx-auto border border-slate-200/40 dark:border-slate-700/40">
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className="flex sm:flex-row gap-4 justify-center items-center">
                   {tabs.map((tab, index) => (
                     <button
                       key={tab.id}
@@ -547,7 +547,7 @@ const BienEtre = () => {
                           x: activeTab === tab.id ? 2 : 0,
                         }}
                         transition={{ duration: 0.3 }}
-                        className="text-sm sm:text-base font-bold relative z-10 whitespace-nowrap"
+                        className="text-xs sm:text-base font-bold relative z-10 whitespace-nowrap"
                       >
                         {tab.label}
                       </motion.span>
