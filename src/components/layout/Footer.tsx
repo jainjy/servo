@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
           <div className='ml-4 flex-col grid grid-cols-2 lg:flex  max-w-md mx-auto w-full'>
             <div className='relative group cursor-pointer'>
               <span className="text-gray-300 text-lg font-medium py-2 block group-hover:text-gray-100 transition-colors duration-300">
-                Partenaire 1
+                <a href="https://www.olimmoreunion.re/" target="_blank" rel="noopener noreferrer" >Olimmo réunion</a>
               </span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-100 to-purple-100 group-hover:w-1/2 transition-all duration-300"></div>
             </div>
