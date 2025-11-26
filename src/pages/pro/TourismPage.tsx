@@ -1681,7 +1681,8 @@ export default function TourismPage() {
   const handleAdminSubmit = async (formData) => {
     try {
       console.log("📤 Envoi des données avec images:", formData);
-
+      setShowAdminModal(false);
+      setEditingListing(null);
       // Réinitialiser les filtres
       resetAllFilters();
 
