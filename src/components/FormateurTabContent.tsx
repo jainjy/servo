@@ -177,11 +177,11 @@ const CourseCard: React.FC<CourseCardProps> = ({
       </div>
 
       {/* Bouton de réservation */}
-      <div className="w-full">
+      <div className="w-full flex justify-end">
         {isUserConnected ? (
           <Button
             onClick={handleBook}
-            className="w-full bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2 text-sm"
+            className="lg:w-1/2 w-full bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2 text-sm"
             size="sm"
           >
             <BookOpen className="w-3 h-3 mr-1" />
