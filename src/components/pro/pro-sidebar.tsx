@@ -42,6 +42,7 @@ const navigation = [
   { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
   { name: "Reservations tourisme", href: "/pro/reservations", icon: ShoppingBag },
+  { name: "Reservations bien-être", href: "/pro/reservationbien-etre", icon: ShoppingBag },
   {
     name: "Mes Commandes",
     href: "/pro/orders",
