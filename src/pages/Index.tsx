@@ -109,7 +109,7 @@ const Index = () => {
             </div>
             <PropertyListings cardsOnly maxItems={4} />
             <Slider />
-            {/* <AnnoncesImmobilieres /> */}
+            <AnnoncesImmobilieres />
           </>
         </Suspense>
       </div>
