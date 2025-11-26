@@ -1366,22 +1366,31 @@ export default function TourismPage() {
     }
   };
 
-  const loadStats = async () => {
-    try {
-      setStatsLoading(true);
-      const response = await tourismeAPI.getStats();
-      console.log("📊 Réponse API stats:", response.data);
+const loadStats = async () => {
+  try {
+    setStatsLoading(true);
 
-      if (response.data.success) {
-        setStats(response.data.data);
-        console.log("✅ Stats mises à jour:", response.data.data);
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement des statistiques:", error);
-    } finally {
-      setStatsLoading(false);
+    // Passer le contentType comme paramètre
+    const response = await tourismeAPI.getStats({
+      contentType: contentType === "flights" ? null : contentType,
+    });
+
+    console.log("📊 Réponse API stats:", response.data);
+
+    if (response.data.success) {
+      setStats(response.data.data);
+      console.log(
+        "✅ Stats mises à jour pour:",
+        contentType,
+        response.data.data
+      );
     }
-  };
+  } catch (error) {
+    console.error("Erreur lors du chargement des statistiques:", error);
+  } finally {
+    setStatsLoading(false);
+  }
+};
 
   // Filtrer les résultats (pour hébergements et lieux touristiques)
   useEffect(() => {
@@ -2110,7 +2119,7 @@ export default function TourismPage() {
           </div>
         </div>
 
-        {/* Statistiques */}
+        {/* Statistiques pour hébergements et lieux touristiques */}
         {stats && contentType !== "flights" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
@@ -2118,18 +2127,19 @@ export default function TourismPage() {
                 <Building className="w-8 h-8 text-blue-600 mr-4" />
                 <div>
                   <div className="text-2xl font-bold">
-                    {contentType === "accommodations"
-                      ? stats.totalAccommodations
-                      : stats.totalTouristicPlaces}
+                    {stats.totalListings || 0}
                   </div>
                   <div className="text-gray-600">
                     {contentType === "accommodations"
                       ? "Hébergements"
-                      : "Lieux touristiques"}
+                      : contentType === "touristic_places"
+                      ? "Lieux touristiques"
+                      : "Total"}
                   </div>
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Star className="w-8 h-8 text-yellow-500 mr-4" />
@@ -2141,23 +2151,25 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
                 <div>
                   <div className="text-2xl font-bold">
-                    {stats.availableListings}
+                    {stats.availableListings || 0}
                   </div>
                   <div className="text-gray-600">Disponibles</div>
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-purple-600 mr-4" />
                 <div>
                   <div className="text-2xl font-bold">
-                    {stats.totalBookings}
+                    {stats.totalBookings || 0}
                   </div>
                   <div className="text-gray-600">Réservations</div>
                 </div>
@@ -2178,6 +2190,7 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
@@ -2195,6 +2208,7 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Star className="w-8 h-8 text-yellow-500 mr-4" />
@@ -2212,6 +2226,7 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-purple-600 mr-4" />

@@ -63,7 +63,6 @@ export const financementAPI = {
 // Services pour le tourisme
 export const tourismeAPI = {
   // Routes admin
-  // Nouvelles méthodes avec upload d'images
   createListingWithImages: (formData) =>
     api.post("/admin/tourisme", formData, {
       headers: {
@@ -77,8 +76,12 @@ export const tourismeAPI = {
         "Content-Type": "multipart/form-data",
       },
     }),
+    
   getListings: (params = {}) => api.get("/admin/tourisme", { params }),
-  getStats: () => api.get("/admin/tourisme/stats"),
+  
+  // CORRECTION : Ajouter le paramètre contentType
+  getStats: (params = {}) => api.get("/admin/tourisme/stats", { params }),
+  
   createListing: (data) => api.post("/admin/tourisme", data),
   updateListing: (id, data) => api.put(`/admin/tourisme/${id}`, data),
   deleteListing: (id) => api.delete(`/admin/tourisme/${id}`),
