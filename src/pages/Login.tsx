@@ -71,16 +71,18 @@ const LoginPage = () => {
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden p-10 text-white flex-col justify-center max-w-md">
           <div className="relative z-10 flex flex-col justify-center h-full">
             <div className="mb-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
-                  <img
-                    src="/logo.png"
-                    className="h-10 w-10 rounded-full"
-                    alt="Logo"
-                  />
+              <Link to="/">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
+                    <img
+                      src="/logo.png"
+                      className="h-10 w-10 rounded-full"
+                      alt="Logo"
+                    />
+                  </div>
+                  <h1 className="text-3xl azonix font-bold">SERVO</h1>
                 </div>
-                <h1 className="text-3xl azonix font-bold">SERVO</h1>
-              </div>
+              </Link>
               <p className="text-blue-100 text-lg">
                 Des biens immobiliers, ses services additionnels, produits
                 adaptés à vos besoins et vos locations au sein d’une seule
@@ -131,8 +133,8 @@ const LoginPage = () => {
         <div className=" flex items-center justify-center bg-white overflow-auto rounded-lg py-2 lg:py-6 px-0 lg:px-2">
           <div className="w-full max-w-md">
             <Card className="border-0 shadow-none px-0 lg:px-5 py-4 lg:py-0 bg-white">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 mx-2"
               >
                 <ArrowLeft className="w-4 h-4" />

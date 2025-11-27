@@ -1090,12 +1090,14 @@ const Header = () => {
                     <div className="flex flex-col lg:flex-row h-full w-full">
                       {/* Left: Titles column */}
                       <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4 lg:sticky lg:top-4 lg:h-[500px]">
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="p-1 rounded-full bg-white border-black border-2">
-                            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+                        <Link to="/" onClick={() => setIsPopoverOpen(false)}>
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="p-1 rounded-full bg-white border-black border-2">
+                              <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+                            </div>
+                            <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
                           </div>
-                          <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
-                        </div>
+                        </Link>
                         <nav className="space-y-1">
                           {menuSections.map((section, si) => {
                             const hasItems = !!section.items && section.items.length > 0;

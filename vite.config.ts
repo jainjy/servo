@@ -14,4 +14,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // AJOUTEZ CES 2 LIGNES :
+  base: './',
+  build: {
+    outDir: 'dist'
+  }
 }));

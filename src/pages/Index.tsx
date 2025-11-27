@@ -90,11 +90,11 @@ const Index = () => {
           <CardCarte />
           <>
             <div className="text-center mx-10 mt-6 grid lg:flex items-center justify-between">
-              <h2 className="text-3xl font-bold ml-8 text-slate-900 my-6">Nos biens immobiliers</h2>
+              <h2 className="text-xl lg:text-3xl font-bold ml-8 text-slate-900 my-6">Nos biens immobiliers</h2>
               {/* Voir plus button */}
 
               <Button
-                className="relative px-8 mx-auto py-3 mr-10 bg-slate-900 flex items-center gap-3 hover:bg-salte-700 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
+                className="relative px-8 mx-auto py-3 mr-0 lg:mr-10 bg-slate-900 flex items-center gap-3 hover:bg-salte-700 overflow-hidden rounded-md group transition-all duration-500 hover:scale-105"
                 onClick={() => navigate('/immobilier')}
               >
                 {/* Cercle animé à droite */}

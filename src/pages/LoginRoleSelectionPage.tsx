@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { User, Building, Home, Car, Trees, CheckCircle, Star, Users, Shield } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginRoleSelectionPage = () => {
   const navigate = useNavigate();
@@ -76,24 +76,27 @@ const LoginRoleSelectionPage = () => {
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
       <div className="w-full">
-        <div className="text-center">
-          <div className="flex justify-center my-2">
-            <div className="w-16 h-16  rounded-full overflow-hidden flex items-center justify-center shadow-lg">
-              <img
-                src="/logo.png"
-                className="h-full w-ful rounded-lg"
-                alt="Logo SERVO"
-              />
+        <Link to="/">
+          <div className="text-center">
+
+            <div className="flex justify-center my-2">
+              <div className="w-16 h-16  rounded-full overflow-hidden flex items-center justify-center shadow-lg">
+                <img
+                  src="/logo.png"
+                  className="h-full w-ful rounded-lg"
+                  alt="Logo SERVO"
+                />
+              </div>
             </div>
+            <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
+              Connectez-vous à votre compte
+            </CardTitle>
+            <CardDescription className="mb-5 text-sm lg:text-md text-gray-400 font-extralight max-w-2xl mx-auto">
+              Sélectionnez le type de compte avec lequel vous souhaitez vous connecter.
+              Votre expérience sera adaptée à votre profil.
+            </CardDescription>
           </div>
-          <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
-            Connectez-vous à votre compte
-          </CardTitle>
-          <CardDescription className="mb-5 text-sm lg:text-md text-gray-400 font-extralight max-w-2xl mx-auto">
-            Sélectionnez le type de compte avec lequel vous souhaitez vous connecter.
-            Votre expérience sera adaptée à votre profil.
-          </CardDescription>
-        </div>
+        </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
           {roleOptions.map((role) => {
@@ -107,9 +110,9 @@ const LoginRoleSelectionPage = () => {
 
                 <div className="flex flex-col items-center text-center space-y-2 flex-1">
                   {/* Icon Container avec effet lumineux */}
-                    <div className={`${color.text} filter drop-shadow-lg`}>
-                      {role.icon}
-                    </div>
+                  <div className={`${color.text} filter drop-shadow-lg`}>
+                    {role.icon}
+                  </div>
 
                   {/* Titre et description */}
                   <div className="space-y-4 mt-4">
@@ -157,21 +160,21 @@ const LoginRoleSelectionPage = () => {
             </a>
           </div>
 
-          
+
         </div>
         <div className="lg:flex hidden items-center mt-16  justify-between px-2 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              <span>100% sécurisé</span>
-            </div>
-            <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>Communauté vérifiée</span>
-            </div>
-            <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-            <div>© 2025 SERVO . Tous droits réservés.</div>
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span>100% sécurisé</span>
           </div>
+          <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span>Communauté vérifiée</span>
+          </div>
+          <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+          <div>© 2025 SERVO . Tous droits réservés.</div>
+        </div>
       </div>
     </div>
   );
