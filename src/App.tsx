@@ -164,6 +164,7 @@ import ProTouristicPlaceBookings from "./components/pro/ProTouristicPlaceBooking
 import AccountSuspended from "./pages/AccountSuspended";
 import AccountStatusGuard from "./components/AccountStatusGuard";
 import UserLayout from "./pages/UserLayout";
+import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
 
 const queryClient = new QueryClient();
 
@@ -644,16 +645,10 @@ const App = () => {
                     />
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
-                    <Route
-                      path="investissement-demandes"
-                      element={
-                        <div>
-                          Interface admin pour les demandes d'investissement
-                          international (à créer)
-                        </div>
-                      }
-                    />
-                  </Route>
+
+                     <Route path="investissement-demandes" element={<InvestmentDemandesPage />} />
+
+                  </Route>=
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
