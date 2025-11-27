@@ -165,6 +165,7 @@ import AccountSuspended from "./pages/AccountSuspended";
 import AccountStatusGuard from "./components/AccountStatusGuard";
 import UserLayout from "./pages/UserLayout";
 import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
+import MissionIBR from "./pages/pro/MissionIBR";
 
 const queryClient = new QueryClient();
 
@@ -520,8 +521,10 @@ const App = () => {
                       </AccountStatusGuard>
                     }
                   >
+                    
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
+                     <Route path="ibr" element={<MissionIBR />} />
                     <Route path="calendar" element={<CalendarPage />} />
                      <Route path="reservationbien-etre" element={<ReservationTable />} />
                     {/* <Route path="clients" element={<ClientSection />} /> */}

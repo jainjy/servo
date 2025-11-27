@@ -21,6 +21,7 @@ import {
   BookOpen,
   Plus,
   WalletCards,
+  ClipboardCheck
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -34,6 +35,10 @@ const navigation = [
     icon: Wrench,
   },
   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
+  
+  ////
+  /////
+  { name: "missions d’IBR", href: "/pro/ibr", icon: ClipboardCheck },
   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
   { name: "Abonnements", href: "/pro/subscription", icon: WalletCards },
@@ -42,7 +47,7 @@ const navigation = [
   { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
   { name: "Reservations tourisme", href: "/pro/reservations", icon: ShoppingBag },
-  { name: "Reservations bien-être", href: "/pro/reservationbien-etre", icon: ShoppingBag },
+  { name: "Reservations bien-être", href: "/pro/reservationbien-etre", icon: Calendar },
   {
     name: "Mes Commandes",
     href: "/pro/orders",
