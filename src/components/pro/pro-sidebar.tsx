@@ -34,7 +34,7 @@ const navigation = [
     icon: Wrench,
   },
   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
-  { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
+  { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
   { name: "Abonnements", href: "/pro/subscription", icon: WalletCards },
   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
@@ -76,68 +76,68 @@ const navigation = [
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
 ];
-const navigationPrestataire = [
-  { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
-  { name: "Mes Services", href: "/pro/services", icon: Wrench },
-  {
-    name: "Art et commerce Services",
-    href: "/pro/Art-commerce-services",
-    icon: Wrench,
-  },
-  { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
-  { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
-  { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-  // { name: "Mes Clients", href: "/pro/clients", icon: Users },
-  { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-  { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
-  { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
-  {
-    name: "Mes Commandes",
-    href: "/pro/orders",
-    icon: ShoppingCart,
-  },
-  { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
-  {
-    name: "Les demandes de devis",
-    href: "/pro/demandes-devis",
-    icon: FileText,
-  },
-  {
-    name: "Gestion des Médias",
-    href: "/pro/media",
-    icon: Video,
-  },
-  { name: "Avis", href: "/pro/reviews", icon: Star },
-  { name: "Paramètres", href: "/pro/settings", icon: Settings },
-];
-const navigationBienEtre = [
-  { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
+// const navigationPrestataire = [
+//   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
+//   { name: "Mes Services", href: "/pro/services", icon: Wrench },
+//   {
+//     name: "Art et commerce Services",
+//     href: "/pro/Art-commerce-services",
+//     icon: Wrench,
+//   },
+//   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
+//   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
+//   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
+//   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
+//   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
+//   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
+//   { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
+//   {
+//     name: "Mes Commandes",
+//     href: "/pro/orders",
+//     icon: ShoppingCart,
+//   },
+//   { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
+//   {
+//     name: "Les demandes de devis",
+//     href: "/pro/demandes-devis",
+//     icon: FileText,
+//   },
+//   {
+//     name: "Gestion des Médias",
+//     href: "/pro/media",
+//     icon: Video,
+//   },
+//   { name: "Avis", href: "/pro/reviews", icon: Star },
+//   { name: "Paramètres", href: "/pro/settings", icon: Settings },
+// ];
+// const navigationBienEtre = [
+//   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
 
-  { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
-  { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
-  { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-  // { name: "Mes Clients", href: "/pro/clients", icon: Users },
-  { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-  { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
-  {
-    name: "Mes Commandes",
-    href: "/pro/orders",
-    icon: ShoppingCart,
-  },
-  { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
-  {
-    name: "Liste demande immobilier",
-    href: "/pro/demandes-immobilier",
-    icon: Building2,
-  },
-  {
-    name: "Gestion des Médias",
-    href: "/pro/media",
-    icon: Video,
-  },
-  { name: "Avis", href: "/pro/reviews", icon: Star },
-  { name: "Paramètres", href: "/pro/settings", icon: Settings },
-];
+//   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
+//   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
+//   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
+//   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
+//   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
+//   { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
+//   {
+//     name: "Mes Commandes",
+//     href: "/pro/orders",
+//     icon: ShoppingCart,
+//   },
+//   { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
+//   {
+//     name: "Liste demande immobilier",
+//     href: "/pro/demandes-immobilier",
+//     icon: Building2,
+//   },
+//   {
+//     name: "Gestion des Médias",
+//     href: "/pro/media",
+//     icon: Video,
+//   },
+//   { name: "Avis", href: "/pro/reviews", icon: Star },
+//   { name: "Paramètres", href: "/pro/settings", icon: Settings },
+// ];
 
 export function ProSidebar() {
   const location = useLocation();
