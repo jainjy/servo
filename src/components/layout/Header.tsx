@@ -1336,11 +1336,11 @@ const Header = () => {
                     {/* Contenu des notifications */}
                     <div className="flex-1 overflow-y-auto">
                       {notifLoading ? (
-                        <div className="flex flex-col items-center justify-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
-                          <div className="text-sm text-gray-500">
-                            Chargement des notifications...
-                          </div>
+                        <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
+                          <img src="/loading.gif" alt="" className='w-24 h-24'/>
+                            <p className="mt-4 text-xl font-semibold text-gray-700">
+                              Chargement des notifications...
+                            </p>
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">

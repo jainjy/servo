@@ -661,12 +661,13 @@ const DocumentsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des documents...</p>
+      
+      <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
+          <img src="/loading.gif" alt="" className='w-24 h-24'/>
+            <p className="mt-4 text-xl font-semibold text-gray-700">
+              Chargement des documents...
+            </p>
         </div>
-      </div>
     );
   }
 

@@ -1,6 +1,7 @@
 // components/Cart.js
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ const Cart = ({ isOpen, onClose }) => {
   const [validationErrors, setValidationErrors] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+   const navigate = useNavigate();
 
   // Synchroniser avec les items du contexte
   useEffect(() => {
@@ -492,7 +494,10 @@ const Cart = ({ isOpen, onClose }) => {
                 achats
               </p>
               <Button
-                onClick={onClose}
+                onClick={() => {
+                  navigate('/domicile#produits-commerces');
+                  onClose();
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6"
               >
                 Découvrir les produits
