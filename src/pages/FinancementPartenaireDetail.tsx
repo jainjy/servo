@@ -93,17 +93,24 @@ export default function FinancementPartenaireDetail() {
       setLoading(true);
       setError(null);
 
+      console.log("🔍 ID du partenaire:", id); // ✅ Debug
+
       const partenairesResponse = await financementAPI.getPartenairesDetails(id);
-      console.log(partenairesResponse.data)
+      console.log("✅ Réponse API:", partenairesResponse.data); // ✅ Debug complet
+      
       if (!partenairesResponse.data) {
         setError("Partenaire non trouvé");
         return;
       }
 
       setPartenaire(partenairesResponse.data);
-      setServices(partenairesResponse.data.ServiceFinanciers || []);
+      
+      // ✅ Vérifiez la structure des données retournées
+      const services = partenairesResponse.data.ServiceFinancier || [];
+      console.log("📊 Services reçus:", services); // ✅ Debug services
+      setServices(services);
     } catch (error) {
-      console.error("Erreur lors du chargement des données:", error);
+      console.error("❌ Erreur lors du chargement:", error);
       setError("Impossible de charger les données du partenaire");
     } finally {
       setLoading(false);
@@ -220,7 +227,8 @@ export default function FinancementPartenaireDetail() {
                       <CheckCircle className="h-5 w-5" />
                       Partenaire Actif
                     </div>
-                  )}
+                  )
+                  }
                 </div>
 
                 <p className="text-lg text-slate-600 leading-relaxed mb-6">

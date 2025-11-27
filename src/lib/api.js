@@ -48,10 +48,14 @@ api.interceptors.response.use(
 export const financementAPI = {
   // Routes publiques
   getPartenaires: () => api.get("/financement/partenaires"),
-  getPartenairesDetails: (id) => api.get("/financement/partenaires/"+id),
+  getPartenairesDetails: (id) => api.get(`/financement/partenaires/${id}`), // ✅ Template literal
   getAssurances: () => api.get("/financement/assurances"),
   submitDemande: (data) => api.post("/financement/demande", data),
   getUserDemandes: (userId) => api.get(`/financement/demandes/${userId}`),
+
+  // Services financiers
+  getServiceFinancier: (id) => api.get(`/financement/services/${id}`),
+  getServiceFinanciers: (partenaireId) => api.get("/financement/services", { params: { partenaireId } }),
 
   // NOUVELLES ROUTES ADMIN
   getAllDemandes: (params = {}) =>
