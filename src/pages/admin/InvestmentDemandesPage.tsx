@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Mail, Phone, Globe, TrendingUp, Calendar, Filter } from 'lucide-react';
 
 interface InvestmentRequest {
   id: string;
@@ -23,7 +23,7 @@ const InvestmentDemandesPage = () => {
   const [demandes, setDemandes] = useState<InvestmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
-  const [hoveredCell, setHoveredCell] = useState<{rowId: string, column: string} | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>('tous');
 
   // Charger les demandes
   const fetchDemandes = async () => {
@@ -101,15 +101,13 @@ const InvestmentDemandesPage = () => {
     return paysMap[paysCode] || paysCode;
   };
 
-  // Fonction pour tronquer le texte
-  const truncateText = (text: string, maxLength: number = 20) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
+  const filteredDemandes = filterStatus === 'tous' 
+    ? demandes 
+    : demandes.filter(d => d.status === filterStatus);
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Chargement des demandes...</div>
         </div>
@@ -118,50 +116,59 @@ const InvestmentDemandesPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* En-tête */}
-      <div>
-        <h1 className="text-3xl font-bold">Demandes d'Investissement International</h1>
-        <p className="text-muted-foreground">
+      <div className="space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold">Demandes d'Investissement</h1>
+        <p className="text-muted-foreground text-sm md:text-base">
           Gestion des demandes d'investissement à l'étranger
         </p>
       </div>
 
-      {/* Statistiques */}
+      {/* Statistiques - Grid responsive */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Demandes</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Total Demandes
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-xl md:text-2xl font-bold">{stats.total}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Ce Mois</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Ce Mois
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.ceMois}</div>
+              <div className="text-xl md:text-2xl font-bold">{stats.ceMois}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">En Attente</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium">En Attente</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl md:text-2xl font-bold">
                 {stats.parStatut.find((s: any) => s.status === 'en_attente')?._count?._all || 0}
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Pays Populaire</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Top Pays
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-bold">
+              <div className="text-lg md:text-xl font-bold truncate">
                 {getPaysNom(stats.parPays[0]?.pays_interet) || '-'}
               </div>
             </CardContent>
@@ -169,164 +176,130 @@ const InvestmentDemandesPage = () => {
         </div>
       )}
 
-      {/* Tableau des demandes */}
-      <Card className="w-[1090px] ml-[-45px] bg-red-100/50">
-        <CardHeader>
-          <CardTitle>Liste des Demandes</CardTitle>
-          <CardDescription>
-            {demandes.length} demande(s) d'investissement
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          {/* Supprimer complètement le overflow-x-auto */}
-          <div className="ml-[5px] w-[1080px]">
-            <div className="inline-block align-middle w-[1070px]">
-              <div className="border rounded-lg w-[1080px]">
-                <Table className="w-[1070px]">
-                  <TableHeader className="bg-gray-200">
-                    <TableRow>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</TableHead>
-                      <TableHead className="w-40 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</TableHead>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</TableHead>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</TableHead>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</TableHead>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</TableHead>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</TableHead>
-                      <TableHead className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</TableHead>
-                      <TableHead className="w-40 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="bg-white divide-y divide-gray-200">
-                    {demandes.map((demande) => (
-                      <TableRow key={demande.id} className="hover:bg-gray-50">
-                        {/* Nom */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 w-25">
-                          <div 
-                            className="relative"
-                            onMouseEnter={() => setHoveredCell({rowId: demande.id, column: 'nom'})}
-                            onMouseLeave={() => setHoveredCell(null)}
-                          >
-                            <span className="block truncate">
-                              {truncateText(demande.nom, 15)}
-                            </span>
-                            {hoveredCell?.rowId === demande.id && hoveredCell?.column === 'nom' && (
-                              <div className="absolute z-10 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap">
-                                {demande.nom}
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Email */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          <div 
-                            className="relative"
-                            onMouseEnter={() => setHoveredCell({rowId: demande.id, column: 'email'})}
-                            onMouseLeave={() => setHoveredCell(null)}
-                          >
-                            <span className="block truncate">
-                              {truncateText(demande.email, 20)}
-                            </span>
-                            {hoveredCell?.rowId === demande.id && hoveredCell?.column === 'email' && (
-                              <div className="absolute z-10 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap">
-                                {demande.email}
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Téléphone */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          <div 
-                            className="relative"
-                            onMouseEnter={() => setHoveredCell({rowId: demande.id, column: 'telephone'})}
-                            onMouseLeave={() => setHoveredCell(null)}
-                          >
-                            <span className="block truncate">
-                              {truncateText(demande.telephone, 12)}
-                            </span>
-                            {hoveredCell?.rowId === demande.id && hoveredCell?.column === 'telephone' && (
-                              <div className="absolute z-10 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap">
-                                {demande.telephone}
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Pays */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          {getPaysNom(demande.pays_interet)}
-                        </TableCell>
-
-                        {/* Type */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          <div 
-                            className="relative"
-                            onMouseEnter={() => setHoveredCell({rowId: demande.id, column: 'type'})}
-                            onMouseLeave={() => setHoveredCell(null)}
-                          >
-                            <span className="block truncate">
-                              {truncateText(demande.type_investissement, 15)}
-                            </span>
-                            {hoveredCell?.rowId === demande.id && hoveredCell?.column === 'type' && (
-                              <div className="absolute z-10 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap">
-                                {demande.type_investissement}
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Budget */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          {demande.budget}
-                        </TableCell>
-
-                        {/* Statut */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          {getStatusBadge(demande.status)}
-                        </TableCell>
-
-                        {/* Date */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          {new Date(demande.created_at).toLocaleDateString('fr-FR')}
-                        </TableCell>
-
-                        {/* Actions */}
-                        <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 w-25">
-                          <Select
-                            value={demande.status}
-                            onValueChange={(value) => updateStatus(demande.id, value)}
-                          >
-                            <SelectTrigger className="w-25">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="en_attente">En attente</SelectItem>
-                              <SelectItem value="en_cours">En cours</SelectItem>
-                              <SelectItem value="traite">Traité</SelectItem>
-                              <SelectItem value="annule">Annulé</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+      {/* Filtres */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              <h2 className="font-semibold">Filtres</h2>
             </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tous">Tous les statuts</SelectItem>
+                <SelectItem value="en_attente">En attente</SelectItem>
+                <SelectItem value="en_cours">En cours</SelectItem>
+                <SelectItem value="traite">Traité</SelectItem>
+                <SelectItem value="annule">Annulé</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-
-          {demandes.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucune demande d'investissement pour le moment
-            </div>
-          )}
-        </CardContent>
+        </CardHeader>
       </Card>
+
+      {/* Cartes des demandes - Grid responsive */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredDemandes.map((demande) => (
+          <Card key={demande.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+            <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-transparent">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base md:text-lg truncate">{demande.nom}</CardTitle>
+                  <CardDescription className="text-xs md:text-sm">
+                    {new Date(demande.created_at).toLocaleDateString('fr-FR')}
+                  </CardDescription>
+                </div>
+                {getStatusBadge(demande.status)}
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-3">
+              {/* Email */}
+              <div className="flex items-center gap-3 text-sm">
+                <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <a href={`mailto:${demande.email}`} className="text-blue-600 hover:underline truncate">
+                  {demande.email}
+                </a>
+              </div>
+
+              {/* Téléphone */}
+              <div className="flex items-center gap-3 text-sm">
+                <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <a href={`tel:${demande.telephone}`} className="text-blue-600 hover:underline">
+                  {demande.telephone}
+                </a>
+              </div>
+
+              {/* Localisation */}
+              <div className="flex items-center gap-3 text-sm">
+                <Globe className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span className="text-gray-700">{getPaysNom(demande.pays_interet)}</span>
+              </div>
+
+              {/* Détails investissement */}
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">Type</p>
+                  <p className="text-sm text-gray-900 line-clamp-2">{demande.type_investissement}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 uppercase">Budget</p>
+                  <p className="text-sm font-bold text-gray-900">{demande.budget}</p>
+                </div>
+              </div>
+
+              {/* Message */}
+              {demande.message && (
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-gray-600 uppercase mb-1">Message</p>
+                  <p className="text-sm text-gray-700 line-clamp-2">{demande.message}</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="pt-3 border-t">
+                <label className="text-xs font-semibold text-gray-600 uppercase block mb-2">
+                  Modifier le statut
+                </label>
+                <Select
+                  value={demande.status}
+                  onValueChange={(value) => updateStatus(demande.id, value)}
+                >
+                  <SelectTrigger className="w-full text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en_attente">En attente</SelectItem>
+                    <SelectItem value="en_cours">En cours</SelectItem>
+                    <SelectItem value="traite">Traité</SelectItem>
+                    <SelectItem value="annule">Annulé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Message vide */}
+      {filteredDemandes.length === 0 && (
+        <Card className="text-center py-12">
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-lg font-semibold text-gray-900">Aucune demande</p>
+              <p className="text-sm text-muted-foreground">
+                {filterStatus === 'tous' 
+                  ? 'Aucune demande d\'investissement pour le moment'
+                  : `Aucune demande avec le statut ${filterStatus}`
+                }
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
