@@ -59,7 +59,9 @@ const Header = () => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(AuthService.getCurrentUser());
+  const [user, setUser] = useState<AuthUser | null>(
+    AuthService.getCurrentUser()
+  );
   const { logout } = useAuth();
 
   // Utiliser le contexte panier
@@ -147,7 +149,7 @@ const Header = () => {
       loadNotifications();
     }
   }, [user?.id]);
-  // Écouter les événements de rechargement des notifications 
+  // Écouter les événements de rechargement des notifications
   useEffect(() => {
     if (!user?.id) return;
 
@@ -161,17 +163,18 @@ const Header = () => {
     return () => window.removeEventListener("notifications:reload", handler);
   }, [user?.id, notifOpen]);
 
-
   const loadNotifications = async () => {
     if (!user?.id) return;
 
     setNotifLoading(true);
     try {
-      console.log('📨 Chargement des notifications...');
+      console.log("📨 Chargement des notifications...");
       const response = await api.get(`/notifications/user/${user.id}`);
       const { notifications = [], unreadCount = 0 } = response.data || {};
 
-      console.log(`✅ ${notifications.length} notifications chargées, ${unreadCount} non lues`);
+      console.log(
+        `✅ ${notifications.length} notifications chargées, ${unreadCount} non lues`
+      );
 
       setNotifications(notifications);
       setNotificationCount(unreadCount);
@@ -180,7 +183,7 @@ const Header = () => {
       toast({
         title: "Erreur",
         description: "Impossible de charger les notifications",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setNotifLoading(false);
@@ -195,25 +198,22 @@ const Header = () => {
       await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
 
       // Mettre à jour localement
-      setNotifications(prev =>
-        prev.map(n =>
-          n.id === notificationId ? { ...n, isRead: true } : n
-        )
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
       );
 
       // Mettre à jour le compteur WebSocket
-      setNotificationCount(prev => Math.max(0, prev - 1));
+      setNotificationCount((prev) => Math.max(0, prev - 1));
 
       toast({
-        description: "Notification marquée comme lue"
+        description: "Notification marquée comme lue",
       });
-
     } catch (error) {
       console.error("❌ Error marking notification as read:", error);
       toast({
         title: "Erreur",
         description: "Impossible de marquer comme lu",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -226,25 +226,22 @@ const Header = () => {
       await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
 
       // Mettre à jour localement
-      setNotifications(prev =>
-        prev.map(n =>
-          n.id === notificationId ? { ...n, isRead: false } : n
-        )
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: false } : n))
       );
 
       // Mettre à jour le compteur WebSocket
-      setNotificationCount(prev => prev + 1);
+      setNotificationCount((prev) => prev + 1);
 
       toast({
-        description: "Notification marquée comme non lue"
+        description: "Notification marquée comme non lue",
       });
-
     } catch (error) {
       console.error("❌ Error marking notification as unread:", error);
       toast({
         title: "Erreur",
         description: "Impossible de marquer comme non lu",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -253,26 +250,24 @@ const Header = () => {
     if (!user?.id) return;
 
     try {
-      console.log('📨 Marquer toutes comme lues');
+      console.log("📨 Marquer toutes comme lues");
       await api.post(`/notifications/user/${user.id}/read-all`);
 
       // Mettre à jour localement
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, isRead: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
 
       // Réinitialiser le compteur WebSocket
       setNotificationCount(0);
 
       toast({
-        description: "Toutes les notifications ont été marquées comme lues"
+        description: "Toutes les notifications ont été marquées comme lues",
       });
     } catch (error) {
       console.error("❌ Error marking all as read:", error);
       toast({
         title: "Erreur",
         description: "Impossible de marquer comme lu",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -281,7 +276,7 @@ const Header = () => {
     if (!user?.id) return;
 
     try {
-      console.log('🗑️ Supprimer toutes les notifications');
+      console.log("🗑️ Supprimer toutes les notifications");
       await api.post(`/notifications/user/${user.id}/clear-all`);
 
       // Recharger les notifications
@@ -295,7 +290,7 @@ const Header = () => {
       toast({
         title: "Erreur",
         description: "Impossible de supprimer les notifications",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -305,20 +300,22 @@ const Header = () => {
 
     try {
       console.log(`🗑️ Supprimer notification: ${notificationId}`);
-      await api.delete(`/notifications/user/${user.id}/delete/${notificationId}`);
+      await api.delete(
+        `/notifications/user/${user.id}/delete/${notificationId}`
+      );
 
       // Recharger les notifications
       await loadNotifications();
 
       toast({
-        description: "Notification supprimée"
+        description: "Notification supprimée",
       });
     } catch (error) {
-      console.error('❌ Error deleting notification:', error);
+      console.error("❌ Error deleting notification:", error);
       toast({
         title: "Erreur",
         description: "Impossible de supprimer la notification",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -346,7 +343,9 @@ const Header = () => {
       const firstSectionWithItems = menuSections.find(
         (s) => s.items && s.items.length > 0
       );
-      setHoveredSection(firstSectionWithItems ? firstSectionWithItems.title : null);
+      setHoveredSection(
+        firstSectionWithItems ? firstSectionWithItems.title : null
+      );
     } else {
       setHoveredSection(null);
     }
@@ -415,7 +414,8 @@ const Header = () => {
           href: "/immobilier-sections",
           image:
             "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
-        },{
+        },
+        {
           title: "Blogs et conseils",
           description: "Actualités et astuces immobilières",
           href: "/blog",
@@ -526,6 +526,14 @@ const Header = () => {
         //   href: "/batiments#division-parcellaire",
         //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
         // },
+        {
+          title: "IBR - Ingénierie Bâtiment Rénovation",
+          description:
+            "Expertise complète en ingénierie du bâtiment : études techniques, conception architecturale, calculs structurels et suivi de chantier par des professionnels certifiés",
+          href: "/services-ibr",
+          image:
+            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+        },
         {
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
@@ -887,28 +895,40 @@ const Header = () => {
     },
   ];
 
-  const profilePath = role === "admin" ? "/admin" : role === "professional" ? "/pro" : "/mon-compte/profil";
+  const profilePath =
+    role === "admin"
+      ? "/admin"
+      : role === "professional"
+      ? "/pro"
+      : "/mon-compte/profil";
 
-  const initials = user ? (() => {
-    let base = "";
-    if (user.firstName && user.firstName.trim().length > 0) {
-      base = user.firstName.trim();
-    } else if (user.email) {
-      base = user.email.split("@")[0];
-    }
-    base = base.replace(/[^A-Za-z0-9]/g, "");
-    const two = base.slice(0, 2).toUpperCase();
-    if (two && two.length === 2) return two;
-    if (!two && user.lastName) return user.lastName.slice(0, 2).toUpperCase();
-    return two || "US";
-  })() : "";
+  const initials = user
+    ? (() => {
+        let base = "";
+        if (user.firstName && user.firstName.trim().length > 0) {
+          base = user.firstName.trim();
+        } else if (user.email) {
+          base = user.email.split("@")[0];
+        }
+        base = base.replace(/[^A-Za-z0-9]/g, "");
+        const two = base.slice(0, 2).toUpperCase();
+        if (two && two.length === 2) return two;
+        if (!two && user.lastName)
+          return user.lastName.slice(0, 2).toUpperCase();
+        return two || "US";
+      })()
+    : "";
 
   const MobileMenu = () => (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
           <div className="p-1 rounded-full bg-white border-black border-2">
-            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+            <img
+              src={logo}
+              alt="Servo Logo"
+              className="w-10 h-10 rounded-full"
+            />
           </div>
         </Link>
         <Button
@@ -933,8 +953,9 @@ const Header = () => {
                   >
                     {section.title}
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${openSubmenu === section.title ? "rotate-180" : ""
-                        }`}
+                      className={`h-4 w-4 transition-transform ${
+                        openSubmenu === section.title ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
                   {openSubmenu === section.title && (
@@ -963,8 +984,6 @@ const Header = () => {
               )}
             </div>
           ))}
-
-
         </nav>
       </div>
 
@@ -1019,7 +1038,11 @@ const Header = () => {
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/"}>
             <div className="p-1 rounded-full bg-white border-black border-2">
-              <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+              <img
+                src={logo}
+                alt="Servo Logo"
+                className="w-10 h-10 rounded-full"
+              />
             </div>
           </Link>
 
@@ -1045,7 +1068,9 @@ const Header = () => {
                             className="block p-2 rounded-lg hover:bg-gray-50 transition-all duration-150 text-sm text-gray-700"
                           >
                             <div className="font-semibold">{item.title}</div>
-                            <div className="text-xs text-gray-500">{item.description}</div>
+                            <div className="text-xs text-gray-500">
+                              {item.description}
+                            </div>
                           </Link>
                         ))}
                       </div>
@@ -1060,14 +1085,14 @@ const Header = () => {
                   )}
                 </li>
               ))}
-
-
             </ul>
-
 
             {/* Desktop hamburger: Popover avec animation GSAP */}
             <div className="hidden lg:block">
-              <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
+              <Popover
+                open={isPopoverOpen}
+                onOpenChange={handlePopoverOpenChange}
+              >
                 <PopoverTrigger asChild>
                   <Button className="h-9 hover:bg-slate-800 bg-slate-900">
                     <Menu className="text-white" />
@@ -1092,21 +1117,33 @@ const Header = () => {
                       <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="p-1 rounded-full bg-white border-black border-2">
-                            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+                            <img
+                              src={logo}
+                              alt="Servo Logo"
+                              className="w-10 h-10 rounded-full"
+                            />
                           </div>
-                          <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
+                          <div className="azonix text-lg font-bold text-slate-300">
+                            SERVO
+                          </div>
                         </div>
                         <nav className="space-y-1">
                           {menuSections.map((section, si) => {
-                            const hasItems = !!section.items && section.items.length > 0;
+                            const hasItems =
+                              !!section.items && section.items.length > 0;
                             const isActive = hoveredSection === section.title;
                             return (
                               <div
                                 key={si}
-                                onMouseEnter={() => hasItems && setHoveredSection(section.title)}
-                                onFocus={() => hasItems && setHoveredSection(section.title)}
-                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${isActive ? "bg-white/10" : "hover:bg-white/5"
-                                  }`}
+                                onMouseEnter={() =>
+                                  hasItems && setHoveredSection(section.title)
+                                }
+                                onFocus={() =>
+                                  hasItems && setHoveredSection(section.title)
+                                }
+                                className={`py-1 px-4 rounded-md transition-colors cursor-pointer ${
+                                  isActive ? "bg-white/10" : "hover:bg-white/5"
+                                }`}
                               >
                                 {hasItems ? (
                                   <button className="scramble w-full text-left text-xs font-semibold text-white">
@@ -1130,7 +1167,9 @@ const Header = () => {
                                 to="/login"
                                 className="group relative bg-white text-black py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
                               >
-                                <span className="relative z-10 group-hover:text-white">Se connecter</span>
+                                <span className="relative z-10 group-hover:text-white">
+                                  Se connecter
+                                </span>
                                 <span className="absolute inset-0 bg-black border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
                               </Link>
                             ) : (
@@ -1139,7 +1178,9 @@ const Header = () => {
                                 onClick={handleLogout}
                                 className="group relative border-2 border-red-600 text-red-600 py-2 px-6 rounded-full font-semibold overflow-hidden transition-colors duration-300"
                               >
-                                <span className="relative z-10 group-hover:text-white">Déconnexion</span>
+                                <span className="relative z-10 group-hover:text-white">
+                                  Déconnexion
+                                </span>
                                 <span className="absolute inset-0 bg-red-700 border-black scale-0 group-hover:scale-100 transition-transform duration-300 rounded-full"></span>
                               </Link>
                             )}
@@ -1151,7 +1192,9 @@ const Header = () => {
                       <div className="flex-1 p-6 relative">
                         {hoveredSection ? (
                           (() => {
-                            const current = menuSections.find((s) => s.title === hoveredSection);
+                            const current = menuSections.find(
+                              (s) => s.title === hoveredSection
+                            );
                             if (!current) return null;
                             if (!current.items || current.items.length === 0) {
                               return (
@@ -1209,7 +1252,6 @@ const Header = () => {
                           </div>
                         )}
                       </div>
-
                     </div>
                   </div>
                 </PopoverContent>
@@ -1245,7 +1287,11 @@ const Header = () => {
                 }}
               >
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative hidden lg:flex">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative hidden lg:flex"
+                  >
                     <Bell className="h-5 w-5" />
                     {notificationCount > 0 && (
                       <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
@@ -1255,21 +1301,25 @@ const Header = () => {
                   </Button>
                 </SheetTrigger>
 
-                <SheetContent side="right" className="w-[400px] p-0 overflow-hidden">
+                <SheetContent
+                  side="right"
+                  className="w-[400px] p-0 overflow-hidden"
+                >
                   <div className="flex flex-col h-full">
                     {/* Header des notifications */}
                     <div className="flex items-center justify-between p-4 border-b">
                       <div className="space-y-1">
                         <h4 className="text-lg font-semibold">
-                          Notifications {notificationCount > 0 && `(${notificationCount})`}
+                          Notifications{" "}
+                          {notificationCount > 0 && `(${notificationCount})`}
                         </h4>
                         <p className="text-sm text-gray-500">
-                          {notifications.length} notification{notifications.length !== 1 ? 's' : ''} au total
+                          {notifications.length} notification
+                          {notifications.length !== 1 ? "s" : ""} au total
                         </p>
                       </div>
                       {notifications.length > 0 && (
                         <div className="flex items-center gap-1">
-
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1288,27 +1338,37 @@ const Header = () => {
                       {notifLoading ? (
                         <div className="flex flex-col items-center justify-center py-8">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
-                          <div className="text-sm text-gray-500">Chargement des notifications...</div>
+                          <div className="text-sm text-gray-500">
+                            Chargement des notifications...
+                          </div>
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                           <Bell className="w-12 h-12 text-gray-300 mb-3" />
-                          <div className="text-sm text-gray-500 mb-1">Aucune notification</div>
-                          <div className="text-xs text-gray-400">Les nouvelles notifications apparaîtront ici</div>
+                          <div className="text-sm text-gray-500 mb-1">
+                            Aucune notification
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Les nouvelles notifications apparaîtront ici
+                          </div>
                         </div>
                       ) : (
                         <div className="space-y-2 p-2">
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-3 rounded-lg border transition-colors ${notification.isRead ? "bg-gray-50" : "bg-white border-blue-200 shadow-sm"
-                                }`}
+                              className={`p-3 rounded-lg border transition-colors ${
+                                notification.isRead
+                                  ? "bg-gray-50"
+                                  : "bg-white border-blue-200 shadow-sm"
+                              }`}
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-1">
                                     <div className="text-sm font-medium text-gray-800 truncate">
-                                      {notification.titre || "Nouvelle notification"}
+                                      {notification.titre ||
+                                        "Nouvelle notification"}
                                     </div>
                                     {!notification.isRead && (
                                       <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
@@ -1323,21 +1383,30 @@ const Header = () => {
 
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {notification.statut && (
-                                      <span className={`px-2 py-1 rounded-full text-xs ${notification.statut === 'validée' || notification.statut === 'validee'
-                                        ? 'bg-green-100 text-green-800'
-                                        : notification.statut === 'refusée'
-                                          ? 'bg-red-100 text-red-800'
-                                          : 'bg-gray-100 text-gray-800'
-                                        }`}>
+                                      <span
+                                        className={`px-2 py-1 rounded-full text-xs ${
+                                          notification.statut === "validée" ||
+                                          notification.statut === "validee"
+                                            ? "bg-green-100 text-green-800"
+                                            : notification.statut === "refusée"
+                                            ? "bg-red-100 text-red-800"
+                                            : "bg-gray-100 text-gray-800"
+                                        }`}
+                                      >
                                         {notification.statut}
                                       </span>
                                     )}
 
-                                    <span className={`px-2 py-1 rounded-full text-xs ${notification.source === 'demande'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-purple-100 text-purple-800'
-                                      }`}>
-                                      {notification.source === 'demande' ? 'Demande' : 'Système'}
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs ${
+                                        notification.source === "demande"
+                                          ? "bg-blue-100 text-blue-800"
+                                          : "bg-purple-100 text-purple-800"
+                                      }`}
+                                    >
+                                      {notification.source === "demande"
+                                        ? "Demande"
+                                        : "Système"}
                                     </span>
                                   </div>
                                 </div>
@@ -1352,7 +1421,11 @@ const Header = () => {
                                         ? handleMarkAsUnread(notification.id)
                                         : handleMarkAsRead(notification.id)
                                     }
-                                    title={notification.isRead ? "Marquer comme non lu" : "Marquer comme lu"}
+                                    title={
+                                      notification.isRead
+                                        ? "Marquer comme non lu"
+                                        : "Marquer comme lu"
+                                    }
                                   >
                                     {notification.isRead ? (
                                       <EyeOff className="h-3 w-3 text-gray-500" />
@@ -1366,27 +1439,30 @@ const Header = () => {
                               <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
                                 <div className="text-xs text-gray-400">
                                   {notification.createdAt
-                                    ? new Date(notification.createdAt).toLocaleDateString("fr-FR", {
-                                      day: 'numeric',
-                                      month: 'short',
-                                      year: 'numeric'
-                                    })
+                                    ? new Date(
+                                        notification.createdAt
+                                      ).toLocaleDateString("fr-FR", {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric",
+                                      })
                                     : ""}
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  {notification.source === 'demande' && notification.propertyId && (
-                                    <a
-                                      href={`/immobilier/${notification.propertyId}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-xs text-blue-600 hover:underline font-medium"
-                                    >
-                                      👁️ Voir le bien
-                                    </a>
-                                  )}
+                                  {notification.source === "demande" &&
+                                    notification.propertyId && (
+                                      <a
+                                        href={`/immobilier/${notification.propertyId}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-xs text-blue-600 hover:underline font-medium"
+                                      >
+                                        👁️ Voir le bien
+                                      </a>
+                                    )}
 
-                                  {notification.source === 'demande' && (
+                                  {notification.source === "demande" && (
                                     <a
                                       href={`/mon-compte/demandes-immobilier`}
                                       className="text-xs text-green-600 hover:underline font-medium"
@@ -1399,7 +1475,9 @@ const Header = () => {
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => handleDeleteNotification(notification.id)}
+                                    onClick={() =>
+                                      handleDeleteNotification(notification.id)
+                                    }
                                   >
                                     <Trash2 className="h-3 w-3 mr-1" />
                                     Supprimer
@@ -1435,7 +1513,10 @@ const Header = () => {
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 z-[1050] shadow-lg">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-64 z-[1050] shadow-lg"
+                >
                   <DropdownMenuLabel className="flex flex-col">
                     <span className="text-sm font-medium">
                       {user?.firstName} {user?.lastName}
@@ -1462,36 +1543,56 @@ const Header = () => {
                         Profil
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/mes-commandes")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/mes-commandes")}
+                      >
                         <Package className="mr-2 h-4 w-4" />
                         Mes Commandes
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/demandes")}
+                      >
                         <ListCheck className="mr-2 h-4 w-4" />
                         Mes demandes de services
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes-immobilier")}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          navigate("/mon-compte/demandes-immobilier")
+                        }
+                      >
                         <BookDashed className="mr-2 h-4 w-4" />
                         Mes demandes immobilieres
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/mes-reservations-cours")}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          navigate("/mon-compte/mes-reservations-cours")
+                        }
+                      >
                         <List className="mr-2 h-4 w-4" />
                         Mes réservations en cours
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/reservation")}
+                      >
                         <Calendar className="mr-2 h-4 w-4" />
                         Réservations
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/payement")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/payement")}
+                      >
                         <CreditCard className="mr-2 h-4 w-4" />
                         Paiements
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/documents")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/documents")}
+                      >
                         <FileText className="mr-2 h-4 w-4" />
                         Mes documents
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate("/mon-compte/agenda")}>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/agenda")}
+                      >
                         <Calendar1 className="mr-2 h-4 w-4" />
                         Mon agenda
                       </DropdownMenuItem>
@@ -1517,7 +1618,10 @@ const Header = () => {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[85vw] max-w-sm p-0 overflow-hidden bg-white border-r border-gray-200">
+                <SheetContent
+                  side="left"
+                  className="w-[85vw] max-w-sm p-0 overflow-hidden bg-white border-r border-gray-200"
+                >
                   <MobileMenu />
                 </SheetContent>
               </Sheet>
@@ -1531,20 +1635,28 @@ const Header = () => {
       {/* Logout Confirmation Dialog */}
       {isLogoutDialogOpen && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCancelLogout} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleCancelLogout}
+          />
           <div className="relative z-50 w-full max-w-sm bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 p-6 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
               <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
                 <AlertCircle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Confirmer la déconnexion</h2>
-                <p className="text-sm text-gray-500">Cette action ne peut pas être annulée</p>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Confirmer la déconnexion
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Cette action ne peut pas être annulée
+                </p>
               </div>
             </div>
             <div className="p-6">
               <p className="text-gray-700 text-sm leading-relaxed">
-                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous reconnecter pour accéder à votre compte.
+                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous
+                reconnecter pour accéder à votre compte.
               </p>
             </div>
             <div className="flex gap-3 p-6 border-t border-gray-100 bg-gray-50">

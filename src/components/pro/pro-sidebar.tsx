@@ -41,12 +41,25 @@ const navigation = [
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
-  { name: "Reservations tourisme", href: "/pro/reservations", icon: ShoppingBag },
-  { name: "Reservations bien-être", href: "/pro/reservationbien-etre", icon: ShoppingBag },
+  {
+    name: "Reservations tourisme",
+    href: "/pro/reservations",
+    icon: ShoppingBag,
+  },
+  {
+    name: "Reservations bien-être",
+    href: "/pro/reservationbien-etre",
+    icon: ShoppingBag,
+  },
   {
     name: "Mes Commandes",
     href: "/pro/orders",
     icon: ShoppingCart,
+  },
+  {
+    name: "Mes Demandes de financement",
+    href: "/pro/financement-demandes",
+    icon: Building2,
   },
   { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
   {
@@ -60,13 +73,11 @@ const navigation = [
     icon: FileText,
   },
   {
-    name: 'Cours à Domicile',
-    href: '/pro/cours-domicile',
+    name: "Cours à Domicile",
+    href: "/pro/cours-domicile",
     icon: BookOpen,
   },
-  { name: 'Reservations Cours', 
-    href: '/pro/reservations-cours',
-    icon: Plus },
+  { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
   // 🔥 NOUVEL ITEM : Gestion des Médias
   {
     name: "Gestion des Médias",

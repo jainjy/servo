@@ -166,6 +166,7 @@ import AccountSuspended from "./pages/AccountSuspended";
 import AccountStatusGuard from "./components/AccountStatusGuard";
 import UserLayout from "./pages/UserLayout";
 import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
+import ServicesIBRPage from "./pages/ServicesIBRPage";
 
 const queryClient = new QueryClient();
 
@@ -233,6 +234,7 @@ const App = () => {
                   <Route path="/cookies" element={<CookiesPolicy />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
+                  <Route path="/services-ibr" element={<ServicesIBRPage />} />
                   {/* /*entreprise link* */}
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
@@ -528,6 +530,10 @@ const App = () => {
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
                     <Route
+                      path="financement-demandes"
+                      element={<FinancementDemandesPro />}
+                    />
+                    <Route
                       path="reservationbien-etre"
                       element={<ReservationTable />}
                     />
@@ -604,6 +610,7 @@ const App = () => {
                       path="mes-reservations-cours"
                       element={<UserReservations />}
                     />
+
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
@@ -652,10 +659,6 @@ const App = () => {
                     <Route
                       path="financement-demandes"
                       element={<FinancementDemandes />}
-                    />
-                    <Route
-                      path="financement-demandes"
-                      element={<FinancementDemandesPro />}
                     />
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
