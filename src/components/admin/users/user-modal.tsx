@@ -307,27 +307,7 @@ export function UserModal({
                 </Select>
               </div>
             </div>
-            {/* Type de demandeur pour les utilisateurs */}
-            {isUser && (
-              <div className="space-y-2">
-                <Label>Type de demandeur</Label>
-                <Select
-                  value={formData.demandType}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, demandType: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="particulier">Particulier</SelectItem>
-                    <SelectItem value="agence">Agence immobilière</SelectItem>
-                    <SelectItem value="syndicat">Syndicat</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+
             {/* Informations de base */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
