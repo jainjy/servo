@@ -316,6 +316,25 @@ export default function Financement() {
     }
   };
 
+  // Fonction utilitaire pour vérifier si c'est une URL d'image
+  const isImageUrl = (icon: any): boolean => {
+    if (typeof icon === 'string') {
+      return icon.startsWith('/') || icon.startsWith('https://');
+    }
+    return false;
+  };
+
+  // Fonction pour afficher l'icône ou l'image
+  const renderIcon = (icon: any, className: string = "h-7 w-7") => {
+    if (isImageUrl(icon)) {
+      return <img src={icon} alt="icon" className={className} />;
+    }
+    if (icon) {
+      return <icon className={className} />;
+    }
+    return <Building2 className={className} />;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
@@ -450,7 +469,11 @@ export default function Financement() {
                   onClick={service.onClick}
                 >
                   <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300">
-                    <service.icon className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                    {isImageUrl(service.icon) ? (
+                      <img src={service.icon} alt={service.title} className="h-6 w-6 object-cover rounded-lg" />
+                    ) : (
+                      <service.icon className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                    )}
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
                   <p className="text-slate-600 mb-4 text-sm leading-relaxed">{service.description}</p>
@@ -504,7 +527,9 @@ export default function Financement() {
                 >
                   <div className="flex items-center mb-6">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mr-5 group-hover:bg-slate-900 transition-colors duration-300">
-                      {partenaire.icon ? (
+                      {isImageUrl(partenaire.icon) ? (
+                        <img src={partenaire.icon} alt={partenaire.nom} className="h-7 w-7 object-cover rounded-lg" />
+                      ) : partenaire.icon ? (
                         <partenaire.icon className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
                       ) : (
                         <Building2 className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
@@ -587,7 +612,9 @@ export default function Financement() {
                 >
                   <div className="flex items-start justify-between mb-6">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-slate-900 transition-colors duration-300">
-                      {assurance.icon ? (
+                      {isImageUrl(assurance.icon) ? (
+                        <img src={assurance.icon} alt={assurance.nom} className="h-7 w-7 object-cover rounded-lg" />
+                      ) : assurance.icon ? (
                         <assurance.icon className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
                       ) : (
                         <Shield className="h-7 w-7 text-slate-600 group-hover:text-white transition-colors duration-300" />
@@ -854,7 +881,11 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
           <Card key={index} className="p-6 border border-slate-200 rounded-xl hover:shadow-lg transition-all duration-300">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-4">
-                <service.icon className="h-6 w-6 text-slate-600" />
+                {isImageUrl(service.icon) ? (
+                  <img src={service.icon} alt={service.title} className="h-6 w-6 object-cover rounded-lg" />
+                ) : (
+                  <service.icon className="h-6 w-6 text-slate-600" />
+                )}
               </div>
               <h3 className="font-semibold text-slate-900 text-lg">{service.title}</h3>
             </div>

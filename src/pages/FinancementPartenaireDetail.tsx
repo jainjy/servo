@@ -481,8 +481,6 @@ export default function FinancementPartenaireDetail() {
           onContact={handleContactPartner}
         />
       )}
-
-      <Footer />
     </div>
   );
 }

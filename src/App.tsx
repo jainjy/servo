@@ -107,7 +107,7 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
  
 import ReservationTable from "./pages/pro/ReservationBien-etre"
 // Import des nouveaux composants immobilier
-
+import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
 import PodcastsBatiment from "./components/PodcastsBatiment";
@@ -652,6 +652,10 @@ const App = () => {
                     <Route
                       path="financement-demandes"
                       element={<FinancementDemandes />}
+                    />
+                    <Route
+                      path="financement-demandes"
+                      element={<FinancementDemandesPro />}
                     />
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
