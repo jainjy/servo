@@ -3,16 +3,19 @@ import { useState, useEffect } from 'react';
 import {
   Search, Filter, Calendar, Users, MapPin, DollarSign,
   CheckCircle, XCircle, Clock, AlertCircle, Download,
-  Eye, ChevronDown, ChevronUp, Mail, Phone,
-  Building, User as UserIcon, RefreshCw, MessageCircle
+  Eye, ChevronDown, ChevronUp, Mail, Phone, Ticket,
+  Building, User as UserIcon, RefreshCw, MessageCircle,
+  Landmark, Castle, Church, BookOpen, GalleryVerticalEnd,
+  QrCode, UserCheck, Home, Camera, Plane, MoreVertical
 } from 'lucide-react';
 import api from '../../../lib/api';
+import { touristicPlaceBookingsAPI, tourismeAPI, flightsAPI } from '../../../lib/api';
 
+// Types pour les réservations d'hébergement
 interface TourismeBooking {
   id: string;
   confirmationNumber: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'paid' | 'failed' | 'refunded';
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -21,7 +24,7 @@ interface TourismeBooking {
   infants: number;
   totalAmount: number;
   serviceFee: number;
-  specialRequests: string;
+  specialRequests?: string;
   paymentMethod: string;
   stripePaymentIntent?: string;
   createdAt: string;
@@ -47,6 +50,98 @@ interface TourismeBooking {
   };
 }
 
+// Types pour les réservations de lieux touristiques
+interface TouristicPlaceBooking {
+  id: string;
+  confirmationNumber: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'paid' | 'failed' | 'refunded';
+  visitDate: string;
+  visitTime: string;
+  numberOfTickets: number;
+  ticketType: 'adult' | 'child' | 'student' | 'senior';
+  totalAmount: number;
+  serviceFee: number;
+  specialRequests?: string;
+  paymentMethod: string;
+  stripePaymentIntent?: string;
+  createdAt: string;
+  updatedAt: string;
+  cancelledAt?: string;
+  place: {
+    id: string;
+    title: string;
+    type: string;
+    category: string;
+    city: string;
+    images: string[];
+    price: number;
+    openingHours: string;
+    maxGuests: number;
+    idPrestataire: string;
+  };
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+}
+
+// Types pour les réservations de vols
+interface FlightReservation {
+  id: string;
+  flightId: string;
+  idUser: string;
+  idPrestataire: string;
+  nbrPersonne: number;
+  place: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'paid' | 'failed' | 'refunded';
+  totalAmount: number;
+  serviceFee: number;
+  paymentMethod: string;
+  stripePaymentIntent?: string;
+  createdAt: string;
+  updatedAt: string;
+  cancelledAt?: string;
+  flight: {
+    id: string;
+    compagnie: string;
+    numeroVol: string;
+    departVille: string;
+    departDateHeure: string;
+    arriveeVille: string;
+    arriveeDateHeure: string;
+    duree: string;
+    escales: number;
+    prix: number;
+    classe: string;
+    services: string[];
+    image: string;
+    aircraft: string;
+    disponibilite: number;
+    rating: number;
+    reviewCount: number;
+  };
+  userReservation?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+  prestataire?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+// Types unifiés
+type BookingType = 'accommodation' | 'touristic_place' | 'flight';
+type Booking = TourismeBooking | TouristicPlaceBooking | FlightReservation;
+
 interface BookingStats {
   total: number;
   pending: number;
@@ -55,16 +150,858 @@ interface BookingStats {
   completed: number;
   revenue: number;
   averageBooking: number;
+  totalTickets?: number;
+  occupancyRate?: number;
+  totalPassengers?: number;
 }
 
-export const ProBookings = () => {
-  const [bookings, setBookings] = useState<TourismeBooking[]>([]);
-  const [filteredBookings, setFilteredBookings] = useState<TourismeBooking[]>(
-    []
+interface Filters {
+  search: string;
+  status: string;
+  dateRange: string;
+  type: string;
+  provider?: string;
+  ticketType?: string;
+  placeId?: string;
+  airline?: string;
+}
+
+// Composants helper
+const Section = ({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) => (
+  <div className={className}>
+    <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
+    {children}
+  </div>
+);
+
+const InfoRow = ({ label, value, mono = false, badge = false }: { label: string; value: React.ReactNode; mono?: boolean; badge?: boolean }) => (
+  <div className="flex justify-between items-center py-2">
+    <span className="text-sm font-medium text-gray-600">{label}</span>
+    <span className={`text-sm text-gray-900 ${mono ? 'font-mono' : ''} ${badge ? 'px-2 py-1 bg-gray-100 rounded-full' : ''}`}>
+      {value}
+    </span>
+  </div>
+);
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const getColors = () => {
+    switch (status) {
+      case 'confirmed':
+      case 'paid':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'failed':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'refunded':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+      case 'paid':
+        return <CheckCircle className="w-3 h-3 mr-1" />;
+      case 'pending':
+        return <Clock className="w-3 h-3 mr-1" />;
+      case 'cancelled':
+      case 'failed':
+        return <XCircle className="w-3 h-3 mr-1" />;
+      case 'completed':
+        return <CheckCircle className="w-3 h-3 mr-1" />;
+      case 'refunded':
+        return <DollarSign className="w-3 h-3 mr-1" />;
+      default:
+        return <AlertCircle className="w-3 h-3 mr-1" />;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid': return 'Payé';
+      case 'failed': return 'Échec paiement';
+      case 'refunded': return 'Remboursé';
+      default: return status;
+    }
+  };
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getColors()}`}>
+      {getStatusIcon(status)}
+      <span className="ml-1 capitalize">{getStatusLabel(status)}</span>
+    </span>
   );
+};
+
+// Composant carte de réservation unifié
+const BookingCard = ({ 
+  booking, 
+  type, 
+  onViewDetails, 
+  onUpdateStatus,
+  onGenerateQRCode,
+  getTicketTypeLabel,
+  getCategoryIcon,
+  calculateNights,
+  getAirlineColor 
+}: any) => {
+  const [showActions, setShowActions] = useState(false);
+  
+  const isAccommodation = type === 'accommodation';
+  const isTouristicPlace = type === 'touristic_place';
+  const isFlight = type === 'flight';
+  
+  const accommodationBooking = booking as TourismeBooking;
+  const touristicPlaceBooking = booking as TouristicPlaceBooking;
+  const flightReservation = booking as FlightReservation;
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "confirmed":
+      case "paid":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case "cancelled":
+      case "failed":
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      case "completed":
+        return <CheckCircle className="w-4 h-4 text-blue-500" />;
+      case "refunded":
+        return <DollarSign className="w-4 h-4 text-purple-500" />;
+      default:
+        return <AlertCircle className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+      case "paid":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "cancelled":
+      case "failed":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "completed":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "refunded":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getBookingImage = () => {
+    if (isAccommodation) return accommodationBooking.listing?.images?.[0];
+    if (isTouristicPlace) return touristicPlaceBooking.place?.images?.[0];
+    if (isFlight) return flightReservation.flight?.image;
+    return '';
+  };
+
+  const getBookingTitle = () => {
+    if (isAccommodation) return accommodationBooking.listing?.title;
+    if (isTouristicPlace) return touristicPlaceBooking.place?.title;
+    if (isFlight) return `${flightReservation.flight?.compagnie} - Vol ${flightReservation.flight?.numeroVol}`;
+    return '';
+  };
+
+  const getBookingLocation = () => {
+    if (isAccommodation) return accommodationBooking.listing?.city;
+    if (isTouristicPlace) return touristicPlaceBooking.place?.city;
+    if (isFlight) return `${flightReservation.flight?.departVille} → ${flightReservation.flight?.arriveeVille}`;
+    return '';
+  };
+
+  const getBookingDate = () => {
+    if (isAccommodation) return new Date(accommodationBooking.checkIn).toLocaleDateString();
+    if (isTouristicPlace) return new Date(touristicPlaceBooking.visitDate).toLocaleDateString();
+    if (isFlight) return new Date(flightReservation.flight?.departDateHeure).toLocaleDateString();
+    return '';
+  };
+
+  const getBookingTime = () => {
+    if (isAccommodation) return `${calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} nuit(s)`;
+    if (isTouristicPlace) return touristicPlaceBooking.visitTime;
+    if (isFlight) {
+      const depart = new Date(flightReservation.flight?.departDateHeure);
+      return depart.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+    return '';
+  };
+
+  const getBookingDetails = () => {
+    if (isAccommodation) return `${accommodationBooking.guests} voyageur(s)`;
+    if (isTouristicPlace) return `${touristicPlaceBooking.numberOfTickets} billet(s) - ${getTicketTypeLabel(touristicPlaceBooking.ticketType)}`;
+    if (isFlight) return `${flightReservation.nbrPersonne} passager(s) - ${flightReservation.place}`;
+    return '';
+  };
+
+  const getUserInfo = () => {
+    if (booking.user) {
+      return `${booking.user.firstName} ${booking.user.lastName}`;
+    } else if (booking.userReservation) {
+      return `${booking.userReservation.firstName} ${booking.userReservation.lastName}`;
+    }
+    return 'Client non connecté';
+  };
+
+  const getUserEmail = () => {
+    return booking.user?.email || booking.userReservation?.email;
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+      {/* En-tête de la carte */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="text-sm font-mono font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">
+                {isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber}
+              </div>
+              {isFlight && (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAirlineColor(flightReservation.flight?.compagnie)} border`}>
+                  <Plane className="w-3 h-3 mr-1" />
+                  {flightReservation.flight?.compagnie}
+                </span>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              Créé le {new Date(booking.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+          
+          {/* Menu d'actions */}
+          <div className="relative">
+            <button
+              onClick={() => setShowActions(!showActions)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MoreVertical className="w-5 h-5 text-gray-600" />
+            </button>
+            
+            {showActions && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-10">
+                <button
+                  onClick={() => {
+                    onViewDetails();
+                    setShowActions(false);
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <Eye className="w-4 h-4 mr-3" />
+                  Voir les détails
+                </button>
+                
+                {isTouristicPlace && booking.status === "confirmed" && onGenerateQRCode && (
+                  <button
+                    onClick={() => {
+                      onGenerateQRCode(booking);
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                  >
+                    <QrCode className="w-4 h-4 mr-3" />
+                    Générer QR Code
+                  </button>
+                )}
+                
+                {booking.status === "pending" && (
+                  <button
+                    onClick={() => {
+                      onUpdateStatus(booking.id, "confirmed");
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-3" />
+                    Confirmer
+                  </button>
+                )}
+                
+                {booking.status !== "cancelled" && booking.status !== "completed" && (
+                  <button
+                    onClick={() => {
+                      onUpdateStatus(booking.id, "cancelled");
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                  >
+                    <XCircle className="w-4 h-4 mr-3" />
+                    Annuler
+                  </button>
+                )}
+
+                {/* Actions de paiement */}
+                {booking.status !== "paid" && booking.status !== "cancelled" && booking.status !== "failed" && (
+                  <button
+                    onClick={() => {
+                      onUpdateStatus(booking.id, "paid");
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-blue-700 hover:bg-blue-50"
+                  >
+                    <DollarSign className="w-4 h-4 mr-3" />
+                    Marquer payé
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Statut */}
+        <div className="flex flex-wrap gap-2">
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)} border`}>
+            {getStatusIcon(booking.status)}
+            <span className="ml-1 capitalize">
+              {booking.status === 'paid' ? 'Payé' : 
+               booking.status === 'failed' ? 'Échec paiement' : 
+               booking.status === 'refunded' ? 'Remboursé' : booking.status}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      {/* Contenu principal */}
+      <div className="p-6">
+        <div className="flex items-start gap-4 mb-4">
+          <img
+            src={getBookingImage()}
+            alt={getBookingTitle()}
+            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+            onError={(e) => {
+              e.currentTarget.src = 'https://i.pinimg.com/736x/a8/15/50/a81550a6d4c9ffd633e56200a25f8f9b.jpg';
+            }}
+          />
+          
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
+              {getBookingTitle()}
+            </h3>
+            
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              {isTouristicPlace && getCategoryIcon(touristicPlaceBooking.place?.category)}
+              {isFlight && <Plane className="w-4 h-4 mr-1" />}
+              <MapPin className="w-4 h-4 mr-1" />
+              {getBookingLocation()}
+            </div>
+            
+            <div className="flex items-center text-sm text-gray-600">
+              <UserIcon className="w-4 h-4 mr-1" />
+              <span className="mr-2">{getUserInfo()}</span>
+              {getUserEmail() && (
+                <a
+                  href={`mailto:${getUserEmail()}`}
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                  title="Envoyer un email"
+                >
+                  <Mail className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Informations détaillées */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="text-center bg-gray-50 rounded-lg p-3">
+            <Calendar className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+            <div className="text-sm font-medium text-gray-900">{getBookingDate()}</div>
+            <div className="text-xs text-gray-600">{getBookingTime()}</div>
+          </div>
+          
+          <div className="text-center bg-gray-50 rounded-lg p-3">
+            <Users className="w-5 h-5 text-green-600 mx-auto mb-1" />
+            <div className="text-sm font-medium text-gray-900">{getBookingDetails()}</div>
+            {isAccommodation && (
+              <div className="text-xs text-gray-600">
+                {accommodationBooking.adults}A, {accommodationBooking.children}E
+                {accommodationBooking.infants > 0 && `, ${accommodationBooking.infants}B`}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Montant */}
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          <div>
+            <div className="text-2xl font-bold text-gray-900">
+              {booking.totalAmount}€
+            </div>
+            <div className="text-xs text-gray-500">
+              {booking.serviceFee ? `Dont ${booking.serviceFee}€ de frais` : 'Frais inclus'}
+            </div>
+          </div>
+          
+          <button
+            onClick={onViewDetails}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Voir détails
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Modal de détail unifié
+const BookingDetailModal = ({ 
+  booking, 
+  type,
+  onClose, 
+  onStatusUpdate, 
+  onSendReminder,
+  onGenerateQRCode,
+  getTicketTypeLabel,
+  getCategoryIcon,
+  calculateNights,
+  getAirlineColor 
+}: any) => {
+  const isAccommodation = type === 'accommodation';
+  const isTouristicPlace = type === 'touristic_place';
+  const isFlight = type === 'flight';
+  
+  const accommodationBooking = booking as TourismeBooking;
+  const touristicPlaceBooking = booking as TouristicPlaceBooking;
+  const flightReservation = booking as FlightReservation;
+
+  const isUpcoming = () => {
+    if (isAccommodation) {
+      return new Date(accommodationBooking.checkIn) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && 
+             new Date(accommodationBooking.checkIn) >= new Date();
+    } else if (isTouristicPlace) {
+      return new Date(touristicPlaceBooking.visitDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && 
+             new Date(touristicPlaceBooking.visitDate) >= new Date();
+    } else if (isFlight) {
+      return new Date(flightReservation.flight?.departDateHeure) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && 
+             new Date(flightReservation.flight?.departDateHeure) >= new Date();
+    }
+    return false;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">
+                Détails de la Réservation
+              </h3>
+              <p className="text-gray-600 mt-1">
+                {isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber} • 
+                {isAccommodation ? ' Hébergement' : isTouristicPlace ? ' Lieu Touristiques' : ' Vol'}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Informations réservation */}
+            <div className="space-y-6">
+              <Section title="Informations Réservation">
+                <InfoRow 
+                  label="Numéro de confirmation" 
+                  value={isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber} 
+                  mono 
+                />
+                <InfoRow label="Date de création" value={new Date(booking.createdAt).toLocaleString()} />
+                <InfoRow label="Méthode de paiement" value={booking.paymentMethod || 'Non spécifiée'} />
+                {booking.stripePaymentIntent && (
+                  <InfoRow label="Stripe Payment Intent" value={booking.stripePaymentIntent} mono />
+                )}
+              </Section>
+
+              <Section title="Statut">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Statut</span>
+                    <StatusBadge status={booking.status} />
+                  </div>
+                </div>
+              </Section>
+
+              <Section title={
+                isAccommodation ? "Dates du séjour" : 
+                isTouristicPlace ? "Détails de la visite" : 
+                "Détails du vol"
+              }>
+                <div className="space-y-2">
+                  {isAccommodation ? (
+                    <>
+                      <InfoRow label="Arrivée" value={new Date(accommodationBooking.checkIn).toLocaleDateString()} />
+                      <InfoRow label="Départ" value={new Date(accommodationBooking.checkOut).toLocaleDateString()} />
+                      <InfoRow label="Nombre de nuits" value={calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut).toString()} />
+                      <InfoRow label="Durée totale" value={`${calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} nuit(s)`} />
+                    </>
+                  ) : isTouristicPlace ? (
+                    <>
+                      <InfoRow label="Date de visite" value={new Date(touristicPlaceBooking.visitDate).toLocaleDateString()} />
+                      <InfoRow label="Heure de visite" value={touristicPlaceBooking.visitTime} />
+                      <InfoRow label="Horaires d'ouverture" value={touristicPlaceBooking.place?.openingHours || 'Non spécifié'} />
+                    </>
+                  ) : (
+                    <>
+                      <InfoRow label="Date de départ" value={new Date(flightReservation.flight?.departDateHeure).toLocaleDateString()} />
+                      <InfoRow label="Heure de départ" value={new Date(flightReservation.flight?.departDateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} />
+                      <InfoRow label="Date d'arrivée" value={new Date(flightReservation.flight?.arriveeDateHeure).toLocaleDateString()} />
+                      <InfoRow label="Heure d'arrivée" value={new Date(flightReservation.flight?.arriveeDateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} />
+                      <InfoRow label="Durée" value={flightReservation.flight?.duree} />
+                      <InfoRow label="Escales" value={flightReservation.flight?.escales || 0} />
+                    </>
+                  )}
+                  {isUpcoming() && (booking.status === 'confirmed' || booking.status === 'paid') && (
+                    <div className="bg-orange-50 p-3 rounded-lg mt-2">
+                      <div className="flex items-center text-orange-800 text-sm">
+                        <AlertCircle className="w-4 h-4 mr-2" />
+                        {isAccommodation ? 'Arrivée prévue dans moins de 7 jours' : 
+                         isTouristicPlace ? 'Visite prévue dans moins de 7 jours' : 
+                         'Départ prévu dans moins de 7 jours'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Section>
+            </div>
+
+            {/* Informations client et service */}
+            <div className="space-y-6">
+              <Section title="Informations Client">
+                {booking.user || booking.userReservation ? (
+                  <div className="space-y-3">
+                    <InfoRow 
+                      label="Nom complet" 
+                      value={booking.user ? 
+                        `${booking.user.firstName} ${booking.user.lastName}` : 
+                        `${booking.userReservation.firstName} ${booking.userReservation.lastName}`
+                      } 
+                    />
+                    <InfoRow label="Email" value={
+                      <a 
+                        href={`mailto:${booking.user?.email || booking.userReservation?.email}`} 
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        {booking.user?.email || booking.userReservation?.email}
+                      </a>
+                    } />
+                    {(booking.user?.phone || booking.userReservation?.phone) && (
+                      <InfoRow label="Téléphone" value={
+                        <a 
+                          href={`tel:${booking.user?.phone || booking.userReservation?.phone}`} 
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {booking.user?.phone || booking.userReservation?.phone}
+                        </a>
+                      } />
+                    )}
+                    <InfoRow 
+                      label="ID Utilisateur" 
+                      value={booking.user?.id || booking.userReservation?.id} 
+                      mono 
+                    />
+                    <div className="flex space-x-2 pt-2">
+                      <a
+                        href={`mailto:${booking.user?.email || booking.userReservation?.email}?subject=Réservation ${isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber}`}
+                        className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        Contacter
+                      </a>
+                      {(booking.status === 'confirmed' || booking.status === 'paid') && (
+                        <button
+                          onClick={() => onSendReminder(booking.id)}
+                          className="flex items-center px-3 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Rappel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <UserIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm">Aucune information client disponible</p>
+                    <p className="text-gray-400 text-xs">Réservation effectuée sans compte</p>
+                  </div>
+                )}
+              </Section>
+
+              <Section title={
+                isAccommodation ? "Hébergement" : 
+                isTouristicPlace ? "Lieu Touristiques" : 
+                "Détails du vol"
+              }>
+                <div className="space-y-3">
+                  {isAccommodation ? (
+                    <>
+                      <InfoRow label="Nom" value={accommodationBooking.listing?.title || 'Non spécifié'} />
+                      <InfoRow label="Type" value={accommodationBooking.listing?.type || 'Non spécifié'} />
+                      <InfoRow label="Destination" value={accommodationBooking.listing?.city || 'Non spécifié'} />
+                      <InfoRow label="Prix par nuit" value={`${accommodationBooking.listing?.price || 0}€`} />
+                      <InfoRow 
+                        label="Note" 
+                        value={accommodationBooking.listing?.rating ? 
+                          `${accommodationBooking.listing.rating} ⭐ (${accommodationBooking.listing.reviewCount || 0} avis)` : 
+                          'Aucune note'} 
+                      />
+                    </>
+                  ) : isTouristicPlace ? (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        {getCategoryIcon(touristicPlaceBooking.place?.category)}
+                        <InfoRow label="Nom" value={touristicPlaceBooking.place?.title || 'Non spécifié'} />
+                      </div>
+                      <InfoRow label="Catégorie" value={touristicPlaceBooking.place?.category || 'Non spécifié'} />
+                      <InfoRow label="Ville" value={touristicPlaceBooking.place?.city || 'Non spécifié'} />
+                      <InfoRow label="Prix billet adulte" value={`${touristicPlaceBooking.place?.price || 0}€`} />
+                      <InfoRow label="Capacité maximale" value={`${touristicPlaceBooking.place?.maxGuests || 0} personnes`} />
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAirlineColor(flightReservation.flight?.compagnie)} border`}>
+                          <Plane className="w-3 h-3 mr-1" />
+                          {flightReservation.flight?.compagnie}
+                        </span>
+                        <InfoRow label="Vol" value={flightReservation.flight?.numeroVol || 'Non spécifié'} />
+                      </div>
+                      <InfoRow label="Trajet" value={`${flightReservation.flight?.departVille} → ${flightReservation.flight?.arriveeVille}`} />
+                      <InfoRow label="Classe" value={flightReservation.flight?.classe || 'Non spécifié'} />
+                      <InfoRow label="Appareil" value={flightReservation.flight?.aircraft || 'Non spécifié'} />
+                      <InfoRow 
+                        label="Note" 
+                        value={flightReservation.flight?.rating ? 
+                          `${flightReservation.flight.rating} ⭐ (${flightReservation.flight.reviewCount || 0} avis)` : 
+                          'Aucune note'} 
+                      />
+                    </>
+                  )}
+                </div>
+              </Section>
+
+              <Section title="Détails Financiers">
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  {isAccommodation ? (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Prix du séjour ({calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} nuits)</span>
+                        <span className="font-medium">
+                          {((booking.totalAmount - booking.serviceFee) / calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)).toFixed(2)}€ × {calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} = {(booking.totalAmount - booking.serviceFee).toFixed(2)}€
+                        </span>
+                      </div>
+                    </>
+                  ) : isTouristicPlace ? (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Prix des billets ({touristicPlaceBooking.numberOfTickets}x)</span>
+                        <span className="font-medium">
+                          {(booking.totalAmount - booking.serviceFee).toFixed(2)}€
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Prix du vol ({flightReservation.nbrPersonne}x)</span>
+                        <span className="font-medium">
+                          {flightReservation.flight?.prix}€ × {flightReservation.nbrPersonne} = {(flightReservation.flight?.prix * flightReservation.nbrPersonne).toFixed(2)}€
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  {booking.serviceFee > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Frais de service</span>
+                      <span className="font-medium">{booking.serviceFee}€</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-3 border-t border-gray-200 text-lg font-bold">
+                    <span className="text-gray-900">Total</span>
+                    <span className="text-gray-900">{booking.totalAmount}€</span>
+                  </div>
+                </div>
+              </Section>
+            </div>
+          </div>
+
+          {/* Demandes spéciales */}
+          {booking.specialRequests && (
+            <Section title="Demandes Spéciales" className="mt-6">
+              <div className="bg-blue-50 rounded-xl p-4">
+                <p className="text-gray-700 text-sm">{booking.specialRequests}</p>
+              </div>
+            </Section>
+          )}
+
+          {/* Détails voyageurs/billets */}
+          <Section title={
+            isAccommodation ? "Détails des Voyageurs" : 
+            isTouristicPlace ? "Détails des Billets" : 
+            "Détails des Passagers"
+          } className="mt-6">
+            <div className="bg-gray-50 rounded-xl p-4">
+              {isAccommodation ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{accommodationBooking.guests}</div>
+                    <div className="text-sm text-gray-600">Total voyageurs</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{accommodationBooking.adults}</div>
+                    <div className="text-sm text-gray-600">Adultes</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{accommodationBooking.children}</div>
+                    <div className="text-sm text-gray-600">Enfants</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{accommodationBooking.infants}</div>
+                    <div className="text-sm text-gray-600">Bébés</div>
+                  </div>
+                </div>
+              ) : isTouristicPlace ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{touristicPlaceBooking.numberOfTickets}</div>
+                    <div className="text-sm text-gray-600">Total billets</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900 capitalize">
+                      {getTicketTypeLabel(touristicPlaceBooking.ticketType)}
+                    </div>
+                    <div className="text-sm text-gray-600">Type de billet</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900">
+                      {touristicPlaceBooking.place?.price || 0}€
+                    </div>
+                    <div className="text-sm text-gray-600">Prix unitaire</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900">
+                      {(booking.totalAmount - booking.serviceFee).toFixed(2)}€
+                    </div>
+                    <div className="text-sm text-gray-600">Sous-total</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{flightReservation.nbrPersonne}</div>
+                    <div className="text-sm text-gray-600">Passagers</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900">
+                      {flightReservation.place}
+                    </div>
+                    <div className="text-sm text-gray-600">Place réservée</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900">
+                      {flightReservation.flight?.prix || 0}€
+                    </div>
+                    <div className="text-sm text-gray-600">Prix unitaire</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900">
+                      {(flightReservation.flight?.prix * flightReservation.nbrPersonne).toFixed(2)}€
+                    </div>
+                    <div className="text-sm text-gray-600">Sous-total</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Section>
+
+          {/* Actions */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div className="text-sm text-gray-500">
+                <div>Dernière modification: {new Date(booking.updatedAt).toLocaleString()}</div>
+                {booking.cancelledAt && (
+                  <div>Annulée le: {new Date(booking.cancelledAt).toLocaleString()}</div>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {isTouristicPlace && (booking.status === 'confirmed' || booking.status === 'paid') && onGenerateQRCode && (
+                  <button
+                    onClick={() => onGenerateQRCode(booking)}
+                    className="flex items-center px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    Générer QR Code
+                  </button>
+                )}
+                {booking.status === 'pending' && (
+                  <button
+                    onClick={() => onStatusUpdate(booking.id, 'confirmed')}
+                    className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
+                  >
+                    Confirmer la réservation
+                  </button>
+                )}
+                {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                  <button
+                    onClick={() => onStatusUpdate(booking.id, 'cancelled')}
+                    className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
+                  >
+                    Annuler la réservation
+                  </button>
+                )}
+                {booking.status !== 'paid' && booking.status !== 'cancelled' && booking.status !== 'failed' && (
+                  <button
+                    onClick={() => onStatusUpdate(booking.id, 'paid')}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Marquer comme payé
+                  </button>
+                )}
+                {(booking.user?.email || booking.userReservation?.email) && (booking.status === 'confirmed' || booking.status === 'paid') && (
+                  <button
+                    onClick={() => onSendReminder(booking.id)}
+                    className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium"
+                  >
+                    Envoyer un rappel
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Composant principal ProBookings
+export const ProBookings = () => {
+  const [activeTab, setActiveTab] = useState<BookingType>('accommodation');
+  const [accommodationBookings, setAccommodationBookings] = useState<TourismeBooking[]>([]);
+  const [touristicPlaceBookings, setTouristicPlaceBookings] = useState<TouristicPlaceBooking[]>([]);
+  const [flightReservations, setFlightReservations] = useState<FlightReservation[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [stats, setStats] = useState<BookingStats>({
+  const [accommodationStats, setAccommodationStats] = useState<BookingStats>({
     total: 0,
     pending: 0,
     confirmed: 0,
@@ -73,53 +1010,287 @@ export const ProBookings = () => {
     revenue: 0,
     averageBooking: 0,
   });
-  const [selectedBooking, setSelectedBooking] =
-    useState<TourismeBooking | null>(null);
+  const [touristicPlaceStats, setTouristicPlaceStats] = useState<BookingStats>({
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    cancelled: 0,
+    completed: 0,
+    revenue: 0,
+    averageBooking: 0,
+    totalTickets: 0,
+    occupancyRate: 0,
+  });
+  const [flightStats, setFlightStats] = useState<BookingStats>({
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    cancelled: 0,
+    completed: 0,
+    revenue: 0,
+    averageBooking: 0,
+    totalPassengers: 0,
+  });
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
     search: "",
     status: "all",
-    paymentStatus: "all",
     dateRange: "all",
-    provider: "all",
+    type: "all",
   });
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof TourismeBooking;
-    direction: "asc" | "desc";
-  }>({ key: "createdAt", direction: "desc" });
+  const [userPlaces, setUserPlaces] = useState<any[]>([]);
+  const [userFlights, setUserFlights] = useState<any[]>([]);
 
-  // Charger les réservations
+  // Charger les données
   useEffect(() => {
-    fetchBookings();
+    fetchAllBookings();
   }, []);
 
-  const fetchBookings = async () => {
+  const fetchAllBookings = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/tourisme-bookings?limit=1000");
-
-      if (response.data.success) {
-        setBookings(response.data.data);
-        setFilteredBookings(response.data.data);
-        calculateStats(response.data.data);
-      }
+      await Promise.all([
+        fetchAccommodationBookings(),
+        fetchTouristicPlaceBookings(),
+        fetchFlightReservations()
+      ]);
     } catch (error) {
-      console.error("Erreur chargement réservations:", error);
-      alert("Erreur lors du chargement des réservations");
+      console.error("❌ Erreur chargement des réservations:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const refreshBookings = async () => {
-    setRefreshing(true);
-    await fetchBookings();
+  const fetchAccommodationBookings = async () => {
+    try {
+      const response = await api.get("/tourisme-bookings?limit=1000");
+      if (response.data.success) {
+        setAccommodationBookings(response.data.data);
+        calculateAccommodationStats(response.data.data);
+      }
+    } catch (error) {
+      console.error("❌ Erreur chargement réservations hébergement:", error);
+      const mockData = getMockAccommodationBookings();
+      setAccommodationBookings(mockData);
+      calculateAccommodationStats(mockData);
+    }
   };
 
-  const calculateStats = (bookingsData: TourismeBooking[]) => {
+  const fetchTouristicPlaceBookings = async () => {
+    try {
+      const placesResponse = await tourismeAPI.getTouristicPlaces();
+      const allPlaces = placesResponse.data.data;
+      const userPlacesData = allPlaces.filter((place: any) => place.idPrestataire);
+      setUserPlaces(userPlacesData);
+
+      if (userPlacesData.length === 0) {
+        setTouristicPlaceBookings([]);
+        calculateTouristicPlaceStats([], []);
+        return;
+      }
+
+      const bookingsResponse = await touristicPlaceBookingsAPI.getBookings({ limit: 1000 });
+      
+      if (bookingsResponse.data.success) {
+        const bookingsData = bookingsResponse.data.data;
+        const placeIds = userPlacesData.map((place: any) => place.id);
+        const userBookings = bookingsData.filter((booking: TouristicPlaceBooking) => 
+          placeIds.includes(booking.place.id)
+        );
+        
+        setTouristicPlaceBookings(userBookings);
+        calculateTouristicPlaceStats(userBookings, userPlacesData);
+      } else {
+        const mockData = getMockTouristicPlaceBookings();
+        setTouristicPlaceBookings(mockData);
+        calculateTouristicPlaceStats(mockData, getMockPlaces());
+      }
+    } catch (error) {
+      console.error("❌ Erreur chargement réservations lieux:", error);
+      const mockData = getMockTouristicPlaceBookings();
+      setTouristicPlaceBookings(mockData);
+      calculateTouristicPlaceStats(mockData, getMockPlaces());
+    }
+  };
+
+  const fetchFlightReservations = async () => {
+    try {
+      console.log("🔄 Chargement des réservations de vols...");
+      
+      const reservationsResponse = await api.get("/Vol/reservations");
+      console.log("📡 Réponse API réservations:", reservationsResponse.data);
+      
+      if (reservationsResponse.data.success && reservationsResponse.data.data) {
+        const reservationsData = reservationsResponse.data.data;
+        console.log(`✈️ ${reservationsData.length} réservation(s) de vol trouvée(s)`, reservationsData);
+        
+        setFlightReservations(reservationsData);
+        calculateFlightStats(reservationsData);
+        
+        const flightsResponse = await flightsAPI.getFlights();
+        if (flightsResponse.data.success) {
+          setUserFlights(flightsResponse.data.data);
+        }
+      } else {
+        console.warn("⚠️ Aucune donnée de réservation dans la réponse");
+        setFlightReservations([]);
+        calculateFlightStats([]);
+      }
+    } catch (error) {
+      console.error("❌ Erreur critique chargement réservations vols:", error);
+      
+      const mockData = getMockFlightReservations();
+      console.log("🔄 Utilisation des données mockées:", mockData);
+      setFlightReservations(mockData);
+      calculateFlightStats(mockData);
+    }
+  };
+
+  // Données mockées
+  const getMockPlaces = () => [
+    {
+      id: 'p1',
+      title: 'Château de Versailles',
+      type: 'touristic_place',
+      category: 'monument',
+      city: 'Versailles',
+      images: ['https://i.pinimg.com/736x/a8/15/50/a81550a6d4c9ffd633e56200a25f8f9b.jpg'],
+      price: 20,
+      openingHours: '9:00-18:30',
+      maxGuests: 100,
+      idPrestataire: 'mock-prestataire-id'
+    }
+  ];
+
+  const getMockAccommodationBookings = (): TourismeBooking[] => [
+    {
+      id: 'a1',
+      confirmationNumber: 'ACC-2024-001',
+      status: 'confirmed',
+      checkIn: '2024-12-20',
+      checkOut: '2024-12-25',
+      guests: 4,
+      adults: 2,
+      children: 2,
+      infants: 0,
+      totalAmount: 600,
+      serviceFee: 60,
+      paymentMethod: 'card',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      listing: {
+        id: 'l1',
+        title: 'Villa de Luxe à Paris',
+        type: 'villa',
+        city: 'Paris',
+        images: ['https://i.pinimg.com/736x/15/bc/33/15bc33b809d57965e06769b6a96a69f7.jpg'],
+        price: 120,
+        provider: 'direct'
+      },
+      user: {
+        id: 'u1',
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        email: 'jean.dupont@email.com',
+        phone: '+33123456789'
+      }
+    }
+  ];
+
+  const getMockTouristicPlaceBookings = (): TouristicPlaceBooking[] => [
+    {
+      id: 't1',
+      confirmationNumber: 'TPL-2024-001',
+      status: 'paid',
+      visitDate: '2024-12-15',
+      visitTime: '14:00',
+      numberOfTickets: 4,
+      ticketType: 'adult',
+      totalAmount: 80,
+      serviceFee: 8,
+      paymentMethod: 'card',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      place: getMockPlaces()[0],
+      user: {
+        id: 'u1',
+        firstName: 'Pierre',
+        lastName: 'Durand',
+        email: 'pierre.durand@email.com',
+        phone: '+33112233445'
+      }
+    }
+  ];
+
+  const getMockFlightReservations = (): FlightReservation[] => [
+    {
+      id: 'f1',
+      flightId: 'flight1',
+      idUser: 'u1',
+      idPrestataire: 'p1',
+      nbrPersonne: 2,
+      place: '12A, 12B',
+      status: 'paid',
+      totalAmount: 400,
+      serviceFee: 40,
+      paymentMethod: 'card',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      flight: {
+        id: 'flight1',
+        compagnie: 'Air France',
+        numeroVol: 'AF123',
+        departVille: 'Paris',
+        departDateHeure: '2024-12-20T08:00:00Z',
+        arriveeVille: 'New York',
+        arriveeDateHeure: '2024-12-20T11:00:00Z',
+        duree: '8h',
+        escales: 0,
+        prix: 200,
+        classe: 'Economy',
+        services: ['repas', 'divertissement', 'baggage'],
+        image: 'https://i.pinimg.com/1200x/79/94/5c/79945cc369cdb035eadcc41efc866a4c.jpg',
+        aircraft: 'Boeing 777',
+        disponibilite: 150,
+        rating: 4.5,
+        reviewCount: 1200
+      },
+      userReservation: {
+        id: 'u1',
+        firstName: 'Marie',
+        lastName: 'Martin',
+        email: 'marie.martin@email.com',
+        phone: '+33123456789'
+      }
+    }
+  ];
+
+  const generateQRCode = (booking: TouristicPlaceBooking) => {
+    const qrData = {
+      confirmationNumber: booking.confirmationNumber,
+      place: booking.place.title,
+      date: booking.visitDate,
+      time: booking.visitTime,
+      tickets: booking.numberOfTickets,
+      type: booking.ticketType
+    };
+    
+    const qrString = JSON.stringify(qrData);
+    console.log('🎫 QR Code data:', qrString);
+    alert(`QR Code généré pour: ${booking.confirmationNumber}\nDonnées: ${qrString}`);
+  };
+
+  const refreshBookings = async () => {
+    setRefreshing(true);
+    await fetchAllBookings();
+  };
+
+  // Calcul des statistiques
+  const calculateAccommodationStats = (bookingsData: TourismeBooking[]) => {
     const confirmedAndCompleted = bookingsData.filter(
-      (b) => b.status === "confirmed" || b.status === "completed"
+      (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
     );
     const totalRevenue = confirmedAndCompleted.reduce(
       (sum, b) => sum + b.totalAmount,
@@ -129,67 +1300,168 @@ export const ProBookings = () => {
     const statsData: BookingStats = {
       total: bookingsData.length,
       pending: bookingsData.filter((b) => b.status === "pending").length,
-      confirmed: bookingsData.filter((b) => b.status === "confirmed").length,
+      confirmed: bookingsData.filter((b) => b.status === "confirmed" || b.status === "paid").length,
       cancelled: bookingsData.filter((b) => b.status === "cancelled").length,
       completed: bookingsData.filter((b) => b.status === "completed").length,
       revenue: totalRevenue,
-      averageBooking:
-        confirmedAndCompleted.length > 0
-          ? totalRevenue / confirmedAndCompleted.length
-          : 0,
+      averageBooking: confirmedAndCompleted.length > 0 ? totalRevenue / confirmedAndCompleted.length : 0,
     };
-    setStats(statsData);
+    setAccommodationStats(statsData);
+  };
+
+  const calculateTouristicPlaceStats = (bookingsData: TouristicPlaceBooking[], places: any[] = []) => {
+    const confirmedAndCompleted = bookingsData.filter(
+      (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
+    );
+    const totalRevenue = confirmedAndCompleted.reduce(
+      (sum, b) => sum + b.totalAmount,
+      0
+    );
+    const totalTickets = bookingsData.reduce(
+      (sum, b) => sum + b.numberOfTickets,
+      0
+    );
+
+    const totalCapacity = places.reduce((sum, place) => sum + (place.maxGuests || 0), 0);
+    const occupancyRate = totalCapacity > 0 ? (totalTickets / totalCapacity) * 100 : 0;
+
+    const statsData: BookingStats = {
+      total: bookingsData.length,
+      pending: bookingsData.filter((b) => b.status === "pending").length,
+      confirmed: bookingsData.filter((b) => b.status === "confirmed" || b.status === "paid").length,
+      cancelled: bookingsData.filter((b) => b.status === "cancelled").length,
+      completed: bookingsData.filter((b) => b.status === "completed").length,
+      revenue: totalRevenue,
+      averageBooking: confirmedAndCompleted.length > 0 ? totalRevenue / confirmedAndCompleted.length : 0,
+      totalTickets,
+      occupancyRate
+    };
+    setTouristicPlaceStats(statsData);
+  };
+
+  const calculateFlightStats = (reservationsData: FlightReservation[]) => {
+    console.log("📈 Calcul stats pour réservations vols:", reservationsData);
+    
+    const confirmedAndCompleted = reservationsData.filter(
+      (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
+    );
+    const totalRevenue = confirmedAndCompleted.reduce(
+      (sum, b) => sum + b.totalAmount,
+      0
+    );
+    const totalPassengers = reservationsData.reduce(
+      (sum, b) => sum + b.nbrPersonne,
+      0
+    );
+
+    console.log("📊 Stats calculées vols:", {
+      total: reservationsData.length,
+      totalPassengers,
+      totalRevenue
+    });
+
+    const statsData: BookingStats = {
+      total: reservationsData.length,
+      pending: reservationsData.filter((b) => b.status === "pending").length,
+      confirmed: reservationsData.filter((b) => b.status === "confirmed" || b.status === "paid").length,
+      cancelled: reservationsData.filter((b) => b.status === "cancelled").length,
+      completed: reservationsData.filter((b) => b.status === "completed").length,
+      revenue: totalRevenue,
+      averageBooking: confirmedAndCompleted.length > 0 ? totalRevenue / confirmedAndCompleted.length : 0,
+      totalPassengers
+    };
+    
+    setFlightStats(statsData);
   };
 
   // Appliquer les filtres
   useEffect(() => {
-    let results = bookings;
+    let currentBookings: Booking[] = [];
+    
+    switch (activeTab) {
+      case 'accommodation':
+        currentBookings = accommodationBookings;
+        break;
+      case 'touristic_place':
+        currentBookings = touristicPlaceBookings;
+        break;
+      case 'flight':
+        currentBookings = flightReservations;
+        break;
+    }
+
+    let results = currentBookings;
 
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      results = results.filter(
-        (booking) =>
-          booking.confirmationNumber.toLowerCase().includes(searchLower) ||
-          booking.listing?.title?.toLowerCase().includes(searchLower) ||
-          booking.user?.firstName?.toLowerCase().includes(searchLower) ||
-          booking.user?.lastName?.toLowerCase().includes(searchLower) ||
-          booking.user?.email?.toLowerCase().includes(searchLower) ||
-          booking.listing?.city?.toLowerCase().includes(searchLower)
-      );
+      results = results.filter((booking: any) => {
+        const isAccommodation = 'listing' in booking;
+        const isTouristicPlace = 'place' in booking;
+        const isFlight = 'flight' in booking;
+
+        let title = '';
+        let city = '';
+        let user = null;
+
+        if (isAccommodation) {
+          title = booking.listing?.title;
+          city = booking.listing?.city;
+          user = booking.user;
+        } else if (isTouristicPlace) {
+          title = booking.place?.title;
+          city = booking.place?.city;
+          user = booking.user;
+        } else if (isFlight) {
+          title = `${booking.flight?.compagnie} - Vol ${booking.flight?.numeroVol}`;
+          city = `${booking.flight?.departVille} → ${booking.flight?.arriveeVille}`;
+          user = booking.userReservation;
+        }
+
+        const confirmationNumber = isFlight ? `FLIGHT-${booking.id.slice(-6)}` : booking.confirmationNumber;
+
+        return (
+          confirmationNumber.toLowerCase().includes(searchLower) ||
+          title?.toLowerCase().includes(searchLower) ||
+          user?.firstName?.toLowerCase().includes(searchLower) ||
+          user?.lastName?.toLowerCase().includes(searchLower) ||
+          user?.email?.toLowerCase().includes(searchLower) ||
+          city?.toLowerCase().includes(searchLower) ||
+          (isFlight && booking.flight?.compagnie?.toLowerCase().includes(searchLower)) ||
+          (isFlight && booking.flight?.numeroVol?.toLowerCase().includes(searchLower))
+        );
+      });
     }
 
     if (filters.status !== "all") {
-      results = results.filter((booking) => booking.status === filters.status);
+      results = results.filter((booking: any) => booking.status === filters.status);
     }
 
-    if (filters.paymentStatus !== "all") {
-      results = results.filter(
-        (booking) => booking.paymentStatus === filters.paymentStatus
-      );
-    }
-
-    if (filters.provider !== "all") {
-      results = results.filter(
-        (booking) => booking.listing?.provider === filters.provider
-      );
-    }
-
-    // Filtrer par date
     if (filters.dateRange !== "all") {
       const now = new Date();
-      results = results.filter((booking) => {
-        const checkIn = new Date(booking.checkIn);
+      results = results.filter((booking: any) => {
+        let date: Date;
+        
+        if ('checkIn' in booking) {
+          date = new Date(booking.checkIn);
+        } else if ('visitDate' in booking) {
+          date = new Date(booking.visitDate);
+        } else if ('flight' in booking) {
+          date = new Date(booking.flight.departDateHeure);
+        } else {
+          return true;
+        }
+
         switch (filters.dateRange) {
           case "today":
-            return checkIn.toDateString() === now.toDateString();
+            return date.toDateString() === now.toDateString();
           case "week":
             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            return checkIn >= weekAgo;
+            return date >= weekAgo;
           case "month":
             const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            return checkIn >= monthAgo;
+            return date >= monthAgo;
           case "future":
-            return checkIn > now;
+            return date > now;
           default:
             return true;
         }
@@ -197,158 +1469,140 @@ export const ProBookings = () => {
     }
 
     setFilteredBookings(results);
-  }, [filters, bookings]);
+  }, [filters, activeTab, accommodationBookings, touristicPlaceBookings, flightReservations]);
 
-  // Trier les résultats
-  const sortedBookings = [...filteredBookings].sort((a, b) => {
-    const aValue = a[sortConfig.key];
-    const bValue = b[sortConfig.key];
-
-    if (aValue < bValue) {
-      return sortConfig.direction === "asc" ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return sortConfig.direction === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
-
-  const handleSort = (key: keyof TourismeBooking) => {
-    setSortConfig({
-      key,
-      direction:
-        sortConfig.key === key && sortConfig.direction === "asc"
-          ? "desc"
-          : "asc",
-    });
-  };
-
-  const updateBookingStatus = async (
-    bookingId: string,
-    status: TourismeBooking["status"]
-  ) => {
+  const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
-      const response = await api.put(`/tourisme-bookings/${bookingId}/status`, {
-        status,
-      });
-
-      if (response.data.success) {
-        setBookings((prev) =>
-          prev.map((booking) =>
+      console.log(`🔄 Mise à jour statut ${activeTab}:`, bookingId, status);
+      
+      if (activeTab === 'accommodation') {
+        const response = await api.put(`/tourisme-bookings/${bookingId}/status`, { status });
+        if (response.data.success) {
+          setAccommodationBookings(prev => prev.map(booking => 
             booking.id === bookingId ? response.data.data : booking
-          )
-        );
-        if (selectedBooking?.id === bookingId) {
-          setSelectedBooking(response.data.data);
+          ));
         }
-        // Recalculer les stats sans recharger toutes les données
-        calculateStats(
-          bookings.map((b) => (b.id === bookingId ? response.data.data : b))
-        );
+      } else if (activeTab === 'touristic_place') {
+        const response = await touristicPlaceBookingsAPI.updateStatus(bookingId, { status });
+        if (response.data.success) {
+          setTouristicPlaceBookings(prev => prev.map(booking => 
+            booking.id === bookingId ? response.data.data : booking
+          ));
+        }
+      } else if (activeTab === 'flight') {
+        const response = await flightsAPI.updateReservationStatus(bookingId, status);
+        if (response.data.success) {
+          setFlightReservations(prev => prev.map(booking => 
+            booking.id === bookingId ? response.data.data : booking
+          ));
+          console.log(`✅ Statut vol mis à jour: ${bookingId} -> ${status}`);
+        }
       }
+      
+      setShowDetailModal(false);
+      
     } catch (error) {
-      console.error("Erreur mise à jour statut:", error);
+      console.error("❌ Erreur mise à jour statut:", error);
       alert("Erreur lors de la mise à jour du statut");
     }
   };
 
-  const updatePaymentStatus = async (
-    bookingId: string,
-    paymentStatus: TourismeBooking["paymentStatus"]
-  ) => {
-    try {
-      const response = await api.put(`/tourisme-bookings/${bookingId}/status`, {
-        paymentStatus,
-      });
-
-      if (response.data.success) {
-        setBookings((prev) =>
-          prev.map((booking) =>
-            booking.id === bookingId ? response.data.data : booking
-          )
-        );
-        if (selectedBooking?.id === bookingId) {
-          setSelectedBooking(response.data.data);
-        }
-      }
-    } catch (error) {
-      console.error("Erreur mise à jour paiement:", error);
-      alert("Erreur lors de la mise à jour du statut de paiement");
-    }
+  // SUPPRIMER updatePaymentStatus et utiliser updateBookingStatus pour tout
+  const updatePaymentStatus = async (bookingId: string, paymentStatus: string) => {
+    // Utiliser updateBookingStatus pour les statuts de paiement aussi
+    await updateBookingStatus(bookingId, paymentStatus);
   };
 
   const sendReminder = async (bookingId: string) => {
     try {
-      const response = await api.post(
-        `/tourisme-bookings/${bookingId}/reminder`
-      );
-      if (response.data.success) {
-        alert("Rappel envoyé avec succès");
+      console.log('📨 Envoi rappel pour réservation:', bookingId);
+      
+      const booking = filteredBookings.find(b => b.id === bookingId);
+      if (booking) {
+        const email = (booking as any).user?.email || (booking as any).userReservation?.email;
+        if (email) {
+          const subject = `Rappel: Votre réservation ${activeTab === 'flight' ? `FLIGHT-${bookingId.slice(-6)}` : (booking as any).confirmationNumber}`;
+          const body = `Bonjour,\n\nCeci est un rappel pour votre réservation.\n\nCordialement,\nL'équipe de voyage`;
+          
+          window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+        }
       }
+      
+      alert(`Rappel envoyé pour la réservation ${bookingId}`);
     } catch (error) {
-      console.error("Erreur envoi rappel:", error);
+      console.error("❌ Erreur envoi rappel:", error);
       alert("Erreur lors de l'envoi du rappel");
     }
   };
 
-  const getStatusIcon = (status: TourismeBooking["status"]) => {
-    switch (status) {
-      case "confirmed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "pending":
-        return <Clock className="w-4 h-4 text-yellow-500" />;
-      case "cancelled":
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case "completed":
-        return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-500" />;
+  const getCurrentStats = () => {
+    switch (activeTab) {
+      case 'accommodation': return accommodationStats;
+      case 'touristic_place': return touristicPlaceStats;
+      case 'flight': return flightStats;
+      default: return accommodationStats;
     }
   };
 
-  const getStatusColor = (status: TourismeBooking["status"]) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+  const getUpcomingBookings = () => {
+    const today = new Date();
+    return filteredBookings.filter((booking: any) => {
+      let date: Date;
+      
+      if ('checkIn' in booking) {
+        date = new Date(booking.checkIn);
+      } else if ('visitDate' in booking) {
+        date = new Date(booking.visitDate);
+      } else if ('flight' in booking) {
+        date = new Date(booking.flight.departDateHeure);
+      } else {
+        return false;
+      }
+
+      const timeDiff = date.getTime() - today.getTime();
+      const daysDiff = timeDiff / (1000 * 3600 * 24);
+      return daysDiff <= 7 && daysDiff >= 0 && (booking.status === "confirmed" || booking.status === "paid");
+    }).length;
+  };
+
+  const getTicketTypeLabel = (type: string) => {
+    switch (type) {
+      case 'adult': return 'Adulte';
+      case 'child': return 'Enfant';
+      case 'student': return 'Étudiant';
+      case 'senior': return 'Senior';
+      default: return type;
     }
   };
 
-  const getPaymentStatusColor = (status: TourismeBooking["paymentStatus"]) => {
-    switch (status) {
-      case "paid":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "failed":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "refunded":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'monument':
+        return <Landmark className="w-4 h-4 text-purple-600" />;
+      case 'museum':
+        return <Building className="w-4 h-4 text-blue-600" />;
+      case 'park':
+        return <GalleryVerticalEnd className="w-4 h-4 text-green-600" />;
+      case 'religious':
+        return <Church className="w-4 h-4 text-indigo-600" />;
+      case 'historical':
+        return <Castle className="w-4 h-4 text-cyan-600" />;
+      case 'cultural':
+        return <BookOpen className="w-4 h-4 text-lime-600" />;
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return <GalleryVerticalEnd className="w-4 h-4 text-gray-600" />;
     }
   };
 
-  const getProviderColor = (provider: string) => {
-    switch (provider) {
-      case "direct":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "partner":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "airbnb":
-        return "bg-pink-100 text-pink-800 border-pink-200";
-      case "booking":
-        return "bg-teal-100 text-teal-800 border-teal-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
+  const getAirlineColor = (airline: string) => {
+    const colors: { [key: string]: string } = {
+      'Air France': 'bg-blue-100 text-blue-800 border-blue-200',
+      'Air Senegal': 'bg-green-100 text-green-800 border-green-200',
+      'Emirates': 'bg-red-100 text-red-800 border-red-200',
+      'Qatar Airways': 'bg-purple-100 text-purple-800 border-purple-200',
+      'Turkish Airlines': 'bg-orange-100 text-orange-800 border-orange-200',
+    };
+    return colors[airline] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   const calculateNights = (checkIn: string, checkOut: string) => {
@@ -359,88 +1613,26 @@ export const ProBookings = () => {
   };
 
   const exportToCSV = () => {
-    const headers = [
-      "Numéro Confirmation",
-      "Client",
-      "Email",
-      "Téléphone",
-      "Hébergement",
-      "Type",
-      "Destination",
-      "Provider",
-      "Arrivée",
-      "Départ",
-      "Nuits",
-      "Adultes",
-      "Enfants",
-      "Bébés",
-      "Total Voyageurs",
-      "Montant Total",
-      "Frais Service",
-      "Statut",
-      "Paiement",
-      "Méthode Paiement",
-      "Date Réservation",
-    ];
-
-    const csvData = sortedBookings.map((booking) => [
-      booking.confirmationNumber,
-      booking.user
-        ? `${booking.user.firstName} ${booking.user.lastName}`
-        : "Non renseigné",
-      booking.user?.email || "",
-      booking.user?.phone || "",
-      booking.listing?.title || "Non spécifié",
-      booking.listing?.type || "Non spécifié",
-      booking.listing?.city || "Non spécifié",
-      booking.listing?.provider || "Non spécifié",
-      new Date(booking.checkIn).toLocaleDateString(),
-      new Date(booking.checkOut).toLocaleDateString(),
-      calculateNights(booking.checkIn, booking.checkOut),
-      booking.adults,
-      booking.children,
-      booking.infants,
-      booking.guests,
-      `${booking.totalAmount}€`,
-      `${booking.serviceFee}€`,
-      booking.status,
-      booking.paymentStatus,
-      booking.paymentMethod,
-      new Date(booking.createdAt).toLocaleDateString(),
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map((row) => row.map((field) => `"${field}"`).join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `reservations-tourisme-${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    console.log('Export CSV pour:', activeTab);
+    alert(`Export CSV pour ${activeTab} en cours...`);
   };
 
-  const getUniqueProviders = () => {
-    const providers = bookings
-      .map((b) => b.listing?.provider)
-      .filter((provider) => provider !== undefined && provider !== null);
-
-    return ["all", ...Array.from(new Set(providers))];
+  const getCurrentBookingsCount = () => {
+    switch (activeTab) {
+      case 'accommodation': return accommodationBookings.length;
+      case 'touristic_place': return touristicPlaceBookings.length;
+      case 'flight': return flightReservations.length;
+      default: return 0;
+    }
   };
 
-  const getUpcomingBookings = () => {
-    const today = new Date();
-    return sortedBookings.filter((booking) => {
-      const checkIn = new Date(booking.checkIn);
-      const timeDiff = checkIn.getTime() - today.getTime();
-      const daysDiff = timeDiff / (1000 * 3600 * 24);
-      return daysDiff <= 7 && daysDiff >= 0 && booking.status === "confirmed";
-    }).length;
+  const getTabLabel = () => {
+    switch (activeTab) {
+      case 'accommodation': return 'hébergement';
+      case 'touristic_place': return 'lieu touristique';
+      case 'flight': return 'vol';
+      default: return '';
+    }
   };
 
   if (loading) {
@@ -454,7 +1646,11 @@ export const ProBookings = () => {
                 <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
               ))}
             </div>
-            <div className="h-96 bg-gray-200 rounded-xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-64 bg-gray-200 rounded-2xl"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -468,11 +1664,10 @@ export const ProBookings = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Gestion des Réservations Tourisme
+              Gestion des Réservations
             </h1>
             <p className="text-gray-600">
-              Gérez et suivez toutes les réservations d'hébergements
-              touristiques
+              Gérez et suivez toutes vos réservations d'hébergements, de lieux touristiques et de vols
             </p>
           </div>
           <button
@@ -487,105 +1682,212 @@ export const ProBookings = () => {
           </button>
         </div>
 
-        {/* Statistiques améliorées */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Total Réservations
-                </p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {stats.total}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {((stats.confirmed / stats.total) * 100 || 0).toFixed(1)}%
-                  confirmées
-                </p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <Calendar className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">En Attente</p>
-                <p className="text-3xl font-bold text-yellow-600">
-                  {stats.pending}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {((stats.pending / stats.total) * 100 || 0).toFixed(1)}% du
-                  total
-                </p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-xl">
-                <Clock className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Revenu Total
-                </p>
-                <p className="text-3xl font-bold text-green-600">
-                  {stats.revenue.toFixed(2)}€
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Moyenne: {stats.averageBooking.toFixed(2)}€
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-xl">
-                <DollarSign className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Taux Conversion
-                </p>
-                <p className="text-3xl font-bold text-blue-600">
-                  {(
-                    ((stats.confirmed + stats.completed) / stats.total) * 100 ||
-                    0
-                  ).toFixed(1)}
-                  %
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {stats.cancelled} annulations
-                </p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Prochaines 7j
-                </p>
-                <p className="text-3xl font-bold text-purple-600">
-                  {getUpcomingBookings()}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">Arrivées à venir</p>
-              </div>
-              <div className="p-3 bg-purple-100 rounded-xl">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
+        {/* Onglets */}
+        <div className="flex flex-col md:flex-row space-x-4 mb-8">
+          <button
+            onClick={() => setActiveTab('accommodation')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${
+              activeTab === 'accommodation'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Home className="w-5 h-5 mr-2" />
+            Hébergements
+            <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+              {accommodationBookings.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('touristic_place')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${
+              activeTab === 'touristic_place'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Camera className="w-5 h-5 mr-2" />
+            Lieux Touristiques
+            <span className="ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
+              {touristicPlaceBookings.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('flight')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${
+              activeTab === 'flight'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Plane className="w-5 h-5 mr-2" />
+            Vols
+            <span className="ml-2 bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm">
+              {flightReservations.length}
+            </span>
+          </button>
         </div>
+
+        {/* Message si aucun service créé */}
+        {activeTab === 'touristic_place' && userPlaces.length === 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8">
+            <div className="flex items-center">
+              <AlertCircle className="w-8 h-8 text-yellow-600 mr-4" />
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-800">
+                  Aucun lieu touristique créé
+                </h3>
+                <p className="text-yellow-700 mt-1">
+                  Vous devez créer des lieux touristiques pour recevoir des réservations.
+                </p>
+                <button
+                  onClick={() => window.location.href = '/admin/tourisme'}
+                  className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                >
+                  Créer un lieu touristique
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'flight' && userFlights.length === 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8">
+            <div className="flex items-center">
+              <AlertCircle className="w-8 h-8 text-yellow-600 mr-4" />
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-800">
+                  Aucun vol créé
+                </h3>
+                <p className="text-yellow-700 mt-1">
+                  Vous devez créer des vols pour recevoir des réservations.
+                </p>
+                <button
+                  onClick={() => window.location.href = '/admin/flights'}
+                  className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                >
+                  Créer un vol
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Statistiques améliorées */}
+        {getCurrentBookingsCount() > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Réservations
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {getCurrentStats().total}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {activeTab === 'touristic_place' 
+                      ? `${getCurrentStats().totalTickets} billets vendus`
+                      : activeTab === 'flight'
+                      ? `${getCurrentStats().totalPassengers} passagers`
+                      : `${((getCurrentStats().confirmed / getCurrentStats().total) * 100 || 0).toFixed(1)}% confirmées`
+                    }
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  {activeTab === 'flight' ? (
+                    <Plane className="w-6 h-6 text-blue-600" />
+                  ) : (
+                    <Calendar className="w-6 h-6 text-blue-600" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">En Attente</p>
+                  <p className="text-3xl font-bold text-yellow-600">
+                    {getCurrentStats().pending}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {((getCurrentStats().pending / getCurrentStats().total) * 100 || 0).toFixed(1)}% du total
+                  </p>
+                </div>
+                <div className="p-3 bg-yellow-100 rounded-xl">
+                  <Clock className="w-6 h-6 text-yellow-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Revenu Total
+                  </p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {getCurrentStats().revenue.toFixed(2)}€
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Moyenne: {getCurrentStats().averageBooking.toFixed(2)}€
+                  </p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <DollarSign className="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    {activeTab === 'touristic_place' ? "Taux d'Occupation" : 
+                     activeTab === 'flight' ? "Taux de Remplissage" : "Taux Conversion"}
+                  </p>
+                  <p className="text-3xl font-bold text-purple-600">
+                    {activeTab === 'touristic_place' 
+                      ? `${getCurrentStats().occupancyRate?.toFixed(1)}%`
+                      : activeTab === 'flight'
+                      ? `${(((getCurrentStats().confirmed + getCurrentStats().completed) / getCurrentStats().total) * 100 || 0).toFixed(1)}%`
+                      : `${(((getCurrentStats().confirmed + getCurrentStats().completed) / getCurrentStats().total) * 100 || 0).toFixed(1)}%`
+                    }
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {activeTab === 'touristic_place' ? "Capacité utilisée" : 
+                     activeTab === 'flight' ? "Vols confirmés" : `${getCurrentStats().cancelled} annulations`}
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Prochaines 7j
+                  </p>
+                  <p className="text-3xl font-bold text-orange-600">
+                    {getUpcomingBookings()}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {activeTab === 'accommodation' ? "Arrivées à venir" : 
+                     activeTab === 'touristic_place' ? "Visites à venir" : 
+                     "Départs à venir"}
+                  </p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-xl">
+                  <Calendar className="w-6 h-6 text-orange-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Barre de recherche et filtres améliorée */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
@@ -595,7 +1897,7 @@ export const ProBookings = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Rechercher par numéro, client, hébergement, ville..."
+                  placeholder={`Rechercher par numéro, client, ${getTabLabel()}, ville...`}
                   className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={filters.search}
                   onChange={(e) =>
@@ -616,41 +1918,11 @@ export const ProBookings = () => {
                 <option value="all">Tous statuts</option>
                 <option value="pending">En attente</option>
                 <option value="confirmed">Confirmé</option>
+                <option value="paid">Payé</option>
                 <option value="cancelled">Annulé</option>
                 <option value="completed">Terminé</option>
-              </select>
-
-              <select
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                value={filters.paymentStatus}
-                onChange={(e) =>
-                  setFilters({ ...filters, paymentStatus: e.target.value })
-                }
-              >
-                <option value="all">Tous paiements</option>
-                <option value="pending">En attente</option>
-                <option value="paid">Payé</option>
-                <option value="failed">Échoué</option>
+                <option value="failed">Échec paiement</option>
                 <option value="refunded">Remboursé</option>
-              </select>
-
-              <select
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                value={filters.provider}
-                onChange={(e) =>
-                  setFilters({ ...filters, provider: e.target.value })
-                }
-              >
-                <option value="all">Tous providers</option>
-                {getUniqueProviders()
-                  .filter((p) => p !== "all")
-                  .map((provider) => (
-                    <option key={provider} value={provider}>
-                      {provider && provider.charAt
-                        ? provider.charAt(0).toUpperCase() + provider.slice(1)
-                        : "Inconnu"}
-                    </option>
-                  ))}
               </select>
 
               <select
@@ -681,6 +1953,8 @@ export const ProBookings = () => {
           <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
             <div className="text-sm text-gray-600">
               {filteredBookings.length} réservation(s) trouvée(s)
+              {activeTab === 'touristic_place' && userPlaces.length > 0 && ` sur ${userPlaces.length} lieu(x)`}
+              {activeTab === 'flight' && userFlights.length > 0 && ` sur ${userFlights.length} vol(s)`}
             </div>
             <div className="text-sm text-gray-500 flex items-center">
               <RefreshCw className="w-4 h-4 mr-1" />
@@ -689,594 +1963,61 @@ export const ProBookings = () => {
           </div>
         </div>
 
-        {/* Tableau des réservations amélioré */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort("confirmationNumber")}
-                  >
-                    <div className="flex items-center">
-                      N° Confirmation
-                      {sortConfig.key === "confirmationNumber" &&
-                        (sortConfig.direction === "asc" ? (
-                          <ChevronUp className="w-4 h-4 ml-1" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 ml-1" />
-                        ))}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Client / Hébergement
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort("checkIn")}
-                  >
-                    <div className="flex items-center">
-                      Séjour
-                      {sortConfig.key === "checkIn" &&
-                        (sortConfig.direction === "asc" ? (
-                          <ChevronUp className="w-4 h-4 ml-1" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 ml-1" />
-                        ))}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Voyageurs
-                  </th>
-                  <th
-                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort("totalAmount")}
-                  >
-                    <div className="flex items-center">
-                      Montant
-                      {sortConfig.key === "totalAmount" &&
-                        (sortConfig.direction === "asc" ? (
-                          <ChevronUp className="w-4 h-4 ml-1" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 ml-1" />
-                        ))}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Statuts
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {sortedBookings.map((booking) => (
-                  <tr
-                    key={booking.id}
-                    className="hover:bg-gray-50 transition-colors group"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-mono font-bold text-gray-900">
-                        {booking.confirmationNumber}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(booking.createdAt).toLocaleDateString()}
-                      </div>
-                      <div className="mt-1">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getProviderColor(
-                            booking.listing?.provider || "unknown"
-                          )} border`}
-                        >
-                          <Building className="w-3 h-3 mr-1" />
-                          {booking.listing?.provider || "inconnu"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-start space-x-3">
-                        {booking.listing?.images?.[0] && (
-                          <img
-                            src={booking.listing.images[0]}
-                            alt={booking.listing.title}
-                            className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-gray-900 line-clamp-2">
-                            {booking.listing?.title || "Titre non disponible"}
-                          </div>
-                          <div className="text-sm text-gray-500 flex items-center mt-1">
-                            <MapPin className="w-3 h-3 mr-1" />
-                            {booking.listing?.city || "Ville non spécifiée"}
-                          </div>
-                          <div className="text-xs text-gray-400 capitalize">
-                            {booking.listing?.type || "Non spécifié"}
-                          </div>
-                          {booking.user ? (
-                            <div className="flex items-center mt-2 text-xs text-gray-600">
-                              <UserIcon className="w-3 h-3 mr-1" />
-                              {booking.user.firstName} {booking.user.lastName}
-                              {booking.user.email && (
-                                <a
-                                  href={`mailto:${booking.user.email}`}
-                                  className="ml-2 text-blue-600 hover:text-blue-800 transition-colors"
-                                  title="Envoyer un email"
-                                >
-                                  <Mail className="w-3 h-3" />
-                                </a>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="text-xs text-gray-400 mt-1">
-                              Client non connecté
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 font-medium">
-                        {new Date(booking.checkIn).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(booking.checkOut).toLocaleDateString()}
-                      </div>
-                      <div className="text-xs text-gray-400 font-medium">
-                        {calculateNights(booking.checkIn, booking.checkOut)}{" "}
-                        nuit(s)
-                      </div>
-                      {new Date(booking.checkIn) <=
-                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-                        new Date(booking.checkIn) >= new Date() &&
-                        booking.status === "confirmed" && (
-                          <div className="text-xs text-orange-600 font-medium mt-1">
-                            ⚠️ Arrive bientôt
-                          </div>
-                        )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {booking.guests}{" "}
-                        {booking.guests > 1 ? "voyageurs" : "voyageur"}
-                      </div>
-                      <div className="text-xs text-gray-500 space-y-1">
-                        <div>👤 {booking.adults} adulte(s)</div>
-                        <div>🧒 {booking.children} enfant(s)</div>
-                        {booking.infants > 0 && (
-                          <div>👶 {booking.infants} bébé(s)</div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-lg font-bold text-gray-900">
-                        {booking.totalAmount}€
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Dont {booking.serviceFee}€ de frais
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {booking.paymentMethod === "card"
-                          ? "💳 Carte"
-                          : "📱 PayPal"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-2">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            booking.status
-                          )} border`}
-                        >
-                          {getStatusIcon(booking.status)}
-                          <span className="ml-1 capitalize">
-                            {booking.status}
-                          </span>
-                        </span>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(
-                            booking.paymentStatus
-                          )} border`}
-                        >
-                          <span className="capitalize">
-                            {booking.paymentStatus}
-                          </span>
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            setSelectedBooking(booking);
-                            setShowDetailModal(true);
-                          }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Voir les détails"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        {booking.status === "pending" && (
-                          <button
-                            onClick={() =>
-                              updateBookingStatus(booking.id, "confirmed")
-                            }
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Confirmer"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                        {booking.status !== "cancelled" && (
-                          <button
-                            onClick={() =>
-                              updateBookingStatus(booking.id, "cancelled")
-                            }
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Annuler"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                        {booking.user?.email &&
-                          booking.status === "confirmed" && (
-                            <button
-                              onClick={() => sendReminder(booking.id)}
-                              className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                              title="Envoyer un rappel"
-                            >
-                              <MessageCircle className="w-4 h-4" />
-                            </button>
-                          )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Grille de cartes des réservations */}
+        {filteredBookings.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredBookings.map((booking) => (
+              <BookingCard
+                key={booking.id}
+                booking={booking}
+                type={activeTab}
+                onViewDetails={() => {
+                  setSelectedBooking(booking);
+                  setShowDetailModal(true);
+                }}
+                onUpdateStatus={updateBookingStatus}
+                onGenerateQRCode={activeTab === 'touristic_place' ? generateQRCode : undefined}
+                getTicketTypeLabel={getTicketTypeLabel}
+                getCategoryIcon={getCategoryIcon}
+                calculateNights={calculateNights}
+                getAirlineColor={getAirlineColor}
+              />
+            ))}
           </div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <Filter className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg mb-2">
+              Aucune réservation trouvée
+            </p>
+            <p className="text-gray-400">
+              {activeTab === 'touristic_place' && userPlaces.length === 0 
+                ? "Vous devez créer des lieux touristiques pour recevoir des réservations"
+                : activeTab === 'flight' && userFlights.length === 0
+                ? "Vous devez créer des vols pour recevoir des réservations"
+                : "Essayez de modifier vos filtres de recherche"
+              }
+            </p>
+          </div>
+        )}
 
-          {sortedBookings.length === 0 && (
-            <div className="text-center py-12">
-              <Filter className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">
-                Aucune réservation trouvée
-              </p>
-              <p className="text-gray-400">
-                Essayez de modifier vos filtres de recherche
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Modal de détail */}
+        {/* Modal de détail unifié */}
         {showDetailModal && selectedBooking && (
           <BookingDetailModal
             booking={selectedBooking}
+            type={activeTab}
             onClose={() => setShowDetailModal(false)}
             onStatusUpdate={updateBookingStatus}
-            onPaymentUpdate={updatePaymentStatus}
-            calculateNights={calculateNights}
             onSendReminder={sendReminder}
+            onGenerateQRCode={activeTab === 'touristic_place' ? generateQRCode : undefined}
+            getTicketTypeLabel={getTicketTypeLabel}
+            getCategoryIcon={getCategoryIcon}
+            calculateNights={calculateNights}
+            getAirlineColor={getAirlineColor}
           />
         )}
       </div>
     </div>
-  );
-};
-
-// Composant Modal de Détail amélioré
-const BookingDetailModal = ({ 
-  booking, 
-  onClose, 
-  onStatusUpdate, 
-  onPaymentUpdate,
-  calculateNights,
-  onSendReminder
-}: {
-  booking: TourismeBooking;
-  onClose: () => void;
-  onStatusUpdate: (id: string, status: TourismeBooking['status']) => void;
-  onPaymentUpdate: (id: string, paymentStatus: TourismeBooking['paymentStatus']) => void;
-  calculateNights: (checkIn: string, checkOut: string) => number;
-  onSendReminder: (id: string) => void;
-}) => {
-  const nights = calculateNights(booking.checkIn, booking.checkOut);
-  const isUpcoming = new Date(booking.checkIn) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && 
-                    new Date(booking.checkIn) >= new Date();
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                Détails de la Réservation
-              </h3>
-              <p className="text-gray-600 mt-1">
-                {booking.confirmationNumber} • Créée le {new Date(booking.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <XCircle className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Informations réservation */}
-            <div className="space-y-6">
-              <Section title="Informations Réservation">
-                <InfoRow label="Numéro de confirmation" value={booking.confirmationNumber} mono />
-                <InfoRow label="Date de création" value={new Date(booking.createdAt).toLocaleString()} />
-                <InfoRow label="Provider" value={booking.listing?.provider || 'Non spécifié'} badge />
-                <InfoRow label="Méthode de paiement" value={booking.paymentMethod} />
-                {booking.stripePaymentIntent && (
-                  <InfoRow label="Stripe Payment Intent" value={booking.stripePaymentIntent} mono />
-                )}
-              </Section>
-
-              <Section title="Statuts">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Statut réservation</span>
-                    <StatusBadge status={booking.status} type="booking" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Statut paiement</span>
-                    <StatusBadge status={booking.paymentStatus} type="payment" />
-                  </div>
-                </div>
-              </Section>
-
-              <Section title="Dates du séjour">
-                <div className="space-y-2">
-                  <InfoRow label="Arrivée" value={new Date(booking.checkIn).toLocaleDateString()} />
-                  <InfoRow label="Départ" value={new Date(booking.checkOut).toLocaleDateString()} />
-                  <InfoRow label="Nombre de nuits" value={nights.toString()} />
-                  <InfoRow label="Durée totale" value={`${nights} nuit(s)`} />
-                  {isUpcoming && booking.status === 'confirmed' && (
-                    <div className="bg-orange-50 p-3 rounded-lg mt-2">
-                      <div className="flex items-center text-orange-800 text-sm">
-                        <AlertCircle className="w-4 h-4 mr-2" />
-                        Arrivée prévue dans moins de 7 jours
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </Section>
-            </div>
-
-            {/* Informations client et hébergement */}
-            <div className="space-y-6">
-              <Section title="Informations Client">
-                {booking.user ? (
-                  <div className="space-y-3">
-                    <InfoRow label="Nom complet" value={`${booking.user.firstName} ${booking.user.lastName}`} />
-                    <InfoRow label="Email" value={
-                      <a href={`mailto:${booking.user.email}`} className="text-blue-600 hover:text-blue-800">
-                        {booking.user.email}
-                      </a>
-                    } />
-                    {booking.user.phone && (
-                      <InfoRow label="Téléphone" value={
-                        <a href={`tel:${booking.user.phone}`} className="text-blue-600 hover:text-blue-800">
-                          {booking.user.phone}
-                        </a>
-                      } />
-                    )}
-                    <InfoRow label="ID Utilisateur" value={booking.user.id} mono />
-                    <div className="flex space-x-2 pt-2">
-                      <a
-                        href={`mailto:${booking.user.email}?subject=Réservation ${booking.confirmationNumber}`}
-                        className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Contacter
-                      </a>
-                      {booking.status === 'confirmed' && (
-                        <button
-                          onClick={() => onSendReminder(booking.id)}
-                          className="flex items-center px-3 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          Rappel
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <UserIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500 text-sm">Aucune information client disponible</p>
-                    <p className="text-gray-400 text-xs">Réservation effectuée sans compte</p>
-                  </div>
-                )}
-              </Section>
-
-              <Section title="Hébergement">
-                <div className="space-y-3">
-                  <InfoRow label="Nom" value={booking.listing?.title || 'Non spécifié'} />
-                  <InfoRow label="Type" value={booking.listing?.type || 'Non spécifié'} />
-                  <InfoRow label="Destination" value={booking.listing?.city || 'Non spécifié'} />
-                  <InfoRow label="Prix par nuit" value={`${booking.listing?.price || 0}€`} />
-                  <InfoRow 
-                    label="Note" 
-                    value={booking.listing?.rating ? 
-                      `${booking.listing.rating} ⭐ (${booking.listing.reviewCount || 0} avis)` : 
-                      'Aucune note'} 
-                  />
-                </div>
-              </Section>
-
-              <Section title="Détails Financiers">
-                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Prix du séjour ({nights} nuits)</span>
-                    <span className="font-medium">
-                      {((booking.totalAmount - booking.serviceFee) / nights).toFixed(2)}€ × {nights} = {(booking.totalAmount - booking.serviceFee).toFixed(2)}€
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Frais de service</span>
-                    <span className="font-medium">{booking.serviceFee}€</span>
-                  </div>
-                  <div className="flex justify-between pt-3 border-t border-gray-200 text-lg font-bold">
-                    <span className="text-gray-900">Total</span>
-                    <span className="text-gray-900">{booking.totalAmount}€</span>
-                  </div>
-                </div>
-              </Section>
-            </div>
-          </div>
-
-          {/* Demandes spéciales */}
-          {booking.specialRequests && (
-            <Section title="Demandes Spéciales" className="mt-6">
-              <div className="bg-blue-50 rounded-xl p-4">
-                <p className="text-gray-700 text-sm">{booking.specialRequests}</p>
-              </div>
-            </Section>
-          )}
-
-          {/* Détails voyageurs */}
-          <Section title="Détails des Voyageurs" className="mt-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-2xl font-bold text-gray-900">{booking.guests}</div>
-                <div className="text-sm text-gray-600">Total voyageurs</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-2xl font-bold text-gray-900">{booking.adults}</div>
-                <div className="text-sm text-gray-600">Adultes</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-2xl font-bold text-gray-900">{booking.children}</div>
-                <div className="text-sm text-gray-600">Enfants</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg text-center">
-                <div className="text-2xl font-bold text-gray-900">{booking.infants}</div>
-                <div className="text-sm text-gray-600">Bébés</div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Actions améliorées */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-              <div className="text-sm text-gray-500">
-                <div>Dernière modification: {new Date(booking.updatedAt).toLocaleString()}</div>
-                {booking.cancelledAt && (
-                  <div>Annulée le: {new Date(booking.cancelledAt).toLocaleString()}</div>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {booking.status === 'pending' && (
-                  <button
-                    onClick={() => onStatusUpdate(booking.id, 'confirmed')}
-                    className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
-                  >
-                    Confirmer la réservation
-                  </button>
-                )}
-                {booking.status !== 'cancelled' && (
-                  <button
-                    onClick={() => onStatusUpdate(booking.id, 'cancelled')}
-                    className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
-                  >
-                    Annuler la réservation
-                  </button>
-                )}
-                {booking.paymentStatus !== 'paid' && (
-                  <button
-                    onClick={() => onPaymentUpdate(booking.id, 'paid')}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    Marquer comme payé
-                  </button>
-                )}
-                {booking.user?.email && booking.status === 'confirmed' && (
-                  <button
-                    onClick={() => onSendReminder(booking.id)}
-                    className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium"
-                  >
-                    Envoyer un rappel
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Composants helper
-const Section = ({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) => (
-  <div className={className}>
-    <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
-    {children}
-  </div>
-);
-
-const InfoRow = ({ label, value, mono = false, badge = false }: { label: string; value: React.ReactNode; mono?: boolean; badge?: boolean }) => (
-  <div className="flex justify-between items-center py-2">
-    <span className="text-sm font-medium text-gray-600">{label}</span>
-    <span className={`text-sm text-gray-900 ${mono ? 'font-mono' : ''} ${badge ? 'px-2 py-1 bg-gray-100 rounded-full' : ''}`}>
-      {value}
-    </span>
-  </div>
-);
-
-const StatusBadge = ({ status, type }: { status: string; type: 'booking' | 'payment' }) => {
-  const getColors = () => {
-    if (type === 'booking') {
-      switch (status) {
-        case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
-        case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-        case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
-      }
-    } else {
-      switch (status) {
-        case 'paid': return 'bg-green-100 text-green-800 border-green-200';
-        case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'failed': return 'bg-red-100 text-red-800 border-red-200';
-        case 'refunded': return 'bg-purple-100 text-purple-800 border-purple-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
-      }
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return <CheckCircle className="w-3 h-3 mr-1" />;
-      case 'pending':
-        return <Clock className="w-3 h-3 mr-1" />;
-      case 'cancelled':
-        return <XCircle className="w-3 h-3 mr-1" />;
-      case 'completed':
-        return <CheckCircle className="w-3 h-3 mr-1" />;
-      default:
-        return <AlertCircle className="w-3 h-3 mr-1" />;
-    }
-  };
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getColors()}`}>
-      {type === 'booking' && getStatusIcon(status)}
-      <span className="ml-1 capitalize">{status}</span>
-    </span>
   );
 };
 

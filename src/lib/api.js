@@ -505,5 +505,9 @@ export const flightsAPI = {
   // Créer une réservation de vol
    createReservation: (flightId, data) => 
         api.post(`/Vol/reservation/${flightId}/reserver`, data),
-    
+    getReservations: (params = {}) => 
+    api.get("/Vol/reservations", { params }),
+  
+  updateReservationStatus: (id, status) => 
+    api.put(`/Vol/reservations/${id}/status`, { status }),  
 };
