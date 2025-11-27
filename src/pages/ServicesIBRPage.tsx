@@ -28,6 +28,11 @@ import {
   Shield,
   Settings,
   Loader2,
+  Calendar,
+  Home,
+  User,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "@/lib/api";
