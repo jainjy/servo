@@ -1366,22 +1366,31 @@ export default function TourismPage() {
     }
   };
 
-  const loadStats = async () => {
-    try {
-      setStatsLoading(true);
-      const response = await tourismeAPI.getStats();
-      console.log("📊 Réponse API stats:", response.data);
+const loadStats = async () => {
+  try {
+    setStatsLoading(true);
 
-      if (response.data.success) {
-        setStats(response.data.data);
-        console.log("✅ Stats mises à jour:", response.data.data);
-      }
-    } catch (error) {
-      console.error("Erreur lors du chargement des statistiques:", error);
-    } finally {
-      setStatsLoading(false);
+    // Passer le contentType comme paramètre
+    const response = await tourismeAPI.getStats({
+      contentType: contentType === "flights" ? null : contentType,
+    });
+
+    console.log("📊 Réponse API stats:", response.data);
+
+    if (response.data.success) {
+      setStats(response.data.data);
+      console.log(
+        "✅ Stats mises à jour pour:",
+        contentType,
+        response.data.data
+      );
     }
-  };
+  } catch (error) {
+    console.error("Erreur lors du chargement des statistiques:", error);
+  } finally {
+    setStatsLoading(false);
+  }
+};
 
   // Filtrer les résultats (pour hébergements et lieux touristiques)
   useEffect(() => {
@@ -2037,80 +2046,78 @@ export default function TourismPage() {
             </p>
           </div>
 
-          <div className="flex items-center space-x-4">
-            {/* Dropdown de sélection du type de contenu */}
-            <div className="relative">
-              <button
-                onClick={() =>
-                  setShowContentTypeDropdown(!showContentTypeDropdown)
-                }
-                className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
-              >
-                <div className="flex items-center">
-                  {currentContentType?.icon && (
-                    <currentContentType.icon className="w-5 h-5 mr-3" />
-                  )}
-                  <span>{currentContentType?.label || "Sélectionner"}</span>
-                </div>
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </button>
+      
+        <div className="flex items-center space-x-4">
+          {/* Dropdown de sélection du type de contenu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
+              className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
+            >
+              <div className="flex items-center">
+                {currentContentType?.icon && (
+                  <currentContentType.icon className="w-5 h-5 mr-3" />
+                )}
+                <span>{currentContentType?.label || "Sélectionner"}</span>
+              </div>
+              <ChevronDown className="w-4 h-4 ml-2" />
+            </button>
 
-              {showContentTypeDropdown && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
-                  <div className="p-2">
-                    {contentTypeOptions.map((option) => {
-                      const IconComponent = option.icon;
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            setContentType(option.id);
-                            setShowContentTypeDropdown(false);
-                          }}
-                          className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
-                        >
-                          <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
-                          <div className="flex-1">
-                            <div className="font-semibold">{option.label}</div>
-                            <div className="text-sm text-gray-500">
-                              {option.description}
-                            </div>
+            {showContentTypeDropdown && (
+              <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                <div className="p-2">
+                  {contentTypeOptions.map((option) => {
+                    const IconComponent = option.icon;
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => {
+                          setContentType(option.id);
+                          setShowContentTypeDropdown(false);
+                        }}
+                        className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                      >
+                        <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
+                        <div className="flex-1">
+                          <div className="font-semibold">{option.label}</div>
+                          <div className="text-sm text-gray-500">
+                            {option.description}
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-
-            {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
-            {user?.role === "professional" && (
-              <button
-                onClick={() => {
-                  if (contentType === "accommodations") {
-                    setEditingListing(null);
-                    setShowAdminModal(true);
-                  } else if (contentType === "touristic_places") {
-                    setEditingListing(null);
-                    setShowAdminModal(true);
-                  } else if (contentType === "flights") {
-                    setShowFlightModal(true);
-                  }
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-              >
-                <PlusCircle className="w-5 h-5 mr-2" />
-                {contentType === "accommodations" && "Ajouter un hébergement"}
-                {contentType === "touristic_places" &&
-                  "Ajouter un lieu touristique"}
-                {contentType === "flights" && "Ajouter un vol"}
-              </button>
+              </div>
             )}
           </div>
+
+          {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
+          {user?.role === "professional" && (
+            <button
+              onClick={() => {
+                if (contentType === "accommodations") {
+                  setEditingListing(null);
+                  setShowAdminModal(true);
+                } else if (contentType === "touristic_places") {
+                  setEditingListing(null);
+                  setShowAdminModal(true);
+                } else if (contentType === "flights") {
+                  setShowFlightModal(true);
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+            >
+              <PlusCircle className="w-5 h-5 mr-2" />
+              {contentType === "accommodations" && "Ajouter un hébergement"}
+              {contentType === "touristic_places" && "Ajouter un lieu touristique"}
+              {contentType === "flights" && "Ajouter un vol"}
+            </button>
+          )}
+        </div>
         </div>
 
-        {/* Statistiques */}
+        {/* Statistiques pour hébergements et lieux touristiques */}
         {stats && contentType !== "flights" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
@@ -2118,18 +2125,19 @@ export default function TourismPage() {
                 <Building className="w-8 h-8 text-blue-600 mr-4" />
                 <div>
                   <div className="text-2xl font-bold">
-                    {contentType === "accommodations"
-                      ? stats.totalAccommodations
-                      : stats.totalTouristicPlaces}
+                    {stats.totalListings || 0}
                   </div>
                   <div className="text-gray-600">
                     {contentType === "accommodations"
                       ? "Hébergements"
-                      : "Lieux touristiques"}
+                      : contentType === "touristic_places"
+                      ? "Lieux touristiques"
+                      : "Total"}
                   </div>
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Star className="w-8 h-8 text-yellow-500 mr-4" />
@@ -2141,23 +2149,25 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
                 <div>
                   <div className="text-2xl font-bold">
-                    {stats.availableListings}
+                    {stats.availableListings || 0}
                   </div>
                   <div className="text-gray-600">Disponibles</div>
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-purple-600 mr-4" />
                 <div>
                   <div className="text-2xl font-bold">
-                    {stats.totalBookings}
+                    {stats.totalBookings || 0}
                   </div>
                   <div className="text-gray-600">Réservations</div>
                 </div>
@@ -2178,6 +2188,7 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
@@ -2195,6 +2206,7 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Star className="w-8 h-8 text-yellow-500 mr-4" />
@@ -2212,6 +2224,7 @@ export default function TourismPage() {
                 </div>
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-purple-600 mr-4" />

@@ -103,7 +103,8 @@ import GlobalTracking from "@/components/GlobalTracking";
 //import TestPage from "./pages/TestPage";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
-
+ 
+import ReservationTable from "./pages/pro/ReservationBien-etre"
 // Import des nouveaux composants immobilier
 
 // Import des composants bâtiments
@@ -153,8 +154,6 @@ import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
 import CoursDomicile from "./pages/pro/CoursDomicil";
-import CourseForm from "./pages/pro/CoursForm";
-import CoursForm from "./pages/pro/CoursForm";
 import ProReservations from "./pages/ProReservations";
 import UserReservations from "./pages/UserReservations";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
@@ -162,6 +161,10 @@ import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import Donation from "./components/components/Don";
 import ProTouristicPlaceBookings from "./components/pro/ProTouristicPlaceBookings";
+import AccountSuspended from "./pages/AccountSuspended";
+import AccountStatusGuard from "./components/AccountStatusGuard";
+import UserLayout from "./pages/UserLayout";
+import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
 
 const queryClient = new QueryClient();
 
@@ -236,6 +239,11 @@ const App = () => {
                   <Route
                     path="/juridiqueLiquidation"
                     element={<JuridiqueLiquidation />}
+                  />
+
+                  <Route
+                    path="/account-suspended"
+                    element={<AccountSuspended />}
                   />
                   <Route
                     path="/podcast_service"
@@ -408,7 +416,6 @@ const App = () => {
                     path="/medecine-plantes"
                     element={<MedecinePlants />}
                   />
-
                   <Route
                     path="/produits/categorie/:categoryName"
                     element={<CategorieProduits />}
@@ -505,10 +512,18 @@ const App = () => {
                     element={<InvestissementDetail />}
                   />
                   {/* Section pro Routes */}
-                  <Route path="/pro" element={<ProLayout />}>
+                  <Route
+                    path="/pro"
+                    element={
+                      <AccountStatusGuard>
+                        <ProLayout />
+                      </AccountStatusGuard>
+                    }
+                  >
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
+                     <Route path="reservationbien-etre" element={<ReservationTable />} />
                     {/* <Route path="clients" element={<ClientSection />} /> */}
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
@@ -553,11 +568,21 @@ const App = () => {
                       element={<ListeDemandesDevis />}
                     />
                     <Route path="cours-domicile" element={<CoursDomicile />} />
-                    <Route path="reservations-cours" element={<ProReservations />} />
+                    <Route
+                      path="reservations-cours"
+                      element={<ProReservations />}
+                    />
                     <Route path="media" element={<AdminMedia />} />
                   </Route>
                   {/* Section Mon Compte Routes */}
-                  <Route path="/mon-compte">
+                  <Route
+                    path="/mon-compte"
+                    element={
+                      <AccountStatusGuard>
+                        <UserLayout />
+                      </AccountStatusGuard>
+                    }
+                  >
                     <Route index element={<MonComptePage />} />
                     <Route path="payement" element={<PaiementPage />} />
                     <Route path="profil" element={<MonComptePage />} />
@@ -565,7 +590,10 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
-                    <Route path="mes-reservations-cours" element={<UserReservations />} />
+                    <Route
+                      path="mes-reservations-cours"
+                      element={<UserReservations />}
+                    />
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
@@ -584,7 +612,10 @@ const App = () => {
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
-                    <Route path="subscriptions" element={<AdminSubscriptions />} />
+                    <Route
+                      path="subscriptions"
+                      element={<AdminSubscriptions />}
+                    />
                     <Route path="products" element={<Products />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="reports" element={<Reports />} />
@@ -614,11 +645,10 @@ const App = () => {
                     />
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
-                    <Route
-                      path="investissement-demandes"
-                      element={<div>Interface admin pour les demandes d'investissement international (à créer)</div>}
-                    />
-                  </Route>
+
+                     <Route path="investissement-demandes" element={<InvestmentDemandesPage />} />
+
+                  </Route>=
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />

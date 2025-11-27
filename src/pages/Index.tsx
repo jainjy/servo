@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import AdvertisementPopup from '@/components/AdvertisementPopup';
 import CardCarte from '@/components/components/CardCarte';
+import AnnoncesImmobilieres from '@/components/components/CardsOlimmo';
 
 const Hero = lazy(() => import("@/components/Hero"));
 const ServiceCards = lazy(() => import("@/components/ServiceCards"));
@@ -108,6 +109,7 @@ const Index = () => {
             </div>
             <PropertyListings cardsOnly maxItems={4} />
             <Slider />
+            <AnnoncesImmobilieres />
           </>
         </Suspense>
       </div>

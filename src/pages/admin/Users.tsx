@@ -13,10 +13,10 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Utilisateurs</h1>
           <p className="text-muted-foreground">Gérer tous les utilisateurs de la plateforme</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        {/* <Button onClick={() => setIsModalOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="mr-2 h-4 w-4" />
           Nouvel utilisateur
-        </Button>
+        </Button> */}
       </div>
       <UsersStats />
       <UsersTable />
