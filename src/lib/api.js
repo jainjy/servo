@@ -504,9 +504,5 @@ export const flightsAPI = {
     api.get("/Vol/reservations", { params }),
   
   updateReservationStatus: (id, status) => 
-    api.put(`/Vol/reservations/${id}/status`, { status }),
-  
-  updateReservationPaymentStatus: (id, paymentStatus) => 
-    api.put(`/Vol/reservations/${id}/payment-status`, { paymentStatus })
-    
+    api.put(`/Vol/reservations/${id}/status`, { status }),  
 };

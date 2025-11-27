@@ -15,8 +15,7 @@ import { touristicPlaceBookingsAPI, tourismeAPI, flightsAPI } from '../../../lib
 interface TourismeBooking {
   id: string;
   confirmationNumber: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'paid' | 'failed' | 'refunded';
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -55,8 +54,7 @@ interface TourismeBooking {
 interface TouristicPlaceBooking {
   id: string;
   confirmationNumber: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'paid' | 'failed' | 'refunded';
   visitDate: string;
   visitTime: string;
   numberOfTickets: number;
@@ -98,8 +96,7 @@ interface FlightReservation {
   idPrestataire: string;
   nbrPersonne: number;
   place: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'paid' | 'failed' | 'refunded';
   totalAmount: number;
   serviceFee: number;
   paymentMethod: string;
@@ -161,7 +158,6 @@ interface BookingStats {
 interface Filters {
   search: string;
   status: string;
-  paymentStatus: string;
   dateRange: string;
   type: string;
   provider?: string;
@@ -187,46 +183,59 @@ const InfoRow = ({ label, value, mono = false, badge = false }: { label: string;
   </div>
 );
 
-const StatusBadge = ({ status, type }: { status: string; type: 'booking' | 'payment' }) => {
+const StatusBadge = ({ status }: { status: string }) => {
   const getColors = () => {
-    if (type === 'booking') {
-      switch (status) {
-        case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
-        case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-        case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
-      }
-    } else {
-      switch (status) {
-        case 'paid': return 'bg-green-100 text-green-800 border-green-200';
-        case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'failed': return 'bg-red-100 text-red-800 border-red-200';
-        case 'refunded': return 'bg-purple-100 text-purple-800 border-purple-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
-      }
+    switch (status) {
+      case 'confirmed':
+      case 'paid':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'failed':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'refunded':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'confirmed':
+      case 'paid':
         return <CheckCircle className="w-3 h-3 mr-1" />;
       case 'pending':
         return <Clock className="w-3 h-3 mr-1" />;
       case 'cancelled':
+      case 'failed':
         return <XCircle className="w-3 h-3 mr-1" />;
       case 'completed':
         return <CheckCircle className="w-3 h-3 mr-1" />;
+      case 'refunded':
+        return <DollarSign className="w-3 h-3 mr-1" />;
       default:
         return <AlertCircle className="w-3 h-3 mr-1" />;
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'paid': return 'Payé';
+      case 'failed': return 'Échec paiement';
+      case 'refunded': return 'Remboursé';
+      default: return status;
+    }
+  };
+
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getColors()}`}>
-      {type === 'booking' && getStatusIcon(status)}
-      <span className="ml-1 capitalize">{status}</span>
+      {getStatusIcon(status)}
+      <span className="ml-1 capitalize">{getStatusLabel(status)}</span>
     </span>
   );
 };
@@ -256,13 +265,17 @@ const BookingCard = ({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "confirmed":
+      case "paid":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case "pending":
         return <Clock className="w-4 h-4 text-yellow-500" />;
       case "cancelled":
+      case "failed":
         return <XCircle className="w-4 h-4 text-red-500" />;
       case "completed":
         return <CheckCircle className="w-4 h-4 text-blue-500" />;
+      case "refunded":
+        return <DollarSign className="w-4 h-4 text-purple-500" />;
       default:
         return <AlertCircle className="w-4 h-4 text-gray-500" />;
     }
@@ -271,26 +284,15 @@ const BookingCard = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
       case "paid":
         return "bg-green-100 text-green-800 border-green-200";
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "cancelled":
       case "failed":
         return "bg-red-100 text-red-800 border-red-200";
+      case "completed":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "refunded":
         return "bg-purple-100 text-purple-800 border-purple-200";
       default:
@@ -438,19 +440,34 @@ const BookingCard = ({
                     Annuler
                   </button>
                 )}
+
+                {/* Actions de paiement */}
+                {booking.status !== "paid" && booking.status !== "cancelled" && booking.status !== "failed" && (
+                  <button
+                    onClick={() => {
+                      onUpdateStatus(booking.id, "paid");
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-blue-700 hover:bg-blue-50"
+                  >
+                    <DollarSign className="w-4 h-4 mr-3" />
+                    Marquer payé
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Statuts */}
+        {/* Statut */}
         <div className="flex flex-wrap gap-2">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)} border`}>
             {getStatusIcon(booking.status)}
-            <span className="ml-1 capitalize">{booking.status}</span>
-          </span>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(booking.paymentStatus)} border`}>
-            <span className="capitalize">{booking.paymentStatus}</span>
+            <span className="ml-1 capitalize">
+              {booking.status === 'paid' ? 'Payé' : 
+               booking.status === 'failed' ? 'Échec paiement' : 
+               booking.status === 'refunded' ? 'Remboursé' : booking.status}
+            </span>
           </span>
         </div>
       </div>
@@ -538,13 +555,12 @@ const BookingCard = ({
   );
 };
 
-// Modal de détail unifié (inchangé)
+// Modal de détail unifié
 const BookingDetailModal = ({ 
   booking, 
   type,
   onClose, 
   onStatusUpdate, 
-  onPaymentUpdate,
   onSendReminder,
   onGenerateQRCode,
   getTicketTypeLabel,
@@ -614,15 +630,11 @@ const BookingDetailModal = ({
                 )}
               </Section>
 
-              <Section title="Statuts">
+              <Section title="Statut">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Statut réservation</span>
-                    <StatusBadge status={booking.status} type="booking" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Statut paiement</span>
-                    <StatusBadge status={booking.paymentStatus} type="payment" />
+                    <span className="text-sm font-medium text-gray-700">Statut</span>
+                    <StatusBadge status={booking.status} />
                   </div>
                 </div>
               </Section>
@@ -656,7 +668,7 @@ const BookingDetailModal = ({
                       <InfoRow label="Escales" value={flightReservation.flight?.escales || 0} />
                     </>
                   )}
-                  {isUpcoming() && booking.status === 'confirmed' && (
+                  {isUpcoming() && (booking.status === 'confirmed' || booking.status === 'paid') && (
                     <div className="bg-orange-50 p-3 rounded-lg mt-2">
                       <div className="flex items-center text-orange-800 text-sm">
                         <AlertCircle className="w-4 h-4 mr-2" />
@@ -713,7 +725,7 @@ const BookingDetailModal = ({
                         <Mail className="w-4 h-4 mr-2" />
                         Contacter
                       </a>
-                      {booking.status === 'confirmed' && (
+                      {(booking.status === 'confirmed' || booking.status === 'paid') && (
                         <button
                           onClick={() => onSendReminder(booking.id)}
                           className="flex items-center px-3 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
@@ -930,7 +942,7 @@ const BookingDetailModal = ({
                 )}
               </div>
               <div className="flex flex-wrap gap-3">
-                {isTouristicPlace && booking.status === 'confirmed' && onGenerateQRCode && (
+                {isTouristicPlace && (booking.status === 'confirmed' || booking.status === 'paid') && onGenerateQRCode && (
                   <button
                     onClick={() => onGenerateQRCode(booking)}
                     className="flex items-center px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
@@ -955,15 +967,15 @@ const BookingDetailModal = ({
                     Annuler la réservation
                   </button>
                 )}
-                {booking.paymentStatus !== 'paid' && (
+                {booking.status !== 'paid' && booking.status !== 'cancelled' && booking.status !== 'failed' && (
                   <button
-                    onClick={() => onPaymentUpdate(booking.id, 'paid')}
+                    onClick={() => onStatusUpdate(booking.id, 'paid')}
                     className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
                   >
                     Marquer comme payé
                   </button>
                 )}
-                {(booking.user?.email || booking.userReservation?.email) && booking.status === 'confirmed' && (
+                {(booking.user?.email || booking.userReservation?.email) && (booking.status === 'confirmed' || booking.status === 'paid') && (
                   <button
                     onClick={() => onSendReminder(booking.id)}
                     className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium"
@@ -1024,7 +1036,6 @@ export const ProBookings = () => {
   const [filters, setFilters] = useState<Filters>({
     search: "",
     status: "all",
-    paymentStatus: "all",
     dateRange: "all",
     type: "all",
   });
@@ -1158,7 +1169,6 @@ export const ProBookings = () => {
       id: 'a1',
       confirmationNumber: 'ACC-2024-001',
       status: 'confirmed',
-      paymentStatus: 'paid',
       checkIn: '2024-12-20',
       checkOut: '2024-12-25',
       guests: 4,
@@ -1193,8 +1203,7 @@ export const ProBookings = () => {
     {
       id: 't1',
       confirmationNumber: 'TPL-2024-001',
-      status: 'confirmed',
-      paymentStatus: 'paid',
+      status: 'paid',
       visitDate: '2024-12-15',
       visitTime: '14:00',
       numberOfTickets: 4,
@@ -1223,8 +1232,7 @@ export const ProBookings = () => {
       idPrestataire: 'p1',
       nbrPersonne: 2,
       place: '12A, 12B',
-      status: 'confirmed',
-      paymentStatus: 'paid',
+      status: 'paid',
       totalAmount: 400,
       serviceFee: 40,
       paymentMethod: 'card',
@@ -1282,7 +1290,7 @@ export const ProBookings = () => {
   // Calcul des statistiques
   const calculateAccommodationStats = (bookingsData: TourismeBooking[]) => {
     const confirmedAndCompleted = bookingsData.filter(
-      (b) => b.status === "confirmed" || b.status === "completed"
+      (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
     );
     const totalRevenue = confirmedAndCompleted.reduce(
       (sum, b) => sum + b.totalAmount,
@@ -1292,7 +1300,7 @@ export const ProBookings = () => {
     const statsData: BookingStats = {
       total: bookingsData.length,
       pending: bookingsData.filter((b) => b.status === "pending").length,
-      confirmed: bookingsData.filter((b) => b.status === "confirmed").length,
+      confirmed: bookingsData.filter((b) => b.status === "confirmed" || b.status === "paid").length,
       cancelled: bookingsData.filter((b) => b.status === "cancelled").length,
       completed: bookingsData.filter((b) => b.status === "completed").length,
       revenue: totalRevenue,
@@ -1303,7 +1311,7 @@ export const ProBookings = () => {
 
   const calculateTouristicPlaceStats = (bookingsData: TouristicPlaceBooking[], places: any[] = []) => {
     const confirmedAndCompleted = bookingsData.filter(
-      (b) => b.status === "confirmed" || b.status === "completed"
+      (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
     );
     const totalRevenue = confirmedAndCompleted.reduce(
       (sum, b) => sum + b.totalAmount,
@@ -1320,7 +1328,7 @@ export const ProBookings = () => {
     const statsData: BookingStats = {
       total: bookingsData.length,
       pending: bookingsData.filter((b) => b.status === "pending").length,
-      confirmed: bookingsData.filter((b) => b.status === "confirmed").length,
+      confirmed: bookingsData.filter((b) => b.status === "confirmed" || b.status === "paid").length,
       cancelled: bookingsData.filter((b) => b.status === "cancelled").length,
       completed: bookingsData.filter((b) => b.status === "completed").length,
       revenue: totalRevenue,
@@ -1335,7 +1343,7 @@ export const ProBookings = () => {
     console.log("📈 Calcul stats pour réservations vols:", reservationsData);
     
     const confirmedAndCompleted = reservationsData.filter(
-      (b) => b.status === "confirmed" || b.status === "completed"
+      (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
     );
     const totalRevenue = confirmedAndCompleted.reduce(
       (sum, b) => sum + b.totalAmount,
@@ -1355,7 +1363,7 @@ export const ProBookings = () => {
     const statsData: BookingStats = {
       total: reservationsData.length,
       pending: reservationsData.filter((b) => b.status === "pending").length,
-      confirmed: reservationsData.filter((b) => b.status === "confirmed").length,
+      confirmed: reservationsData.filter((b) => b.status === "confirmed" || b.status === "paid").length,
       cancelled: reservationsData.filter((b) => b.status === "cancelled").length,
       completed: reservationsData.filter((b) => b.status === "completed").length,
       revenue: totalRevenue,
@@ -1426,10 +1434,6 @@ export const ProBookings = () => {
 
     if (filters.status !== "all") {
       results = results.filter((booking: any) => booking.status === filters.status);
-    }
-
-    if (filters.paymentStatus !== "all") {
-      results = results.filter((booking: any) => booking.paymentStatus === filters.paymentStatus);
     }
 
     if (filters.dateRange !== "all") {
@@ -1503,40 +1507,10 @@ export const ProBookings = () => {
     }
   };
 
+  // SUPPRIMER updatePaymentStatus et utiliser updateBookingStatus pour tout
   const updatePaymentStatus = async (bookingId: string, paymentStatus: string) => {
-    try {
-      console.log(`🔄 Mise à jour paiement ${activeTab}:`, bookingId, paymentStatus);
-      
-      if (activeTab === 'accommodation') {
-        const response = await api.put(`/tourisme-bookings/${bookingId}/status`, { paymentStatus });
-        if (response.data.success) {
-          setAccommodationBookings(prev => prev.map(booking => 
-            booking.id === bookingId ? response.data.data : booking
-          ));
-        }
-      } else if (activeTab === 'touristic_place') {
-        const response = await touristicPlaceBookingsAPI.updateStatus(bookingId, { paymentStatus });
-        if (response.data.success) {
-          setTouristicPlaceBookings(prev => prev.map(booking => 
-            booking.id === bookingId ? response.data.data : booking
-          ));
-        }
-      } else if (activeTab === 'flight') {
-        const response = await flightsAPI.updateReservationPaymentStatus(bookingId, paymentStatus);
-        if (response.data.success) {
-          setFlightReservations(prev => prev.map(booking => 
-            booking.id === bookingId ? response.data.data : booking
-          ));
-          console.log(`✅ Paiement vol mis à jour: ${bookingId} -> ${paymentStatus}`);
-        }
-      }
-      
-      setShowDetailModal(false);
-      
-    } catch (error) {
-      console.error("❌ Erreur mise à jour paiement:", error);
-      alert("Erreur lors de la mise à jour du paiement");
-    }
+    // Utiliser updateBookingStatus pour les statuts de paiement aussi
+    await updateBookingStatus(bookingId, paymentStatus);
   };
 
   const sendReminder = async (bookingId: string) => {
@@ -1587,7 +1561,7 @@ export const ProBookings = () => {
 
       const timeDiff = date.getTime() - today.getTime();
       const daysDiff = timeDiff / (1000 * 3600 * 24);
-      return daysDiff <= 7 && daysDiff >= 0 && booking.status === "confirmed";
+      return daysDiff <= 7 && daysDiff >= 0 && (booking.status === "confirmed" || booking.status === "paid");
     }).length;
   };
 
@@ -1944,21 +1918,10 @@ export const ProBookings = () => {
                 <option value="all">Tous statuts</option>
                 <option value="pending">En attente</option>
                 <option value="confirmed">Confirmé</option>
+                <option value="paid">Payé</option>
                 <option value="cancelled">Annulé</option>
                 <option value="completed">Terminé</option>
-              </select>
-
-              <select
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                value={filters.paymentStatus}
-                onChange={(e) =>
-                  setFilters({ ...filters, paymentStatus: e.target.value })
-                }
-              >
-                <option value="all">Tous paiements</option>
-                <option value="pending">En attente</option>
-                <option value="paid">Payé</option>
-                <option value="failed">Échoué</option>
+                <option value="failed">Échec paiement</option>
                 <option value="refunded">Remboursé</option>
               </select>
 
@@ -2045,7 +2008,6 @@ export const ProBookings = () => {
             type={activeTab}
             onClose={() => setShowDetailModal(false)}
             onStatusUpdate={updateBookingStatus}
-            onPaymentUpdate={updatePaymentStatus}
             onSendReminder={sendReminder}
             onGenerateQRCode={activeTab === 'touristic_place' ? generateQRCode : undefined}
             getTicketTypeLabel={getTicketTypeLabel}
