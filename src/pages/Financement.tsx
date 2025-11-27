@@ -32,6 +32,7 @@ import {
   Plane
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 // Types
 interface FinancementPartenaire {
@@ -235,6 +236,7 @@ export default function Financement() {
   const [servicesAssurance, setServicesAssurance] = useState<AssuranceService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Charger les données depuis l'API
   useEffect(() => {
@@ -497,7 +499,9 @@ export default function Financement() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
               >
-                <Card className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group">
+                <Card className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group cursor-pointer"
+                  onClick={() => navigate(`/financement/${partenaire.id}`)}
+                >
                   <div className="flex items-center mb-6">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mr-5 group-hover:bg-slate-900 transition-colors duration-300">
                       {partenaire.icon ? (

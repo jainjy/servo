@@ -17,6 +17,7 @@ import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
 import Entreprise from "./pages/Entreprise";
 import Financement from "./pages/Financement";
+import FinancementPartenaireDetail from "./pages/FinancementPartenaireDetail";
 import Actualites from "./pages/Actualites";
 import RegisterPage from "./pages/Register";
 import ProRegisterPage from "./pages/ProRegisterPage";
@@ -240,7 +241,6 @@ const App = () => {
                     path="/juridiqueLiquidation"
                     element={<JuridiqueLiquidation />}
                   />
-
                   <Route
                     path="/account-suspended"
                     element={<AccountSuspended />}
@@ -422,6 +422,10 @@ const App = () => {
                   />
                   <Route path="/entreprise" element={<Entreprise />} />
                   <Route path="/financement" element={<Financement />} />
+                  <Route
+                    path="/financement/:id"
+                    element={<FinancementPartenaireDetail />}
+                  />
                   <Route path="/blog" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
@@ -523,13 +527,19 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
-                     <Route path="reservationbien-etre" element={<ReservationTable />} />
+                    <Route
+                      path="reservationbien-etre"
+                      element={<ReservationTable />}
+                    />
                     {/* <Route path="clients" element={<ClientSection />} /> */}
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
                     <Route path="reservations" element={<ProBookings />} />
-                    < Route path="reservationPro" element={<ProTouristicPlaceBookings />} />
+                    <Route
+                      path="reservationPro"
+                      element={<ProTouristicPlaceBookings />}
+                    />
                     <Route
                       path="subscription"
                       element={<SubscriptionStatusPage />}
@@ -646,10 +656,12 @@ const App = () => {
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
 
-                     <Route path="investissement-demandes" element={<InvestmentDemandesPage />} />
-
-                  </Route>=
-                  {/* Section not found Routes */}
+                    <Route
+                      path="investissement-demandes"
+                      element={<InvestmentDemandesPage />}
+                    />
+                  </Route>
+                  ={/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
                   <Route path="/import-info" element={<ImportInfo />} />

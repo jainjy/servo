@@ -48,6 +48,7 @@ api.interceptors.response.use(
 export const financementAPI = {
   // Routes publiques
   getPartenaires: () => api.get("/financement/partenaires"),
+  getPartenairesDetails: (id) => api.get("/financement/partenaires/"+id),
   getAssurances: () => api.get("/financement/assurances"),
   submitDemande: (data) => api.post("/financement/demande", data),
   getUserDemandes: (userId) => api.get(`/financement/demandes/${userId}`),
