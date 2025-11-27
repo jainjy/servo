@@ -40,6 +40,7 @@ import {
   AlertCircle,
   Calendar1,
   FileText,
+  List,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/components/contexts/CartContext";
@@ -412,6 +413,12 @@ const Header = () => {
           title: "Audit patrimonial & finance",
           description: "Optimisez votre patrimoine immobilier",
           href: "/immobilier-sections",
+          image:
+            "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
+        },{
+          title: "Blogs et conseils",
+          description: "Actualités et astuces immobilières",
+          href: "/blog",
           image:
             "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
         },
@@ -870,7 +877,10 @@ const Header = () => {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
     // },
-
+    {
+      title: "DONS",
+      href: "/don",
+    },
     {
       title: "NOS OFFRES EXCLUSIVES",
       href: "/pack",
@@ -1464,6 +1474,10 @@ const Header = () => {
                       <DropdownMenuItem onClick={() => navigate("/mon-compte/demandes-immobilier")}>
                         <BookDashed className="mr-2 h-4 w-4" />
                         Mes demandes immobilieres
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/mon-compte/mes-reservations-cours")}>
+                        <List className="mr-2 h-4 w-4" />
+                        Mes réservations en cours
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/mon-compte/reservation")}>
                         <Calendar className="mr-2 h-4 w-4" />

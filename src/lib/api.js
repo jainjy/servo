@@ -33,7 +33,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       if (
-        currentPath != "/login/particular" || 
+        currentPath != "/login/particular" ||
         currentPath != "/login/professional"
       ) {
         //window.location.href = "/login";
@@ -63,8 +63,25 @@ export const financementAPI = {
 // Services pour le tourisme
 export const tourismeAPI = {
   // Routes admin
+  createListingWithImages: (formData) =>
+    api.post("/admin/tourisme", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+
+  updateListingWithImages: (id, formData) =>
+    api.put(`/admin/tourisme/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+    
   getListings: (params = {}) => api.get("/admin/tourisme", { params }),
-  getStats: () => api.get("/admin/tourisme/stats"),
+  
+  // CORRECTION : Ajouter le paramètre contentType
+  getStats: (params = {}) => api.get("/admin/tourisme/stats", { params }),
+  
   createListing: (data) => api.post("/admin/tourisme", data),
   updateListing: (id, data) => api.put(`/admin/tourisme/${id}`, data),
   deleteListing: (id) => api.delete(`/admin/tourisme/${id}`),
@@ -75,11 +92,24 @@ export const tourismeAPI = {
   // Routes publiques (si nécessaire)
   getPublicListings: (params = {}) => api.get("/tourisme", { params }),
   getListingById: (id) => api.get(`/tourisme/${id}`),
-   getAccommodations: (params = {}) => 
-    api.get('/admin/tourisme/accommodations', { params }),
-  
+  getAccommodations: (params = {}) =>
+    api.get("/admin/tourisme/accommodations", { params }),
+
+  getTouristicPlaces: (params = {}) =>
+    api.get("/admin/tourisme/places", { params }),
+  getFlights: (params = {}) => api.get("/Vol/flights", { params }),
+   checkPlaceAvailability: (placeId, visitDate) => 
+    touristicPlaceBookingsAPI.checkAvailability(placeId, visitDate),
+
+  createPlaceBooking: (userId, bookingData) =>
+    touristicPlaceBookingsAPI.createBooking(userId, bookingData),
+
+  // Utilisez la méthode existante getTouristicPlaces
   getTouristicPlaces: (params = {}) => 
-    api.get('/admin/tourisme/places', { params })
+    api.get("/admin/tourisme/places", { params }),
+
+  // Méthode de secours
+  getListings: (params = {}) => api.get("/admin/tourisme", { params }),
 };
 
 // Services pour l'upload
@@ -238,46 +268,57 @@ export const MediaService = {
   getVideos: (params = {}) => mediaAPI.getVideos(params),
   createPodcast: (formData) => mediaAPI.createPodcast(formData),
   createVideo: (formData) => mediaAPI.createVideo(formData),
-  
+
   // Méthodes améliorées avec gestion d'erreur
   updatePodcast: async (id, data) => {
     const response = await mediaAPI.updatePodcast(id, data);
     if (response.data && response.data.success === false) {
-      throw new Error(response.data.message || response.data.error || 'Erreur lors de la modification du podcast');
+      throw new Error(
+        response.data.message ||
+          response.data.error ||
+          "Erreur lors de la modification du podcast"
+      );
     }
     return response;
   },
-  
+
   updateVideo: async (id, data) => {
     const response = await mediaAPI.updateVideo(id, data);
     if (response.data && response.data.success === false) {
-      throw new Error(response.data.message || response.data.error || 'Erreur lors de la modification de la vidéo');
+      throw new Error(
+        response.data.message ||
+          response.data.error ||
+          "Erreur lors de la modification de la vidéo"
+      );
     }
     return response;
   },
-  
+
   // Méthode avec retry pour plus de robustesse
   updateVideoWithRetry: async (id, data, retries = 3) => {
     for (let i = 0; i < retries; i++) {
       try {
         const response = await mediaAPI.updateVideo(id, data);
-        
+
         if (response.data && response.data.success === true) {
           return response.data.data;
         }
-        
+
         // Si success: false mais pas d'erreur throw, on retry
         if (i === retries - 1) {
-          throw new Error(response.data.message || response.data.error || 'Erreur lors de la modification');
+          throw new Error(
+            response.data.message ||
+              response.data.error ||
+              "Erreur lors de la modification"
+          );
         }
-        
       } catch (error) {
         console.error(`Tentative ${i + 1} échouée:`, error);
         if (i === retries - 1) throw error;
       }
     }
   },
-  
+
   deletePodcast: (id) => mediaAPI.deletePodcast(id),
   deleteVideo: (id) => mediaAPI.deleteVideo(id),
   getCategories: () => mediaAPI.getCategories(),
@@ -308,22 +349,22 @@ export const planningAPI = {
 export const ordersAPI = {
   // Créer une commande
   createOrder: (data) => api.post("/orders", data),
-  
+
   // Récupérer les commandes de l'utilisateur
   getUserOrders: (params = {}) => api.get("/orders/user/my-orders", { params }),
-  
+
   // Récupérer les détails d'une commande
   getOrderById: (id) => api.get(`/orders/user/${id}`),
-  
+
   // Annuler une commande
   cancelOrder: (id) => api.put(`/orders/user/${id}/cancel`),
-  
+
   // Statistiques utilisateur
   getUserStats: () => api.get("/orders/user/stats"),
-  
+
   // Test d'authentification
   testAuth: () => api.get("/orders/test/auth"),
-  
+
   // Test de données
   testData: () => api.get("/orders/test-data"),
 };
@@ -332,27 +373,132 @@ export const ordersAPI = {
 export const cartAPI = {
   // Valider le panier
   validateCart: (data) => api.post("/cart/validate", data),
-  
+
   // Vérifier le stock
   checkStock: (data) => api.post("/cart/check-stock", data),
-  
+
   // Vérifier la disponibilité
   checkAvailability: (data) => api.post("/cart/check-availability", data),
 };
-
 
 // Ajouter dans lib/api.js
 export const offresExclusivesAPI = {
   // Récupérer toutes les offres
   getOffres: (params = {}) => api.get("/offres-exclusives", { params }),
-  
+
   // Récupérer les offres flash
   getOffresFlash: () => api.get("/offres-exclusives/flash"),
-  
+
   // Récupérer les statistiques
   getStats: () => api.get("/offres-exclusives/stats"),
-  
+
   // Récupérer les catégories
   getCategories: () => api.get("/offres-exclusives/categories")
 }; 
+export const touristicPlaceBookingsAPI = {
+  // Créer une réservation
+  createBooking: (userId, data) =>
+    api.post(`/touristic-place-bookings/${userId}`, data),
 
+  // Récupérer les réservations
+  getBookings: (params = {}) =>
+    api.get("/touristic-place-bookings", { params }),
+
+  // Récupérer une réservation spécifique
+  getBookingById: (id) => api.get(`/touristic-place-bookings/${id}`),
+
+  // Récupérer par numéro de confirmation
+  getBookingByConfirmation: (confirmationNumber) =>
+    api.get(`/touristic-place-bookings/confirmation/${confirmationNumber}`),
+
+  // Mettre à jour le statut
+  updateStatus: (id, statusData) =>
+    api.put(`/touristic-place-bookings/${id}/status`, statusData),
+
+  // Vérifier la disponibilité
+  checkAvailability: (placeId, visitDate) =>
+    api.get(`/touristic-place-bookings/place/${placeId}/availability`, {
+      params: { visitDate },
+    }),
+
+  // Annuler une réservation
+  cancelBooking: (id) => api.delete(`/touristic-place-bookings/${id}`),
+
+  // Statistiques pour prestataires
+  getPrestataireStats: (prestataireId, period = "month") =>
+    api.get(`/touristic-place-bookings/prestataire/${prestataireId}/stats`, {
+      params: { period },
+    }),
+
+  // Récupérer les réservations d'un lieu spécifique
+  getBookingsByPlace: (placeId, params = {}) =>
+    api.get("/touristic-place-bookings", {
+      params: { placeId, ...params },
+    }),
+    
+};
+
+// Service utilitaire pour les réservations
+export const bookingService = {
+  // Calculer le prix total
+  calculateTotalPrice: (basePrice, ticketType, numberOfTickets) => {
+    const multipliers = {
+      adult: 1,
+      child: 0.5,
+      student: 0.7,
+      senior: 0.8,
+    };
+
+    const multiplier = multipliers[ticketType] || 1;
+    return basePrice * multiplier * numberOfTickets;
+  },
+
+  // Formater la date pour l'affichage
+  formatVisitDate: (dateString, timeString) => {
+    const date = new Date(dateString);
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return `${date.toLocaleDateString("fr-FR", options)} à ${timeString}`;
+  },
+
+  // Générer un QR code data URL (simulé)
+  generateQRCodeData: (bookingData) => {
+    const data = {
+      confirmationNumber: bookingData.confirmationNumber,
+      placeTitle: bookingData.place?.title,
+      visitDate: bookingData.visitDate,
+      visitTime: bookingData.visitTime,
+      numberOfTickets: bookingData.numberOfTickets,
+    };
+
+    // En production, vous utiliseriez une vraie librairie QR code
+    return `data:image/svg+xml;base64,${btoa(JSON.stringify(data))}`;
+  },
+};
+export const flightsAPI = {
+  // Récupérer tous les vols
+  getFlights: (params = {}) => api.get("/vol", { params }),
+  
+  // Récupérer un vol par ID
+  getFlightById: (id) => api.get(`/vol/${id}`),
+  
+  // Créer un vol
+  createFlight: (data) => api.post("/vol", data),
+  
+  // Modifier un vol
+  updateFlight: (id, data) => api.put(`/vol/${id}`, data),
+  
+  // Supprimer un vol
+  deleteFlight: (id) => api.delete(`/vol/${id}`),
+  
+  // Statistiques des vols
+  getFlightStats: () => api.get("/vol/stats"),
+  // Créer une réservation de vol
+   createReservation: (flightId, data) => 
+        api.post(`/Vol/reservation/${flightId}/reserver`, data),
+    
+};

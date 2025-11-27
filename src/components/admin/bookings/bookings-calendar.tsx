@@ -7,6 +7,8 @@ import api from "@/lib/api"
 interface Booking {
   id: string
   service: string
+
+  
   time: string
   date: string
   status: "confirmed" | "pending" | "cancelled"

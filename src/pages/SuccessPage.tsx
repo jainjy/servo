@@ -1,8 +1,7 @@
-// SuccessPage.jsx - Version améliorée
-import React from "react";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
   CheckCircle,
   Mail,
@@ -11,23 +10,15 @@ import {
   Calendar,
   Star,
   ArrowRight,
-  Download,
 } from "lucide-react";
-
 const SuccessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, plan, metiers, metiersLabel } = location.state || {};
-
+  console.log({ user, plan, metiers, metiersLabel } );
   const handleGoToDashboard = () => {
     navigate("/pro");
   };
-
-  const handleDownloadInvoice = () => {
-    // Logique pour télécharger la facture
-    console.log("Téléchargement de la facture");
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-emerald-100">
       <div className="w-full max-w-2xl">
@@ -39,24 +30,21 @@ const SuccessPage = () => {
                   <CheckCircle className="h-12 w-12 text-green-600" />
                 </div>
               </div>
-
               <CardTitle className="text-3xl font-bold text-gray-900 mb-3">
                 Félicitations !
               </CardTitle>
-
               <p className="text-gray-600 text-lg mb-2">
-                Votre inscription professionnelle est confirmée
+                Votre inscription professionnelle est confirmée. Essai gratuit
+                de 2 mois activé.
               </p>
-
               <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
                 <Star className="h-4 w-4" />
                 Compte Professionnel Activé
               </div>
             </div>
           </div>
-
           <CardContent className="p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Informations utilisateur */}
               <div className="space-y-6">
                 <h3 className="font-semibold text-gray-900 text-lg flex items-center gap-2">
@@ -215,22 +203,13 @@ const SuccessPage = () => {
 
             {/* Actions */}
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button
-                className="flex-1 h-12 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white font-semibold text-lg rounded-xl shadow-lg transition-all duration-200"
-                onClick={handleGoToDashboard}
-              >
-                Accéder à mon tableau de bord
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-
-              {/* <Button
-                variant="outline"
-                className="flex-1 h-12 border-blue-300 text-blue-700 hover:bg-blue-50 rounded-xl"
-                onClick={handleDownloadInvoice}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Télécharger la facture
-              </Button> */}
+            <Button
+              className="flex-1 h-12 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white font-semibold text-lg rounded-xl shadow-lg transition-all duration-200"
+              onClick={handleGoToDashboard}
+            >
+              Accéder à mon tableau de bord
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
             </div>
           </CardContent>
         </Card>
@@ -238,5 +217,4 @@ const SuccessPage = () => {
     </div>
   );
 };
-
 export default SuccessPage;

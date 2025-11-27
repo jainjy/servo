@@ -1,8 +1,9 @@
 export default function Test() {
   const imageSrc = [
     {
-      src: "https://i.pinimg.com/736x/f7/63/03/f7630358b6c2e058381a34be8d2736d8.jpg",
+      src: "/olimmo.png",
       alt: "Image",
+      link: "https://www.olimmoreunion.re/"
     },
     {
       src: "https://i.pinimg.com/736x/cc/3c/db/cc3cdb8498f8d4135b87f8501f3faa31.jpg",
@@ -69,24 +70,25 @@ export default function Test() {
           "
         >
           {imageSrc.map((image, i) => (
-            <div
-              key={i}
-              className="
+            <a href={image.link} target="_blank" rel="noopener noreferrer">
+              <div
+                key={i}
+                className="
                 flex-none py-7 flex justify-center items-center h-full w-28 lg:w-52
                 transition-all duration-500 ease-in-out
-                
-                
               "
-            >
+              >
 
-              <img
-                className="object-cover w-full h-full filter rounded-lg  hover:grayscale hover:scale-105 transition-all duration-500 brightness-110 contrast-110"
-                src={image.src}
-                alt={image.alt}
-                width={130}
-                height={130}
-              />
-            </div>
+                <img
+                  className="object-cover w-full h-full filter rounded-lg bg-gradient-to-r from-black/80 to-slate-900/90  hover:grayscale hover:scale-105 transition-all duration-500 brightness-110 contrast-110"
+                  src={image.src}
+                  alt={image.alt}
+                  width={130}
+                  height={130}
+                />
+
+              </div>
+            </a>
 
           ))}
         </div>
@@ -99,23 +101,26 @@ export default function Test() {
           "
         >
           {imageSrc.map((image, i) => (
-            <div
-              key={i}
-              className="
+            <a href={image.link} >
+              <div
+                key={i}
+                className="
                 flex-none py-7 flex justify-center items-center h-full w-28 lg:w-52
                 transition-all duration-500 ease-in-out
                
               "
-            >
+              >
 
-              <img
-                className="object-cover rounded-lg w-full h-full filter hover:scale-105 hover:grayscale brightness-110 contrast-110"
-                src={image.src}
-                alt={image.alt}
-                width={130}
-                height={130}
-              />
-            </div>
+                <img
+                  className="object-cover rounded-lg w-full h-full bg-gradient-to-r from-black/80 to-slate-900/90 filter hover:scale-105 hover:grayscale brightness-110 contrast-110"
+                  src={image.src}
+                  alt={image.alt}
+                  width={130}
+                  height={130}
+                />
+
+              </div>
+            </a>
 
           ))}
         </div>

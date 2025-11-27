@@ -11,7 +11,7 @@ import {
   Ruler,
   Tag,
   FileText,
-  Globe,
+  WalletCards,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
@@ -19,6 +19,7 @@ import logo from '../../assets/logo.png';
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Utilisateurs", href: "/admin/users", icon: Users },
+  { name: "Abonnement Pro", href: "/admin/subscriptions", icon: WalletCards },
   // { name: "Prestataires", href: "/admin/vendors", icon: Building2 },
   { name: "Annonces", href: "/admin/listings", icon: Building2 },
   { name: "Audit", href: "/admin/audits", icon: ShieldCheck },
@@ -56,6 +57,7 @@ export function AdminSidebar() {
       {/* Sidebar desktop */}
       <aside className="hidden md:flex w-64 flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
+          <Link to="/admin" className="flex items-center gap-2">
           <div className="p-1 rounded-full bg-white border-black border-2">
             {/* Remplacement de <Image> par <img> */}
             <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
@@ -64,6 +66,7 @@ export function AdminSidebar() {
             <h1 className="text-lg font-semibold text-sidebar-foreground">SERVO</h1>
             <p className="text-xs text-muted-foreground">Administration</p>
           </div>
+          </Link>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
           {navigation.map((item) => {

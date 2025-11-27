@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 // Dans PartnersPage.tsx et ServicesPages.tsx
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Calendar, ArrowRight, ChevronDown, X, Clock, User, Play, Headphones, BookOpen, Download, MessageCircle, ThumbsUp, Share2, Bookmark, Heart, Eye, Pause } from "lucide-react";
+import { Search, Calendar, ArrowRight, ChevronDown, X, Clock, User, Play, Headphones, BookOpen, Download, MessageCircle, ThumbsUp, Share2, Bookmark, Heart, Eye, Pause, Lightbulb, Home, BarChart3, Banknote } from "lucide-react";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import "@/styles/actualite.css";
 import Footer from "@/components/layout/Footer";
 import api from "@/lib/api";
@@ -77,6 +78,194 @@ const articlesPodcast = [
   }
 ];
 
+// Données des conseils par catégorie
+const conseilsData = {
+  immobilier: {
+    titre: "Conseils Immobilier",
+    icon: Home,
+    couleur: "from-blue-600 to-cyan-600",
+    conseils: [
+      {
+        id: 1,
+        titre: "Bien choisir son bien immobilier",
+        description: "Les critères essentiels pour trouver le bon bien selon votre budget et vos besoins.",
+        image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
+        tips: [
+          "Vérifier la localisation et l'accessibilité",
+          "Analyser les tendances du marché local",
+          "Inspecter l'état général de la propriété",
+          "Évaluer le potentiel d'appréciation",
+          "Considérer les frais de copropriété"
+        ]
+      },
+      {
+        id: 2,
+        titre: "Négocier le meilleur prix",
+        description: "Stratégies pour obtenir un accord au meilleur prix possible.",
+        image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+        tips: [
+          "Faire une étude comparative du marché",
+          "Identifier les motivations du vendeur",
+          "Proposer un prix initial légèrement bas",
+          "Être prêt à faire comprometis",
+          "Obtenir une inspection professionnelle"
+        ]
+      },
+      {
+        id: 3,
+        titre: "Comprendre les diagnostics immobiliers",
+        description: "Guide complet des diagnostics obligatoires et leur interprétation.",
+        image: "https://i.pinimg.com/736x/fe/6e/f9/fe6ef9d561df8876a2c4c9df8fea643b.jpg",
+        tips: [
+          "Diagnostic de performance énergétique",
+          "Diagnostic amiante et plomb",
+          "Inspection termites et ravageurs",
+          "Diagnostic gaz et électricité",
+          "État relatif à la présence de polluants"
+        ]
+      }
+    ]
+  },
+  travaux: {
+    titre: "Conseils Travaux",
+    icon: BarChart3,
+    couleur: "from-orange-600 to-red-600",
+    conseils: [
+      {
+        id: 1,
+        titre: "Planifier vos travaux de rénovation",
+        description: "Méthodologie pour planifier et budgéter vos travaux efficacement.",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+        tips: [
+          "Établir un plan détaillé des travaux",
+          "Évaluer le budget réaliste",
+          "Prioriser les travaux urgents",
+          "Demander plusieurs devis",
+          "Prévoir une marge de contingence de 10-15%"
+        ]
+      },
+      {
+        id: 2,
+        titre: "Choisir les bons artisans",
+        description: "Comment sélectionner et travailler avec des entrepreneurs qualifiés.",
+        image: "https://i.pinimg.com/1200x/10/1a/3b/101a3b63cbe22f20331ed259d36b328a.jpg",
+        tips: [
+          "Vérifier les qualifications et certifications",
+          "Consulter les références antérieures",
+          "Comparer les devis détaillés",
+          "Vérifier l'assurance responsabilité civile",
+          "Mettre en place un contrat clair"
+        ]
+      },
+      {
+        id: 3,
+        titre: "Aides et subventions disponibles",
+        description: "Liste complète des aides gouvernementales pour vos travaux.",
+        image: "https://i.pinimg.com/1200x/34/52/64/3452648882e5ac346729a623e41b6292.jpg",
+        tips: [
+          "MaPrimeRénov' pour les rénovations énergétiques",
+          "Éco-PTZ pour les travaux écologiques",
+          "Crédit d'impôt transition énergétique",
+          "Aides des collectivités locales",
+          "Subventions ANAH pour les propriétaires"
+        ]
+      }
+    ]
+  },
+  financement: {
+    titre: "Conseils Financement",
+    icon: Banknote,
+    couleur: "from-green-600 to-emerald-600",
+    conseils: [
+      {
+        id: 1,
+        titre: "Préparer votre dossier de crédit",
+        description: "Comment préparer un dossier solide pour obtenir votre crédit immobilier.",
+        image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
+        tips: [
+          "Maintenir un bon score de crédit",
+          "Augmenter votre apport personnel",
+          "Stabiliser vos revenus",
+          "Réduire vos dettes existantes",
+          "Documenter votre situation financière"
+        ]
+      },
+      {
+        id: 2,
+        titre: "Comprendre les taux de prêt",
+        description: "Guide pour comprendre et négocier les taux d'intérêt.",
+        image: "https://i.pinimg.com/1200x/9b/24/d0/9b24d0ed911c05757b4f2dd2f704dd47.jpg",
+        tips: [
+          "Taux fixe vs taux variable",
+          "L'impact du TAEG (Taux Annuel Effectif Global)",
+          "Les frais de dossier et d'assurance",
+          "Comparaison entre banques et courtiers",
+          "Timing optimal pour demander un crédit"
+        ]
+      },
+      {
+        id: 3,
+        titre: "Assurance emprunteur : ce qu'il faut savoir",
+        description: "Tout ce que vous devez connaître sur l'assurance crédit immobilier.",
+        image: "https://i.pinimg.com/1200x/36/50/80/365080dea43aa6265c52ba9d7a3b10fd.jpg",
+        tips: [
+          "Assurance décès-invalidité obligatoire",
+          "Délai de réflexion et loi Lemoine",
+          "Comparaison des garanties",
+          "Possibilité de changer d'assurance",
+          "Impact sur le coût total du prêt"
+        ]
+      }
+    ]
+  },
+  renovation: {
+    titre: "Conseils Rénovation",
+    icon: Lightbulb,
+    couleur: "from-purple-600 to-pink-600",
+    conseils: [
+      {
+        id: 1,
+        titre: "Rénovation énergétique : où commencer ?",
+        description: "Étapes pour réduire votre consommation énergétique et vos factures.",
+        image: "https://i.pinimg.com/736x/72/66/14/72661412809840e6abd0c937940b3c4e.jpg",
+        tips: [
+          "Audit énergétique initial recommandé",
+          "Isolation toiture et combles en priorité",
+          "Remplacement des fenêtres",
+          "Chauffage et production d'eau chaude",
+          "Installation d'énergies renouvelables"
+        ]
+      },
+      {
+        id: 2,
+        titre: "Choisir les matériaux durables",
+        description: "Guide des matériaux écologiques et performants pour vos travaux.",
+        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
+        tips: [
+          "Matériaux biosourcés (bois, liège, chanvre)",
+          "Isolants naturels et performants",
+          "Peintures et finitions éco-responsables",
+          "Matériaux recyclés et récupérés",
+          "Certifications environnementales à vérifier"
+        ]
+      },
+      {
+        id: 3,
+        titre: "Budget et calendrier de rénovation",
+        description: "Comment gérer le budget et le timing de votre projet de rénovation.",
+        image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+        tips: [
+          "Établir un budget réaliste par zone",
+          "Prévoir la durée de chaque étape",
+          "Gérer la logistique pendant les travaux",
+          "Éviter les retards coûteux",
+          "Documenter tous les frais et modifications"
+        ]
+      }
+    ]
+  }
+};
+
 const Actualites = () => {
   const [articles, setArticles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,6 +276,9 @@ const Actualites = () => {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [activeConseilTab, setActiveConseilTab] = useState("immobilier");
+  const [selectedConseil, setSelectedConseil] = useState(null);
+  const [isConseilModalOpen, setIsConseilModalOpen] = useState(false);
 
   // Charger les articles depuis l'API
   useEffect(() => {
@@ -295,12 +487,12 @@ const Actualites = () => {
           <div className="max-w-4xl mx-auto text-center">
             {/* Titre réduit */}
             <h1 className="text-4xl md:text-8xl font-elegant font-light text-white mb-4 tracking-tight">
-              Actualités
+              Blogs et conseils
             </h1>
 
             {/* Sous-titre réduit */}
             <p className="text-lg font-modern font-light text-slate-200 mb-6 max-w-2xl mx-auto">
-              L'excellence immobilière à portée de main
+              Restez informé avec nos dernières actualités, guides et podcasts sur l'immobilier.
             </p>
 
             {/* Barre de recherche */}
@@ -341,57 +533,16 @@ const Actualites = () => {
       </section>
 
       {/* Contenu principal */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 pt-12">
         {/* Section 1: Carrousel des guides fondamentaux */}
-        {selectedCategory === "Toutes" && (
-          <section className="mb-16">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Guides Fondamentaux</h2>
-                <p className="text-slate-600 text-sm">Les essentiels pour maîtriser l'immobilier</p>
-              </div>
-              <button className="text-slate-600 hover:text-slate-900 font-medium flex items-center gap-2 transition-all duration-300 group text-sm">
-                Explorer
-                <ArrowRight className="h-3 w-3 transform group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {guidesFondamentaux.map((guide) => (
-                <div
-                  key={guide.id}
-                  className="group bg-white rounded-xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-500 hover:-translate-y-1 cursor-pointer"
-                  onClick={() => handleReadMore(guide)}
-                >
-                  <div className="relative w-full aspect-[4/3] overflow-hidden">
-                    <img
-                      src={guide.image}
-                      alt={guide.titre}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    {/* Badge */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="inline-block bg-white/90 backdrop-blur-sm text-slate-900 px-3 py-1.5 rounded-full text-xs font-semibold border border-white/20 shadow-lg">
-                        {guide.badge}
-                      </span>
-                    </div>
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-slate-900/70 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                      <span className="text-white font-semibold text-sm">Découvrir</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        
 
         {/* Section 2: Actualités */}
         <section className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                {selectedCategory === "Toutes" ? "Actualités du Marché" : `Actualités - ${selectedCategory}`}
+                {selectedCategory === "Toutes" ? "Tous nos actualités" : `Actualités - ${selectedCategory}`}
               </h2>
               <p className="text-slate-600 text-sm">
                 {selectedCategory === "Toutes"
@@ -505,130 +656,206 @@ const Actualites = () => {
           )}
         </section>
 
-        {/* Section 3: Articles Podcast */}
-        {selectedCategory === "Toutes" && (
-          <section className="rounded-lg bg-gray-100 p-4">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Podcasts Immobiliers</h2>
-                <p className="text-slate-600 text-sm">Écoutez les experts du secteur</p>
-              </div>
-              <button className="text-slate-600 hover:text-slate-900 font-medium flex items-center gap-2 transition-all duration-300 group text-sm">
-                Tous les podcasts
-                <ArrowRight className="h-3 w-3 transform group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-
-            <div className="space-y-3 gap-3 grid grid-cols-1 lg:grid-cols-2">
-              {articlesPodcast.map((podcast, index) => (
-                <div
-                  key={podcast.id}
-                  className="group bg-white rounded-2xl border border-slate-100 hover:border-slate-200 overflow-hidden hover:shadow-sm transition-all duration-500 cursor-pointer"
-                  onClick={() => handleReadMore(podcast)}
-                >
-                  <div className="flex items-center gap-4 p-4">
-                    {/* Numéro et bouton play */}
-                    <div className="flex items-center gap-4">
-                      {/* Numéro */}
-                      <div className="w-8 flex-shrink-0">
-                        <span className="text-slate-400 group-hover:text-slate-600 text-sm font-medium transition-colors">
-                          {(index + 1).toString().padStart(2, '0')}
-                        </span>
-                      </div>
-
-                      {/* Bouton Play */}
-                      <div className="w-12 h-12 flex-shrink-0 relative">
-                        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl w-full h-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-all duration-300">
-                          <Play className="h-5 w-5 text-white ml-0.5 fill-white" />
-                        </div>
-                        {/* État pause au survol */}
-                        <div className="absolute inset-0 bg-slate-900/80 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <Pause className="h-5 w-5 text-white" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Image de couverture */}
-                    <div className="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden shadow-sm">
-                      <img
-                        src={podcast.image}
-                        alt={podcast.titre}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
-
-                    {/* Informations du podcast */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                          {podcast.titre}
-                        </h3>
-                        <span className="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
-                          {podcast.badge}
-                        </span>
-                      </div>
-
-                      <p className="text-slate-600 text-sm mb-2 line-clamp-1">
-                        {podcast.description || "Découvrez ce podcast inspirant..."}
-                      </p>
-
-                      <div className="flex items-center gap-4 text-xs text-slate-500">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(podcast.date)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {podcast.duree || "25 min"}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Headphones className="h-3 w-3" />
-                          { "1.2K"}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions secondaires */}
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                        <Heart className="h-4 w-4" />
-                      </button>
-                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                        <Bookmark className="h-4 w-4" />
-                      </button>
-                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                        <Share2 className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    {/* Durée */}
-                    <div className="w-16 flex-shrink-0 text-right">
-                      <span className="text-slate-400 text-sm font-medium">
-                        {podcast.duree || "25:00"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Barre de progression (optionnelle) */}
-                  <div className="px-4 pb-3">
-                    <div className="w-full bg-slate-100 rounded-full h-1">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full transition-all duration-500 group-hover:w-3/4"
-                        style={{ width: '0%' }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+       
       </div>
+
+      {/* Section Conseils avec Onglets */}
+      <section className="bg-gradient-to-br from-slate-50 via-white to-slate-50 py-16 border-t border-slate-100">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+              Conseils pratiques
+            </h2>
+            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+              Des guides détaillés et astuces pour vous accompagner dans vos projets immobiliers
+            </p>
+          </motion.div>
+
+          {/* Menu des onglets */}
+          <LayoutGroup>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 flex-wrap">
+              {Object.entries(conseilsData).map(([key, data]) => {
+                const IconComponent = data.icon;
+                return (
+                  <motion.button
+                    key={key}
+                    onClick={() => setActiveConseilTab(key)}
+                    className={`relative px-8 py-4 rounded-3xl font-semibold text-base transition-all duration-300 flex items-center gap-3 border-2 ${
+                      activeConseilTab === key
+                        ? `bg-gradient-to-r ${data.couleur} text-white border-transparent shadow-lg`
+                        : 'bg-gradient-to-br from-white to-slate-50 text-slate-900 border-slate-200/60 hover:bg-slate-100'
+                    }`}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <motion.div
+                      animate={{
+                        scale: activeConseilTab === key ? 1.15 : 1,
+                        rotate: activeConseilTab === key ? 5 : 0
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <IconComponent className="h-5 w-5" />
+                    </motion.div>
+                    <motion.span
+                      animate={{
+                        x: activeConseilTab === key ? 2 : 0
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {data.titre}
+                    </motion.span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </LayoutGroup>
+
+          {/* Contenu des onglets */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeConseilTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-slate-200/40"
+            >
+              <div className=" mx-auto">
+                <h3 className="text-3xl font-bold text-slate-900 mb-8">
+                  {conseilsData[activeConseilTab].titre}
+                </h3>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  {conseilsData[activeConseilTab].conseils.map((conseil, idx) => (
+                    <motion.div
+                      key={conseil.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: idx * 0.1 }}
+                      className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-6 border border-slate-200 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className="mb-4">
+                        <div className={`w-full overflow-hidden h-40 rounded-xl bg-gradient-to-br ${conseilsData[activeConseilTab].couleur} mb-4`}>
+                          <img src={conseil.image} alt={conseil.titre} className="w-full h-full object-cover" />
+                        </div>
+                        <h4 className="text-xl font-bold text-slate-900 mb-2">
+                          {conseil.titre}
+                        </h4>
+                        <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                          {conseil.description}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                          Points clés:
+                        </p>
+                        {conseil.tips.map((tip, tipIdx) => (
+                          <div key={tipIdx} className="flex items-start gap-3">
+                            <div className={`w-5 h-5 rounded-full bg-gradient-to-br ${conseilsData[activeConseilTab].couleur} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                              <span className="text-white text-xs font-bold">✓</span>
+                            </div>
+                            <p className="text-slate-700 text-sm leading-relaxed">{tip}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button 
+                        onClick={() => {
+                          setSelectedConseil({ ...conseil, categorie: activeConseilTab });
+                          setIsConseilModalOpen(true);
+                        }}
+                        className={`w-full mt-6 px-4 py-3 rounded-xl font-semibold text-white transition-all duration-300 bg-gradient-to-r ${conseilsData[activeConseilTab].couleur} hover:shadow-lg hover:scale-105`}>
+                        En savoir plus
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Modal Conseils */}
+      {isConseilModalOpen && selectedConseil && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setIsConseilModalOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image Header */}
+            <div className="relative h-80 overflow-hidden">
+              <img
+                src={selectedConseil.image}
+                alt={selectedConseil.titre}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsConseilModalOpen(false)}
+                className="absolute top-6 right-6 bg-white/90 hover:bg-white text-slate-900 rounded-full p-2 transition-all duration-300 shadow-lg"
+              >
+                <X className="h-6 w-6" />
+              </button>
+
+              {/* Title Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                <h2 className="text-4xl font-bold mb-2">{selectedConseil.titre}</h2>
+                <p className="text-slate-200 text-lg">{selectedConseil.description}</p>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 md:p-12">
+              <div className="max-w-3xl mx-auto">
+                <h3 className="text-2xl font-bold text-slate-900 mb-6">Points clés à retenir</h3>
+                <div className="grid md:grid-cols-2 gap-6 mb-10">
+                  {selectedConseil.tips.map((tip, idx) => (
+                    <div key={idx} className="flex items-start gap-4">
+                      <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${conseilsData[selectedConseil.categorie]?.couleur} flex items-center justify-center flex-shrink-0 mt-1`}>
+                        <span className="text-white font-bold text-sm">✓</span>
+                      </div>
+                      <p className="text-slate-700 leading-relaxed">{tip}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <div className="bg-gradient-to-r from-slate-50 to-white rounded-2xl border border-slate-200 p-8 text-center">
+                  <h4 className="text-xl font-bold text-slate-900 mb-3">Prêt à passer à l'action ?</h4>
+                  <p className="text-slate-600 mb-6">Contactez nos experts pour une assistance personnalisée</p>
+                  <button className={`px-8 py-3 rounded-xl font-semibold text-white transition-all duration-300 bg-gradient-to-r ${conseilsData[selectedConseil.categorie]?.couleur} hover:shadow-lg hover:scale-105`}>
+                    Demander un conseil personnalisé
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Article Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-7xl h-[95vh] overflow-hidden rounded-3xl border-0 shadow-2xl bg-white p-0">
-          <DialogHeader className="px-8 py-2 border-b border-slate-100">
+          <DialogHeader className="px-8 py-2 flex items-center justify-center border-b border-slate-100">
             <DialogTitle className="mx-auto text-4xl font-semibold text-slate-700 flex items-center">
               <BookOpen className="w-8 h-8 mr-2 text-slate-600" />
               Détail de l'article

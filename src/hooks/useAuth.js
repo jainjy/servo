@@ -1,30 +1,27 @@
-// hooks/useAuth.js
-import { useState, useEffect } from 'react';
-import AuthService from '../services/authService';
+import { useState, useEffect } from "react";
+import AuthService from "../services/authService";
 
 export const useAuth = () => {
   const [user, setUser] = useState(AuthService.getCurrentUser());
-  const [isAuthenticated, setIsAuthenticated] = useState(AuthService.isAuthenticated());
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    AuthService.isAuthenticated()
+  );
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     // Vérifier l'authentification au chargement
     setUser(AuthService.getCurrentUser());
     setIsAuthenticated(AuthService.isAuthenticated());
     setLoading(false);
-
     // Écouter les changements d'authentification
     const handleAuthChange = () => {
       setUser(AuthService.getCurrentUser());
       setIsAuthenticated(AuthService.isAuthenticated());
     };
-
-    window.addEventListener('auth-change', handleAuthChange);
+    window.addEventListener("auth-change", handleAuthChange);
     return () => {
-      window.removeEventListener('auth-change', handleAuthChange);
+      window.removeEventListener("auth-change", handleAuthChange);
     };
   }, []);
-
   return {
     user,
     isAuthenticated,
