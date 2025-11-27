@@ -374,8 +374,8 @@ const Header = () => {
             "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
         },
         {
-          title: "SHLMR",
-          description: "Logements intermédiaires abordables",
+          title: "Logement social",
+          description: "Accédez à un logement abordable",
           href: "/SHLMR",
           image:
             "https://i.pinimg.com/1200x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg",
@@ -420,7 +420,7 @@ const Header = () => {
           description: "Actualités et astuces immobilières",
           href: "/blog",
           image:
-            "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
+            "https://i.pinimg.com/1200x/aa/e0/7d/aae07d295ac376efa051410403eacfec.jpg",
         },
         // {
         //   title: "Estimation & expertise",
@@ -1114,7 +1114,7 @@ const Header = () => {
                   <div className="w-full h-screen overflow-auto">
                     <div className="flex flex-col lg:flex-row h-full w-full">
                       {/* Left: Titles column */}
-                      <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4">
+                      <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4 lg:sticky lg:top-4 lg:h-[500px]">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="p-1 rounded-full bg-white border-black border-2">
                             <img
@@ -1161,7 +1161,7 @@ const Header = () => {
                               </div>
                             );
                           })}
-                          <div className=" absolute bottom-2 left-10 w-auto flex items-start justify-start z-50 gap-5 h-20">
+                          <div className=" absolute -bottom-28 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
                             {!isAuthenticated ? (
                               <Link
                                 to="/login"

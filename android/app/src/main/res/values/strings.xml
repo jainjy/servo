@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">servo</string>
+    <string name="title_activity_main">servo</string>
+    <string name="package_name">com.servo.servo</string>
+    <string name="custom_url_scheme">com.servo.servo</string>
+</resources>

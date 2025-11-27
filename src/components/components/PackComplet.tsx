@@ -260,8 +260,8 @@ const OffresExclusives = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <div className="text-center flex flex-col items-center justify-center">
+          <img src="/loading.gif" alt="" />
           <p className="mt-4 text-gray-600">Chargement des offres exclusives...</p>
         </div>
       </div>
@@ -385,7 +385,7 @@ const OffresExclusives = () => {
                       <img
                         src={offre.images[0] || "https://i.pinimg.com/736x/74/43/b2/7443b23952143eede1e031cadee50689.jpg"}
                         alt={offre.title}
-                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-48 object-cover rounded-lg group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
 
@@ -440,16 +440,13 @@ const OffresExclusives = () => {
 
                       <div className="flex gap-2">
                         <Button
-                          className="flex-1"
+                          className="flex-1 bg-yellow-500 hover:bg-yellow-600"
                           size="sm"
                           variant={buttonConfig.variant}
                           onClick={() => handleButtonAction(offre, buttonConfig.action)}
                         >
                           <ButtonIcon className="w-4 h-4 mr-2" />
                           {buttonConfig.text}
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Heart className="w-4 h-4" />
                         </Button>
                       </div>
                     </CardContent>
