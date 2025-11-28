@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle, Building, Users, Wrench, Sofa } from "lucide-react";
+import { CheckCircle, Building, Users, Wrench, Sofa, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { subscriptionPlansAPI } from "@/lib/api/subscriptionPlans";
@@ -19,6 +19,16 @@ const ProfessionalSubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [subscriptionPlans, setSubscriptionPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
+
+  // Fonction pour trier les plans par prix décroissant
+  const sortPlansByPrice = (plans) => {
+    return plans.sort((a, b) => {
+      const priceA = parseFloat(a.price);
+      const priceB = parseFloat(b.price);
+      return priceB - priceA; // Décroissant
+    });
+  };
 
   // Fonction pour récupérer les plans depuis l'API
   const fetchSubscriptionPlans = async () => {
@@ -54,7 +64,9 @@ const ProfessionalSubscriptionPage = () => {
           };
         });
 
-        setSubscriptionPlans(plansWithIcons);
+        // Trier les plans par prix décroissant
+        const sortedPlans = sortPlansByPrice(plansWithIcons);
+        setSubscriptionPlans(sortedPlans);
       } else {
         toast.error("Erreur lors du chargement des plans d'abonnement");
       }
@@ -62,7 +74,9 @@ const ProfessionalSubscriptionPage = () => {
       console.error("Erreur:", error);
       toast.error("Impossible de charger les plans d'abonnement");
       // Fallback vers les données statiques en cas d'erreur
-      setSubscriptionPlans(getFallbackPlans());
+      const fallbackPlans = getFallbackPlans();
+      const sortedFallbackPlans = sortPlansByPrice(fallbackPlans);
+      setSubscriptionPlans(sortedFallbackPlans);
     } finally {
       setLoading(false);
     }
@@ -198,34 +212,36 @@ const ProfessionalSubscriptionPage = () => {
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
-  const handleSubscriptionSelect = (planId: string) => {
+  const handleSubscriptionSelect = async (planId: string) => {
+    if (redirecting) return;
+    
     setSelectedPlan(planId);
-  };
-
-  const handleContinue = async () => {
-    if (!selectedPlan) {
-      toast.warning("Veuillez sélectionner un abonnement");
-      return;
-    }
-
+    setRedirecting(true);
+    
+    // Petit délai pour montrer le feedback visuel
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     const selectedPlanData = subscriptionPlans.find(
-      (plan) => plan.id === selectedPlan
+      (plan) => plan.id === planId
     );
 
-    // Redirection vers la page d'inscription avec les données de l'abonnement
-    navigate("/register/professional/form", {
-      state: {
-        subscriptionData: {
-          // The API should return the numeric ID as `id`
-          planId: selectedPlan,
-          planTitle: selectedPlanData?.title,
-          price: selectedPlanData?.price,
-          period: selectedPlanData?.period,
-          userTypes: selectedPlanData?.userTypes,
-          truePlanId: selectedPlanData?.truePlanId,
+    if (selectedPlanData) {
+      navigate("/register/professional/form", {
+        state: {
+          subscriptionData: {
+            planId: planId,
+            planTitle: selectedPlanData?.title,
+            price: selectedPlanData?.price,
+            period: selectedPlanData?.period,
+            userTypes: selectedPlanData?.userTypes,
+            truePlanId: selectedPlanData?.truePlanId,
+          },
         },
-      },
-    });
+      });
+    } else {
+      setRedirecting(false);
+      toast.error("Erreur lors de la sélection du plan");
+    }
   };
 
   const handleBack = () => {
@@ -243,7 +259,6 @@ const ProfessionalSubscriptionPage = () => {
 
   return (
     <div className="min-h-screen flex overflow-hidden relative">
-      {/* Votre JSX existant reste identique */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
       <div className="absolute inset-0 -z-20">
         <img
@@ -256,7 +271,20 @@ const ProfessionalSubscriptionPage = () => {
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
 
-      <div className="w-full">
+      {/* Bouton Retour stylé en haut à gauche */}
+      <div className="absolute top-6 left-6 z-30">
+        <Button
+          variant="outline"
+          className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
+          onClick={handleBack}
+          disabled={redirecting}
+        >
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-semibold">Retour</span>
+        </Button>
+      </div>
+
+      <div className="w-full p-6 pt-24">
         <div className="text-center mb-8">
           <div className="flex justify-center">
             <div className="w-16 h-16 rounded-full overflow-hidden my-4 flex items-center justify-center shadow-lg">
@@ -281,6 +309,7 @@ const ProfessionalSubscriptionPage = () => {
           {subscriptionPlans.map((plan) => {
             const color = getColorClasses(plan.color);
             const isSelected = selectedPlan === plan.id;
+            const isRedirecting = isSelected && redirecting;
 
             return (
               <div
@@ -289,10 +318,11 @@ const ProfessionalSubscriptionPage = () => {
                   isSelected ? color.hoverBorder : color.border
                 } rounded-2xl p-6 hover:${
                   color.hoverBorder
-                } transition-all duration-500 cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-lg hover:shadow-2xl border-opacity-30 hover:border-opacity-60 group`}
+                } transition-all duration-500 cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-lg hover:shadow-2xl border-opacity-30 hover:border-opacity-60 group ${
+                  redirecting && !isSelected ? 'opacity-50 pointer-events-none' : ''
+                }`}
                 onClick={() => handleSubscriptionSelect(plan.id)}
               >
-                {/* Le reste de votre JSX pour afficher les plans */}
                 {plan.popular && (
                   <div className="absolute -top-4 left-2 z-10">
                     <div
@@ -351,14 +381,22 @@ const ProfessionalSubscriptionPage = () => {
                       isSelected
                         ? `${color.button} bg-gradient-to-r ${color.gradient} text-white shadow-2xl hover:shadow-3xl border-white/20`
                         : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-600 hover:border-gray-500"
-                    }`}
+                    } ${isRedirecting ? 'animate-pulse' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSubscriptionSelect(plan.id);
                     }}
+                    disabled={redirecting}
                   >
                     <span className="flex items-center justify-center gap-2">
-                      {isSelected ? (
+                      {isRedirecting ? (
+                        <>
+                          <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v4m0 12v4m8-10h-4M6 12H2" />
+                          </svg>
+                          Redirection...
+                        </>
+                      ) : isSelected ? (
                         <>
                           <svg
                             className="w-4 h-4"
@@ -411,24 +449,7 @@ const ProfessionalSubscriptionPage = () => {
           })}
         </div>
 
-        <div className="flex justify-center gap-4 mt-12">
-          <Button
-            variant="outline"
-            className="px-8 py-3 border-gray-300"
-            onClick={handleBack}
-          >
-            Retour
-          </Button>
-          <Button
-            className="px-8 py-3 bg-blue-700 text-white font-semibold"
-            onClick={handleContinue}
-            disabled={!selectedPlan}
-          >
-            Continuer
-          </Button>
-        </div>
-
-        <div className="text-end mt-8 mr-4 space-y-4">
+        <div className="text-center mt-12 space-y-4">
           <div className="text-xs text-gray-500">
             © 2025 SERVO . Tous droits réservés.
           </div>
