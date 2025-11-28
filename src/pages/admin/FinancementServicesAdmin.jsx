@@ -165,13 +165,14 @@ const FinancementServicesAdmin = () => {
               <Select
                 value={filters.partenaireId}
                 onValueChange={(value) =>
-                  handleFilterChange("partenaireId", value)
+                  handleFilterChange("partenaireId", value === "all" ? "" : value)
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les partenaires" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Tous les partenaires</SelectItem>
                   {partenaires && partenaires.length > 0 ? (
                     partenaires.map((partenaire) => (
                       <SelectItem
@@ -194,12 +195,15 @@ const FinancementServicesAdmin = () => {
               <Label htmlFor="type">Type de service</Label>
               <Select
                 value={filters.type}
-                onValueChange={(value) => handleFilterChange("type", value)}
+                onValueChange={(value) =>
+                  handleFilterChange("type", value === "all" ? "" : value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les types" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Tous les types</SelectItem>
                   {serviceTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {getTypeLabel(type)}
@@ -213,12 +217,15 @@ const FinancementServicesAdmin = () => {
               <Label htmlFor="status">Statut</Label>
               <Select
                 value={filters.isActive}
-                onValueChange={(value) => handleFilterChange("isActive", value)}
+                onValueChange={(value) =>
+                  handleFilterChange("isActive", value === "all" ? "" : value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les statuts" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
                   <SelectItem value="true">Actif</SelectItem>
                   <SelectItem value="false">Inactif</SelectItem>
                 </SelectContent>

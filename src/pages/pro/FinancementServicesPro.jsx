@@ -45,7 +45,7 @@ const FinancementServicesPro = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("");
+  const [selectedType, setSelectedType] = useState("all");
   const queryClient = useQueryClient();
 
   // Récupérer les partenaires de l'utilisateur
@@ -114,7 +114,7 @@ const FinancementServicesPro = () => {
   const filteredServices = services.filter(
     (service) =>
       service.nom.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedType === "" || service.type === selectedType)
+      (selectedType === "all" || service.type === selectedType)
   );
 
   const serviceTypes = [
@@ -233,7 +233,7 @@ const FinancementServicesPro = () => {
                   <SelectValue placeholder="Tous les types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les types</SelectItem>
+                  <SelectItem value="all">Tous les types</SelectItem>
                   {serviceTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {getTypeLabel(type)}
