@@ -45,14 +45,14 @@ const FinancementServicesPro = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedType, setSelectedType] = useState("");
   const queryClient = useQueryClient();
 
   // Récupérer les partenaires de l'utilisateur
   const { data: partenaires, isLoading: isLoadingPartenaires } = useQuery({
     queryKey: ["mes-partenaires-financement"],
     queryFn: async () => {
-      const response = await financementAPI.getPartenaires();
+      const response = await financementAPI.getPartenairesPro();
       return response.data;
     },
   });
@@ -61,7 +61,7 @@ const FinancementServicesPro = () => {
   const { data: servicesData, isLoading: isLoadingServices } = useQuery({
     queryKey: ["mes-services-financiers"],
     queryFn: async () => {
-      const response = await financementAPI.getServicesFinanciers();
+      const response = await financementAPI.getServicesFinanciersPro();
       return response.data;
     },
   });
@@ -110,11 +110,24 @@ const FinancementServicesPro = () => {
     },
   });
 
-  const services = servicesData || [];
-  const filteredServices = services.filter(
+  // Aplatir tous les services des partenaires
+  const allServices =
+    servicesData?.flatMap(
+      (partenaire) =>
+        partenaire.ServiceFinancier?.map((service) => ({
+          ...service,
+          partenaire: {
+            id: partenaire.id,
+            nom: partenaire.nom,
+            icon: partenaire.icon,
+          },
+        })) || []
+    ) || [];
+
+  const filteredServices = allServices.filter(
     (service) =>
       service.nom.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedType === "all" || service.type === selectedType)
+      (selectedType === "" || service.type === selectedType)
   );
 
   const serviceTypes = [
@@ -164,7 +177,7 @@ const FinancementServicesPro = () => {
     if (!service.isActive) {
       return <Badge variant="destructive">Inactif</Badge>;
     }
-    return <Badge variant="success">Actif</Badge>;
+    return <Badge variant="default">Actif</Badge>;
   };
 
   if (isLoadingServices || isLoadingPartenaires) {
@@ -204,6 +217,7 @@ const FinancementServicesPro = () => {
               partenaires={partenaires || []}
               onSubmit={handleCreate}
               isLoading={createMutation.isLoading}
+              onCancel={() => setIsCreateDialogOpen(false)}
             />
           </DialogContent>
         </Dialog>
@@ -275,7 +289,7 @@ const FinancementServicesPro = () => {
                   <TableCell>
                     <Badge variant="outline">{service.categorie}</Badge>
                   </TableCell>
-                  <TableCell>{service.partenaire.nom}</TableCell>
+                  <TableCell>{service.partenaire?.nom || "-"}</TableCell>
                   <TableCell>
                     {service.taux ? `${service.taux}%` : "-"}
                   </TableCell>
@@ -330,6 +344,10 @@ const FinancementServicesPro = () => {
               partenaires={partenaires || []}
               onSubmit={handleUpdate}
               isLoading={updateMutation.isLoading}
+              onCancel={() => {
+                setIsEditDialogOpen(false);
+                setSelectedService(null);
+              }}
             />
           )}
         </DialogContent>
@@ -339,7 +357,13 @@ const FinancementServicesPro = () => {
 };
 
 // Composant formulaire de service
-const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
+const ServiceForm = ({
+  service,
+  partenaires,
+  onSubmit,
+  isLoading,
+  onCancel,
+}) => {
   const [formData, setFormData] = useState({
     nom: service?.nom || "",
     description: service?.description || "",
@@ -365,7 +389,23 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // Nettoyer les données avant envoi
+    const cleanedData = {
+      ...formData,
+      partenaireId: formData.partenaireId,
+      taux: formData.taux ? parseFloat(formData.taux) : null,
+      dureeMin: formData.dureeMin ? parseInt(formData.dureeMin) : null,
+      dureeMax: formData.dureeMax ? parseInt(formData.dureeMax) : null,
+      montantMin: formData.montantMin ? parseFloat(formData.montantMin) : null,
+      montantMax: formData.montantMax ? parseFloat(formData.montantMax) : null,
+      fraisDossier: formData.fraisDossier
+        ? parseFloat(formData.fraisDossier)
+        : null,
+      ordreAffichage: parseInt(formData.ordreAffichage) || 0,
+    };
+
+    onSubmit(cleanedData);
   };
 
   const handleAddAvantage = () => {
@@ -462,9 +502,9 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
                   </SelectItem>
                 ))
               ) : (
-                <div className="p-2 text-sm text-muted-foreground">
+                <SelectItem value="no-partner" disabled>
                   Aucun partenaire disponible
-                </div>
+                </SelectItem>
               )}
             </SelectContent>
           </Select>
@@ -534,6 +574,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
             id="taux"
             type="number"
             step="0.01"
+            min="0"
             value={formData.taux}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, taux: e.target.value }))
@@ -547,6 +588,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
             id="fraisDossier"
             type="number"
             step="0.01"
+            min="0"
             value={formData.fraisDossier}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, fraisDossier: e.target.value }))
@@ -559,6 +601,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
           <Input
             id="dureeMin"
             type="number"
+            min="0"
             value={formData.dureeMin}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, dureeMin: e.target.value }))
@@ -571,6 +614,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
           <Input
             id="dureeMax"
             type="number"
+            min="0"
             value={formData.dureeMax}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, dureeMax: e.target.value }))
@@ -584,6 +628,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
             id="montantMin"
             type="number"
             step="0.01"
+            min="0"
             value={formData.montantMin}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, montantMin: e.target.value }))
@@ -597,6 +642,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
             id="montantMax"
             type="number"
             step="0.01"
+            min="0"
             value={formData.montantMax}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, montantMax: e.target.value }))
@@ -718,6 +764,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
         <Input
           id="ordreAffichage"
           type="number"
+          min="0"
           value={formData.ordreAffichage}
           onChange={(e) =>
             setFormData((prev) => ({
@@ -729,15 +776,7 @@ const ServiceForm = ({ service, partenaires, onSubmit, isLoading }) => {
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() =>
-            service
-              ? setIsEditDialogOpen?.(false)
-              : setIsCreateDialogOpen?.(false)
-          }
-        >
+        <Button type="button" variant="outline" onClick={onCancel}>
           Annuler
         </Button>
         <Button type="submit" disabled={isLoading}>

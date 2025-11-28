@@ -165,7 +165,7 @@ const FinancementServicesAdmin = () => {
               <Select
                 value={filters.partenaireId}
                 onValueChange={(value) =>
-                  handleFilterChange("partenaireId", value === "all" ? "" : value)
+                  handleFilterChange("partenaireId", value)
                 }
               >
                 <SelectTrigger>
@@ -183,9 +183,9 @@ const FinancementServicesAdmin = () => {
                       </SelectItem>
                     ))
                   ) : (
-                    <div className="p-2 text-sm text-muted-foreground">
+                    <SelectItem value="no-data" disabled>
                       Aucun partenaire
-                    </div>
+                    </SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -195,9 +195,7 @@ const FinancementServicesAdmin = () => {
               <Label htmlFor="type">Type de service</Label>
               <Select
                 value={filters.type}
-                onValueChange={(value) =>
-                  handleFilterChange("type", value === "all" ? "" : value)
-                }
+                onValueChange={(value) => handleFilterChange("type", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les types" />
@@ -217,9 +215,7 @@ const FinancementServicesAdmin = () => {
               <Label htmlFor="status">Statut</Label>
               <Select
                 value={filters.isActive}
-                onValueChange={(value) =>
-                  handleFilterChange("isActive", value === "all" ? "" : value)
-                }
+                onValueChange={(value) => handleFilterChange("isActive", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les statuts" />

@@ -43,7 +43,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 // Services pour le financement
 export const financementAPI = {
   // Routes publiques
@@ -55,8 +54,8 @@ export const financementAPI = {
 
   // Services financiers
   getServiceFinancier: (id) => api.get(`/financement/services/${id}`),
-  getServiceFinanciers: (partenaireId) =>
-    api.get("/financement/services", { params: { partenaireId } }),
+  getServiceFinanciers: (params = {}) =>
+    api.get("/financement/services", { params }),
 
   // NOUVELLES ROUTES ADMIN
   getAllDemandes: (params = {}) =>
@@ -64,10 +63,11 @@ export const financementAPI = {
   updateDemandeStatus: (id, status) =>
     api.put(`/financement/admin/demandes/${id}/status`, { status }),
   deleteDemande: (id) => api.delete(`/financement/admin/demandes/${id}`),
+
   // Services financiers - Professionnels
-  getServicesFinanciers: (params = {}) =>
-    api.get("/financement/services", { params }),
-  getServiceFinancierById: (id) => api.get(`/financement/services/${id}`),
+  getServicesFinanciersPro: (params = {}) =>
+    api.get("/financement/pro/services", { params }),
+  getPartenairesPro: () => api.get("/financement/pro/partenaires"),
   createServiceFinancier: (data) => api.post("/financement/services", data),
   updateServiceFinancier: (id, data) =>
     api.put(`/financement/services/${id}`, data),
@@ -79,7 +79,6 @@ export const financementAPI = {
   toggleServiceStatus: (id, isActive) =>
     api.put(`/financement/admin/services/${id}/status`, { isActive }),
 };
-
 // Services pour le tourisme
 export const tourismeAPI = {
   // Routes admin
