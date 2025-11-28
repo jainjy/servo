@@ -21,6 +21,7 @@ import {
   BookOpen,
   Plus,
   WalletCards,
+  Wallet2Icon,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -63,9 +64,9 @@ const navigation = [
   },
   { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
   {
-    name: "Liste demande immobilier",
-    href: "/pro/demandes-immobilier",
-    icon: Building2,
+    name: "Liste des services financiers",
+    href: "/pro/financement-services",
+    icon: Wallet2Icon,
   },
   {
     name: "Les demandes de devis",
