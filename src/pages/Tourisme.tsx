@@ -715,7 +715,7 @@ const confirmBooking = async () => {
           </p>
         </div>
 
-        {/* AJOUT: Indicateur de connexion utilisant le hook useAuth */}
+        {/* AJOUT: Indicateur de connexion utilisant le hook useAuth 
         {!userLoading && (
           <div className="flex justify-center mb-6" data-aos="fade-up" data-aos-delay="400">
             <div className={`px-4 py-2 rounded-full flex items-center ${isAuthenticated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
@@ -727,7 +727,7 @@ const confirmBooking = async () => {
               )}
             </div>
           </div>
-        )}
+        )}*/}
 
         {/* Formulaire de recherche avec animations */}
         <div
