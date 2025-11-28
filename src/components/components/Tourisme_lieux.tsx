@@ -5,11 +5,8 @@ import {
     Star,
     Calendar,
     Ticket,
-    Users,
-    Camera,
     Heart,
-    Share2,
-    Navigation,
+    Camera,
     BookOpen,
     Castle,
     Church,
@@ -30,10 +27,8 @@ import {
     CreditCard,
     QrCode
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { tourismeAPI } from "../../lib/api";
+import { useAuth } from "../../hooks/useAuth";
 
 interface LieuTouristique {
     id: string;
@@ -84,10 +79,11 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
     ville = 'Paris',
     typeFiltre = 'tous'
 }) => {
+    const { user, isAuthenticated } = useAuth();
+    
     const [filtreType, setFiltreType] = useState<string>('tous');
     const [tri, setTri] = useState<string>('notation');
     const [lieuSelectionne, setLieuSelectionne] = useState<LieuTouristique | null>(null);
-    const [isMapOpen, setIsMapOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [lieux, setLieux] = useState<LieuTouristique[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -105,6 +101,20 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
     });
     const [reservationLoading, setReservationLoading] = useState(false);
     const [availability, setAvailability] = useState<any>(null);
+
+    // Images de fallback
+    const fallbackImages = {
+        monument: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        museum: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        park: 'https://images.unsplash.com/photo-1571863533956-01c88e79957e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        beach: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        mountain: 'https://images.unsplash.com/photo-1464822759844-dfa37c4d70ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        religious: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        historical: 'https://images.unsplash.com/photo-1580651315530-69c8e0026377?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        cultural: 'https://images.unsplash.com/photo-1481277542470-605612bd2d61?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        natural: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+        default: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+    };
 
     // Amenities disponibles avec icônes
     const availableAmenities = [
@@ -132,6 +142,29 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
         '09:00', '10:00', '11:00', '12:00', 
         '14:00', '15:00', '16:00', '17:00'
     ];
+
+    // Fonction pour gérer les erreurs d'image
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, category: string = 'default') => {
+        const target = e.target as HTMLImageElement;
+        console.log(`❌ Erreur chargement image, utilisation fallback pour ${category}`);
+        target.src = fallbackImages[category as keyof typeof fallbackImages] || fallbackImages.default;
+        target.onerror = null; // Éviter les boucles infinies
+    };
+
+    // Fonction pour obtenir l'URL d'image sécurisée
+    const getSafeImageUrl = (imageUrl: string | undefined, category: string = 'default'): string => {
+        if (!imageUrl) {
+            return fallbackImages[category as keyof typeof fallbackImages] || fallbackImages.default;
+        }
+
+        // Si l'URL est valide et commence par http
+        if (imageUrl.startsWith('http')) {
+            return imageUrl;
+        }
+
+        // Si c'est un chemin relatif ou invalide, utiliser fallback
+        return fallbackImages[category as keyof typeof fallbackImages] || fallbackImages.default;
+    };
 
     // Charger les lieux touristiques depuis l'API
     const loadTouristicPlaces = async () => {
@@ -161,8 +194,8 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                         price: place.price,
                         rating: place.rating,
                         reviewCount: place.reviewCount,
-                        images: place.images,
-                        amenities: place.amenities,
+                        images: place.images || [],
+                        amenities: place.amenities || [],
                         available: place.available,
                         featured: place.featured,
                         isTouristicPlace: place.isTouristicPlace,
@@ -204,8 +237,8 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                         price: place.price,
                         rating: place.rating,
                         reviewCount: place.reviewCount,
-                        images: place.images,
-                        amenities: place.amenities,
+                        images: place.images || [],
+                        amenities: place.amenities || [],
                         available: place.available,
                         featured: place.featured,
                         isTouristicPlace: place.isTouristicPlace,
@@ -253,11 +286,18 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
 
     // Ouvrir le modal de réservation
     const handleOpenReservation = (lieu: LieuTouristique) => {
+        // Vérifier si l'utilisateur est connecté
+        if (!isAuthenticated || !user) {
+            alert('Veuillez vous connecter pour effectuer une réservation');
+            window.location.href = '/login';
+            return;
+        }
+
         setLieuSelectionne(lieu);
         setReservationData({
             ...reservationData,
             placeId: lieu.id,
-            visitDate: new Date().toISOString().split('T')[0] // Date du jour par défaut
+            visitDate: new Date().toISOString().split('T')[0]
         });
         setIsReservationOpen(true);
         
@@ -265,22 +305,32 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
         checkAvailability(lieu.id, new Date().toISOString().split('T')[0]);
     };
 
-    // Soumettre la réservation
+    // Soumettre la réservation - CORRIGÉ
     const handleSubmitReservation = async () => {
         if (!reservationData.visitDate || !reservationData.visitTime) {
             alert('Veuillez sélectionner une date et une heure de visite');
             return;
         }
 
+        // Vérification de l'authentification
+        if (!isAuthenticated || !user) {
+            alert('Veuillez vous connecter pour effectuer une réservation');
+            window.location.href = '/login';
+            return;
+        }
+
         setReservationLoading(true);
         try {
-            // Récupérer l'ID utilisateur (à adapter selon votre système d'authentification)
-            const userId = localStorage.getItem('userId') || 'user-demo-id';
+            // Utiliser l'ID utilisateur du contexte d'authentification
+            const userId = user.id;
+            
+            console.log('🔄 Création réservation avec userId:', userId);
+            console.log('📦 Données réservation:', reservationData);
             
             const response = await tourismeAPI.createPlaceBooking(userId, reservationData);
             
             if (response.data.success) {
-                alert('🎉 Réservation créée avec succès!');
+                alert('🎉 Réservation créée avec succès! Votre numéro de confirmation: ' + response.data.data.confirmationNumber);
                 setIsReservationOpen(false);
                 setReservationData({
                     placeId: '',
@@ -296,7 +346,14 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
             }
         } catch (error: any) {
             console.error('❌ Erreur création réservation:', error);
-            alert('❌ Erreur lors de la réservation: ' + (error.response?.data?.error || error.message));
+            const errorMessage = error.response?.data?.error || error.message;
+            alert('❌ Erreur lors de la réservation: ' + errorMessage);
+            
+            // Si l'erreur indique un problème d'authentification
+            if (errorMessage.includes('authentifié') || errorMessage.includes('connecté') || error.response?.status === 401) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                window.location.href = '/login';
+            }
         } finally {
             setReservationLoading(false);
         }
@@ -334,7 +391,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
             price: 20,
             rating: 4.8,
             reviewCount: 12457,
-            images: ['https://i.pinimg.com/736x/a8/15/50/a81550a6d4c9ffd633e56200a25f8f9b.jpg'],
+            images: ['https://images.unsplash.com/photo-1581368087046-92cc0e5a7b39?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'],
             amenities: ['wifi', 'parking'],
             available: true,
             featured: true,
@@ -359,7 +416,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
             price: 17,
             rating: 4.9,
             reviewCount: 15632,
-            images: ['https://i.pinimg.com/736x/15/bc/33/15bc33b809d57965e06769b6a96a69f7.jpg'],
+            images: ['https://images.unsplash.com/photo-1594641642923-5d5df5fe7f6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'],
             amenities: ['wifi', 'parking'],
             available: true,
             featured: true,
@@ -378,45 +435,6 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
     useEffect(() => {
         loadTouristicPlaces();
     }, []);
-
-    // Fonction pour créer les icônes personnalisées pour la carte
-    const getMarkerIcon = (category: string) => {
-        const colors: { [key: string]: string } = {
-            monument: '#a855f7',
-            museum: '#3b82f6',
-            park: '#22c55e',
-            beach: '#f97316',
-            mountain: '#ef4444',
-            religious: '#8b5cf6',
-            historical: '#06b6d4',
-            cultural: '#84cc16',
-            natural: '#10b981'
-        };
-
-        const color = colors[category] || '#6b7280';
-
-        return L.divIcon({
-            html: `
-                <div style="
-                    background-color: ${color};
-                    color: white;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 20px;
-                    border: 3px solid white;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                ">
-                    📍
-                </div>
-            `,
-            iconSize: [40, 40],
-            className: 'custom-marker'
-        });
-    };
 
     const categories = [
         { value: 'tous', label: 'Tous les types', icon: <GalleryVerticalEnd className="w-4 h-4" /> },
@@ -541,7 +559,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
             <div className="min-h-screen bg-white">
                 <div className="min-h-screen flex items-center justify-center">
                     <div className="text-center flex flex-col items-center justify-center">
-                        <img src="/loading.gif" alt="" />
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                         <p className="text-gray-600">Chargement des lieux touristiques...</p>
                     </div>
                 </div>
@@ -553,19 +571,26 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
         <div className="min-h-screen mt-16 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* En-tête */}
-                <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+                <div className='relative h-64 mb-12 rounded-lg overflow-hidden'>
                     <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-                    <img src="https://i.pinimg.com/1200x/a4/27/cf/a427cf2bd4915d03ae201f4f85285282.jpg" alt="" />
-                </div>
-                <div className="text-center mb-12">
-                    <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
-                        Lieux Touristiques & Culturels
-                    </h1>
-                    <p className="text-xs lg:text-sm text-gray-200 max-w-3xl mx-auto">
-                        Explorez le patrimoine local et découvrez les trésors touristiques
-                    </p>
+                    <img 
+                        src="https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                        alt="Lieux touristiques" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => handleImageError(e, 'default')}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center text-center">
+                        <div>
+                            <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
+                                Lieux Touristiques & Culturels
+                            </h1>
+                            <p className="text-xs lg:text-sm text-gray-200 max-w-3xl mx-auto">
+                                Explorez le patrimoine local et découvrez les trésors touristiques
+                            </p>
+                        </div>
+                    </div>
                     {error && (
-                        <div className="mt-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                        <div className="absolute bottom-4 left-4 right-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
                             {error} - Affichage des données de démonstration
                         </div>
                     )}
@@ -617,7 +642,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                 </div>
 
                 {/* Grille des lieux */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {lieuxFiltres.map((lieu) => (
                         <div
                             key={lieu.id}
@@ -627,9 +652,10 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                             <div className="h-48 bg-black relative overflow-hidden">
                                 {lieu.images && lieu.images.length > 0 ? (
                                     <img
-                                        src={lieu.images[0]}
+                                        src={getSafeImageUrl(lieu.images[0], lieu.category)}
                                         alt={lieu.title}
                                         className="w-full h-full object-cover flex-shrink-0 opacity-60"
+                                        onError={(e) => handleImageError(e, lieu.category)}
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
@@ -642,11 +668,6 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                         {getCategoryIcon(lieu.category)}
                                         <span className="ml-1">{getCategoryLabel(lieu.category)}</span>
                                     </span>
-                                </div>
-                                <div className="absolute top-4 right-4 flex space-x-2">
-                                    <button className="p-2 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-all">
-                                        <Heart className="w-4 h-4 text-gray-600" />
-                                    </button>
                                 </div>
                                 <div className="absolute bottom-4 left-4 text-white">
                                     <h3 className="text-xl font-bold">{lieu.title}</h3>
@@ -730,167 +751,20 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                     </div>
                                 )}
 
-                                {/* Actions */}
+                                {/* Bouton Achat billet uniquement */}
                                 <div className="flex space-x-3">
                                     <button 
                                         onClick={() => handleOpenReservation(lieu)}
-                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-sm"
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200"
                                     >
                                         <Ticket className="w-4 h-4 inline mr-2" />
                                         {lieu.price === 0 ? 'Réserver visite' : 'Acheter billet'}
-                                    </button>
-                                    <button
-                                        onClick={() => setIsMapOpen(true)}
-                                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-colors duration-200"
-                                    >
-                                        <Navigation className="w-4 h-4" />
-                                    </button>
-                                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-colors duration-200">
-                                        <Camera className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
-
-                {/* Carte interactive */}
-                <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 lg:p-8">
-                    <div className="text-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                            Carte des Lieux Touristiques
-                        </h2>
-                        <p className="text-gray-600">
-                            Localisez tous les sites touristiques sur la carte interactive
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-1 lg:p-6 border border-gray-200">
-                        <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                            <div className="text-center">
-                                <MapPin className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                                <p className="text-gray-600 mb-4">
-                                    Carte interactive des lieux touristiques
-                                </p>
-                                <button
-                                    onClick={() => setIsMapOpen(true)}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors duration-200">
-                                    Ouvrir la carte
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                            {categories.slice(1).map((category) => (
-                                <div key={category.value} className="flex items-center">
-                                    {category.icon}
-                                    <span className="ml-2 text-gray-700">{category.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Modal Carte Interactive */}
-                {isMapOpen && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                        <div className="w-full max-w-6xl h-[90vh] bg-white rounded-lg shadow-xl flex flex-col">
-                            {/* Header */}
-                            <div className="flex items-center justify-between border-b border-gray-200 p-4">
-                                <h2 className="text-xl font-bold text-gray-900">Carte des Lieux Touristiques</h2>
-                                <button
-                                    onClick={() => setIsMapOpen(false)}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                >
-                                    <X className="w-6 h-6 text-gray-600" />
-                                </button>
-                            </div>
-
-                            {/* Map Container */}
-                            <div className="flex-1 relative">
-                                <MapContainer
-                                    center={[48.8566, 2.3522]}
-                                    zoom={12}
-                                    scrollWheelZoom={true}
-                                    className="w-full h-full"
-                                >
-                                    <TileLayer
-                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                    />
-                                    {lieux.map((lieu) => (
-                                        <Marker
-                                            key={lieu.id}
-                                            position={[lieu.coordonnees.lat, lieu.coordonnees.lng]}
-                                            icon={getMarkerIcon(lieu.category)}
-                                        >
-                                            <Popup>
-                                                <div className="max-w-xs">
-                                                    <h3 className="font-bold text-gray-900 mb-2">{lieu.title}</h3>
-                                                    <p className="text-sm text-gray-600 mb-2">{lieu.description}</p>
-                                                    <div className="text-sm space-y-1">
-                                                        <p><strong>Ville:</strong> {lieu.city}</p>
-                                                        <p><strong>Catégorie:</strong> {getCategoryLabel(lieu.category)}</p>
-                                                        {lieu.openingHours && <p><strong>Horaires:</strong> {lieu.openingHours}</p>}
-                                                        <p><strong>Entrée:</strong> {lieu.price === 0 ? 'Gratuit' : `${lieu.price}€`}</p>
-                                                        <div className="flex items-center gap-1 mt-2">
-                                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                                            <span className="text-sm">{lieu.rating} ({lieu.reviewCount} avis)</span>
-                                                        </div>
-                                                        <button 
-                                                            onClick={() => {
-                                                                setIsMapOpen(false);
-                                                                handleOpenReservation(lieu);
-                                                            }}
-                                                            className="mt-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                                                        >
-                                                            Réserver
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </Popup>
-                                        </Marker>
-                                    ))}
-                                </MapContainer>
-                            </div>
-
-                            {/* Legend */}
-                            <div className="border-t border-gray-200 p-4 bg-gray-50">
-                                <p className="text-sm font-semibold text-gray-900 mb-3">Légende des marqueurs:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                                    {categories.slice(1).map((category) => (
-                                        <div key={category.value} className="flex items-center gap-2">
-                                            <div style={{
-                                                backgroundColor: category.value === 'monument' ? '#a855f7' :
-                                                    category.value === 'museum' ? '#3b82f6' :
-                                                        category.value === 'park' ? '#22c55e' :
-                                                            category.value === 'beach' ? '#f97316' :
-                                                                category.value === 'mountain' ? '#ef4444' :
-                                                                    category.value === 'religious' ? '#8b5cf6' :
-                                                                        category.value === 'historical' ? '#06b6d4' :
-                                                                            category.value === 'cultural' ? '#84cc16' :
-                                                                                category.value === 'natural' ? '#10b981' : '#6b7280',
-                                                borderRadius: '50%',
-                                                width: '20px',
-                                                height: '20px',
-                                                border: '2px solid white',
-                                                boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: 'white',
-                                                fontSize: '10px'
-                                            }}>
-                                                📍
-                                            </div>
-                                            <span className="text-gray-700">{category.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Modal de Réservation */}
                 {isReservationOpen && lieuSelectionne && (
@@ -915,13 +789,12 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                 {/* Informations du lieu */}
                                 <div className="bg-gray-50 rounded-lg p-4">
                                     <div className="flex items-center space-x-3">
-                                        {lieuSelectionne.images && lieuSelectionne.images.length > 0 && (
-                                            <img 
-                                                src={lieuSelectionne.images[0]} 
-                                                alt={lieuSelectionne.title}
-                                                className="w-16 h-16 object-cover rounded"
-                                            />
-                                        )}
+                                        <img 
+                                            src={getSafeImageUrl(lieuSelectionne.images?.[0], lieuSelectionne.category)} 
+                                            alt={lieuSelectionne.title}
+                                            className="w-16 h-16 object-cover rounded"
+                                            onError={(e) => handleImageError(e, lieuSelectionne.category)}
+                                        />
                                         <div>
                                             <h3 className="font-semibold text-gray-900">{lieuSelectionne.title}</h3>
                                             <p className="text-sm text-gray-600">{lieuSelectionne.city}</p>
