@@ -531,3 +531,22 @@ export const flightsAPI = {
   updateReservationStatus: (id, status) => 
     api.put(`/Vol/reservations/${id}/status`, { status }),  
 };
+// Services pour les commandes professionnelles
+// Services pour les commandes professionnelles
+export const ordersProAPI = {
+  // Récupérer les commandes du pro avec filtres
+  getProOrders: (params = {}) => api.get('/orders/pro', { params }),
+  
+  // Récupérer les statistiques du pro
+  getProStats: () => api.get('/orders/pro/stats'),
+  
+  // Récupérer les statistiques par type de produit
+  getProProductTypes: () => api.get('/orders/pro/product-types'),
+  
+  // Mettre à jour le statut d'une commande
+  updateOrderStatus: (orderId, status) => 
+    api.put(`/orders/pro/${orderId}/status`, { status }),
+  
+  // Récupérer les détails d'une commande spécifique
+  getOrderDetails: (orderId) => api.get(`/orders/pro/${orderId}`),
+};

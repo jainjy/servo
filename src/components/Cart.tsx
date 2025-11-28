@@ -1,4 +1,4 @@
-// components/Cart.js
+// components/Cart.js - VERSION COMPLÈTE CORRIGÉE
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ const Cart = ({ isOpen, onClose }) => {
   const [validationErrors, setValidationErrors] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Synchroniser avec les items du contexte
   useEffect(() => {
@@ -139,9 +139,8 @@ const Cart = ({ isOpen, onClose }) => {
       const userData = localStorage.getItem("user-data");
 
       console.log("🔍 [CART AUTH] - Vérification détaillée:");
-      console.log("📍 Token:", token);
-      console.log("📍 UserData:", userData);
-      console.log("📍 Panier items:", cartItems?.length || 0);
+      console.log("📍 Token:", token ? "Présent" : "Absent");
+      console.log("📍 UserData:", userData ? "Présent" : "Absent");
 
       if (token && token !== "null" && token !== "undefined") {
         setIsAuthenticated(true);
@@ -246,149 +245,123 @@ const Cart = ({ isOpen, onClose }) => {
   const redirectToLogin = () => {
     console.log("🔐 [CART] - Redirection vers login");
     onClose();
-    window.location.href = "/login";
+    navigate("/login");
   };
 
-  // ✅ NOUVELLE FONCTION : Validation réelle avec le backend
-  const validateCartWithBackend = async () => {
-    try {
-      console.log("🛒 [CART VALIDATION] - Début validation avec backend");
-      
-      // Préparer les données pour l'API
-      const cartData = {
-        items: localCartItems.map(item => ({
-          productId: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          images: item.images || [],
-          productType: item.productType || 'general'
-        })),
-        shippingAddress: {}, // À compléter selon vos besoins
-        paymentMethod: "card" // Par défaut
-      };
-
-      console.log("📦 [CART VALIDATION] - Données envoyées:", cartData);
-
-      // Appel réel à l'API
-      const response = await api.post('/orders', cartData);
-      
-      console.log("✅ [CART VALIDATION] - Réponse backend:", response.data);
-      
-      return response.data;
-
-    } catch (error) {
-      console.error("💥 [CART VALIDATION] - Erreur validation panier:", error);
-      
-      // Gestion détaillée des erreurs
-      if (error.response) {
-        console.error("📡 [CART VALIDATION] - Détails erreur:", {
-          status: error.response.status,
-          data: error.response.data,
-          headers: error.response.headers
-        });
-        
-        if (error.response.status === 400 && error.response.data.errors) {
-          // Erreurs de stock
-          setValidationErrors(error.response.data.errors);
-          throw new Error("Problèmes de stock détectés");
-        } else if (error.response.status === 401) {
-          throw new Error("Authentification requise");
-        } else if (error.response.status === 500) {
-          throw new Error("Erreur serveur, veuillez réessayer");
-        }
-      }
-      
-      throw new Error(error.response?.data?.message || "Erreur lors de la validation du panier");
-    }
-  };
-
-  // Valider le panier avant commande
-  const validateCartBeforeCheckout = async () => {
-    if (!localCartItems || localCartItems.length === 0) {
-      toast.error("Votre panier est vide !");
-      return false;
-    }
-    return true;
-  };
-
-  // ✅ CORRECTION : Commander avec le backend réel
+  // ✅ FONCTION CORRIGÉE : Création de commande avec le backend
   const handleCheckout = async () => {
     console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
-    console.log("🔐 [CART CHECKOUT] - Statut auth avant vérification:", isAuthenticated);
-    console.log("👤 [CART CHECKOUT] - Utilisateur avant vérification:", user);
-
+    
     // Re-vérifier l'authentification avant de commander
     checkAuthentication();
 
-    console.log("🔐 [CART CHECKOUT] - Statut auth après vérification:", isAuthenticated);
-    console.log("👤 [CART CHECKOUT] - Utilisateur après vérification:", user);
-
     if (!isAuthenticated) {
-      console.log("❌ [CART CHECKOUT] - Utilisateur non authentifié, redirection vers login");
+      console.log("❌ [CART CHECKOUT] - Utilisateur non authentifié");
       toast.error("❌ Veuillez vous connecter pour passer commande");
       redirectToLogin();
       return;
     }
 
-    console.log("✅ [CART CHECKOUT] - Utilisateur authentifié, validation du panier...");
-
-    // Valider le panier d'abord
-    const isValid = await validateCartBeforeCheckout();
-    if (!isValid) {
-      console.log("❌ [CART CHECKOUT] - Panier invalide, arrêt du processus");
+    // Validation du panier
+    if (!localCartItems || localCartItems.length === 0) {
+      toast.error("Votre panier est vide !");
       return;
     }
 
     console.log("✅ [CART CHECKOUT] - Panier valide, création de commande...");
     setIsCheckingOut(true);
+    setValidationErrors([]);
 
     try {
-      // ✅ APPEL RÉEL AU BACKEND
-      const orderResult = await validateCartWithBackend();
+      // ✅ STRUCTURE DES DONNÉES CORRIGÉE - SIMPLIFIÉE
+      const orderData = {
+        items: localCartItems.map(item => ({
+          productId: item.id, // ✅ SEULEMENT L'ID ET LA QUANTITÉ
+          quantity: item.quantity
+        })),
+        shippingAddress: {
+          firstName: user?.firstName || "Client",
+          lastName: user?.lastName || "Utilisateur",
+          address: user?.address || "À définir",
+          city: user?.city || "À définir",
+          postalCode: user?.zipCode || "00000",
+          country: "France"
+        },
+        paymentMethod: "card"
+      };
 
-      console.log("✅ [CART CHECKOUT] - Commande créée avec succès:", orderResult);
-      
-      // Track l'achat
-      await safeTrack(() => trackPurchase(localCartItems, calculateTotal()));
-      
-      // Vider le panier
-      handleClearCart();
+      console.log("📦 [CART CHECKOUT] - Données envoyées:", orderData);
 
-      // Fermer le panier
-      onClose();
-
-      // Afficher le succès avec détails
-      toast.success(
-        `🎉 Commande #${orderResult.order.orderNumber} passée avec succès !`,
-        {
-          description: `Total: €${orderResult.order.totalAmount.toFixed(2)}`,
-          duration: 5000,
-        }
-      );
+      // ✅ APPEL API CORRECT
+      const response = await api.post('/orders', orderData);
       
-      console.log("🎉 [CART CHECKOUT] - Processus de commande terminé avec succès");
+      console.log("✅ [CART CHECKOUT] - Réponse API:", response.data);
+
+      if (response.data.success) {
+        // Succès - vider le panier et fermer
+        clearCart();
+        onClose();
+
+        // Track l'achat
+        await safeTrack(() => trackPurchase(localCartItems, calculateTotal()));
+
+        toast.success(
+          `🎉 Commande #${response.data.order.orderNumber} créée avec succès !`,
+          {
+            description: `Total: €${response.data.order.totalAmount.toFixed(2)}`,
+            duration: 5000,
+          }
+        );
+
+        // Rediriger vers les commandes après un délai
+        setTimeout(() => {
+          navigate('mon-compte/mes-commandes');
+        }, 2000);
+
+      } else {
+        throw new Error(response.data.message || "Erreur inconnue");
+      }
 
     } catch (error) {
-      console.error("💥 [CART CHECKOUT] - Erreur lors de la commande:", error);
-
+      console.error("💥 [CART CHECKOUT] - Erreur détaillée:", error);
+      
       // Gestion spécifique des erreurs
-      if (error.message.includes("stock")) {
-        toast.error(
-          `❌ Problèmes de stock détectés. Veuillez vérifier votre panier.`
-        );
-      } else if (error.message.includes("Authentification")) {
+      if (error.response?.data?.errors) {
+        // Erreurs de stock du backend
+        setValidationErrors(error.response.data.errors);
+        toast.error("❌ Problèmes de stock détectés");
+        
+      } else if (error.response?.status === 401) {
         toast.error("❌ Session expirée, veuillez vous reconnecter");
         redirectToLogin();
+        
+      } else if (error.response?.status === 400) {
+        // Erreur de validation
+        const errorMessage = error.response.data.message || "Erreur de validation";
+        setValidationErrors([errorMessage]);
+        toast.error(`❌ ${errorMessage}`);
+        
+      } else if (error.response?.data?.message) {
+        // Message d'erreur spécifique du backend
+        toast.error(`❌ ${error.response.data.message}`);
+        
+      } else if (error.message?.includes("stock")) {
+        toast.error("❌ Problèmes de stock détectés");
+        
+      } else if (error.message?.includes("Authentification")) {
+        toast.error("❌ Session expirée, veuillez vous reconnecter");
+        redirectToLogin();
+        
       } else {
-        toast.error(`❌ Erreur lors de la commande: ${error.message}`);
+        // Erreur générique
+        toast.error("❌ Erreur lors de la création de la commande");
       }
     } finally {
       setIsCheckingOut(false);
     }
   };
 
-  // Test manuel d'authentification (optionnel)
+  // Test manuel d'authentification (optionnel - développement seulement)
   const testAuthManually = () => {
     console.log("=== 🧪 TEST MANUEL AUTHENTIFICATION ===");
     const token = localStorage.getItem("auth-token");
@@ -412,7 +385,7 @@ const Cart = ({ isOpen, onClose }) => {
       });
   };
 
-  // Test de création de commande (debug)
+  // Test de création de commande (debug - développement seulement)
   const testOrderCreation = async () => {
     try {
       console.log("🧪 TEST création commande...");
@@ -420,11 +393,7 @@ const Cart = ({ isOpen, onClose }) => {
         items: [
           {
             productId: "test-product-1",
-            name: "Produit Test",
-            price: 25.99,
-            quantity: 2,
-            images: [],
-            productType: "general"
+            quantity: 1
           }
         ],
         shippingAddress: {
@@ -451,6 +420,7 @@ const Cart = ({ isOpen, onClose }) => {
 
   const items = localCartItems || [];
   const itemsCount = items.length;
+  const totalAmount = calculateTotal();
 
   return (
     <div className="fixed inset-0 z-50">
@@ -503,27 +473,7 @@ const Cart = ({ isOpen, onClose }) => {
                 Découvrir les produits
               </Button>
 
-              {/* Boutons de debug (seulement en développement)
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-6 space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testAuthManually}
-                    className="text-xs"
-                  >
-                    Test Auth
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testOrderCreation}
-                    className="text-xs"
-                  >
-                    Test Commande
-                  </Button>
-                </div>
-              )} */}
+              
               
             </div>
           ) : (
@@ -650,7 +600,7 @@ const Cart = ({ isOpen, onClose }) => {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-600">Sous-total:</span>
                 <span className="font-medium">
-                  €{calculateTotal().toFixed(2)}
+                  €{totalAmount.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
@@ -661,12 +611,12 @@ const Cart = ({ isOpen, onClose }) => {
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total:</span>
                   <span className="text-blue-600">
-                    €{calculateTotal().toFixed(2)}
+                    €{totalAmount.toFixed(2)}
                   </span>
                 </div>
               </div>
             </div>
-
+            
             
             {/* Actions */}
             <div className="space-y-3">
@@ -690,7 +640,7 @@ const Cart = ({ isOpen, onClose }) => {
                 ) : validationErrors.length > 0 ? (
                   "Corrigez les erreurs pour commander"
                 ) : (
-                  "Passer la commande"
+                  ` Passer au Commande `
                 )}
               </Button>
 
