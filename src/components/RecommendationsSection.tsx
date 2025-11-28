@@ -12,6 +12,7 @@ import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
 // Ajouter le type pour la source
 interface EnhancedRecommendation extends Recommendation {
   sourceType?: string;
+  title?: string;
   recommendationSource?: string;
   entityType?: string;
   city?: string;
