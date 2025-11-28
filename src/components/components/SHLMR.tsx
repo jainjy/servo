@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Home,
     Shield,
@@ -20,13 +20,388 @@ import {
     Clock,
     CheckCircle2,
     Building,
-    Landmark
+    Landmark,
+    X,
+    User,
+    Mail,
+    Phone,
+    Loader,
+    AlertTriangle,
+    ArrowRight
 } from 'lucide-react';
+import { useAuth } from "../../hooks/useAuth";
+import { toast } from "../../hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { createDemande, getDemandesByUser, initDemoData } from "@/lib/demandeStorage";
+
+// Types TypeScript
+interface Caracteristiques {
+    chambres: number;
+    sdb: number;
+    surface: string;
+    parking: number;
+    annee: number;
+    etage: number;
+    balcon: boolean;
+    cave: boolean;
+}
+
+interface Logement {
+    id: number;
+    image: string;
+    type: string;
+    categorie: string;
+    prix: string;
+    titre: string;
+    lieu: string;
+    description: string;
+    caracteristiques: Caracteristiques;
+    promoteur: string;
+    dateDispo: string;
+    vues: number;
+    favori: boolean;
+    address?: string;
+    energyClass?: string;
+    isPSLA?: boolean;
+}
+
+interface FormDataModal {
+    nomPrenom: string;
+    email: string;
+    telephone: string;
+    message: string;
+    dateSouhaitee: string;
+    heureSouhaitee: string;
+}
+
+interface FormDataSimulation {
+    nom: string;
+    email: string;
+    telephone: string;
+    situation: string;
+    revenus: string;
+    composition: string;
+    localisation: string;
+    budget: string;
+}
+
+// Composant Modal pour la demande de visite
+const ModalPostuler = ({ 
+    open, 
+    onClose, 
+    logement,
+    onSuccess,
+    isAlreadySent
+}: { 
+    open: boolean; 
+    onClose: () => void; 
+    logement: Logement | null;
+    onSuccess?: (logementId: number) => void;
+    isAlreadySent?: boolean;
+}) => {
+    const [formData, setFormData] = useState<FormDataModal>({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+    });
+    const [loadingSubmit, setLoadingSubmit] = useState(false);
+
+    const { user, isAuthenticated } = useAuth();
+
+    // Réinitialiser le formulaire quand le modal se ferme
+    useEffect(() => {
+        if (!open) {
+            setFormData({
+                nomPrenom: "",
+                email: "",
+                telephone: "",
+                message: "",
+                dateSouhaitee: "",
+                heureSouhaitee: "",
+            });
+        } else if (user && user.firstName) {
+            // Pré-remplir avec les données de l'utilisateur s'il existe
+            setFormData(prev => ({
+                ...prev,
+                nomPrenom: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+                email: user.email || "",
+                telephone: user.phone || "",
+            }));
+        }
+    }, [open, user]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!logement) return;
+
+        if (isAlreadySent) {
+            toast({
+                title: "Demande déjà envoyée",
+                description: "Vous avez déjà envoyé une demande pour ce logement.",
+            });
+            return;
+        }
+
+        if (!isAuthenticated || !user) {
+            toast({
+                title: "Connexion requise",
+                description: "Veuillez vous connecter pour postuler à ce logement.",
+            });
+            return;
+        }
+
+        setLoadingSubmit(true);
+        try {
+            // Préparer les données pour le stockage local
+            const nameParts = String(formData.nomPrenom || "")
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+            const contactPrenom = nameParts.length > 0 ? nameParts[0] : "";
+            const contactNom = nameParts.length > 1 ? nameParts.slice(1).join(" ") : nameParts[0] || "";
+
+            const demandeData = {
+                serviceId: '10', // Service fixe pour démo
+                createdById: user.id,
+                propertyId: String(logement.id),
+                contactNom,
+                contactPrenom,
+                contactEmail: formData.email,
+                contactTel: formData.telephone,
+                description: `Postulation pour logement intermédiaire: ${logement.titre} (${logement.id}). ${formData.message || ''}`,
+                lieuAdresse: logement.lieu,
+                dateSouhaitee: formData.dateSouhaitee,
+                heureSouhaitee: formData.heureSouhaitee,
+                statut: "en attente" as const,
+                nombreArtisans: 0,
+                optionAssurance: false,
+                property: {
+                    id: logement.id,
+                    title: logement.titre,
+                    address: logement.lieu,
+                    images: [logement.image]
+                }
+            };
+
+            console.log('🔄 Création demande locale:', demandeData);
+
+            // Utiliser le stockage local au lieu de l'API
+            const nouvelleDemande = createDemande(demandeData);
+            
+            console.log('✅ Demande créée localement:', nouvelleDemande);
+
+            // Émettre l'événement pour recharger les listes
+            window.dispatchEvent(new CustomEvent('demande:created'));
+            
+            onSuccess?.(logement.id);
+            toast({
+                title: "Succès",
+                description: "Votre candidature a été envoyée avec succès !",
+                variant: "default"
+            });
+            onClose();
+            
+        } catch (error: any) {
+            console.error('❌ Erreur création demande:', error);
+            
+            toast({
+                title: "Erreur",
+                description: "Une erreur est survenue lors de la création de la demande.",
+                variant: "destructive"
+            });
+        } finally {
+            setLoadingSubmit(false);
+        }
+    };
+
+    const handleChange = useCallback((
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }, []);
+
+    if (!open) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+                {/* En-tête du modal */}
+                <div className="bg-blue-600 px-6 py-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-white text-xl font-bold">
+                                Postuler pour ce logement
+                            </h2>
+                            <p className="text-white/80 text-sm mt-1">
+                                {logement?.titre} - {logement?.type}
+                            </p>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Contenu scrollable */}
+                <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Informations de contact */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <User className="w-5 h-5 text-gray-700" />
+                                <span className="text-gray-700 font-medium">
+                                    Vos coordonnées
+                                </span>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <input
+                                        name="nomPrenom"
+                                        value={formData.nomPrenom}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="Nom et Prénom"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="Adresse email"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <input
+                                        name="telephone"
+                                        type="tel"
+                                        value={formData.telephone}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="Téléphone"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Date et heure souhaitées */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-gray-600" />
+                                <span className="text-gray-700 font-medium">
+                                    Disponibilités pour une visite
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="relative">
+                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <input
+                                        name="dateSouhaitee"
+                                        type="date"
+                                        value={formData.dateSouhaitee}
+                                        onChange={handleChange}
+                                        min={new Date().toISOString().split("T")[0]}
+                                        required
+                                        className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="relative">
+                                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+                                        <select
+                                            name="heureSouhaitee"
+                                            value={formData.heureSouhaitee}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none hover:bg-white"
+                                        >
+                                            <option value="">Sélectionnez un créneau</option>
+                                            <option value="08:00">Matin : 08h00</option>
+                                            <option value="10:00">Matin : 10h00</option>
+                                            <option value="14:00">Après-midi : 14h00</option>
+                                            <option value="16:00">Après-midi : 16h00</option>
+                                            <option value="18:00">Soir : 18h00</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Message */}
+                        <div className="space-y-3">
+                            <label className="block text-gray-700 font-medium text-sm">
+                                Message complémentaire (optionnel)
+                            </label>
+                            <textarea
+                                name="message"
+                                value={formData.message}
+                                onChange={handleChange}
+                                className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                placeholder="Précisez votre situation, vos motivations ou toute information complémentaire..."
+                            />
+                        </div>
+                    </form>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2"
+                        >
+                            <X className="w-4 h-4" />
+                            Annuler
+                        </button>
+                        <button
+                            type="submit"
+                            onClick={handleSubmit}
+                            disabled={loadingSubmit || !!isAlreadySent}
+                            className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-60"
+                        >
+                            <FileText className="w-4 h-4" />
+                            {loadingSubmit 
+                                ? "Envoi en cours..." 
+                                : isAlreadySent 
+                                ? "Déjà postulé" 
+                                : "Envoyer ma candidature"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const LogementsIntermediaires = () => {
     const [activeTab, setActiveTab] = useState('avantages');
-    const [favoris, setFavoris] = useState([]);
-    const [formData, setFormData] = useState({
+    const [favoris, setFavoris] = useState<number[]>([]);
+    const [sentRequests, setSentRequests] = useState<Record<string, boolean>>({});
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedLogement, setSelectedLogement] = useState<Logement | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [logements, setLogements] = useState<Logement[]>([]);
+    
+    const [formData, setFormData] = useState<FormDataSimulation>({
         nom: '',
         email: '',
         telephone: '',
@@ -37,7 +412,11 @@ const LogementsIntermediaires = () => {
         budget: ''
     });
 
-    const logementsExemples = [
+    const { user, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
+    // Sample data as fallback - données d'exemple complètes
+    const getSampleLogementsData = (): Logement[] => [
         {
             id: 1,
             image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
@@ -60,7 +439,8 @@ const LogementsIntermediaires = () => {
             promoteur: "Nexity",
             dateDispo: "2024-09-01",
             vues: 89,
-            favori: false
+            favori: false,
+            energyClass: "A"
         },
         {
             id: 2,
@@ -84,7 +464,8 @@ const LogementsIntermediaires = () => {
             promoteur: "Action Logement",
             dateDispo: "2024-08-15",
             vues: 124,
-            favori: true
+            favori: true,
+            energyClass: "B"
         },
         {
             id: 3,
@@ -108,9 +489,154 @@ const LogementsIntermediaires = () => {
             promoteur: "Bouygues Immobilier",
             dateDispo: "2024-10-01",
             vues: 67,
-            favori: false
+            favori: false,
+            energyClass: "A"
+        },
+        {
+            id: 4,
+            image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400",
+            type: "PSLA",
+            categorie: "maison",
+            prix: "1 100 €",
+            titre: "Maison T4 - Zone pavillonnaire",
+            lieu: "Toulouse, 31000",
+            description: "Maison individuelle avec jardin, idéale pour les familles. Dispositif PSLA.",
+            caracteristiques: {
+                chambres: 3,
+                sdb: 2,
+                surface: "95 m²",
+                parking: 2,
+                annee: 2022,
+                etage: 0,
+                balcon: false,
+                cave: true
+            },
+            promoteur: "Kaufman & Broad",
+            dateDispo: "2024-07-01",
+            vues: 156,
+            favori: false,
+            energyClass: "C"
+        },
+        {
+            id: 5,
+            image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400",
+            type: "PLUS",
+            categorie: "appartement",
+            prix: "980 €",
+            titre: "Studio étudiant - Proche université",
+            lieu: "Lille, 59000",
+            description: "Studio meublé parfait pour étudiant. Quartier animé et bien desservi.",
+            caracteristiques: {
+                chambres: 1,
+                sdb: 1,
+                surface: "25 m²",
+                parking: 0,
+                annee: 2023,
+                etage: 2,
+                balcon: true,
+                cave: false
+            },
+            promoteur: "Résidence Campus",
+            dateDispo: "2024-08-20",
+            vues: 203,
+            favori: true,
+            energyClass: "A"
+        },
+        {
+            id: 6,
+            image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400",
+            type: "PLS",
+            categorie: "appartement",
+            prix: "1 350 €",
+            titre: "Duplex moderne - Centre-ville",
+            lieu: "Nantes, 44000",
+            description: "Duplex lumineux avec mezzanine. Standing haut de gamme.",
+            caracteristiques: {
+                chambres: 2,
+                sdb: 1,
+                surface: "55 m²",
+                parking: 1,
+                annee: 2024,
+                etage: 4,
+                balcon: true,
+                cave: true
+            },
+            promoteur: "Groupe Cardinal",
+            dateDispo: "2024-09-15",
+            vues: 78,
+            favori: false,
+            energyClass: "B"
         }
     ];
+
+    // Charger les logements intermédiaires
+    const fetchLogementsIntermediaires = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Utilisation directe des données d'exemple sans appel API
+            console.log('🔄 Chargement des données locales de démonstration');
+            setLogements(getSampleLogementsData());
+            
+        } catch (err) {
+            console.error("❌ Erreur lors du chargement des propriétés:", err);
+            setError("Utilisation des données de démonstration");
+            setLogements(getSampleLogementsData());
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load user's demandes to persist "déjà postulé" state
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) return;
+
+        let mounted = true;
+        const loadUserDemandes = async () => {
+            try {
+                // Utiliser le stockage local au lieu de l'API
+                initDemoData(); // S'assurer que les données sont initialisées
+                const demandes = getDemandesByUser(user.id);
+                const map: Record<string, boolean> = {};
+                demandes.forEach((d: any) => {
+                    if (d && d.propertyId) map[String(d.propertyId)] = true;
+                });
+                if (mounted) setSentRequests((prev) => ({ ...prev, ...map }));
+                console.log('📋 Demandes utilisateur chargées:', demandes.length);
+            } catch (err) {
+                console.error("Unable to load user demandes", err);
+            }
+        };
+
+        loadUserDemandes();
+        return () => {
+            mounted = false;
+        };
+    }, [isAuthenticated, user?.id]);
+
+    useEffect(() => {
+        fetchLogementsIntermediaires();
+    }, []);
+
+    // Écouter les événements de nouvelle demande
+    useEffect(() => {
+        const handleNewDemande = () => {
+            if (user?.id) {
+                const demandes = getDemandesByUser(user.id);
+                const map: Record<string, boolean> = {};
+                demandes.forEach((d: any) => {
+                    if (d && d.propertyId) map[String(d.propertyId)] = true;
+                });
+                setSentRequests(map);
+            }
+        };
+
+        window.addEventListener('demande:created', handleNewDemande);
+        return () => {
+            window.removeEventListener('demande:created', handleNewDemande);
+        };
+    }, [user?.id]);
 
     const dispositifs = [
         {
@@ -239,26 +765,64 @@ const LogementsIntermediaires = () => {
         }
     ];
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Formulaire soumis:', formData);
-        alert('Merci ! Notre conseiller vous contacte sous 48h pour une étude personnalisée.');
+        toast({
+            title: "Simulation envoyée",
+            description: "Notre conseiller vous contacte sous 48h pour une étude personnalisée.",
+            variant: "default"
+        });
     };
 
-    const toggleFavori = (id) => {
+    const toggleFavori = (id: number) => {
         setFavoris(prev =>
             prev.includes(id)
                 ? prev.filter(favId => favId !== id)
                 : [...prev, id]
         );
     };
+
+    // Fonction pour gérer le clic sur "Postuler"
+    const handlePostuler = (logement: Logement) => {
+        if (sentRequests?.[logement.id]) {
+            toast({
+                title: "Déjà postulé",
+                description: "Vous avez déjà postulé à ce logement.",
+            });
+            return;
+        }
+        setSelectedLogement(logement);
+        setModalOpen(true);
+    };
+
+    // Fonction appelée quand une demande est envoyée avec succès
+    const handleDemandeSuccess = (logementId: number) => {
+        setSentRequests(prev => ({ ...prev, [logementId]: true }));
+    };
+
+    const handleVoirDetails = (logement: Logement, e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigate(`/immobilier/${logement.id}`);
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8 mt-16 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+                    <p className="text-gray-600">Chargement des logements intermédiaires...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen ">
@@ -275,9 +839,16 @@ const LogementsIntermediaires = () => {
                             Découvrez les dispositifs PLUS, PLAI, PLS et PSLA pour un parcours résidentiel
                             sécurisé avec des loyers encadrés et des aides adaptées
                         </p>
+                        {error && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <p className="text-yellow-800 text-sm">
+                                    ⚠️ {error}
+                                </p>
+                            </div>
+                        )}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <button
-                                onClick={() => document.getElementById('simulation').scrollIntoView({ behavior: 'smooth' })}
+                                onClick={() => document.getElementById('simulation')?.scrollIntoView({ behavior: 'smooth' })}
                                 className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform flex items-center justify-center"
                             >
                                 <Calculator className="w-5 h-5 mr-2" />
@@ -453,121 +1024,182 @@ const LogementsIntermediaires = () => {
                             Logements disponibles
                         </h2>
 
+                        {error && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 text-center">
+                                <AlertTriangle className="w-6 h-6 text-yellow-600 inline mr-2" />
+                                <span className="text-yellow-800">{error}</span>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {logementsExemples.map((logement) => (
-                                <div
-                                    key={logement.id}
-                                    className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
-                                >
-                                    {/* Image avec badges */}
-                                    <div className="relative">
-                                        <img
-                                            src={logement.image}
-                                            alt={logement.titre}
-                                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
+                            {logements.map((logement) => {
+                                const isDejaPostule = sentRequests?.[logement.id];
+                                
+                                return (
+                                    <div
+                                        key={logement.id}
+                                        className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                                    >
+                                        {/* Image avec badges */}
+                                        <div className="relative">
+                                            <img
+                                                src={logement.image}
+                                                alt={logement.titre}
+                                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
 
-                                        {/* Badges superposés */}
-                                        <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${logement.type === 'PLUS'
-                                                ? 'bg-green-500 text-white'
-                                                : logement.type === 'PLAI'
-                                                    ? 'bg-blue-500 text-white'
-                                                    : 'bg-purple-500 text-white'
-                                                }`}>
-                                                {logement.type}
-                                            </span>
-                                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-orange-500 text-white">
-                                                {logement.categorie}
-                                            </span>
-                                        </div>
-
-                                        {/* Badge prix */}
-                                        <div className="absolute top-4 right-4">
-                                            <span className="bg-white bg-opacity-95 backdrop-blur-sm px-3 py-2 rounded-lg font-bold text-gray-900 shadow-lg">
-                                                {logement.prix}
-                                            </span>
-                                        </div>
-
-                                        {/* Bouton favori */}
-                                        <button
-                                            onClick={() => toggleFavori(logement.id)}
-                                            className={`absolute bottom-4 right-4 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
-                                                ? 'bg-red-500 text-white'
-                                                : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
-                                                }`}
-                                        >
-                                            <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
-                                        </button>
-                                    </div>
-
-                                    {/* Contenu de la carte */}
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
-                                            {logement.titre}
-                                        </h3>
-
-                                        <div className="flex items-center text-gray-600 mb-3">
-                                            <MapPin className="w-4 h-4 mr-1" />
-                                            <span className="text-sm">{logement.lieu}</span>
-                                        </div>
-
-                                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                            {logement.description}
-                                        </p>
-
-                                        {/* Caractéristiques */}
-                                        <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-100">
-                                            <div className="flex items-center gap-2">
-                                                <Bed className="w-4 h-4 text-blue-600" />
-                                                <span className="text-sm text-gray-700">
-                                                    {logement.caracteristiques.chambres} chambre{logement.caracteristiques.chambres > 1 ? 's' : ''}
+                                            {/* Badges superposés */}
+                                            <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${logement.type === 'PLUS'
+                                                    ? 'bg-green-500 text-white'
+                                                    : logement.type === 'PLAI'
+                                                        ? 'bg-blue-500 text-white'
+                                                        : logement.type === 'PLS'
+                                                            ? 'bg-purple-500 text-white'
+                                                            : 'bg-orange-500 text-white'
+                                                    }`}>
+                                                    {logement.type}
+                                                </span>
+                                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gray-600 text-white">
+                                                    {logement.categorie}
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
-                                                <Bath className="w-4 h-4 text-blue-600" />
-                                                <span className="text-sm text-gray-700">
-                                                    {logement.caracteristiques.sdb} salle{logement.caracteristiques.sdb > 1 ? 's' : ''} de bain
+                                            {/* Badge prix */}
+                                            <div className="absolute top-4 right-4">
+                                                <span className="bg-white bg-opacity-95 backdrop-blur-sm px-3 py-2 rounded-lg font-bold text-gray-900 shadow-lg">
+                                                    {logement.prix}
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
-                                                <Square className="w-4 h-4 text-blue-600" />
-                                                <span className="text-sm text-gray-700">
-                                                    {logement.caracteristiques.surface}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <Car className="w-4 h-4 text-blue-600" />
-                                                <span className="text-sm text-gray-700">
-                                                    {logement.caracteristiques.parking} place{logement.caracteristiques.parking > 1 ? 's' : ''}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Informations supplémentaires */}
-                                        <div className="flex justify-between items-center pt-4">
-                                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                <div className="flex items-center gap-1">
-                                                    <Calendar className="w-4 h-4" />
-                                                    <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
+                                            {/* Badge classe énergie */}
+                                            {logement.energyClass && (
+                                                <div className="absolute bottom-4 left-4">
+                                                    <span
+                                                        className={`px-2 py-1 rounded text-xs font-semibold ${
+                                                            logement.energyClass === "A"
+                                                                ? "bg-green-500 text-white"
+                                                                : logement.energyClass === "B"
+                                                                ? "bg-lime-500 text-white"
+                                                                : logement.energyClass === "C"
+                                                                ? "bg-yellow-500 text-white"
+                                                                : "bg-gray-500 text-white"
+                                                        }`}
+                                                    >
+                                                        Classe {logement.energyClass}
+                                                    </span>
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    <Eye className="w-4 h-4" />
-                                                    <span>{logement.vues} vues</span>
-                                                </div>
-                                            </div>
+                                            )}
 
-                                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300">
-                                                Postuler
+                                            {/* Bouton favori */}
+                                            <button
+                                                onClick={() => toggleFavori(logement.id)}
+                                                className={`absolute bottom-4 right-4 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
+                                                    ? 'bg-red-500 text-white'
+                                                    : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                                                    }`}
+                                            >
+                                                <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
                                             </button>
                                         </div>
+
+                                        {/* Contenu de la carte */}
+                                        <div className="p-6">
+                                            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                                                {logement.titre}
+                                            </h3>
+
+                                            <div className="flex items-center text-gray-600 mb-3">
+                                                <MapPin className="w-4 h-4 mr-1" />
+                                                <span className="text-sm">{logement.lieu}</span>
+                                            </div>
+
+                                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                                {logement.description}
+                                            </p>
+
+                                            {/* Caractéristiques */}
+                                            <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-100">
+                                                <div className="flex items-center gap-2">
+                                                    <Bed className="w-4 h-4 text-blue-600" />
+                                                    <span className="text-sm text-gray-700">
+                                                        {logement.caracteristiques.chambres} chambre{logement.caracteristiques.chambres > 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Bath className="w-4 h-4 text-blue-600" />
+                                                    <span className="text-sm text-gray-700">
+                                                        {logement.caracteristiques.sdb} salle{logement.caracteristiques.sdb > 1 ? 's' : ''} de bain
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Square className="w-4 h-4 text-blue-600" />
+                                                    <span className="text-sm text-gray-700">
+                                                        {logement.caracteristiques.surface}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Car className="w-4 h-4 text-blue-600" />
+                                                    <span className="text-sm text-gray-700">
+                                                        {logement.caracteristiques.parking} place{logement.caracteristiques.parking > 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Informations supplémentaires */}
+                                            <div className="flex justify-between items-center pt-4">
+                                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar className="w-4 h-4" />
+                                                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Eye className="w-4 h-4" />
+                                                        <span>{logement.vues} vues</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Boutons d'action */}
+                                            <div className="flex gap-3 mt-4">
+                                                <button
+                                                    onClick={() => handlePostuler(logement)}
+                                                    disabled={isDejaPostule}
+                                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-60 disabled:bg-blue-400 flex items-center justify-center gap-2"
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                    {isDejaPostule ? "Déjà postulé" : "Postuler"}
+                                                </button>
+
+                                                {/* <button
+                                                    onClick={(e) => handleVoirDetails(logement, e)}
+                                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                    Voir détails
+                                                </button> */}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
+
+                        {/* Message si aucun résultat */}
+                        {logements.length === 0 && (
+                            <div className="text-center py-12">
+                                <Home className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                                    Aucun logement trouvé
+                                </h3>
+                                <p className="text-gray-500">
+                                    Aucun logement intermédiaire ne correspond à vos critères.
+                                </p>
+                            </div>
+                        )}
 
                         {/* Processus de candidature */}
                         <div className="mt-20 bg-gradient-to-r from-green-600 to-blue-700 rounded-2xl p-8 text-white">
@@ -804,6 +1436,15 @@ const LogementsIntermediaires = () => {
                     </div>
                 </section>
             )}
+
+            {/* Modal de postulation */}
+            <ModalPostuler
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                logement={selectedLogement}
+                onSuccess={handleDemandeSuccess}
+                isAlreadySent={selectedLogement ? !!sentRequests?.[selectedLogement.id] : false}
+            />
         </div>
     );
 };
