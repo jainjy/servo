@@ -662,6 +662,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
                                         <Landmark className="w-12 h-12 text-white" />
                                     </div>
                                 )}
+
                                 <div className="absolute inset-0 bg-black bg-opacity-20"></div>
                                 <div className="absolute top-4 left-4">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white bg-opacity-90 text-gray-800">
