@@ -49,7 +49,7 @@ export default function Test() {
       <div
         className="
           relative
-          w-11/12 flex h-56 mx-auto overflow-auto 
+          w-11/12 flex h-32 lg:h-56 mx-auto overflow-auto 
           [scrollbar-width:none]
           [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]
           group
@@ -65,7 +65,7 @@ export default function Test() {
 
         <div
           className="
-            flex w-max gap-10 pr-10
+            flex w-max gap-2 lg:gap-10 pr-2 lg:pr-10
             animate-[move_20s_linear_infinite] animation-pausable
           "
         >
@@ -96,7 +96,7 @@ export default function Test() {
         <div
           aria-hidden
           className="
-            flex w-max gap-10 pr-10
+            flex w-max gap-2 lg:gap-10 pr-2 lg:pr-10
             animate-[move_20s_linear_infinite] animation-pausable
           "
         >
