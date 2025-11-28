@@ -527,14 +527,6 @@ const Header = () => {
         //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
         // },
         {
-          title: "IBR - Ingénierie Bâtiment Rénovation",
-          description:
-            "Expertise complète en ingénierie du bâtiment : études techniques, conception architecturale, calculs structurels et suivi de chantier par des professionnels certifiés",
-          href: "/services-ibr",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
           href: "/formation-batiment",

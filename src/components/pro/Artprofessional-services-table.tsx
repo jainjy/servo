@@ -1,17 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import {
-  Eye,
-  Briefcase,
-  Users,
-  Tag,
-  CheckCircle,
-  XCircle,
-  PlusCircle,
-  Clock,
-} from "lucide-react";
 import api from "@/lib/api";
-import OeuvreModal from "./Pro-oeuvre-modal";
 import ProOeuvreModal from "./Pro-oeuvre-modal";
 import React from "react";
 

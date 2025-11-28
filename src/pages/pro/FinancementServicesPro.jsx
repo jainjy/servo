@@ -10,14 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -260,7 +252,7 @@ const FinancementServicesPro = () => {
         </CardContent>
       </Card>
 
-      {/* Tableau des services */}
+      {/* Grille des services */}
       <Card>
         <CardHeader>
           <CardTitle>Mes Services Financiers</CardTitle>
@@ -269,60 +261,86 @@ const FinancementServicesPro = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Partenaire</TableHead>
-                <TableHead>Taux</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {filteredServices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredServices.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell className="font-medium">{service.nom}</TableCell>
-                  <TableCell>{getTypeLabel(service.type)}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{service.categorie}</Badge>
-                  </TableCell>
-                  <TableCell>{service.partenaire?.nom || "-"}</TableCell>
-                  <TableCell>
-                    {service.taux ? `${service.taux}%` : "-"}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(service)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedService(service);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(service)}
-                        disabled={deleteMutation.isLoading}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                <Card key={service.id} className="flex flex-col">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{service.nom}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {service.partenaire?.nom || "-"}
+                        </CardDescription>
+                      </div>
+                      {getStatusBadge(service)}
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </CardHeader>
+                  <CardContent className="flex-1 space-y-3 pb-3">
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Type:</span>
+                        <p className="font-medium">{getTypeLabel(service.type)}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Catégorie:</span>
+                        <p className="mt-1">
+                          <Badge variant="outline">{service.categorie}</Badge>
+                        </p>
+                      </div>
+                      {service.taux && (
+                        <div>
+                          <span className="text-muted-foreground">Taux:</span>
+                          <p className="font-medium">{service.taux}%</p>
+                        </div>
+                      )}
+                      {service.montantMin && service.montantMax && (
+                        <div>
+                          <span className="text-muted-foreground">Montant:</span>
+                          <p className="font-medium">
+                            {service.montantMin}€ - {service.montantMax}€
+                          </p>
+                        </div>
+                      )}
+                      {service.dureeMin && service.dureeMax && (
+                        <div>
+                          <span className="text-muted-foreground">Durée:</span>
+                          <p className="font-medium">
+                            {service.dureeMin} - {service.dureeMax} mois
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                  <div className="border-t p-3 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedService(service);
+                        setIsEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleDelete(service)}
+                      disabled={deleteMutation.isLoading}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </Card>
               ))}
-            </TableBody>
-          </Table>
-
-          {filteredServices.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
               Aucun service financier trouvé
             </div>
           )}
