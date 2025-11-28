@@ -17,6 +17,7 @@ import Travaux from "./pages/Travaux";
 import Produits from "./pages/Produits";
 import Entreprise from "./pages/Entreprise";
 import Financement from "./pages/Financement";
+import FinancementPartenaireDetail from "./pages/FinancementPartenaireDetail";
 import Actualites from "./pages/Actualites";
 import RegisterPage from "./pages/Register";
 import ProRegisterPage from "./pages/ProRegisterPage";
@@ -106,7 +107,7 @@ import AdvertisementPopup from "./components/AdvertisementPopup";
  
 import ReservationTable from "./pages/pro/ReservationBien-etre"
 // Import des nouveaux composants immobilier
-
+import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
 // Import des composants bâtiments
 import BatimentsLayout from "./pages/batiments/BatimentsLayout";
 import PodcastsBatiment from "./components/PodcastsBatiment";
@@ -154,6 +155,7 @@ import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
 import CoursDomicile from "./pages/pro/CoursDomicil";
+import FinancementServicesPro from "./pages/pro/FinancementServicesPro";
 import ProReservations from "./pages/ProReservations";
 import UserReservations from "./pages/UserReservations";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
@@ -165,6 +167,8 @@ import AccountSuspended from "./pages/AccountSuspended";
 import AccountStatusGuard from "./components/AccountStatusGuard";
 import UserLayout from "./pages/UserLayout";
 import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
+import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
+import ServicesIBRPage from "./pages/ServicesIBRPage";
 
 const queryClient = new QueryClient();
 
@@ -232,6 +236,7 @@ const App = () => {
                   <Route path="/cookies" element={<CookiesPolicy />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
+                  <Route path="/services-ibr" element={<ServicesIBRPage />} />
                   {/* /*entreprise link* */}
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
@@ -240,7 +245,6 @@ const App = () => {
                     path="/juridiqueLiquidation"
                     element={<JuridiqueLiquidation />}
                   />
-
                   <Route
                     path="/account-suspended"
                     element={<AccountSuspended />}
@@ -422,6 +426,10 @@ const App = () => {
                   />
                   <Route path="/entreprise" element={<Entreprise />} />
                   <Route path="/financement" element={<Financement />} />
+                  <Route
+                    path="/financement/:id"
+                    element={<FinancementPartenaireDetail />}
+                  />
                   <Route path="/blog" element={<Actualites />} />
                   <Route path="/tourisme" element={<TourismSection />} />
                   <Route path="/pack" element={<PricingPacksDisplay />} />
@@ -523,13 +531,27 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
-                     <Route path="reservationbien-etre" element={<ReservationTable />} />
+                    <Route
+                      path="financement-demandes"
+                      element={<FinancementDemandesPro />}
+                    />
+                    <Route
+                      path="financement-services"
+                      element={<FinancementServicesPro />}
+                    />
+                    <Route
+                      path="reservationbien-etre"
+                      element={<ReservationTable />}
+                    />
                     {/* <Route path="clients" element={<ClientSection />} /> */}
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
                     <Route path="reservations" element={<ProBookings />} />
-                    < Route path="reservationPro" element={<ProTouristicPlaceBookings />} />
+                    <Route
+                      path="reservationPro"
+                      element={<ProTouristicPlaceBookings />}
+                    />
                     <Route
                       path="subscription"
                       element={<SubscriptionStatusPage />}
@@ -594,6 +616,7 @@ const App = () => {
                       path="mes-reservations-cours"
                       element={<UserReservations />}
                     />
+
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
@@ -612,6 +635,10 @@ const App = () => {
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
+                    <Route
+                      path="financement-services"
+                      element={<FinancementServicesAdmin />}
+                    />
                     <Route
                       path="subscriptions"
                       element={<AdminSubscriptions />}
@@ -646,10 +673,12 @@ const App = () => {
 
                     {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
 
-                     <Route path="investissement-demandes" element={<InvestmentDemandesPage />} />
-
-                  </Route>=
-                  {/* Section not found Routes */}
+                    <Route
+                      path="investissement-demandes"
+                      element={<InvestmentDemandesPage />}
+                    />
+                  </Route>
+                  ={/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
                   <Route path="/import-info" element={<ImportInfo />} />

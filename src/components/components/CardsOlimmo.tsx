@@ -209,7 +209,7 @@ const AnnoncesImmobilieres = () => {
         <div className="w-full py-12 px-4 sm:px-2 lg:px-4 bg-gradient-to-b from-white via-gray-50 to-white">
             <div className="max-w-7xl mx-auto">
                 {/* En-tête */}
-                <div className="mb-12 flex justify-between items-center">
+                <div className="mb-12 grid place-items-center lg:flex justify-between items-center">
                     <h2 className="text-xl sm:text-4xl font-bold text-gray-900 mb-3">
                         Propriétés de nos partenaires
                     </h2>
@@ -276,7 +276,7 @@ const AnnoncesImmobilieres = () => {
                 {/* Résultats */}
                 {!loading && filteredProperties.length > 0 && (
                     <div className="mt-8 grid place-items-center  text-gray-100">
-                        <p className='bg-slate-800 w-1/4 text-center text-xs font-bold rounded-full p-2'>
+                        <p className='bg-slate-800 w-auto lg:w-1/4 text-center text-xs font-bold rounded-full p-2'>
                             Affichage de <span className="font-semibold">{Math.min(4, filteredProperties.length)}</span> propriété{Math.min(4, filteredProperties.length) > 1 ? 's' : ''} sur <span className="font-semibold">{properties.length}</span>
                         </p>
                     </div>

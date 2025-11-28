@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const CardCarte: React.FC = () => {
     return (
-        <div className="w-full px-12 py-4 overflow-hidden">
+        <div className="w-full px-2 lg:px-12 py-4 overflow-hidden">
             <div className="flex flex-col shadow-md bg-white rounded-2xl overflow-hidden lg:flex-row">
                 {/* Partie gauche - Description */}
                 <div className="lg:w-1/2 p-8 flex flex-col justify-between">

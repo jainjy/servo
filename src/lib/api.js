@@ -43,14 +43,19 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 // Services pour le financement
 export const financementAPI = {
   // Routes publiques
   getPartenaires: () => api.get("/financement/partenaires"),
+  getPartenairesDetails: (id) => api.get(`/financement/partenaires/${id}`),
   getAssurances: () => api.get("/financement/assurances"),
   submitDemande: (data) => api.post("/financement/demande", data),
   getUserDemandes: (userId) => api.get(`/financement/demandes/${userId}`),
+
+  // Services financiers
+  getServiceFinancier: (id) => api.get(`/financement/services/${id}`),
+  getServiceFinanciers: (params = {}) =>
+    api.get("/financement/services", { params }),
 
   // NOUVELLES ROUTES ADMIN
   getAllDemandes: (params = {}) =>
@@ -58,8 +63,22 @@ export const financementAPI = {
   updateDemandeStatus: (id, status) =>
     api.put(`/financement/admin/demandes/${id}/status`, { status }),
   deleteDemande: (id) => api.delete(`/financement/admin/demandes/${id}`),
-};
 
+  // Services financiers - Professionnels
+  getServicesFinanciersPro: (params = {}) =>
+    api.get("/financement/pro/services", { params }),
+  getPartenairesPro: () => api.get("/financement/pro/partenaires"),
+  createServiceFinancier: (data) => api.post("/financement/services", data),
+  updateServiceFinancier: (id, data) =>
+    api.put(`/financement/services/${id}`, data),
+  deleteServiceFinancier: (id) => api.delete(`/financement/services/${id}`),
+
+  // Services financiers - Admin
+  getAllServicesFinanciers: (params = {}) =>
+    api.get("/financement/admin/services", { params }),
+  toggleServiceStatus: (id, isActive) =>
+    api.put(`/financement/admin/services/${id}/status`, { isActive }),
+};
 // Services pour le tourisme
 export const tourismeAPI = {
   // Routes admin
@@ -500,5 +519,9 @@ export const flightsAPI = {
   // Créer une réservation de vol
    createReservation: (flightId, data) => 
         api.post(`/Vol/reservation/${flightId}/reserver`, data),
-    
+    getReservations: (params = {}) => 
+    api.get("/Vol/reservations", { params }),
+  
+  updateReservationStatus: (id, status) => 
+    api.put(`/Vol/reservations/${id}/status`, { status }),  
 };

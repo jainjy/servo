@@ -8,9 +8,15 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:android": "npm run build && npx cap copy && npx cap open android",
+    "sync:android": "npx cap sync",
+    "android:studio": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@headlessui/react": "^2.2.9",
@@ -76,6 +82,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.61.1",
     "react-leaflet": "^4.2.1",
+    "react-pull-to-refresh": "^2.0.1",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",
     "react-select": "^5.10.2",

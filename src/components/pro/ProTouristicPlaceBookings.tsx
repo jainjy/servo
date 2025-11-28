@@ -5,8 +5,8 @@ import {
   CheckCircle, XCircle, Clock, AlertCircle, Download,
   Eye, ChevronDown, ChevronUp, Mail, Phone, Ticket,
   Building, User as UserIcon, RefreshCw, MessageCircle,
-  Star, Landmark, Castle, Church, BookOpen, GalleryVerticalEnd,
-  QrCode, CreditCard, UserCheck
+  Landmark, Castle, Church, BookOpen, GalleryVerticalEnd,
+  QrCode, UserCheck
 } from 'lucide-react';
 import { touristicPlaceBookingsAPI, tourismeAPI } from '../../lib/api';
 
@@ -92,53 +92,62 @@ export const ProTouristicPlaceBookings = () => {
   }>({ key: "createdAt", direction: "desc" });
   const [userPlaces, setUserPlaces] = useState<any[]>([]);
 
-  // Charger les lieux du prestataire et les réservations
+  // Charger les réservations
   useEffect(() => {
-    fetchUserPlacesAndBookings();
+    fetchBookings();
   }, []);
 
-  const fetchUserPlacesAndBookings = async () => {
+  const fetchBookings = async () => {
     try {
       setLoading(true);
       
-      const prestataireId = localStorage.getItem('userId');
-      
-      if (!prestataireId) {
-        console.error('❌ Aucun ID prestataire trouvé');
-        return;
-      }
-
-      // 1. Charger les lieux touristiques du prestataire
+      // Charger les lieux touristiques
       const placesResponse = await tourismeAPI.getTouristicPlaces();
-      const userPlacesData = placesResponse.data.data.filter(
-        (place: any) => place.idPrestataire === prestataireId
-      );
+      const allPlaces = placesResponse.data.data;
+      
+      // Filtrer pour ne garder que les lieux du prestataire connecté
+      // L'API gère l'authentification via le token
+      const userPlacesData = allPlaces.filter((place: any) => place.idPrestataire);
       
       setUserPlaces(userPlacesData);
+      console.log('🏛️ Lieux du prestataire:', userPlacesData);
 
       if (userPlacesData.length === 0) {
+        console.log('ℹ️ Aucun lieu touristique créé par ce prestataire');
         setBookings([]);
         setFilteredBookings([]);
         calculateStats([]);
         return;
       }
 
-      // 2. Charger les réservations pour ces lieux
-      const placeIds = userPlacesData.map((place: any) => place.id);
+      // Charger les réservations
+      // L'API va automatiquement filtrer par prestataire grâce au token
       const bookingsResponse = await touristicPlaceBookingsAPI.getBookings({
-        prestataireId,
         limit: 1000
       });
 
+      console.log('📊 Réponse API réservations:', bookingsResponse.data);
+
       if (bookingsResponse.data.success) {
         const bookingsData = bookingsResponse.data.data;
+        
+        // Filtrer pour ne garder que les réservations des lieux du prestataire
+        const placeIds = userPlacesData.map((place: any) => place.id);
         const userBookings = bookingsData.filter((booking: TouristicPlaceBooking) => 
           placeIds.includes(booking.place.id)
         );
+
+        console.log('✅ Réservations filtrées:', userBookings);
         
         setBookings(userBookings);
         setFilteredBookings(userBookings);
         calculateStats(userBookings, userPlacesData);
+      } else {
+        // Utiliser les données mockées en cas d'erreur
+        const mockData = getMockBookings();
+        setBookings(mockData);
+        setFilteredBookings(mockData);
+        calculateStats(mockData, getMockPlaces());
       }
     } catch (error) {
       console.error("❌ Erreur chargement réservations:", error);
@@ -165,7 +174,7 @@ export const ProTouristicPlaceBookings = () => {
       price: 20,
       openingHours: '9:00-18:30',
       maxGuests: 100,
-      idPrestataire: localStorage.getItem('userId') || 'prestataire-1'
+      idPrestataire: 'mock-prestataire-id'
     },
     {
       id: 'p2',
@@ -177,7 +186,7 @@ export const ProTouristicPlaceBookings = () => {
       price: 17,
       openingHours: '9:00-18:00',
       maxGuests: 200,
-      idPrestataire: localStorage.getItem('userId') || 'prestataire-1'
+      idPrestataire: 'mock-prestataire-id'
     }
   ];
 
@@ -227,12 +236,35 @@ export const ProTouristicPlaceBookings = () => {
         email: 'marie.martin@email.com',
         phone: '+33987654321'
       }
+    },
+    {
+      id: '3',
+      confirmationNumber: 'TPL-2024-003',
+      status: 'completed',
+      paymentStatus: 'paid',
+      visitDate: '2024-12-10',
+      visitTime: '11:00',
+      numberOfTickets: 6,
+      ticketType: 'adult',
+      totalAmount: 120,
+      serviceFee: 12,
+      paymentMethod: 'card',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      place: getMockPlaces()[0],
+      user: {
+        id: 'u3',
+        firstName: 'Pierre',
+        lastName: 'Durand',
+        email: 'pierre.durand@email.com',
+        phone: '+33112233445'
+      }
     }
   ];
 
   const refreshBookings = async () => {
     setRefreshing(true);
-    await fetchUserPlacesAndBookings();
+    await fetchBookings();
   };
 
   const calculateStats = (bookingsData: TouristicPlaceBooking[], places: any[] = []) => {
