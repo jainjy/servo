@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -9,14 +9,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -25,8 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Select,
@@ -50,6 +40,18 @@ import {
   Clock,
   Building,
   Scissors,
+  Plane,
+  Ticket,
+  Eye,
+  X,
+  MessageCircle,
+  User,
+  Phone,
+  Mail,
+  QrCode,
+  MoreVertical,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 // Types pour les réservations tourisme
@@ -112,6 +114,84 @@ interface ServiceBooking {
   createdAt: string;
 }
 
+// Types pour les réservations de lieux touristiques
+interface TouristicPlaceBooking {
+  id: string;
+  placeId: string;
+  userId: string;
+  visitDate: string;
+  visitTime: string;
+  numberOfTickets: number;
+  ticketType: string;
+  totalAmount: number;
+  serviceFee: number;
+  specialRequests?: string;
+  paymentMethod: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  paymentStatus: "pending" | "paid" | "failed" | "refunded";
+  confirmationNumber: string;
+  createdAt: string;
+  cancelledAt?: string;
+  place: {
+    id: string;
+    title: string;
+    type: string;
+    city: string;
+    images: string[];
+    price: number;
+    openingHours?: string;
+    maxGuests: number;
+  };
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+}
+
+// Types pour les réservations de vols
+interface FlightReservation {
+  id: string;
+  flightId: string;
+  idUser: string;
+  idPrestataire: string;
+  nbrPersonne: number;
+  place: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed" | "paid" | "failed" | "refunded";
+  createdAt: string;
+  cancelledAt?: string;
+  flight: {
+    id: string;
+    compagnie: string;
+    numeroVol: string;
+    departVille: string;
+    departDateHeure: string;
+    arriveeVille: string;
+    arriveeDateHeure: string;
+    duree: string;
+    escales: number;
+    prix: number;
+    classe: string;
+    services: string[];
+    image?: string;
+  };
+  userReservation?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+  prestataire?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
 // Composants utilitaires
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("fr-FR", {
@@ -162,416 +242,571 @@ function ServiceStatusBadge({ status }: { status: ServiceBooking["status"] }) {
   return <Badge variant={variant as any}>{label}</Badge>;
 }
 
+function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["status"] }) {
+  const variant =
+    status === "confirmed"
+      ? "default"
+      : status === "pending"
+      ? "secondary"
+      : status === "completed"
+      ? "outline"
+      : "destructive";
+  const label =
+    status === "confirmed"
+      ? "Confirmée"
+      : status === "pending"
+      ? "En attente"
+      : status === "completed"
+      ? "Terminée"
+      : "Annulée";
+
+  return <Badge variant={variant as any}>{label}</Badge>;
+}
+
+function FlightStatusBadge({ status }: { status: FlightReservation["status"] }) {
+  const variant =
+    status === "confirmed" || status === "paid" || status === "completed"
+      ? "default"
+      : status === "pending"
+      ? "secondary"
+      : status === "refunded"
+      ? "outline"
+      : "destructive";
+  const label =
+    status === "confirmed"
+      ? "Confirmée"
+      : status === "pending"
+      ? "En attente"
+      : status === "paid"
+      ? "Payée"
+      : status === "completed"
+      ? "Terminée"
+      : status === "refunded"
+      ? "Remboursée"
+      : "Annulée";
+
+  return <Badge variant={variant as any}>{label}</Badge>;
+}
+
 function generateBookingCode(id: string): string {
   return `BK-${id.slice(-4).toUpperCase()}`;
 }
 
-// Modal pour les détails des réservations tourisme
-function TourismBookingDetailsModal({
-  booking,
-  open,
-  onOpenChange,
-}: {
-  booking: TourismBooking;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const calculateNights = () => {
-    const checkIn = new Date(booking.checkIn);
-    const checkOut = new Date(booking.checkOut);
-    const timeDiff = checkOut.getTime() - checkIn.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+// Composant Modal de Détails
+interface DetailModalProps {
+  booking: any;
+  type: "tourisme" | "service" | "touristic_place" | "flight";
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function DetailModal({ booking, type, isOpen, onClose }: DetailModalProps) {
+  if (!booking) return null;
+
+  const renderTourismDetails = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Date d'arrivée</h4>
+          <p>{new Date(booking.checkIn).toLocaleDateString("fr-FR")}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Date de départ</h4>
+          <p>{new Date(booking.checkOut).toLocaleDateString("fr-FR")}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Voyageurs</h4>
+          <p>{booking.guests} personne(s)</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Méthode de paiement</h4>
+          <p>{booking.paymentMethod}</p>
+        </div>
+      </div>
+      {booking.specialRequests && (
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Demandes spéciales</h4>
+          <p>{booking.specialRequests}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderServiceDetails = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Date</h4>
+          <p>{new Date(booking.date).toLocaleDateString("fr-FR")}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Heure</h4>
+          <p>{booking.time}</p>
+        </div>
+      </div>
+      {booking.message && (
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Message</h4>
+          <p>{booking.message}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderTouristicPlaceDetails = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Date de visite</h4>
+          <p>{new Date(booking.visitDate).toLocaleDateString("fr-FR")}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Heure de visite</h4>
+          <p>{booking.visitTime}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Nombre de billets</h4>
+          <p>{booking.numberOfTickets}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Type de billet</h4>
+          <p>{booking.ticketType}</p>
+        </div>
+      </div>
+      {booking.specialRequests && (
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Demandes spéciales</h4>
+          <p>{booking.specialRequests}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderFlightDetails = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Départ</h4>
+          <p>{booking.flight.departVille}</p>
+          <p className="text-sm text-gray-500">
+            {new Date(booking.flight.departDateHeure).toLocaleString("fr-FR")}
+          </p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Arrivée</h4>
+          <p>{booking.flight.arriveeVille}</p>
+          <p className="text-sm text-gray-500">
+            {new Date(booking.flight.arriveeDateHeure).toLocaleString("fr-FR")}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Passagers</h4>
+          <p>{booking.nbrPersonne}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold text-sm text-gray-500">Classe</h4>
+          <p>{booking.flight.classe}</p>
+        </div>
+      </div>
+      <div>
+        <h4 className="font-semibold text-sm text-gray-500">Compagnie</h4>
+        <p>{booking.flight.compagnie} - Vol {booking.flight.numeroVol}</p>
+      </div>
+    </div>
+  );
+
+  const getModalTitle = () => {
+    switch (type) {
+      case "tourisme":
+        return "Détails de la réservation d'hébergement";
+      case "service":
+        return "Détails de la réservation de service";
+      case "touristic_place":
+        return "Détails de la réservation de billet";
+      case "flight":
+        return "Détails de la réservation de vol";
+      default:
+        return "Détails de la réservation";
+    }
   };
 
-  const nights = calculateNights();
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Building className="w-5 h-5" />
-            Détails de la réservation {booking.code}
-          </DialogTitle>
-          <DialogDescription>
-            Informations complètes sur votre réservation d'hébergement
-          </DialogDescription>
+          <DialogTitle>{getModalTitle()}</DialogTitle>
         </DialogHeader>
-
-        <div className="grid gap-6">
-          {/* En-tête avec statut */}
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div>
-              <div className="flex items-center gap-2">
-                <TourismStatusBadge status={booking.status} />
-                <span className="text-sm text-muted-foreground">
-                  Créée le{" "}
-                  {new Date(booking.createdAt).toLocaleDateString("fr-FR")}
-                </span>
-              </div>
+        <div className="space-y-6">
+          {/* Informations principales */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1">
+              <img
+                src={
+                  type === "tourisme" 
+                    ? booking.listing.images?.[0] 
+                    : type === "service"
+                    ? "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                    : type === "touristic_place"
+                    ? booking.place.images?.[0]
+                    : booking.flight.image
+                }
+                alt="Image"
+                className="w-full h-32 object-cover rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+                }}
+              />
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">
-                {formatCurrency(booking.amount)}
+            <div className="md:col-span-2">
+              <h3 className="font-semibold text-lg">
+                {type === "tourisme" 
+                  ? booking.listing.title
+                  : type === "service"
+                  ? booking.service.libelle
+                  : type === "touristic_place"
+                  ? booking.place.title
+                  : `${booking.flight.compagnie} - Vol ${booking.flight.numeroVol}`
+                }
+              </h3>
+              <p className="text-gray-600 text-sm mt-1">
+                {type === "tourisme" 
+                  ? `${booking.listing.city} • ${booking.listing.type}`
+                  : type === "service"
+                  ? booking.service.description
+                  : type === "touristic_place"
+                  ? `${booking.place.city} • ${booking.place.type}`
+                  : `${booking.flight.departVille} → ${booking.flight.arriveeVille}`
+                }
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                {type === "tourisme" && <TourismStatusBadge status={booking.status} />}
+                {type === "service" && <ServiceStatusBadge status={booking.status} />}
+                {type === "touristic_place" && <TouristicPlaceStatusBadge status={booking.status} />}
+                {type === "flight" && <FlightStatusBadge status={booking.status} />}
+                <Badge variant="outline" className="text-xs">
+                  {type === "tourisme" ? "🏠 Hébergement" : 
+                   type === "service" ? "💆 Service" : 
+                   type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
+                </Badge>
               </div>
-              <div className="text-sm text-muted-foreground">Total</div>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Informations de l'hébergement */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Home className="w-4 h-4" />
-                  Hébergement
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-semibold">{booking.listing.title}</h3>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    {booking.listing.city}
-                  </p>
-                </div>
-
-                {booking.listing.images &&
-                  booking.listing.images.length > 0 && (
-                    <div className="aspect-video rounded-lg overflow-hidden">
-                      <img
-                        src={booking.listing.images[0]}
-                        alt={booking.listing.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span>{booking.listing.rating}</span>
-                    <span className="text-muted-foreground">
-                      ({booking.listing.reviewCount} avis)
-                    </span>
-                  </div>
-                  <div className="text-muted-foreground capitalize">
-                    {booking.listing.type}
-                  </div>
-                </div>
-
-                {booking.listing.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {booking.listing.description}
-                  </p>
-                )}
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {booking.listing.bedrooms && (
-                    <div>🛏️ {booking.listing.bedrooms} chambre(s)</div>
-                  )}
-                  {booking.listing.bathrooms && (
-                    <div>🚿 {booking.listing.bathrooms} salle(s) de bain</div>
-                  )}
-                  {booking.listing.area && (
-                    <div>📐 {booking.listing.area}m²</div>
-                  )}
-                  <div>👥 Jusqu'à {booking.listing.maxGuests} voyageurs</div>
-                </div>
-
-                {booking.listing.amenities &&
-                  booking.listing.amenities.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-2">
-                        Équipements :
-                      </h4>
-                      <div className="flex flex-wrap gap-1">
-                        {booking.listing.amenities
-                          .slice(0, 5)
-                          .map((amenity, index) => (
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {amenity}
-                            </Badge>
-                          ))}
-                        {booking.listing.amenities.length > 5 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{booking.listing.amenities.length - 5}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-              </CardContent>
-            </Card>
-
-            {/* Informations de réservation */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Dates et voyageurs
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Arrivée</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>
-                          {new Date(booking.checkIn).toLocaleDateString(
-                            "fr-FR"
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Départ</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>
-                          {new Date(booking.checkOut).toLocaleDateString(
-                            "fr-FR"
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">
-                      Durée du séjour
-                    </Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <span>
-                        {nights} nuit{nights > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">Voyageurs</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <span>
-                        {booking.guests} personne{booking.guests > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1 ml-6">
-                      {booking.adults} adulte{booking.adults > 1 ? "s" : ""}
-                      {booking.children > 0 &&
-                        `, ${booking.children} enfant${
-                          booking.children > 1 ? "s" : ""
-                        }`}
-                      {booking.infants > 0 &&
-                        `, ${booking.infants} bébé${
-                          booking.infants > 1 ? "s" : ""
-                        }`}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    Paiement
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Méthode de paiement :</span>
-                    <span className="font-medium capitalize">
-                      {booking.paymentMethod === "card"
-                        ? "Carte bancaire"
-                        : booking.paymentMethod}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Statut du paiement :</span>
-                    <Badge
-                      variant={
-                        booking.paymentStatus === "paid"
-                          ? "default"
-                          : booking.paymentStatus === "pending"
-                          ? "secondary"
-                          : "destructive"
-                      }
-                    >
-                      {booking.paymentStatus === "paid"
-                        ? "Payé"
-                        : booking.paymentStatus === "pending"
-                        ? "En attente"
-                        : "Échoué"}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {booking.specialRequests && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
-                      <FileText className="w-4 h-4" />
-                      Demandes spéciales
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {booking.specialRequests}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+          {/* Détails spécifiques */}
+          <div className="border-t pt-4">
+            {type === "tourisme" && renderTourismDetails()}
+            {type === "service" && renderServiceDetails()}
+            {type === "touristic_place" && renderTouristicPlaceDetails()}
+            {type === "flight" && renderFlightDetails()}
           </div>
 
-          {/* Détails du prix */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Détail du prix</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>
-                    {booking.listing.price}€ × {nights} nuit
-                    {nights > 1 ? "s" : ""}
-                  </span>
-                  <span>{formatCurrency(booking.listing.price * nights)}</span>
-                </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Frais de service</span>
-                  <span>
-                    {formatCurrency(
-                      booking.amount - booking.listing.price * nights
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between font-bold border-t pt-2">
-                  <span>Total</span>
-                  <span>{formatCurrency(booking.amount)}</span>
-                </div>
+          {/* Informations de paiement */}
+          <div className="border-t pt-4">
+            <h4 className="font-semibold text-sm text-gray-500 mb-2">Informations de paiement</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-sm text-gray-500">Montant total</h4>
+                <p className="text-lg font-semibold">
+                  {formatCurrency(
+                    type === "tourisme" ? booking.amount :
+                    type === "service" ? booking.service.price :
+                    type === "touristic_place" ? booking.totalAmount :
+                    booking.flight.prix * booking.nbrPersonne
+                  )}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-500">Référence</h4>
+                <p>
+                  {type === "tourisme" ? booking.code :
+                   type === "touristic_place" ? booking.confirmationNumber :
+                   type === "flight" ? `Vol ${booking.flight.numeroVol}` :
+                   booking.id}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fermer
-          </Button>
-          {booking.status !== "annulee" && booking.status !== "terminee" && (
-            <Button asChild>
-              <Link to={`/app/messages?booking=${booking.code}`}>
-                Contacter le support
-              </Link>
-            </Button>
-          )}
+          <Button onClick={onClose}>Fermer</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// Modal pour les détails des réservations services
-function ServiceBookingDetailsModal({
+// Composant Carte de Réservation Générique
+interface BookingCardProps {
+  booking: any;
+  type: "tourisme" | "service" | "touristic_place" | "flight";
+  onViewDetails: () => void;
+  onCancel?: () => void;
+  getStatusBadge: (status: string) => JSX.Element;
+  getBookingImage: () => string;
+  getBookingTitle: () => string;
+  getBookingSubtitle: () => string;
+  getBookingDate: () => string;
+  getBookingDetails: () => string;
+  getBookingAmount: () => number;
+  canCancel?: boolean;
+}
+
+function BookingCard({
   booking,
-  open,
-  onOpenChange,
-}: {
-  booking: ServiceBooking;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
+  type,
+  onViewDetails,
+  onCancel,
+  getStatusBadge,
+  getBookingImage,
+  getBookingTitle,
+  getBookingSubtitle,
+  getBookingDate,
+  getBookingDetails,
+  getBookingAmount,
+  canCancel = true,
+}: BookingCardProps) {
+  const [showActions, setShowActions] = useState(false);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Scissors className="w-5 h-5" />
-            Détails de la réservation {generateBookingCode(booking.id)}
-          </DialogTitle>
-          <DialogDescription>
-            Informations complètes sur votre réservation de service
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="font-semibold">Service</Label>
-              <p className="mt-1">{booking.service.libelle}</p>
-            </div>
-            <div>
-              <Label className="font-semibold">Statut</Label>
-              <div className="mt-1">
-                <ServiceStatusBadge status={booking.status} />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="font-semibold">Date</Label>
-              <p className="mt-1">
-                {new Date(booking.date).toLocaleDateString("fr-FR", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-            </div>
-            <div>
-              <Label className="font-semibold">Heure</Label>
-              <p className="mt-1">{booking.time}</p>
-            </div>
-          </div>
-
-          <div>
-            <Label className="font-semibold">Prix</Label>
-            <p className="mt-1 text-lg font-semibold">
-              {formatCurrency(booking.service.price)}
-            </p>
-          </div>
-
-          {booking.message && (
-            <div>
-              <Label className="font-semibold">Message</Label>
-              <div className="mt-1 p-3 bg-muted rounded-md">
-                <p className="text-sm">{booking.message}</p>
-              </div>
-            </div>
-          )}
-
-          <div>
-            <Label className="font-semibold">Description du service</Label>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {booking.service.description}
-            </p>
-          </div>
-
-          <div>
-            <Label className="font-semibold">Date de création</Label>
-            <p className="mt-1">
-              {new Date(booking.createdAt).toLocaleDateString("fr-FR")}
-            </p>
-          </div>
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+      {/* Layout pour mobile : image en haut */}
+      <div className="block md:hidden">
+        {/* Image en haut pour mobile */}
+        <div className="w-full h-40">
+          <img
+            src={getBookingImage()}
+            alt={getBookingTitle()}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+            }}
+          />
         </div>
 
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Fermer</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        {/* Contenu sous l'image pour mobile */}
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                {getStatusBadge(booking.status)}
+                <Badge variant="outline" className="text-xs">
+                  {type === "tourisme" ? "🏠 Hébergement" : 
+                   type === "service" ? "💆 Service" : 
+                   type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
+                </Badge>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                {getBookingTitle()}
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                {getBookingSubtitle()}
+              </p>
+            </div>
+
+            {/* Menu d'actions pour mobile */}
+            <div className="relative inline-block">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowActions(!showActions)}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+              
+              {showActions && (
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                  <button
+                    onClick={() => {
+                      onViewDetails();
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Voir les détails
+                  </button>
+                  
+                  {canCancel && onCancel && (
+                    <button
+                      onClick={() => {
+                        onCancel();
+                        setShowActions(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Annuler
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Informations détaillées pour mobile */}
+          <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span className="text-xs">{getBookingDate()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-gray-400" />
+              <span className="text-xs">{getBookingDetails()}</span>
+            </div>
+          </div>
+
+          {/* Montant et actions pour mobile */}
+          <div className="flex flex-col gap-3 pt-3 border-t border-gray-100">
+            <div className="text-center">
+              <div className="text-xl font-bold text-gray-900">
+                {formatCurrency(getBookingAmount())}
+              </div>
+              <div className="text-xs text-gray-500">
+                {type === "touristic_place" && booking.confirmationNumber && (
+                  <span>Ref: {booking.confirmationNumber}</span>
+                )}
+                {type === "tourisme" && booking.code && (
+                  <span>Ref: {booking.code}</span>
+                )}
+                {type === "flight" && (
+                  <span>Vol: {booking.flight?.numeroVol}</span>
+                )}
+              </div>
+            </div>
+            
+            {/* Boutons d'action pour mobile */}
+            <div className="grid grid-cols-1 gap-2">
+              <Button variant="outline" size="sm" onClick={onViewDetails} className="w-full">
+                <Eye className="w-4 h-4 mr-1" />
+                Détails
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Layout pour desktop : image à gauche */}
+      <div className="hidden md:flex">
+        {/* Image à gauche pour desktop */}
+        <div className="w-24 flex-shrink-0">
+          <img
+            src={getBookingImage()}
+            alt={getBookingTitle()}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+            }}
+          />
+        </div>
+
+        {/* Contenu à droite pour desktop */}
+        <div className="flex-1 p-4">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                {getStatusBadge(booking.status)}
+                <Badge variant="outline" className="text-xs">
+                  {type === "tourisme" ? "🏠 Hébergement" : 
+                   type === "service" ? "💆 Service" : 
+                   type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
+                </Badge>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                {getBookingTitle()}
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                {getBookingSubtitle()}
+              </p>
+            </div>
+
+            {/* Menu d'actions pour desktop */}
+            <div className="relative inline-block">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowActions(!showActions)}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+              
+              {showActions && (
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                  <button
+                    onClick={() => {
+                      onViewDetails();
+                      setShowActions(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Voir les détails
+                  </button>
+                  
+                  {canCancel && onCancel && (
+                    <button
+                      onClick={() => {
+                        onCancel();
+                        setShowActions(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Annuler
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Informations détaillées pour desktop */}
+          <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span>{getBookingDate()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-gray-400" />
+              <span>{getBookingDetails()}</span>
+            </div>
+          </div>
+
+          {/* Montant et actions pour desktop */}
+          <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+            <div className="text-right">
+              <div className="text-xl font-bold text-gray-900">
+                {formatCurrency(getBookingAmount())}
+              </div>
+              <div className="text-sm text-gray-500">
+                {type === "touristic_place" && booking.confirmationNumber && (
+                  <span>Ref: {booking.confirmationNumber}</span>
+                )}
+                {type === "tourisme" && booking.code && (
+                  <span>Ref: {booking.code}</span>
+                )}
+                {type === "flight" && (
+                  <span>Vol: {booking.flight?.numeroVol}</span>
+                )}
+              </div>
+            </div>
+            
+            {/* Boutons d'action pour desktop */}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={onViewDetails}>
+                <Eye className="w-4 h-4 mr-1" />
+                Détails
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }
 
@@ -580,21 +815,29 @@ export default function UnifiedReservationPage() {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
 
-  // États pour les réservations tourisme
+  // États pour les réservations
   const [tourismBookings, setTourismBookings] = useState<TourismBooking[]>([]);
-  const [tourismLoading, setTourismLoading] = useState(true);
-  const [tourismFilter, setTourismFilter] = useState<string>("all");
-  const [selectedTourismBooking, setSelectedTourismBooking] =
-    useState<TourismBooking | null>(null);
-  const [tourismDetailsModalOpen, setTourismDetailsModalOpen] = useState(false);
-
-  // États pour les réservations services
   const [serviceBookings, setServiceBookings] = useState<ServiceBooking[]>([]);
+  const [touristicPlaceBookings, setTouristicPlaceBookings] = useState<TouristicPlaceBooking[]>([]);
+  const [flightReservations, setFlightReservations] = useState<FlightReservation[]>([]);
+  
+  const [tourismLoading, setTourismLoading] = useState(true);
   const [serviceLoading, setServiceLoading] = useState(true);
+  const [touristicPlaceLoading, setTouristicPlaceLoading] = useState(true);
+  const [flightLoading, setFlightLoading] = useState(true);
+  
+  const [tourismFilter, setTourismFilter] = useState<string>("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
-  const [selectedServiceBooking, setSelectedServiceBooking] =
-    useState<ServiceBooking | null>(null);
-  const [serviceDetailsModalOpen, setServiceDetailsModalOpen] = useState(false);
+  const [touristicPlaceFilter, setTouristicPlaceFilter] = useState<string>("all");
+  const [flightFilter, setFlightFilter] = useState<string>("all");
+
+  const [selectedTourismBooking, setSelectedTourismBooking] = useState<TourismBooking | null>(null);
+  const [selectedServiceBooking, setSelectedServiceBooking] = useState<ServiceBooking | null>(null);
+  const [selectedTouristicPlaceBooking, setSelectedTouristicPlaceBooking] = useState<TouristicPlaceBooking | null>(null);
+  const [selectedFlightReservation, setSelectedFlightReservation] = useState<FlightReservation | null>(null);
+
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [currentBookingType, setCurrentBookingType] = useState<"tourisme" | "service" | "touristic_place" | "flight">("tourisme");
 
   // Charger les réservations tourisme
   useEffect(() => {
@@ -649,7 +892,6 @@ export default function UnifiedReservationPage() {
         setServiceLoading(true);
         const response = await api.get("/appointment/appointment");
 
-        // Mapper les statuts
         const mappedBookings = response.data.map((booking: any) => ({
           ...booking,
           status: mapServiceStatus(booking.status),
@@ -671,7 +913,84 @@ export default function UnifiedReservationPage() {
     fetchServiceBookings();
   }, [isAuthenticated, user, serviceFilter, toast]);
 
-  // Fonctions pour les réservations tourisme
+  // Charger les réservations de lieux touristiques
+  useEffect(() => {
+    const fetchTouristicPlaceBookings = async () => {
+      if (!isAuthenticated || !user) {
+        setTouristicPlaceLoading(false);
+        return;
+      }
+
+      try {
+        setTouristicPlaceLoading(true);
+        const response = await api.get("/touristic-place-bookings", {
+          params: {
+            userId: user.id,
+            status: touristicPlaceFilter !== "all" ? touristicPlaceFilter : undefined,
+          },
+        });
+
+        if (response.data.success) {
+          setTouristicPlaceBookings(response.data.data);
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les réservations de lieux touristiques",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Erreur chargement réservations lieux touristiques:", error);
+        toast({
+          title: "Erreur",
+          description: "Erreur lors du chargement des réservations de lieux touristiques",
+          variant: "destructive",
+        });
+      } finally {
+        setTouristicPlaceLoading(false);
+      }
+    };
+
+    fetchTouristicPlaceBookings();
+  }, [isAuthenticated, user, touristicPlaceFilter, toast]);
+
+  // Charger les réservations de vols
+  useEffect(() => {
+    const fetchFlightReservations = async () => {
+      if (!isAuthenticated || !user) {
+        setFlightLoading(false);
+        return;
+      }
+
+      try {
+        setFlightLoading(true);
+        const response = await api.get("/Vol/reservations");
+
+        if (response.data.success) {
+          setFlightReservations(response.data.data);
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les réservations de vols",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Erreur chargement réservations vols:", error);
+        toast({
+          title: "Erreur",
+          description: "Erreur lors du chargement des réservations de vols",
+            variant: "destructive",
+        });
+      } finally {
+        setFlightLoading(false);
+      }
+    };
+
+    fetchFlightReservations();
+  }, [isAuthenticated, user, flightFilter, toast]);
+
+  // Fonctions d'annulation
   const cancelTourismBooking = async (id: string) => {
     try {
       const response = await api.put(`/user/bookings/${id}/cancel`, {
@@ -693,27 +1012,10 @@ export default function UnifiedReservationPage() {
       console.error("Erreur annulation tourisme:", error);
       toast({
         title: "Erreur",
-        description:
-          error.response?.data?.error || "Erreur lors de l'annulation",
+        description: error.response?.data?.error || "Erreur lors de l'annulation",
         variant: "destructive",
       });
     }
-  };
-
-  const handleShowTourismDetails = (booking: TourismBooking) => {
-    setSelectedTourismBooking(booking);
-    setTourismDetailsModalOpen(true);
-  };
-
-  // Fonctions pour les réservations services
-  const mapServiceStatus = (status: string): ServiceBooking["status"] => {
-    const statusMap: Record<string, ServiceBooking["status"]> = {
-      pending: "pending",
-      confirmed: "confirmed",
-      cancelled: "cancelled",
-      completed: "completed",
-    };
-    return statusMap[status] || "pending";
   };
 
   const cancelServiceBooking = async (id: string) => {
@@ -736,18 +1038,143 @@ export default function UnifiedReservationPage() {
     }
   };
 
-  const handleShowServiceDetails = async (id: string) => {
+  const cancelTouristicPlaceBooking = async (id: string) => {
     try {
-      const response = await api.get(`/appointment/${id}`);
-      setSelectedServiceBooking(response.data);
-      setServiceDetailsModalOpen(true);
+      await api.delete(`/touristic-place-bookings/${id}`);
+      setTouristicPlaceBookings((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b))
+      );
+      toast({
+        title: "Réservation annulée",
+        description: "Votre réservation de lieu touristique a été annulée",
+      });
     } catch (error) {
-      console.error("Erreur chargement détails service:", error);
+      console.error("Erreur annulation lieu touristique:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de charger les détails de la réservation",
+        description: "Impossible d'annuler la réservation",
         variant: "destructive",
       });
+    }
+  };
+
+  const cancelFlightReservation = async (id: string) => {
+    try {
+      await api.put(`/Vol/reservations/${id}/status`, { status: "cancelled" });
+      setFlightReservations((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: "cancelled" } : b))
+      );
+      toast({
+        title: "Réservation annulée",
+        description: "Votre réservation de vol a été annulée",
+      });
+    } catch (error) {
+      console.error("Erreur annulation vol:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'annuler la réservation",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Fonctions de mapping des statuts
+  const mapServiceStatus = (status: string): ServiceBooking["status"] => {
+    const statusMap: Record<string, ServiceBooking["status"]> = {
+      pending: "pending",
+      confirmed: "confirmed",
+      cancelled: "cancelled",
+      completed: "completed",
+    };
+    return statusMap[status] || "pending";
+  };
+
+  // Fonctions utilitaires pour les cartes
+  const getTourismCardData = (booking: TourismBooking) => ({
+    image: booking.listing.images?.[0] || "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    title: booking.listing.title,
+    subtitle: `${booking.listing.city} • ${booking.listing.type}`,
+    date: `${new Date(booking.checkIn).toLocaleDateString("fr-FR")} - ${new Date(booking.checkOut).toLocaleDateString("fr-FR")}`,
+    details: `${booking.guests} voyageur${booking.guests > 1 ? "s" : ""}`,
+    amount: booking.amount,
+    canCancel: booking.status !== "annulee" && booking.status !== "terminee",
+  });
+
+  const getServiceCardData = (booking: ServiceBooking) => ({
+    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    title: booking.service.libelle,
+    subtitle: booking.service.description,
+    date: new Date(booking.date).toLocaleDateString("fr-FR"),
+    details: booking.time,
+    amount: booking.service.price,
+    canCancel: booking.status !== "cancelled" && booking.status !== "completed",
+  });
+
+  const getTouristicPlaceCardData = (booking: TouristicPlaceBooking) => ({
+    image: booking.place.images?.[0] || "https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    title: booking.place.title,
+    subtitle: `${booking.place.city} • ${booking.place.type}`,
+    date: new Date(booking.visitDate).toLocaleDateString("fr-FR"),
+    details: `${booking.numberOfTickets} billet${booking.numberOfTickets > 1 ? "s" : ""} • ${booking.visitTime}`,
+    amount: booking.totalAmount,
+    canCancel: booking.status !== "cancelled" && booking.status !== "completed",
+  });
+
+  const getFlightCardData = (booking: FlightReservation) => ({
+    image: booking.flight.image || "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    title: `${booking.flight.compagnie} - Vol ${booking.flight.numeroVol}`,
+    subtitle: `${booking.flight.departVille} → ${booking.flight.arriveeVille}`,
+    date: new Date(booking.flight.departDateHeure).toLocaleDateString("fr-FR"),
+    details: `${booking.nbrPersonne} passager${booking.nbrPersonne > 1 ? "s" : ""} • ${booking.flight.classe}`,
+    amount: booking.flight.prix * booking.nbrPersonne,
+    canCancel: booking.status !== "cancelled" && booking.status !== "completed",
+  });
+
+  // Fonctions pour ouvrir les modals de détails
+  const openTourismDetails = (booking: TourismBooking) => {
+    setSelectedTourismBooking(booking);
+    setCurrentBookingType("tourisme");
+    setDetailModalOpen(true);
+  };
+
+  const openServiceDetails = (booking: ServiceBooking) => {
+    setSelectedServiceBooking(booking);
+    setCurrentBookingType("service");
+    setDetailModalOpen(true);
+  };
+
+  const openTouristicPlaceDetails = (booking: TouristicPlaceBooking) => {
+    setSelectedTouristicPlaceBooking(booking);
+    setCurrentBookingType("touristic_place");
+    setDetailModalOpen(true);
+  };
+
+  const openFlightDetails = (booking: FlightReservation) => {
+    setSelectedFlightReservation(booking);
+    setCurrentBookingType("flight");
+    setDetailModalOpen(true);
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalOpen(false);
+    setSelectedTourismBooking(null);
+    setSelectedServiceBooking(null);
+    setSelectedTouristicPlaceBooking(null);
+    setSelectedFlightReservation(null);
+  };
+
+  const getCurrentBooking = () => {
+    switch (currentBookingType) {
+      case "tourisme":
+        return selectedTourismBooking;
+      case "service":
+        return selectedServiceBooking;
+      case "touristic_place":
+        return selectedTouristicPlaceBooking;
+      case "flight":
+        return selectedFlightReservation;
+      default:
+        return null;
     }
   };
 
@@ -773,31 +1200,51 @@ export default function UnifiedReservationPage() {
 
   return (
     <div className="container mx-auto max-w-6xl py-8 mt-12">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Mes Réservations</h1>
-        <p className="text-muted-foreground">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Réservations</h1>
+        <p className="text-gray-600">
           {user?.firstName ? `Bonjour ${user.firstName}, ` : ""}
           Consultez et gérez toutes vos réservations.
         </p>
       </div>
 
       <Tabs defaultValue="tourisme" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 p-2 h-auto gap-2">
           <TabsTrigger value="tourisme" className="flex items-center gap-2">
             <Building className="w-4 h-4" />
             Hébergements
+            <Badge variant="secondary" className="ml-2">
+              {tourismBookings.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="services" className="flex items-center gap-2">
             <Scissors className="w-4 h-4" />
             Services
+            <Badge variant="secondary" className="ml-2">
+              {serviceBookings.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="lieux-touristiques" className="flex items-center gap-2">
+            <Ticket className="w-4 h-4" />
+            Billets
+            <Badge variant="secondary" className="ml-2">
+              {touristicPlaceBookings.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="vols" className="flex items-center gap-2">
+            <Plane className="w-4 h-4" />
+            Vols
+            <Badge variant="secondary" className="ml-2">
+              {flightReservations.length}
+            </Badge>
           </TabsTrigger>
         </TabsList>
 
-        {/* Onglet Réservations Tourisme */}
+        {/* Onglet Hébergements */}
         <TabsContent value="tourisme">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                   <CardTitle>Mes réservations d'hébergements</CardTitle>
                   <CardDescription>
@@ -806,23 +1253,18 @@ export default function UnifiedReservationPage() {
                     {tourismBookings.length > 1 ? "s" : ""}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Select
-                    value={tourismFilter}
-                    onValueChange={setTourismFilter}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filtrer par statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes</SelectItem>
-                      <SelectItem value="en_attente">En attente</SelectItem>
-                      <SelectItem value="confirmee">Confirmées</SelectItem>
-                      <SelectItem value="terminee">Terminées</SelectItem>
-                      <SelectItem value="annulee">Annulées</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Select value={tourismFilter} onValueChange={setTourismFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="en_attente">En attente</SelectItem>
+                    <SelectItem value="confirmee">Confirmées</SelectItem>
+                    <SelectItem value="terminee">Terminées</SelectItem>
+                    <SelectItem value="annulee">Annulées</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardHeader>
             <CardContent>
@@ -830,315 +1272,339 @@ export default function UnifiedReservationPage() {
                 <div className="text-center py-8">
                   <p>Chargement de vos réservations...</p>
                 </div>
+              ) : tourismBookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Aucune réservation d'hébergement
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Vous n'avez pas encore de réservation d'hébergement.
+                  </p>
+                  <Button asChild>
+                    <Link to="/tourisme">Découvrir les hébergements</Link>
+                  </Button>
+                </div>
               ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Référence</TableHead>
-                        <TableHead>Hébergement</TableHead>
-                        <TableHead>Dates</TableHead>
-                        <TableHead>Voyageurs</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead className="text-right">Montant</TableHead>
-                        <TableHead className="w-[1%]">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tourismBookings.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8">
-                            <div className="text-muted-foreground">
-                              Aucune réservation d'hébergement trouvée
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        tourismBookings.map((booking) => (
-                          <TableRow key={booking.id}>
-                            <TableCell className="font-medium">
-                              {booking.code}
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">
-                                  {booking.listing.title}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {booking.listing.city} •{" "}
-                                  {booking.listing.type}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div>
-                                <div>
-                                  Arrivée:{" "}
-                                  {new Date(booking.checkIn).toLocaleDateString(
-                                    "fr-FR"
-                                  )}
-                                </div>
-                                <div>
-                                  Départ:{" "}
-                                  {new Date(
-                                    booking.checkOut
-                                  ).toLocaleDateString("fr-FR")}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {booking.guests} voyageur
-                              {booking.guests > 1 ? "s" : ""}
-                            </TableCell>
-                            <TableCell>
-                              <TourismStatusBadge status={booking.status} />
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {formatCurrency(booking.amount)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleShowTourismDetails(booking)
-                                  }
-                                >
-                                  Détails
-                                </Button>
-                                {booking.status !== "annulee" &&
-                                  booking.status !== "terminee" && (
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Button variant="ghost" size="sm">
-                                          Annuler
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent>
-                                        <DialogHeader>
-                                          <DialogTitle>
-                                            Annuler la réservation{" "}
-                                            {booking.code} ?
-                                          </DialogTitle>
-                                          <DialogDescription>
-                                            Cette action est irréversible.
-                                          </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter>
-                                          <Button
-                                            variant="destructive"
-                                            onClick={() =>
-                                              cancelTourismBooking(booking.id)
-                                            }
-                                          >
-                                            Confirmer l'annulation
-                                          </Button>
-                                        </DialogFooter>
-                                      </DialogContent>
-                                    </Dialog>
-                                  )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
+                <div className="space-y-4">
+                  {tourismBookings.map((booking) => {
+                    const cardData = getTourismCardData(booking);
+                    return (
+                      <BookingCard
+                        key={booking.id}
+                        booking={booking}
+                        type="tourisme"
+                        onViewDetails={() => openTourismDetails(booking)}
+                        onCancel={() => cancelTourismBooking(booking.id)}
+                        getStatusBadge={() => <TourismStatusBadge status={booking.status} />}
+                        getBookingImage={() => cardData.image}
+                        getBookingTitle={() => cardData.title}
+                        getBookingSubtitle={() => cardData.subtitle}
+                        getBookingDate={() => cardData.date}
+                        getBookingDetails={() => cardData.details}
+                        getBookingAmount={() => cardData.amount}
+                        canCancel={cardData.canCancel}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Onglet Réservations Services */}
+        {/* Onglet Services */}
         <TabsContent value="services">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>Mes réservations de services de bien etre</CardTitle>
+                  <CardTitle>Mes réservations de services</CardTitle>
                   <CardDescription>
                     Historique et réservations à venir
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Select
-                    defaultValue="all"
-                    onValueChange={(v) => setServiceFilter(v)}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filtrer par statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes</SelectItem>
-                      <SelectItem value="pending">En attente</SelectItem>
-                      <SelectItem value="confirmed">Confirmées</SelectItem>
-                      <SelectItem value="completed">Terminées</SelectItem>
-                      <SelectItem value="cancelled">Annulées</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Select value={serviceFilter} onValueChange={setServiceFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="confirmed">Confirmées</SelectItem>
+                    <SelectItem value="completed">Terminées</SelectItem>
+                    <SelectItem value="cancelled">Annulées</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardHeader>
-
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Heure</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="w-[1%]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
+              {serviceLoading ? (
+                <div className="text-center py-8">
+                  <p>Chargement de vos réservations...</p>
+                </div>
+              ) : serviceBookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <Scissors className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Aucune réservation de service
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Vous n'avez pas encore de réservation de service.
+                  </p>
+                  <Button asChild>
+                    <Link to="/app/services">Découvrir les services</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {serviceBookings.map((booking) => {
+                    const cardData = getServiceCardData(booking);
+                    return (
+                      <BookingCard
+                        key={booking.id}
+                        booking={booking}
+                        type="service"
+                        onViewDetails={() => openServiceDetails(booking)}
+                        onCancel={() => cancelServiceBooking(booking.id)}
+                        getStatusBadge={() => <ServiceStatusBadge status={booking.status} />}
+                        getBookingImage={() => cardData.image}
+                        getBookingTitle={() => cardData.title}
+                        getBookingSubtitle={() => cardData.subtitle}
+                        getBookingDate={() => cardData.date}
+                        getBookingDetails={() => cardData.details}
+                        getBookingAmount={() => cardData.amount}
+                        canCancel={cardData.canCancel}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                  <TableBody>
-                    {serviceBookings.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={7}
-                          className="text-center py-8 text-muted-foreground"
-                        >
-                          Aucune réservation de service trouvée
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      serviceBookings.map((booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell className="font-medium">
-                            {generateBookingCode(booking.id)}
-                          </TableCell>
-                          <TableCell>{booking.service.libelle}</TableCell>
-                          <TableCell>
-                            {new Date(booking.date).toLocaleDateString("fr-FR")}
-                          </TableCell>
-                          <TableCell>{booking.time}</TableCell>
-                          <TableCell>
-                            <ServiceStatusBadge status={booking.status} />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(booking.service.price)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleShowServiceDetails(booking.id)
-                                }
-                              >
-                                Détails
-                              </Button>
-                              {booking.status !== "cancelled" &&
-                                booking.status !== "completed" && (
-                                  <Dialog>
-                                    <DialogTrigger asChild>
-                                      <Button variant="ghost" size="sm">
-                                        Annuler
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                      <DialogHeader>
-                                        <DialogTitle>
-                                          Annuler la réservation{" "}
-                                          {generateBookingCode(booking.id)} ?
-                                        </DialogTitle>
-                                        <DialogDescription>
-                                          Cette action est irréversible.
-                                        </DialogDescription>
-                                      </DialogHeader>
-                                      <DialogFooter>
-                                        <Button
-                                          variant="destructive"
-                                          onClick={() =>
-                                            cancelServiceBooking(booking.id)
-                                          }
-                                        >
-                                          Confirmer l'annulation
-                                        </Button>
-                                      </DialogFooter>
-                                    </DialogContent>
-                                  </Dialog>
-                                )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+        {/* Onglet Lieux Touristiques */}
+        <TabsContent value="lieux-touristiques">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <CardTitle>Mes billets de lieux touristiques</CardTitle>
+                  <CardDescription>
+                    {touristicPlaceBookings.length} billet
+                    {touristicPlaceBookings.length > 1 ? "s" : ""} trouvé
+                    {touristicPlaceBookings.length > 1 ? "s" : ""}
+                  </CardDescription>
+                </div>
+                <Select value={touristicPlaceFilter} onValueChange={setTouristicPlaceFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="confirmed">Confirmées</SelectItem>
+                    <SelectItem value="completed">Terminées</SelectItem>
+                    <SelectItem value="cancelled">Annulées</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </CardHeader>
+            <CardContent>
+              {touristicPlaceLoading ? (
+                <div className="text-center py-8">
+                  <p>Chargement de vos billets...</p>
+                </div>
+              ) : touristicPlaceBookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <Ticket className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Aucun billet de lieu touristique
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Vous n'avez pas encore de billet pour un lieu touristique.
+                  </p>
+                  <Button asChild>
+                    <Link to="/tourisme?type=touristic">Découvrir les lieux</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {touristicPlaceBookings.map((booking) => {
+                    const cardData = getTouristicPlaceCardData(booking);
+                    return (
+                      <BookingCard
+                        key={booking.id}
+                        booking={booking}
+                        type="touristic_place"
+                        onViewDetails={() => openTouristicPlaceDetails(booking)}
+                        onCancel={() => cancelTouristicPlaceBooking(booking.id)}
+                        getStatusBadge={() => <TouristicPlaceStatusBadge status={booking.status} />}
+                        getBookingImage={() => cardData.image}
+                        getBookingTitle={() => cardData.title}
+                        getBookingSubtitle={() => cardData.subtitle}
+                        getBookingDate={() => cardData.date}
+                        getBookingDetails={() => cardData.details}
+                        getBookingAmount={() => cardData.amount}
+                        canCancel={cardData.canCancel}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Onglet Vols */}
+        <TabsContent value="vols">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <CardTitle>Mes réservations de vols</CardTitle>
+                  <CardDescription>
+                    {flightReservations.length} réservation
+                    {flightReservations.length > 1 ? "s" : ""} trouvée
+                    {flightReservations.length > 1 ? "s" : ""}
+                  </CardDescription>
+                </div>
+                <Select value={flightFilter} onValueChange={setFlightFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="confirmed">Confirmées</SelectItem>
+                    <SelectItem value="paid">Payées</SelectItem>
+                    <SelectItem value="completed">Terminées</SelectItem>
+                    <SelectItem value="cancelled">Annulées</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {flightLoading ? (
+                <div className="text-center py-8">
+                  <p>Chargement de vos réservations de vols...</p>
+                </div>
+              ) : flightReservations.length === 0 ? (
+                <div className="text-center py-12">
+                  <Plane className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Aucune réservation de vol
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Vous n'avez pas encore de réservation de vol.
+                  </p>
+                  <Button asChild>
+                    <Link to="/vols">Découvrir les vols</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {flightReservations.map((booking) => {
+                    const cardData = getFlightCardData(booking);
+                    return (
+                      <BookingCard
+                        key={booking.id}
+                        booking={booking}
+                        type="flight"
+                        onViewDetails={() => openFlightDetails(booking)}
+                        onCancel={() => cancelFlightReservation(booking.id)}
+                        getStatusBadge={() => <FlightStatusBadge status={booking.status} />}
+                        getBookingImage={() => cardData.image}
+                        getBookingTitle={() => cardData.title}
+                        getBookingSubtitle={() => cardData.subtitle}
+                        getBookingDate={() => cardData.date}
+                        getBookingDetails={() => cardData.details}
+                        getBookingAmount={() => cardData.amount}
+                        canCancel={cardData.canCancel}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Section d'actions communes */}
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
+      {/* Modal de détails */}
+      <DetailModal
+        booking={getCurrentBooking()}
+        type={currentBookingType}
+        isOpen={detailModalOpen}
+        onClose={closeDetailModal}
+      />
+
+      {/* Section d'actions communes 
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Support</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Support</CardTitle>
             <CardDescription>
               Besoin d'aide pour une réservation ?
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link to="/app/messages">Contacter le support</Link>
+            <Button asChild className="w-full">
+              <Link to="/app/messages">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contacter le support
+              </Link>
             </Button>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader>
-            <CardTitle>Politique d'annulation</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Politique d'annulation</CardTitle>
             <CardDescription>
               Consultez les conditions d'annulation
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" asChild>
-              <Link to="/app/conditions-annulation">Voir les conditions</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Nouvelle réservation</CardTitle>
-            <CardDescription>Parcourez nos services</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button variant="secondary" asChild className="w-full">
-              <Link to="/tourisme">Hébergements</Link>
-            </Button>
             <Button variant="outline" asChild className="w-full">
-              <Link to="/app/services">Services</Link>
+              <Link to="/app/conditions-annulation">
+                Voir les conditions
+              </Link>
             </Button>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Modals des détails */}
-      {selectedTourismBooking && (
-        <TourismBookingDetailsModal
-          booking={selectedTourismBooking}
-          open={tourismDetailsModalOpen}
-          onOpenChange={setTourismDetailsModalOpen}
-        />
-      )}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Lieux touristiques</CardTitle>
+            <CardDescription>Découvrez nos sites</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="secondary" asChild className="w-full">
+              <Link to="/tourisme?type=touristic">
+                <Ticket className="w-4 h-4 mr-2" />
+                Voir les lieux
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
 
-      {selectedServiceBooking && (
-        <ServiceBookingDetailsModal
-          booking={selectedServiceBooking}
-          open={serviceDetailsModalOpen}
-          onOpenChange={setServiceDetailsModalOpen}
-        />
-      )}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Vols</CardTitle>
+            <CardDescription>Réservez votre vol</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" asChild className="w-full">
+              <Link to="/vols">
+                <Plane className="w-4 h-4 mr-2" />
+                Voir les vols
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>*/}
     </div>
   );
 }
