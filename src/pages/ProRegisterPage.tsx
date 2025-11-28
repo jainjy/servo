@@ -13,6 +13,8 @@ import {
   CheckCircle,
   MapPin,
   Hash,
+  Search,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +42,7 @@ const ProRegisterPage = () => {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [metiersList, setMetiersList] = useState([]);
   const [metiersLoading, setMetiersLoading] = useState(false);
+  const [metiersSearchQuery, setMetiersSearchQuery] = useState("");
   const { signupPro } = useAuth();
   const [formData, setFormData] = useState({
     // Informations de base
@@ -50,7 +53,7 @@ const ProRegisterPage = () => {
     password: "",
     confirmPassword: "",
     // Type d'utilisateur
-    userType: subscriptionData.userTypes[0], // PRESTATAIRE | VENDEUR | ADMIN | AGENCE | BIEN_ETRE
+    userType: subscriptionData?.userTypes[0], // PRESTATAIRE | VENDEUR | ADMIN | AGENCE | BIEN_ETRE
     role: "professional", // particular ou professional
     demandType: "", // agence immobilier, particulier ou syndicat
     // Informations entreprise (si professionnel)
@@ -79,6 +82,8 @@ const ProRegisterPage = () => {
     "Masseur",
     "Formateur",
   ];
+  const espacementMetiers = ["espace ameublements"];
+
   useEffect(() => {
     // Charger les métiers depuis l'API
     const loadMetiers = async () => {
@@ -95,12 +100,48 @@ const ProRegisterPage = () => {
     };
     loadMetiers();
   }, []);
+
+  // Auto-sélectionner les métiers pour VENDEUR et BIEN_ETRE
+  useEffect(() => {
+    if (
+      metiersList.length > 0 &&
+      (formData.userType === "VENDEUR" || formData.userType === "BIEN_ETRE")
+    ) {
+      const filteredMetiers = getFilteredMetiers();
+      const metierIds = filteredMetiers.map((m) => m.id);
+      setFormData((prev) => ({
+        ...prev,
+        metiers: metierIds,
+      }));
+    }
+  }, [formData.userType, metiersList]);
+
+  const getFilteredMetiers = () => {
+    return metiersList.filter((metier) => {
+      if (formData.userType === "BIEN_ETRE") {
+        return bienEtreMetiers.includes(metier.libelle);
+      }
+      if (formData.userType === "VENDEUR") {
+        return espacementMetiers.includes(metier.libelle);
+      }
+      return true;
+    });
+  };
+
+  const getSearchFilteredMetiers = () => {
+    const filtered = getFilteredMetiers();
+    return filtered.filter((metier) =>
+      metier.libelle.toLowerCase().includes(metiersSearchQuery.toLowerCase())
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
       setStep(2);
       return;
     }
+
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
@@ -110,10 +151,11 @@ const ProRegisterPage = () => {
       toast.error("Veuillez accepter les conditions d'utilisation");
       return;
     }
-    if (formData.metiers.length ==0) {
+    if (formData.metiers.length == 0) {
       toast.error("Veuillez accepter ajouters au moins un metiers");
       return;
     }
+
     // DÉTERMINER userType BASÉ SUR L'ABONNEMENT EXACT
     let finalUserType = "CLIENT"; // Valeur par défaut
     if (subscriptionData) {
@@ -128,6 +170,7 @@ const ProRegisterPage = () => {
       finalUserType =
         subscriptionToUserType[subscriptionData.name] || "PRESTATAIRE";
     }
+
     // Créer le mapping metiersLabel
     const metiersLabel: { [key: number]: string } = {};
     formData.metiers.forEach((metierId) => {
@@ -136,6 +179,7 @@ const ProRegisterPage = () => {
         metiersLabel[metierId] = metier.libelle;
       }
     });
+
     // Appel à l'API d'inscription sans paiement
     setIsLoading(true);
     formData.userType = finalUserType;
@@ -158,6 +202,7 @@ const ProRegisterPage = () => {
       setIsLoading(false);
     }
   };
+
   // Afficher l'abonnement sélectionné dans le formulaire
   useEffect(() => {
     if (subscriptionData) {
@@ -179,12 +224,14 @@ const ProRegisterPage = () => {
       }
     }
   }, [subscriptionData]);
+
   const handleInputChange = (
     field: string,
     value: string | boolean | number[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
   const handleMetierToggle = (metierId: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -193,6 +240,7 @@ const ProRegisterPage = () => {
         : [...prev.metiers, metierId],
     }));
   };
+
   const features = [
     {
       icon: <Home className="h-6 w-6" />,
@@ -445,61 +493,109 @@ const ProRegisterPage = () => {
                     </>
                   ) : (
                     <>
-                      {/* Étape 2 */}
-                      {/* Métiers (si prestataire) */}
-                      {formData.userType != "VENDEUR" && (
-                        <div className="space-y-4 h-32 overflow-y-auto">
-                          <label className="text-sm font-medium text-gray-700">
+                      {/* Étape 2 - Métiers avec recherche améliorée */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 block mb-3">
                             Sélectionnez vos métiers *
+                            {(formData.userType === "VENDEUR" ||
+                              formData.userType === "BIEN_ETRE") && (
+                              <span className="ml-2 text-xs text-green-600 font-normal">
+                                (Tous sélectionnés automatiquement)
+                              </span>
+                            )}
                           </label>
-                          {metiersLoading ? (
-                            <div className="text-center text-gray-500">
-                              Chargement des métiers...
-                            </div>
-                          ) : metiersList.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-3">
-                              {metiersList.map(
-                                (metier) =>
-                                  (formData.userType == "BIEN_ETRE"
-                                    ? metier.libelle == bienEtreMetiers[0] ||
-                                      metier.libelle == bienEtreMetiers[1] ||
-                                      metier.libelle == bienEtreMetiers[2] ||
-                                      metier.libelle == bienEtreMetiers[3]
-                                    : true) && (
-                                    <div
-                                      key={metier.id}
-                                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                                        formData.metiers.includes(metier.id)
-                                          ? "border-blue-500 bg-blue-50"
-                                          : "border-gray-300 hover:border-gray-400"
-                                      }`}
-                                      onClick={() =>
-                                        handleMetierToggle(metier.id)
-                                      }
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <div
-                                          className={`w-5 h-5 rounded-full border-2 ${
-                                            formData.metiers.includes(metier.id)
-                                              ? "border-blue-500 bg-blue-500"
-                                              : "border-gray-400"
-                                          }`}
-                                        ></div>
-                                        <span className="text-sm font-medium">
-                                          {metier.libelle}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )
+
+                          {/* Barre de recherche */}
+                          {getFilteredMetiers().length > 2 && (
+                            <div className="mb-4 relative">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                type="text"
+                                placeholder="Rechercher un métier..."
+                                className="pl-10 pr-8 h-10 bg-gray-50 border-gray-300 rounded-lg text-sm"
+                                value={metiersSearchQuery}
+                                onChange={(e) =>
+                                  setMetiersSearchQuery(e.target.value)
+                                }
+                              />
+                              {metiersSearchQuery && (
+                                <button
+                                  type="button"
+                                  onClick={() => setMetiersSearchQuery("")}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
                               )}
                             </div>
-                          ) : (
-                            <div className="text-center text-gray-500">
-                              Aucun métier disponible
-                            </div>
                           )}
+
+                          {/* Liste des métiers */}
+                          <div className="space-y-2">
+                            {metiersLoading ? (
+                              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                                <div className="w-5 h-5 border-2 border-gray-400 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                Chargement des métiers...
+                              </div>
+                            ) : getSearchFilteredMetiers().length > 0 ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
+                                {getSearchFilteredMetiers().map((metier) => (
+                                  <div
+                                    key={metier.id}
+                                    onClick={() => handleMetierToggle(metier.id)}
+                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                                      formData.metiers.includes(metier.id)
+                                        ? "border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100 shadow-md"
+                                        : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                                    }`}
+                                  >
+                                    {/* Checkbox personnalisé */}
+                                    <div
+                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                        formData.metiers.includes(metier.id)
+                                          ? "border-blue-500 bg-blue-500"
+                                          : "border-gray-300 group-hover:border-blue-400"
+                                      }`}
+                                    >
+                                      {formData.metiers.includes(metier.id) && (
+                                        <CheckCircle className="h-4 w-4 text-white fill-current" />
+                                      )}
+                                    </div>
+
+                                    {/* Texte du métier */}
+                                    <span
+                                      className={`text-sm font-medium transition-all ${
+                                        formData.metiers.includes(metier.id)
+                                          ? "text-blue-700"
+                                          : "text-gray-700 group-hover:text-gray-900"
+                                      }`}
+                                    >
+                                      {metier.libelle}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                                <p className="text-sm">
+                                  Aucun métier ne correspond à votre recherche
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Compteur de sélection */}
+                          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-xs text-blue-700 font-medium">
+                              {formData.metiers.length} métier
+                              {formData.metiers.length > 1 ? "s" : ""} sélectionné
+                              {formData.metiers.length > 1 ? "s" : ""}
+                            </p>
+                          </div>
                         </div>
-                      )}
+                      </div>
+
                       {/* Adresse */}
                       <div className="space-y-2">
                         <div className="space-y-2">
