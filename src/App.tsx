@@ -169,6 +169,7 @@ import UserLayout from "./pages/UserLayout";
 import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
 import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
+import { App as CapacitorApp } from '@capacitor/app';
 
 const queryClient = new QueryClient();
 
@@ -210,6 +211,19 @@ const App = () => {
     }
     console.log("User ID for Socket Connection:", user.id);
   }, [user]);
+
+   useEffect(() => {
+    // Gestion simple du bouton retour
+    CapacitorApp.addListener('backButton', () => {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        if (window.confirm('Voulez-vous quitter SERVO ?')) {
+          CapacitorApp.exitApp();
+        }
+      }
+    });
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
