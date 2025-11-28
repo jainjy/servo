@@ -522,8 +522,7 @@ export default function Financement() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
               >
-                <Card className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group cursor-pointer"
-                  onClick={() => navigate(`/financement/${partenaire.id}`)}
+                <Card className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group"
                 >
                   <div className="flex items-center mb-6">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mr-5 group-hover:bg-slate-900 transition-colors duration-300">
@@ -566,13 +565,22 @@ export default function Financement() {
                     </div>
                   </div>
 
-                  <Button
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-slate-900 hover:border-slate-800"
-                    onClick={() => handlePartenaireClick(partenaire)}
-                  >
-                    <Handshake className="h-5 w-5 mr-3" />
-                    Contacter ce partenaire
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-slate-900 hover:border-slate-800"
+                      onClick={() => handlePartenaireClick(partenaire)}
+                    >
+                      <Handshake className="h-5 w-5 mr-3" />
+                      Contacter
+                    </Button>
+                    <Button
+                      className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-slate-200 hover:border-slate-300"
+                      onClick={() => navigate(`/financement/${partenaire.id}`)}
+                    >
+                      <ArrowRight className="h-5 w-5 mr-3" />
+                      Détails
+                    </Button>
+                  </div>
                 </Card>
               </motion.div>
             ))}

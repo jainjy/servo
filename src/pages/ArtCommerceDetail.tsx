@@ -45,7 +45,7 @@ const ArtCommerceDetail = () => {
       try {
         console.log("🔄 Tentative de récupération du service ID:", id);
         const res = await api.get(`/services/${id}`);
-        console.log("✅ Réponse reçue:", res.data);
+        console.log("✅ Réponse reçue:", res.data.users);
         setService(res.data);
         setError("");
       } catch (err) {
@@ -209,7 +209,7 @@ const ArtCommerceDetail = () => {
           <div className="space-y-3 mb-6">
             <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <Mail size={20} className="text-blue-600" />
-              <span className="text-slate-700 font-medium">{service?.email || "Email non disponible"}</span>
+              <span className="text-slate-700 font-medium">{service?.users[0]?.user.email || "Email non disponible"}</span>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
@@ -598,7 +598,7 @@ const ArtCommerceDetail = () => {
                   <div className="space-y-4 mb-8">
                     <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <Mail size={20} className="text-blue-600" />
-                      <span className="text-slate-700 font-medium">{service.mail || "Non disponible"}</span>
+                      <span className="text-slate-700 font-medium">{service?.users[0]?.user.email || "Non disponible"}</span>
                     </div>
 
                     <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">

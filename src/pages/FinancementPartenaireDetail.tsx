@@ -20,6 +20,7 @@ import {
   Calculator,
   AlertCircle,
   Loader,
+  X,
 } from "lucide-react";
 import { financementAPI } from "@/lib/api";
 import Header from "@/components/layout/Header";
@@ -123,6 +124,33 @@ export default function FinancementPartenaireDetail() {
       return;
     }
     setShowContactForm(true);
+  };
+
+  const handleCloseContactForm = () => {
+    setShowContactForm(false);
+  };
+
+  const handleContactSubmit = async (formData: any) => {
+    try {
+      const demandeData = {
+        nom: formData.nom,
+        email: formData.email,
+        telephone: formData.telephone,
+        message: formData.message,
+        type: 'contact_partenaire',
+        partenaireId: partenaire?.id
+      };
+
+      const response = await financementAPI.submitDemande(demandeData);
+
+      if (response.data.success) {
+        alert("Votre demande a été envoyée avec succès !");
+        setShowContactForm(false);
+      }
+    } catch (error) {
+      console.error('Erreur envoi demande:', error);
+      alert("Erreur lors de l'envoi de la demande. Veuillez réessayer.");
+    }
   };
 
   if (loading) {
@@ -481,6 +509,15 @@ export default function FinancementPartenaireDetail() {
           onContact={handleContactPartner}
         />
       )}
+
+      {/* Modal de contact partenaire */}
+      {showContactForm && partenaire && (
+        <ContactPartnerModal
+          partenaire={partenaire}
+          onClose={handleCloseContactForm}
+          onSubmit={handleContactSubmit}
+        />
+      )}
     </div>
   );
 }
@@ -760,6 +797,204 @@ function ServiceDetailsModal({
               Fermer
             </Button>
           </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Composant Modal Contact Partenaire
+interface ContactFormData {
+  nom: string;
+  email: string;
+  telephone: string;
+  message: string;
+}
+
+function ContactPartnerModal({
+  partenaire,
+  onClose,
+  onSubmit,
+}: {
+  partenaire: Partenaire;
+  onClose: () => void;
+  onSubmit: (data: ContactFormData) => Promise<void>;
+}) {
+  const [formData, setFormData] = useState<ContactFormData>({
+    nom: "",
+    email: "",
+    telephone: "",
+    message: `Bonjour, je souhaite contacter ${partenaire.nom} pour discuter de financement.`
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await onSubmit(formData);
+      setFormData({
+        nom: "",
+        email: "",
+        telephone: "",
+        message: `Bonjour, je souhaite contacter ${partenaire.nom} pour discuter de financement.`
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-8">
+          {/* En-tête avec bouton fermer */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900">
+                Contacter {partenaire.nom}
+              </h2>
+              <p className="text-slate-600 mt-2">
+                Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              disabled={submitting}
+              className="text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nom complet *
+                </label>
+                <input
+                  type="text"
+                  name="nom"
+                  placeholder="Votre nom"
+                  value={formData.nom}
+                  onChange={handleInputChange}
+                  required
+                  disabled={submitting}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 disabled:bg-slate-100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Téléphone *
+                </label>
+                <input
+                  type="tel"
+                  name="telephone"
+                  placeholder="Votre téléphone"
+                  value={formData.telephone}
+                  onChange={handleInputChange}
+                  required
+                  disabled={submitting}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 disabled:bg-slate-100"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Votre email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                disabled={submitting}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 disabled:bg-slate-100"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Message *
+              </label>
+              <textarea
+                name="message"
+                placeholder="Votre message"
+                rows={5}
+                value={formData.message}
+                onChange={handleInputChange}
+                required
+                disabled={submitting}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 resize-none disabled:bg-slate-100"
+              />
+            </div>
+
+            {/* Informations du partenaire */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">Partenaire sélectionné:</span> {partenaire.nom}
+              </p>
+              {partenaire.email && (
+                <p className="text-sm text-blue-800 mt-1">
+                  <span className="font-semibold">Nous transférerons:</span> {partenaire.email}
+                </p>
+              )}
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex gap-4 pt-6 border-t border-slate-200">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl py-3 font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-5 w-5" />
+                    Envoyer ma demande
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={submitting}
+                className="flex-1 border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 rounded-xl py-3 font-semibold transition-all duration-300 disabled:opacity-50"
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
         </div>
       </motion.div>
     </motion.div>
