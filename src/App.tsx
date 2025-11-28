@@ -155,6 +155,7 @@ import InvestirEtranger from "./components/components/Investir_etrangert";
 import SHLMR from "./components/components/SHLMR";
 import MedecinePlants from "./pages/MedecinePlantes";
 import CoursDomicile from "./pages/pro/CoursDomicil";
+import FinancementServicesPro from "./pages/pro/FinancementServicesPro";
 import ProReservations from "./pages/ProReservations";
 import UserReservations from "./pages/UserReservations";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
@@ -166,6 +167,7 @@ import AccountSuspended from "./pages/AccountSuspended";
 import AccountStatusGuard from "./components/AccountStatusGuard";
 import UserLayout from "./pages/UserLayout";
 import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
+import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
 
 const queryClient = new QueryClient();
@@ -534,6 +536,10 @@ const App = () => {
                       element={<FinancementDemandesPro />}
                     />
                     <Route
+                      path="financement-services"
+                      element={<FinancementServicesPro />}
+                    />
+                    <Route
                       path="reservationbien-etre"
                       element={<ReservationTable />}
                     />
@@ -629,6 +635,10 @@ const App = () => {
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
+                    <Route
+                      path="financement-services"
+                      element={<FinancementServicesAdmin />}
+                    />
                     <Route
                       path="subscriptions"
                       element={<AdminSubscriptions />}
