@@ -15,6 +15,7 @@ import {
   Hash,
   Search,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -263,10 +264,15 @@ const ProRegisterPage = () => {
       description: "Tout votre habitat géré depuis une seule plateforme",
     },
   ];
+  const handleBack = () => {
+    navigate("/register/professional/subscription");
+  };
+  const [redirecting, setRedirecting] = useState(false);
   return (
     <div className="min-h-screen flex">
       {/* Background reste identique */}
       <div className="w-screen h-screen bg-black/80 backdrop-blur-lg -z-10 top-0 absolute"></div>
+
       <div className="absolute w-screen h-screen top-0 left-0 -z-20 opacity-70">
         <img
           src="/nature.jpeg"
@@ -280,6 +286,18 @@ const ProRegisterPage = () => {
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
+            {/* Bouton Retour stylé en haut à gauche */}
+            <div className="absolute top-6 left-6 z-30">
+              <Button
+                variant="outline"
+                className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
+                onClick={handleBack}
+                disabled={redirecting}
+              >
+                <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+                <span className="font-semibold">Retour</span>
+              </Button>
+            </div>
             <div className="mb-8">
               <div className="flex items-center gap-3">
                 <div className="w-10 overflow-hidden h-10 rounded-full bg-black flex items-center justify-center">
@@ -348,14 +366,12 @@ const ProRegisterPage = () => {
                   </div>
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 1 ? "bg-blue-600" : "bg-green-500"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${step === 1 ? "bg-blue-600" : "bg-green-500"
+                        }`}
                     ></div>
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 2 ? "bg-blue-600" : "bg-gray-300"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${step === 2 ? "bg-blue-600" : "bg-gray-300"
+                        }`}
                     ></div>
                   </div>
                 </div>
@@ -500,10 +516,10 @@ const ProRegisterPage = () => {
                             Sélectionnez vos métiers *
                             {(formData.userType === "VENDEUR" ||
                               formData.userType === "BIEN_ETRE") && (
-                              <span className="ml-2 text-xs text-green-600 font-normal">
-                                (Tous sélectionnés automatiquement)
-                              </span>
-                            )}
+                                <span className="ml-2 text-xs text-green-600 font-normal">
+                                  (Tous sélectionnés automatiquement)
+                                </span>
+                              )}
                           </label>
 
                           {/* Barre de recherche */}
@@ -544,19 +560,17 @@ const ProRegisterPage = () => {
                                   <div
                                     key={metier.id}
                                     onClick={() => handleMetierToggle(metier.id)}
-                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                                      formData.metiers.includes(metier.id)
-                                        ? "border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100 shadow-md"
-                                        : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
-                                    }`}
+                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${formData.metiers.includes(metier.id)
+                                      ? "border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100 shadow-md"
+                                      : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                                      }`}
                                   >
                                     {/* Checkbox personnalisé */}
                                     <div
-                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                        formData.metiers.includes(metier.id)
-                                          ? "border-blue-500 bg-blue-500"
-                                          : "border-gray-300 group-hover:border-blue-400"
-                                      }`}
+                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.metiers.includes(metier.id)
+                                        ? "border-blue-500 bg-blue-500"
+                                        : "border-gray-300 group-hover:border-blue-400"
+                                        }`}
                                     >
                                       {formData.metiers.includes(metier.id) && (
                                         <CheckCircle className="h-4 w-4 text-white fill-current" />
@@ -565,11 +579,10 @@ const ProRegisterPage = () => {
 
                                     {/* Texte du métier */}
                                     <span
-                                      className={`text-sm font-medium transition-all ${
-                                        formData.metiers.includes(metier.id)
-                                          ? "text-blue-700"
-                                          : "text-gray-700 group-hover:text-gray-900"
-                                      }`}
+                                      className={`text-sm font-medium transition-all ${formData.metiers.includes(metier.id)
+                                        ? "text-blue-700"
+                                        : "text-gray-700 group-hover:text-gray-900"
+                                        }`}
                                     >
                                       {metier.libelle}
                                     </span>
@@ -676,10 +689,10 @@ const ProRegisterPage = () => {
                               <MapPin className="h-4 w-4 mr-2" />
                               {formData.latitude && formData.longitude
                                 ? `Position définie: ${parseFloat(
-                                    formData.latitude
-                                  ).toFixed(4)}, ${parseFloat(
-                                    formData.longitude
-                                  ).toFixed(4)}`
+                                  formData.latitude
+                                ).toFixed(4)}, ${parseFloat(
+                                  formData.longitude
+                                ).toFixed(4)}`
                                 : "Cliquez pour sélectionner sur la carte"}
                             </Button>
                             <p className="text-xs text-gray-500">
@@ -864,9 +877,8 @@ const ProRegisterPage = () => {
                     )}
                     <Button
                       type="submit"
-                      className={`${
-                        step === 2 ? "flex-1" : "w-full"
-                      } h-11 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold`}
+                      className={`${step === 2 ? "flex-1" : "w-full"
+                        } h-11 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold`}
                       disabled={isLoading}
                     >
                       {isLoading ? (

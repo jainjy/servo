@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { User, Building, Home, Car, Trees, CheckCircle, Star, Users, Shield } from "lucide-react";
+import { User, Building, Home, Car, Trees, CheckCircle, Star, Users, Shield, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const RoleSelectionPage = () => {
@@ -78,6 +78,10 @@ const RoleSelectionPage = () => {
     };
     return colors[color as keyof typeof colors] || colors.blue;
   };
+  const [redirecting, setRedirecting] = useState(false);
+    const handleBack = () => {
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen flex overflow-hidden relative">
@@ -93,6 +97,19 @@ const RoleSelectionPage = () => {
 
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
+
+      {/* Bouton Retour stylé en haut à gauche */}
+      <div className="absolute top-6 left-6 z-30">
+        <Button
+          variant="outline"
+          className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
+          onClick={handleBack}
+          disabled={redirecting}
+        >
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-semibold">Retour</span>
+        </Button>
+      </div>
 
       <div className="w-full">
         <div className="text-center my-4">
@@ -127,7 +144,7 @@ const RoleSelectionPage = () => {
                 {role.popular && (
                   <div className="absolute -top-5 right-2 transform z-10">
                     <div className={`bg-gradient-to-r ${color.gradient} overflow-hidden text-white px-2 py-1 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 backdrop-blur-sm border border-white/10`}>
-                      <img src="/fire.gif" alt=""  className="w-6 h-6"/> 
+                      <img src="/fire.gif" alt="" className="w-6 h-6" />
                       Le plus populaire
                     </div>
                   </div>
@@ -190,7 +207,7 @@ const RoleSelectionPage = () => {
         {/* Footer */}
         <div className="text-center mt-8 lg:mb-2 mb-8 space-y-4">
           <div className="text-lg text-gray-600">
-           Vous avez déjà un compte ?{" "}
+            Vous avez déjà un compte ?{" "}
             <a
               href="/login"
               className="text-blue-600 ml-2 hover:underline hover:text-blue-700 font-semibold transition-colors duration-200"
