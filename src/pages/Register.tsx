@@ -27,13 +27,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 
 const RegisterPage = () => {
@@ -50,9 +43,9 @@ const RegisterPage = () => {
     confirmPassword: "",
 
     // Type d'utilisateur
-    userType: "CLIENT", // PRESTATAIRE | VENDEUR | LOUEUR | CLIENT | ADMIN
-    role: "particular", // particular ou professional
-    demandType: "", // agence immobilier, particulier ou syndicat
+    userType: "CLIENT",
+    role: "particular",
+    demandType: "particulier",
 
     // Informations entreprise (si professionnel)
     companyName: "",
@@ -69,9 +62,6 @@ const RegisterPage = () => {
     latitude: "",
     longitude: "",
 
-    // Métiers (si prestataire)
-    metiers: [] as number[],
-
     acceptTerms: false,
     importedContactsConsent: false,
   });
@@ -79,30 +69,6 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const { register } = useAuth();
-
-  // Types d'utilisateurs disponibles
-  const userTypes = [
-    { value: "CLIENT", label: "Client" },
-    { value: "PRESTATAIRE", label: "Prestataire" },
-    { value: "VENDEUR", label: "Vendeur" },
-    { value: "LOUEUR", label: "Loueur" },
-  ];
-
-  // Types de demandes
-  const demandTypes = [
-    { value: "particulier", label: "Particulier" },
-    { value: "agence immobilier", label: "Agence immobilière" },
-    { value: "syndicat", label: "Syndicat" },
-  ];
-
-  // Liste des métiers (exemple)
-  const metiersList = [
-    { id: 1, libelle: "Plombier" },
-    { id: 2, libelle: "Électricien" },
-    { id: 3, libelle: "Peintre" },
-    { id: 4, libelle: "Menuisier" },
-    { id: 5, libelle: "Jardinier" },
-  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,22 +95,6 @@ const RegisterPage = () => {
       return;
     }
 
-    if (step === 1) {
-      // Vérifie les champs de base
-      if (
-        !formData.firstName ||
-        !formData.lastName ||
-        !formData.email ||
-        !formData.phone
-      ) {
-        toast.error("Veuillez remplir toutes les informations requises");
-        return;
-      }
-      // Passe à l'étape 2 (les conditions RGPD seront ici)
-      setStep(2);
-      return;
-    }
-
     if (!formData.acceptTerms) {
       toast.error(
         "Veuillez accepter les conditions d'utilisation et la politique de confidentialité"
@@ -158,7 +108,6 @@ const RegisterPage = () => {
       return;
     }
 
-    // Pour les particuliers, inscription directe
     setIsLoading(true);
     try {
       const registerData = {
@@ -167,22 +116,12 @@ const RegisterPage = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role: formData.role,
-        userType: "CLIENT", // FORCER userType à "CLIENT" pour les particuliers
-        demandType: formData.demandType,
-        companyName: formData.companyName,
-        commercialName: formData.commercialName,
-        siret: formData.siret,
         address: formData.address,
         addressComplement: formData.addressComplement,
         zipCode: formData.zipCode,
         city: formData.city,
-        latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
-        longitude: formData.longitude
-          ? parseFloat(formData.longitude)
-          : undefined,
-        metiers: formData.metiers,
-        subscriptionType: "FREE", // Gratuit pour les particuliers
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
       };
 
       const { user, token, route } = await register(registerData);
@@ -202,15 +141,6 @@ const RegisterPage = () => {
     value: string | boolean | number[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleMetierToggle = (metierId: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      metiers: prev.metiers.includes(metierId)
-        ? prev.metiers.filter((id) => id !== metierId)
-        : [...prev.metiers, metierId],
-    }));
   };
 
   const features = [
@@ -416,71 +346,10 @@ const RegisterPage = () => {
                           />
                         </div>
                       </div>
-
-                      {/* Type de demande (si particulier) */}
-                      {formData.role === "particular" && (
-                        <div className="space-y-3">
-                          <label className="text-sm font-medium text-gray-700">
-                            Type de demande *
-                          </label>
-                          <Select
-                            value={formData.demandType}
-                            onValueChange={(value) =>
-                              handleInputChange("demandType", value)
-                            }
-                          >
-                            <SelectTrigger className="h-11 bg-white border-gray-300">
-                              <SelectValue placeholder="Sélectionnez votre type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {demandTypes.map((type) => (
-                                <SelectItem key={type.value} value={type.value}>
-                                  {type.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
                     </>
                   ) : (
                     <>
                       {/* Étape 2 */}
-                      {/* Métiers (si prestataire) */}
-                      {formData.userType === "PRESTATAIRE" && (
-                        <div className="space-y-4">
-                          <label className="text-sm font-medium text-gray-700">
-                            Sélectionnez vos métiers *
-                          </label>
-                          <div className="grid grid-cols-2 gap-3">
-                            {metiersList.map((metier) => (
-                              <div
-                                key={metier.id}
-                                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                                  formData.metiers.includes(metier.id)
-                                    ? "border-blue-500 bg-blue-50"
-                                    : "border-gray-300 hover:border-gray-400"
-                                }`}
-                                onClick={() => handleMetierToggle(metier.id)}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    className={`w-5 h-5 rounded-full border-2 ${
-                                      formData.metiers.includes(metier.id)
-                                        ? "border-blue-500 bg-blue-500"
-                                        : "border-gray-400"
-                                    }`}
-                                  ></div>
-                                  <span className="text-sm font-medium">
-                                    {metier.libelle}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
                       {/* Adresse */}
                       <div className="relative space-y-1">
                         <div className="space-y-2">

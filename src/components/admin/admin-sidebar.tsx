@@ -12,6 +12,7 @@ import {
   Tag,
   FileText,
   WalletCards,
+  Globe,
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
