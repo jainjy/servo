@@ -8,7 +8,7 @@ import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import api from "@/lib/api";
 import start from '/run.gif';
 import { DevisModal } from "@/components/TravauxSection";
-import { ModalDemandeVisite } from "@/components/PropertyListings";
+import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
 // Import du contexte panier  
 import { useCart } from "@/components/contexts/CartContext";
 import { toast } from "sonner";
