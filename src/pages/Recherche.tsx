@@ -268,76 +268,79 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // Normalisation des résultats - AMÉLIORÉE pour inclure plus de données
-  const normalizeApiResults = (apiResults: any[]): SearchItem[] => {
-    return apiResults.map((item) => {
-      let title = "";
-      let image = "";
-      let price: number | undefined;
-      let location = "";
-      let route = "/";
-      let type = item.source_table;
+    const normalizeApiResults = (apiResults: any[]): SearchItem[] => {
+      return apiResults.map((item) => {
+        let title = "";
+        let image = "";
+        let price: number | undefined;
+        let location = "";
+        let route = "/";
+        // CORRECTION : utiliser item.source au lieu de item.source_table
+        let type = item.source || item.source_table;
 
-      switch (item.source_table) {
-        case "Property":
-          title = item.title || "Propriété";
-          image = extractFirstValidImage(item.images);
-          price = item.price;
-          location = item.city || "";
-          route = `/immobilier/${item.id}`;
-          break;
+        // CORRECTION : utiliser item.source dans le switch
+        switch (item.source || item.source_table) {
+          case "Property":
+            title = item.title || "Propriété";
+            image = extractFirstValidImage(item.images);
+            price = item.price;
+            location = item.city || "";
+            route = `/immobilier/${item.id}`;
+            break;
 
-        case "Product":
-          title = item.name || "Produit";
-          image = extractFirstValidImage(item.images);
-          price = item.price;
-          route = `/produits/${item.id}`;
-          break;
+          case "Product":
+            title = item.name || "Produit";
+            image = extractFirstValidImage(item.images);
+            price = item.price;
+            route = `/produits/${item.id}`;
+            break;
 
-        case "BlogArticle":
-          title = item.title || "Article";
-          image = extractFirstValidImage(item.coverUrl || item.images);
-          route = `/blog/${item.slug || item.id}`;
-          break;
+          // case "BlogArticle":
+          //   title = item.title || "Article";
+          //   image = extractFirstValidImage(item.coverUrl || item.images);
+          //   route = `/blog/${item.slug || item.id}`;
+          //   break;
 
-        case "Service":
-          title = item.libelle || "Service";
-          image = extractFirstValidImage(item.images);
-          price = item.price;
-          route = `/services`;
-          break;
+          case "Service":
+            title = item.libelle || "Service";
+            image = extractFirstValidImage(item.images);
+            price = item.price;
+            route = `/services`;
+            break;
 
-        case "Metier":
-          title = item.libelle || "Métier";
-          image = extractFirstValidImage(item.images);
-          route = `/professionnels`;
-          break;
+          case "Metier":
+            title = item.libelle || "Métier";
+            image = extractFirstValidImage(item.images);
+            route = `/professionnels`;
+            break;
 
-        default:
-          title = item.title || item.name || item.libelle || "Élément";
-          image = extractFirstValidImage(item.images);
-          route = "/";
-      }
+          default:
+            title = item.title || item.name || item.libelle || "Élément";
+            image = extractFirstValidImage(item.images);
+            route = "/";
+        }
 
-      return {
-        id: item.id,
-        title,
-        image,
-        price,
-        location,
-        route,
-        type: type.toUpperCase(),
-        source_table: item.source_table,
-        similarity: item.similarity,
-        // Données supplémentaires pour les modales
-        libelle: item.libelle || title,
-        description: item.description,
-        name: item.name || title,
-        images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
-        city: item.city,
-        address: item.address
-      };
-    });
-  };
+        return {
+          id: item.id,
+          title,
+          image,
+          price,
+          location,
+          route,
+          type: type ? type.toUpperCase() : "UNKNOWN", // ← Ajouter une vérification
+          // CORRECTION : utiliser source au lieu de source_table
+          source_table: item.source || item.source_table || "unknown",
+          similarity: item.similarity,
+          // Données supplémentaires pour les modales
+          libelle: item.libelle || title,
+          description: item.description,
+          name: item.name || title,
+          images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
+          city: item.city,
+          address: item.address
+        };
+      });
+    };
 
   // Fonctions de recherche existantes (garder removeDuplicates, areTitlesSimilar, levenshteinDistance, filterResults)
 
@@ -426,6 +429,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
     try {
       const response = await api.post("/recherche", { prompt: q });
+   console.log("Réponse API:", response.data);
 
       if (response.data.success && Array.isArray(response.data.results)) {
         const normalizedResults = normalizeApiResults(response.data.results);
@@ -576,49 +580,66 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // Fonction pour rendre le bouton approprié selon le type
-  const renderActionButton = (item: SearchItem) => {
-    switch (item.source_table) {
-      case "Service":
-      case "Metier":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-            onClick={(e) => handleDevis(item, e)}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Faire un devis
-          </Button>
-        );
+    const renderActionButton = (item: SearchItem) => {
+      // Utilisez source_table qui a été corrigé dans normalizeApiResults
+      switch (item.source_table) {
+        case "Service":
+        case "Metier":
+          return (
+            <Button
+              size="sm"
+              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={(e) => handleDevis(item, e)}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Faire un devis
+            </Button>
+          );
 
-      case "Property":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
-            onClick={(e) => handleVisite(item, e)}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Demande visite
-          </Button>
-        );
+        case "Property":
+          return (
+            <Button
+              size="sm"
+              className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
+              onClick={(e) => handleVisite(item, e)}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Demande visite
+            </Button>
+          );
 
-      case "Product":
-        return (
-          <Button
-            size="sm"
-            className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
-            onClick={(e) => handleAddToCart(item, e)}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Ajouter au panier
-          </Button>
-        );
+        case "Product":
+          return (
+            <Button
+              size="sm"
+              className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
+              onClick={(e) => handleAddToCart(item, e)}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Ajouter au panier
+            </Button>
+          );
 
-      default:
-        return null;
-    }
-  };
+        // Ajoutez d'autres cas si nécessaire
+        case "BlogArticle":
+          return (
+            <Button
+              size="sm"
+              className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(item.route);
+              }}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Lire l'article
+            </Button>
+          );
+
+        default:
+          return null;
+      }
+    };
 
   // NOUVELLE FONCTION : Rendu de l'image avec fallback aux initiales - MODIFIÉE
   const renderImageWithFallback = (item: SearchItem) => {
