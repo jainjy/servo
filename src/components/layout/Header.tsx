@@ -957,6 +957,10 @@ const Header = () => {
       title: "SERVICES ET PARTENAIRES",
       href: "/service",
     },
+    {
+      title: "DIGITALISATION",
+      href: "/digitalisation",
+    },
     // {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
