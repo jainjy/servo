@@ -1,4 +1,4 @@
-// DigitalisationSimple.jsx (version simplifiée)
+//pages/Digitalisation.jsx
 import React from "react";
 import {
   ShoppingCart,
@@ -9,6 +9,9 @@ import {
   Zap,
   CheckCircle,
   ArrowRight,
+  Palette,
+  Lightbulb,
+  LifeBuoy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -43,6 +46,21 @@ const Digitalisation = () => {
       title: "Transformation Digitale",
       icon: <Zap />,
       desc: "Accompagnement complet pour digitaliser",
+    },
+    {
+      title: "Design UI/UX",
+      icon: <Palette />,
+      desc: "Conception d'interfaces utilisateur et expérience utilisateur",
+    },
+    {
+      title: "Consulting Digital",
+      icon: <Lightbulb />,
+      desc: "Conseil en stratégie digitale",
+    },
+    {
+      title: "Maintenance & Support",
+      icon: <LifeBuoy />,
+      desc: "Maintenance et support technique",
     },
   ];
 
@@ -97,7 +115,6 @@ const Digitalisation = () => {
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );
