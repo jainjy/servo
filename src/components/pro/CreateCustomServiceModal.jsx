@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Tag, Briefcase, Euro, Clock, Save } from "lucide-react";
+import { Plus, X, Tag, Briefcase, Euro, Clock, Save, Image, Trash2 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
@@ -24,6 +24,7 @@ export function CreateCustomServiceModal({
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [userMetiers, setUserMetiers] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [formData, setFormData] = useState({
     libelle: "",
     description: "",
@@ -32,8 +33,10 @@ export function CreateCustomServiceModal({
     duration: "",
     tags: [],
     metierIds: [],
+    images: [],
   });
   const [newTag, setNewTag] = useState("");
+  const [previewImages, setPreviewImages] = useState([]);
 
   useEffect(() => {
     if (open) {
@@ -65,8 +68,47 @@ export function CreateCustomServiceModal({
       duration: "",
       tags: [],
       metierIds: [],
+      images: [],
     });
     setNewTag("");
+    setPreviewImages([]);
+  };
+
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    const maxFiles = 5;
+    const totalImages = previewImages.length + files.length;
+
+    if (totalImages > maxFiles) {
+      toast.error(`Maximum ${maxFiles} images autorisées`);
+      return;
+    }
+
+    files.forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Seules les images sont acceptées");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewImages((prev) => [
+          ...prev,
+          {
+            preview: e.target.result,
+            file: file,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Réinitialiser l'input
+    e.target.value = "";
+  };
+
+  const removeImage = (index) => {
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -79,12 +121,34 @@ export function CreateCustomServiceModal({
 
     setLoading(true);
     try {
-      const response = await api.post("/professional/services/custom", {
-        ...formData,
+      const submitData = {
+        libelle: formData.libelle,
+        description: formData.description,
+        categoryId: formData.categoryId || null,
         price: formData.price ? parseFloat(formData.price) : null,
         duration: formData.duration ? parseInt(formData.duration) : null,
-        categoryId: formData.categoryId || null,
-        images: [], // Vous pouvez ajouter l'upload d'images plus tard
+        tags: formData.tags,
+        metierIds: formData.metierIds,
+        images: previewImages.map(img => img.file),
+      };
+
+      const formDataToSend = new FormData();
+      formDataToSend.append("libelle", submitData.libelle);
+      formDataToSend.append("description", submitData.description);
+      formDataToSend.append("categoryId", submitData.categoryId);
+      formDataToSend.append("price", submitData.price);
+      formDataToSend.append("duration", submitData.duration);
+      formDataToSend.append("tags", JSON.stringify(submitData.tags));
+      formDataToSend.append("metierIds", JSON.stringify(submitData.metierIds));
+
+      submitData.images.forEach((image, index) => {
+        formDataToSend.append("images", image);
+      });
+
+      const response = await api.post("/professional/services/custom", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       toast.success("Service créé avec succès");
@@ -175,6 +239,56 @@ export function CreateCustomServiceModal({
               rows={3}
               className="bg-background border-input resize-none"
             />
+          </div>
+
+          {/* Images */}
+          <div className="space-y-2">
+            <Label className="text-foreground flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              Images ({previewImages.length}/5)
+            </Label>
+            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+              <input
+                type="file"
+                id="image-upload"
+                multiple
+                accept="image/*"
+                onChange={handleImageSelect}
+                disabled={previewImages.length >= 5 || uploadingImages}
+                className="hidden"
+              />
+              <label htmlFor="image-upload" className="cursor-pointer">
+                <Image className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm font-medium text-foreground">
+                  Cliquez pour ajouter des images
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PNG, JPG, GIF jusqu'à 5 images (5MB max chacune)
+                </p>
+              </label>
+            </div>
+
+            {/* Aperçu des images */}
+            {previewImages.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {previewImages.map((img, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={img.preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-destructive text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Catégorie */}
@@ -337,7 +451,7 @@ export function CreateCustomServiceModal({
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || uploadingImages}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {loading ? (
