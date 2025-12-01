@@ -247,6 +247,7 @@ const App = () => {
                   />
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
+                  <Route path="/digitalisation" element={<BienEtre />} />
                   <Route path="/cookies" element={<CookiesPolicy />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
