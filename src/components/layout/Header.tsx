@@ -1203,7 +1203,7 @@ const Header = () => {
                             <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
                           </div>
                         </Link>
-                        <nav className="space-y-1">
+                        <nav className="space-y-1 overflow-y-auto">
                           {menuSections.map((section, si) => {
                             const hasItems =
                               !!section.items && section.items.length > 0;
@@ -1237,7 +1237,7 @@ const Header = () => {
                               </div>
                             );
                           })}
-                          <div className=" absolute -bottom-28 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
+                          <div className=" absolute -bottom-36 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
                             {!isAuthenticated ? (
                               <Link
                                 to="/login"
