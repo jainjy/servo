@@ -13,6 +13,7 @@ import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
 import { useCart } from "@/components/contexts/CartContext";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
+import { AutoSuggestInput } from "@/components/AutoSuggestInput";
 
 interface SearchItem {
   id: string | number;
@@ -71,7 +72,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const prevStageRef = useRef<Stage>("idle");
 
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [searchHistory, setSearchHistory] = useState<Array<{ q: string; date: number }>>([]);
+ const [searchHistory, setSearchHistory] = useState<Array<{ q: string; date: number }>>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const HISTORY_KEY = "hero-search-history";
   const inputRef = useRef<HTMLInputElement>(null);
@@ -215,32 +216,71 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     return colors[index];
   };
 
-  // Gestion de l'historique (garder les fonctions existantes)
-  const loadHistory = () => {
-    try {
-      const raw = localStorage.getItem(HISTORY_KEY);
-      if (!raw) return [] as Array<{ q: string; date: number }>;
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [] as Array<{ q: string; date: number }>;
-    }
-  };
+  // Gestion de l'historique
+
+// Dans handleSearch, ajouter l'enregistrement de l'activité :
+    const handleSearch = async (searchQuery?: string) => {
+      const q = (searchQuery || query).trim();
+      
+      if (!q) {
+        setResults([]);
+        setFilteredResults([]);
+        setStage("results");
+        navigate('/recherche', { replace: true });
+        return;
+      }
+      
+      // Ajouter à l'historique local
+      addHistory(q);
+      
+      // Enregistrer dans l'historique serveur (asynchrone, ne pas attendre)
+      if (isAuthenticated) {
+        try {
+          await api.post('/suggestions/log', {
+            query: q,
+            userId: localStorage.getItem("user-id") || undefined,
+            resultsCount: 0 // Sera mis à jour après
+          });
+        } catch (error) {
+          console.error("Erreur enregistrement recherche:", error);
+        }
+      }
+      
+      // Mettre à jour la query affichée
+      if (searchQuery) {
+        setQuery(searchQuery);
+      }
+      
+      await runSearch(q);
+    };
+
+// Simplifier addHistory :
+    const addHistory = (q: string) => {
+      if (!q) return;
+      setSearchHistory((prev) => {
+        const withoutDup = prev.filter((i) => i.q.toLowerCase() !== q.toLowerCase());
+        const next = [{ q, date: Date.now() }, ...withoutDup].slice(0, 50);
+        saveHistory(next);
+        return next;
+      });
+    };
+
+// Mettre à jour loadHistory et saveHistory pour enlever correctedFrom
+    const loadHistory = () => {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        if (!raw) return [] as Array<{ q: string; date: number }>;
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [] as Array<{ q: string; date: number }>;
+      }
+    };
 
   const saveHistory = (list: Array<{ q: string; date: number }>) => {
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
     } catch { /* empty */ }
-  };
-
-  const addHistory = (q: string) => {
-    if (!q) return;
-    setSearchHistory((prev) => {
-      const withoutDup = prev.filter((i) => i.q.toLowerCase() !== q.toLowerCase());
-      const next = [{ q, date: Date.now() }, ...withoutDup].slice(0, 50);
-      saveHistory(next);
-      return next;
-    });
   };
 
   useEffect(() => {
@@ -268,88 +308,82 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // Normalisation des résultats - AMÉLIORÉE pour inclure plus de données
-    const normalizeApiResults = (apiResults: any[]): SearchItem[] => {
-      return apiResults.map((item) => {
-        let title = "";
-        let image = "";
-        let price: number | undefined;
-        let location = "";
-        let route = "/";
-        // CORRECTION : utiliser item.source au lieu de item.source_table
-        let type = item.source || item.source_table;
+  const normalizeApiResults = (apiResults: any[]): SearchItem[] => {
+    return apiResults.map((item) => {
+      let title = "";
+      let image = "";
+      let price: number | undefined;
+      let location = "";
+      let route = "/";
+      let type = item.source || item.source_table;
 
-        // CORRECTION : utiliser item.source dans le switch
-        switch (item.source || item.source_table) {
-          case "Property":
-            title = item.title || "Propriété";
-            image = extractFirstValidImage(item.images);
-            price = item.price;
-            location = item.city || "";
-            route = `/immobilier/${item.id}`;
-            break;
+      switch (item.source || item.source_table) {
+        case "Property":
+          title = item.title || "Propriété";
+          image = extractFirstValidImage(item.images);
+          price = item.price;
+          location = item.city || "";
+          route = `/immobilier/${item.id}`;
+          break;
 
-          case "Product":
-            title = item.name || "Produit";
-            image = extractFirstValidImage(item.images);
-            price = item.price;
-            route = `/produits/${item.id}`;
-            break;
+        case "Product":
+          title = item.name || "Produit";
+          image = extractFirstValidImage(item.images);
+          price = item.price;
+          route = `/produits/${item.id}`;
+          break;
 
-          // case "BlogArticle":
-          //   title = item.title || "Article";
-          //   image = extractFirstValidImage(item.coverUrl || item.images);
-          //   route = `/blog/${item.slug || item.id}`;
-          //   break;
+        // case "BlogArticle":
+        //   title = item.title || "Article";
+        //   image = extractFirstValidImage(item.coverUrl || item.images);
+        //   route = `/blog/${item.slug || item.id}`;
+        //   break;
 
-          case "Service":
-            title = item.libelle || "Service";
-            image = extractFirstValidImage(item.images);
-            price = item.price;
-            route = `/services`;
-            break;
+        case "Service":
+          title = item.libelle || "Service";
+          image = extractFirstValidImage(item.images);
+          price = item.price;
+          route = `/services`;
+          break;
 
-          case "Metier":
-            title = item.libelle || "Métier";
-            image = extractFirstValidImage(item.images);
-            route = `/professionnels`;
-            break;
+        case "Metier":
+          title = item.libelle || "Métier";
+          image = extractFirstValidImage(item.images);
+          route = `/professionnels`;
+          break;
 
-          default:
-            title = item.title || item.name || item.libelle || "Élément";
-            image = extractFirstValidImage(item.images);
-            route = "/";
-        }
+        default:
+          title = item.title || item.name || item.libelle || "Élément";
+          image = extractFirstValidImage(item.images);
+          route = "/";
+      }
 
-        return {
-          id: item.id,
-          title,
-          image,
-          price,
-          location,
-          route,
-          type: type ? type.toUpperCase() : "UNKNOWN", // ← Ajouter une vérification
-          // CORRECTION : utiliser source au lieu de source_table
-          source_table: item.source || item.source_table || "unknown",
-          similarity: item.similarity,
-          // Données supplémentaires pour les modales
-          libelle: item.libelle || title,
-          description: item.description,
-          name: item.name || title,
-          images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
-          city: item.city,
-          address: item.address
-        };
-      });
-    };
+      return {
+        id: item.id,
+        title,
+        image,
+        price,
+        location,
+        route,
+        type: type ? type.toUpperCase() : "UNKNOWN",
+        source_table: item.source || item.source_table || "unknown",
+        similarity: item.similarity,
+        libelle: item.libelle || title,
+        description: item.description,
+        name: item.name || title,
+        images: Array.isArray(item.images) ? item.images : [image].filter(Boolean),
+        city: item.city,
+        address: item.address
+      };
+    });
+  };
 
-  // Fonctions de recherche existantes (garder removeDuplicates, areTitlesSimilar, levenshteinDistance, filterResults)
-
+  // Fonctions de recherche existantes
   const removeDuplicates = (results: SearchItem[]): SearchItem[] => {
     const seen = new Set();
 
     return results.filter(item => {
       const uniqueKey = `${item.id}-${item.source_table}`;
-
       const titleKey = item.title.toLowerCase().trim();
 
       if (seen.has(uniqueKey)) {
@@ -429,7 +463,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
     try {
       const response = await api.post("/recherche", { prompt: q });
-   console.log("Réponse API:", response.data);
+      console.log("Réponse API:", response.data);
 
       if (response.data.success && Array.isArray(response.data.results)) {
         const normalizedResults = normalizeApiResults(response.data.results);
@@ -450,18 +484,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     }
   };
 
-  const handleSearch = async () => {
-    const q = query.trim();
-    if (!q) {
-      setResults([]);
-      setFilteredResults([]);
-      setStage("results");
-      navigate('/recherche', { replace: true });
-      return;
-    }
-    await runSearch(q);
-    addHistory(q);
-  };
+
 
   const handleSelect = (item: SearchItem) => {
     navigate(item.route);
@@ -552,7 +575,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   const isLoading = stage === "loading";
 
-  // Animation du runner (garder existant)
+  // Animation du runner
   useEffect(() => {
     const prev = prevStageRef.current;
     if (stage === "loading") {
@@ -580,68 +603,66 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // Fonction pour rendre le bouton approprié selon le type
-    const renderActionButton = (item: SearchItem) => {
-      // Utilisez source_table qui a été corrigé dans normalizeApiResults
-      switch (item.source_table) {
-        case "Service":
-        case "Metier":
-          return (
-            <Button
-              size="sm"
-              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={(e) => handleDevis(item, e)}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Faire un devis
-            </Button>
-          );
+  const renderActionButton = (item: SearchItem) => {
+    switch (item.source_table) {
+      case "Service":
+      case "Metier":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={(e) => handleDevis(item, e)}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Faire un devis
+          </Button>
+        );
 
-        case "Property":
-          return (
-            <Button
-              size="sm"
-              className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
-              onClick={(e) => handleVisite(item, e)}
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Demande visite
-            </Button>
-          );
+      case "Property":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white"
+            onClick={(e) => handleVisite(item, e)}
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Demande visite
+          </Button>
+        );
 
-        case "Product":
-          return (
-            <Button
-              size="sm"
-              className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
-              onClick={(e) => handleAddToCart(item, e)}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Ajouter au panier
-            </Button>
-          );
+      case "Product":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white"
+            onClick={(e) => handleAddToCart(item, e)}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Ajouter au panier
+          </Button>
+        );
 
-        // Ajoutez d'autres cas si nécessaire
-        case "BlogArticle":
-          return (
-            <Button
-              size="sm"
-              className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(item.route);
-              }}
-            >
-              <Play className="h-4 w-4 mr-2" />
-              Lire l'article
-            </Button>
-          );
+      case "BlogArticle":
+        return (
+          <Button
+            size="sm"
+            className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(item.route);
+            }}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Lire l'article
+          </Button>
+        );
 
-        default:
-          return null;
-      }
-    };
+      default:
+        return null;
+    }
+  };
 
-  // NOUVELLE FONCTION : Rendu de l'image avec fallback aux initiales - MODIFIÉE
+  // Rendu de l'image avec fallback aux initiales
   const renderImageWithFallback = (item: SearchItem) => {
     const hasValidImage = item.image && isValidImageUrl(item.image);
     const initials = generateInitials(item.title);
@@ -656,7 +677,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
             className="w-full h-full object-cover transition-transform hover:scale-105"
             loading="lazy"
             onError={(e) => {
-              // Si l'image échoue au chargement, on la remplace par les initiales
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
               const parent = target.parentElement;
@@ -691,12 +711,10 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       );
     }
 
-    // Afficher les initiales si pas d'image valide ou si c'est un métier
     return (
       <div className="relative h-48 overflow-hidden rounded-t-xl">
         <div className={`w-full h-full ${bgColor} flex items-center justify-center text-white`}>
           <div className="text-center">
-            {/* TAILLE DE L'INITIALE AUGMENTÉE - text-4xl au lieu de text-3xl */}
             <div className="text-4xl font-bold mb-1">{initials}</div>
           </div>
         </div>
@@ -712,7 +730,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
             </span>
           </div>
         )}
-        {/* BACKGROUND COLOR UNI EN DARK AU-DESSOUS DE L'ÉCRITURE */}
         <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white p-2">
           <div className="text-xs font-medium truncate">{item.title}</div>
         </div>
@@ -726,9 +743,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       <main className="flex-1 pt-1">
         <div className="container mx-auto px-4">
           {/* Barre de recherche normale (non fixe) */}
-
           <div className="mb-6">
-
             <div className="p-4 flex items-center gap-3">
               <div className="p-1 lg:block hidden rounded-full bg-white border-black border-2">
                 <img
@@ -741,22 +756,17 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               <div className="relative bg-white rounded-lg flex-1">
                 <Search className="absolute lg:block hidden left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
 
-                <Input
-                  ref={inputRef}
+                <AutoSuggestInput
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={setQuery}
+                  onSearch={handleSearch}
                   placeholder="Rechercher un bien, service, article..."
-                  className="pl-2 lg:pl-10 pr-12 lg:pr-10 h-12 text-lg border-0 bg-transparent focus-visible:ring-0"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSearch();
-                    }
-                  }}
+                  disabled={isLoading}
                 />
 
                 {/* Bouton Rechercher - Desktop */}
                 <Button
-                  onClick={handleSearch}
+                  onClick={() => handleSearch()}
                   disabled={isLoading}
                   className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 h-10 min-w-24 bg-black/90 hover:bg-black overflow-hidden text-sm"
                 >
@@ -776,7 +786,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
                 {/* Icône Recherche - Mobile */}
                 <Button
-                  onClick={handleSearch}
+                  onClick={() => handleSearch()}
                   disabled={isLoading}
                   size="icon"
                   variant="ghost"
@@ -786,11 +796,12 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                     <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <div className="w-10 h-full bg-slate-900 rounded-sm grid place-items-center"> 
-                      <Search className="h-10 w-10  z-50 rounded-sm text-slate-100" />
+                      <Search className="h-10 w-10 z-50 rounded-sm text-slate-100" />
                     </div>
                   )}
                 </Button>
               </div>
+              
               <Button
                 onClick={() => setHistoryOpen(true)}
                 variant="ghost"
@@ -799,7 +810,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
               >
                 <History className="h-5 w-5" />
               </Button>
-
 
               <button onClick={handleClose} className="relative w-10 h-10 group transition-all duration-300">
                 <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 transition-all duration-500">
@@ -812,56 +822,56 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
           {/* Historique latéral */}
           {historyOpen && (
-            <>
-              <div
-                className="fixed inset-0 bg-black/10 w-screen h-screen overflow-hidden backdrop-blur-sm z-50"
-                onClick={() => setHistoryOpen(false)}
-              />
-              <aside className="absolute z-50 h-96 w-11/12  lg:w-1/2 bg-white border border-gray-200 rounded-xl lg:rounded-b-xl  left-1/2 top-0 transform -translate-x-1/2">
-                <div className="h-full flex flex-col">
-                  <div className="px-4 py-3 border-b flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <History className="h-4 w-4 text-gray-700" />
-                      <span className="text-sm font-semibold text-gray-800">Historique</span>
-                    </div>
-                    <button
-                      className="text-xs text-red-600 hover:underline"
-                      onClick={() => { setSearchHistory([]); saveHistory([]); }}
-                    >
-                      Vider
-                    </button>
+  <>
+    <div
+      className="fixed inset-0 bg-black/10 w-screen h-screen overflow-hidden backdrop-blur-sm z-50"
+      onClick={() => setHistoryOpen(false)}
+    />
+    <aside className="absolute z-50 h-96 w-11/12 lg:w-1/2 bg-white border border-gray-200 rounded-xl lg:rounded-b-xl left-1/2 top-0 transform -translate-x-1/2">
+      <div className="h-full flex flex-col">
+        <div className="px-4 py-3 border-b flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-gray-700" />
+            <span className="text-sm font-semibold text-gray-800">Historique des recherches</span>
+          </div>
+          <button
+            className="text-xs text-red-600 hover:underline"
+            onClick={() => { setSearchHistory([]); saveHistory([]); }}
+          >
+            Vider
+          </button>
+        </div>
+        <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
+          {searchHistory.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
+          ) : (
+            <ul className="divide-y">
+              {searchHistory.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
+                  onClick={() => {
+                    setQuery(item.q);
+                    setHistoryOpen(false);
+                    setStage('loading');
+                    runSearch(item.q);
+                  }}
+                >
+                  <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                    {item.q}
                   </div>
-                  <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
-                    {searchHistory.length === 0 ? (
-                      <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
-                    ) : (
-                      <ul className="divide-y">
-                        {searchHistory.map((item, idx) => (
-                          <li
-                            key={idx}
-                            className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
-                            onClick={() => {
-                              setQuery(item.q);
-                              setHistoryOpen(false);
-                              setStage('loading');
-                              runSearch(item.q);
-                            }}
-                          >
-                            <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                              {item.q}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(item.date).toLocaleString()}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                  <div className="text-xs text-gray-500">
+                    {new Date(item.date).toLocaleString()}
                   </div>
-                </div>
-              </aside>
-            </>
+                </li>
+              ))}
+            </ul>
           )}
+        </div>
+      </div>
+    </aside>
+  </>
+)}
 
           {/* Contenu des résultats */}
           <div className="max-w-7xl mx-auto">
@@ -880,7 +890,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
             {stage === "loading" && (
               <div className="py-20 flex flex-col items-center justify-center">
-                {/* <LoadingSpinner size="lg" text="Recherche en cours" /> */}
                 <img src="/chatbot.gif" alt="" className="w-56 h-56" />
                 <div className="text-lg text-gray-700 mt-2">
                   Recherche en cours...
@@ -909,10 +918,8 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                               }`}
                             onClick={(e) => toggleItemExpansion(item.id, item.source_table, e)}
                           >
-                            {/* Image avec fallback aux initiales */}
                             {renderImageWithFallback(item)}
 
-                            {/* Contenu */}
                             <div className="p-4 flex-1 flex flex-col">
                               <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2">
                                 {item.title}
@@ -927,7 +934,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                                   )}
                                   {item.location && (
                                     <div className="text-sm text-gray-600 flex items-center">
-                                      {/* REMPLACEMENT DE L'EMOJI 📍 PAR LE SVG */}
                                       <PositionIcon className="w-4 h-4 mr-1" />
                                       {item.location}
                                     </div>
@@ -943,10 +949,8 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                                 </div>
                               )}
 
-                              {/* Bouton d'action spécifique - affiché seulement si l'élément est étendu */}
                               {isExpanded && renderActionButton(item)}
 
-                              {/* Indicateur d'expansion */}
                               <div className="mt-2 text-center">
                                 <div className="text-xs text-blue-600 font-medium">
                                   {isExpanded ? 'Cliquer pour réduire' : 'Cliquer pour voir les actions'}
@@ -980,19 +984,14 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                       </>
                     ) : (
                       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-12">
-                        {/* Message de recherche */}
                         <div className="text-center space-y-4">
                           <div className="text-5xl azonix font-semibold text-gray-400">
                             Veuillez saisir un terme de recherche.
                           </div>
                         </div>
 
-                        {/* Section Vidéo Autoloop WebM */}
                         <div className="w-full max-w-4xl">
-
-                          {/* Conteneur vidéo autoloop WebM */}
                           <div className="relative rounded-2xl overflow-hidden drop-shadow-lg">
-                            {/* Vidéo WebM en autoloop */}
                             <video
                               className="w-52 h-52 mx-auto object-cover"
                               autoPlay
@@ -1001,17 +1000,14 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                               playsInline
                               preload="auto"
                             >
-                              {/* Source WebM - Format optimisé pour le web */}
                               <source
                                 src="/vids.webm"
                                 type="video/webm"
                               />
                             </video>
-
                           </div>
                         </div>
                       </div>
-
                     )}
                   </div>
                 )}
