@@ -953,10 +953,10 @@ const Header = () => {
     //   title: "ACTUALITÉS",
     //   href: "/actualites",
     // },
-    // {
-    //   title: "CONSULTATIONS/AIDES",
-    //   href: "/service",
-    // },
+    {
+      title: "SERVICES ET PARTENAIRES",
+      href: "/service",
+    },
     // {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
