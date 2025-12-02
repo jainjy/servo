@@ -85,6 +85,13 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false); 
 
+ 
+
+  const openRecherchePage = () => {
+  navigate("/recherche");
+};
+
+
   const handleSearch = (e: React.FormEvent) => {
   e.preventDefault();
   if (searchQuery.trim()) {
@@ -92,7 +99,8 @@ const Header = () => {
     navigate(`/recherche?q=${encodeURIComponent(searchQuery)}`);
     setIsSearchOpen(false);
     setSearchQuery("");
-  }
+  };
+  
 };
 
 
@@ -1325,50 +1333,26 @@ const Header = () => {
 
           <div className="flex items-center gap-1">   
             <div className="relative flex items-center">
-    {/* Barre de recherche avec animation */}
-    <div className={`
-      flex items-center transition-all duration-300 ease-in-out
-      ${isSearchOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 overflow-hidden'}
-    `}>
-      <form 
-        onSubmit={handleSearch}
-        className="flex items-center bg-white border border-gray-300 rounded-lg shadow-lg p-1 w-full"
-      >
-        <input
-          type="text"
-          placeholder="Rechercher..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 px-3 py-1 text-sm outline-none border-none bg-transparent"
-          autoFocus={isSearchOpen}
-        />
-        <Button
-          type="submit"
-          size="icon"
-          variant="ghost"
-          className="h-7 w-7 hover:bg-gray-100"
-        >
-          <Search className="h-3 w-3" />
-        </Button>
-      </form>
-    </div>
-
-    {/* Bouton de recherche */}
-    <Button
-      variant="ghost"
-      size="icon"
-      className={`
-        h-9 w-9 rounded-lg border transition-all duration-200 ml-2
-        ${isSearchOpen 
-          ? 'bg-gray-800 text-white border-gray-700' 
-          : 'bg-black text-white border-gray-800 hover:bg-gray-800'
-        }
-      `}
-      onClick={() => setIsSearchOpen(!isSearchOpen)}
-    >
-      {isSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
-    </Button>
-  </div>         
+            
+              {/* Bouton de recherche */}
+              <div className="relative flex items-center">
+                {/* Option 1 : Simple bouton qui ouvre la page */}
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`
+                    h-9 w-9 rounded-lg border transition-all duration-200 ml-2
+                    ${isSearchOpen 
+                      ? 'bg-gray-800 text-white border-gray-700' 
+                      : 'bg-black text-white border-gray-800 hover:bg-gray-800'
+                    }
+                  `}
+                      onClick={openRecherchePage}                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>         
             {/* Icône Panier pour utilisateurs connectés */}
             {isAuthenticated && (
               <Button
