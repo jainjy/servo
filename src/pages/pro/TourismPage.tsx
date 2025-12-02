@@ -2694,38 +2694,299 @@ export default function TourismPage() {
               </>
             )}
 
-            {contentType === "activities" && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {activities.map((activity) => (
-                    <ActivityCard key={activity.id} activity={activity} />
-                  ))}
-                </div>
+        {contentType === "activities" && (
+  <div className="space-y-8">
+    {/* En-tête avec statistiques */}
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Gestion des Activités</h2>
+          <p className="text-gray-600 mt-1">
+            Gérez vos activités touristiques et catégories
+          </p>
+        </div>
+        
+        {user?.role === "professional" && (
+          <div className="flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-white rounded-xl border border-gray-200">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-sm text-gray-700">
+                {activities.filter(a => a.isActive !== false).length} actives
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setEditingActivity(null);
+                setShowActivitiesModal(true);
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <PlusCircle className="w-5 h-5" />
+              <span>Nouvelle activité</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
 
-                {activities.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🎯</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Aucune activité trouvée
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {user?.role === "professional"
-                        ? "Commencez par ajouter votre première activité."
-                        : "Aucune activité disponible pour le moment."}
-                    </p>
-                    {user?.role === "professional" && (
-                      <button
-                        onClick={() => setShowActivitiesModal(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
-                      >
-                        <PlusCircle className="w-5 h-5 mr-2" />
-                        Ajouter une activité
-                      </button>
-                    )}
+    {/* Cartes d'activités avec effet de vitrine */}
+    {activitiesLoading ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="h-48 bg-gray-200"></div>
+            <div className="p-6 space-y-4">
+              <div className="h-6 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="flex space-x-2">
+                <div className="h-8 bg-gray-200 rounded w-20"></div>
+                <div className="h-8 bg-gray-200 rounded w-20"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : activities.length > 0 ? (
+      <>
+        {/* Filtres rapides */}
+        <div className="flex flex-wrap gap-3">
+          <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            Toutes ({activities.length})
+          </button>
+          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+            Actives ({activities.filter(a => a.isActive !== false).length})
+          </button>
+          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+            Inactives ({activities.filter(a => a.isActive === false).length})
+          </button>
+        </div>
+
+        {/* Grille d'activités améliorée */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {activities.map((activity) => (
+            <div 
+              key={activity.id} 
+              className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              {/* En-tête avec image et badge de statut */}
+              <div className="relative h-56 overflow-hidden">
+                {activity.image ? (
+                  <img
+                    src={activity.image}
+                    alt={activity.name || activity.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="text-5xl mb-2">🎯</div>
+                      <div className="font-medium">Activité</div>
+                    </div>
                   </div>
                 )}
-              </>
-            )}
+                
+                {/* Badge de statut */}
+                <div className="absolute top-4 left-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${activity.isActive === false
+                    ? 'bg-gray-100 text-gray-800'
+                    : 'bg-green-100 text-green-800'
+                  }`}>
+                    {activity.isActive === false ? 'Inactive' : 'Active'}
+                  </span>
+                </div>
+                
+                {/* Prix en overlay */}
+                {activity.price > 0 && (
+                  <div className="absolute bottom-4 left-4">
+                    <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-xl">
+                      <span className="text-xl font-bold">{activity.price}€</span>
+                      <span className="text-sm opacity-90">/personne</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Icône de catégorie */}
+                {activity.icon && (
+                  <div className="absolute top-4 right-4">
+                    <div 
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
+                      style={{ backgroundColor: activity.color || '#3B82F6' }}
+                    >
+                      <span className="font-bold">{activity.icon.charAt(0)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Contenu de la carte */}
+              <div className="p-6">
+                {/* Titre et catégorie */}
+                <div className="mb-4">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-bold text-xl text-gray-900 line-clamp-1">
+                      {activity.name || activity.title}
+                    </h3>
+                    <div className="flex space-x-2">
+                      {user?.role === "professional" && (
+                        <>
+                          <button
+                            onClick={() => handleEditActivity(activity)}
+                            className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                            title="Modifier"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteActivity(activity.id)}
+                            className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {activity.category && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+                        {activity.category}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                {activity.description && (
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {activity.description}
+                  </p>
+                )}
+
+                {/* Métadonnées */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {activity.location && (
+                    <div className="flex items-center text-gray-600">
+                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-sm truncate">{activity.location}</span>
+                    </div>
+                  )}
+                  
+                  {activity.duration && (
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-sm">{activity.duration}</span>
+                    </div>
+                  )}
+                  
+                  {activity.capacity && (
+                    <div className="flex items-center text-gray-600">
+                      <Users className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-sm">{activity.capacity} pers.</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Inclus dans l'activité */}
+                {activity.included && activity.included.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-xs text-gray-500 mb-2">Inclus :</p>
+                    <div className="flex flex-wrap gap-1">
+                      {activity.included.slice(0, 3).map((item, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-green-50 text-green-700"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          {item}
+                        </span>
+                      ))}
+                      {activity.included.length > 3 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-600">
+                          +{activity.included.length - 3} plus
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Boutons d'action */}
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => handleViewActivityDetails(activity)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Détails
+                  </button>
+                  
+                  {!user?.role === "professional" && activity.price > 0 && (
+                    <button className="px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-medium text-sm transition-all duration-300">
+                      Réserver
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination ou compteur */}
+        <div className="flex items-center justify-between pt-8 border-t border-gray-200">
+          <div className="text-gray-600">
+            Affichage de <span className="font-semibold text-gray-900">{activities.length}</span> activité{activities.length > 1 ? 's' : ''}
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+              ← Précédent
+            </button>
+            <span className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">1</span>
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              Suivant →
+            </button>
+          </div>
+        </div>
+      </>
+    ) : (
+      /* État vide amélioré */
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center">
+        <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+          <div className="text-4xl">🎯</div>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+          Aucune activité disponible
+        </h3>
+        <p className="text-gray-600 max-w-md mx-auto mb-8">
+          {user?.role === "professional"
+            ? "Commencez par créer votre première activité pour enrichir votre catalogue touristique."
+            : "Revenez plus tard pour découvrir nos activités passionnantes."}
+        </p>
+        {user?.role === "professional" && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => {
+                setEditingActivity(null);
+                setShowActivitiesModal(true);
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <PlusCircle className="w-6 h-6" />
+              <span>Créer une activité</span>
+            </button>
+            <button
+              onClick={() => loadActivities()}
+              className="px-8 py-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-semibold transition-all duration-300"
+            >
+              <RefreshCw className="w-5 h-5 inline mr-2" />
+              Rafraîchir
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
           </>
         )}
       </div>
