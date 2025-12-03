@@ -171,6 +171,7 @@ import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
 import { App as CapacitorApp } from '@capacitor/app';
 import Digitalisation from "./pages/Digitalisation";
+import  GestionLocationSaisonniere from "./pages/GestionLocationSaisonniere";
 
 const queryClient = new QueryClient();
 
@@ -628,6 +629,7 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
+                    <Route path="locationSaisonniere" element={<GestionLocationSaisonniere />} />
                     <Route
                       path="mes-reservations-cours"
                       element={<UserReservations />}

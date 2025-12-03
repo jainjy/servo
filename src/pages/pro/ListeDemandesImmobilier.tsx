@@ -26,14 +26,36 @@ import {
   Ban,
   CheckSquare,
   AlertTriangle,
-  Info
+  Info,
+  Building2,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  X,
+  FileText
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
-import { getDemandesByUser, getAllDemandes, updateDemandeStatut, deleteDemande, initDemoData } from "@/lib/demandeStorage";
+import { demandeImmobilierAPI } from "@/lib/api";
 
-const DemandeCard = ({ demande, onValidate, onRefuse, onArchive, onRemove, isAdmin = false }: any) => {
+const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: any) => {
   const [showActions, setShowActions] = useState(false);
+  const [showStatusSelector, setShowStatusSelector] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Détecter si on est en mode mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const formatMessage = (message: string) => {
     if (!message) return "—";
@@ -44,10 +66,6 @@ const DemandeCard = ({ demande, onValidate, onRefuse, onArchive, onRemove, isAdm
     );
     return userMessage ? userMessage.trim() : "—";
   };
-
-  const isActionDisabled = ["validée", "refusée", "archivée", "terminée"].includes(
-    demande.statut?.toLowerCase()
-  );
 
   const getStatusIcon = (status: string) => {
     switch ((status || "").toLowerCase()) {
@@ -74,227 +92,156 @@ const DemandeCard = ({ demande, onValidate, onRefuse, onArchive, onRemove, isAdm
     }
   };
 
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-8 hover:border-blue-200 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
-      {/* Effet de fond subtil au survol */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-blue-50/0 group-hover:from-blue-50/30 group-hover:to-blue-50/10 transition-all duration-500 rounded-2xl"></div>
+  const statusOptions = [
+    { value: "en attente", label: "En attente", icon: <Clock className="w-4 h-4" />, color: "bg-yellow-100 text-yellow-800" },
+    { value: "validée", label: "Validée", icon: <CheckCircle className="w-4 h-4" />, color: "bg-green-100 text-green-800" },
+    { value: "refusée", label: "Refusée", icon: <XCircle className="w-4 h-4" />, color: "bg-red-100 text-red-800" },
+    { value: "archivée", label: "Archivée", icon: <Archive className="w-4 h-4" />, color: "bg-gray-100 text-gray-800" },
+    { value: "terminée", label: "Terminée", icon: <CheckSquare className="w-4 h-4" />, color: "bg-blue-100 text-blue-800" },
+  ];
 
-      <div className="flex justify-between items-start mb-6 relative z-10">
-        <div className="flex items-start gap-6">
-          {/* Image avec effet de zoom */}
+  const handleStatusSelect = (status: string) => {
+    onStatusChange(demande.id, status);
+    setShowStatusSelector(false);
+  };
+
+  const renderDesktopView = () => (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-6">
+        {/* Section gauche - Image et informations de base */}
+        <div className="flex-1 flex flex-col md:flex-row gap-6">
+          {/* Image */}
           {demande.property?.images?.length > 0 ? (
-            <div className="relative overflow-hidden rounded-xl">
+            <div className="relative overflow-hidden rounded-xl min-w-[150px] h-32 md:h-36">
               <img
                 src={demande.property.images[0]}
                 alt={demande.property?.title || "Propriété"}
-                className="w-36 h-28 object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300 rounded-xl"></div>
             </div>
           ) : (
-            <div className="w-36 h-28 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+            <div className="min-w-[150px] h-32 md:h-36 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
               <Home className="w-8 h-8" />
             </div>
           )}
 
-          <div className="space-y-2">
-            <h3 className="font-bold text-gray-900 text-xl group-hover:text-blue-700 transition-colors duration-300 leading-tight">
-              {demande.property?.title || "Demande de visite"}
-            </h3>
-            <p className="text-gray-600 text-sm flex items-center gap-2">
-              <span className="flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
-                <MapPin className="w-4 h-4" />
-                {formatAddress(demande)}
-              </span>
-            </p>
-            {isAdmin && demande.createdBy && (
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <User className="w-3 h-3" />
-                User ID: {demande.createdBy}
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="font-bold text-gray-900 text-lg md:text-xl group-hover:text-blue-700 transition-colors duration-300 leading-tight">
+                {demande.property?.title || "Demande de visite"}
+              </h3>
+              <p className="text-gray-600 text-sm flex items-center gap-2 mt-2">
+                <span className="flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                  <MapPin className="w-4 h-4" />
+                  {formatAddress(demande)}
+                </span>
               </p>
+            </div>
+
+            {/* Informations client pour artisan */}
+            {isArtisan && demande.createdBy && (
+              <div className="flex flex-wrap gap-4 mt-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="w-4 h-4" />
+                  <span>Client: {demande.createdBy.firstName} {demande.createdBy.lastName}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Mail className="w-4 h-4" />
+                  <span>{demande.contactEmail}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Phone className="w-4 h-4" />
+                  <span>{demande.contactTel}</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
-          <div className="flex items-center gap-2">
-            {getStatusIcon(demande.statut)}
-            <span
-              className={`px-4 py-2 rounded-full text-sm font-semibold border-2 backdrop-blur-sm ${getStatusColor(
-                demande.statut
-              )} shadow-sm`}
-            >
-              {demande.statut}
-            </span>
-          </div>
-          <span className="text-xs text-gray-500">
-            {new Date(demande.createdAt || demande.date).toLocaleDateString("fr-FR")}
-          </span>
-        </div>
-      </div>
+        {/* Section droite - Statut et date */}
+        <div className="flex flex-col items-start lg:items-end gap-4 min-w-[200px]">
+          <div className="flex flex-col gap-3 w-full">
+            {/* Sélecteur de statut */}
+            <div className="relative">
+              <button
+                onClick={() => setShowStatusSelector(!showStatusSelector)}
+                className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg font-medium border-2 transition-all ${getStatusColor(demande.statut)} hover:shadow-md`}
+              >
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(demande.statut)}
+                  <span className="capitalize">{demande.statut}</span>
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </button>
 
-      {/* Grille améliorée avec séparateurs */}
-      <div className="grid grid-cols-2 gap-8 mb-6 relative z-10">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-            <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">
-              Informations du demandeur
-            </h4>
-          </div>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3">
-              <User className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">
-                <span className="font-medium text-gray-800">
-                  {demande.contactPrenom} {demande.contactNom}
-                </span>
-              </span>
+              {showStatusSelector && (
+                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-2xl border border-gray-200 z-50 py-2">
+                  {statusOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleStatusSelect(option.value)}
+                      className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors hover:bg-gray-50 ${option.value === demande.statut ? option.color : "text-gray-700"}`}
+                    >
+                      {option.icon}
+                      {option.label}
+                      {option.value === demande.statut && <Check className="w-4 h-4 ml-auto" />}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">{demande.contactEmail}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">{demande.contactTel}</span>
-            </div>
-          </div>
-        </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-4 bg-green-500 rounded-full"></div>
-            <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">
-              Détails de la visite
-            </h4>
-          </div>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">
-                <span className="font-medium text-gray-800">
-                  {demande.dateSouhaitee ? 
-                    new Date(demande.dateSouhaitee).toLocaleDateString("fr-FR", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }) : "Non spécifiée"
-                  }
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span>
+                {new Date(demande.createdAt || demande.date).toLocaleDateString("fr-FR")}
+              </span>
+            </div>
+
+            {demande.dateSouhaitee && (
+              <div className="text-sm text-gray-500 flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>
+                  Visite: {new Date(demande.dateSouhaitee).toLocaleDateString("fr-FR")} à {demande.heureSouhaitee || "--:--"}
                 </span>
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Clock className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">{demande.heureSouhaitee || "Non spécifiée"}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <MessageCircle className="w-4 h-4 text-gray-400 mt-1" />
-              <span className="text-gray-600 leading-relaxed">
-                {formatMessage(demande.description)}
-              </span>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Pied de carte avec bordure élégante */}
-      <div className="flex justify-between items-center pt-6 border-t border-gray-100 relative z-10">
-        <div className="flex items-center gap-4 text-gray-500 text-sm">
-          <span className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-            <Calendar className="w-4 h-4" />
-            {demande.createdAt
-              ? new Date(demande.createdAt).toLocaleDateString("fr-FR")
-              : "—"}
-          </span>
-          {demande.updatedAt && demande.updatedAt !== demande.createdAt && (
-            <span className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg text-blue-600">
-              <Edit className="w-4 h-4" />
-              Modifié: {new Date(demande.updatedAt).toLocaleDateString("fr-FR")}
-            </span>
-          )}
-        </div>
-
-        <div className="flex gap-3 items-center">
-          {/* <Link
-            to={`/immobilier/${demande.propertyId}`}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105"
+      {/* Boutons d'action */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-6 border-t border-gray-100">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to={`/immobilier/${demande.propertyId || demande.property?.id}`}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
           >
             <Eye className="w-4 h-4" />
             Voir le bien
-          </Link> */}
+          </Link>
 
-          {/* Menu d'actions déroulant pour admin */}
-          {isAdmin && (
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            {showDetails ? "Masquer détails" : "Voir détails"}
+          </button>
+        </div>
+
+        <div className="flex gap-3">
+          {isArtisan && (
             <div className="relative">
               <button
                 onClick={() => setShowActions(!showActions)}
-                className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all duration-300 hover:scale-110 shadow-sm"
+                className="p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all duration-300 hover:scale-105"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
 
               {showActions && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 py-2">
-                  {/* Actions pour demandes en attente */}
-                  {["en attente", "en cours", "En attente", "En cours"].includes(
-                    String(demande.statut)
-                  ) && (
-                    <>
-                      <button
-                        onClick={() => {
-                          onValidate(demande.id);
-                          setShowActions(false);
-                        }}
-                        disabled={isActionDisabled}
-                        className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
-                          isActionDisabled
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "text-green-600 hover:bg-green-50"
-                        }`}
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Valider
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          onRefuse(demande.id);
-                          setShowActions(false);
-                        }}
-                        disabled={isActionDisabled}
-                        className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
-                          isActionDisabled
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "text-red-600 hover:bg-red-50"
-                        }`}
-                      >
-                        <XCircle className="w-4 h-4" />
-                        Refuser
-                      </button>
-
-                      <div className="border-t border-gray-100 my-1"></div>
-                    </>
-                  )}
-
-                  {/* Action Archiver pour tous les statuts sauf déjà archivé */}
-                  {!["archivée", "archivee", "archive"].includes(
-                    (demande.statut || "").toLowerCase()
-                  ) && (
-                    <button
-                      onClick={() => {
-                        onArchive(demande.id);
-                        setShowActions(false);
-                      }}
-                      className="w-full px-4 py-3 text-left flex items-center gap-3 text-gray-600 hover:bg-gray-50 transition-colors"
-                    >
-                      <Archive className="w-4 h-4" />
-                      Archiver
-                    </button>
-                  )}
-
-                  {/* Action Supprimer */}
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 py-2">
                   <button
                     onClick={() => {
                       onRemove(demande.id);
@@ -303,64 +250,217 @@ const DemandeCard = ({ demande, onValidate, onRefuse, onArchive, onRemove, isAdm
                     className="w-full px-4 py-3 text-left flex items-center gap-3 text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Supprimer
+                    Supprimer définitivement
                   </button>
                 </div>
               )}
             </div>
           )}
-
-          {/* Boutons d'action principaux pour non-admin */}
-          {!isAdmin && ["en attente", "en cours", "En attente", "En cours"].includes(
-            String(demande.statut)
-          ) && (
-            <div className="flex gap-3">
-              <button
-                onClick={() => onValidate(demande.id)}
-                disabled={isActionDisabled}
-                className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105 ${
-                  isActionDisabled
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                }`}
-              >
-                <CheckCircle className="w-4 h-4" />
-                Valider
-              </button>
-
-              <button
-                onClick={() => onRefuse(demande.id)}
-                disabled={isActionDisabled}
-                className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-105 ${
-                  isActionDisabled
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-white hover:bg-red-50 text-red-600 border-2 border-red-200"
-                }`}
-              >
-                <XCircle className="w-4 h-4" />
-                Refuser
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Fermer le menu déroulant en cliquant ailleurs */}
-      {showActions && (
+      {/* Détails supplémentaires */}
+      {showDetails && (
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                Informations du client
+              </h4>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">
+                    <span className="font-medium text-gray-800">
+                      {demande.contactPrenom} {demande.contactNom}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">{demande.contactEmail}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">{demande.contactTel}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+                <div className="w-1 h-4 bg-green-500 rounded-full"></div>
+                Message du client
+              </h4>
+              <div className="text-gray-600 leading-relaxed text-sm bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <MessageCircle className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+                  <span>{formatMessage(demande.description)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fermer les menus en cliquant ailleurs */}
+      {(showActions || showStatusSelector) && (
         <div 
           className="fixed inset-0 z-40" 
-          onClick={() => setShowActions(false)}
+          onClick={() => {
+            setShowActions(false);
+            setShowStatusSelector(false);
+          }}
         />
       )}
     </div>
   );
+
+  const renderMobileView = () => (
+    <div className="bg-white rounded-xl border border-gray-100 p-4 hover:border-blue-200 hover:shadow-lg transition-all duration-500">
+      {/* En-tête mobile */}
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex-1">
+          <h3 className="font-bold text-gray-900 text-base mb-2">
+            {demande.property?.title || "Demande de visite"}
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+            <MapPin className="w-4 h-4" />
+            <span className="truncate">{formatAddress(demande)}</span>
+          </div>
+        </div>
+        
+        {/* Bouton pour voir détails */}
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="p-2 text-gray-500"
+        >
+          {showDetails ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Informations principales */}
+      <div className="space-y-3 mb-4">
+        {/* Sélecteur de statut */}
+        <div className="relative">
+          <button
+            onClick={() => setShowStatusSelector(!showStatusSelector)}
+            className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg font-medium border ${getStatusColor(demande.statut)}`}
+          >
+            <div className="flex items-center gap-2">
+              {getStatusIcon(demande.statut)}
+              <span className="text-sm capitalize">{demande.statut}</span>
+            </div>
+            <ChevronDown className="w-4 h-4" />
+          </button>
+
+          {showStatusSelector && (
+            <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleStatusSelect(option.value)}
+                  className={`w-full px-3 py-2 text-left flex items-center gap-2 text-sm ${option.value === demande.statut ? option.color : "text-gray-700"}`}
+                >
+                  {option.icon}
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Date et heure */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Calendar className="w-4 h-4" />
+          <span>{new Date(demande.createdAt || demande.date).toLocaleDateString("fr-FR")}</span>
+        </div>
+      </div>
+
+      {/* Boutons d'action mobile */}
+      <div className="flex gap-2 mb-4">
+        <Link
+          to={`/immobilier/${demande.propertyId || demande.property?.id}`}
+          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+        >
+          <Eye className="w-4 h-4" />
+          Voir
+        </Link>
+
+        {isArtisan && (
+          <button
+            onClick={() => onRemove(demande.id)}
+            className="px-3 py-2 rounded-lg font-medium text-sm flex items-center gap-2 border border-red-200 text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Détails dépliables */}
+      {showDetails && (
+        <div className="pt-4 border-t border-gray-100 space-y-4">
+          <div>
+            <h4 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-3">
+              Client
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-gray-400" />
+                <span>{demande.contactPrenom} {demande.contactNom}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-400" />
+                <span>{demande.contactTel}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-gray-400" />
+                <span className="truncate">{demande.contactEmail}</span>
+              </div>
+            </div>
+          </div>
+
+          {demande.description && (
+            <div>
+              <h4 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-3">
+                Message
+              </h4>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {formatMessage(demande.description)}
+              </p>
+            </div>
+          )}
+
+          {demande.dateSouhaitee && (
+            <div>
+              <h4 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-3">
+                Visite prévue
+              </h4>
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <span>{new Date(demande.dateSouhaitee).toLocaleDateString("fr-FR")}</span>
+                {demande.heureSouhaitee && (
+                  <>
+                    <span>•</span>
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span>{demande.heureSouhaitee}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  return isMobileView ? renderMobileView() : renderDesktopView();
 };
 
 const formatAddress = (demande: any) => {
   if (demande.property && (demande.property.address || demande.property.city)) {
-    const parts = [demande.property.address, demande.property.city].filter(
-      Boolean
-    );
+    const parts = [demande.property.address, demande.property.city].filter(Boolean);
     return parts.join(", ");
   }
   const parts = [
@@ -369,11 +469,6 @@ const formatAddress = (demande: any) => {
     demande.lieuAdresseCp,
   ].filter(Boolean);
   if (parts.length) return parts.join(", ");
-  const contactParts = [
-    demande.contactAdresse,
-    demande.lieuAdresseVille,
-  ].filter(Boolean);
-  if (contactParts.length) return contactParts.join(", ");
   return "Adresse non renseignée";
 };
 
@@ -381,24 +476,24 @@ const getStatusColor = (status: string) => {
   switch ((status || "").toLowerCase()) {
     case "en attente":
     case "en cours":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      return "bg-yellow-50 text-yellow-700 border-yellow-200";
     case "validée":
     case "validee":
     case "valide":
-      return "bg-green-100 text-green-800 border-green-200";
+      return "bg-green-50 text-green-700 border-green-200";
     case "refusée":
     case "refusee":
     case "refus":
-      return "bg-red-100 text-red-800 border-red-200";
+      return "bg-red-50 text-red-700 border-red-200";
     case "archivée":
     case "archivee":
     case "archive":
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-50 text-gray-700 border-gray-200";
     case "terminée":
     case "terminee":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-blue-50 text-blue-700 border-blue-200";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "bg-gray-50 text-gray-700 border-gray-200";
   }
 };
 
@@ -407,14 +502,26 @@ const ListeDemandesImmobilier = () => {
   const [demandes, setDemandes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<number[]>([]);
-  const [properties, setProperties] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Vérifier si l'utilisateur est admin
-  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
+  // Détecter la taille de l'écran
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-  // Fonction pour charger les demandes - AVEC STOCKAGE LOCAL
+  // Vérifier si l'utilisateur est un artisan/professionnel
+  const isArtisan = user?.role === "professional" || user?.role === "artisan" || user?.role === "pro";
+
+  // Fonction pour charger les demandes depuis l'API
   const loadDemandes = async () => {
     if (!isAuthenticated || !user?.id) {
       console.log('❌ Utilisateur non authentifié ou ID manquant');
@@ -424,39 +531,51 @@ const ListeDemandesImmobilier = () => {
     
     setLoading(true);
     try {
-      console.log('🔄 Chargement des demandes depuis stockage local...', { 
-        isAdmin, 
-        userId: user.id 
+      console.log('🔄 Chargement des demandes depuis l\'API...', { 
+        isArtisan, 
+        userId: user.id,
+        userRole: user.role
       });
       
-      // Initialiser les données de démonstration
-      initDemoData();
+      let response;
       
-      let demandesData;
-      
-      if (isAdmin) {
-        // Admin: charger toutes les demandes
-        demandesData = getAllDemandes();
-        console.log('👑 Mode ADMIN - Toutes les demandes:', demandesData);
+      if (isArtisan) {
+        response = await demandeImmobilierAPI.getArtisanDemandes(user.id);
+        console.log('🏗️ Mode ARTISAN - Demandes pour ses propriétés:', response.data);
       } else {
-        // User: charger seulement ses demandes
-        demandesData = getDemandesByUser(user.id);
-        console.log('👤 Mode USER - Demandes utilisateur:', demandesData);
+        response = await demandeImmobilierAPI.getUserDemandes(user.id);
+        console.log('👤 Mode CLIENT - Demandes envoyées:', response.data);
       }
 
-      console.log(`✅ ${demandesData.length} demandes chargées`);
-      
-      setDemandes(demandesData);
+      if (response.data && Array.isArray(response.data)) {
+        const formattedDemandes = response.data.map(demande => ({
+          ...demande,
+          createdAt: demande.createdAt || demande.date,
+          dateSouhaitee: demande.dateSouhaitee,
+          heureSouhaitee: demande.heureSouhaitee,
+          property: demande.property || {},
+          contactNom: demande.contactNom || demande.createdBy?.lastName || "",
+          contactPrenom: demande.contactPrenom || demande.createdBy?.firstName || "",
+          contactEmail: demande.contactEmail || demande.createdBy?.email || "",
+          contactTel: demande.contactTel || demande.createdBy?.phone || ""
+        }));
+        
+        setDemandes(formattedDemandes);
+        console.log(`✅ ${formattedDemandes.length} demandes chargées`);
+      } else {
+        console.error('❌ Format de données invalide:', response.data);
+        setDemandes([]);
+      }
 
     } catch (err: any) {
       console.error("❌ Erreur chargement demandes:", err);
+      console.error("Détails erreur:", err.response?.data);
       
-      // En cas d'erreur, utiliser un tableau vide
       setDemandes([]);
       
       toast({
         title: "Erreur",
-        description: "Impossible de charger les demandes",
+        description: err.response?.data?.error || "Impossible de charger les demandes depuis le serveur",
         variant: "destructive"
       });
     } finally {
@@ -467,7 +586,7 @@ const ListeDemandesImmobilier = () => {
   // Charger les demandes au montage
   useEffect(() => {
     loadDemandes();
-  }, [isAuthenticated, user?.id, isAdmin]);
+  }, [isAuthenticated, user?.id, isArtisan]);
 
   // Écouter les événements de nouvelle demande
   useEffect(() => {
@@ -476,7 +595,6 @@ const ListeDemandesImmobilier = () => {
       loadDemandes();
     };
 
-    // Écouter les événements personnalisés
     window.addEventListener('demande:created', handleNewDemande);
     window.addEventListener('demande:statusChanged', handleNewDemande);
 
@@ -490,7 +608,6 @@ const ListeDemandesImmobilier = () => {
   const filteredDemandes = React.useMemo(() => {
     let filtered = demandes;
 
-    // Filtre par statut
     if (activeTab !== "all") {
       filtered = filtered.filter((demande) => {
         const status = (demande.statut || "").toLowerCase();
@@ -498,10 +615,7 @@ const ListeDemandesImmobilier = () => {
           case "en_attente":
             return status === "en attente" || status === "en cours";
           case "validees":
-            return [
-              "validée", "validee", "valide", 
-              "terminée", "terminee"
-            ].includes(status);
+            return ["validée", "validee", "valide"].includes(status);
           case "refusees":
             return ["refusée", "refusee", "refus"].includes(status);
           case "archivees":
@@ -512,8 +626,7 @@ const ListeDemandesImmobilier = () => {
       });
     }
 
-    // Filtre par recherche (admin seulement)
-    if (isAdmin && searchTerm) {
+    if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((demande) =>
         demande.contactPrenom?.toLowerCase().includes(term) ||
@@ -525,7 +638,7 @@ const ListeDemandesImmobilier = () => {
     }
 
     return filtered;
-  }, [demandes, activeTab, searchTerm, isAdmin]);
+  }, [demandes, activeTab, searchTerm]);
 
   // Statistiques pour chaque onglet
   const stats = React.useMemo(() => {
@@ -534,7 +647,7 @@ const ListeDemandesImmobilier = () => {
       ["en attente", "en cours"].includes((d.statut || "").toLowerCase())
     ).length;
     const validees = demandes.filter(d => 
-      ["validée", "validee", "valide", "terminée", "terminee"].includes((d.statut || "").toLowerCase())
+      ["validée", "validee", "valide"].includes((d.statut || "").toLowerCase())
     ).length;
     const refusees = demandes.filter(d => 
       ["refusée", "refusee", "refus"].includes((d.statut || "").toLowerCase())
@@ -546,59 +659,38 @@ const ListeDemandesImmobilier = () => {
     return { total, enAttente, validees, refusees, archivees };
   }, [demandes]);
 
-  // Actions communes
-  const handleAction = async (id: number, action: "validate" | "refuse" | "archive") => {
+  // Changer le statut d'une demande
+  const handleStatusChange = async (id: number, statut: string) => {
     setUpdatingIds((s) => [...s, id]);
     try {
-      let newStatus = "";
-      let actionText = "";
+      console.log(`🔄 Changement statut demande ${id} -> ${statut}`);
       
-      switch (action) {
-        case "validate":
-          newStatus = "validée";
-          actionText = "validée";
-          break;
-        case "refuse":
-          newStatus = "refusée";
-          actionText = "refusée";
-          break;
-        case "archive":
-          newStatus = "archivée";
-          actionText = "archivée";
-          break;
+      const response = await demandeImmobilierAPI.updateStatut(id, statut);
+      
+      if (response.data) {
+        setDemandes((prev) =>
+          prev.map((d) => (d.id === id ? { ...d, statut, updatedAt: new Date().toISOString() } : d))
+        );
+
+        window.dispatchEvent(
+          new CustomEvent("demande:statusChanged", {
+            detail: { demandeId: id, status: statut },
+          })
+        );
+
+        toast({ 
+          title: "Succès", 
+          description: `Statut changé en "${statut}"`,
+          variant: "default"
+        });
+      } else {
+        throw new Error('Erreur lors de la mise à jour');
       }
-
-      console.log(`🔄 Changement statut demande ${id} -> ${newStatus}`);
-      
-      // Utiliser le stockage local au lieu de l'API
-      const demandeMiseAJour = updateDemandeStatut(id, newStatus as any);
-      
-      if (!demandeMiseAJour) {
-        throw new Error('Demande non trouvée');
-      }
-
-      // Mettre à jour l'état local
-      setDemandes((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, statut: newStatus, updatedAt: new Date().toISOString() } : d))
-      );
-
-      // Émettre un événement pour les autres composants
-      window.dispatchEvent(
-        new CustomEvent("demande:statusChanged", {
-          detail: { demandeId: id, status: newStatus },
-        })
-      );
-
-      toast({ 
-        title: "Succès", 
-        description: `Demande ${actionText} avec succès`,
-        variant: "default"
-      });
     } catch (err: any) {
-      console.error("❌ Erreur action demande", err);
+      console.error("❌ Erreur changement statut:", err);
       toast({ 
         title: "Erreur", 
-        description: "Impossible de traiter la demande pour le moment.",
+        description: err.response?.data?.error || "Impossible de changer le statut",
         variant: "destructive"
       });
     } finally {
@@ -609,24 +701,26 @@ const ListeDemandesImmobilier = () => {
   const handleRemove = async (id: number) => {
     setUpdatingIds((s) => [...s, id]);
     try {
-      // Utiliser le stockage local au lieu de l'API
-      const success = deleteDemande(id);
+      const hardDelete = !isArtisan;
       
-      if (!success) {
-        throw new Error('Demande non trouvée');
+      const response = await demandeImmobilierAPI.deleteDemande(id, hardDelete);
+      
+      if (response.data) {
+        setDemandes((prev) => prev.filter((d) => d.id !== id));
+        
+        toast({
+          title: isArtisan ? "Archivée" : "Supprimée",
+          description: response.data.message || "La demande a été traitée avec succès.",
+          variant: "default"
+        });
+      } else {
+        throw new Error('Erreur lors de la suppression');
       }
-
-      setDemandes((prev) => prev.filter((d) => d.id !== id));
-      toast({
-        title: "Supprimé",
-        description: "La demande a été supprimée avec succès.",
-        variant: "default"
-      });
     } catch (err: any) {
       console.error("Erreur suppression demande", err);
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer la demande pour le moment.",
+        description: err.response?.data?.error || "Impossible de supprimer la demande",
         variant: "destructive"
       });
     } finally {
@@ -634,7 +728,7 @@ const ListeDemandesImmobilier = () => {
     }
   };
 
-  // Export des données (admin seulement)
+  // Export des données
   const handleExport = () => {
     if (filteredDemandes.length === 0) {
       toast({
@@ -648,17 +742,17 @@ const ListeDemandesImmobilier = () => {
     const csvData = filteredDemandes.map(d => ({
       ID: d.id,
       Statut: d.statut,
-      'Prénom': d.contactPrenom,
-      'Nom': d.contactNom,
-      'Email': d.contactEmail,
-      'Téléphone': d.contactTel,
+      'Prénom client': d.contactPrenom,
+      'Nom client': d.contactNom,
+      'Email client': d.contactEmail,
+      'Téléphone client': d.contactTel,
       'Bien': d.property?.title,
       'Adresse': formatAddress(d),
-      'Date souhaitée': d.dateSouhaitee,
+      'Date souhaitée': d.dateSouhaitee ? new Date(d.dateSouhaitee).toLocaleDateString("fr-FR") : '',
       'Heure': d.heureSouhaitee,
       'Message': d.description,
-      'Date création': d.createdAt || d.date,
-      'User ID': d.createdBy || 'N/A'
+      'Date création': d.createdAt ? new Date(d.createdAt).toLocaleDateString("fr-FR") : '',
+      'Client ID': d.createdBy?.id || 'N/A'
     }));
 
     const headers = Object.keys(csvData[0] || {});
@@ -671,7 +765,7 @@ const ListeDemandesImmobilier = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `demandes-immobilier-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `reservations-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -684,7 +778,7 @@ const ListeDemandesImmobilier = () => {
 
   if (!isAuthenticated)
     return (
-      <div className="min-h-screen mt-12 bg-gray-50 p-6 flex items-center justify-center">
+      <div className="min-h-screen mt-12 bg-gray-50 p-4 md:p-6 flex items-center justify-center">
         <p className="text-gray-600">
           Veuillez vous connecter pour voir les demandes.
         </p>
@@ -695,117 +789,111 @@ const ListeDemandesImmobilier = () => {
     return <LoadingSpinner text="Chargement des demandes immobilières" />;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* En-tête */}
-        <div className="flex items-center justify-between mb-8">
+        {/* En-tête responsive */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {isAdmin ? "Administration des demandes" : "Mes demandes immobilières"}
-            </h1>
-            <p className="text-gray-600 mt-2">
-              {isAdmin 
-                ? "Gérez toutes les demandes de visite du système" 
-                : "Gérez les demandes de visite liées à vos biens"
-              }
+            <div className="flex items-center gap-3 mb-2">
+              {isArtisan ? (
+                <Building2 className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+              ) : (
+                <User className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+              )}
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900">
+                {isArtisan ? "Réservations" : "Mes demandes"}
+              </h1>
+            </div>
+            <p className="text-gray-600 text-sm md:text-base">
+              {isArtisan 
+                ? "Gérez les réservations de vos propriétés" 
+                : "Gérez vos demandes de visite"}
             </p>
-            {!isAdmin && (
-              <p className="text-sm text-gray-500 mt-1">
-                <span className="font-semibold text-gray-700">
-                  {demandes.length} demande(s) trouvée(s)
-                </span>
-              </p>
-            )}
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
+              <span className="font-semibold text-gray-700">
+                {demandes.length} demande(s)
+              </span>
+            </p>
           </div>
 
-          {/* Boutons d'action pour admin */}
-          {isAdmin && (
-            <div className="flex gap-3">
-              <button
-                onClick={handleExport}
-                disabled={filteredDemandes.length === 0}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Download className="w-4 h-4" />
-                Exporter CSV
-              </button>
-              <button
-                onClick={loadDemandes}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Actualiser
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Statistiques rapides */}
-        <div className="grid grid-cols-5 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-4 border border-gray-200 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total</div>
-          </div>
-          <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl font-bold text-yellow-700">{stats.enAttente}</div>
-            <div className="text-sm text-yellow-600">En attente</div>
-          </div>
-          <div className="bg-green-50 rounded-xl p-4 border border-green-200 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl font-bold text-green-700">{stats.validees}</div>
-            <div className="text-sm text-green-600">Validées</div>
-          </div>
-          <div className="bg-red-50 rounded-xl p-4 border border-red-200 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl font-bold text-red-700">{stats.refusees}</div>
-            <div className="text-sm text-red-600">Refusées</div>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl font-bold text-gray-700">{stats.archivees}</div>
-            <div className="text-sm text-gray-600">Archivées</div>
+          {/* Boutons d'action responsive */}
+          <div className="flex flex-wrap gap-2 md:gap-3">
+            <button
+              onClick={handleExport}
+              disabled={filteredDemandes.length === 0}
+              className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden md:inline">Exporter</span>
+              <span className="md:hidden">CSV</span>
+            </button>
+            <button
+              onClick={loadDemandes}
+              className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="hidden md:inline">Actualiser</span>
+              <span className="md:hidden">Rafraîchir</span>
+            </button>
           </div>
         </div>
 
-        {/* Barre de recherche (admin seulement) */}
-        {isAdmin && (
-          <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="flex-1 relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Rechercher par nom, email, bien..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">Filtrer:</span>
-              </div>
+        {/* Statistiques responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mb-6">
+          {[
+            { label: "Total", value: stats.total, color: "bg-white" },
+            { label: "En attente", value: stats.enAttente, color: "bg-yellow-50" },
+            { label: "Acceptées", value: stats.validees, color: "bg-green-50" },
+            { label: "Refusées", value: stats.refusees, color: "bg-red-50" },
+            { label: "Archivées", value: stats.archivees, color: "bg-gray-50" },
+          ].map((stat, index) => (
+            <div key={index} className={`${stat.color} rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 text-center shadow-sm`}>
+              <div className="text-lg md:text-2xl font-bold text-gray-900">{stat.value}</div>
+              <div className="text-xs md:text-sm text-gray-600">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Barre de recherche responsive */}
+        <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 mb-4 md:mb-6 shadow-sm">
+          <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
+            <div className="flex-1 w-full relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder={isArtisan ? "Rechercher client, bien..." : "Rechercher bien, date..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+              />
+            </div>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-600">Filtrer:</span>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Tabs de filtrage améliorés */}
-        <div className="flex items-center space-x-1 bg-white rounded-xl p-2 border border-gray-200 mb-8 shadow-sm">
+        {/* Tabs de filtrage responsive */}
+        <div className="flex items-center space-x-1 bg-white rounded-lg md:rounded-xl p-1 md:p-2 border border-gray-200 mb-4 md:mb-8 shadow-sm overflow-x-auto">
           {[
             { id: "all", label: "Toutes", count: stats.total },
             { id: "en_attente", label: "En attente", count: stats.enAttente },
-            { id: "validees", label: "Validées", count: stats.validees },
+            { id: "validees", label: "Acceptées", count: stats.validees },
             { id: "refusees", label: "Refusées", count: stats.refusees },
             { id: "archivees", label: "Archivées", count: stats.archivees },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
+              className={`px-3 md:px-6 py-2 md:py-3 text-xs md:text-sm font-medium rounded-md md:rounded-lg transition-all duration-200 flex items-center gap-1 md:gap-2 whitespace-nowrap ${
                 activeTab === tab.id
                   ? "bg-blue-500 text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
               {tab.label}
-              <span className={`px-2 py-1 text-xs rounded-full ${
+              <span className={`px-1.5 md:px-2 py-0.5 md:py-1 text-xs rounded-full ${
                 activeTab === tab.id
                   ? "bg-white/20 text-white"
                   : "bg-gray-200 text-gray-600"
@@ -816,55 +904,43 @@ const ListeDemandesImmobilier = () => {
           ))}
         </div>
 
-        {/* Liste des demandes */}
-        <div className="space-y-6">
+        {/* Liste des demandes responsive */}
+        <div className="space-y-4 md:space-y-6">
           {filteredDemandes.length > 0 ? (
             filteredDemandes.map((d) => (
               <DemandeCard
                 key={d.id}
                 demande={d}
-                isAdmin={isAdmin}
-                onValidate={(id: number) => handleAction(id, "validate")}
-                onRefuse={(id: number) => handleAction(id, "refuse")}
-                onArchive={(id: number) => handleAction(id, "archive")}
-                onRemove={(id: number) => handleRemove(id)}
+                isArtisan={isArtisan}
+                onStatusChange={handleStatusChange}
+                onRemove={handleRemove}
               />
             ))
           ) : (
-            <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-gray-400" />
+            <div className="bg-white rounded-lg md:rounded-2xl border border-gray-200 p-6 md:p-12 text-center shadow-sm">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {isArtisan ? (
+                  <Building className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
+                ) : (
+                  <Calendar className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
+                )}
               </div>
-              <h4 className="text-gray-700 text-lg font-medium mb-2">
+              <h4 className="text-gray-700 text-base md:text-lg font-medium mb-2">
                 Aucune demande{" "}
-                {activeTab !== "all" ? "dans cette catégorie" : isAdmin ? "immobilière" : "pour vos biens"}
+                {activeTab !== "all" ? "dans cette catégorie" : isArtisan ? "pour vos biens" : "de visite"}
               </h4>
-              {activeTab !== "all" ? (
-                <p className="text-gray-500 text-sm mb-6">
-                  Essayez de sélectionner une autre catégorie
-                </p>
-              ) : (
-                <>
-                  {isAdmin ? (
-                    <p className="text-gray-500 text-sm">
-                      Aucune demande de visite n'a été soumise pour le moment.
-                    </p>
-                  ) : (
-                    <p className="text-gray-500 text-sm mb-6">
-                      {demandes.length === 0 
-                        ? "Vous n'avez pas encore postulé à des logements intermédiaires." 
-                        : "Aucune demande ne correspond aux filtres actuels."}
-                    </p>
-                  )}
-                </>
-              )}
-              {!isAdmin && demandes.length === 0 && (
+              <p className="text-gray-500 text-sm md:text-base mb-4 md:mb-6">
+                {isArtisan 
+                  ? "Aucun client n'a encore réservé de visite pour vos propriétés."
+                  : "Vous n'avez pas encore demandé de visite pour un bien immobilier."}
+              </p>
+              {!isArtisan && (
                 <Link
-                  to="/logements-intermediaires"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 inline-flex items-center gap-2"
+                  to="/immobilier"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center gap-2"
                 >
                   <Home className="w-4 h-4" />
-                  Voir les logements disponibles
+                  Voir les biens
                 </Link>
               )}
             </div>
