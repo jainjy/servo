@@ -31,8 +31,11 @@ const MapPage: React.FC = () => {
         setPoints(allPoints);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur inconnue");
+        const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
+        setError(errorMessage);
         console.error("Erreur chargement carte:", err);
+        // Afficher un message d'erreur sans bloquer l'UI
+        setPoints([]);
       } finally {
         setLoading(false);
       }
@@ -175,28 +178,11 @@ const MapPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex items-center justify-center h-96 mt-20">
         <div className="flex flex-col items-center">
-          <img src="/loading.gif" alt="" />
+          <img src="/loading.gif" alt="Chargement" />
           <p className="mt-4 text-gray-600">Chargement de la carte...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <h3 className="text-red-800 font-bold flex items-center gap-2">
-          <X className="h-5 w-5" /> Erreur
-        </h3>
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          Réessayer
-        </button>
       </div>
     );
   }
@@ -356,6 +342,21 @@ const MapPage: React.FC = () => {
         className="rounded-lg shadow-lg border"
         onPointClick={handlePointClick}
       />
+
+      {/* Message si erreur lors du chargement des données */}
+      {error && (
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-800">
+            <span className="font-bold">⚠️ Attention :</span> {error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
 
       {/* Modal des détails */}
       <PointDetailsModal
