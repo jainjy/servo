@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Phone, Globe, TrendingUp, Calendar, Filter } from 'lucide-react';
+import api from '../../lib/api.js';
 
 interface InvestmentRequest {
   id: string;
@@ -28,10 +29,9 @@ const InvestmentDemandesPage = () => {
   // Charger les demandes
   const fetchDemandes = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/investissement/admin/demandes');
-      const result = await response.json();
-      if (result.success) {
-        setDemandes(result.data);
+      const response = await api.get('/investissement/admin/demandes');
+      if (response.data.success) {
+        setDemandes(response.data.data);
       }
     } catch (error) {
       console.error('Erreur chargement demandes:', error);
@@ -43,10 +43,9 @@ const InvestmentDemandesPage = () => {
   // Charger les statistiques
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/investissement/admin/statistiques');
-      const result = await response.json();
-      if (result.success) {
-        setStats(result.data);
+      const response = await api.get('/investissement/admin/statistiques');
+      if (response.data.success) {
+        setStats(response.data.data);
       }
     } catch (error) {
       console.error('Erreur chargement stats:', error);
@@ -56,16 +55,11 @@ const InvestmentDemandesPage = () => {
   // Mettre à jour le statut
   const updateStatus = async (id: string, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/investissement/admin/demandes/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus })
+      const response = await api.patch(`/investissement/admin/demandes/${id}/status`, { 
+        status: newStatus 
       });
 
-      const result = await response.json();
-      if (result.success) {
+      if (response.data.success) {
         // Recharger les demandes
         fetchDemandes();
       }
