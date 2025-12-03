@@ -76,6 +76,11 @@ const navigation = [
     icon: Wallet2Icon,
   },
   {
+    name: "Liste demande immobilier",
+    href: "/pro/demandes-immobilier",
+    icon: Building2,
+  },
+  {
     name: "Les demandes de devis",
     href: "/pro/demandes-devis",
     icon: FileText,
