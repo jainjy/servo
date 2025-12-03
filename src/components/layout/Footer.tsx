@@ -55,7 +55,7 @@ const Footer: React.FC = () => {
                   </p>
                 </div>
                 {/* Traînée d'étoiles au survol */}
-                <div className="absolute -right-2 top-0 opacity-0 group-hover/logo:opacity-100 group-hover/logo:translate-x-2 transition-all duration-500">
+                <div className="absolute left-36 top-1/3 opacity-0 group-hover/logo:opacity-100 group-hover/logo:translate-x-2 transition-all duration-500">
                   <div className="flex space-x-1">
                     {[...Array(3)].map((_, i) => (
                       <div
