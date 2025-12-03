@@ -41,8 +41,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import api from '@/lib/api';
 import ProOrderDetailsModal from './ProOrderDetailsModal';
+import { ordersProAPI } from '@/lib/api';
 
 const ProOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -54,6 +54,7 @@ const ProOrders = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [productTypeStats, setProductTypeStats] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   
   const [stats, setStats] = useState({
     total: 0,
@@ -118,7 +119,7 @@ const ProOrders = () => {
     }
   };
 
-  // ✅ NOUVEAU : Configuration des types de produits naturels
+  // Configuration des types de produits naturels
   const PRODUCT_TYPE_CONFIG = {
     'all': { label: 'Tous les produits', icon: Package, color: 'bg-gray-100 text-gray-800 border-gray-200' },
     'food': { label: 'Alimentation', icon: Utensils, color: 'bg-orange-100 text-orange-800 border-orange-200' },
@@ -132,22 +133,22 @@ const ProOrders = () => {
     'accessoires': { label: 'Accessoires', icon: Package, color: 'bg-cyan-100 text-cyan-800 border-cyan-200' }
   };
 
-  // ✅ NOUVEAU : Fonction pour obtenir la configuration d'un type de produit
+  // Fonction pour obtenir la configuration d'un type de produit
   const getProductTypeConfig = (productType) => {
     return PRODUCT_TYPE_CONFIG[productType] || PRODUCT_TYPE_CONFIG.general;
   };
 
-  // ✅ NOUVEAU : Fonction pour obtenir l'icône d'un type de produit
+  // Fonction pour obtenir l'icône d'un type de produit
   const getProductTypeIcon = (productType) => {
     return getProductTypeConfig(productType).icon;
   };
 
-  // ✅ NOUVEAU : Fonction pour obtenir le label d'un type de produit
+  // Fonction pour obtenir le label d'un type de produit
   const getProductTypeLabel = (productType) => {
     return getProductTypeConfig(productType).label;
   };
 
-  // ✅ NOUVEAU : Fonction pour obtenir la couleur d'un type de produit
+  // Fonction pour obtenir la couleur d'un type de produit
   const getProductTypeColor = (productType) => {
     return getProductTypeConfig(productType).color;
   };
@@ -161,7 +162,7 @@ const ProOrders = () => {
   const fetchStats = async () => {
     try {
       console.log('📊 Chargement des statistiques...');
-      const response = await api.get('/orders/pro/stats');
+      const response = await ordersProAPI.getProStats();
       console.log('✅ Statistiques reçues:', response.data);
       setStats(response.data.stats);
     } catch (error) {
@@ -173,7 +174,7 @@ const ProOrders = () => {
   const fetchProductTypeStats = async () => {
     try {
       console.log('📈 Chargement des statistiques par type de produit...');
-      const response = await api.get('/orders/pro/product-types');
+      const response = await ordersProAPI.getProProductTypes();
       if (response.data.success) {
         console.log('✅ Statistiques types produits reçues:', response.data.productTypes);
         setProductTypeStats(response.data.productTypes);
@@ -183,28 +184,24 @@ const ProOrders = () => {
     }
   };
 
-  // ✅ AMÉLIORÉ : Charger les commandes du pro avec gestion des produits naturels
+  // Charger les commandes du pro avec gestion des produits naturels
   const fetchOrders = async (productType = 'all', status = 'all') => {
     try {
       setLoading(true);
+      setError(null);
       console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${status})...`);
       
-      // Construire les paramètres de requête
-      const params = new URLSearchParams();
-      if (productType !== 'all') params.append('productType', productType);
-      if (status !== 'all') params.append('status', status);
-      
-      // Utiliser une seule route avec paramètres
-      const response = await api.get(`/orders/pro?${params.toString()}`);
+      const response = await ordersProAPI.getProOrders({
+        productType: productType !== 'all' ? productType : undefined,
+        status: status !== 'all' ? status : undefined
+      });
       
       console.log('✅ Commandes reçues:', response.data);
       
       if (response.data.success) {
-        // ✅ FILTRAGE SUPPLÉMENTAIRE POUR LES PRODUITS NATURELS
         let filteredOrders = response.data.orders || [];
         
         if (productType === 'produitnaturel') {
-          // Filtrer pour n'avoir que les commandes contenant des produits naturels
           filteredOrders = filteredOrders.filter(order => 
             order.items?.some(item => 
               item.productType === 'produitnaturel' || 
@@ -222,22 +219,25 @@ const ProOrders = () => {
         
         setOrders(filteredOrders);
         
-        // Charger les stats seulement pour l'onglet "all"
         if (productType === 'all' && status === 'all') {
           await fetchStats();
         }
         
         await fetchProductTypeStats();
-        
-        // Déclencher la mise à jour des notifications
         triggerNotificationsUpdate();
       } else {
         console.error('❌ API a retourné success: false', response.data);
         setOrders([]);
+        setError('Erreur lors du chargement des commandes');
       }
     } catch (error) {
       console.error('❌ Erreur chargement commandes:', error);
       setOrders([]);
+      setError(
+        error.response?.status === 401 
+          ? 'Session expirée. Veuillez vous reconnecter.'
+          : 'Erreur de connexion au serveur'
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -257,6 +257,7 @@ const ProOrders = () => {
   // Fonction de rafraîchissement manuel
   const handleRefresh = () => {
     setRefreshing(true);
+    setError(null);
     fetchOrders(activeTab, statusFilter);
   };
 
@@ -265,14 +266,11 @@ const ProOrders = () => {
     try {
       console.log(`🔄 Mise à jour statut commande ${orderId} vers: ${newStatus}`);
       
-      const response = await api.put(`/orders/pro/${orderId}/status`, { status: newStatus });
+      const response = await ordersProAPI.updateOrderStatus(orderId, newStatus);
       
       if (response.data.success) {
         console.log('✅ Statut mis à jour avec succès');
-        // Recharger les données actuelles sans changer les filtres
         fetchOrders(activeTab, statusFilter);
-        
-        // Déclencher la mise à jour des notifications
         triggerNotificationsUpdate();
       } else {
         console.error('❌ Erreur API lors de la mise à jour:', response.data);
@@ -282,10 +280,10 @@ const ProOrders = () => {
     }
   };
 
-  // CORRIGÉ : Obtenir les actions disponibles selon le statut actuel
+  // Obtenir les actions disponibles selon le statut actuel
   const getAvailableActions = (order) => {
     if (!order || order.status === STATUS_CANCELLED || order.status === 'delivered') {
-      return []; // Aucune action possible si annulé ou livré
+      return [];
     }
 
     const currentStatusConfig = STATUS_CONFIG[order.status];
@@ -353,7 +351,7 @@ const ProOrders = () => {
     return statuses;
   };
 
-  // ✅ NOUVEAU : Fonction pour extraire les types de produits uniques d'une commande
+  // Fonction pour extraire les types de produits uniques d'une commande
   const getUniqueProductTypes = (order) => {
     if (!order.items || !Array.isArray(order.items)) return [];
     
@@ -368,7 +366,7 @@ const ProOrders = () => {
     return Array.from(productTypes);
   };
 
-  // ✅ NOUVEAU : Fonction pour vérifier si une commande contient des produits naturels
+  // Fonction pour vérifier si une commande contient des produits naturels
   const hasNaturalProducts = (order) => {
     return order.items?.some(item => 
       item.productType === 'produitnaturel' || 
@@ -456,7 +454,6 @@ const ProOrders = () => {
   // Gérer le changement d'onglet
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    // Réinitialiser le filtre de statut quand on change d'onglet
     setStatusFilter('all');
   };
 
@@ -520,8 +517,6 @@ const ProOrders = () => {
     const availableActions = getAvailableActions(order);
     const dateInfo = formatDate(order.createdAt);
     const statusBorderColor = getStatusBorderColor(order.status);
-
-    // ✅ AMÉLIORÉ : Utiliser la nouvelle fonction pour les types de produits
     const productTypes = getUniqueProductTypes(order);
 
     return (
@@ -566,7 +561,7 @@ const ProOrders = () => {
               </span>
             </div>
             
-            {/* ✅ AMÉLIORÉ : Affichage des types de produits avec nouvelles icônes */}
+            {/* Affichage des types de produits avec nouvelles icônes */}
             {productTypes.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {productTypes.map((productType, index) => {
@@ -629,13 +624,31 @@ const ProOrders = () => {
     );
   };
 
+  // Affichage des erreurs
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center py-12">
+          <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Erreur</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Button onClick={handleRefresh} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage du chargement
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p>Chargement de vos commandes...</p>
-          <p className="text-sm text-gray-500 mt-2">Vérification de la connexion à l'API</p>
+          <p className="text-sm text-gray-500 mt-2">Récupération des données pour {getProductTypeLabel(activeTab)}</p>
         </div>
       </div>
     );
@@ -762,7 +775,7 @@ const ProOrders = () => {
         </Card>
       )}
 
-      {/* ✅ AMÉLIORÉ : Navigation par types de produits avec produits naturels */}
+      {/* Navigation par types de produits avec produits naturels */}
       <Card>
         <CardContent className="p-4 lg:p-6">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -855,13 +868,25 @@ const ProOrders = () => {
           {orders.length === 0 ? (
             <div className="text-center py-12 px-4">
               <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune commande trouvée</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {activeTab === 'all' ? 'Aucune commande trouvée' : `Aucune commande ${getProductTypeLabel(activeTab).toLowerCase()}`}
+              </h3>
               <p className="text-gray-600 mb-4">
-                {loading ? 'Chargement en cours...' : 'Aucune commande n\'a été trouvée dans la base de données.'}
+                {loading 
+                  ? 'Chargement en cours...' 
+                  : activeTab !== 'all' 
+                    ? `Vous n'avez pas de commandes de type "${getProductTypeLabel(activeTab)}" pour le moment.`
+                    : "Vous n'avez pas encore de commandes. Elles apparaîtront ici lorsqu'un client passera commande sur vos produits."
+                }
               </p>
-              <Button onClick={handleRefresh} variant="outline">
-                Réessayer
-              </Button>
+              {!loading && (
+                <div className="space-y-2">
+                  <Button onClick={handleRefresh} variant="outline">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Actualiser
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <>

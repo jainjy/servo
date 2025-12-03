@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { X,Search } from "lucide-react";
+
 
 // Import des icônes
 import {
@@ -77,6 +79,30 @@ const Header = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<any>>([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false); 
+
+ 
+
+  const openRecherchePage = () => {
+  navigate("/recherche");
+};
+
+
+  const handleSearch = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (searchQuery.trim()) {
+    // Rediriger vers la page de résultats ou exécuter la recherche
+    navigate(`/recherche?q=${encodeURIComponent(searchQuery)}`);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  };
+  
+};
+
 
   useEffect(() => {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?$%*#";
@@ -162,6 +188,64 @@ const Header = () => {
     window.addEventListener("notifications:reload", handler);
     return () => window.removeEventListener("notifications:reload", handler);
   }, [user?.id, notifOpen]);
+
+  useEffect(() => {
+    if (searchQuery.trim().length > 2) {
+      setIsLoading(true);
+      
+      const timeoutId = setTimeout(() => {
+        // Données simulées
+        const mockResults = [
+          {
+            id: 1,
+            title: "Appartement moderne",
+            description: "Bel appartement 3 pièces en centre-ville",
+            price: "250,000",
+            href: "/immobilier/appartement-1",
+            image: "https://i.pinimg.com/736x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg"
+          },
+          {
+            id: 2,
+            title: "Maison de ville",
+            description: "Maison spacieuse avec jardin",
+            price: "350,000",
+            href: "/immobilier/maison-2",
+            image: "https://i.pinimg.com/736x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg"
+          },
+          {
+            id: 3,
+            title: "Studio étudiant",
+            description: "Studio meublé proche université",
+            price: "120,000",
+            href: "/immobilier/studio-3",
+            image: "https://i.pinimg.com/736x/8c/c1/22/8cc122eb07f85e3b4881b3d20b318bd2.jpg"
+          }
+        ].filter(item => 
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        setSearchResults(mockResults);
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  // ... le reste de vos fonctions existantes (handleLogin, handleLogout, etc.) ...
+
+  // AJOUTEZ CES FONCTIONS APRÈS VOS AUTRES FONCTIONS :
+  
+
+  const handleResultClick = (result: any) => {
+    navigate(result.href);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
 
   const loadNotifications = async () => {
     if (!user?.id) return;
@@ -527,14 +611,6 @@ const Header = () => {
         //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
         // },
         {
-          title: "IBR - Ingénierie Bâtiment Rénovation",
-          description:
-            "Expertise complète en ingénierie du bâtiment : études techniques, conception architecturale, calculs structurels et suivi de chantier par des professionnels certifiés",
-          href: "/services-ibr",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
           title: "Formation",
           description: " Formations pour professionnels du bâtiment",
           href: "/formation-batiment",
@@ -877,10 +953,14 @@ const Header = () => {
     //   title: "ACTUALITÉS",
     //   href: "/actualites",
     // },
-    // {
-    //   title: "CONSULTATIONS/AIDES",
-    //   href: "/service",
-    // },
+    {
+      title: "SERVICES ET PARTENAIRES",
+      href: "/service",
+    },
+    {
+      title: "DIGITALISATION",
+      href: "/digitalisation",
+    },
     // {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
@@ -1123,7 +1203,7 @@ const Header = () => {
                             <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
                           </div>
                         </Link>
-                        <nav className="space-y-1">
+                        <nav className="space-y-1 overflow-y-auto">
                           {menuSections.map((section, si) => {
                             const hasItems =
                               !!section.items && section.items.length > 0;
@@ -1157,7 +1237,7 @@ const Header = () => {
                               </div>
                             );
                           })}
-                          <div className=" absolute -bottom-28 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
+                          <div className=" absolute -bottom-36 left-8 w-auto flex items-start justify-start z-50 gap-5 h-20">
                             {!isAuthenticated ? (
                               <Link
                                 to="/login"
@@ -1255,7 +1335,28 @@ const Header = () => {
             </div>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">   
+            <div className="relative flex items-center">
+            
+              {/* Bouton de recherche */}
+              <div className="relative flex items-center">
+                {/* Option 1 : Simple bouton qui ouvre la page */}
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`
+                    h-9 w-9 rounded-lg border transition-all duration-200 ml-2
+                    ${isSearchOpen 
+                      ? 'bg-gray-800 text-white border-gray-700' 
+                      : 'bg-black text-white border-gray-800 hover:bg-gray-800'
+                    }
+                  `}
+                      onClick={openRecherchePage}                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>         
             {/* Icône Panier pour utilisateurs connectés */}
             {isAuthenticated && (
               <Button

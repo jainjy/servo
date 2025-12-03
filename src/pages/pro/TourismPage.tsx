@@ -39,6 +39,8 @@ import { toast } from "sonner";
 import { tourismeAPI } from "../../lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import AjoutVolModal from "../../components/components/AjoutVol";
+import AjoutActivitesModal from "@/components/components/AjoutActivites";
+import { api } from "@/lib/axios";
 
 // Amenities disponibles avec icônes
 const availableAmenities = [
@@ -83,6 +85,11 @@ const addOptions = [
     label: "Ajouter un vol",
     icon: Plane,
   },
+  {
+    id: "activities",
+    label: "Ajouter une activité",
+    icon: Mountain,
+  },
 ];
 
 // Options pour le dropdown de type de contenu
@@ -104,6 +111,12 @@ const contentTypeOptions = [
     label: "Services de Vol",
     icon: Plane,
     description: "Gérer vos vols et compagnies aériennes",
+  },
+  {
+    id: "activities",
+    label: "Activités et Loisirs",
+    icon: Mountain,
+    description: "Gérer vos activités et loisirs",
   },
 ];
 
@@ -140,15 +153,14 @@ const AdminModal = ({
     entranceFee: "",
     website: "",
     contactInfo: "",
-    removedImages: [], // Nouveau champ pour les images supprimées
+    removedImages: [],
   };
 
   const [formData, setFormData] = useState(defaultForm);
   const [uploading, setUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]); // Fichiers à uploader
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
 
-  // CORRECTION : Améliorer la gestion du changement de type
   const handleTypeChange = (e) => {
     const selectedValue = e.target.value;
     const isTouristic = selectedValue === "touristic_place";
@@ -157,12 +169,11 @@ const AdminModal = ({
       ...prev,
       isTouristicPlace: isTouristic,
       type: isTouristic ? "touristic_place" : selectedValue,
-      // Réinitialiser les champs spécifiques si nécessaire
       category: isTouristic ? "" : prev.category,
       price: isTouristic ? 0 : prev.price,
     }));
   };
-  // Réinitialiser le formulaire quand les props changent
+
   useEffect(() => {
     if (editingListing) {
       setFormData({ ...defaultForm, ...editingListing });
@@ -182,16 +193,12 @@ const AdminModal = ({
 
     setUploading(true);
     try {
-      // Stocker les fichiers pour l'upload réel
       setUploadedFiles((prev) => [...prev, ...files]);
-
-      // Prévisualisation locale
       const newImageUrls = files.map((file) => URL.createObjectURL(file));
       setFormData((prev) => ({
         ...prev,
         images: [...(prev.images || []), ...newImageUrls],
       }));
-
       toast.success(`${files.length} image(s) sélectionnée(s)`);
     } catch (error) {
       console.error("❌ Erreur sélection images:", error);
@@ -209,7 +216,6 @@ const AdminModal = ({
       const newImages = [...prev.images];
       const removedImage = newImages.splice(index, 1)[0];
 
-      // Si c'est une URL existante (pas une prévisualisation locale), l'ajouter aux images supprimées
       if (removedImage && !removedImage.startsWith("blob:")) {
         return {
           ...prev,
@@ -218,7 +224,6 @@ const AdminModal = ({
         };
       }
 
-      // Si c'est une prévisualisation locale, retirer le fichier correspondant
       const fileIndex = uploadedFiles.findIndex(
         (file) => URL.createObjectURL(file) === removedImage
       );
@@ -239,19 +244,14 @@ const AdminModal = ({
 
     try {
       console.log("📝 Préparation soumission formulaire:", formData);
-
-      // Créer FormData pour l'upload des fichiers
       const submitData = new FormData();
 
       Object.keys(formData).forEach((key) => {
         if (key !== "images" && key !== "removedImages") {
           let value = formData[key];
-
-          // Convertir les boolean en string pour FormData
           if (typeof value === "boolean") {
             value = value.toString();
           }
-
           if (Array.isArray(value)) {
             submitData.append(key, JSON.stringify(value));
           } else {
@@ -260,7 +260,6 @@ const AdminModal = ({
         }
       });
 
-      // Ajouter les images supprimées
       if (formData.removedImages && formData.removedImages.length > 0) {
         submitData.append(
           "removedImages",
@@ -268,12 +267,10 @@ const AdminModal = ({
         );
       }
 
-      // Ajouter les fichiers à uploader
       uploadedFiles.forEach((file) => {
         submitData.append("images", file);
       });
 
-      // Utiliser l'API appropriée selon qu'on crée ou modifie
       let response;
       if (editingListing) {
         response = await tourismeAPI.updateListingWithImages(
@@ -290,12 +287,10 @@ const AdminModal = ({
         onSubmit(response.data.data);
         toast.success(
           editingListing
-            ? `${
-                formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
-              } modifié avec succès ✅`
-            : `${
-                formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
-              } créé avec succès ✅`
+            ? `${formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
+            } modifié avec succès ✅`
+            : `${formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
+            } créé avec succès ✅`
         );
       }
     } catch (error) {
@@ -323,14 +318,13 @@ const AdminModal = ({
           <div className="flex justify-between items-center">
             <h3 className="text-2xl font-bold text-gray-900">
               {editingListing
-                ? `Modifier ${
-                    formData.isTouristicPlace
-                      ? "le lieu touristique"
-                      : "l'hébergement"
-                  }`
+                ? `Modifier ${formData.isTouristicPlace
+                  ? "le lieu touristique"
+                  : "l'hébergement"
+                }`
                 : contentType === "accommodations"
-                ? "Nouvel hébergement"
-                : "Nouveau lieu touristique"}
+                  ? "Nouvel hébergement"
+                  : "Nouveau lieu touristique"}
             </h3>
             <button
               onClick={handleClose}
@@ -342,7 +336,6 @@ const AdminModal = ({
           </div>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Sélecteur de type principal */}
           {!editingListing && (
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -368,7 +361,6 @@ const AdminModal = ({
             </div>
           )}
 
-          {/* Champs conditionnels pour lieux touristiques */}
           {formData.isTouristicPlace && (
             <>
               <div>
@@ -470,7 +462,6 @@ const AdminModal = ({
             </>
           )}
 
-          {/* Champs pour hébergements */}
           {!formData.isTouristicPlace && (
             <>
               <div className="grid grid-cols-2 gap-4">
@@ -612,7 +603,6 @@ const AdminModal = ({
             </>
           )}
 
-          {/* Section Images MODIFIÉE */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-4">
               Images {uploading && "(Upload en cours...)"}
@@ -653,7 +643,6 @@ const AdminModal = ({
               </p>
             </div>
 
-            {/* Aperçu des images */}
             {(formData.images || []).length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {(formData.images || []).map((image, index) => (
@@ -677,7 +666,6 @@ const AdminModal = ({
             )}
           </div>
 
-          {/* Champs communs */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -883,7 +871,6 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Images */}
           {selectedListing.images && selectedListing.images.length > 0 ? (
             <div className="relative h-64 rounded-xl overflow-hidden">
               <img
@@ -900,7 +887,6 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
             </div>
           )}
 
-          {/* Description */}
           <div>
             <h4 className="text-lg font-semibold text-gray-900 mb-2">
               Description
@@ -908,7 +894,6 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
             <p className="text-gray-600">{selectedListing.description}</p>
           </div>
 
-          {/* Informations spécifiques */}
           {isTouristicPlace ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedListing.openingHours && (
@@ -979,7 +964,6 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
             </div>
           )}
 
-          {/* Équipements */}
           <div>
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
               Équipements
@@ -1005,7 +989,6 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
             </div>
           </div>
 
-          {/* Informations de réservation (uniquement pour hébergements) */}
           {!isTouristicPlace && (
             <div className="bg-blue-50 p-4 rounded-xl">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
@@ -1024,11 +1007,10 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
                       Réservation instantanée
                     </span>
                     <span
-                      className={`font-semibold ${
-                        selectedListing.instantBook
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+                      className={`font-semibold ${selectedListing.instantBook
+                        ? "text-green-600"
+                        : "text-red-600"
+                        }`}
                     >
                       {selectedListing.instantBook ? "Oui" : "Non"}
                     </span>
@@ -1208,9 +1190,11 @@ export default function TourismPage() {
   const [contentType, setContentType] = useState("accommodations");
   const [listings, setListings] = useState([]);
   const [flights, setFlights] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [flightsLoading, setFlightsLoading] = useState(false);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const { user } = useAuth();
@@ -1234,10 +1218,13 @@ export default function TourismPage() {
   const [favorites, setFavorites] = useState(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showActivityDetailModal, setShowActivityDetailModal] = useState(false);
   const [editingListing, setEditingListing] = useState(null);
+  const [editingActivity, setEditingActivity] = useState(null);
   const [bookingForm, setBookingForm] = useState({
     listingId: "",
     checkIn: "",
@@ -1254,6 +1241,7 @@ export default function TourismPage() {
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [showContentTypeDropdown, setShowContentTypeDropdown] = useState(false);
   const [showFlightModal, setShowFlightModal] = useState(false);
+  const [showActivitiesModal, setShowActivitiesModal] = useState(false);
   const [showAirlineModal, setShowAirlineModal] = useState(false);
 
   const sliderRef = useRef(null);
@@ -1289,6 +1277,8 @@ export default function TourismPage() {
       loadTouristicPlaces();
     } else if (contentType === "flights") {
       loadFlights();
+    } else if (contentType === "activities") {
+      loadActivities();
     }
     loadStats();
   }, [contentType]);
@@ -1366,35 +1356,58 @@ export default function TourismPage() {
     }
   };
 
-const loadStats = async () => {
-  try {
-    setStatsLoading(true);
+  const loadActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+      const response = await api.get('/ActivityCategory');
+      console.log("🎯 Réponse API activités:", response.data);
 
-    // Passer le contentType comme paramètre
-    const response = await tourismeAPI.getStats({
-      contentType: contentType === "flights" ? null : contentType,
-    });
-
-    console.log("📊 Réponse API stats:", response.data);
-
-    if (response.data.success) {
-      setStats(response.data.data);
-      console.log(
-        "✅ Stats mises à jour pour:",
-        contentType,
-        response.data.data
-      );
+      if (response.data.success) {
+        setActivities(response.data.data);
+        console.log("✅ Activités chargées:", response.data.data.length);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des activités:", error);
+      if (error.response) {
+        console.error("Détails de l'erreur:", {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+      }
+      toast.error("Erreur lors du chargement des activités");
+    } finally {
+      setActivitiesLoading(false);
     }
-  } catch (error) {
-    console.error("Erreur lors du chargement des statistiques:", error);
-  } finally {
-    setStatsLoading(false);
-  }
-};
+  };
+
+  const loadStats = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await tourismeAPI.getStats({
+        contentType: contentType === "flights" || contentType === "activities" ? null : contentType,
+      });
+
+      console.log("📊 Réponse API stats:", response.data);
+
+      if (response.data.success) {
+        setStats(response.data.data);
+        console.log(
+          "✅ Stats mises à jour pour:",
+          contentType,
+          response.data.data
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des statistiques:", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   // Filtrer les résultats (pour hébergements et lieux touristiques)
   useEffect(() => {
-    if (contentType === "flights") return;
+    if (contentType === "flights" || contentType === "activities") return;
 
     let results = listings;
 
@@ -1462,6 +1475,50 @@ const loadStats = async () => {
     setFilteredListings(results);
   }, [filters, listings, contentType]);
 
+  // Fonction pour supprimer une activité
+  const handleDeleteActivity = async (id) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette activité ?")) {
+      return;
+    }
+
+    try {
+      console.log("🗑️ Suppression activité:", id);
+      const response = await api.delete(`/ActivityCategory/${id}`);
+      
+      if (response.data.success) {
+        toast.success("Activité supprimée avec succès");
+        
+        // Mettre à jour la liste des activités
+        setActivities(prev => prev.filter(activity => activity.id !== id));
+        
+        // Si l'activité sélectionnée est celle qu'on supprime, on la retire
+        if (selectedActivity?.id === id) {
+          setSelectedActivity(null);
+          setShowActivityDetailModal(false);
+        }
+        
+        console.log("✅ Activité supprimée avec succès");
+      }
+    } catch (error) {
+      console.error("❌ Erreur suppression activité:", error);
+      toast.error(error.response?.data?.error || "Erreur lors de la suppression");
+    }
+  };
+
+  // Fonction pour éditer une activité
+  const handleEditActivity = (activity) => {
+    setEditingActivity(activity);
+    // Si vous avez un modal spécifique pour les activités, utilisez-le
+    // Sinon, vous pouvez utiliser le modal d'activités en mode édition
+    setShowActivitiesModal(true);
+  };
+
+  // Fonction pour voir les détails d'une activité
+  const handleViewActivityDetails = (activity) => {
+    setSelectedActivity(activity);
+    setShowActivityDetailModal(true);
+  };
+
   const handleDeleteListing = async (id) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
       return;
@@ -1469,7 +1526,6 @@ const loadStats = async () => {
 
     try {
       console.log("🗑️ Suppression:", id);
-
       await tourismeAPI.deleteListing(id);
       toast.success(
         contentType === "touristic_places"
@@ -1477,7 +1533,6 @@ const loadStats = async () => {
           : "Hébergement supprimé avec succès"
       );
 
-      // Mise à jour optimiste
       setListings((prev) => {
         const updated = prev.filter((listing) => listing.id !== id);
         console.log("📊 Listings après suppression:", updated.length);
@@ -1486,7 +1541,6 @@ const loadStats = async () => {
 
       resetAllFilters();
       await loadStats();
-
       console.log("✅ Suppression terminée");
     } catch (error) {
       const backendMessage = error.response?.data?.error;
@@ -1498,12 +1552,10 @@ const loadStats = async () => {
   const toggleAvailability = async (id) => {
     try {
       console.log("🔄 Bascule disponibilité:", id);
-
       const response = await tourismeAPI.toggleAvailability(id);
       console.log("📥 Réponse disponibilité:", response.data);
 
       if (response.data.success) {
-        // Mise à jour optimiste
         setListings((prev) =>
           prev.map((listing) =>
             listing.id === id ? response.data.data : listing
@@ -1518,14 +1570,13 @@ const loadStats = async () => {
 
         toast.success(response.data.message);
         await loadStats();
-
         console.log("✅ Disponibilité basculée");
       }
     } catch (error) {
       console.error("❌ Erreur bascule disponibilité:", error);
       toast.error(
         error.response?.data?.error ||
-          "Erreur lors du changement de disponibilité"
+        "Erreur lors du changement de disponibilité"
       );
     }
   };
@@ -1533,12 +1584,10 @@ const loadStats = async () => {
   const toggleFeatured = async (id) => {
     try {
       console.log("⭐ Bascule vedette:", id);
-
       const response = await tourismeAPI.toggleFeatured(id);
       console.log("📥 Réponse vedette:", response.data);
 
       if (response.data.success) {
-        // Mise à jour optimiste
         setListings((prev) =>
           prev.map((listing) =>
             listing.id === id ? response.data.data : listing
@@ -1553,14 +1602,13 @@ const loadStats = async () => {
 
         toast.success(response.data.message);
         await loadStats();
-
         console.log("✅ Statut vedette basculé");
       }
     } catch (error) {
       console.error("❌ Erreur bascule vedette:", error);
       toast.error(
         error.response?.data?.error ||
-          "Erreur lors du changement de statut vedette"
+        "Erreur lors du changement de statut vedette"
       );
     }
   };
@@ -1621,23 +1669,19 @@ const loadStats = async () => {
     setShowBookingModal(true);
   };
 
-  // Dans le composant TourismPage
   const handleAdminSubmit = async (formData) => {
     try {
       console.log("📤 Envoi des données avec images:", formData);
       setShowAdminModal(false);
       setEditingListing(null);
-      // Réinitialiser les filtres
       resetAllFilters();
 
-      // Recharger les données
       if (formData.isTouristicPlace) {
         await loadTouristicPlaces();
       } else {
         await loadAccommodations();
       }
       await loadStats();
-
       console.log("✅ Opération terminée avec succès");
     } catch (error) {
       console.error("❌ Erreur opération:", error);
@@ -1655,6 +1699,11 @@ const loadStats = async () => {
     setSelectedListing(null);
   };
 
+  const handleCloseActivityDetailModal = () => {
+    setShowActivityDetailModal(false);
+    setSelectedActivity(null);
+  };
+
   // Composant Carte pour Hébergements et Lieux Touristiques
   const ListingCard = ({ listing }) => {
     const isTouristicPlace = listing.isTouristicPlace;
@@ -1667,7 +1716,6 @@ const loadStats = async () => {
 
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        {/* Image */}
         <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 overflow-hidden">
           {listing.images && listing.images.length > 0 ? (
             <img
@@ -1687,7 +1735,6 @@ const loadStats = async () => {
             </div>
           )}
 
-          {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col space-y-2">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-gray-800 capitalize">
               {isTouristicPlace ? listing.category : listing.type}
@@ -1703,11 +1750,10 @@ const loadStats = async () => {
           <div className="absolute top-3 right-3 flex space-x-2">
             <button
               onClick={() => toggleFavorite(listing.id)}
-              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                isFavorite
-                  ? "bg-red-500 text-white"
-                  : "bg-white/90 text-gray-600 hover:bg-white"
-              }`}
+              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isFavorite
+                ? "bg-red-500 text-white"
+                : "bg-white/90 text-gray-600 hover:bg-white"
+                }`}
             >
               <Heart
                 className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
@@ -1720,7 +1766,6 @@ const loadStats = async () => {
             )}
           </div>
 
-          {/* Prix */}
           {listing.price > 0 && (
             <div className="absolute bottom-3 left-3">
               <div className="bg-black/70 text-white px-3 py-2 rounded-xl backdrop-blur-sm">
@@ -1732,16 +1777,14 @@ const loadStats = async () => {
             </div>
           )}
 
-          {/* Statut disponibilité */}
           {user?.role === "professional" && (
             <div className="absolute bottom-3 right-3">
               <button
                 onClick={() => toggleAvailability(listing.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${
-                  listing.available
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-red-500 text-white hover:bg-red-600"
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm transition-all duration-300 ${listing.available
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-red-500 text-white hover:bg-red-600"
+                  }`}
               >
                 {listing.available ? "✓ Disponible" : "✗ Indisponible"}
               </button>
@@ -1749,9 +1792,7 @@ const loadStats = async () => {
           )}
         </div>
 
-        {/* Contenu */}
         <div className="p-5">
-          {/* Titre et Localisation */}
           <div className="mb-3">
             <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
               {listing.title}
@@ -1762,7 +1803,6 @@ const loadStats = async () => {
             </p>
           </div>
 
-          {/* Note et Avis */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
@@ -1777,11 +1817,10 @@ const loadStats = async () => {
             {user?.role === "professional" && (
               <button
                 onClick={() => toggleFeatured(listing.id)}
-                className={`p-1 rounded-full transition-all duration-300 ${
-                  listing.featured
-                    ? "text-yellow-500 bg-yellow-50"
-                    : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
-                }`}
+                className={`p-1 rounded-full transition-all duration-300 ${listing.featured
+                  ? "text-yellow-500 bg-yellow-50"
+                  : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
+                  }`}
                 title={
                   listing.featured
                     ? "Retirer des vedettes"
@@ -1789,15 +1828,13 @@ const loadStats = async () => {
                 }
               >
                 <Star
-                  className={`w-4 h-4 ${
-                    listing.featured ? "fill-current" : ""
-                  }`}
+                  className={`w-4 h-4 ${listing.featured ? "fill-current" : ""
+                    }`}
                 />
               </button>
             )}
           </div>
 
-          {/* Informations spécifiques */}
           {isTouristicPlace ? (
             <div className="mb-4 space-y-2">
               {listing.entranceFee && (
@@ -1844,7 +1881,6 @@ const loadStats = async () => {
             </div>
           )}
 
-          {/* Équipements principaux */}
           <div className="mb-4">
             <div className="flex flex-wrap gap-1">
               {listing.amenities.slice(0, 4).map((amenityId) => {
@@ -1874,7 +1910,6 @@ const loadStats = async () => {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex space-x-2">
             <button
               onClick={() => openDetailModal(listing)}
@@ -1908,11 +1943,10 @@ const loadStats = async () => {
     );
   };
 
-  // Composant Carte pour Vols (MISE À JOUR)
+  // Composant Carte pour Vols
   const FlightCard = ({ flight }) => {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        {/* Image du vol */}
         <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 overflow-hidden">
           {flight.image ? (
             <img
@@ -1930,7 +1964,6 @@ const loadStats = async () => {
             </div>
           )}
 
-          {/* Badge prix */}
           <div className="absolute bottom-3 left-3">
             <div className="bg-black/70 text-white px-3 py-2 rounded-xl backdrop-blur-sm">
               <span className="text-lg font-bold">{flight.prix}€</span>
@@ -1938,7 +1971,6 @@ const loadStats = async () => {
             </div>
           </div>
 
-          {/* Badge classe */}
           <div className="absolute top-3 left-3">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-gray-800 capitalize">
               {flight.classe === "economy" && "✈️ Économique"}
@@ -1989,7 +2021,6 @@ const loadStats = async () => {
             </div>
           </div>
 
-          {/* Services */}
           {flight.services && flight.services.length > 0 && (
             <div className="mb-4">
               <p className="text-xs text-gray-600 mb-2">Services inclus:</p>
@@ -2027,6 +2058,272 @@ const loadStats = async () => {
     );
   };
 
+  // Composant Carte pour Activités
+  const ActivityCard = ({ activity }) => {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+        <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 overflow-hidden">
+          {activity.image ? (
+            <img
+              src={activity.image}
+              alt={activity.name || activity.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
+              <div className="text-center">
+                <div className="text-6xl mb-2">🎯</div>
+                <div>Activité</div>
+              </div>
+            </div>
+          )}
+
+          {activity.price > 0 && (
+            <div className="absolute bottom-3 left-3">
+              <div className="bg-black/70 text-white px-3 py-2 rounded-xl backdrop-blur-sm">
+                <span className="text-lg font-bold">{activity.price}€</span>
+                <span className="text-sm opacity-90">/personne</span>
+              </div>
+            </div>
+          )}
+
+          {activity.category && (
+            <div className="absolute top-3 left-3">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/90 backdrop-blur-sm text-gray-800">
+                {activity.category}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-5">
+          <div className="mb-3">
+            <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
+              {activity.name || activity.title}
+            </h3>
+            
+            {activity.location && (
+              <p className="text-gray-600 flex items-center text-sm mt-1">
+                <MapPin className="w-4 h-4 mr-1" />
+                {activity.location}
+              </p>
+            )}
+          </div>
+
+          {activity.description && (
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              {activity.description}
+            </p>
+          )}
+
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              {activity.duration && (
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 mr-1" />
+                  <span>{activity.duration}</span>
+                </div>
+              )}
+              {activity.capacity && (
+                <div className="flex items-center">
+                  <Users className="w-4 h-4 mr-1" />
+                  <span>{activity.capacity} pers. max</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleViewActivityDetails(activity)}
+              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center"
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              Détails
+            </button>
+
+            {user?.role === "professional" && (
+              <>
+                <button
+                  onClick={() => handleEditActivity(activity)}
+                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-300"
+                  title="Modifier"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteActivity(activity.id)}
+                  className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-300"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Modal pour les détails d'activité
+  const ActivityDetailModal = ({ isOpen, onClose, activity }) => {
+    if (!isOpen || !activity) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-2xl font-bold text-gray-900">
+                {activity.name || activity.title}
+              </h3>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            {activity.location && (
+              <p className="text-gray-600 flex items-center mt-2">
+                <MapPin className="w-4 h-4 mr-1" />
+                {activity.location}
+              </p>
+            )}
+          </div>
+
+          <div className="p-6 space-y-6">
+            {activity.image ? (
+              <div className="relative h-64 rounded-xl overflow-hidden">
+                <img
+                  src={activity.image}
+                  alt={activity.name || activity.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="relative h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
+                  <div className="text-center">
+                    <div className="text-6xl mb-2">🎯</div>
+                    <div>Activité</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activity.description && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  Description
+                </h4>
+                <p className="text-gray-600">{activity.description}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {activity.category && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">Catégorie</div>
+                  <div className="font-semibold">{activity.category}</div>
+                </div>
+              )}
+              
+              {activity.price > 0 && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">Prix</div>
+                  <div className="font-semibold text-green-600">
+                    {activity.price}€ / personne
+                  </div>
+                </div>
+              )}
+              
+              {activity.duration && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <Clock className="w-6 h-6 text-blue-600 mb-2" />
+                  <div className="text-sm text-gray-600">Durée</div>
+                  <div className="font-semibold">{activity.duration}</div>
+                </div>
+              )}
+              
+              {activity.capacity && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <Users className="w-6 h-6 text-purple-600 mb-2" />
+                  <div className="text-sm text-gray-600">Capacité</div>
+                  <div className="font-semibold">
+                    {activity.capacity} personnes max
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {activity.included && activity.included.length > 0 && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  Inclus dans l'activité
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {activity.included.map((item, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activity.requirements && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  Prérequis
+                </h4>
+                <p className="text-gray-600">{activity.requirements}</p>
+              </div>
+            )}
+
+            <div className="flex space-x-4 pt-4">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              >
+                Fermer
+              </button>
+              {user?.role === "professional" && (
+                <>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      handleEditActivity(activity);
+                    }}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm("Êtes-vous sûr de vouloir supprimer cette activité ?")) {
+                        handleDeleteActivity(activity.id);
+                        onClose();
+                      }
+                    }}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
+                  >
+                    Supprimer
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Interface Admin avec cartes
   const AdminInterface = () => {
     const currentContentType = contentTypeOptions.find(
@@ -2046,79 +2343,79 @@ const loadStats = async () => {
             </p>
           </div>
 
-      
-        <div className="flex items-center space-x-4">
-          {/* Dropdown de sélection du type de contenu */}
-          <div className="relative">
-            <button
-              onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
-              className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
-            >
-              <div className="flex items-center">
-                {currentContentType?.icon && (
-                  <currentContentType.icon className="w-5 h-5 mr-3" />
-                )}
-                <span>{currentContentType?.label || "Sélectionner"}</span>
-              </div>
-              <ChevronDown className="w-4 h-4 ml-2" />
-            </button>
-
-            {showContentTypeDropdown && (
-              <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
-                <div className="p-2">
-                  {contentTypeOptions.map((option) => {
-                    const IconComponent = option.icon;
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => {
-                          setContentType(option.id);
-                          setShowContentTypeDropdown(false);
-                        }}
-                        className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
-                      >
-                        <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
-                        <div className="flex-1">
-                          <div className="font-semibold">{option.label}</div>
-                          <div className="text-sm text-gray-500">
-                            {option.description}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <button
+                onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
+                className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
+              >
+                <div className="flex items-center">
+                  {currentContentType?.icon && (
+                    <currentContentType.icon className="w-5 h-5 mr-3" />
+                  )}
+                  <span>{currentContentType?.label || "Sélectionner"}</span>
                 </div>
-              </div>
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </button>
+
+              {showContentTypeDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                  <div className="p-2">
+                    {contentTypeOptions.map((option) => {
+                      const IconComponent = option.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            setContentType(option.id);
+                            setShowContentTypeDropdown(false);
+                          }}
+                          className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                        >
+                          <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
+                          <div className="flex-1">
+                            <div className="font-semibold">{option.label}</div>
+                            <div className="text-sm text-gray-500">
+                              {option.description}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {user?.role === "professional" && (
+              <button
+                onClick={() => {
+                  if (contentType === "accommodations") {
+                    setEditingListing(null);
+                    setShowAdminModal(true);
+                  } else if (contentType === "touristic_places") {
+                    setEditingListing(null);
+                    setShowAdminModal(true);
+                  } else if (contentType === "flights") {
+                    setShowFlightModal(true);
+                  } else if (contentType === "activities") {
+                    setEditingActivity(null);
+                    setShowActivitiesModal(true);
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+              >
+                <PlusCircle className="w-5 h-5 mr-2" />
+                {contentType === "accommodations" && "Ajouter un hébergement"}
+                {contentType === "touristic_places" && "Ajouter un lieu touristique"}
+                {contentType === "flights" && "Ajouter un vol"}
+                {contentType === "activities" && "Ajouter une activité"}
+              </button>
             )}
           </div>
-
-          {/* Bouton d'ajout intelligent qui change selon le type de contenu */}
-          {user?.role === "professional" && (
-            <button
-              onClick={() => {
-                if (contentType === "accommodations") {
-                  setEditingListing(null);
-                  setShowAdminModal(true);
-                } else if (contentType === "touristic_places") {
-                  setEditingListing(null);
-                  setShowAdminModal(true);
-                } else if (contentType === "flights") {
-                  setShowFlightModal(true);
-                }
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
-            >
-              <PlusCircle className="w-5 h-5 mr-2" />
-              {contentType === "accommodations" && "Ajouter un hébergement"}
-              {contentType === "touristic_places" && "Ajouter un lieu touristique"}
-              {contentType === "flights" && "Ajouter un vol"}
-            </button>
-          )}
-        </div>
         </div>
 
-        {/* Statistiques pour hébergements et lieux touristiques */}
-        {stats && contentType !== "flights" && (
+        {stats && contentType !== "flights" && contentType !== "activities" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center">
@@ -2131,8 +2428,8 @@ const loadStats = async () => {
                     {contentType === "accommodations"
                       ? "Hébergements"
                       : contentType === "touristic_places"
-                      ? "Lieux touristiques"
-                      : "Total"}
+                        ? "Lieux touristiques"
+                        : "Total"}
                   </div>
                 </div>
               </div>
@@ -2176,7 +2473,6 @@ const loadStats = async () => {
           </div>
         )}
 
-        {/* Statistiques pour les vols */}
         {contentType === "flights" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
@@ -2196,10 +2492,10 @@ const loadStats = async () => {
                   <div className="text-2xl font-bold">
                     {flights.length > 0
                       ? flights.reduce(
-                          (total, flight) =>
-                            total + (flight.availableSeats || 0),
-                          0
-                        )
+                        (total, flight) =>
+                          total + (flight.availableSeats || 0),
+                        0
+                      )
                       : 0}
                   </div>
                   <div className="text-gray-600">Places disponibles</div>
@@ -2232,9 +2528,9 @@ const loadStats = async () => {
                   <div className="text-2xl font-bold">
                     {flights.length > 0
                       ? flights.reduce(
-                          (total, flight) => total + (flight.nbrPersonne || 0),
-                          0
-                        )
+                        (total, flight) => total + (flight.nbrPersonne || 0),
+                        0
+                      )
                       : 0}
                   </div>
                   <div className="text-gray-600">Réservations</div>
@@ -2244,67 +2540,127 @@ const loadStats = async () => {
           </div>
         )}
 
-        {/* Grille de contenu */}
-        {loading || flightsLoading ? (
+        {contentType === "activities" && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Mountain className="w-8 h-8 text-blue-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">{activities.length}</div>
+                  <div className="text-gray-600">Activités</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {activities.length > 0
+                      ? (activities.reduce(
+                        (total, activity) => total + (activity.price || 0),
+                        0
+                      ) / activities.length).toFixed(2)
+                      : "0.00"}
+                    €
+                  </div>
+                  <div className="text-gray-600">Prix moyen</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Star className="w-8 h-8 text-yellow-500 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {activities.length > 0
+                      ? Math.min(...activities.map((a) => a.price || Infinity)) ===
+                        Infinity
+                        ? 0
+                        : Math.min(...activities.map((a) => a.price || Infinity))
+                      : 0}
+                    €
+                  </div>
+                  <div className="text-gray-600">Prix minimum</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center">
+                <Users className="w-8 h-8 text-purple-600 mr-4" />
+                <div>
+                  <div className="text-2xl font-bold">
+                    {activities.length > 0
+                      ? activities.filter((a) => a.available !== false).length
+                      : 0}
+                  </div>
+                  <div className="text-gray-600">Disponibles</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loading || flightsLoading || activitiesLoading ? (
           <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
-          <img src="/loading.gif" alt="" className='w-24 h-24'/>
+            <img src="/loading.gif" alt="" className='w-24 h-24' />
             <p className="mt-4 text-xl font-semibold text-gray-700">
               Chargement...
             </p>
-        </div>
+          </div>
         ) : (
           <>
-            {/* Affichage des hébergements et lieux touristiques */}
             {(contentType === "accommodations" ||
               contentType === "touristic_places") && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredListings.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
-                  ))}
-                </div>
-
-                {filteredListings.length === 0 && (
-                  <div className="text-center py-12">
-                    {contentType === "accommodations" ? (
-                      <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    ) : (
-                      <Landmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    )}
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {contentType === "accommodations"
-                        ? "Aucun hébergement trouvé"
-                        : "Aucun lieu touristique trouvé"}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {listings.length === 0
-                        ? `Commencez par ajouter votre premier ${
-                            contentType === "accommodations"
-                              ? "hébergement"
-                              : "lieu touristique"
-                          }.`
-                        : "Aucun élément ne correspond à vos critères de recherche."}
-                    </p>
-                    {listings.length === 0 && user?.role === "professional" && (
-                      <button
-                        onClick={() => {
-                          setEditingListing(null);
-                          setShowAdminModal(true);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
-                      >
-                        <PlusCircle className="w-5 h-5 mr-2" />
-                        {contentType === "accommodations"
-                          ? "Ajouter un hébergement"
-                          : "Ajouter un lieu touristique"}
-                      </button>
-                    )}
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredListings.map((listing) => (
+                      <ListingCard key={listing.id} listing={listing} />
+                    ))}
                   </div>
-                )}
-              </>
-            )}
 
-            {/* Affichage des vols */}
+                  {filteredListings.length === 0 && (
+                    <div className="text-center py-12">
+                      {contentType === "accommodations" ? (
+                        <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      ) : (
+                        <Landmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      )}
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {contentType === "accommodations"
+                          ? "Aucun hébergement trouvé"
+                          : "Aucun lieu touristique trouvé"}
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        {listings.length === 0
+                          ? `Commencez par ajouter votre premier ${contentType === "accommodations"
+                            ? "hébergement"
+                            : "lieu touristique"
+                          }.`
+                          : "Aucun élément ne correspond à vos critères de recherche."}
+                      </p>
+                      {listings.length === 0 && user?.role === "professional" && (
+                        <button
+                          onClick={() => {
+                            setEditingListing(null);
+                            setShowAdminModal(true);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                        >
+                          <PlusCircle className="w-5 h-5 mr-2" />
+                          {contentType === "accommodations"
+                            ? "Ajouter un hébergement"
+                            : "Ajouter un lieu touristique"}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
             {contentType === "flights" && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -2337,19 +2693,312 @@ const loadStats = async () => {
                 )}
               </>
             )}
+
+        {contentType === "activities" && (
+  <div className="space-y-8">
+    {/* En-tête avec statistiques */}
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Gestion des Activités</h2>
+          <p className="text-gray-600 mt-1">
+            Gérez vos activités touristiques et catégories
+          </p>
+        </div>
+        
+        {user?.role === "professional" && (
+          <div className="flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-white rounded-xl border border-gray-200">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-sm text-gray-700">
+                {activities.filter(a => a.isActive !== false).length} actives
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setEditingActivity(null);
+                setShowActivitiesModal(true);
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <PlusCircle className="w-5 h-5" />
+              <span>Nouvelle activité</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Cartes d'activités avec effet de vitrine */}
+    {activitiesLoading ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="h-48 bg-gray-200"></div>
+            <div className="p-6 space-y-4">
+              <div className="h-6 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="flex space-x-2">
+                <div className="h-8 bg-gray-200 rounded w-20"></div>
+                <div className="h-8 bg-gray-200 rounded w-20"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : activities.length > 0 ? (
+      <>
+        {/* Filtres rapides */}
+        <div className="flex flex-wrap gap-3">
+          <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+            Toutes ({activities.length})
+          </button>
+          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+            Actives ({activities.filter(a => a.isActive !== false).length})
+          </button>
+          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+            Inactives ({activities.filter(a => a.isActive === false).length})
+          </button>
+        </div>
+
+        {/* Grille d'activités améliorée */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {activities.map((activity) => (
+            <div 
+              key={activity.id} 
+              className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              {/* En-tête avec image et badge de statut */}
+              <div className="relative h-56 overflow-hidden">
+                {activity.image ? (
+                  <img
+                    src={activity.image}
+                    alt={activity.name || activity.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="text-5xl mb-2">🎯</div>
+                      <div className="font-medium">Activité</div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Badge de statut */}
+                <div className="absolute top-4 left-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${activity.isActive === false
+                    ? 'bg-gray-100 text-gray-800'
+                    : 'bg-green-100 text-green-800'
+                  }`}>
+                    {activity.isActive === false ? 'Inactive' : 'Active'}
+                  </span>
+                </div>
+                
+                {/* Prix en overlay */}
+                {activity.price > 0 && (
+                  <div className="absolute bottom-4 left-4">
+                    <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-xl">
+                      <span className="text-xl font-bold">{activity.price}€</span>
+                      <span className="text-sm opacity-90">/personne</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Icône de catégorie */}
+                {activity.icon && (
+                  <div className="absolute top-4 right-4">
+                    <div 
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
+                      style={{ backgroundColor: activity.color || '#3B82F6' }}
+                    >
+                      <span className="font-bold">{activity.icon.charAt(0)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Contenu de la carte */}
+              <div className="p-6">
+                {/* Titre et catégorie */}
+                <div className="mb-4">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-bold text-xl text-gray-900 line-clamp-1">
+                      {activity.name || activity.title}
+                    </h3>
+                    <div className="flex space-x-2">
+                      {user?.role === "professional" && (
+                        <>
+                          <button
+                            onClick={() => handleEditActivity(activity)}
+                            className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                            title="Modifier"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteActivity(activity.id)}
+                            className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {activity.category && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+                        {activity.category}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Description */}
+                {activity.description && (
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {activity.description}
+                  </p>
+                )}
+
+                {/* Métadonnées */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {activity.location && (
+                    <div className="flex items-center text-gray-600">
+                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-sm truncate">{activity.location}</span>
+                    </div>
+                  )}
+                  
+                  {activity.duration && (
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-sm">{activity.duration}</span>
+                    </div>
+                  )}
+                  
+                  {activity.capacity && (
+                    <div className="flex items-center text-gray-600">
+                      <Users className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-sm">{activity.capacity} pers.</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Inclus dans l'activité */}
+                {activity.included && activity.included.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-xs text-gray-500 mb-2">Inclus :</p>
+                    <div className="flex flex-wrap gap-1">
+                      {activity.included.slice(0, 3).map((item, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-green-50 text-green-700"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          {item}
+                        </span>
+                      ))}
+                      {activity.included.length > 3 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-600">
+                          +{activity.included.length - 3} plus
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Boutons d'action */}
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => handleViewActivityDetails(activity)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Détails
+                  </button>
+                  
+                  {!user?.role === "professional" && activity.price > 0 && (
+                    <button className="px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-medium text-sm transition-all duration-300">
+                      Réserver
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination ou compteur */}
+        <div className="flex items-center justify-between pt-8 border-t border-gray-200">
+          <div className="text-gray-600">
+            Affichage de <span className="font-semibold text-gray-900">{activities.length}</span> activité{activities.length > 1 ? 's' : ''}
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+              ← Précédent
+            </button>
+            <span className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">1</span>
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              Suivant →
+            </button>
+          </div>
+        </div>
+      </>
+    ) : (
+      /* État vide amélioré */
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center">
+        <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+          <div className="text-4xl">🎯</div>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+          Aucune activité disponible
+        </h3>
+        <p className="text-gray-600 max-w-md mx-auto mb-8">
+          {user?.role === "professional"
+            ? "Commencez par créer votre première activité pour enrichir votre catalogue touristique."
+            : "Revenez plus tard pour découvrir nos activités passionnantes."}
+        </p>
+        {user?.role === "professional" && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => {
+                setEditingActivity(null);
+                setShowActivitiesModal(true);
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <PlusCircle className="w-6 h-6" />
+              <span>Créer une activité</span>
+            </button>
+            <button
+              onClick={() => loadActivities()}
+              className="px-8 py-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-semibold transition-all duration-300"
+            >
+              <RefreshCw className="w-5 h-5 inline mr-2" />
+              Rafraîchir
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
           </>
         )}
       </div>
     );
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Contenu principal */}
       <div className="container mx-auto px-4 py-8">
         <AdminInterface />
       </div>
 
-      {/* Modals */}
       <AdminModal
         isOpen={showAdminModal}
         onClose={handleCloseAdminModal}
@@ -2365,6 +3014,12 @@ const loadStats = async () => {
         onBook={handleBooking}
       />
 
+      <ActivityDetailModal
+        isOpen={showActivityDetailModal}
+        onClose={handleCloseActivityDetailModal}
+        activity={selectedActivity}
+      />
+
       {showFlightModal && (
         <AjoutVolModal
           isOpen={showFlightModal}
@@ -2374,6 +3029,21 @@ const loadStats = async () => {
             toast.success("Vol ajouté avec succès");
             setShowFlightModal(false);
             loadFlights();
+          }}
+        />
+      )}
+
+      {showActivitiesModal && (
+        <AjoutActivitesModal
+          isOpen={showActivitiesModal}
+          onClose={() => setShowActivitiesModal(false)}
+          editingActivity={editingActivity}
+          onSubmit={(activitesData) => {
+            console.log("Nouvelle activité:", activitesData);
+            toast.success(editingActivity ? "Activité modifiée avec succès" : "Activité ajoutée avec succès");
+            setShowActivitiesModal(false);
+            setEditingActivity(null);
+            loadActivities();
           }}
         />
       )}

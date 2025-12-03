@@ -1,44 +1,58 @@
-import { useState, useCallback } from "react"
-
-import { Button } from "@/components/ui/button"
-import { Plus, Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { AvailableServicesModal } from "@/components/pro/available-services-modal"
-import { ProfessionalServicesTable } from "@/components/pro/professional-services-table"
-import { ProfessionalServicesStats } from "@/components/pro/professional-services-stats"
+import { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, Search, Package } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { AvailableServicesModal } from "@/components/pro/available-services-modal";
+import { CreateCustomServiceModal } from "@/components/pro/CreateCustomServiceModal";
+import { ProfessionalServicesTable } from "@/components/pro/professional-services-table";
+import { ProfessionalServicesStats } from "@/components/pro/professional-services-stats";
 
 export default function ProfessionalServicesPage() {
-  const [isAvailableModalOpen, setIsAvailableModalOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState("associated") // "associated" | "available"
-  const [statsRefreshKey, setStatsRefreshKey] = useState(0)
-  const [tableRefreshKey, setTableRefreshKey] = useState(0)
+  const [isAvailableModalOpen, setIsAvailableModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("associated");
+  const [statsRefreshKey, setStatsRefreshKey] = useState(0);
+  const [tableRefreshKey, setTableRefreshKey] = useState(0);
 
   const handleServiceUpdated = useCallback(() => {
-    // Rafraîchir seulement les stats et la table associée
-    setStatsRefreshKey(prev => prev + 1)
-    setTableRefreshKey(prev => prev + 1)
-  }, [])
+    setStatsRefreshKey((prev) => prev + 1);
+    setTableRefreshKey((prev) => prev + 1);
+  }, []);
 
   const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value)
-  }, [])
+    setSearchQuery(value);
+  }, []);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center flex-col md:flex-row justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Mes Services</h1>
-          <p className="text-muted-foreground">Gérez les services que vous proposez</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Mes Services
+          </h1>
+          <p className="text-muted-foreground">
+            Gérez les services que vous proposez
+          </p>
         </div>
-        <Button 
-          onClick={() => setIsAvailableModalOpen(true)} 
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Ajouter un service
-        </Button>
+        <div className="flex gap-2 mt-4 md:mt-0">
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            variant="outline"
+            className="border-border hover:bg-accent"
+          >
+            <Package className="mr-2 h-4 w-4" />
+            Créer un service
+          </Button>
+          <Button
+            onClick={() => setIsAvailableModalOpen(true)}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Relier un service
+          </Button>
+        </div>
       </div>
 
       <ProfessionalServicesStats key={`stats-${statsRefreshKey}`} />
@@ -50,20 +64,24 @@ export default function ProfessionalServicesPage() {
               variant={activeTab === "associated" ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("associated")}
-              className={activeTab === "associated" ? "bg-background shadow-sm" : ""}
+              className={
+                activeTab === "associated" ? "bg-background shadow-sm" : ""
+              }
             >
-              Mes Services ({activeTab === "associated" ? "✓" : ""})
+              Mes Services
             </Button>
             <Button
               variant={activeTab === "available" ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("available")}
-              className={activeTab === "available" ? "bg-background shadow-sm" : ""}
+              className={
+                activeTab === "available" ? "bg-background shadow-sm" : ""
+              }
             >
               Services Disponibles
             </Button>
           </div>
-          
+
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -76,7 +94,7 @@ export default function ProfessionalServicesPage() {
           </div>
         </div>
 
-        <ProfessionalServicesTable 
+        <ProfessionalServicesTable
           key={`table-${tableRefreshKey}-${activeTab}`}
           activeTab={activeTab}
           searchQuery={searchQuery}
@@ -84,11 +102,17 @@ export default function ProfessionalServicesPage() {
         />
       </Card>
 
-      <AvailableServicesModal 
-        open={isAvailableModalOpen} 
+      <AvailableServicesModal
+        open={isAvailableModalOpen}
         onOpenChange={setIsAvailableModalOpen}
         onServiceAssociated={handleServiceUpdated}
       />
+
+      <CreateCustomServiceModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onServiceCreated={handleServiceUpdated}
+      />
     </div>
-  )
+  );
 }

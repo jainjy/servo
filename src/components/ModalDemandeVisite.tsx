@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,12 +30,55 @@ export const ModalDemandeVisite = ({
     heureSouhaitee: "",
   });
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [formErrors, setFormErrors] = useState({
+    dateSouhaitee: false,
+    heureSouhaitee: false
+  });
 
   const { user, isAuthenticated } = useAuth();
+
+  // Pré-remplir automatiquement avec les données de l'utilisateur connecté
+  useEffect(() => {
+    if (open && user && isAuthenticated) {
+      // Construire le nom complet
+      const nomComplet = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      
+      // Mettre à jour le formulaire avec les données de l'utilisateur
+      setFormData(prev => ({
+        ...prev,
+        nomPrenom: nomComplet,
+        email: user.email || '',
+        telephone: user.phone || user.telephone || user.mobile || '',
+      }));
+    } else if (open) {
+      // Réinitialiser si l'utilisateur n'est pas connecté ou modal fermé
+      setFormData({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+      });
+    }
+  }, [open, user, isAuthenticated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!property) return;
+    
+    // VÉRIFICATION CRITIQUE - Empêcher l'envoi si date ou heure ne sont pas sélectionnées
+    if (!formData.dateSouhaitee || !formData.heureSouhaitee) {
+      setFormErrors({
+        dateSouhaitee: !formData.dateSouhaitee,
+        heureSouhaitee: !formData.heureSouhaitee
+      });
+      toast.error("Veuillez sélectionner une date et un créneau horaire.");
+      return;
+    }
+
+    // Réinitialiser les erreurs si tout est valide
+    setFormErrors({ dateSouhaitee: false, heureSouhaitee: false });
     
     // Track contact action
     if (onPropertyContact) {
@@ -118,9 +161,14 @@ export const ModalDemandeVisite = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Réinitialiser l'erreur du champ quand l'utilisateur commence à taper
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({ ...prev, [name]: false }));
+    }
   };
 
   if (!open) return null;
@@ -138,6 +186,7 @@ export const ModalDemandeVisite = ({
               </p>
             </div>
             <button
+              type="button"
               onClick={onClose}
               className="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
             >
@@ -212,7 +261,9 @@ export const ModalDemandeVisite = ({
                     onChange={handleChange}
                     min={new Date().toISOString().split('T')[0]}
                     required
-                    className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className={`w-full bg-gray-50 border ${
+                      formErrors.dateSouhaitee ? 'border-red-500' : 'border-gray-200'
+                    } pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                   />
                 </div>
                 <div className="space-y-2">
@@ -224,7 +275,9 @@ export const ModalDemandeVisite = ({
                       value={formData.heureSouhaitee}
                       onChange={handleChange}
                       required
-                      className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none hover:bg-white"
+                      className={`w-full bg-gray-50 border ${
+                        formErrors.heureSouhaitee ? 'border-red-500' : 'border-gray-200'
+                      } pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none hover:bg-white`}
                     >
                       <option value="">Sélectionnez un créneau</option>
                       <option value="08:00">Matin : 08h00</option>
@@ -236,6 +289,14 @@ export const ModalDemandeVisite = ({
                   </div>
                 </div>
               </div>
+              
+              {/* Message d'erreur */}
+              {(formErrors.dateSouhaitee || formErrors.heureSouhaitee) && (
+                <div className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                  <X className="w-4 h-4" />
+                  Veuillez sélectionner une date et un créneau horaire pour continuer
+                </div>
+              )}
             </div>
 
             {/* Message */}

@@ -532,7 +532,7 @@ const ServicesPartnersPage = () => {
       <div className="text-center py-12">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-gray-900">
-            {view === "default" ? "Tous nos services et biens" :
+            {view === "default" ? "Tous nos services" :
              view === "partenaires" ? "Nos Partenaires" :
              view === "services" ? "Demandes de Prestations" : "Aides"}
           </h1>
@@ -577,15 +577,6 @@ const ServicesPartnersPage = () => {
               <ChevronDown className="w-4 h-4" />
             </button>
             
-            <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "aides" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
-              } text-sm font-semibold transform hover:scale-105`}
-              onClick={() => navigate('/services-partners?section=aides')}
-            >
-              AIDES
-              <ChevronDown className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </header>
@@ -594,7 +585,6 @@ const ServicesPartnersPage = () => {
         {view === "default" && <AllServicesGridView />}
         {view === "partenaires" && <PartnersPage />}
         {view === "services" && <ServicesPage />}
-        {view === "aides" && <AidesPage />}
       </main>
     </div>
   );

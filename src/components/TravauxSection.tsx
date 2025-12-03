@@ -460,6 +460,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   });
   // NOUVEL ÉTAT POUR LE CHARGEMENT DES SERVICES
   const [isLoadingServices, setIsLoadingServices] = useState(false);
+  // NOUVEL ÉTAT POUR LE FILTRE MÉTIERS
+  const [metierFilter, setMetierFilter] = useState("TOUS"); // "TOUS", "AVEC_METIERS", "SANS_METIERS"
 
   const { user, isAuthenticated } = useAuth();
 
@@ -558,6 +560,17 @@ const IntelligibleSection = ({ showAllPrestations }) => {
       );
     }
 
+    // Filtre par métiers
+    if (metierFilter === "AVEC_METIERS") {
+      filtered = filtered.filter(
+        (prestation) => prestation.metiers && prestation.metiers.length > 0
+      );
+    } else if (metierFilter === "SANS_METIERS") {
+      filtered = filtered.filter(
+        (prestation) => !prestation.metiers || prestation.metiers.length === 0
+      );
+    }
+
     // Filtre par recherche
     if (searchFilter) {
       filtered = filtered.filter(
@@ -574,7 +587,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     setDisplayedPrestations(
       showAllPrestations ? filtered : filtered.slice(0, 8)
     );
-  }, [selectedType, servicesCategorie, searchFilter, showAllPrestations]);
+  }, [selectedType, servicesCategorie, searchFilter, showAllPrestations, metierFilter]);
 
   const nextImage = (prestationId, totalImages, e) => {
     e?.stopPropagation();
@@ -794,6 +807,38 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       ))}
                     </div>
                   </div>
+
+                  {/* NOUVEAU : Filtre Métiers */}
+                  <div className="flex-1 border-t pt-4">
+                    <div className="flex justify-center items-start gap-3 mb-3">
+                      <BookCheck className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-gray-700">
+                        MÉTIERS :
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mx-auto justify-center">
+                      <FilterButton
+                        label="TOUS"
+                        isSelected={metierFilter === "TOUS"}
+                        onClick={() => setMetierFilter("TOUS")}
+                        disabled={isLoadingServices}
+                        isAllButton
+                      />
+                      <FilterButton
+                        label="Avec Métiers"
+                        isSelected={metierFilter === "AVEC_METIERS"}
+                        onClick={() => setMetierFilter("AVEC_METIERS")}
+                        disabled={isLoadingServices}
+                      />
+                      <FilterButton
+                        label="Sans Métiers"
+                        isSelected={metierFilter === "SANS_METIERS"}
+                        onClick={() => setMetierFilter("SANS_METIERS")}
+                        disabled={isLoadingServices}
+                      />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
             ))}
@@ -1008,6 +1053,20 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">
                         {prestation.description}
                       </p>
+
+                      {/* Métiers liés en badges */}
+                      {prestation.metiers && prestation.metiers.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {prestation.metiers.map((metierService) => (
+                            <span
+                              key={metierService.metier.id}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200"
+                            >
+                              {metierService.metier.libelle}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Actions */}
                       <div className="flex items-center gap-2">

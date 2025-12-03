@@ -64,6 +64,18 @@ export const financementAPI = {
     api.put(`/financement/admin/demandes/${id}/status`, { status }),
   deleteDemande: (id) => api.delete(`/financement/admin/demandes/${id}`),
 
+  // Services financiers - Admin
+  getAllServicesFinanciers: (params = {}) =>
+    api.get("/financement/admin/services", { params }),
+  toggleServiceStatus: (id, isActive) =>
+    api.put(`/financement/admin/services/${id}/status`, { isActive }),
+
+  // Gestion des partenaires - Admin
+  getProfessionals: () => api.get("/financement/admin/professionals"),
+  createPartenaire: (data) => api.post("/financement/admin/partenaires", data),
+  updatePartenaire: (id, data) => api.put(`/financement/admin/partenaires/${id}`, data),
+  deletePartenaire: (id) => api.delete(`/financement/admin/partenaires/${id}`),
+
   // Services financiers - Professionnels
   getServicesFinanciersPro: (params = {}) =>
     api.get("/financement/pro/services", { params }),
@@ -72,12 +84,6 @@ export const financementAPI = {
   updateServiceFinancier: (id, data) =>
     api.put(`/financement/services/${id}`, data),
   deleteServiceFinancier: (id) => api.delete(`/financement/services/${id}`),
-
-  // Services financiers - Admin
-  getAllServicesFinanciers: (params = {}) =>
-    api.get("/financement/admin/services", { params }),
-  toggleServiceStatus: (id, isActive) =>
-    api.put(`/financement/admin/services/${id}/status`, { isActive }),
 };
 // Services pour le tourisme
 export const tourismeAPI = {
@@ -524,4 +530,23 @@ export const flightsAPI = {
   
   updateReservationStatus: (id, status) => 
     api.put(`/Vol/reservations/${id}/status`, { status }),  
+};
+// Services pour les commandes professionnelles
+// Services pour les commandes professionnelles
+export const ordersProAPI = {
+  // Récupérer les commandes du pro avec filtres
+  getProOrders: (params = {}) => api.get('/orders/pro', { params }),
+  
+  // Récupérer les statistiques du pro
+  getProStats: () => api.get('/orders/pro/stats'),
+  
+  // Récupérer les statistiques par type de produit
+  getProProductTypes: () => api.get('/orders/pro/product-types'),
+  
+  // Mettre à jour le statut d'une commande
+  updateOrderStatus: (orderId, status) => 
+    api.put(`/orders/pro/${orderId}/status`, { status }),
+  
+  // Récupérer les détails d'une commande spécifique
+  getOrderDetails: (orderId) => api.get(`/orders/pro/${orderId}`),
 };

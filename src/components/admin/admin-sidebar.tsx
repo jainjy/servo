@@ -38,7 +38,7 @@ const navigation = [
   { name: "Paiements", href: "/admin/payments", icon: CreditCard },
   { name: "Demandes", href: "/admin/demandes", icon: FileCheck },
   { name: "Métiers", href: "/admin/metiers", icon: Ruler },
-  { name: "Financements", href: "/admin/financement-demandes", icon: FileText },
+  { name: "demandes de Financements", href: "/admin/financement-demandes", icon: FileText },
   {
     name: "Investissement International",
     href: "/admin/investissement-demandes",
@@ -46,7 +46,7 @@ const navigation = [
   },
   {
     name: "Liste des services financiers",
-    href: "/pro/financement-services",
+    href: "/admin/financement-services",
     icon: Wallet2Icon,
   },
   { name: "Publicité", href: "/admin/publicite", icon: MessageCircle },

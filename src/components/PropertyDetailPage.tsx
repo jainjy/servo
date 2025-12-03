@@ -37,8 +37,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import PropertyMap from "@/components/PropertyMap";
-import { ModalDemandeVisite } from "@/components/PropertyListings";
-
+import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
 interface Property {
   id: string;
   title: string;
