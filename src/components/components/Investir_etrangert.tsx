@@ -1,13 +1,44 @@
 import { BadgeDollarSign, Building2, CastleIcon, ChartArea, DollarSignIcon, FlagIcon, Globe2, HandshakeIcon, SparkleIcon, TreePalm } from 'lucide-react';
 import React, { useState } from 'react';
+import Api from "../../lib/api.js";
+import DemandeAudit from '../../components/DemandeAudit.tsx'; // Import du composant de modale
+
+// Interface pour les données du formulaire
+interface InvestFormData {
+    nom: string;
+    email: string;
+    telephone: string;
+    paysInteret: string;
+    typeInvestissement: string;
+    budget: string;
+    message: string;
+}
+
+interface PaysData {
+    nom: string;
+    avantages: string[];
+    opportunites: string[];
+    fiscalite: string;
+    rendement: string;
+    image: JSX.Element;
+    couleur: string;
+}
+
+interface TypeBienData {
+    titre: string;
+    description: string;
+    avantages: string[];
+    couleur: string;
+}
 
 const InvestirEtranger = () => {
     const [paysActive, setPaysActive] = useState('maurice');
     const [typeBien, setTypeBien] = useState('vente');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
     
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<InvestFormData>({
         nom: '',
         email: '',
         telephone: '',
@@ -17,7 +48,7 @@ const InvestirEtranger = () => {
         message: ''
     });
 
-    const paysData = {
+    const paysData: Record<string, PaysData> = {
         maurice: {
             nom: 'Île Maurice',
             avantages: [
@@ -96,7 +127,7 @@ const InvestirEtranger = () => {
         }
     };
 
-    const typesBiens = {
+    const typesBiens: Record<string, TypeBienData> = {
         vente: {
             titre: 'Mettre en vente',
             description: 'Vendez votre bien à l\'étranger avec notre réseau d\'acheteurs internationaux',
@@ -132,7 +163,7 @@ const InvestirEtranger = () => {
         }
     };
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
@@ -141,7 +172,7 @@ const InvestirEtranger = () => {
         if (error) setError(null);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -156,29 +187,20 @@ const InvestirEtranger = () => {
         try {
             console.log('📤 Envoi des données au backend:', formData);
             
-            const response = await fetch('http://localhost:3001/api/investissement/demande', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    nom: formData.nom,
-                    email: formData.email,
-                    telephone: formData.telephone,
-                    paysInteret: paysActive,
-                    typeInvestissement: formData.typeInvestissement,
-                    budget: formData.budget,
-                    message: formData.message
-                })
+            // Utilisation de l'API configurée au lieu de fetch direct
+            const response = await Api.post('/investissement/demande', {
+                nom: formData.nom,
+                email: formData.email,
+                telephone: formData.telephone,
+                paysInteret: paysActive,
+                typeInvestissement: formData.typeInvestissement,
+                budget: formData.budget,
+                message: formData.message
             });
 
-            const result = await response.json();
+            console.log('📥 Réponse du backend:', response.data);
 
-            if (!response.ok) {
-                throw new Error(result.error || 'Erreur serveur');
-            }
-
-            if (result.success) {
+            if (response.data.success) {
                 // Réinitialiser le formulaire
                 setFormData({
                     nom: '',
@@ -190,20 +212,44 @@ const InvestirEtranger = () => {
                     message: ''
                 });
                 
-                alert('✅ ' + result.message);
-                console.log('🎉 Demande créée avec succès:', result.data);
+                alert('✅ ' + response.data.message);
+                console.log('🎉 Demande créée avec succès:', response.data.data);
                 
             } else {
-                throw new Error(result.error || 'Erreur inconnue');
+                throw new Error(response.data.error || 'Erreur inconnue');
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('❌ Erreur lors de l\'envoi:', error);
-            setError(error.message);
-            alert('❌ Erreur: ' + error.message);
+            
+            // Gestion des erreurs spécifiques à axios
+            const errorMessage = error.response?.data?.error || 
+                               error.response?.data?.message || 
+                               error.message || 
+                               'Erreur lors de l\'envoi de la demande';
+            
+            setError(errorMessage);
+            alert('❌ Erreur: ' + errorMessage);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Fonction pour ouvrir la modale d'audit
+    const openAuditModal = () => {
+        setIsAuditModalOpen(true);
+    };
+
+    // Fonction pour fermer la modale d'audit
+    const closeAuditModal = () => {
+        setIsAuditModalOpen(false);
+    };
+
+    // Fonction appelée après l'ajout d'un audit
+    const handleAddAudit = (audit: any) => {
+        console.log('✅ Audit ajouté avec succès:', audit);
+        alert('Votre demande d\'audit a été enregistrée avec succès !');
+        // Vous pouvez ajouter ici d'autres actions après l'ajout d'un audit
     };
 
     const paysActuel = paysData[paysActive];
@@ -466,7 +512,10 @@ const InvestirEtranger = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <button className="mt-8 bg-white text-gray-900 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                <button 
+                                    onClick={openAuditModal}
+                                    className="mt-8 bg-white text-gray-900 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
+                                >
                                     Demander un audit gratuit
                                 </button>
                             </div>
@@ -527,6 +576,13 @@ const InvestirEtranger = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Modale DemandeAudit */}
+            <DemandeAudit 
+                isOpen={isAuditModalOpen}
+                onClose={closeAuditModal}
+                onAddAudit={handleAddAudit}
+            />
         </div>
     );
 };

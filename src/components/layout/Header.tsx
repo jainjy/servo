@@ -234,9 +234,6 @@ const Header = () => {
   }, [searchQuery]);
 
   // ... le reste de vos fonctions existantes (handleLogin, handleLogout, etc.) ...
-
-  // AJOUTEZ CES FONCTIONS APRÈS VOS AUTRES FONCTIONS :
-
   const handleResultClick = (result: any) => {
     navigate(result.href);
     setIsSearchOpen(false);
@@ -1418,11 +1415,12 @@ const Header = () => {
                     className="relative hidden lg:flex"
                   >
                     <Bell className="h-5 w-5" />
-                    {notificationCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
+                   {notificationCount > 0 && (
+                      <Badge className="absolute bottom-1 right-1 h-3 w-3 flex items-center justify-center p-1 text-[10px] bg-blue-500 text-white">
                         {notificationCount}
                       </Badge>
                     )}
+                    
                   </Button>
                 </SheetTrigger>
 
