@@ -22,6 +22,7 @@ const GenericMap: React.FC<GenericMapProps> = ({
   const markersRef = useRef<L.Marker[]>([]);
   const userLocationMarkerRef = useRef<L.Marker | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     initializeLeaflet();
@@ -30,11 +31,21 @@ const GenericMap: React.FC<GenericMapProps> = ({
   // Écouteur pour centrer la carte via événement personnalisé
   useEffect(() => {
     const handleCenterMap = (event: Event) => {
-      const customEvent = event as CustomEvent<{ location: [number, number]; zoom?: number }>;
+      const customEvent = event as CustomEvent<{ location: [number, number]; zoom?: number; smooth?: boolean }>;
       if (mapInstanceRef.current && customEvent.detail.location) {
         const [lat, lng] = customEvent.detail.location;
         const zoomLevel = customEvent.detail.zoom || 15;
-        mapInstanceRef.current.setView([lat, lng], zoomLevel);
+        const smooth = customEvent.detail.smooth ?? true;
+        
+        // Utiliser flyTo pour un zoom smooth, sinon setView pour un changement immédiat
+        if (smooth) {
+          mapInstanceRef.current.flyTo([lat, lng], zoomLevel, {
+            duration: 1.5, // Durée en secondes
+            easeLinearity: 0.25, // Animation easing
+          });
+        } else {
+          mapInstanceRef.current.setView([lat, lng], zoomLevel);
+        }
       }
     };
 
@@ -76,6 +87,81 @@ const GenericMap: React.FC<GenericMapProps> = ({
 
     baseMaps["OpenStreetMap"].addTo(map);
     L.control.layers(baseMaps).addTo(map);
+
+    // Ajouter le bouton de localisation personnalisé
+    const LocationControl = L.Control.extend({
+      onAdd: (map: L.Map) => {
+        const div = L.DomUtil.create("div", "leaflet-bar leaflet-control");
+        div.style.backgroundColor = "white";
+        div.style.border = "2px solid #ccc";
+        div.style.borderRadius = "4px";
+        div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+        div.style.cursor = "pointer";
+        div.style.padding = "0";
+        
+        const button = L.DomUtil.create("button", "", div);
+        button.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6; padding: 8px;">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        `;
+        button.style.background = "none";
+        button.style.border = "none";
+        button.style.cursor = "pointer";
+        button.style.padding = "0";
+        button.style.display = "flex";
+        button.style.alignItems = "center";
+        button.style.justifyContent = "center";
+        button.style.width = "36px";
+        button.style.height = "36px";
+        button.title = "Centrer sur ma position";
+        
+        button.addEventListener("click", () => {
+          setIsLocating(true);
+          if (!navigator.geolocation) {
+            alert("Géolocalisation non supportée");
+            setIsLocating(false);
+            return;
+          }
+
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              window.dispatchEvent(new CustomEvent("centerMap", {
+                detail: {
+                  location: [latitude, longitude],
+                  zoom: 16,
+                  smooth: true,
+                },
+              }));
+              setIsLocating(false);
+            },
+            (error) => {
+              console.error("Erreur géolocalisation:", error);
+              // Fallback sur Réunion
+              window.dispatchEvent(new CustomEvent("centerMap", {
+                detail: {
+                  location: [-21.1351, 55.2471],
+                  zoom: 12,
+                  smooth: true,
+                },
+              }));
+              setIsLocating(false);
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: 10000,
+              maximumAge: 300000,
+            }
+          );
+        });
+
+        return div;
+      },
+    });
+
+    new (LocationControl as any)({ position: "bottomright" }).addTo(map);
 
     return () => {
       if (mapInstanceRef.current) {
