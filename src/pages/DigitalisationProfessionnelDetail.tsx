@@ -20,6 +20,9 @@ import {
   FileText,
   Heart,
   Share2,
+  EyeIcon,
+  WebhookOffIcon,
+  GlobeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +31,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 const DigitalisationProfessionnelDetail = () => {
   const { id } = useParams();
@@ -90,13 +94,9 @@ const DigitalisationProfessionnelDetail = () => {
   };
 
   const handleContact = () => {
-    if (user) {
-      // Rediriger vers la messagerie
-      navigate(`/messages/new?userId=${id}`);
-    } else {
-      // Rediriger vers la connexion
-      navigate("/login");
-    }
+      navigate("/professional/"+professional.id+"", {
+        state: { professionalId: professional.id },
+      });
   };
 
   const handleBookService = (serviceId) => {
@@ -121,16 +121,7 @@ const DigitalisationProfessionnelDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-16">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-600">Chargement du profil...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Chargement des informations" />;
   }
 
   if (!professional) {
@@ -211,13 +202,16 @@ const DigitalisationProfessionnelDetail = () => {
             </div>
 
             <div className="flex gap-3">
-              <Button
-                className="bg-white text-blue-600 hover:bg-blue-50"
-                onClick={handleContact}
+              {professional.websiteUrl && (
+              <a
+                href={professional.websiteUrl || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-blue-600 hover:bg-blue-50 flex px-4 py-2 rounded-md" 
               >
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Contacter
-              </Button>
+                <GlobeIcon className="mr-2 h-4 w-4" />
+                consulter le site web
+              </a>)}
             </div>
           </div>
         </div>

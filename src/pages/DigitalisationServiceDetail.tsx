@@ -221,15 +221,7 @@ const DigitalisationServiceDetail = () => {
                   onClick={handleBookService}
                 >
                   <Calendar className="mr-2 h-4 w-4" />
-                  Réserver ce service
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full border-white text-white hover:bg-white/10"
-                  onClick={handleContact}
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Contacter le professionnel
+                  Demander ce service
                 </Button>
               </div>
             </div>
