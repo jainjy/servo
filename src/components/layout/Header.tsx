@@ -57,6 +57,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -1082,19 +1083,135 @@ const Header = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-gray-900 text-white text-xs">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+            
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="w-full flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="bg-gray-900 text-white text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-left min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
               </div>
-            </div>
+              <ChevronDown
+                className={`h-4 w-4 text-gray-600 transition-transform flex-shrink-0 ${
+                  isUserMenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Menu utilisateur pour mobile */}
+            {role === "user" && isUserMenuOpen && (
+              <nav className="space-y-2 py-3 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    navigate(profilePath);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <UserIcon className="h-4 w-4" />
+                  <span>Profil</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/mes-commandes");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Package className="h-4 w-4" />
+                  <span>Mes Commandes</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/demandes");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ListCheck className="h-4 w-4" />
+                  <span>Mes demandes de services</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/demandes-immobilier");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <BookDashed className="h-4 w-4" />
+                  <span>Mes demandes immobilières</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/mes-reservations-cours");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <List className="h-4 w-4" />
+                  <span>Mes réservations en cours</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/reservation");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Réservations</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/payement");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  <span>Paiements</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/documents");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Mes documents</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/agenda");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Calendar1 className="h-4 w-4" />
+                  <span>Mon agenda</span>
+                </button>
+              </nav>
+            )}
+
             <Button
               variant="outline"
               className="w-full border-red-200 text-red-600 hover:bg-red-50"

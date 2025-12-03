@@ -263,19 +263,23 @@ const CartesBiensImmobiliers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 mt-16">
+    <div className="min-h-screen py-8 mt-16">
       <div className="container mx-auto px-4">
         {/* En-tête */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" className='h-full object-cover w-full' alt="" />
+        </div>
+        <div className="text-center mb-4 lg:mb-12">
+          <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
             Biens éligibles au PSLA
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm lg:text-md text-gray-200 max-w-2xl mx-auto">
             Découvrez notre sélection de propriétés éligibles au Prêt Social
             Location Accession
           </p>
           <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 inline-block">
-            <p className="text-green-800 font-semibold flex items-center justify-center gap-2">
+            <p className="text-green-800 text-xs lg:text-md font-semibold flex items-center justify-center gap-2">
               <Home className="w-5 h-5" />
               Prêt Social Location Accession - Accessibilité facilitée
             </p>
@@ -348,22 +352,20 @@ const CartesBiensImmobiliers = () => {
                 {/* Badges superposés */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      bien.type === "achat"
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${bien.type === "achat"
                         ? "bg-green-500 text-white"
                         : "bg-blue-500 text-white"
-                    }`}
+                      }`}
                   >
                     {bien.type === "achat" ? "À vendre" : "À louer"}
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      bien.categorie === "villa"
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${bien.categorie === "villa"
                         ? "bg-purple-500 text-white"
                         : bien.categorie === "maison"
-                        ? "bg-orange-500 text-white"
-                        : "bg-cyan-500 text-white"
-                    }`}
+                          ? "bg-orange-500 text-white"
+                          : "bg-cyan-500 text-white"
+                      }`}
                   >
                     {bien.categorie.charAt(0).toUpperCase() +
                       bien.categorie.slice(1)}
@@ -388,15 +390,14 @@ const CartesBiensImmobiliers = () => {
                 {bien.energyClass && (
                   <div className="absolute bottom-4 left-4">
                     <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
-                        bien.energyClass === "A"
+                      className={`px-2 py-1 rounded text-xs font-semibold ${bien.energyClass === "A"
                           ? "bg-green-500 text-white"
                           : bien.energyClass === "B"
-                          ? "bg-lime-500 text-white"
-                          : bien.energyClass === "C"
-                          ? "bg-yellow-500 text-white"
-                          : "bg-gray-500 text-white"
-                      }`}
+                            ? "bg-lime-500 text-white"
+                            : bien.energyClass === "C"
+                              ? "bg-yellow-500 text-white"
+                              : "bg-gray-500 text-white"
+                        }`}
                     >
                       Classe {bien.energyClass}
                     </span>

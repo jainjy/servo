@@ -211,7 +211,7 @@ export function RecentBookings() {
             <p className="text-sm text-muted-foreground">Chargement...</p>
           </div>
           <Button variant="outline" size="sm" disabled>
-            Voir tout
+            Voir tous
           </Button>
         </div>
         <div className="space-y-4">
@@ -256,7 +256,7 @@ export function RecentBookings() {
             <span className="text-yellow-600 ml-1">{pendingCount} en attente</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className=" flex  items-center gap-2">
           <Button 
             variant="outline" 
             size="icon"
@@ -266,7 +266,7 @@ export function RecentBookings() {
             <RefreshCw className={`h-4 w-4 ${actionLoading === 'refresh' ? 'animate-spin' : ''}`} />
           </Button>
           <Button variant="outline" size="sm">
-            Voir tout
+            Voir tous
           </Button>
         </div>
       </div>

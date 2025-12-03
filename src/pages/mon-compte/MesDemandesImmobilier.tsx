@@ -95,20 +95,20 @@ const DemandeImmoCard = ({
     }
   };
   return (
-    <div className=" bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-700 p-6 hover:border-blue-500/50 hover:shadow-2xl transition-all duration-500 group">
+    <div className=" bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl md:rounded-2xl border border-gray-700 p-4 md:p-6 hover:border-blue-500/50 hover:shadow-2xl transition-all duration-500 group">
       <div className="flex flex-col space-y-4">
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <div className="flex-1 flex gap-2 pr-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-3">
+          <div className="flex-1 flex gap-3 md:gap-2 pr-0 md:pr-4">
             {demande.property?.images?.length > 0 && (
               <img
                 src={demande.property.images[0]}
                 alt={demande.property?.title || "Propriété"}
-                className="w-32 h-24 rounded-lg object-cover"
+                className="w-24 h-20 md:w-32 md:h-24 rounded-lg object-cover"
               />
             )}
             <div className="flex flex-col">
-              <h3 className="font-bold text-white text-xl group-hover:text-blue-400 transition-colors duration-300">
+              <h3 className="font-bold text-white text-base md:text-xl group-hover:text-blue-400 transition-colors duration-300 line-clamp-1">
                 {demande.property?.title || "Demande pour un bien"}
               </h3>
               <div className="flex items-center gap-2">
@@ -144,15 +144,15 @@ const DemandeImmoCard = ({
               </div>
 
               {/* Localisation */}
-              <div className="mt-3 flex items-center gap-2 text-gray-300">
+              <div className="mt-2 md:mt-3 flex items-center gap-2 text-gray-300">
                 <MapPin className="w-4 h-4 text-blue-400" />
-                <span className="text-sm">
+                <span className="text-xs md:text-sm line-clamp-1">
                   {demande.property?.address || formatLieu()}
                 </span>
               </div>
 
               {/* Description */}
-              <p className="text-gray-400 mt-4 mb-3 line-clamp-3 leading-relaxed text-sm">
+              <p className="text-gray-400 mt-3 md:mt-4 mb-3 line-clamp-2 md:line-clamp-3 leading-relaxed text-xs md:text-sm">
                 <span className="underline">Déscription </span>: &nbsp;
                 {demande.property?.description || "Aucune description fournie."}
               </p>
@@ -160,12 +160,12 @@ const DemandeImmoCard = ({
           </div>
 
           {/* Statut et Date */}
-          <div className="text-right min-w-[120px]">
-            <div className="flex items-center justify-end gap-2 text-gray-400 text-sm mb-3">
+          <div className="w-full md:w-auto text-left md:text-right min-w-[unset] md:min-w-[120px]">
+            <div className="flex md:justify-end items-center gap-2 text-gray-400 text-xs md:text-sm mb-2 md:mb-3">
               <Calendar className="w-4 h-4 text-blue-400" />
               <span>{formatDate(demande)}</span>
             </div>
-            <div className="flex items-center justify-end gap-2 text-gray-400 text-sm mb-3">
+            <div className="flex md:justify-end items-center gap-2 text-gray-400 text-xs md:text-sm mb-2 md:mb-3">
               <Clock className="w-4 h-4 text-blue-400" />
               <span>{formatHeure(demande)}</span>
             </div>
@@ -177,16 +177,16 @@ const DemandeImmoCard = ({
         </div>
 
         {/* Separator */}
-        <div className="border-t border-gray-700/50 pt-4 flex items-center justify-between gap-4">
+        <div className="border-t border-gray-700/50 pt-3 md:pt-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
           {/* Action Button */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 order-2 md:order-1">
             <Link
               to={
                 demande.propertyId || demande.property?.id
                   ? `/immobilier/${demande.propertyId || demande.property?.id}`
                   : "#"
               }
-              className="group/btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20"
+              className="group/btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20"
             >
               <span>Voir le bien</span>
               <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
@@ -194,7 +194,7 @@ const DemandeImmoCard = ({
           </div>
 
           {/* Actions: pending -> allow cancel. If validated or refused -> allow delete. Otherwise show badge */}
-          <div className="">
+          <div className="order-1 md:order-2">
             {(() => {
               const status = String(demande.statut || "").toLowerCase();
 
@@ -207,7 +207,7 @@ const DemandeImmoCard = ({
                       onAddHistory={onAddHistory}
                       onStatusChange={onStatusChange}
                     />
-                    <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-orange-500 text-white">
+                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-orange-500 text-white">
                       En attente
                     </span>
                   </div>
@@ -223,7 +223,7 @@ const DemandeImmoCard = ({
                       onAddHistory={onAddHistory}
                       onStatusChange={onStatusChange}
                     />
-                    <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-red-500 text-white">
+                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-red-500 text-white">
                       Refusée
                     </span>
                   </div>
@@ -243,29 +243,29 @@ const DemandeImmoCard = ({
                       onAddHistory={onAddHistory}
                       onStatusChange={onStatusChange}
                     />
-                    <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500 text-white">
+                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-green-500 text-white">
                       Validée
                     </span>
 
                     {/* Informations de contact du propriétaire */}
                     {demande.property?.owner && (
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg">
+                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-2.5 py-1.5 rounded-lg">
                           <Phone className="w-4 h-4" />
-                          <span className="text-sm">
+                          <span className="text-xs md:text-sm">
                             {demande.property.owner.phone || "Non renseigné"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg">
+                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-2.5 py-1.5 rounded-lg">
                           <Mail className="w-4 h-4" />
-                          <span className="text-sm">
+                          <span className="text-xs md:text-sm">
                             {demande.property.owner.email || "Non renseigné"}
                           </span>
                         </div>
                         {demande.property.owner.companyName && (
-                          <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg">
+                          <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-2.5 py-1.5 rounded-lg">
                             <User className="w-4 h-4" />
-                            <span className="text-sm">
+                            <span className="text-xs md:text-sm">
                               {demande.property.owner.companyName}
                             </span>
                           </div>
@@ -277,7 +277,7 @@ const DemandeImmoCard = ({
               }
 
               return (
-                <div className="px-4  py-2">
+                <div className="px-2 md:px-4  py-2">
                   <span
                     className={`grid grid-cols-2 items-center px-3 py-1.5 rounded-full text-sm font-semibold ${getStatutStyles(
                       demande.statut
@@ -685,7 +685,7 @@ const MesDemandesImmobilier = () => {
     <div className="min-h-screen mt-12">
       <div className="flex flex-col gap-6 mb-6">
         <div className="flex items-center justify-between">
-          <div className="flex relative overflow-hidden h-44 w-full items-center gap-3">
+          <div className="flex relative overflow-hidden h-24 lg:h-44 w-full items-center gap-3">
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40 backdrop-blur-[1px]"></div>
             {/* Effet de lumière */}
             <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
@@ -695,7 +695,7 @@ const MesDemandesImmobilier = () => {
               className="absolute -z-0 w-full opacity-45 object-cover object-center"
               src="https://i.pinimg.com/1200x/23/26/d5/2326d5fc9fdbff00492a8f7c6390a88c.jpg"
             />
-            <h1 className="text-5xl tracking-wider font-serif font-bold text-slate-100 z-10">
+            <h1 className="text-xl lg:text-5xl tracking-wider font-serif font-bold text-slate-100 z-10">
               Mes demandes immobilières
             </h1>
           </div>
@@ -728,10 +728,10 @@ const MesDemandesImmobilier = () => {
 
         <div className="flex flex-col space-y-4 px-6 py-2">
           {/* Tabs de filtrage */}
-          <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-start">
+          <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-stretch md:self-start overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "all"
                   ? "bg-blue-500 text-white"
                   : "text-gray-600 hover:bg-gray-100"
@@ -741,7 +741,7 @@ const MesDemandesImmobilier = () => {
             </button>
             <button
               onClick={() => setActiveTab("en_attente")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "en_attente"
                   ? "bg-blue-500 text-white"
                   : "text-gray-600 hover:bg-gray-100"
@@ -751,7 +751,7 @@ const MesDemandesImmobilier = () => {
             </button>
             <button
               onClick={() => setActiveTab("validees")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "validees"
                   ? "bg-blue-500 text-white"
                   : "text-gray-600 hover:bg-gray-100"
@@ -761,7 +761,7 @@ const MesDemandesImmobilier = () => {
             </button>
             <button
               onClick={() => setActiveTab("refusees")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "refusees"
                   ? "bg-blue-500 text-white"
                   : "text-gray-600 hover:bg-gray-100"
@@ -771,7 +771,7 @@ const MesDemandesImmobilier = () => {
             </button>
             <button
               onClick={() => setActiveTab("archivees")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "archivees"
                   ? "bg-blue-500 text-white"
                   : "text-gray-600 hover:bg-gray-100"
