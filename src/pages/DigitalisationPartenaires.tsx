@@ -568,14 +568,14 @@ const DigitalisationPartenaires = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex space-x-2">
                           {professional.phone && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
+                            <a
+                              href={`tel:${professional.phone}`}
+          
+                              className="text-xs flex items-center underline bg-gray-100 px-2 py-1 rounded-md hover:bg-gray-200 transition-colors"
                             >
                               <Phone className="h-3 w-3 mr-1" />
                               Appeler
-                            </Button>
+                            </a>
                           )}
                           {professional.websiteUrl && (
                             <Button

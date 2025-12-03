@@ -174,6 +174,7 @@ import Digitalisation from "./pages/Digitalisation";
 import DigitalisationPartenaires from "./pages/DigitalisationPartenaires";
 import DigitalisationProfessionnelDetail from "./pages/DigitalisationProfessionnelDetail";
 import DigitalisationServiceDetail from "./pages/DigitalisationServiceDetail";
+import ContactMessagesPage from "./pages/pro/ContactMessagesPage";
 
 const queryClient = new QueryClient();
 
@@ -570,6 +571,10 @@ const App = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
+                    <Route
+                      path="contact-messages"
+                      element={<ContactMessagesPage />}
+                    />
                     <Route
                       path="financement-demandes"
                       element={<FinancementDemandesPro />}
