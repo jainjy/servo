@@ -256,14 +256,14 @@ const SubscriptionStatusPage = () => {
   const isExpired = subscription?.status == 'expired';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+    <div className="min-h-screen py-0 ">
       <div className="max-w-6xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-lg lg:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Votre Abonnement
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-md lg:text-lg text-gray-600 max-w-2xl mx-auto">
             Gérez et suivez l'état de votre abonnement en temps réel
           </p>
         </div>
@@ -300,7 +300,7 @@ const SubscriptionStatusPage = () => {
             }`}>
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-2xl">
+                  <CardTitle className="flex items-center gap-2 text-md lg:text-2xl">
                     <PlanIcon className="h-6 w-6 text-primary" />
                     {subscription?.plan?.name || "Essai Gratuit"}
                   </CardTitle>

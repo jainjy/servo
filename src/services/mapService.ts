@@ -58,19 +58,26 @@ export class MapService {
 
       // 🔥 SOLUTION : Utiliser les APIs séparées MAIS avec les données complètes
       const [usersResponse, propertiesResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/map/users`),
-        fetch(`${API_BASE_URL}/map/properties`),
+        fetch(`${API_BASE_URL}/map/users`).catch(err => {
+          console.warn("Erreur utilisateurs:", err);
+          return new Response(JSON.stringify({ success: false, data: [], count: 0 }), { 
+            status: 500 
+          });
+        }),
+        fetch(`${API_BASE_URL}/map/properties`).catch(err => {
+          console.warn("Erreur propriétés:", err);
+          return new Response(JSON.stringify({ success: false, data: [], count: 0 }), { 
+            status: 500 
+          });
+        }),
       ]);
 
-      if (!usersResponse.ok || !propertiesResponse.ok) {
-        throw new Error("Erreur HTTP");
-      }
+      // Continuer même si une des requêtes échoue
+      const usersData = usersResponse.ok ? await usersResponse.json() : { success: false, data: [], count: 0 };
+      const propertiesData = propertiesResponse.ok ? await propertiesResponse.json() : { success: false, data: [], count: 0 };
 
-      const usersData = await usersResponse.json();
-      const propertiesData = await propertiesResponse.json();
-
-      if (!usersData.success || !propertiesData.success) {
-        throw new Error("API returned error");
+      if (!usersData.success && !propertiesData.success) {
+        throw new Error("Impossible de charger les données de la carte. Le serveur ne répond pas.");
       }
 
       // 🔥 CORRECTION COMPLÈTE :
@@ -111,7 +118,9 @@ export class MapService {
       return allPoints;
     } catch (error) {
       console.error("❌ Erreur lors du chargement des points:", error);
-      throw error;
+      // Retourner un tableau vide au lieu de lever une erreur
+      console.warn("⚠️ Retour vide pour la carte");
+      return [];
     }
   }
 

@@ -171,6 +171,8 @@ import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
 import { App as CapacitorApp } from '@capacitor/app';
 import Digitalisation from "./pages/Digitalisation";
+import PrivacyPolicyWidget from "./components/Confidentialite";
+import LegalMentionsWidget from "./components/MentionLegal";
 import DigitalisationPartenaires from "./pages/DigitalisationPartenaires";
 import DigitalisationProfessionnelDetail from "./pages/DigitalisationProfessionnelDetail";
 import DigitalisationServiceDetail from "./pages/DigitalisationServiceDetail";
@@ -319,6 +321,8 @@ const App = () => {
                     element={<FormationsTourisme />}
                   />
                   <Route path="/voyages" element={<Voyages />} />
+                  <Route path="/confidentialite" element={<PrivacyPolicyWidget />} />
+                  <Route path="/mentions_legales" element={<LegalMentionsWidget />} />
                   <Route
                     path="/plan_administratif"
                     element={<PlanAdministratifServices />}

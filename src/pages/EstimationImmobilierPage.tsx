@@ -210,7 +210,7 @@ export default function EstimationImmobilierPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-24 pt-10"
           >
-            <h1 className="text-4xl md:text-4xl font-bold text-gray-100 mb-4">
+            <h1 className="text-xl lg:text-4xl md:text-4xl font-bold text-gray-100 mb-4">
               Estimation Immobilière <span className="text-purple-300">Intelligente</span>
             </h1>
             <p className="text-sm text-gray-200 max-w-2xl mx-auto">

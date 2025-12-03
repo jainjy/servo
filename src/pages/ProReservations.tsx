@@ -126,7 +126,7 @@ const ProReservations: React.FC = () => {
       annulee: { 
         variant: 'destructive' as const, 
         text: 'Annulée', 
-        color: 'text-red-600',
+        color: 'text-red-100',
         icon: <XCircle className="w-3 h-3 mr-1" />
       },
       terminee: { 
@@ -191,13 +191,13 @@ const ProReservations: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-2 lg:p-0">
       <div className="container mx-auto px-4">
         {/* En-tête */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-lg lg:text-3xl font-bold text-gray-900 mb-2">
                 Gestion des réservations de cours
               </h1>
               <p className="text-gray-600">

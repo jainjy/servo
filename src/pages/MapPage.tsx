@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Users, Home, MapPin, Search, X, Loader, TreePalm } from "lucide-react";
+import { Users, Home, MapPin, Search, X, Loader, TreePalm, Phone, Mail, ChevronDown } from "lucide-react";
 import GenericMap from "../components/GenericMap";
 import PointDetailsModal from "../components/PointDetailsModal";
 import { MapPoint } from "../types/map";
@@ -21,7 +21,48 @@ const MapPage: React.FC = () => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(
     null
   );
+  const [nearbyPoints, setNearbyPoints] = useState<MapPoint[]>([]);
+  const [showNearbyModal, setShowNearbyModal] = useState(false);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Fonction pour calculer la distance entre deux points (formule Haversine)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Fonction pour trouver les points dans un rayon de 5km
+  const handleSearch5km = () => {
+    if (!userLocation) {
+      setError("Vous devez d'abord activer votre géolocalisation");
+      return;
+    }
+
+    setNearbyLoading(true);
+    const [userLat, userLon] = userLocation;
+    
+    // Filtrer les points à proximité (5km)
+    const nearby = points.filter((point) => {
+      const distance = calculateDistance(userLat, userLon, point.latitude, point.longitude);
+      return distance <= 5;
+    }).sort((a, b) => {
+      const distA = calculateDistance(userLat, userLon, a.latitude, a.longitude);
+      const distB = calculateDistance(userLat, userLon, b.latitude, b.longitude);
+      return distA - distB;
+    });
+
+    setNearbyPoints(nearby);
+    setShowNearbyModal(true);
+    setNearbyLoading(false);
+  };
 
   useEffect(() => {
     const loadMapData = async () => {
@@ -31,8 +72,11 @@ const MapPage: React.FC = () => {
         setPoints(allPoints);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur inconnue");
+        const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
+        setError(errorMessage);
         console.error("Erreur chargement carte:", err);
+        // Afficher un message d'erreur sans bloquer l'UI
+        setPoints([]);
       } finally {
         setLoading(false);
       }
@@ -106,27 +150,91 @@ const MapPage: React.FC = () => {
 
   const handleGetUserLocation = () => {
     if (!navigator.geolocation) {
-      setError("La géolocalisation n'est pas supportée par votre navigateur");
+      setError("La géolocalisation n'est pas supportée par votre navigateur. Vous pouvez cliquer sur '5km' pour chercher autour de la Réunion.");
+      // Définir une position par défaut (centre de la Réunion)
+      setUserLocation([-21.1351, 55.2471]);
       return;
     }
 
     setGeoLoading(true);
+    setError(null);
+
+    // Timeout avec fallback pour la Réunion
+    const timeout = setTimeout(() => {
+      console.warn("⚠️ Timeout de géolocalisation, utilisation des coordonnées de la Réunion");
+      const reunionCoords: [number, number] = [-21.1351, 55.2471];
+      setUserLocation(reunionCoords);
+      setError("Impossible de déterminer votre position exacte. Recherche autour de la Réunion.");
+      setGeoLoading(false);
+      
+      // Zoom smooth vers Réunion
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('centerMap', { 
+          detail: { 
+            location: reunionCoords,
+            zoom: 12,
+            smooth: true
+          } 
+        }));
+      }, 300);
+    }, 15000); // 15 secondes
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(timeout);
         const { latitude, longitude } = position.coords;
         setUserLocation([latitude, longitude]);
         setGeoLoading(false);
+        setError(null);
+        
+        // Zoom smooth vers la position avec effet de transition
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('centerMap', { 
+            detail: { 
+              location: [latitude, longitude],
+              zoom: 16,
+              smooth: true
+            } 
+          }));
+        }, 300);
       },
       (error) => {
+        clearTimeout(timeout);
         console.error("Erreur de géolocalisation:", error);
-        setError("Impossible d'obtenir votre position");
+        
+        // Fallback sur la Réunion
+        const reunionCoords: [number, number] = [-21.1351, 55.2471];
+        setUserLocation(reunionCoords);
+        
+        let errorMessage = "Impossible d'obtenir votre position exacte. Recherche autour de la Réunion.";
+        
+        // Messages d'erreur plus détaillés
+        if (error.code === 1) {
+          errorMessage = "Permission refusée. Recherche autour de la Réunion.";
+        } else if (error.code === 2) {
+          errorMessage = "Position indisponible. Vérifiez votre service de localisation. Recherche autour de la Réunion.";
+        } else if (error.code === 3) {
+          errorMessage = "Délai d'attente dépassé. Recherche autour de la Réunion.";
+        }
+        
+        setError(errorMessage);
         setGeoLoading(false);
+        
+        // Zoom smooth vers Réunion
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('centerMap', { 
+            detail: { 
+              location: reunionCoords,
+              zoom: 12,
+              smooth: true
+            } 
+          }));
+        }, 300);
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
+        enableHighAccuracy: false,
+        timeout: 12000, // Timeout avant le fallback
+        maximumAge: 300000, // Accepter une position vieille de 5 minutes
       }
     );
   };
@@ -175,28 +283,11 @@ const MapPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex items-center justify-center h-96 mt-20">
         <div className="flex flex-col items-center">
-          <img src="/loading.gif" alt="" />
+          <img src="/loading.gif" alt="Chargement" />
           <p className="mt-4 text-gray-600">Chargement de la carte...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <h3 className="text-red-800 font-bold flex items-center gap-2">
-          <X className="h-5 w-5" /> Erreur
-        </h3>
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          Réessayer
-        </button>
       </div>
     );
   }
@@ -213,55 +304,55 @@ const MapPage: React.FC = () => {
           Carte des partenaires et propriétés
         </h1>
         {/* Version Desktop */}
-<div className="hidden md:grid grid-cols-2 lg:flex flex-wrap items-center justify-center gap-3 mb-6">
-  <div className="bg-white/20 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
-    <div className="flex items-center text-white">
-      <Users className="w-4 h-4 text-blue-300 mr-3" />
-      <span className="font-medium">Partenaires: </span>
-      <span className="ml-2 bg-blue-500/20 px-2 py-1 text-xs rounded-lg text-blue-100 font-bold">
-        {points.filter((p) => p.type === "user").length}
-      </span>
-    </div>
-  </div>
+        <div className="hidden md:grid grid-cols-2 lg:flex flex-wrap items-center justify-center gap-3 mb-6">
+          <div className="bg-white/20 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
+            <div className="flex items-center text-white">
+              <Users className="w-4 h-4 text-blue-300 mr-3" />
+              <span className="font-medium">Partenaires: </span>
+              <span className="ml-2 bg-blue-500/20 px-2 py-1 text-xs rounded-lg text-blue-100 font-bold">
+                {points.filter((p) => p.type === "user").length}
+              </span>
+            </div>
+          </div>
 
-  <div className="bg-white/20 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
-    <div className="flex items-center text-white">
-      <Home className="w-4 h-4 text-green-300 mr-3" />
-      <span className="font-medium">Propriétés: </span>
-      <span className="ml-2 bg-green-500/20 px-2 text-xs py-1 rounded-lg text-green-100 font-bold">
-        {points.filter((p) => p.type === "property").length}
-      </span>
-    </div>
-  </div>
+          <div className="bg-white/20 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
+            <div className="flex items-center text-white">
+              <Home className="w-4 h-4 text-green-300 mr-3" />
+              <span className="font-medium">Propriétés: </span>
+              <span className="ml-2 bg-green-500/20 px-2 text-xs py-1 rounded-lg text-green-100 font-bold">
+                {points.filter((p) => p.type === "property").length}
+              </span>
+            </div>
+          </div>
 
-  <div className="bg-white/20 col-span-1 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
-    <div className="flex items-center text-white">
-      <MapPin className="w-4 h-4 text-red-300 mr-3" />
-      <span className="font-medium">Affichés: </span>
-      <span className="ml-2 bg-red-500/20 text-xs px-2 py-1 rounded-lg text-red-100 font-bold">
-        {filteredPoints.length} points
-      </span>
-    </div>
-  </div>
-</div>
+          <div className="bg-white/20 col-span-1 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
+            <div className="flex items-center text-white">
+              <MapPin className="w-4 h-4 text-red-300 mr-3" />
+              <span className="font-medium">Affichés: </span>
+              <span className="ml-2 bg-red-500/20 text-xs px-2 py-1 rounded-lg text-red-100 font-bold">
+                {filteredPoints.length} points
+              </span>
+            </div>
+          </div>
+        </div>
 
-{/* Version Mobile */}
-<div className="md:hidden flex justify-between items-center px-4 py-3">
-  <div className="flex items-center text-white text-sm">
-    <Users className="w-4 h-4 text-blue-300 mr-2" />
-    <span className="font-bold">{points.filter((p) => p.type === "user").length}</span>
-  </div>
+        {/* Version Mobile */}
+        <div className="md:hidden flex justify-between items-center px-4 py-3">
+          <div className="flex items-center text-white text-sm">
+            <Users className="w-4 h-4 text-blue-300 mr-2" />
+            <span className="font-bold">{points.filter((p) => p.type === "user").length}</span>
+          </div>
 
-  <div className="flex items-center text-white text-sm">
-    <Home className="w-4 h-4 text-green-300 mr-2" />
-    <span className="font-bold">{points.filter((p) => p.type === "property").length}</span>
-  </div>
+          <div className="flex items-center text-white text-sm">
+            <Home className="w-4 h-4 text-green-300 mr-2" />
+            <span className="font-bold">{points.filter((p) => p.type === "property").length}</span>
+          </div>
 
-  <div className="flex items-center text-white text-sm">
-    <MapPin className="w-4 h-4 text-red-300 mr-2" />
-    <span className="font-bold">{filteredPoints.length}</span>
-  </div>
-</div>
+          <div className="flex items-center text-white text-sm">
+            <MapPin className="w-4 h-4 text-red-300 mr-2" />
+            <span className="font-bold">{filteredPoints.length}</span>
+          </div>
+        </div>
 
         {/* Barre de recherche et filtres */}
         <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
@@ -343,6 +434,23 @@ const MapPage: React.FC = () => {
                 <TreePalm className="h-4 w-4" />
                 <span className="hidden sm:inline ml-1">Réunion</span>
               </button>
+              <button
+                onClick={handleSearch5km}
+                disabled={!userLocation || nearbyLoading}
+                className="px-3 py-2 flex sm:px-4 bg-red-700 text-white rounded-lg border border-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                title="Chercher 5 km autour de moi"
+              >
+                {nearbyLoading ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin" />
+                    <span className="hidden sm:inline ml-1">Recherche...</span>
+                  </>
+                ) : userLocation ? (
+                  "5km ✓"
+                ) : (
+                  "5km"
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -357,12 +465,165 @@ const MapPage: React.FC = () => {
         onPointClick={handlePointClick}
       />
 
+      {/* Message si erreur lors du chargement des données */}
+      {error && (
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-800">
+            <span className="font-bold">⚠️ Attention :</span> {error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
+
       {/* Modal des détails */}
       <PointDetailsModal
         point={selectedPoint}
         onClose={handleCloseModal}
         onViewDetails={handleViewDetails}
       />
+
+      {/* Modal des résultats 5km */}
+      {showNearbyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-white" />
+                <div>
+                  <h2 className="text-white font-bold">Points à proximité (5 km)</h2>
+                  <p className="text-red-100 text-sm">{nearbyPoints.length} résultat{nearbyPoints.length !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNearbyModal(false)}
+                className="text-white hover:bg-red-500/30 p-2 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Contenu */}
+            <div className="flex-1 overflow-y-auto">
+              {nearbyPoints.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 px-4">
+                  <MapPin className="w-12 h-12 text-gray-300 mb-3" />
+                  <p className="text-gray-600 text-center">Aucun point trouvé dans un rayon de 5 km</p>
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {nearbyPoints.map((point, index) => {
+                    const distance = calculateDistance(
+                      userLocation![0],
+                      userLocation![1],
+                      point.latitude,
+                      point.longitude
+                    );
+                    return (
+                      <div
+                        key={point.id}
+                        className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          setShowNearbyModal(false);
+                          handleViewDetails(point);
+                        }}
+                      >
+                        <div className="flex gap-4">
+                          {/* Numéro de rang */}
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                            <span className="text-red-600 font-bold text-sm">{index + 1}</span>
+                          </div>
+
+                          {/* Contenu */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-gray-900 truncate">{point.name}</h3>
+                              <span className="flex-shrink-0 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                                {distance.toFixed(1)} km
+                              </span>
+                            </div>
+
+                            {/* Type et ville */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                              <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium">
+                                {point.type === "user" ? "Partenaire" : "Propriété"}
+                              </span>
+                              {point.city && (
+                                <>
+                                  <span>•</span>
+                                  <span>{point.city}</span>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Description */}
+                            {point.type === "user" && point.metiers && point.metiers.length > 0 && (
+                              <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+                                {point.metiers.join(", ")}
+                              </p>
+                            )}
+
+                            {/* Coordonnées */}
+                            <div className="flex flex-wrap gap-3 text-xs">
+                              {point.type === "user" && (
+                                <>
+                                  {point.phone && (
+                                    <a
+                                      href={`tel:${point.phone}`}
+                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Phone className="w-3 h-3" />
+                                      {point.phone}
+                                    </a>
+                                  )}
+                                  {point.email && (
+                                    <a
+                                      href={`mailto:${point.email}`}
+                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Mail className="w-3 h-3" />
+                                      {point.email}
+                                    </a>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Arrow */}
+                          <div className="flex-shrink-0 text-gray-400">
+                            <ChevronDown className="w-5 h-5 rotate-180" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                Cliquez sur un résultat pour voir les détails
+              </p>
+              <button
+                onClick={() => setShowNearbyModal(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -134,10 +134,10 @@ const ListeDemandesDevis = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-2 lg:p-0">
       <Card>
         <CardHeader>
-          <CardTitle>Liste des Demandes de Devis</CardTitle>
+          <CardTitle className='lg:text-2xl text-lg'>Liste des Demandes de Devis</CardTitle>
           <CardDescription>
             Gérez toutes vos demandes de devis entrantes
           </CardDescription>

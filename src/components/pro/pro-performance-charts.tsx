@@ -340,7 +340,7 @@ export function ProPerformanceCharts() {
                 color: "hsl(var(--chart-3))",
               },
             }}
-            className="h-[150px]"
+            className="h-[150px] lg:w-full w-4/5"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={defaultRatingData}>
@@ -375,7 +375,7 @@ export function ProPerformanceCharts() {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-0 lg:p-6  border-none bg-transparent lg:bg-card lg:border-border">
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-foreground">Revenus et réservations</h3>
           <p className="text-sm text-muted-foreground">Évolution sur les 7 derniers jours</p>
@@ -391,7 +391,7 @@ export function ProPerformanceCharts() {
               color: "hsl(var(--chart-2))",
             },
           }}
-          className="h-[200px]"
+          className="h-[200px] lg:w-full w-4/5"
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={hasRevenueData ? revenueData : defaultRevenueData}>
@@ -433,8 +433,8 @@ export function ProPerformanceCharts() {
         )}
       </Card>
 
-      <Card className="p-6 bg-card border-border">
-        <div className="mb-4">
+      <Card className="p-0 lg:p-6 bg-transparent lg:bg-card border-none lg:border-border">
+        <div className=" mb-4">
           <h3 className="text-lg font-semibold text-foreground">Évolution de la note</h3>
           <p className="text-sm text-muted-foreground">Moyenne sur les 6 derniers mois</p>
         </div>

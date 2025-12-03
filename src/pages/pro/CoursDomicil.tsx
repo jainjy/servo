@@ -129,13 +129,13 @@ const CoursDomicile: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-gray-50 py-2 lg:py-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* En-tête */}
                 <div className="mb-8">
-                    <div className="flex justify-between items-start">
+                    <div className="grid gap-4 lg:flex justify-between items-start">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Gestion des Cours à Domicile</h1>
+                            <h1 className="text-lg lg:text-3xl font-bold text-gray-900">Gestion des Cours à Domicile</h1>
                             <p className="mt-2 text-gray-600">
                                 Créez et gérez vos cours proposés à domicile
                             </p>
@@ -154,8 +154,8 @@ const CoursDomicile: React.FC = () => {
                 {notification && (
                     <div
                         className={`mb-6 p-4 rounded-lg ${notification.type === 'success'
-                                ? 'bg-green-50 border border-green-200 text-green-700'
-                                : 'bg-red-50 border border-red-200 text-red-700'
+                            ? 'bg-green-50 border border-green-200 text-green-700'
+                            : 'bg-red-50 border border-red-200 text-red-700'
                             }`}
                     >
                         <div className="flex items-center gap-2">
@@ -186,9 +186,9 @@ const CoursDomicile: React.FC = () => {
                 )}
                 {/* Liste des cours */}
                 {loading ? (
-                    
+
                     <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
-                    <img src="/loading.gif" alt="" className='w-24 h-24'/>
+                        <img src="/loading.gif" alt="" className='w-24 h-24' />
                         <p className="mt-4 text-xl font-semibold text-gray-700">
                             Chargement de vos cours...
                         </p>

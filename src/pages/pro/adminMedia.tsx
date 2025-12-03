@@ -748,7 +748,7 @@ const AdminMedia: React.FC = () => {
               <Video className="w-8 h-8 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Gestion des Podcasts Vidéo</h2>
+              <h2 className="text-md lg:text-2xl font-bold text-gray-900">Gestion des Podcasts Vidéo</h2>
               <p className="text-gray-600">Administrez votre bibliothèque de podcasts vidéo</p>
             </div>
           </div>
@@ -948,7 +948,7 @@ const AdminMedia: React.FC = () => {
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Administration Podcasts Vidéo</h1>
+                <h1 className="text-lg lg:text-3xl font-bold text-slate-900">Administration Podcasts Vidéo</h1>
                 <p className="text-gray-600 mt-2">Gérez votre bibliothèque de podcasts vidéo</p>
               </div>
             </div>

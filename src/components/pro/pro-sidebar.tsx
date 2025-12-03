@@ -281,12 +281,12 @@ export function ProSidebar() {
             <div className="p-1 rounded-full bg-white border-black border-2">
               <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
             </div>
-            <div>
+            {/* <div>
               <h1 className="text-sm font-semibold text-sidebar-foreground">
                 SERVO
               </h1>
               <p className="text-xs text-muted-foreground">Espace Pro</p>
-            </div>
+            </div> */}
           </Link>
         </div>
 
