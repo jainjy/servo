@@ -20,7 +20,7 @@ export default function ArtCommerceService() {
     <div className="space-y-6">
       <div className="flex items-center flex-col md:flex-row justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-lg lg:text-3xl font-bold tracking-tight text-foreground">
             Mes oeuvres d'art et commerces
           </h1>
           <p className="text-muted-foreground">

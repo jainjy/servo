@@ -1773,9 +1773,9 @@ export const ProBookings = () => {
     <div className="min-h-screen bg-gray-50 pt-0">
       <div className="container mx-auto px-4">
         {/* En-tête avec bouton rafraîchir */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="grid gap-4 lg:flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-lg lg:text-3xl font-bold text-gray-900 mb-2">
               Gestion des Réservations
             </h1>
             <p className="text-gray-600">
@@ -1785,7 +1785,7 @@ export const ProBookings = () => {
           <button
             onClick={refreshBookings}
             disabled={refreshing}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex w-1/2 lg:w-auto items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             <RefreshCw
               className={`w-5 h-5 mr-2 ${refreshing ? "animate-spin" : ""}`}

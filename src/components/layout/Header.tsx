@@ -627,66 +627,66 @@ const Header = () => {
         },
       ],
     },
-    {
-      title: "DOMICILE",
-      items: [
-        {
-          title: "Produits & commerces",
-          description: " Trouvez tout pour votre maison",
-          href: "/domicile#produits-commerces",
-          image:
-            "https://i.pinimg.com/1200x/e0/6a/9b/e06a9b44678d5ddd2a06c07ed8f1871f.jpg",
-        },
-        {
-          title: "Service maison",
-          description: " Services à domicile de qualité",
-          href: "/domicile#service-maison",
-          image:
-            "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
-        },
-        {
-          title: "Equipements & livraison",
-          description: " Solutions pour un domicile moderne",
-          href: "/domicile#équipements-livraison",
-          image:
-            "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
-        },
-        {
-          title: "Design & décoration (art)",
-          description: " Inspirez-vous pour votre intérieur",
-          href: "/domicile#design-decoration",
-          image:
-            "https://i.pinimg.com/1200x/db/1e/d6/db1ed633dae5dd89cf4610c3f93a8103.jpg",
-        },
-        {
-          title: "Cours & formations",
-          description: " Apprenez de nouvelles compétences",
-          href: "/domicile#cours-formations",
-          image:
-            "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
-        },
-        {
-          title: "Utilities (eau, électricité, internet)",
-          description: "Gestion efficace de votre domicile",
-          href: "/domicile#utilities",
-          image:
-            "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg",
-        },
-        // {
-        //   title: "Matériaux",
-        //   description: "Matériaux de construction qualité premium",
-        //   href: "/domicile#materiaux",
-        //   image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
-        // },
-        {
-          title: "Podcasts",
-          description: "Ressources pour l'aménagement",
-          href: "/podcasts/domicile",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
+    // {
+    //   title: "DOMICILE",
+    //   items: [
+    //     {
+    //       title: "Produits & commerces",
+    //       description: " Trouvez tout pour votre maison",
+    //       href: "/domicile#produits-commerces",
+    //       image:
+    //         "https://i.pinimg.com/1200x/e0/6a/9b/e06a9b44678d5ddd2a06c07ed8f1871f.jpg",
+    //     },
+    //     {
+    //       title: "Service maison",
+    //       description: " Services à domicile de qualité",
+    //       href: "/domicile#service-maison",
+    //       image:
+    //         "https://i.pinimg.com/736x/2f/04/36/2f043687cb9218af9a19da972b52ead5.jpg",
+    //     },
+    //     {
+    //       title: "Equipements & livraison",
+    //       description: " Solutions pour un domicile moderne",
+    //       href: "/domicile#équipements-livraison",
+    //       image:
+    //         "https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg",
+    //     },
+    //     {
+    //       title: "Design & décoration (art)",
+    //       description: " Inspirez-vous pour votre intérieur",
+    //       href: "/domicile#design-decoration",
+    //       image:
+    //         "https://i.pinimg.com/1200x/db/1e/d6/db1ed633dae5dd89cf4610c3f93a8103.jpg",
+    //     },
+    //     {
+    //       title: "Cours & formations",
+    //       description: " Apprenez de nouvelles compétences",
+    //       href: "/domicile#cours-formations",
+    //       image:
+    //         "https://i.pinimg.com/736x/8c/9d/8b/8c9d8bbff5f660b4a78119e3c9f58a4c.jpg",
+    //     },
+    //     {
+    //       title: "Utilities (eau, électricité, internet)",
+    //       description: "Gestion efficace de votre domicile",
+    //       href: "/domicile#utilities",
+    //       image:
+    //         "https://i.pinimg.com/1200x/2a/55/75/2a5575106b8bab32940c640840e1602b.jpg",
+    //     },
+    //     // {
+    //     //   title: "Matériaux",
+    //     //   description: "Matériaux de construction qualité premium",
+    //     //   href: "/domicile#materiaux",
+    //     //   image: "https://i.pinimg.com/736x/03/d7/70/03d7704dad409f8713915bcee69314b1.jpg"
+    //     // },
+    //     {
+    //       title: "Podcasts",
+    //       description: "Ressources pour l'aménagement",
+    //       href: "/podcasts/domicile",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
     {
       title: "CREDIT & ASSURANCE",
       items: [
@@ -789,133 +789,133 @@ const Header = () => {
         },
       ],
     },
-    {
-      title: "TOURISME",
-      items: [
-        {
-          title: "Hôtels & gîtes",
-          description: "Réservations d'hébergements",
-          href: "/tourisme",
-          image:
-            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
-        },
-        {
-          title: "Activités & loisirs",
-          description: "Découvertes & aventures",
-          href: "/activiteLoisirs",
-          image:
-            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
-        },
-        {
-          title: "Lieux historiques & culturels",
-          description: "Explorez le patrimoine local",
-          href: "/lieux_historique",
-          image:
-            "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
-        },
-        {
-          title: "Formations",
-          description: "Cours & ateliers locaux",
-          href: "/formationTourisme",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
-          title: "Voyages",
-          description: "Cours & ateliers locaux",
-          href: "/voyages",
-          image:
-            "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: "Ressources sur le tourisme",
-          href: "/podcasts/tourisme",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
-    {
-      title: "ALIMENTATION",
-      items: [
-        {
-          title: "Courses & épicerie",
-          description: "Livraison de produits frais & épicerie",
-          href: "/alimentation#cours-epicerie",
-          image:
-            "https://i.pinimg.com/1200x/11/80/35/11803586e48bb4b954c93493a2fae78d.jpg",
-        },
-        {
-          title: "Boulangerie & charcuterie",
-          description: "Produits artisanaux livrés chez vous",
-          href: "/alimentation#boulangerie-charcuterie",
-          image:
-            "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
-        },
-        {
-          title: "Cave & vins",
-          description: "Sélection de vins & spiritueux",
-          href: "/alimentation#cave-vins",
-          image:
-            "https://i.pinimg.com/1200x/90/22/b3/9022b34f5669bf2657f32acb26d1d554.jpg",
-        },
-        {
-          title: "Restaurants",
-          description: "Livraison de plats de vos restaurants favoris",
-          href: "/alimentation#restaurant",
-          image:
-            "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg",
-        },
-        {
-          title: "Podcasts ",
-          description: " Ressources sur l'alimentation",
-          href: "/podcasts/alimentation",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
-    {
-      title: "BIEN-ÊTRE",
-      items: [
-        {
-          title: "Cours à domicile",
-          description: "Formations & ateliers personnalisés",
-          href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
-        },
-        {
-          title: "Arts & commerces",
-          description: "Artisans & boutiques bien-être",
-          href: "/art-commerce",
-          image:
-            "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
-        },
-        {
-          title: "Thérapeutes & soins",
-          description: "Professionnels du bien-être à domicile",
-          href: "/bien-etre",
-          image:
-            "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
-        },
-        {
-          title: "Boutique & produits naturels",
-          description: "Produits pour le bien-être",
-          href: "/produits-naturels",
-          image:
-            "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: "Ressources pour le bien-être",
-          href: "/podcasts-bien_etre",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
+    // {
+    //   title: "TOURISME",
+    //   items: [
+    //     {
+    //       title: "Hôtels & gîtes",
+    //       description: "Réservations d'hébergements",
+    //       href: "/tourisme",
+    //       image:
+    //         "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+    //     },
+    //     {
+    //       title: "Activités & loisirs",
+    //       description: "Découvertes & aventures",
+    //       href: "/activiteLoisirs",
+    //       image:
+    //         "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+    //     },
+    //     {
+    //       title: "Lieux historiques & culturels",
+    //       description: "Explorez le patrimoine local",
+    //       href: "/lieux_historique",
+    //       image:
+    //         "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
+    //     },
+    //     {
+    //       title: "Formations",
+    //       description: "Cours & ateliers locaux",
+    //       href: "/formationTourisme",
+    //       image:
+    //         "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+    //     },
+    //     {
+    //       title: "Voyages",
+    //       description: "Cours & ateliers locaux",
+    //       href: "/voyages",
+    //       image:
+    //         "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts",
+    //       description: "Ressources sur le tourisme",
+    //       href: "/podcasts/tourisme",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "ALIMENTATION",
+    //   items: [
+    //     {
+    //       title: "Courses & épicerie",
+    //       description: "Livraison de produits frais & épicerie",
+    //       href: "/alimentation#cours-epicerie",
+    //       image:
+    //         "https://i.pinimg.com/1200x/11/80/35/11803586e48bb4b954c93493a2fae78d.jpg",
+    //     },
+    //     {
+    //       title: "Boulangerie & charcuterie",
+    //       description: "Produits artisanaux livrés chez vous",
+    //       href: "/alimentation#boulangerie-charcuterie",
+    //       image:
+    //         "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
+    //     },
+    //     {
+    //       title: "Cave & vins",
+    //       description: "Sélection de vins & spiritueux",
+    //       href: "/alimentation#cave-vins",
+    //       image:
+    //         "https://i.pinimg.com/1200x/90/22/b3/9022b34f5669bf2657f32acb26d1d554.jpg",
+    //     },
+    //     {
+    //       title: "Restaurants",
+    //       description: "Livraison de plats de vos restaurants favoris",
+    //       href: "/alimentation#restaurant",
+    //       image:
+    //         "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts ",
+    //       description: " Ressources sur l'alimentation",
+    //       href: "/podcasts/alimentation",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "BIEN-ÊTRE",
+    //   items: [
+    //     {
+    //       title: "Cours à domicile",
+    //       description: "Formations & ateliers personnalisés",
+    //       href: "/bien-etre",
+    //       image:
+    //         "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+    //     },
+    //     {
+    //       title: "Arts & commerces",
+    //       description: "Artisans & boutiques bien-être",
+    //       href: "/art-commerce",
+    //       image:
+    //         "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+    //     },
+    //     {
+    //       title: "Thérapeutes & soins",
+    //       description: "Professionnels du bien-être à domicile",
+    //       href: "/bien-etre",
+    //       image:
+    //         "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+    //     },
+    //     {
+    //       title: "Boutique & produits naturels",
+    //       description: "Produits pour le bien-être",
+    //       href: "/produits-naturels",
+    //       image:
+    //         "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts",
+    //       description: "Ressources pour le bien-être",
+    //       href: "/podcasts-bien_etre",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
 
     {
       title: "INVESTISSEMENT",
@@ -954,22 +954,22 @@ const Header = () => {
     //   title: "ACTUALITÉS",
     //   href: "/actualites",
     // },
-    {
-      title: "SERVICES ET PARTENAIRES",
-      href: "/service",
-    },
-    {
-      title: "DIGITALISATION",
-      href: "/digitalisation",
-    },
+    // {
+    //   title: "SERVICES ET PARTENAIRES",
+    //   href: "/service",
+    // },
+    // {
+    //   title: "DIGITALISATION",
+    //   href: "/digitalisation",
+    // },
     // {
     //   title: "ART & COMMERCES",
     //   href: "/art-commerce",
     // },
-    {
-      title: "DONS",
-      href: "/don",
-    },
+    // {
+    //   title: "DONS",
+    //   href: "/don",
+    // },
     {
       title: "NOS OFFRES EXCLUSIVES",
       href: "/pack",

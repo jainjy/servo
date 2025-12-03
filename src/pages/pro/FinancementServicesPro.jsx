@@ -183,10 +183,10 @@ const FinancementServicesPro = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-1 lg:p-0 space-y-6">
+      <div className="grid gap-4 lg:flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Services Financiers</h1>
+          <h1 className="text-lg lg:text-3xl font-bold">Services Financiers</h1>
           <p className="text-muted-foreground">
             Gérez vos services financiers et produits de crédit
           </p>

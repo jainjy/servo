@@ -17,18 +17,18 @@ const HarmonieApp = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 md:p-8">
+        <div className="min-h-screen p-0">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-0">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2 flex items-center gap-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
                             <Leaf className="w-7 h-7" />
                         </div>
                         <span>Harmonie</span>
                     </h1>
-                    <p className="text-gray-600 text-lg">Votre espace bien-être personnalisé - Cours, massages, thérapies, inspiration etc .</p>
+                    <p className="text-gray-600 text-sm lg:text-lg">Votre espace bien-être personnalisé - Cours, massages, thérapies, inspiration etc .</p>
                 </div>
 
                 {/* Stats */}
@@ -44,12 +44,12 @@ const HarmonieApp = () => {
                             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
                                 <List className="w-5 h-5" />
                             </div>
-                            <h2 className="text-2xl font-semibold text-gray-800">Liste des services</h2>
+                            <h2 className="text-md lg:text-2xl font-semibold text-gray-800">Liste des services</h2>
                         </div>
 
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors flex items-center gap-1"
+                            className="text-blue-100 bg-blue-700 rounded-lg py-2 px-5 text-sm font-semibold hover:text-blue-100 transition-colors flex items-center gap-1"
                         >
                             Ajouter
                             <span>+</span>
