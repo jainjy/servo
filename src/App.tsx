@@ -100,8 +100,7 @@ import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
 //tracking page
 import GlobalTracking from "@/components/GlobalTracking";
-
-//import TestPage from "./pages/TestPage";
+import NetworkStatus from "./components/NetworkStatus";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
  
@@ -240,6 +239,7 @@ const App = () => {
             <Toaster />
             <ToastContainer />
             <Sonner />
+            <NetworkStatus />
             <BrowserRouter>
               {/* Intégration du GlobalTracking pour le tracking des pages */}
               <GlobalTracking />
@@ -322,8 +322,14 @@ const App = () => {
                     element={<FormationsTourisme />}
                   />
                   <Route path="/voyages" element={<Voyages />} />
-                  <Route path="/confidentialite" element={<PrivacyPolicyWidget />} />
-                  <Route path="/mentions_legales" element={<LegalMentionsWidget />} />
+                  <Route
+                    path="/confidentialite"
+                    element={<PrivacyPolicyWidget />}
+                  />
+                  <Route
+                    path="/mentions_legales"
+                    element={<LegalMentionsWidget />}
+                  />
                   <Route
                     path="/plan_administratif"
                     element={<PlanAdministratifServices />}
@@ -661,7 +667,10 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
-                    <Route path="locationSaisonniere" element={<GestionLocationSaisonniere />} />
+                    <Route
+                      path="locationSaisonniere"
+                      element={<GestionLocationSaisonniere />}
+                    />
                     <Route
                       path="mes-reservations-cours"
                       element={<UserReservations />}
