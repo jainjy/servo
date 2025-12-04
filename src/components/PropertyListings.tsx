@@ -248,23 +248,23 @@ const normalizeAddress = (address: string) => {
 // Fonction pour détecter si une propriété est hors de La Réunion
 const isHorsDuPays = (property: any) => {
   if (!property) return false;
-  
+
   const reunionCities = [
-    'saint-denis', 'saint-paul', 'saint-pierre', 'saint-gilles-les-bains', 
+    'saint-denis', 'saint-paul', 'saint-pierre', 'saint-gilles-les-bains',
     'saint-leu', 'saint-benoit', 'saint-andre', 'saint-joseph', 'saint-louis',
-    'saint-philippe', 'saint-marie', 'saint-rose', 'le tampon', 'la possession', 
-    'le port', 'les avirons', 'entre-deux', 'etang-sale', 'petite-ile', 
+    'saint-philippe', 'saint-marie', 'saint-rose', 'le tampon', 'la possession',
+    'le port', 'les avirons', 'entre-deux', 'etang-sale', 'petite-ile',
     'plaine-des-palmistes', 'plaine-des-cafres', 'salazie', 'cilaos', 'trois-bassins',
     'bras-panon', 'la plaine-des-palmistes', 'sainte-marie', 'sainte-suzanne',
     'sainte-rose'
   ];
-  
+
   const city = normalizeAddress(property.city || '');
   const address = normalizeAddress(property.address || '');
-  
+
   // Si la ville n'est pas dans la liste des villes de La Réunion, c'est "hors du pays"
-  return !reunionCities.some(reunionCity => 
-    city.includes(normalizeAddress(reunionCity)) || 
+  return !reunionCities.some(reunionCity =>
+    city.includes(normalizeAddress(reunionCity)) ||
     address.includes(normalizeAddress(reunionCity))
   );
 };
@@ -994,11 +994,13 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                         : undefined
                 }
               >
-                <SelectTrigger className="h-11 border-2">
-                  <SelectValue placeholder="Type de bien" />
-                </SelectTrigger>
+                {activeTab !== 'tous' && (
+                  <SelectTrigger className="h-11 border-2">
+                    <SelectValue placeholder="Type de bien" />
+                  </SelectTrigger>
+                )}
                 <SelectContent>
-                  {activeTab === 'tous' && (
+                  {/* {activeTab === 'tous' && (
                     <>
                       <SelectItem value="maison">Maison / Villa</SelectItem>
                       <SelectItem value="appartement">Appartement</SelectItem>
@@ -1024,7 +1026,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                       <SelectItem value="cellier">Cellier</SelectItem>
                       <SelectItem value="cave">Cave</SelectItem>
                     </>
-                  )}
+                  )} */}
                   {activeTab === 'achat' && (
                     <>
                       <SelectItem value="maison">Maison / Villa</SelectItem>
