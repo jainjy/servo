@@ -43,6 +43,62 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+// Services pour les demandes immobilières
+export const demandeImmobilierAPI = {
+  // Récupérer toutes les demandes (admin)
+  getAllDemandes: () => api.get("/demandes/immobilier"),
+  
+  // Récupérer les demandes d'un utilisateur (client)
+  getUserDemandes: (userId) => api.get(`/demandes/immobilier/user/${userId}`),
+  
+  // Récupérer les demandes pour les propriétés d'un artisan/professionnel
+  getArtisanDemandes: (userId) => api.get(`/demandes/immobilier/owner/${userId}`),
+  
+  // Mettre à jour le statut d'une demande
+  updateStatut: (id, statut) => 
+    api.patch(`/demandes/immobilier/${id}/statut`, { statut }),
+  
+  // Supprimer une demande
+  deleteDemande: (id, hardDelete = false) => 
+    api.delete(`/demandes/immobilier/${id}${hardDelete ? '?hardDelete=true' : ''}`),
+  
+  // Créer une demande
+  createDemande: (data) => api.post("/demandes/immobilier", data),
+  
+  // Récupérer l'historique d'une demande
+  getHistory: (id) => api.get(`/demandes/immobilier/${id}/history`),
+  
+  // Récupérer l'historique utilisateur
+  getUserHistory: (userId) => api.get(`/demandes/immobilier/user/${userId}/history`),
+};
+// Services pour les locations saisonnières
+export const locationSaisonniereAPI = {
+  // Créer une location saisonnière
+  createLocation: (data) => api.post("/locations-saisonniere", data),
+  
+  // Récupérer les locations d'un client
+  getClientLocations: (userId) => api.get(`/locations-saisonniere/client/${userId}`),
+  
+  // Récupérer les locations d'un artisan
+  getArtisanLocations: (userId) => api.get(`/locations-saisonniere/artisan/${userId}`),
+  
+  // Mettre à jour le statut d'une location
+  updateLocationStatus: (id, status) => 
+    api.patch(`/locations-saisonniere/${id}/status`, { status }),
+  
+  // Annuler une location
+  cancelLocation: (id) => api.delete(`/locations-saisonniere/${id}`),
+  
+  // Récupérer les détails d'une location
+  getLocationDetails: (id) => api.get(`/locations-saisonniere/${id}`),
+  
+  // Payer une location
+  processPayment: (id, paymentData) => 
+    api.post(`/locations-saisonniere/${id}/paiement`, paymentData),
+  
+  // Générer un contrat
+  generateContract: (id) => api.get(`/locations-saisonniere/${id}/contrat`),
+};
 // Services pour le financement
 export const financementAPI = {
   // Routes publiques

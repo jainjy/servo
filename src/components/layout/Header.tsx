@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { X,Search } from "lucide-react";
-
+import { X, Search } from "lucide-react";
 
 // Import des icônes
 import {
@@ -82,28 +81,23 @@ const Header = () => {
   const [notifLoading, setNotifLoading] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false); 
 
- 
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const openRecherchePage = () => {
-  navigate("/recherche");
-};
-
+    navigate("/recherche");
+  };
 
   const handleSearch = (e: React.FormEvent) => {
-  e.preventDefault();
-  if (searchQuery.trim()) {
-    // Rediriger vers la page de résultats ou exécuter la recherche
-    navigate(`/recherche?q=${encodeURIComponent(searchQuery)}`);
-    setIsSearchOpen(false);
-    setSearchQuery("");
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Rediriger vers la page de résultats ou exécuter la recherche
+      navigate(`/recherche?q=${encodeURIComponent(searchQuery)}`);
+      setIsSearchOpen(false);
+      setSearchQuery("");
+    }
   };
-  
-};
-
 
   useEffect(() => {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?$%*#";
@@ -193,7 +187,7 @@ const Header = () => {
   useEffect(() => {
     if (searchQuery.trim().length > 2) {
       setIsLoading(true);
-      
+
       const timeoutId = setTimeout(() => {
         // Données simulées
         const mockResults = [
@@ -203,7 +197,8 @@ const Header = () => {
             description: "Bel appartement 3 pièces en centre-ville",
             price: "250,000",
             href: "/immobilier/appartement-1",
-            image: "https://i.pinimg.com/736x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg"
+            image:
+              "https://i.pinimg.com/736x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
           },
           {
             id: 2,
@@ -211,7 +206,8 @@ const Header = () => {
             description: "Maison spacieuse avec jardin",
             price: "350,000",
             href: "/immobilier/maison-2",
-            image: "https://i.pinimg.com/736x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg"
+            image:
+              "https://i.pinimg.com/736x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg",
           },
           {
             id: 3,
@@ -219,11 +215,13 @@ const Header = () => {
             description: "Studio meublé proche université",
             price: "120,000",
             href: "/immobilier/studio-3",
-            image: "https://i.pinimg.com/736x/8c/c1/22/8cc122eb07f85e3b4881b3d20b318bd2.jpg"
-          }
-        ].filter(item => 
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase())
+            image:
+              "https://i.pinimg.com/736x/8c/c1/22/8cc122eb07f85e3b4881b3d20b318bd2.jpg",
+          },
+        ].filter(
+          (item) =>
+            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
         setSearchResults(mockResults);
@@ -237,10 +235,6 @@ const Header = () => {
   }, [searchQuery]);
 
   // ... le reste de vos fonctions existantes (handleLogin, handleLogout, etc.) ...
-
-  // AJOUTEZ CES FONCTIONS APRÈS VOS AUTRES FONCTIONS :
-  
-
   const handleResultClick = (result: any) => {
     navigate(result.href);
     setIsSearchOpen(false);
@@ -1315,9 +1309,15 @@ const Header = () => {
                         <Link to="/" onClick={() => setIsPopoverOpen(false)}>
                           <div className="flex items-center gap-2 mb-4">
                             <div className="p-1 rounded-full bg-white border-black border-2">
-                              <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+                              <img
+                                src={logo}
+                                alt="Servo Logo"
+                                className="w-10 h-10 rounded-full"
+                              />
                             </div>
-                            <div className="azonix text-lg font-bold text-slate-300">SERVO</div>
+                            <div className="azonix text-lg font-bold text-slate-300">
+                              SERVO
+                            </div>
                           </div>
                         </Link>
                         <nav className="space-y-1 overflow-y-auto">
@@ -1452,28 +1452,29 @@ const Header = () => {
             </div>
           </nav>
 
-          <div className="flex items-center gap-1">   
+          <div className="flex items-center gap-1">
             <div className="relative flex items-center">
-            
               {/* Bouton de recherche */}
               <div className="relative flex items-center">
                 {/* Option 1 : Simple bouton qui ouvre la page */}
-                
+
                 <Button
                   variant="ghost"
                   size="icon"
                   className={`
                     h-9 w-9 rounded-lg border transition-all duration-200 ml-2
-                    ${isSearchOpen 
-                      ? 'bg-gray-800 text-white border-gray-700' 
-                      : 'bg-black text-white border-gray-800 hover:bg-gray-800'
+                    ${
+                      isSearchOpen
+                        ? "bg-gray-800 text-white border-gray-700"
+                        : "bg-black text-white border-gray-800 hover:bg-gray-800"
                     }
                   `}
-                      onClick={openRecherchePage}                >
+                  onClick={openRecherchePage}
+                >
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
-            </div>         
+            </div>
             {/* Icône Panier pour utilisateurs connectés */}
             {isAuthenticated && (
               <Button
@@ -1507,11 +1508,12 @@ const Header = () => {
                     className="relative hidden lg:flex"
                   >
                     <Bell className="h-5 w-5" />
-                    {notificationCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
+                   {notificationCount > 0 && (
+                      <Badge className="absolute bottom-1 right-1 h-3 w-3 flex items-center justify-center p-1 text-[10px] bg-blue-500 text-white">
                         {notificationCount}
                       </Badge>
                     )}
+                    
                   </Button>
                 </SheetTrigger>
 
@@ -1551,10 +1553,14 @@ const Header = () => {
                     <div className="flex-1 overflow-y-auto">
                       {notifLoading ? (
                         <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
-                          <img src="/loading.gif" alt="" className='w-24 h-24'/>
-                            <p className="mt-4 text-xl font-semibold text-gray-700">
-                              Chargement des notifications...
-                            </p>
+                          <img
+                            src="/loading.gif"
+                            alt=""
+                            className="w-24 h-24"
+                          />
+                          <p className="mt-4 text-xl font-semibold text-gray-700">
+                            Chargement des notifications...
+                          </p>
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">

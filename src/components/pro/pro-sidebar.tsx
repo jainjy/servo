@@ -22,6 +22,8 @@ import {
   Plus,
   WalletCards,
   Wallet2Icon,
+  UserCircle2,
+  Contact2Icon,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -58,6 +60,11 @@ const navigation = [
     icon: ShoppingCart,
   },
   {
+    name: "Listes des Contacts messages",
+    href: "/pro/contact-messages",
+    icon: Contact2Icon,
+  },
+  {
     name: "Mes Demandes de financement",
     href: "/pro/financement-demandes",
     icon: Building2,
@@ -67,6 +74,11 @@ const navigation = [
     name: "Liste des services financiers",
     href: "/pro/financement-services",
     icon: Wallet2Icon,
+  },
+  {
+    name: "Liste demande immobilier",
+    href: "/pro/demandes-immobilier",
+    icon: Building2,
   },
   {
     name: "Les demandes de devis",

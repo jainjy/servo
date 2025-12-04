@@ -171,8 +171,13 @@ import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
 import { App as CapacitorApp } from '@capacitor/app';
 import Digitalisation from "./pages/Digitalisation";
+import  GestionLocationSaisonniere from "./pages/GestionLocationSaisonniere";
 import PrivacyPolicyWidget from "./components/Confidentialite";
 import LegalMentionsWidget from "./components/MentionLegal";
+import DigitalisationPartenaires from "./pages/DigitalisationPartenaires";
+import DigitalisationProfessionnelDetail from "./pages/DigitalisationProfessionnelDetail";
+import DigitalisationServiceDetail from "./pages/DigitalisationServiceDetail";
+import ContactMessagesPage from "./pages/pro/ContactMessagesPage";
 
 const queryClient = new QueryClient();
 
@@ -251,6 +256,26 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/digitalisation" element={<Digitalisation />} />
+                  <Route
+                    path="/digitalisation/services"
+                    element={<Digitalisation />}
+                  />
+                  <Route
+                    path="/digitalisation/partenaires"
+                    element={<DigitalisationPartenaires />}
+                  />
+                  <Route
+                    path="/digitalisation/professionnel/:id"
+                    element={<DigitalisationProfessionnelDetail />}
+                  />
+                  <Route
+                    path="/services/digitalisation/:id"
+                    element={<DigitalisationServiceDetail />}
+                  />
+                  {/* <Route
+                    path="/services/digitalisation/:id/reservation"
+                    element={<DigitalisationReservationPage />}
+                  /> */}
                   <Route path="/cookies" element={<CookiesPolicy />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
@@ -552,6 +577,10 @@ const App = () => {
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
                     <Route
+                      path="contact-messages"
+                      element={<ContactMessagesPage />}
+                    />
+                    <Route
                       path="financement-demandes"
                       element={<FinancementDemandesPro />}
                     />
@@ -632,6 +661,7 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
+                    <Route path="locationSaisonniere" element={<GestionLocationSaisonniere />} />
                     <Route
                       path="mes-reservations-cours"
                       element={<UserReservations />}

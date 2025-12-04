@@ -93,6 +93,8 @@ interface ListingModalProps {
     longitude: number | null;
     latitude: number | null;
     socialLoan?: boolean;
+    isSHLMR?: boolean;
+    
   };
   mode: "create" | "edit";
   onSuccess?: () => void;
@@ -101,6 +103,7 @@ interface ListingModalProps {
     firstName?: string;
     lastName?: string;
     email: string;
+    role?: "user" | "admin" | "professional";
   };
 }
 
@@ -172,6 +175,9 @@ export function ListingModal({
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
 
+  // Vérifier si l'utilisateur est un pro certifié
+  const isProfessional = currentUser?.role === "professional" || currentUser?.role === "admin";
+
   const [formData, setFormData] = useState({
     // Étape 1 - Informations générales
     title: "",
@@ -197,6 +203,8 @@ export function ListingModal({
     longitude: null as number | null,
     // Nouveau champ
     socialLoan: false,
+    isSHLMR: false,
+
   });
 
   const etapes = [
@@ -228,6 +236,7 @@ export function ListingModal({
         latitude: listing.latitude ?? null,
         longitude: listing.longitude ?? null,
         socialLoan: listing.socialLoan || false,
+        isSHLMR: listing.isSHLMR || false,
       });
       setExistingImages(listing.images || []);
       setTemporaryImages([]);
@@ -253,6 +262,7 @@ export function ListingModal({
         latitude: null,
         longitude: null,
         socialLoan: false,
+        isSHLMR: false,
       });
       setExistingImages([]);
       setTemporaryImages([]);
@@ -403,7 +413,8 @@ export function ListingModal({
         status: formData.status,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        socialLoan: formData.socialLoan, // Champ correctement ajouté
+        socialLoan: formData.socialLoan,
+        isSHLMR: formData.isSHLMR, 
         ownerId: listing?.ownerId || currentUser?.id || "default-owner-id",
       };
 
@@ -795,24 +806,56 @@ export function ListingModal({
                 </div>
               </div>
 
-              {/* Checkbox Prêt Social Location Accession - CORRIGÉ */}
-              <div className="mt-4 flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="socialLoan"
-                  checked={formData.socialLoan}
-                  onChange={(e) => 
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      socialLoan: e.target.checked 
-                    }))
-                  }
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <Label htmlFor="socialLoan" className="text-sm font-medium">
-                  Prêt Social Location Accession
-                </Label>
-              </div>
+              {/* Groupe d'options spéciales mutuellement exclusives - Seulement pour les pros */}
+              {isProfessional && (
+                <div className="mt-6 p-4 border rounded-lg">
+                  <div className="space-y-3">
+                    {/* Option 2 : Prêt Social Location Accession - COMPORTEMENT TOGGLE */}
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="socialLoan"
+                        checked={formData.socialLoan}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            socialLoan: isChecked,
+                            // Si on coche Prêt Social, on décoche SHLMR
+                            isSHLMR: isChecked ? false : prev.isSHLMR
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <Label htmlFor="socialLoan" className="text-sm font-medium">
+                        Prêt Social Location Accession (PSLA)
+                      </Label>
+                    </div>
+                    
+                    {/* Option 3 : SHLMR - COMPORTEMENT TOGGLE */}
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="isSHLMR"
+                        checked={formData.isSHLMR}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            isSHLMR: isChecked,
+                            // Si on coche SHLMR, on décoche Prêt Social
+                            socialLoan: isChecked ? false : prev.socialLoan
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <Label htmlFor="isSHLMR" className="text-sm font-medium">
+                        SHLMR (Logement Social)
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1038,12 +1081,22 @@ export function ListingModal({
                         </span>
                       </div>
                     )}
-                  <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Prêt Social:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
-                      {formData.socialLoan ? "Oui" : "Non"}
-                    </span>
-                  </div>
+                  {isProfessional && (
+                    <>
+                      <div className="flex justify-between">
+                        <span style={{ color: "#5A6470" }}>Prêt Social (PSLA):</span>
+                        <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                          {formData.socialLoan ? "Oui" : "Non"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span style={{ color: "#5A6470" }}>SHLMR:</span>
+                        <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                          {formData.isSHLMR ? "Oui" : "Non"}
+                        </span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between">
                     <span style={{ color: "#5A6470" }}>Images:</span>
                     <span className="font-medium" style={{ color: "#0A0A0A" }}>
