@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { X, Search } from "lucide-react";
+import { X, Search, Building2Icon } from "lucide-react";
 
 // Import des icônes
 import {
@@ -1170,6 +1170,16 @@ const Header = () => {
                   <Calendar className="h-4 w-4" />
                   <span>Réservations</span>
                 </button>
+                <button
+                  onClick={() => {
+                    navigate("/mon-compte/locationSaisonniere");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Building2Icon className="h-4 w-4" />
+                  <span>Gestion des locations saisonnieres</span>
+                </button>
 
                 <button
                   onClick={() => {
@@ -1508,12 +1518,11 @@ const Header = () => {
                     className="relative hidden lg:flex"
                   >
                     <Bell className="h-5 w-5" />
-                   {notificationCount > 0 && (
+                    {notificationCount > 0 && (
                       <Badge className="absolute bottom-1 right-1 h-3 w-3 flex items-center justify-center p-1 text-[10px] bg-blue-500 text-white">
                         {notificationCount}
                       </Badge>
                     )}
-                    
                   </Button>
                 </SheetTrigger>
 
@@ -1783,6 +1792,14 @@ const Header = () => {
                       >
                         <BookDashed className="mr-2 h-4 w-4" />
                         Mes demandes immobilieres
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          navigate("/mon-compte/locationSaisonniere")
+                        }
+                      >
+                        <BookDashed className="mr-2 h-4 w-4" />
+                        Gestion des locations saisonnières
                       </DropdownMenuItem>
                       {/* <DropdownMenuItem
                         onClick={() =>
