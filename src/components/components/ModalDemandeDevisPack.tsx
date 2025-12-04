@@ -37,7 +37,7 @@ export const ModalDemandeDevisPack = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!property) return;
-    
+
     if (isAlreadySent) {
       toast.error("Vous avez déjà envoyé une demande pour ce bien.");
       return;
@@ -201,12 +201,29 @@ export const ModalDemandeDevisPack = ({
                     name="surface"
                     type="number"
                     value={formData.surface}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      // Empêche les valeurs négatives même collées
+                      if (Number(value) >= 0 || value === "") {
+                        handleChange(e);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Bloque la touche "-"
+                      if (e.key === "-") {
+                        e.preventDefault();
+                      }
+                    }}
+                    min={0}
                     required
-                    className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl 
+               focus:outline-none focus:ring-2 focus:ring-blue-500 
+               focus:border-transparent transition-all duration-200"
                     placeholder="Surface (m²)"
                   />
                 </div>
+
               </div>
 
               <div className="relative">

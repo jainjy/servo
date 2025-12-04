@@ -1302,9 +1302,11 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                     : undefined
                 }
               >
-                <SelectTrigger className="h-11 border-2">
-                  <SelectValue placeholder="Type de bien" />
-                </SelectTrigger>
+                {activeTab !== 'tous' && (
+                  <SelectTrigger className="h-11 border-2">
+                    <SelectValue placeholder="Type de bien" />
+                  </SelectTrigger>
+                )}
                 <SelectContent>
                   {activeTab === "tous" && (
                     <>
