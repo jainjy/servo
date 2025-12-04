@@ -256,7 +256,7 @@ const ClientReservationsDashboard = () => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
-    <div className="min-h-screen bg-gray-50 mt-10 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 mt-16 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* En-tête */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
