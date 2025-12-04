@@ -1149,7 +1149,7 @@ const Header = () => {
                   <span>Mes demandes immobilières</span>
                 </button>
 
-                <button
+                {/* <button
                   onClick={() => {
                     navigate("/mon-compte/mes-reservations-cours");
                     setIsMobileMenuOpen(false);
@@ -1158,7 +1158,7 @@ const Header = () => {
                 >
                   <List className="h-4 w-4" />
                   <span>Mes réservations en cours</span>
-                </button>
+                </button> */}
 
                 <button
                   onClick={() => {
@@ -1784,14 +1784,14 @@ const Header = () => {
                         <BookDashed className="mr-2 h-4 w-4" />
                         Mes demandes immobilieres
                       </DropdownMenuItem>
-                      <DropdownMenuItem
+                      {/* <DropdownMenuItem
                         onClick={() =>
                           navigate("/mon-compte/mes-reservations-cours")
                         }
                       >
                         <List className="mr-2 h-4 w-4" />
                         Mes réservations en cours
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/reservation")}
                       >

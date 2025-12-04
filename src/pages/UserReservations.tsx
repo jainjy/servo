@@ -136,7 +136,7 @@ const UserReservations: React.FC = () => {
         {/* En-tête */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Mes réservations de cours
+            Mes réservations des cours
           </h1>
           <p className="text-gray-600">
             Consultez et gérez vos réservations de cours

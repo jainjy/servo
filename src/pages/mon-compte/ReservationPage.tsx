@@ -53,6 +53,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 // Types pour les réservations tourisme
 interface TourismBooking {
@@ -1201,22 +1202,17 @@ export default function UnifiedReservationPage() {
   return (
     <div className="container mx-auto max-w-6xl py-8 mt-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mes Réservations</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Mes Réservations
+        </h1>
         <p className="text-gray-600">
           {user?.firstName ? `Bonjour ${user.firstName}, ` : ""}
           Consultez et gérez toutes vos réservations.
         </p>
       </div>
 
-      <Tabs defaultValue="tourisme" className="space-y-6">
+      <Tabs defaultValue="services" className="space-y-6">
         <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 p-2 h-auto gap-2">
-          <TabsTrigger value="tourisme" className="flex items-center gap-2">
-            <Building className="w-4 h-4" />
-            Hébergements
-            <Badge variant="secondary" className="ml-2">
-              {tourismBookings.length}
-            </Badge>
-          </TabsTrigger>
           <TabsTrigger value="services" className="flex items-center gap-2">
             <Scissors className="w-4 h-4" />
             Services
@@ -1224,20 +1220,27 @@ export default function UnifiedReservationPage() {
               {serviceBookings.length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="lieux-touristiques" className="flex items-center gap-2">
+          {/* <TabsTrigger value="tourisme" className="flex items-center gap-2">
+            <Building className="w-4 h-4" />
+            Hébergements
+            <Badge variant="secondary" className="ml-2">
+              {tourismBookings.length}
+            </Badge>
+          </TabsTrigger> */}
+          {/* <TabsTrigger value="lieux-touristiques" className="flex items-center gap-2">
             <Ticket className="w-4 h-4" />
             Billets
             <Badge variant="secondary" className="ml-2">
               {touristicPlaceBookings.length}
             </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="vols" className="flex items-center gap-2">
+          </TabsTrigger> */}
+          {/* <TabsTrigger value="vols" className="flex items-center gap-2">
             <Plane className="w-4 h-4" />
             Vols
             <Badge variant="secondary" className="ml-2">
               {flightReservations.length}
             </Badge>
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         {/* Onglet Hébergements */}
@@ -1269,9 +1272,7 @@ export default function UnifiedReservationPage() {
             </CardHeader>
             <CardContent>
               {tourismLoading ? (
-                <div className="text-center py-8">
-                  <p>Chargement de vos réservations...</p>
-                </div>
+                <LoadingSpinner text="Chargement de vos réservations" />
               ) : tourismBookings.length === 0 ? (
                 <div className="text-center py-12">
                   <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -1296,7 +1297,9 @@ export default function UnifiedReservationPage() {
                         type="tourisme"
                         onViewDetails={() => openTourismDetails(booking)}
                         onCancel={() => cancelTourismBooking(booking.id)}
-                        getStatusBadge={() => <TourismStatusBadge status={booking.status} />}
+                        getStatusBadge={() => (
+                          <TourismStatusBadge status={booking.status} />
+                        )}
                         getBookingImage={() => cardData.image}
                         getBookingTitle={() => cardData.title}
                         getBookingSubtitle={() => cardData.subtitle}
@@ -1340,9 +1343,7 @@ export default function UnifiedReservationPage() {
             </CardHeader>
             <CardContent>
               {serviceLoading ? (
-                <div className="text-center py-8">
-                  <p>Chargement de vos réservations...</p>
-                </div>
+                <LoadingSpinner text="Chargement de vos réservations" />
               ) : serviceBookings.length === 0 ? (
                 <div className="text-center py-12">
                   <Scissors className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -1367,7 +1368,9 @@ export default function UnifiedReservationPage() {
                         type="service"
                         onViewDetails={() => openServiceDetails(booking)}
                         onCancel={() => cancelServiceBooking(booking.id)}
-                        getStatusBadge={() => <ServiceStatusBadge status={booking.status} />}
+                        getStatusBadge={() => (
+                          <ServiceStatusBadge status={booking.status} />
+                        )}
                         getBookingImage={() => cardData.image}
                         getBookingTitle={() => cardData.title}
                         getBookingSubtitle={() => cardData.subtitle}
@@ -1397,7 +1400,10 @@ export default function UnifiedReservationPage() {
                     {touristicPlaceBookings.length > 1 ? "s" : ""}
                   </CardDescription>
                 </div>
-                <Select value={touristicPlaceFilter} onValueChange={setTouristicPlaceFilter}>
+                <Select
+                  value={touristicPlaceFilter}
+                  onValueChange={setTouristicPlaceFilter}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
@@ -1426,7 +1432,9 @@ export default function UnifiedReservationPage() {
                     Vous n'avez pas encore de billet pour un lieu touristique.
                   </p>
                   <Button asChild>
-                    <Link to="/tourisme?type=touristic">Découvrir les lieux</Link>
+                    <Link to="/tourisme?type=touristic">
+                      Découvrir les lieux
+                    </Link>
                   </Button>
                 </div>
               ) : (
@@ -1440,7 +1448,9 @@ export default function UnifiedReservationPage() {
                         type="touristic_place"
                         onViewDetails={() => openTouristicPlaceDetails(booking)}
                         onCancel={() => cancelTouristicPlaceBooking(booking.id)}
-                        getStatusBadge={() => <TouristicPlaceStatusBadge status={booking.status} />}
+                        getStatusBadge={() => (
+                          <TouristicPlaceStatusBadge status={booking.status} />
+                        )}
                         getBookingImage={() => cardData.image}
                         getBookingTitle={() => cardData.title}
                         getBookingSubtitle={() => cardData.subtitle}
@@ -1487,9 +1497,7 @@ export default function UnifiedReservationPage() {
             </CardHeader>
             <CardContent>
               {flightLoading ? (
-                <div className="text-center py-8">
-                  <p>Chargement de vos réservations de vols...</p>
-                </div>
+                <LoadingSpinner text="Chargement de vos réservations" />
               ) : flightReservations.length === 0 ? (
                 <div className="text-center py-12">
                   <Plane className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -1514,7 +1522,9 @@ export default function UnifiedReservationPage() {
                         type="flight"
                         onViewDetails={() => openFlightDetails(booking)}
                         onCancel={() => cancelFlightReservation(booking.id)}
-                        getStatusBadge={() => <FlightStatusBadge status={booking.status} />}
+                        getStatusBadge={() => (
+                          <FlightStatusBadge status={booking.status} />
+                        )}
                         getBookingImage={() => cardData.image}
                         getBookingTitle={() => cardData.title}
                         getBookingSubtitle={() => cardData.subtitle}
