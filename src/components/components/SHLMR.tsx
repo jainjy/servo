@@ -24,6 +24,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { toast } from "../../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
+import { Card } from "@/components/ui/card"; 
+import { Ruler } from "lucide-react";
 
 // Types TypeScript
 interface Caracteristiques {
@@ -264,12 +266,21 @@ const LogementsSHLMR = () => {
         setModalOpen(true);
     };
 
+    const handleVoirDetails = (property: any, e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Ici vous pouvez naviguer vers une page de détails ou ouvrir un modal de détails
+        console.log("Voir détails pour:", property.id);
+    
+        navigate(`/immobilier/${property.id}`);
+      };
+
     const handleDemandeSuccess = (propertyId: string) => {
         setSentRequests(prev => ({ 
             ...prev, 
             [parseInt(propertyId)]: true 
         }));
     };
+    
 
     if (loading) {
         return (
@@ -473,135 +484,164 @@ const LogementsSHLMR = () => {
                                 const isDejaPostule = sentRequests?.[logement.id];
                                 
                                 return (
+                                    // CHANGEMENT ICI : Utilisez le style PropertyListings
                                     <div
                                         key={logement.id}
-                                        className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                                        className="overflow-hidden border-0 hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
                                     >
-                                        {/* Image avec badges */}
+                                        {/* Image avec badges - Style PropertyListings */}
                                         <div className="relative">
-                                            <img
-                                                src={logement.image}
-                                                alt={logement.titre}
-                                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
+                                            <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
+                                                <img
+                                                    src={logement.image}
+                                                    alt={logement.titre}
+                                                    className="w-full h-full object-cover transition-transform duration-500"
+                                                />
 
-                                            {/* Badges superposés */}
-                                            <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-500 text-white">
+                                                {/* Badges superposés - Style PropertyListings */}
+                                                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold">
                                                     SHLMR
-                                                </span>
-                                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gray-600 text-white">
-                                                    {logement.categorie}
-                                                </span>
-                                            </div>
-
-                                            {/* Badge prix */}
-                                            <div className="absolute top-4 right-4">
-                                                <span className="bg-white bg-opacity-95 backdrop-blur-sm px-3 py-2 rounded-lg font-bold text-gray-900 shadow-lg">
-                                                    {logement.prix}
-                                                </span>
-                                            </div>
-
-                                            {/* Badge classe énergie */}
-                                            {logement.energyClass && (
-                                                <div className="absolute bottom-4 left-4">
-                                                    <span
-                                                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                                                            logement.energyClass === "A"
-                                                                ? "bg-green-500 text-white"
-                                                                : logement.energyClass === "B"
-                                                                ? "bg-lime-500 text-white"
-                                                                : logement.energyClass === "C"
-                                                                ? "bg-yellow-500 text-white"
-                                                                : "bg-gray-500 text-white"
-                                                        }`}
-                                                    >
-                                                        Classe {logement.energyClass}
-                                                    </span>
                                                 </div>
-                                            )}
 
-                                            {/* Bouton favori */}
-                                            <button
-                                                onClick={() => toggleFavori(logement.id)}
-                                                className={`absolute bottom-4 right-4 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${favoris.includes(logement.id)
-                                                    ? 'bg-red-500 text-white'
-                                                    : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
+                                                {/* Badge prix - Style PropertyListings */}
+                                                <div className="absolute top-3 right-3 bg-green-200 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold">
+                                                    {logement.prix}
+                                                </div>
+
+                                                {/* Badge classe énergie */}
+                                                {logement.energyClass && (
+                                                    <div className="absolute bottom-3 left-3">
+                                                        <span
+                                                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                                                                logement.energyClass === "A"
+                                                                    ? "bg-green-500 text-white"
+                                                                    : logement.energyClass === "B"
+                                                                    ? "bg-lime-500 text-white"
+                                                                    : logement.energyClass === "C"
+                                                                    ? "bg-yellow-500 text-white"
+                                                                    : "bg-gray-500 text-white"
+                                                            }`}
+                                                        >
+                                                            Classe {logement.energyClass}
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                {/* Bouton favori */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleFavori(logement.id);
+                                                    }}
+                                                    className={`absolute bottom-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
+                                                        favoris.includes(logement.id)
+                                                            ? 'bg-red-500 text-white'
+                                                            : 'bg-white bg-opacity-90 text-gray-700 hover:bg-red-500 hover:text-white'
                                                     }`}
-                                            >
-                                                <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
-                                            </button>
+                                                >
+                                                    <Heart className="w-4 h-4" fill={favoris.includes(logement.id) ? "currentColor" : "none"} />
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        {/* Contenu de la carte */}
-                                        <div className="p-6">
-                                            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                                        {/* Contenu de la carte - Style PropertyListings */}
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 leading-tight mb-2">
                                                 {logement.titre}
                                             </h3>
 
-                                            <div className="flex items-center text-gray-600 mb-3">
-                                                <MapPin className="w-4 h-4 mr-1" />
-                                                <span className="text-sm">{logement.lieu}</span>
+                                            {/* Localisation - Style PropertyListings */}
+                                            <div className="flex items-center text-xs text-gray-500 mb-3">
+                                                <MapPin className="h-3 w-3 mr-1" />
+                                                {logement.lieu}
                                             </div>
 
                                             <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                                                 {logement.description}
                                             </p>
 
-                                            {/* Caractéristiques */}
-                                            <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-100">
-                                                <div className="flex items-center gap-2">
-                                                    <Bed className="w-4 h-4 text-blue-600" />
-                                                    <span className="text-sm text-gray-700">
-                                                        {logement.caracteristiques.chambres} chambre{logement.caracteristiques.chambres > 1 ? 's' : ''}
-                                                    </span>
-                                                </div>
+                                            {/* Caractéristiques - Style PropertyListings */}
+                                            <div className="flex items-center gap-4 text-xs text-gray-600 mb-3">
+                                                {logement.surface && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Ruler className="h-3 w-3 text-blue-600" />
+                                                        <span className="font-medium">{logement.surface} m²</span>
+                                                    </div>
+                                                )}
+                                                {logement.bedrooms && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Bed className="h-3 w-3 text-blue-600" />
+                                                        <span className="font-medium">{logement.bedrooms} ch.</span>
+                                                    </div>
+                                                )}
+                                                {logement.bathrooms && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Bath className="h-3 w-3 text-blue-600" />
+                                                        <span className="font-medium">{logement.bathrooms} sdb</span>
+                                                    </div>
+                                                )}
+                                            </div>
 
-                                                <div className="flex items-center gap-2">
-                                                    <Bath className="w-4 h-4 text-blue-600" />
-                                                    <span className="text-sm text-gray-700">
-                                                        {logement.caracteristiques.sdb} salle{logement.caracteristiques.sdb > 1 ? 's' : ''} de bain
+                                            {/* Features - Style PropertyListings */}
+                                            <div className="flex flex-wrap gap-1 mb-3">
+                                                {/* Badge Achat/Location */}
+                                                {logement.type && (
+                                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+                                                        logement.type === "location" 
+                                                            ? "bg-green-50 text-green-700" 
+                                                            : "bg-blue-50 text-blue-700"
+                                                    }`}>
+                                                        <div className={`w-1 h-1 rounded-full ${
+                                                            logement.type === "location" 
+                                                                ? "bg-green-600" 
+                                                                : "bg-blue-600"
+                                                        }`} />
+                                                        {logement.type === "location" ? "Location" : "À vendre"}
                                                     </span>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <Square className="w-4 h-4 text-blue-600" />
-                                                    <span className="text-sm text-gray-700">
-                                                        {logement.caracteristiques.surface}
+                                                )}
+                                                {logement.categorie && (
+                                                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs">
+                                                        <div className="w-1 h-1 bg-blue-600 rounded-full" />
+                                                        {logement.categorie}
                                                     </span>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <Car className="w-4 h-4 text-blue-600" />
-                                                    <span className="text-sm text-gray-700">
-                                                        {logement.caracteristiques.parking} place{logement.caracteristiques.parking > 1 ? 's' : ''}
+                                                )}
+                                                {logement.caracteristiques.parking > 0 && (
+                                                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs">
+                                                        <div className="w-1 h-1 bg-blue-600 rounded-full" />
+                                                        {logement.caracteristiques.parking} parking
                                                     </span>
-                                                </div>
+                                                )}
                                             </div>
 
                                             {/* Informations supplémentaires */}
-                                            <div className="flex justify-between items-center pt-4">
-                                                <div className="text-sm text-gray-500">
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="w-4 h-4" />
-                                                        <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
-                                                    </div>
+                                            <div className="flex justify-between items-center pt-4 text-sm text-gray-500">
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar className="w-4 h-4" />
+                                                    <span>Dispo: {new Date(logement.dateDispo).toLocaleDateString()}</span>
                                                 </div>
-                                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                                <div className="flex items-center gap-1">
                                                     <Eye className="w-4 h-4" />
                                                     <span>{logement.vues} vues</span>
                                                 </div>
                                             </div>
 
-                                            {/* Boutons d'action */}
-                                            <div className="flex gap-3 mt-4">
+                                            {/* Boutons d'action - Style PropertyListings */}
+                                            <div className="flex gap-2 mt-4">
                                                 <button
-                                                    onClick={() => handlePostuler(logement)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handlePostuler(logement);
+                                                    }}
                                                     disabled={isDejaPostule}
-                                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-60 disabled:bg-blue-400 flex items-center justify-center gap-2"
+                                                    className="flex-1 bg-slate-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 transition disabled:opacity-60 disabled:bg-slate-600"
                                                 >
-                                                    <Calendar className="w-4 h-4" />
                                                     {isDejaPostule ? "Visite déjà demandée" : "Demander une visite"}
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleVoirDetails(logement, e)}
+                                                    className="border-2 p-2 rounded-md hover:bg-gray-50 transition"
+                                                >
+                                                    <Eye className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
