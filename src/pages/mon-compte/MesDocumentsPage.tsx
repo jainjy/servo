@@ -34,10 +34,26 @@ import {
   Edit,
   Filter,
   X,
+  CheckCircle,
+  Clock,
+  File,
+  Users,
+  Building,
+  Shield,
+  MoreVertical,
+  Grid,
+  List,
+  ChevronDown,
+  ExternalLink,
+  Loader2,
+  Plus,
+  FolderPlus,
+  FileUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import api from "@/lib/api";
+import { Progress } from "@/components/ui/progress";
 
 interface Document {
   id: string;
@@ -79,6 +95,10 @@ const MesDocumentsPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState("dateDesc");
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   // Filtres avancés
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -120,7 +140,6 @@ const MesDocumentsPage = () => {
     }
   };
 
-  // Dans votre handleFileSelect, ajoutez un console.log
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     console.log("Fichiers sélectionnés:", files);
@@ -137,6 +156,8 @@ const MesDocumentsPage = () => {
   const handleUpload = async (formData: FormData) => {
     try {
       setUploading(true);
+      setUploadProgress(0);
+      
       const response = await api.post(
         "/client/documents/upload-multiple",
         formData,
@@ -144,17 +165,24 @@ const MesDocumentsPage = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const progress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              setUploadProgress(progress);
+            }
+          },
         }
       );
 
-      // CORRECTION: Utiliser response.data au lieu de response.data
       if (response.data && response.data.success) {
         await fetchDocuments();
         await fetchStats();
         setIsUploadModalOpen(false);
         setSelectedFiles([]);
+        setUploadProgress(0);
 
-        // Afficher un message de succès
         alert(
           `${
             response.data.results?.length || 1
@@ -169,7 +197,6 @@ const MesDocumentsPage = () => {
     } catch (error: any) {
       console.error("Erreur lors de l'upload:", error);
 
-      // Message d'erreur plus détaillé
       if (error.response?.data?.error) {
         alert(`Erreur lors de l'upload: ${error.response.data.error}`);
       } else {
@@ -177,6 +204,7 @@ const MesDocumentsPage = () => {
       }
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -187,7 +215,6 @@ const MesDocumentsPage = () => {
         updates
       );
 
-      // CORRECTION: Utiliser response.data au lieu de response.data
       if (response.data && response.data.success) {
         await fetchDocuments();
         setIsEditModalOpen(false);
@@ -212,22 +239,50 @@ const MesDocumentsPage = () => {
     }
   };
 
-  const downloadDocument = async (documentUrl: string, fileName: string) => {
+  // Téléchargement direct avec optimisation
+  const downloadDocument = async (document: Document) => {
+    if (downloadingId === document.id) return;
+    
+    setDownloadingId(document.id);
+    
     try {
-      const link = document.createElement("a");
-      link.href = documentUrl;
-      link.download = fileName;
+      // Créer un lien caché pour forcer le téléchargement
+      const link = document.createElement('a');
+      link.href = document.url;
+      
+      // Ajouter timestamp pour éviter le cache
+      const timestamp = new Date().getTime();
+      const separator = document.url.includes('?') ? '&' : '?';
+      link.href = `${document.url}${separator}_=${timestamp}&download=true`;
+      
+      // Configurer pour téléchargement
+      link.download = `${document.nom}.${document.format.toLowerCase()}`;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.style.display = 'none';
+      
       document.body.appendChild(link);
+      
+      // Simuler le clic
       link.click();
-      document.body.removeChild(link);
+      
+      // Attendre un peu avant de nettoyer
+      setTimeout(() => {
+        document.body.removeChild(link);
+        setDownloadingId(null);
+      }, 1000);
+      
     } catch (error) {
       console.error("Erreur lors du téléchargement:", error);
-      alert("Erreur lors du téléchargement du document");
+      
+      // Fallback: ouvrir dans un nouvel onglet
+      window.open(document.url, '_blank');
+      setDownloadingId(null);
     }
   };
 
   const viewDocument = (documentUrl: string) => {
-    window.open(documentUrl, "_blank");
+    window.open(documentUrl, '_blank', 'noopener,noreferrer,width=1200,height=800');
   };
 
   const deleteDocument = async (documentId: string) => {
@@ -241,6 +296,7 @@ const MesDocumentsPage = () => {
       if (response.data) {
         await fetchDocuments();
         await fetchStats();
+        alert("Document supprimé avec succès!");
       } else {
         const errorData = await response.data;
         alert(`Erreur lors de la suppression: ${errorData.error}`);
@@ -254,29 +310,66 @@ const MesDocumentsPage = () => {
   const getStatusColor = (statut: string) => {
     switch (statut) {
       case "VALIDE":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/10 text-green-700 border-green-200";
       case "EXPIRÉ":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-700 border-red-200";
       case "EN_ATTENTE":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-700 border-amber-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getStatusIcon = (statut: string) => {
+    switch (statut) {
+      case "VALIDE":
+        return <CheckCircle className="h-4 w-4" />;
+      case "EXPIRÉ":
+        return <AlertTriangle className="h-4 w-4" />;
+      case "EN_ATTENTE":
+        return <Clock className="h-4 w-4" />;
+      default:
+        return <File className="h-4 w-4" />;
+    }
+  };
+
+  const getCategoryIcon = (categorie: string) => {
+    switch (categorie) {
+      case "identite":
+        return <Users className="h-4 w-4" />;
+      case "financier":
+        return <Building className="h-4 w-4" />;
+      case "immobilier":
+        return <Building className="h-4 w-4" />;
+      case "juridique":
+        return <Shield className="h-4 w-4" />;
+      default:
+        return <File className="h-4 w-4" />;
     }
   };
 
   const getCategoryColor = (categorie: string) => {
     switch (categorie) {
       case "identite":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/10 text-blue-700 border-blue-200";
       case "financier":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-500/10 text-purple-700 border-purple-200";
       case "immobilier":
-        return "bg-orange-100 text-orange-800";
+        return "bg-orange-500/10 text-orange-700 border-orange-200";
       case "juridique":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-700 border-red-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-700 border-gray-200";
     }
+  };
+
+  const getFileIcon = (format: string) => {
+    const ext = format.toLowerCase();
+    if (ext.includes('pdf')) return "📄";
+    if (['doc', 'docx'].includes(ext)) return "📝";
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return "🖼️";
+    if (['xls', 'xlsx'].includes(ext)) return "📊";
+    return "📎";
   };
 
   const filteredDocuments = documents.filter((doc) => {
@@ -323,6 +416,22 @@ const MesDocumentsPage = () => {
     );
   });
 
+  // Trier les documents
+  const sortedDocuments = [...filteredDocuments].sort((a, b) => {
+    switch (sortBy) {
+      case "dateAsc":
+        return new Date(a.dateUpload).getTime() - new Date(b.dateUpload).getTime();
+      case "dateDesc":
+        return new Date(b.dateUpload).getTime() - new Date(a.dateUpload).getTime();
+      case "nameAsc":
+        return a.nom.localeCompare(b.nom);
+      case "nameDesc":
+        return b.nom.localeCompare(a.nom);
+      default:
+        return 0;
+    }
+  });
+
   const categories = [
     "tous",
     ...Array.from(new Set(documents.map((doc) => doc.categorie))),
@@ -343,18 +452,23 @@ const MesDocumentsPage = () => {
     setSelectedStatus("tous");
     setDateRange({ start: "", end: "" });
     setSelectedTags([]);
+    setShowAdvancedFilters(false);
+  };
+
+  const formatFileSize = (bytes: string) => {
+    const numBytes = parseFloat(bytes);
+    if (numBytes < 1024) return numBytes + " B";
+    if (numBytes < 1048576) return (numBytes / 1024).toFixed(1) + " KB";
+    return (numBytes / 1048576).toFixed(1) + " MB";
   };
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-          <div className="grid gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded"></div>
-            ))}
+      <div className="container mx-auto px-4 py-8 pt-20">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement de vos documents...</p>
           </div>
         </div>
       </div>
@@ -363,231 +477,279 @@ const MesDocumentsPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 pt-20">
+      {/* En-tête */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Mes Documents</h1>
-        <p className="text-gray-600 mt-2">
-          Gérez tous vos documents personnels stockés sur Supabase
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start md:items-center mb-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-gray-900">Mes Documents</h1>
+            <p className="text-gray-600">
+              Gérez tous vos documents personnels stockés en sécurité
+            </p>
+          </div>
+          <div className="grid grid-cols-[auto_1fr] md:grid-cols-[auto_auto] gap-2 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+              className="hidden md:grid"
+            >
+              {viewMode === "grid" ? (
+                <>
+                  <List className="h-4 w-4 mr-2" />
+                  Liste
+                </>
+              ) : (
+                <>
+                  <Grid className="h-4 w-4 mr-2" />
+                  Grille
+                </>
+              )}
+            </Button>
+            <Button
+              asChild
+              disabled={uploading}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <Upload className="h-4 w-4 mr-2" />
+                {uploading ? "Upload..." : "Ajouter des documents"}
+              </label>
+            </Button>
+            <input
+              id="file-upload"
+              type="file"
+              className="hidden"
+              onChange={handleFileSelect}
+              multiple
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xls,.xlsx"
+            />
+          </div>
+        </div>
+
+        {/* Statistiques */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-[1fr_auto] items-center">
+                  <div>
+                    <p className="text-sm font-medium text-blue-700">Total</p>
+                    <p className="text-2xl font-bold text-blue-900">{stats.total}</p>
+                  </div>
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <FileText className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-[1fr_auto] items-center">
+                  <div>
+                    <p className="text-sm font-medium text-green-700">Valides</p>
+                    <p className="text-2xl font-bold text-green-900">{stats.parStatut.VALIDE}</p>
+                  </div>
+                  <div className="p-2 bg-green-500/20 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-[1fr_auto] items-center">
+                  <div>
+                    <p className="text-sm font-medium text-red-700">Expirés</p>
+                    <p className="text-2xl font-bold text-red-900">{stats.parStatut.EXPIRÉ}</p>
+                  </div>
+                  <div className="p-2 bg-red-500/20 rounded-lg">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-[1fr_auto] items-center">
+                  <div>
+                    <p className="text-sm font-medium text-amber-700">En attente</p>
+                    <p className="text-2xl font-bold text-amber-900">{stats.parStatut.EN_ATTENTE}</p>
+                  </div>
+                  <div className="p-2 bg-amber-500/20 rounded-lg">
+                    <Clock className="h-6 w-6 text-amber-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
-      {/* Statistiques */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total</p>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                </div>
-                <FileText className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Valides</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {stats.parStatut.VALIDE}
-                  </p>
-                </div>
-                <FileText className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Expirés</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {stats.parStatut.EXPIRÉ}
-                  </p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    En attente
-                  </p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {stats.parStatut.EN_ATTENTE}
-                  </p>
-                </div>
-                <FileText className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Actions et filtres */}
-      <Card className="mb-8">
+      {/* Barre de recherche et filtres */}
+      <Card className="mb-8 shadow-sm">
         <CardContent className="p-6">
-          <div className="flex flex-col gap-6">
-            {/* Recherche et filtres de base */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-              <div className="flex flex-col md:flex-row gap-4 flex-1">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Rechercher un document..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+          <div className="space-y-6">
+            {/* Première ligne : Recherche et tri */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start md:items-center">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Rechercher un document, une description ou un tag..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-gray-50"
+                />
+              </div>
 
-                <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Catégorie" />
+              <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Trier par" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat === "tous" ? "Toutes catégories" : cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={selectedStatus}
-                  onValueChange={setSelectedStatus}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statuses.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status === "tous" ? "Tous statuts" : status}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="dateDesc">Plus récent</SelectItem>
+                    <SelectItem value="dateAsc">Plus ancien</SelectItem>
+                    <SelectItem value="nameAsc">Nom (A-Z)</SelectItem>
+                    <SelectItem value="nameDesc">Nom (Z-A)</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Button
                   variant="outline"
+                  size="icon"
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="shrink-0"
                 >
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtres avancés
+                  <Filter className="h-4 w-4" />
                 </Button>
-
-                {(searchTerm ||
-                  selectedCategory !== "tous" ||
-                  selectedStatus !== "tous" ||
-                  showAdvancedFilters) && (
-                  <Button variant="ghost" onClick={clearFilters}>
-                    <X className="h-4 w-4 mr-2" />
-                    Effacer
-                  </Button>
-                )}
               </div>
+            </div>
 
-              <div className="flex gap-2">
-                <UploadModal
-                  open={isUploadModalOpen}
-                  onOpenChange={setIsUploadModalOpen}
-                  selectedFiles={selectedFiles}
-                  onUpload={handleUpload}
-                  uploading={uploading}
-                />
+            {/* Filtres rapides */}
+            <div className="grid grid-cols-1 sm:grid-cols-[auto_auto_1fr] gap-2 items-center">
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Catégorie" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat === "tous" ? "Toutes catégories" : cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <Button asChild disabled={uploading}>
-                  <label htmlFor="file-upload" className="cursor-pointer">
-                    <Upload className="h-4 w-4 mr-2" />
-                    {uploading ? "Upload..." : "Ajouter des documents"}
-                  </label>
+              <Select
+                value={selectedStatus}
+                onValueChange={setSelectedStatus}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status === "tous" ? "Tous statuts" : status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {(searchTerm ||
+                selectedCategory !== "tous" ||
+                selectedStatus !== "tous" ||
+                showAdvancedFilters ||
+                dateRange.start ||
+                dateRange.end ||
+                selectedTags.length > 0) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-gray-600 hover:text-gray-900 justify-self-start"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Effacer les filtres
                 </Button>
-                <input
-                  id="file-upload"
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                  multiple
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xls,.xlsx"
-                />
-              </div>
+              )}
             </div>
 
             {/* Filtres avancés */}
             {showAdvancedFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <Label htmlFor="date-start">Date de début</Label>
-                  <Input
-                    id="date-start"
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) =>
-                      setDateRange((prev) => ({
-                        ...prev,
-                        start: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="date-end">Date de fin</Label>
-                  <Input
-                    id="date-end"
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) =>
-                      setDateRange((prev) => ({ ...prev, end: e.target.value }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label>Tags</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      if (!selectedTags.includes(value)) {
-                        setSelectedTags([...selectedTags, value]);
+              <div className="p-4 bg-gray-50/50 rounded-lg border border-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="date-start" className="text-sm font-medium">
+                      Date de début
+                    </Label>
+                    <Input
+                      id="date-start"
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) =>
+                        setDateRange((prev) => ({
+                          ...prev,
+                          start: e.target.value,
+                        }))
                       }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Ajouter un tag" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allTags.map((tag) => (
-                        <SelectItem key={tag} value={tag}>
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="date-end" className="text-sm font-medium">
+                      Date de fin
+                    </Label>
+                    <Input
+                      id="date-end"
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) =>
+                        setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Tags</Label>
+                    <Select
+                      onValueChange={(value) => {
+                        if (!selectedTags.includes(value)) {
+                          setSelectedTags([...selectedTags, value]);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Ajouter un tag" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allTags.map((tag) => (
+                          <SelectItem key={tag} value={tag}>
+                            {tag}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 mt-2">
+                      {selectedTags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="flex items-center gap-1 px-2 py-1"
+                        >
                           {tag}
-                        </SelectItem>
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-red-600"
+                            onClick={() =>
+                              setSelectedTags(
+                                selectedTags.filter((t) => t !== tag)
+                              )
+                            }
+                          />
+                        </Badge>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {selectedTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {tag}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() =>
-                            setSelectedTags(
-                              selectedTags.filter((t) => t !== tag)
-                            )
-                          }
-                        />
-                      </Badge>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -596,30 +758,41 @@ const MesDocumentsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Liste des documents */}
+      {/* Onglets */}
       <Tabs defaultValue="tous" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="tous">
-            Tous les documents ({filteredDocuments.length})
-          </TabsTrigger>
-          <TabsTrigger value="expirant">
-            Bientôt expirés ({expiringSoonDocuments.length})
-          </TabsTrigger>
-          <TabsTrigger value="statistiques">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Statistiques
-          </TabsTrigger>
-        </TabsList>
+        <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-center">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="tous" className="flex-1 sm:flex-none">
+              Tous ({filteredDocuments.length})
+            </TabsTrigger>
+            <TabsTrigger value="expirant" className="flex-1 sm:flex-none">
+              <AlertTriangle className="h-4 w-4 mr-2 hidden sm:inline" />
+              Expirant ({expiringSoonDocuments.length})
+            </TabsTrigger>
+            <TabsTrigger value="statistiques" className="flex-1 sm:flex-none">
+              <BarChart3 className="h-4 w-4 mr-2 hidden sm:inline" />
+              Stats
+            </TabsTrigger>
+          </TabsList>
 
+          <div className="grid grid-cols-[auto_1fr] gap-2 items-center text-sm text-gray-600">
+            <FileText className="h-4 w-4" />
+            <span>{sortedDocuments.length} document{sortedDocuments.length !== 1 ? 's' : ''} trouvé{sortedDocuments.length !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+
+        {/* Tous les documents */}
         <TabsContent value="tous" className="space-y-4">
-          {filteredDocuments.length === 0 ? (
+          {sortedDocuments.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <div className="grid place-items-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
+                  <FileText className="h-8 w-8 text-gray-400" />
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Aucun document trouvé
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-6">
                   {searchTerm ||
                   selectedCategory !== "tous" ||
                   selectedStatus !== "tous"
@@ -638,79 +811,127 @@ const MesDocumentsPage = () => {
                   )}
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid gap-4">
-              {filteredDocuments.map((document) => (
-                <DocumentCard
+          ) : viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sortedDocuments.map((document) => (
+                <DocumentCardGrid
                   key={document.id}
                   document={document}
-                  onView={viewDocument}
-                  onDownload={downloadDocument}
-                  onDelete={deleteDocument}
-                  onEdit={(doc) => {
-                    setEditingDocument(doc);
+                  onView={() => viewDocument(document.url)}
+                  onDownload={() => downloadDocument(document)}
+                  onDelete={() => deleteDocument(document.id)}
+                  onEdit={() => {
+                    setEditingDocument(document);
                     setIsEditModalOpen(true);
                   }}
                   getStatusColor={getStatusColor}
                   getCategoryColor={getCategoryColor}
+                  getStatusIcon={getStatusIcon}
+                  getCategoryIcon={getCategoryIcon}
+                  getFileIcon={() => getFileIcon(document.format)}
+                  formatFileSize={() => formatFileSize(document.taille)}
+                  isDownloading={downloadingId === document.id}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sortedDocuments.map((document) => (
+                <DocumentCardList
+                  key={document.id}
+                  document={document}
+                  onView={() => viewDocument(document.url)}
+                  onDownload={() => downloadDocument(document)}
+                  onDelete={() => deleteDocument(document.id)}
+                  onEdit={() => {
+                    setEditingDocument(document);
+                    setIsEditModalOpen(true);
+                  }}
+                  getStatusColor={getStatusColor}
+                  getCategoryColor={getCategoryColor}
+                  getStatusIcon={getStatusIcon}
+                  getCategoryIcon={getCategoryIcon}
+                  getFileIcon={() => getFileIcon(document.format)}
+                  formatFileSize={() => formatFileSize(document.taille)}
+                  isDownloading={downloadingId === document.id}
                 />
               ))}
             </div>
           )}
         </TabsContent>
 
+        {/* Documents expirant bientôt */}
         <TabsContent value="expirant" className="space-y-4">
           {expiringSoonDocuments.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <div className="grid place-items-center w-16 h-16 mx-auto mb-4 bg-amber-100 rounded-full">
+                  <Calendar className="h-8 w-8 text-amber-600" />
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Aucun document n'expire bientôt
                 </h3>
                 <p className="text-gray-600">
-                  Tous vos documents sont à jour ou n'ont pas de date
-                  d'expiration.
+                  Tous vos documents sont à jour ou n'ont pas de date d'expiration.
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
+            <div className="space-y-3">
               {expiringSoonDocuments.map((document) => (
-                <DocumentCard
+                <DocumentCardList
                   key={document.id}
                   document={document}
-                  onView={viewDocument}
-                  onDownload={downloadDocument}
-                  onDelete={deleteDocument}
-                  onEdit={(doc) => {
-                    setEditingDocument(doc);
+                  onView={() => viewDocument(document.url)}
+                  onDownload={() => downloadDocument(document)}
+                  onDelete={() => deleteDocument(document.id)}
+                  onEdit={() => {
+                    setEditingDocument(document);
                     setIsEditModalOpen(true);
                   }}
                   getStatusColor={getStatusColor}
                   getCategoryColor={getCategoryColor}
+                  getStatusIcon={getStatusIcon}
+                  getCategoryIcon={getCategoryIcon}
+                  getFileIcon={() => getFileIcon(document.format)}
+                  formatFileSize={() => formatFileSize(document.taille)}
+                  isDownloading={downloadingId === document.id}
+                  highlightExpiring={true}
                 />
               ))}
             </div>
           )}
         </TabsContent>
 
+        {/* Statistiques */}
         <TabsContent value="statistiques">
           {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">
+                  <h3 className="text-lg font-semibold mb-6 pb-3 border-b">
                     Répartition par catégorie
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {Object.entries(stats.parCategorie).map(
                       ([categorie, count]) => (
                         <div
                           key={categorie}
-                          className="flex justify-between items-center"
+                          className="grid grid-cols-[auto_1fr_auto] items-center gap-3"
                         >
-                          <span className="capitalize">{categorie}</span>
-                          <Badge variant="secondary">{count}</Badge>
+                          <div className="p-2 bg-gray-100 rounded-lg">
+                            {getCategoryIcon(categorie)}
+                          </div>
+                          <span className="font-medium capitalize">{categorie}</span>
+                          <div className="grid grid-cols-[auto_auto] items-center gap-3">
+                            <span className="text-2xl font-bold">{count}</span>
+                            <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-blue-500"
+                                style={{ width: `${(count / stats.total) * 100}%` }}
+                              />
+                            </div>
+                          </div>
                         </div>
                       )
                     )}
@@ -720,36 +941,54 @@ const MesDocumentsPage = () => {
 
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">
+                  <h3 className="text-lg font-semibold mb-6 pb-3 border-b">
                     Prochain document à expirer
                   </h3>
                   {stats.prochainExpiration ? (
-                    <div>
-                      <p className="font-medium">
-                        {stats.prochainExpiration.nom}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Expire le:{" "}
-                        {format(
-                          new Date(stats.prochainExpiration.dateExpiration!),
-                          "dd/MM/yyyy",
-                          {
-                            locale: fr,
-                          }
-                        )}
-                      </p>
-                      <Badge
-                        className={getStatusColor(
-                          stats.prochainExpiration.statut
-                        )}
-                      >
-                        {stats.prochainExpiration.statut}
-                      </Badge>
+                    <div className="p-4 bg-gradient-to-r from-amber-50 to-amber-100 rounded-lg border border-amber-200">
+                      <div className="grid grid-cols-[auto_1fr] gap-3 mb-3">
+                        <div className="p-2 bg-amber-500/20 rounded-lg">
+                          <AlertTriangle className="h-6 w-6 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-lg">
+                            {stats.prochainExpiration.nom}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {stats.prochainExpiration.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-[1fr_auto] items-center text-sm">
+                          <span className="text-gray-600">Date d'expiration:</span>
+                          <span className="font-medium">
+                            {format(
+                              new Date(stats.prochainExpiration.dateExpiration!),
+                              "dd MMMM yyyy",
+                              { locale: fr }
+                            )}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-[1fr_auto] items-center text-sm">
+                          <span className="text-gray-600">Statut:</span>
+                          <Badge
+                            className={getStatusColor(
+                              stats.prochainExpiration.statut
+                            )}
+                          >
+                            {stats.prochainExpiration.statut}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   ) : (
-                    <p className="text-gray-600">
-                      Aucun document avec date d'expiration
-                    </p>
+                    <div className="text-center py-8">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">
+                        Aucun document avec date d'expiration
+                      </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -758,7 +997,16 @@ const MesDocumentsPage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Modal d'édition */}
+      {/* Modals */}
+      <UploadModal
+        open={isUploadModalOpen}
+        onOpenChange={setIsUploadModalOpen}
+        selectedFiles={selectedFiles}
+        onUpload={handleUpload}
+        uploading={uploading}
+        uploadProgress={uploadProgress}
+      />
+
       <EditModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
@@ -769,19 +1017,21 @@ const MesDocumentsPage = () => {
   );
 };
 
-// Composant Modal d'Upload - CORRIGÉ
+// Modal d'Upload avec Grid
 const UploadModal = ({
   open,
   onOpenChange,
   selectedFiles,
   onUpload,
   uploading,
+  uploadProgress,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedFiles: File[];
   onUpload: (formData: FormData) => Promise<void>;
   uploading: boolean;
+  uploadProgress: number;
 }) => {
   const [formData, setFormData] = useState({
     type: "document_client",
@@ -794,7 +1044,6 @@ const UploadModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Vérifier qu'il y a des fichiers sélectionnés
     if (selectedFiles.length === 0) {
       alert("Veuillez sélectionner au moins un fichier");
       return;
@@ -802,12 +1051,10 @@ const UploadModal = ({
 
     const uploadFormData = new FormData();
     
-    // Ajouter les fichiers
     selectedFiles.forEach((file) => {
       uploadFormData.append("files", file);
     });
 
-    // Ajouter les métadonnées
     Object.entries(formData).forEach(([key, value]) => {
       if (value) uploadFormData.append(key, value);
     });
@@ -815,7 +1062,6 @@ const UploadModal = ({
     await onUpload(uploadFormData);
   };
 
-  // Réinitialiser le formulaire quand le modal se ferme
   useEffect(() => {
     if (!open) {
       setFormData({
@@ -830,88 +1076,175 @@ const UploadModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Ajouter des documents</DialogTitle>
+      <DialogContent className="
+        max-w-[95vw] 
+        sm:max-w-lg 
+        md:max-w-xl 
+        lg:max-w-2xl 
+        max-h-[90vh] 
+        overflow-y-auto
+        p-4 
+        sm:p-6
+      ">
+        <DialogHeader className="space-y-1">
+          <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg">
+              <FileUp className="h-5 w-5 text-white" />
+            </div>
+            <DialogTitle className="text-xl font-semibold">Ajouter des documents</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600">
+            Téléversez vos fichiers et ajoutez des métadonnées
+          </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Fichiers sélectionnés */}
-          <div>
-            <Label>Fichiers sélectionnés ({selectedFiles.length})</Label>
-            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_auto] items-center">
+              <Label className="text-sm font-medium">
+                Fichiers sélectionnés ({selectedFiles.length})
+              </Label>
+              {selectedFiles.length > 0 && (
+                <span className="text-xs text-gray-500">
+                  {selectedFiles.reduce((acc, file) => acc + file.size, 0) / 1024 / 1024 > 1 
+                    ? `${(selectedFiles.reduce((acc, file) => acc + file.size, 0) / 1024 / 1024).toFixed(2)} MB` 
+                    : `${(selectedFiles.reduce((acc, file) => acc + file.size, 0) / 1024).toFixed(2)} KB`
+                  }
+                </span>
+              )}
+            </div>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 bg-gray-50/50 hover:border-blue-400 transition-colors duration-200">
               {selectedFiles.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">
-                  Aucun fichier sélectionné
-                </p>
-              ) : (
-                selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm truncate max-w-xs">{file.name}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </span>
+                <div className="grid place-items-center py-6 sm:py-8">
+                  <div className="grid place-items-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mb-3 sm:mb-4">
+                    <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
                   </div>
-                ))
+                  <p className="text-gray-600 text-sm sm:text-base">Aucun fichier sélectionné</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    Glissez-déposez ou cliquez pour sélectionner
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-48 sm:max-h-56 overflow-y-auto pr-1 sm:pr-2">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                    >
+                      <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs hidden sm:inline-flex"
+                      >
+                        {file.type.split('/')[1]?.toUpperCase() || "FILE"}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
 
-          {/* Type de document */}
-          <div>
-            <Label htmlFor="type">Type de document</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, type: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="document_client">Document Client</SelectItem>
-                <SelectItem value="identite">Identité</SelectItem>
-                <SelectItem value="professionnel">Professionnel</SelectItem>
-                <SelectItem value="fiscal">Fiscal</SelectItem>
-                <SelectItem value="bancaire">Bancaire</SelectItem>
-                <SelectItem value="immobilier">Immobilier</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Barre de progression */}
+          {uploading && (
+            <div className="space-y-1 sm:space-y-2">
+              <div className="grid grid-cols-[1fr_auto] items-center text-xs sm:text-sm">
+                <span className="text-gray-600">Upload en cours...</span>
+                <span className="font-medium">{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-1.5 sm:h-2" />
+            </div>
+          )}
 
-          {/* Catégorie */}
-          <div>
-            <Label htmlFor="categorie">Catégorie</Label>
-            <Select
-              value={formData.categorie}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, categorie: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="general">Général</SelectItem>
-                <SelectItem value="identite">Identité</SelectItem>
-                <SelectItem value="financier">Financier</SelectItem>
-                <SelectItem value="immobilier">Immobilier</SelectItem>
-                <SelectItem value="juridique">Juridique</SelectItem>
-                <SelectItem value="medical">Médical</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Métadonnées - Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="type" className="text-xs sm:text-sm font-medium">
+                Type de document
+              </Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, type: value }))
+                }
+              >
+                <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <SelectItem value="document_client" className="text-xs sm:text-sm">
+                    Document Client
+                  </SelectItem>
+                  <SelectItem value="identite" className="text-xs sm:text-sm">
+                    Identité
+                  </SelectItem>
+                  <SelectItem value="professionnel" className="text-xs sm:text-sm">
+                    Professionnel
+                  </SelectItem>
+                  <SelectItem value="fiscal" className="text-xs sm:text-sm">
+                    Fiscal
+                  </SelectItem>
+                  <SelectItem value="bancaire" className="text-xs sm:text-sm">
+                    Bancaire
+                  </SelectItem>
+                  <SelectItem value="immobilier" className="text-xs sm:text-sm">
+                    Immobilier
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="categorie" className="text-xs sm:text-sm font-medium">
+                Catégorie
+              </Label>
+              <Select
+                value={formData.categorie}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, categorie: value }))
+                }
+              >
+                <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <SelectItem value="general" className="text-xs sm:text-sm">
+                    Général
+                  </SelectItem>
+                  <SelectItem value="identite" className="text-xs sm:text-sm">
+                    Identité
+                  </SelectItem>
+                  <SelectItem value="financier" className="text-xs sm:text-sm">
+                    Financier
+                  </SelectItem>
+                  <SelectItem value="immobilier" className="text-xs sm:text-sm">
+                    Immobilier
+                  </SelectItem>
+                  <SelectItem value="juridique" className="text-xs sm:text-sm">
+                    Juridique
+                  </SelectItem>
+                  <SelectItem value="medical" className="text-xs sm:text-sm">
+                    Médical
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Description */}
-          <div>
-            <Label htmlFor="description">Description</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="description" className="text-xs sm:text-sm font-medium">
+              Description
+            </Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -922,59 +1255,77 @@ const UploadModal = ({
                 }))
               }
               placeholder="Description du document..."
-              rows={3}
+              rows={2}
+              className="resize-none text-xs sm:text-sm min-h-[60px] sm:min-h-[80px]"
             />
           </div>
 
-          {/* Date d'expiration */}
-          <div>
-            <Label htmlFor="dateExpiration">Date d'expiration (optionnel)</Label>
-            <Input
-              id="dateExpiration"
-              type="date"
-              value={formData.dateExpiration}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  dateExpiration: e.target.value,
-                }))
-              }
-            />
+          {/* Date et Tags - Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="dateExpiration" className="text-xs sm:text-sm font-medium">
+                Date d'expiration
+                <span className="text-gray-500 font-normal ml-1">(optionnel)</span>
+              </Label>
+              <Input
+                id="dateExpiration"
+                type="date"
+                value={formData.dateExpiration}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    dateExpiration: e.target.value,
+                  }))
+                }
+                className="h-9 sm:h-10 text-xs sm:text-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="tags" className="text-xs sm:text-sm font-medium">
+                Tags
+                <span className="text-gray-500 font-normal ml-1">(optionnel)</span>
+              </Label>
+              <Input
+                id="tags"
+                value={formData.tags}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, tags: e.target.value }))
+                }
+                placeholder="tag1, tag2, tag3"
+                className="h-9 sm:h-10 text-xs sm:text-sm"
+              />
+            </div>
           </div>
 
-          {/* Tags */}
-          <div>
-            <Label htmlFor="tags">Tags (séparés par des virgules, optionnel)</Label>
-            <Input
-              id="tags"
-              value={formData.tags}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, tags: e.target.value }))
-              }
-              placeholder="tag1, tag2, tag3"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
+          {/* Boutons - Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3 sm:pt-4 border-t">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={uploading}
+              className="h-9 sm:h-10 text-xs sm:text-sm order-2 sm:order-1"
             >
               Annuler
             </Button>
             <Button 
               type="submit" 
               disabled={uploading || selectedFiles.length === 0}
+              className="h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 order-1 sm:order-2"
             >
               {uploading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Upload en cours...
+                  <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                  <span>Upload en cours...</span>
                 </>
               ) : (
-                `Uploader ${selectedFiles.length} document${selectedFiles.length > 1 ? 's' : ''}`
+                <>
+                  <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  <span>
+                    Uploader {selectedFiles.length} fichier{selectedFiles.length > 1 ? 's' : ''}
+                  </span>
+                </>
               )}
             </Button>
           </div>
@@ -984,7 +1335,7 @@ const UploadModal = ({
   );
 };
 
-// Composant Modal d'Édition
+// Modal d'Édition avec Grid
 const EditModal = ({
   open,
   onOpenChange,
@@ -1043,14 +1394,34 @@ const EditModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Modifier le document</DialogTitle>
+      <DialogContent className="
+        max-w-[95vw] 
+        sm:max-w-lg 
+        md:max-w-xl 
+        lg:max-w-2xl 
+        max-h-[90vh] 
+        overflow-y-auto
+        p-4 
+        sm:p-6
+      ">
+        <DialogHeader className="space-y-1">
+          <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg">
+              <Edit className="h-5 w-5 text-white" />
+            </div>
+            <DialogTitle className="text-xl font-semibold">Modifier le document</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600">
+            Mettez à jour les informations du document
+          </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="edit-nom">Nom</Label>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {/* Nom du document */}
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="edit-nom" className="text-xs sm:text-sm font-medium">
+              Nom du document
+            </Label>
             <Input
               id="edit-nom"
               value={formData.nom}
@@ -1058,11 +1429,15 @@ const EditModal = ({
                 setFormData((prev) => ({ ...prev, nom: e.target.value }))
               }
               required
+              className="h-9 sm:h-10 text-xs sm:text-sm"
             />
           </div>
 
-          <div>
-            <Label htmlFor="edit-description">Description</Label>
+          {/* Description */}
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="edit-description" className="text-xs sm:text-sm font-medium">
+              Description
+            </Label>
             <Textarea
               id="edit-description"
               value={formData.description}
@@ -1072,53 +1447,79 @@ const EditModal = ({
                   description: e.target.value,
                 }))
               }
+              className="resize-none text-xs sm:text-sm min-h-[60px] sm:min-h-[80px]"
+              rows={2}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="edit-categorie">Catégorie</Label>
+          {/* Catégorie et Statut - Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="edit-categorie" className="text-xs sm:text-sm font-medium">
+                Catégorie
+              </Label>
               <Select
                 value={formData.categorie}
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, categorie: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">Général</SelectItem>
-                  <SelectItem value="identite">Identité</SelectItem>
-                  <SelectItem value="financier">Financier</SelectItem>
-                  <SelectItem value="immobilier">Immobilier</SelectItem>
-                  <SelectItem value="juridique">Juridique</SelectItem>
+                <SelectContent className="max-h-60">
+                  <SelectItem value="general" className="text-xs sm:text-sm">
+                    Général
+                  </SelectItem>
+                  <SelectItem value="identite" className="text-xs sm:text-sm">
+                    Identité
+                  </SelectItem>
+                  <SelectItem value="financier" className="text-xs sm:text-sm">
+                    Financier
+                  </SelectItem>
+                  <SelectItem value="immobilier" className="text-xs sm:text-sm">
+                    Immobilier
+                  </SelectItem>
+                  <SelectItem value="juridique" className="text-xs sm:text-sm">
+                    Juridique
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="edit-statut">Statut</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="edit-statut" className="text-xs sm:text-sm font-medium">
+                Statut
+              </Label>
               <Select
                 value={formData.statut}
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, statut: value }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="VALIDE">Valide</SelectItem>
-                  <SelectItem value="EXPIRÉ">Expiré</SelectItem>
-                  <SelectItem value="EN_ATTENTE">En attente</SelectItem>
+                  <SelectItem value="VALIDE" className="text-xs sm:text-sm">
+                    Valide
+                  </SelectItem>
+                  <SelectItem value="EXPIRÉ" className="text-xs sm:text-sm">
+                    Expiré
+                  </SelectItem>
+                  <SelectItem value="EN_ATTENTE" className="text-xs sm:text-sm">
+                    En attente
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="edit-dateExpiration">Date d'expiration</Label>
+          {/* Date d'expiration */}
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="edit-dateExpiration" className="text-xs sm:text-sm font-medium">
+              Date d'expiration
+            </Label>
             <Input
               id="edit-dateExpiration"
               type="date"
@@ -1129,11 +1530,15 @@ const EditModal = ({
                   dateExpiration: e.target.value,
                 }))
               }
+              className="h-9 sm:h-10 text-xs sm:text-sm"
             />
           </div>
 
-          <div>
-            <Label htmlFor="edit-tags">Tags (séparés par des virgules)</Label>
+          {/* Tags */}
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="edit-tags" className="text-xs sm:text-sm font-medium">
+              Tags (séparés par des virgules)
+            </Label>
             <Input
               id="edit-tags"
               value={formData.tags}
@@ -1141,18 +1546,26 @@ const EditModal = ({
                 setFormData((prev) => ({ ...prev, tags: e.target.value }))
               }
               placeholder="tag1, tag2, tag3"
+              className="h-9 sm:h-10 text-xs sm:text-sm"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          {/* Boutons - Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3 sm:pt-4 border-t">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="h-9 sm:h-10 text-xs sm:text-sm order-2 sm:order-1"
             >
               Annuler
             </Button>
-            <Button type="submit">Sauvegarder</Button>
+            <Button 
+              type="submit"
+              className="h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 order-1 sm:order-2"
+            >
+              Sauvegarder les modifications
+            </Button>
           </div>
         </form>
       </DialogContent>
@@ -1160,8 +1573,8 @@ const EditModal = ({
   );
 };
 
-// Composant Carte Document Modifié
-const DocumentCard = ({
+// Carte Document en mode Grille avec Grid
+const DocumentCardGrid = ({
   document,
   onView,
   onDownload,
@@ -1169,130 +1582,436 @@ const DocumentCard = ({
   onEdit,
   getStatusColor,
   getCategoryColor,
+  getStatusIcon,
+  getCategoryIcon,
+  getFileIcon,
+  formatFileSize,
+  isDownloading,
 }: {
   document: Document;
-  onView: (url: string) => void;
-  onDownload: (url: string, fileName: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (document: Document) => void;
+  onView: () => void;
+  onDownload: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
   getStatusColor: (statut: string) => string;
   getCategoryColor: (categorie: string) => string;
+  getStatusIcon: (statut: string) => React.ReactNode;
+  getCategoryIcon: (categorie: string) => React.ReactNode;
+  getFileIcon: () => string;
+  formatFileSize: () => string;
+  isDownloading: boolean;
 }) => {
+  const [showActions, setShowActions] = useState(false);
   const isExpired = document.statut === "EXPIRÉ";
-  const isExpiringSoon =
-    document.dateExpiration &&
-    new Date(document.dateExpiration) <
-      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const isExpiringSoon = document.dateExpiration &&
+    new Date(document.dateExpiration) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
   return (
-    <Card
-      className={`border-l-4 ${
-        isExpired
-          ? "border-l-red-500"
-          : isExpiringSoon
-          ? "border-l-yellow-500"
-          : "border-l-green-500"
-      }`}
-    >
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start space-x-4 flex-1">
-            <div
-              className={`p-3 rounded-lg ${
-                isExpired ? "bg-red-100" : "bg-blue-100"
-              }`}
+    <Card className="group hover:shadow-md transition-all duration-300 hover:-translate-y-1 border border-gray-200 overflow-hidden">
+      <CardContent className="p-4 sm:p-5 grid gap-3 sm:gap-4">
+        {/* En-tête avec icône et actions */}
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-3">
+          <div className="text-xl sm:text-2xl">{getFileIcon()}</div>
+          <div>
+            <Badge className={`${getStatusColor(document.statut)} text-xs sm:text-sm`}>
+              <span className="grid grid-cols-[auto_1fr] items-center gap-1">
+                {getStatusIcon(document.statut)}
+                <span className="hidden sm:inline">{document.statut}</span>
+                <span className="sm:hidden">{document.statut.slice(0, 3)}</span>
+              </span>
+            </Badge>
+          </div>
+          
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 sm:h-8 sm:w-8"
+              onClick={() => setShowActions(!showActions)}
             >
-              <FileText
-                className={`h-6 w-6 ${
-                  isExpired ? "text-red-600" : "text-blue-600"
-                }`}
-              />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold text-lg">{document.nom}</h3>
-                <Badge
-                  variant="secondary"
-                  className={getStatusColor(document.statut)}
-                >
-                  {document.statut}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className={getCategoryColor(document.categorie)}
-                >
-                  {document.categorie}
-                </Badge>
-              </div>
-
-              {document.description && (
-                <p className="text-gray-600 mb-2">{document.description}</p>
-              )}
-
-              <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                <span>Taille: {document.taille}</span>
-                <span>Format: {document.format}</span>
-                <span>
-                  Ajouté le:{" "}
-                  {format(new Date(document.dateUpload), "dd/MM/yyyy", {
-                    locale: fr,
-                  })}
-                </span>
-                {document.dateExpiration && (
-                  <span className={isExpired ? "text-red-600 font-medium" : ""}>
-                    Expire le:{" "}
-                    {format(new Date(document.dateExpiration), "dd/MM/yyyy", {
-                      locale: fr,
-                    })}
-                  </span>
-                )}
-              </div>
-
-              {document.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {document.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+              <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </Button>
+            
+            {showActions && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowActions(false)}
+                />
+                <div className="absolute right-0 top-8 z-50 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                  <button
+                    onClick={() => {
+                      onEdit();
+                      setShowActions(false);
+                    }}
+                    className="grid grid-cols-[auto_1fr] items-center gap-2 w-full px-3 py-2 text-xs sm:text-sm hover:bg-gray-100 text-left"
+                  >
+                    <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => {
+                      onView();
+                      setShowActions(false);
+                    }}
+                    className="grid grid-cols-[auto_1fr] items-center gap-2 w-full px-3 py-2 text-xs sm:text-sm hover:bg-gray-100 text-left"
+                  >
+                    <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Visualiser
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDelete();
+                      setShowActions(false);
+                    }}
+                    className="grid grid-cols-[auto_1fr] items-center gap-2 w-full px-3 py-2 text-xs sm:text-sm hover:bg-red-50 text-red-600 text-left"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Supprimer
+                  </button>
                 </div>
-              )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Nom du document */}
+        <h3 className="font-semibold text-base sm:text-lg line-clamp-2 hover:text-blue-600 transition-colors">
+          {document.nom}
+        </h3>
+
+        {/* Description */}
+        {document.description && (
+          <p className="text-gray-600 text-xs sm:text-sm line-clamp-2">
+            {document.description}
+          </p>
+        )}
+
+        {/* Métadonnées */}
+        <div className="grid gap-2 sm:gap-3">
+          <div className="grid grid-cols-[auto_auto] gap-1 sm:gap-2">
+            <Badge variant="outline" className={`${getCategoryColor(document.categorie)} text-xs sm:text-sm`}>
+              <span className="grid grid-cols-[auto_1fr] items-center gap-1">
+                {getCategoryIcon(document.categorie)}
+                <span className="hidden sm:inline">{document.categorie}</span>
+                <span className="sm:hidden">{document.categorie.slice(0, 3)}</span>
+              </span>
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              {document.format.toUpperCase().slice(0, 3)}
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-2 gap-1 sm:gap-2 text-xs sm:text-sm">
+            <div className="text-gray-600">Taille:</div>
+            <div className="font-medium truncate">{formatFileSize()}</div>
+            
+            <div className="text-gray-600">Ajouté:</div>
+            <div className="font-medium">
+              {format(new Date(document.dateUpload), "dd/MM/yy")}
             </div>
           </div>
 
-          <div className="flex gap-2">
+          {document.dateExpiration && (
+            <div className={`grid grid-cols-[auto_1fr] items-center gap-1 sm:gap-2 text-xs sm:text-sm ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Expire le {format(new Date(document.dateExpiration), "dd/MM/yy")}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Tags */}
+        {document.tags.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+            {document.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full truncate"
+              >
+                {tag}
+              </span>
+            ))}
+            {document.tags.length > 3 && (
+              <span className="text-xs text-gray-500 px-1.5 py-0.5 sm:px-2 sm:py-1">
+                +{document.tags.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Boutons d'action */}
+        <div className="grid grid-cols-[1fr_auto] gap-1.5 sm:gap-2 pt-3 sm:pt-4 border-t">
+          <Button
+            variant="default"
+            size="sm"
+            className="h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+            onClick={onDownload}
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <div className="grid place-items-center">
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+              </div>
+            ) : (
+              <>
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Télécharger</span>
+                <span className="sm:hidden">DL</span>
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 grid place-items-center"
+            onClick={onView}
+          >
+            <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Carte Document en mode Liste avec Grid
+const DocumentCardList = ({
+  document,
+  onView,
+  onDownload,
+  onDelete,
+  onEdit,
+  getStatusColor,
+  getCategoryColor,
+  getStatusIcon,
+  getCategoryIcon,
+  getFileIcon,
+  formatFileSize,
+  isDownloading,
+  highlightExpiring = false,
+}: {
+  document: Document;
+  onView: () => void;
+  onDownload: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
+  getStatusColor: (statut: string) => string;
+  getCategoryColor: (categorie: string) => string;
+  getStatusIcon: (statut: string) => React.ReactNode;
+  getCategoryIcon: (categorie: string) => React.ReactNode;
+  getFileIcon: () => string;
+  formatFileSize: () => string;
+  isDownloading: boolean;
+  highlightExpiring?: boolean;
+}) => {
+  const [showMobileActions, setShowMobileActions] = useState(false);
+  const isExpired = document.statut === "EXPIRÉ";
+  const isExpiringSoon = document.dateExpiration &&
+    new Date(document.dateExpiration) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  return (
+    <Card className={`group hover:shadow-md transition-all duration-200 border-l-4 ${
+      highlightExpiring && isExpiringSoon && !isExpired 
+        ? 'border-l-amber-500' 
+        : isExpired 
+        ? 'border-l-red-500' 
+        : 'border-l-gray-200'
+    } hover:border-l-blue-500`}>
+      <CardContent className="p-3 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-3 sm:gap-4">
+          {/* Partie gauche : Icône */}
+          <div className={`p-2 sm:p-3 rounded-lg ${
+            isExpired ? 'bg-red-100' : 
+            highlightExpiring && isExpiringSoon ? 'bg-amber-100' : 
+            'bg-blue-100'
+          } grid place-items-center`}>
+            <div className="text-lg sm:text-xl">{getFileIcon()}</div>
+          </div>
+
+          {/* Partie centrale : Informations */}
+          <div className="grid gap-1.5 sm:gap-2">
+            <div className="grid gap-0.5 sm:gap-1">
+              <h3 className="font-semibold text-base sm:text-lg truncate hover:text-blue-600">
+                {document.nom}
+              </h3>
+              
+              {document.description && (
+                <p className="text-gray-600 text-xs sm:text-sm line-clamp-1">
+                  {document.description}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-[auto_auto] sm:grid-cols-[auto_auto_auto] gap-1.5 sm:gap-2 items-center">
+              <Badge className={`${getStatusColor(document.statut)} text-xs sm:text-sm`}>
+                <span className="grid grid-cols-[auto_1fr] items-center gap-1">
+                  {getStatusIcon(document.statut)}
+                  <span className="hidden sm:inline">{document.statut}</span>
+                  <span className="sm:hidden">{document.statut.slice(0, 3)}</span>
+                </span>
+              </Badge>
+              
+              <Badge variant="outline" className={`${getCategoryColor(document.categorie)} text-xs sm:text-sm`}>
+                <span className="grid grid-cols-[auto_1fr] items-center gap-1">
+                  {getCategoryIcon(document.categorie)}
+                  <span className="hidden sm:inline">{document.categorie}</span>
+                  <span className="sm:hidden">{document.categorie.slice(0, 3)}</span>
+                </span>
+              </Badge>
+              
+              <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
+                {document.format.toUpperCase()}
+              </Badge>
+            </div>
+
+            {/* Métadonnées */}
+            <div className="grid grid-cols-1 sm:grid-cols-[auto_auto_auto] gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600">
+              <span className="grid grid-cols-[auto_1fr] items-center gap-1">
+                <FileText className="h-3 w-3" />
+                {formatFileSize()}
+              </span>
+              <span className="hidden sm:inline">
+                Ajouté le {format(new Date(document.dateUpload), "dd/MM/yyyy")}
+              </span>
+              <span className="sm:hidden">
+                {format(new Date(document.dateUpload), "dd/MM/yy")}
+              </span>
+              {document.dateExpiration && (
+                <span className={`grid grid-cols-[auto_1fr] items-center gap-1 ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
+                  <Calendar className="h-3 w-3" />
+                  <span className="hidden sm:inline">
+                    Expire le {format(new Date(document.dateExpiration), "dd/MM/yyyy")}
+                  </span>
+                  <span className="sm:hidden">
+                    {format(new Date(document.dateExpiration), "dd/MM/yy")}
+                  </span>
+                </span>
+              )}
+            </div>
+
+            {/* Tags */}
+            {document.tags.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 mt-1">
+                {document.tags.slice(0, 2).map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full truncate"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {document.tags.length > 2 && (
+                  <span className="text-xs text-gray-500 px-1.5 py-0.5 sm:px-2 sm:py-1">
+                    +{document.tags.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Partie droite : Actions */}
+          <div className="grid grid-cols-[1fr_auto] sm:grid-cols-1 gap-1.5 sm:gap-2 items-center">
+            {/* Bouton Télécharger */}
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
-              onClick={() => onEdit(document)}
+              className="h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+              onClick={onDownload}
+              disabled={isDownloading}
             >
-              <Edit className="h-4 w-4" />
+              {isDownloading ? (
+                <div className="grid place-items-center">
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                </div>
+              ) : (
+                <>
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Télécharger</span>
+                  <span className="sm:hidden">DL</span>
+                </>
+              )}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onView(document.url)}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDownload(document.url, document.nom)}
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(document.id)}
-              className="text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            
+            {/* Actions supplémentaires sur mobile */}
+            <div className="sm:hidden relative">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 grid place-items-center"
+                onClick={() => setShowMobileActions(!showMobileActions)}
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </Button>
+              
+              {showMobileActions && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowMobileActions(false)}
+                  />
+                  <div className="absolute right-0 top-10 z-50 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                    <button
+                      onClick={() => {
+                        onEdit();
+                        setShowMobileActions(false);
+                      }}
+                      className="grid grid-cols-[auto_1fr] items-center gap-2 w-full px-3 py-2 text-xs hover:bg-gray-100 text-left"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => {
+                        onView();
+                        setShowMobileActions(false);
+                      }}
+                      className="grid grid-cols-[auto_1fr] items-center gap-2 w-full px-3 py-2 text-xs hover:bg-gray-100 text-left"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      Visualiser
+                    </button>
+                    <button
+                      onClick={() => {
+                        onDelete();
+                        setShowMobileActions(false);
+                      }}
+                      className="grid grid-cols-[auto_1fr] items-center gap-2 w-full px-3 py-2 text-xs hover:bg-red-50 text-red-600 text-left"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Supprimer
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Actions sur desktop */}
+            <div className="hidden sm:grid grid-cols-3 gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onView}
+                className="h-9 w-9 grid place-items-center"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onEdit}
+                className="h-9 w-9 grid place-items-center"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onDelete}
+                className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50 grid place-items-center"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
