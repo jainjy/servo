@@ -291,6 +291,20 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   onFilter
 }) => {
   const navigate = useNavigate();
+//Fonction pour calculer la distance (Haversine)
+const getDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 
   // Initialisation du tracking
   const {
@@ -316,6 +330,14 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
   const [typeBienLocation, setTypeBienLocation] = useState<string | undefined>(undefined);
   const [typeBienSaison, setTypeBienSaison] = useState<string | undefined>(undefined);
   const [localisation, setLocalisation] = useState("");
+  // const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+
+  // CHOIX 1: Utiliser la position par défaut de La Réunion
+  const [userLocation, setUserLocation] = useState({
+    lat: -20.882057,
+    lon: 55.450675
+  });
+
 
   // AJOUT: État pour la modale de carte
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -400,12 +422,76 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     return () => { mounted = false; };
   }, [isAuthenticated, user?.id]);
 
+
+  // FILTRE PAR RAYON - SEULEMENT SI VOUS UTILISEZ userLocation = null
+  useEffect(() => {
+    // Si userLocation est null (version décommentée), alors on essaie d'obtenir la géolocalisation
+    // Si userLocation a une valeur par défaut, on ne fait rien ici
+    if (!userLocation && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude
+          });
+        },
+        (err) => {
+          console.warn("Permission localisation refusée", err);
+          // Si la géolocalisation échoue, on utilise la position par défaut de La Réunion
+          setUserLocation({
+            lat: -20.882057,
+            lon: 55.450675
+          });
+        }
+      );
+    }
+  }, [userLocation]);
+
+  // Fonction pour gérer le changement de valeur via l'input
+  const handleRadiusInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setRadiusKm(0);
+      return;
+    }
+    
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= 30) {
+      setRadiusKm(numValue);
+    }
+  };
+
+  // Fonction pour gérer le blur de l'input (correction automatique)
+  const handleRadiusInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setRadiusKm(0);
+      return;
+    }
+    
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) {
+      setRadiusKm(0);
+    } else if (numValue < 0) {
+      setRadiusKm(0);
+    } else if (numValue > 30) {
+      setRadiusKm(30);
+    } else {
+      setRadiusKm(numValue);
+    }
+  };
+
+  // Fetch properties from API
   const fetchProperties = async () => {
     try {
       setError(null);
       const response = await api.get('/properties');
       if (!response.data) throw new Error('Erreur lors de la récupération des propriétés');
-      const properties = response.data;
+      const properties = response.data.map(p => ({
+        ...p,
+        latitude: Number(p.latitude),
+        longitude: Number(p.longitude),
+      }));
 
       const forSale = properties
         .filter((p: any) => p.status === 'for_sale' && p.isActive)
@@ -534,6 +620,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
       return feats.includes(token.toLowerCase()) || more.includes(token.toLowerCase());
     };
 
+    
     const applyFilters = (arr: any[]) =>
       arr.filter((p) => {
         if (!p) return false;
@@ -619,6 +706,23 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
       base = base.filter((p) => String(p.type || '').toLowerCase().includes(String(typeBienSaison).toLowerCase()));
     }
 
+    // FILTRE PAR RAYON SI POSITION DISPONIBLE
+    // Note: userLocation peut être soit un objet {lat, lon} soit null
+    if (userLocation && radiusKm > 0) {
+      base = base.filter((p) => {
+        if (!p.latitude || !p.longitude) return false;  
+
+        const dist = getDistanceKm(
+          userLocation.lat,
+          userLocation.lon,
+          p.latitude,
+          p.longitude
+        );
+
+        return dist <= radiusKm;
+      });
+    }
+
     return applyFilters(base);
   }, [
     activeTab,
@@ -637,6 +741,8 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     chambres,
     exterieur,
     extras,
+    radiusKm,
+    userLocation, // Ajouté ici pour déclencher le recalcul quand userLocation change
   ]);
 
   const ctaMoreRoute = activeTab === 'achat' ? '/acheter' : '/louer';
@@ -1088,19 +1194,36 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
               readOnly
             />
           </div>
+          
+          {/* FILTRE RAYON MODIFIÉ AVEC INPUT */}
           <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span className="font-semibold">RAYON</span>
-              <span className="font-medium">{radiusKm} Km</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-sm text-muted-foreground">RAYON</span>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="30"
+                  value={radiusKm}
+                  onChange={handleRadiusInputChange}
+                  onBlur={handleRadiusInputBlur}
+                  className="h-8 w-16 text-center border-2"
+                />
+                <span className="font-medium text-sm">Km</span>
+              </div>
             </div>
             <Slider
               value={[radiusKm]}
               min={0}
-              max={10}
+              max={30}
               step={1}
               onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
               className="mt-1"
             />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>0 Km</span>
+              <span>30 Km</span>
+            </div>
           </div>
 
           {/* Filtres supplémentaires */}
