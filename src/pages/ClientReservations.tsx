@@ -20,6 +20,8 @@ import {
   Check,
   DoorOpen,
   Info,
+  AlertCircle,
+  Bell,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
@@ -43,22 +45,18 @@ const ClientReservations = () => {
     en_cours: 0,
     revenueTotal: 0,
   });
+  const [hasNewReservation, setHasNewReservation] = useState(false);
 
   // Détecter la taille de l'écran
   useEffect(() => {
-    console.log("🔄 ClientReservations component mounted");
-    
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768;
-      console.log(`📱 Window width: ${window.innerWidth}px, isMobile: ${mobile}`);
-      setIsMobile(mobile);
+      setIsMobile(window.innerWidth < 768);
     };
     
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
     return () => {
-      console.log("🧹 ClientReservations component cleanup");
       window.removeEventListener('resize', checkMobile);
     };
   }, []);
@@ -66,43 +64,42 @@ const ClientReservations = () => {
   // Charger les réservations
   const loadReservations = async () => {
     if (!isAuthenticated || !user?.id) {
-      console.log('❌ ClientReservations: User not authenticated or no user ID');
-      console.log('📊 Auth state:', { isAuthenticated, userId: user?.id, userRole: user?.role });
       setLoading(false);
       return;
     }
     
     setLoading(true);
     try {
-      console.log('🔄 ClientReservations: Loading client reservations...', { 
-        userId: user.id,
-        userRole: user.role,
-        userEmail: user.email
-      });
+      console.log('🔄 Chargement des réservations client...');
       
-      // Pour les clients: leurs réservations
-      console.log(`🌐 Making API call to: /locations-saisonnieres/client/${user.id}`);
       const response = await api.get(`/locations-saisonnieres/client/${user.id}`);
       
       console.log('📥 API Response:', {
         status: response.status,
-        dataLength: response.data?.length,
-        dataSample: response.data?.[0]
+        dataLength: response.data?.length
       });
 
       if (response.data && Array.isArray(response.data)) {
-        console.log(`✅ ${response.data.length} client reservations loaded`);
+        console.log(`✅ ${response.data.length} réservations chargées`);
         
-        // Log des détails des réservations
-        response.data.forEach((res: LocationSaisonniere, index: number) => {
-          console.log(`📋 Reservation ${index + 1}:`, {
-            id: res.id,
-            propertyTitle: res.property?.title,
-            statut: res.statut,
-            prixTotal: res.prixTotal,
-            dates: `${res.dateDebut} to ${res.dateFin}`
+        // Vérifier s'il y a de nouvelles réservations
+        const oldIds = reservations.map(r => r.id);
+        const newReservations = response.data.filter(r => !oldIds.includes(r.id));
+        
+        if (newReservations.length > 0 && reservations.length > 0) {
+          setHasNewReservation(true);
+          console.log(`🎉 ${newReservations.length} nouvelle(s) réservation(s)`);
+          
+          // Afficher une notification pour chaque nouvelle réservation
+          newReservations.forEach(reservation => {
+            toast({
+              title: "Nouvelle réservation !",
+              description: `Votre réservation pour "${reservation.property?.title}" a été créée`,
+              variant: "default",
+              duration: 5000
+            });
           });
-        });
+        }
         
         setReservations(response.data);
         
@@ -119,21 +116,13 @@ const ClientReservations = () => {
             .reduce((sum: number, r: LocationSaisonniere) => sum + r.prixTotal, 0),
         };
         
-        console.log('📊 Statistics calculated:', statsData);
         setStats(statsData);
       } else {
-        console.error('❌ Invalid data format from API:', response.data);
-        console.log('🔍 Response data type:', typeof response.data);
         setReservations([]);
       }
 
     } catch (err: any) {
-      console.error("❌ Error loading client reservations:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        url: err.config?.url
-      });
+      console.error("❌ Erreur chargement réservations:", err);
       
       setReservations([]);
       
@@ -143,133 +132,110 @@ const ClientReservations = () => {
         variant: "destructive"
       });
     } finally {
-      console.log('🏁 ClientReservations: Loading finished');
       setLoading(false);
     }
   };
 
   // Charger au montage avec écouteurs d'événements
   useEffect(() => {
-    console.log("🔍 ClientReservations: useEffect triggered", {
-      isAuthenticated,
-      userId: user?.id,
-      loading
-    });
-    
     const handleReservationCreated = (event: CustomEvent) => {
       console.log('🎯 Événement réservation créée reçu:', event.detail);
-      // Recharger les réservations
-      loadReservations();
       
-      toast({
-        title: "Nouvelle réservation",
-        description: "Une réservation a été créée suite à votre visite",
-        variant: "default"
-      });
+      // Vérifier si cette réservation concerne cet utilisateur
+      if (event.detail.clientId === user?.id) {
+        console.log('✅ Nouvelle réservation pour cet utilisateur, rechargement...');
+        
+        // Attendre 1 seconde pour laisser le backend terminer
+        setTimeout(() => {
+          loadReservations();
+          
+          toast({
+            title: "Nouvelle réservation",
+            description: "Votre réservation a été créée avec succès",
+            variant: "default",
+            duration: 5000
+          });
+        }, 1000);
+      }
     };
     
     const handleDemandeStatusChanged = (event: CustomEvent) => {
-      const { statut } = event.detail || {};
+      const { statut, propertyId } = event.detail || {};
       const statutLower = statut?.toLowerCase();
       
-      // Si la demande est marquée comme "loué", recharger les réservations
+      // Si une demande est marquée comme "loué", vérifier les réservations
       if (statutLower === 'loué' || statutLower === 'loue' || statutLower === 'rented') {
-        console.log('🏠 Demande marquée comme louée, rechargement des réservations');
+        console.log('🏠 Demande marquée comme louée, vérification réservations...');
+        
+        // Attendre 2 secondes pour laisser le backend créer la réservation
         setTimeout(() => {
           loadReservations();
-        }, 1000); // Petit délai pour laisser le temps au backend de créer la réservation
+        }, 2000);
       }
     };
     
     if (isAuthenticated && user?.id) {
-      console.log("🚀 Starting to load reservations...");
+      console.log("🚀 Démarrage chargement réservations...");
       loadReservations();
       
       // Écouter les événements
       window.addEventListener('reservation:created', handleReservationCreated as EventListener);
       window.addEventListener('demande:statusChanged', handleDemandeStatusChanged as EventListener);
       
-      // Polling toutes les 30 secondes pour les nouvelles réservations (optionnel)
+      // Polling toutes les 30 secondes
       const pollingInterval = setInterval(() => {
-        console.log('⏰ Polling pour nouvelles réservations');
         loadReservations();
       }, 30000);
       
       return () => {
-        console.log("🧹 ClientReservations cleanup");
         window.removeEventListener('reservation:created', handleReservationCreated as EventListener);
         window.removeEventListener('demande:statusChanged', handleDemandeStatusChanged as EventListener);
         clearInterval(pollingInterval);
       };
     } else {
-      console.log("⏸️ Skipping load - user not authenticated");
       setLoading(false);
     }
   }, [isAuthenticated, user?.id]);
 
   // Filtrer les réservations
   const filteredReservations = React.useMemo(() => {
-    console.log("🔍 Filtering reservations:", {
-      totalReservations: reservations.length,
-      activeTab,
-      searchTerm,
-    });
-    
     let filtered = reservations;
 
     if (activeTab !== "all") {
       filtered = filtered.filter((reservation) => reservation.statut === activeTab);
-      console.log(`🎯 Filtered by status "${activeTab}": ${filtered.length} reservations`);
     }
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((reservation) =>
         reservation.property?.title?.toLowerCase().includes(term) ||
-        reservation.property?.city?.toLowerCase().includes(term)
+        reservation.property?.city?.toLowerCase().includes(term) ||
+        reservation.property?.address?.toLowerCase().includes(term)
       );
-      console.log(`🔍 Filtered by search term "${searchTerm}": ${filtered.length} reservations`);
     }
 
-    console.log(`✅ Final filtered count: ${filtered.length} reservations`);
     return filtered;
   }, [reservations, activeTab, searchTerm]);
 
   // Changer le statut d'une réservation
   const handleStatusChange = async (id: number, statut: LocationSaisonniere['statut']) => {
-    console.log(`🔄 ClientReservations: Status change requested`, {
-      reservationId: id,
-      newStatus: statut,
-      currentStatus: reservations.find(r => r.id === id)?.statut
-    });
-    
     setUpdatingIds((s) => [...s, id]);
     try {
-      console.log(`🌐 Making API call to update status for reservation ${id}`);
-      
       const response = await api.patch(`/locations-saisonnieres/${id}/statut`, { statut });
-      
-      console.log('✅ API response:', response.data);
       
       if (response.data) {
         setReservations((prev) =>
           prev.map((r) => r.id === id ? { ...r, statut, updatedAt: new Date().toISOString() } : r)
         );
 
-        console.log(`✅ Status updated locally for reservation ${id}`);
-        
         toast({ 
           title: "Succès", 
-          description: `Statut changé`,
+          description: `Statut changé en "${statut}"`,
           variant: "default"
         });
       }
     } catch (err: any) {
-      console.error("❌ Error changing status:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
+      console.error("❌ Erreur changement statut:", err);
       
       toast({ 
         title: "Erreur", 
@@ -277,33 +243,20 @@ const ClientReservations = () => {
         variant: "destructive"
       });
     } finally {
-      setUpdatingIds((s) => {
-        const newIds = s.filter((x) => x !== id);
-        console.log(`🏁 Updating IDs after completion:`, newIds);
-        return newIds;
-      });
+      setUpdatingIds((s) => s.filter((x) => x !== id));
     }
   };
 
   const handleRemove = async (id: number) => {
-    console.log(`🗑️ ClientReservations: Remove requested for reservation ${id}`);
-    
     if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?")) {
-      console.log('❌ Delete cancelled by user');
       return;
     }
 
     setUpdatingIds((s) => [...s, id]);
     try {
-      console.log(`🌐 Making API call to delete reservation ${id}`);
-      
       await api.delete(`/locations-saisonnieres/${id}`);
       
-      setReservations((prev) => {
-        const newReservations = prev.filter((r) => r.id !== id);
-        console.log(`✅ Reservation ${id} removed locally. New count: ${newReservations.length}`);
-        return newReservations;
-      });
+      setReservations((prev) => prev.filter((r) => r.id !== id));
       
       toast({
         title: "Supprimée",
@@ -311,11 +264,7 @@ const ClientReservations = () => {
         variant: "default"
       });
     } catch (err: any) {
-      console.error("❌ Error deleting reservation:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
+      console.error("❌ Erreur suppression réservation:", err);
       
       toast({
         title: "Erreur",
@@ -328,26 +277,13 @@ const ClientReservations = () => {
   };
 
   const handleViewDetails = (reservation: LocationSaisonniere) => {
-    console.log("👁️ View details clicked for reservation:", {
-      id: reservation.id,
-      propertyId: reservation.propertyId,
-      propertyTitle: reservation.property?.title
-    });
-    
-    // Naviguer vers la page du bien ou ouvrir un modal
     if (reservation.propertyId) {
-      console.log(`🔗 Opening property page: /immobilier/${reservation.propertyId}`);
       window.open(`/immobilier/${reservation.propertyId}`, '_blank');
-    } else {
-      console.warn('⚠️ No propertyId found for reservation:', reservation.id);
     }
   };
 
   const handleExport = () => {
-    console.log(`📤 Export requested for ${filteredReservations.length} reservations`);
-    
     if (filteredReservations.length === 0) {
-      console.warn('⚠️ No reservations to export');
       toast({
         title: "Aucune donnée",
         description: "Aucune réservation à exporter",
@@ -369,8 +305,6 @@ const ClientReservations = () => {
       'Date création': new Date(r.createdAt).toLocaleDateString("fr-FR"),
     }));
 
-    console.log('📊 CSV data prepared:', csvData.length, 'rows');
-
     const headers = Object.keys(csvData[0] || {});
     const csvContent = [
       headers.join(','),
@@ -385,8 +319,6 @@ const ClientReservations = () => {
     a.click();
     URL.revokeObjectURL(url);
     
-    console.log('✅ CSV file downloaded');
-    
     toast({
       title: "Export réussi",
       description: `${filteredReservations.length} réservations exportées`,
@@ -394,8 +326,11 @@ const ClientReservations = () => {
     });
   };
 
+  const clearNewReservationNotification = () => {
+    setHasNewReservation(false);
+  };
+
   if (!isAuthenticated) {
-    console.log('🔒 ClientReservations: User not authenticated, showing login message');
     return (
       <div className="min-h-screen mt-12 bg-gray-50 p-4 md:p-6 flex items-center justify-center">
         <p className="text-gray-600">
@@ -406,17 +341,8 @@ const ClientReservations = () => {
   }
 
   if (loading) {
-    console.log('⏳ ClientReservations: Loading spinner shown');
     return <LoadingSpinner text="Chargement de vos réservations" />;
   }
-
-  console.log('🎨 ClientReservations: Rendering main component', {
-    reservationsCount: reservations.length,
-    filteredCount: filteredReservations.length,
-    stats,
-    activeTab,
-    searchTerm
-  });
 
   return (
     <div className="min-h-screen bg-gray-50 mt-10 p-4 md:p-6">
@@ -429,6 +355,16 @@ const ClientReservations = () => {
               <h1 className="text-xl md:text-3xl font-bold text-gray-900">
                 Mes réservations
               </h1>
+              {hasNewReservation && (
+                <button
+                  onClick={clearNewReservationNotification}
+                  className="relative"
+                  title="Nouvelles réservations disponibles"
+                >
+                  <Bell className="w-6 h-6 text-green-600 animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                </button>
+              )}
             </div>
             <p className="text-gray-600 text-sm md:text-base">
               Suivez vos réservations en location saisonnière
@@ -540,6 +476,29 @@ const ClientReservations = () => {
           </div>
         )}
 
+        {/* Notification nouvelles réservations */}
+        {hasNewReservation && (
+          <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <Bell className="w-5 h-5 text-green-600" />
+              <div className="flex-1">
+                <p className="text-green-800 font-medium">
+                  De nouvelles réservations sont disponibles !
+                </p>
+                <p className="text-green-600 text-sm">
+                  Actualisez la page pour voir les dernières réservations créées.
+                </p>
+              </div>
+              <button
+                onClick={clearNewReservationNotification}
+                className="text-green-700 hover:text-green-800 text-sm font-medium"
+              >
+                Marquer comme lu
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Statistiques */}
         {reservations.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4 mb-6">
@@ -572,10 +531,7 @@ const ClientReservations = () => {
                   type="text"
                   placeholder="Rechercher bien, dates..."
                   value={searchTerm}
-                  onChange={(e) => {
-                    console.log(`🔍 Search term changed: "${e.target.value}"`);
-                    setSearchTerm(e.target.value);
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
                 />
               </div>
@@ -600,10 +556,7 @@ const ClientReservations = () => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => {
-                  console.log(`📌 Tab clicked: ${tab.id}`);
-                  setActiveTab(tab.id);
-                }}
+                onClick={() => setActiveTab(tab.id)}
                 className={`px-3 md:px-6 py-2 md:py-3 text-xs md:text-sm font-medium rounded-md md:rounded-lg transition-all duration-200 flex items-center gap-1 md:gap-2 whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-blue-500 text-white shadow-md"
