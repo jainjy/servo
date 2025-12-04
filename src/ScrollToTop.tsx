@@ -5,10 +5,23 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" }); // Défilement doux vers le haut
-  }, [pathname]); // On déclenche l'effet à chaque changement de route
+    // Solution multi-navigateur pour le scroll to top
+    setTimeout(() => {
+      // Essayer window.scrollTo d'abord (desktop/modern browsers)
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      
+      // Fallback pour iOS Safari et certains navigateurs mobiles
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      
+      // Forcer le reflow sur mobile
+      if (document.scrollingElement) {
+        document.scrollingElement.scrollTop = 0;
+      }
+    }, 0);
+  }, [pathname]);
 
-  return null; // Ce composant ne rend rien
+  return null;
 };
 
 export default ScrollToTop;
