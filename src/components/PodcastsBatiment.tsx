@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Headphones, Clock, Heart, Star, Download, Video, Home, Calendar } from 'lucide-react';
 import { MediaService } from '../lib/api';
+import LoadingSpinner from './Loading/LoadingSpinner';
 
 interface VideoEpisode {
   id: string;
@@ -367,14 +368,7 @@ const PodcastsBatiment: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <div className="text-gray-600">Chargement des vidéos Bâtiment & Construction...</div>
-          </div>
-        </div>
-      </div>
+ <LoadingSpinner text='Chargement des vidéos Bâtiment & Construction'/>
     );
   }
 

@@ -21,6 +21,7 @@ import {
   ThumbsUp,
   Lock,
   ArrowDown,
+  ArrowLeft
 } from "lucide-react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -46,6 +47,7 @@ export default function UserDiscussions() {
   const [reviewComment, setReviewComment] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false); // État pour la modale de chat mobile
+  const [loadingArtisanId, setLoadingArtisanId] = useState(null); // État pour tracker l'artisan en cours de traitement
   const messagesContainerRef = useRef(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const actionsMenuRef = useRef(null);
@@ -152,6 +154,7 @@ export default function UserDiscussions() {
   // Dans UserDiscussions.jsx, ajoutez cette fonction
   const handleConfirmerTravauxTermines = async (confirmer) => {
     try {
+      setLoadingArtisanId("confirming");
       const response = await api.post(
         `/demande-actions/${id}/confirmer-travaux-termines`,
         {
@@ -170,6 +173,8 @@ export default function UserDiscussions() {
     } catch (error) {
       console.error("Erreur confirmation travaux:", error);
       toast.error("Erreur lors de la confirmation des travaux");
+    } finally {
+      setLoadingArtisanId(null);
     }
   };
   // Charger la demande
@@ -337,6 +342,7 @@ export default function UserDiscussions() {
   // Fonction pour signer un devis
   const handleSignerDevis = async (artisanId) => {
     try {
+      setLoadingArtisanId(artisanId);
       const response = await api.post(`/demande-actions/${id}/signer-devis`, {
         artisanId,
       });
@@ -350,6 +356,8 @@ export default function UserDiscussions() {
     } catch (error) {
       console.error("Erreur signature devis:", error);
       toast.error("Erreur lors de la signature du devis");
+    } finally {
+      setLoadingArtisanId(null);
     }
   };
 
@@ -366,6 +374,7 @@ export default function UserDiscussions() {
 
   const handleConfirmPayment = async () => {
     try {
+      setLoadingArtisanId(selectedArtisan);
       const response = await api.post(`/demande-actions/${id}/payer-facture`, {
         artisanId: selectedArtisan,
       });
@@ -380,6 +389,8 @@ export default function UserDiscussions() {
     } catch (error) {
       console.error("Erreur paiement:", error);
       toast.error("Erreur lors du paiement");
+    } finally {
+      setLoadingArtisanId(null);
     }
   };
 
@@ -451,6 +462,11 @@ export default function UserDiscussions() {
     return <div className="p-8 text-center">Demande non trouvée</div>;
   }
 
+  // Composant helper pour afficher le loader
+  const LoadingSpinnerSmall = () => (
+    <div className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+  );
+
   return (
     <div className="min-h-full">
       <div className="flex flex-col lg:flex-row lg:h-screen">
@@ -458,6 +474,16 @@ export default function UserDiscussions() {
         <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-6 lg:p-8 overflow-y-auto mt-16 lg:mt-20">
           <div className="max-w-2xl mx-auto">
             {/* Informations principales */}
+            {/* Bouton de retour */}
+            <div className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>Retour</span>
+              </button>
+            </div>
             <div className="relative space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
@@ -472,13 +498,14 @@ export default function UserDiscussions() {
                 {/* Statut de la demande */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${demande.statut === "validée" ||
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      demande.statut === "validée" ||
                       demande.statut === "assignée"
-                      ? "bg-green-100 text-green-800"
-                      : demande.statut === "refusée"
+                        ? "bg-green-100 text-green-800"
+                        : demande.statut === "refusée"
                         ? "bg-red-100 text-red-800"
                         : "bg-yellow-100 text-yellow-800"
-                      }`}
+                    }`}
                   >
                     {demande.statut || "En attente"}
                   </span>
@@ -540,13 +567,17 @@ export default function UserDiscussions() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 pl-0 sm:pl-6">
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-1">Ville</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1">
+                        Ville
+                      </p>
                       <p className="text-sm sm:text-lg font-semibold text-gray-900">
                         {demande.lieuAdresseVille || ""}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-1">Code postal</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1">
+                        Code postal
+                      </p>
                       <p className="text-sm sm:text-lg font-semibold text-gray-900">
                         {demande.lieuAdresseCp || ""}
                       </p>
@@ -584,12 +615,18 @@ export default function UserDiscussions() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-500">Téléphone</p>
-                    <p className="font-semibold text-sm sm:text-base">{demande.contactTel}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      Téléphone
+                    </p>
+                    <p className="font-semibold text-sm sm:text-base">
+                      {demande.contactTel}
+                    </p>
                   </div>
                   <div className="sm:col-span-2">
                     <p className="text-xs sm:text-sm text-gray-500">Email</p>
-                    <p className="font-semibold text-sm sm:text-base break-all">{demande.contactEmail}</p>
+                    <p className="font-semibold text-sm sm:text-base break-all">
+                      {demande.contactEmail}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -638,7 +675,10 @@ export default function UserDiscussions() {
                             )}
                           </button>
                         </div>
-                        <div className="relative flex-shrink-0" ref={actionsMenuRef}>
+                        <div
+                          className="relative flex-shrink-0"
+                          ref={actionsMenuRef}
+                        >
                           <button
                             onClick={() => setShowActionsMenu(artisan.userId)}
                             className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
@@ -753,19 +793,20 @@ export default function UserDiscussions() {
                         )}
                         {hasFacture(artisan) && (
                           <span
-                            className={`px-2 py-1 text-xs rounded-full ${artisan.factureStatus === "validee"
-                              ? "bg-green-100 text-green-800"
-                              : artisan.factureStatus === "refusee"
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              artisan.factureStatus === "validee"
+                                ? "bg-green-100 text-green-800"
+                                : artisan.factureStatus === "refusee"
                                 ? "bg-red-100 text-red-800"
                                 : "bg-yellow-100 text-yellow-800"
-                              }`}
+                            }`}
                           >
                             Facture{" "}
                             {artisan.factureStatus === "validee"
                               ? "payée"
                               : artisan.factureStatus === "refusee"
-                                ? "refusée"
-                                : "en attente"}
+                              ? "refusée"
+                              : "en attente"}
                           </span>
                         )}
                         {canReviewArtisan(artisan) && (
@@ -785,7 +826,7 @@ export default function UserDiscussions() {
         {/* Bouton pour ouvrir la discussion sur mobile */}
         <div className="lg:hidden fixed bottom-6 right-6 z-40">
           <button
-          draggable
+            draggable
             onClick={() => setShowChatModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
             title="Ouvrir la discussion"
@@ -808,8 +849,9 @@ export default function UserDiscussions() {
               </div>
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"
-                    }`}
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
                 ></div>
                 <span className="text-sm text-gray-500">
                   {isConnected ? "En ligne" : "Hors ligne"}
@@ -843,8 +885,9 @@ export default function UserDiscussions() {
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
-                    className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
-                      }`}
+                    className={`flex gap-4 ${
+                      isCurrentUser(message) ? "justify-end" : ""
+                    }`}
                   >
                     {!isCurrentUser(message) && (
                       <div className="flex flex-col items-center">
@@ -856,8 +899,9 @@ export default function UserDiscussions() {
                     )}
 
                     <div
-                      className={`max-w-[70%] ${isCurrentUser(message) ? "order-first" : ""
-                        }`}
+                      className={`max-w-[70%] ${
+                        isCurrentUser(message) ? "order-first" : ""
+                      }`}
                     >
                       {/* Nom de l'expéditeur pour les messages des autres */}
                       {!isCurrentUser(message) && (
@@ -867,10 +911,11 @@ export default function UserDiscussions() {
                       )}
 
                       <div
-                        className={`rounded-2xl p-4 ${isCurrentUser(message)
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-gray-100 text-gray-900 rounded-bl-none"
-                          }`}
+                        className={`rounded-2xl p-4 ${
+                          isCurrentUser(message)
+                            ? "bg-blue-600 text-white rounded-br-none"
+                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                        }`}
                       >
                         {/* Fichier joint */}
                         {message.urlFichier && (
@@ -880,10 +925,11 @@ export default function UserDiscussions() {
                               target="_blank"
                               download={message.nomFichier}
                               rel="noopener noreferrer"
-                              className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
-                                ? "text-blue-200"
-                                : "text-blue-600"
-                                }`}
+                              className={`flex items-center gap-2 text-sm underline ${
+                                isCurrentUser(message)
+                                  ? "text-blue-200"
+                                  : "text-blue-600"
+                              }`}
                             >
                               <FileText className="w-4 h-4" />
                               {message.nomFichier}
@@ -899,12 +945,12 @@ export default function UserDiscussions() {
                             <p className="text-sm font-medium mb-2">
                               Nouveau devis reçu
                             </p>
-                            {(artisans.find(
+                            {artisans.find(
                               (a) => a.userId === message.expediteurId
                             ).devisFileUrl != null ||
-                              artisans.find(
-                                (a) => a.userId === message.expediteurId
-                              ).devis != null) ? (
+                            artisans.find(
+                              (a) => a.userId === message.expediteurId
+                            ).devis != null ? (
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => {
@@ -914,18 +960,28 @@ export default function UserDiscussions() {
                                     if (artisan)
                                       handleSignerDevis(artisan.userId);
                                   }}
-                                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                  disabled={loadingArtisanId === message.expediteurId || demande?.statut === "terminée"}
+                                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
-                                  Signer
+                                  {loadingArtisanId === message.expediteurId ? (
+                                    <>
+                                      <LoadingSpinnerSmall />
+                                      <span>Signature...</span>
+                                    </>
+                                  ) : (
+                                    "Signer"
+                                  )}
                                 </button>
-                                <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
-                                  Refuser
-                                </button>
+                                {demande?.statut !== "terminée" && (
+                                  <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+                                    Refuser
+                                  </button>
+                                )}
                               </div>
                             ) : (
                               <div className="flex gap-2">
-                                <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
-                                  deja signer <CheckCircle />
+                                <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
+                                  déjà signé <CheckCircle className="w-4 h-4" />
                                 </span>
                               </div>
                             )}
@@ -948,14 +1004,22 @@ export default function UserDiscussions() {
                                     if (artisan)
                                       handlePayerFacture(artisan.userId);
                                   }}
-                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                  disabled={loadingArtisanId === message.expediteurId}
+                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
-                                  Payer maintenant
+                                  {loadingArtisanId === message.expediteurId ? (
+                                    <>
+                                      <LoadingSpinnerSmall />
+                                      <span>Paiement...</span>
+                                    </>
+                                  ) : (
+                                    "Payer maintenant"
+                                  )}
                                 </button>
                               </>
                             ) : (
                               <p className="text-sm font-medium mb-2 bg-green-500 p-4 text-white rounded">
-                                Facture envoyer
+                                Facture payée
                               </p>
                             )}
                           </div>
@@ -973,22 +1037,31 @@ export default function UserDiscussions() {
                                     onClick={() =>
                                       handleConfirmerTravauxTermines(true)
                                     }
-                                    className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                    disabled={loadingArtisanId === "confirming"}
+                                    className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                   >
-                                    Confirmer
+                                    {loadingArtisanId === "confirming" ? (
+                                      <>
+                                        <LoadingSpinnerSmall />
+                                        <span>Confirmation...</span>
+                                      </>
+                                    ) : (
+                                      "Confirmer"
+                                    )}
                                   </button>
                                   <button
                                     onClick={() =>
                                       handleConfirmerTravauxTermines(false)
                                     }
-                                    className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                                    disabled={loadingArtisanId === "confirming"}
+                                    className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                   >
                                     Refuser
                                   </button>
                                 </>
                               ) : (
-                                <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
-                                  accepter <CheckCircle />
+                                <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
+                                  accepté <CheckCircle className="w-4 h-4" />
                                 </span>
                               )}
                             </div>
@@ -1007,10 +1080,11 @@ export default function UserDiscussions() {
                         )}
                       </div>
                       <div
-                        className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
-                          ? "text-gray-500 text-right"
-                          : "text-gray-400"
-                          }`}
+                        className={`text-xs mt-1 flex items-center gap-1 ${
+                          isCurrentUser(message)
+                            ? "text-gray-500 text-right"
+                            : "text-gray-400"
+                        }`}
                       >
                         {formatMessageTime(message.createdAt)}
                         {message.lu && " • Lu"}
@@ -1076,17 +1150,20 @@ export default function UserDiscussions() {
             <div className="flex gap-3">
               {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${uploadingFile
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-                  }`}
+                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                  uploadingFile
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-100"
+                }`}
               >
                 <Paperclip className="w-4 h-4" />
                 <input
                   type="file"
                   className="hidden"
                   onChange={handleFileUpload}
-                  disabled={uploadingFile || sending || demande?.statut == "terminée"}
+                  disabled={
+                    uploadingFile || sending || demande?.statut == "terminée"
+                  }
                 />
               </label>
 
@@ -1166,8 +1243,9 @@ export default function UserDiscussions() {
                     {messages.map((message, index) => (
                       <div
                         key={message.id}
-                        className={`flex gap-4 ${isCurrentUser(message) ? "justify-end" : ""
-                          }`}
+                        className={`flex gap-4 ${
+                          isCurrentUser(message) ? "justify-end" : ""
+                        }`}
                       >
                         {!isCurrentUser(message) && (
                           <div className="flex flex-col items-center">
@@ -1179,8 +1257,9 @@ export default function UserDiscussions() {
                         )}
 
                         <div
-                          className={`max-w-[70%] ${isCurrentUser(message) ? "order-first" : ""
-                            }`}
+                          className={`max-w-[70%] ${
+                            isCurrentUser(message) ? "order-first" : ""
+                          }`}
                         >
                           {/* Nom de l'expéditeur pour les messages des autres */}
                           {!isCurrentUser(message) && (
@@ -1190,10 +1269,11 @@ export default function UserDiscussions() {
                           )}
 
                           <div
-                            className={`rounded-2xl p-4 ${isCurrentUser(message)
-                              ? "bg-blue-600 text-white rounded-br-none"
-                              : "bg-gray-100 text-gray-900 rounded-bl-none"
-                              }`}
+                            className={`rounded-2xl p-4 ${
+                              isCurrentUser(message)
+                                ? "bg-blue-600 text-white rounded-br-none"
+                                : "bg-gray-100 text-gray-900 rounded-bl-none"
+                            }`}
                           >
                             {/* Fichier joint */}
                             {message.urlFichier && (
@@ -1203,10 +1283,11 @@ export default function UserDiscussions() {
                                   target="_blank"
                                   download={message.nomFichier}
                                   rel="noopener noreferrer"
-                                  className={`flex items-center gap-2 text-sm underline ${isCurrentUser(message)
-                                    ? "text-blue-200"
-                                    : "text-blue-600"
-                                    }`}
+                                  className={`flex items-center gap-2 text-sm underline ${
+                                    isCurrentUser(message)
+                                      ? "text-blue-200"
+                                      : "text-blue-600"
+                                  }`}
                                 >
                                   <FileText className="w-4 h-4" />
                                   {message.nomFichier}
@@ -1222,33 +1303,46 @@ export default function UserDiscussions() {
                                 <p className="text-sm font-medium mb-2">
                                   Nouveau devis reçu
                                 </p>
-                                {!(artisans.find(
-                                  (a) => a.userId === message.expediteurId
-                                ).devisFileUrl != null ||
+                                {!(
                                   artisans.find(
                                     (a) => a.userId === message.expediteurId
-                                  ).devis != null) ? (
+                                  ).devisFileUrl != null ||
+                                  artisans.find(
+                                    (a) => a.userId === message.expediteurId
+                                  ).devis != null
+                                ) ? (
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => {
                                         const artisan = artisans.find(
-                                          (a) => a.userId === message.expediteurId
+                                          (a) =>
+                                            a.userId === message.expediteurId
                                         );
                                         if (artisan)
                                           handleSignerDevis(artisan.userId);
                                       }}
-                                      className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                      disabled={loadingArtisanId === message.expediteurId || demande?.statut === "terminée"}
+                                      className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                     >
-                                      Signer
+                                      {loadingArtisanId === message.expediteurId ? (
+                                        <>
+                                          <LoadingSpinnerSmall />
+                                          <span>Signature...</span>
+                                        </>
+                                      ) : (
+                                        "Signer"
+                                      )}
                                     </button>
-                                    <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
-                                      Refuser
-                                    </button>
+                                    {demande?.statut !== "terminée" && (
+                                      <button className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+                                        Refuser
+                                      </button>
+                                    )}
                                   </div>
                                 ) : (
                                   <div className="flex gap-2">
-                                    <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
-                                      deja signer <CheckCircle />
+                                    <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
+                                      déjà signé <CheckCircle className="w-4 h-4" />
                                     </span>
                                   </div>
                                 )}
@@ -1266,19 +1360,28 @@ export default function UserDiscussions() {
                                     <button
                                       onClick={() => {
                                         const artisan = artisans.find(
-                                          (a) => a.userId === message.expediteurId
+                                          (a) =>
+                                            a.userId === message.expediteurId
                                         );
                                         if (artisan)
                                           handlePayerFacture(artisan.userId);
                                       }}
-                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                      disabled={loadingArtisanId === message.expediteurId}
+                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                     >
-                                      Payer maintenant
+                                      {loadingArtisanId === message.expediteurId ? (
+                                        <>
+                                          <LoadingSpinnerSmall />
+                                          <span>Paiement...</span>
+                                        </>
+                                      ) : (
+                                        "Payer maintenant"
+                                      )}
                                     </button>
                                   </>
                                 ) : (
                                   <p className="text-sm font-medium mb-2 bg-green-500 p-4 text-white rounded">
-                                    Facture envoyer
+                                    Facture payée
                                   </p>
                                 )}
                               </div>
@@ -1296,22 +1399,31 @@ export default function UserDiscussions() {
                                         onClick={() =>
                                           handleConfirmerTravauxTermines(true)
                                         }
-                                        className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                                        disabled={loadingArtisanId === "confirming"}
+                                        className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                       >
-                                        Confirmer
+                                        {loadingArtisanId === "confirming" ? (
+                                          <>
+                                            <LoadingSpinnerSmall />
+                                            <span>Confirmation...</span>
+                                          </>
+                                        ) : (
+                                          "Confirmer"
+                                        )}
                                       </button>
                                       <button
                                         onClick={() =>
                                           handleConfirmerTravauxTermines(false)
                                         }
-                                        className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                                        disabled={loadingArtisanId === "confirming"}
+                                        className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                       >
                                         Refuser
                                       </button>
                                     </>
                                   ) : (
-                                    <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
-                                      accepter <CheckCircle />
+                                    <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
+                                      accepté <CheckCircle className="w-4 h-4" />
                                     </span>
                                   )}
                                 </div>
@@ -1324,21 +1436,14 @@ export default function UserDiscussions() {
                                   Avis déposé
                                 </p>
                                 <RatingStars
-                                  rating={extractRatingFromMessage(message.contenu)}
+                                  rating={extractRatingFromMessage(
+                                    message.contenu
+                                  )}
                                 />
                               </div>
                             )}
                           </div>
-                          <div
-                            className={`text-xs mt-1 flex items-center gap-1 ${isCurrentUser(message)
-                              ? "text-gray-500 text-right"
-                              : "text-gray-400"
-                              }`}
-                          >
-                            {formatMessageTime(message.createdAt)}
-                            {message.lu && " • Lu"}
-                            {message.type === "SYSTEM" && " • Système"}
-                          </div>
+                          {/* ...existing code... */}
                         </div>
 
                         {isCurrentUser(message) && (
@@ -1372,10 +1477,11 @@ export default function UserDiscussions() {
                 <div className="flex gap-3">
                   {/* Bouton d'upload de fichier */}
                   <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${uploadingFile
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-gray-100"
-                      }`}
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                      uploadingFile
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-gray-100"
+                    }`}
                   >
                     <Paperclip className="w-4 h-4" />
                     <input
@@ -1471,9 +1577,9 @@ export default function UserDiscussions() {
                       .companyName ||
                       artisans.find((a) => a.userId === selectedArtisan)?.user
                         .firstName +
-                      " " +
-                      artisans.find((a) => a.userId === selectedArtisan)?.user
-                        .lastName}
+                        " " +
+                        artisans.find((a) => a.userId === selectedArtisan)?.user
+                          .lastName}
                   </span>
                 </div>
               </div>
@@ -1547,14 +1653,16 @@ export default function UserDiscussions() {
                       <button
                         key={star}
                         onClick={() => setReviewRating(star)}
-                        className={`p-2 rounded-lg transition-all ${star <= reviewRating
-                          ? "bg-yellow-100 text-yellow-500"
-                          : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                          }`}
+                        className={`p-2 rounded-lg transition-all ${
+                          star <= reviewRating
+                            ? "bg-yellow-100 text-yellow-500"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        }`}
                       >
                         <Star
-                          className={`w-6 h-6 ${star <= reviewRating ? "fill-current" : ""
-                            }`}
+                          className={`w-6 h-6 ${
+                            star <= reviewRating ? "fill-current" : ""
+                          }`}
                         />
                       </button>
                     ))}
@@ -1563,14 +1671,14 @@ export default function UserDiscussions() {
                     {reviewRating === 0
                       ? "Sélectionnez une note"
                       : reviewRating === 1
-                        ? "Très mauvais"
-                        : reviewRating === 2
-                          ? "Mauvais"
-                          : reviewRating === 3
-                            ? "Moyen"
-                            : reviewRating === 4
-                              ? "Bon"
-                              : "Excellent"}
+                      ? "Très mauvais"
+                      : reviewRating === 2
+                      ? "Mauvais"
+                      : reviewRating === 3
+                      ? "Moyen"
+                      : reviewRating === 4
+                      ? "Bon"
+                      : "Excellent"}
                   </p>
                 </div>
 

@@ -358,45 +358,49 @@ const LegalMentionsWidget = () => {
                 Mentions Légales
               </h1>
               <p className="text-gray-600 mt-1">
-                Conformément aux dispositions de la loi n°2004-575 du 21 juin 2004
+                Conformément aux dispositions de la loi n°2004-575 du 21 juin
+                2004
               </p>
             </div>
           </div>
-          
+
           <div className="flex flex-col items-end">
             <div className="text-sm text-gray-500 mb-2">
               Version en vigueur au
             </div>
             <div className="px-4 py-2 bg-gray-100 rounded-lg font-medium text-gray-900">
-              {new Date().toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
+              {new Date().toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
               })}
             </div>
           </div>
         </div>
-        
+
         {/* Bandeau d'information */}
         <div className="bg-gradient-to-r from-blue-900 to-gray-900 text-white rounded-2xl p-6 shadow-xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex-1">
-              <h2 className="text-xl font-bold mb-3">Informations Légales Complètes</h2>
+              <h2 className="text-xl font-bold mb-3">
+                Informations Légales Complètes
+              </h2>
               <p className="text-blue-100">
-                Ce document constitue les mentions légales du site. Pour toute question relative 
-                à ces informations, veuillez contacter notre service juridique.
+                Ce document constitue les mentions légales du site. Pour toute
+                question relative à ces informations, veuillez contacter notre
+                service juridique.
               </p>
             </div>
             <div className="flex gap-4">
-              <a 
+              <a
                 href="/mentions-legales.pdf"
                 className="px-5 py-3 bg-white text-gray-900 hover:bg-gray-100 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-md"
               >
                 <FileText className="w-5 h-5" />
                 Version PDF
               </a>
-              <a 
-                href="/politique-confidentialite"
+              <a
+                href="/confidentialite"
                 className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors"
               >
                 <Shield className="w-5 h-5" />
@@ -412,8 +416,8 @@ const LegalMentionsWidget = () => {
         <div className="lg:col-span-2">
           <div className="space-y-4">
             {legalSections.map((section) => (
-              <div 
-                key={section.id} 
+              <div
+                key={section.id}
                 className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
               >
                 <button
@@ -429,20 +433,27 @@ const LegalMentionsWidget = () => {
                         {section.title}
                       </h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        Cliquez pour {expandedSections[section.id] ? 'réduire' : 'développer'}
+                        Cliquez pour{" "}
+                        {expandedSections[section.id]
+                          ? "réduire"
+                          : "développer"}
                       </p>
                     </div>
                   </div>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-5 h-5 text-gray-400 transition-transform ${
-                      expandedSections[section.id] ? 'rotate-180' : ''
+                      expandedSections[section.id] ? "rotate-180" : ""
                     }`}
                   />
                 </button>
-                
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  expandedSections[section.id] ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-                }`}>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    expandedSections[section.id]
+                      ? "max-h-[2000px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
                   <div className="px-6 pb-6 pt-2 border-t border-gray-100">
                     {section.content}
                   </div>
@@ -459,7 +470,7 @@ const LegalMentionsWidget = () => {
               <Mail className="w-5 h-5" />
               Contact Juridique
             </h3>
-            
+
             <div className="space-y-5">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -467,7 +478,7 @@ const LegalMentionsWidget = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Email légal</p>
-                  <a 
+                  <a
                     href={`mailto:${contactInfo.email}`}
                     className="font-medium text-gray-900 hover:text-blue-600"
                   >
@@ -475,14 +486,14 @@ const LegalMentionsWidget = () => {
                   </a>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <Phone className="w-4 h-4 text-green-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Téléphone</p>
-                  <a 
+                  <a
                     href={`tel:${contactInfo.phone}`}
                     className="font-medium text-gray-900 hover:text-blue-600"
                   >
@@ -490,28 +501,32 @@ const LegalMentionsWidget = () => {
                   </a>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-amber-100 rounded-lg">
                   <MapPin className="w-4 h-4 text-amber-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Adresse postale</p>
-                  <p className="font-medium text-gray-900">{contactInfo.address}</p>
+                  <p className="font-medium text-gray-900">
+                    {contactInfo.address}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-purple-100 rounded-lg">
                   <Clock className="w-4 h-4 text-purple-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Horaires</p>
-                  <p className="font-medium text-gray-900">{contactInfo.hours}</p>
+                  <p className="font-medium text-gray-900">
+                    {contactInfo.hours}
+                  </p>
                 </div>
               </div>
             </div>
-            
+
             {/* <div className="mt-8 pt-6 border-t border-gray-200">
               <a 
                 href="/contact-juridique"
@@ -525,15 +540,21 @@ const LegalMentionsWidget = () => {
 
           {/* Documents légaux */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="font-bold text-gray-900 text-lg mb-6">Documents Officiels</h3>
+            <h3 className="font-bold text-gray-900 text-lg mb-6">
+              Documents Officiels
+            </h3>
             <div className="space-y-3">
               {[
-                { name: 'Statuts de la société', format: 'PDF', size: '2.4 MB' },
-                { name: 'Procès-verbal AG', format: 'PDF', size: '1.8 MB' },
-                { name: 'Attestation RCS', format: 'PDF', size: '1.2 MB' },
-                { name: 'Certificat INSEE', format: 'PDF', size: '0.9 MB' },
+                {
+                  name: "Statuts de la société",
+                  format: "PDF",
+                  size: "2.4 MB",
+                },
+                { name: "Procès-verbal AG", format: "PDF", size: "1.8 MB" },
+                { name: "Attestation RCS", format: "PDF", size: "1.2 MB" },
+                { name: "Certificat INSEE", format: "PDF", size: "0.9 MB" },
               ].map((doc, index) => (
-                <a 
+                <a
                   key={index}
                   href="#"
                   className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors group"
@@ -546,7 +567,9 @@ const LegalMentionsWidget = () => {
                       <p className="font-medium text-gray-900 group-hover:text-blue-600">
                         {doc.name}
                       </p>
-                      <p className="text-xs text-gray-500">{doc.format} • {doc.size}</p>
+                      <p className="text-xs text-gray-500">
+                        {doc.format} • {doc.size}
+                      </p>
                     </div>
                   </div>
                   <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
@@ -554,11 +577,8 @@ const LegalMentionsWidget = () => {
               ))}
             </div>
           </div>
-
-         
         </div>
       </div>
-
     </div>
   );
 };

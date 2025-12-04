@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import {
   Card,
   CardContent,
@@ -174,11 +175,7 @@ const FinancementServicesPro = () => {
 
   if (isLoadingServices || isLoadingPartenaires) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          Chargement des services financiers...
-        </div>
-      </div>
+      <LoadingSpinner text="Chargement des services financiers..." />
     );
   }
 

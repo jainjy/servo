@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { MediaService } from "../../lib/api";
 import MediaUpload from "./MediaUpload";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 // Types adaptés à votre structure de données
 interface MediaBase {
@@ -404,17 +405,6 @@ const EditMediaModal: React.FC<{
   );
 };
 
-// Composants de base
-const LoadingSpinner: React.FC<{ message?: string }> = ({
-  message = "Chargement..."
-}) => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center mt-20">
-    <div className="flex justify-center items-center py-12">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <span className="ml-2 text-gray-600">{message}</span>
-    </div>
-  </div>
-);
 
 const ErrorMessage: React.FC<{ message: string; onRetry?: () => void }> = ({
   message,
@@ -930,7 +920,7 @@ const AdminMedia: React.FC = () => {
 
   // Rendu principal
   if (loading && !refreshing) {
-    return <LoadingSpinner message="Chargement des podcasts vidéo..." />;
+    return <LoadingSpinner text="Chargement des podcasts vidéo" />;
   }
 
   return (
