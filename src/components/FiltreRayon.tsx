@@ -81,41 +81,6 @@ const FiltreRayon: React.FC<FiltreRayonProps> = ({
             </Button>
           )}
         </div>
-
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => setRadiusKm(5)}
-          >
-            5 Km
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => setRadiusKm(10)}
-          >
-            10 Km
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => setRadiusKm(25)}
-          >
-            25 Km
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => setRadiusKm(50)}
-          >
-            50 Km
-          </Button>
-        </div>
         
         {hasUserLocation && (
           <p className="text-xs text-slate-500 text-center mt-1">
