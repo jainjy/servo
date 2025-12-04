@@ -22,47 +22,69 @@ import {
   Info,
   AlertCircle,
   Bell,
+  BarChart3,
+  PieChart,
+  CreditCard,
+  Wallet,
+  FileText,
+  Settings,
+  ChevronRight,
+  TrendingDown,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
+  ExternalLink,
+  Building,
+  User
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import api from "@/lib/api";
-import ReservationCard, { LocationSaisonniere } from '../components/ReservationCard';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { 
+  LineChart, 
+  Line, 
+  BarChart, 
+  Bar, 
+  PieChart as RechartsPieChart, 
+  Pie, 
+  Cell,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
 
-const ClientReservations = () => {
+const ClientReservationsDashboard = () => {
   const { user, isAuthenticated } = useAuth();
-  const [reservations, setReservations] = useState<LocationSaisonniere[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [updatingIds, setUpdatingIds] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isMobile, setIsMobile] = useState(false);
-  const [stats, setStats] = useState({
-    total: 0,
-    en_attente: 0,
-    confirmee: 0,
-    annulee: 0,
-    terminee: 0,
-    en_cours: 0,
-    revenueTotal: 0,
-  });
-  const [hasNewReservation, setHasNewReservation] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [simulatingPayment, setSimulatingPayment] = useState<number | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("carte");
 
   // Détecter la taille de l'écran
+  const [isMobile, setIsMobile] = useState(false);
+  
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Charger les réservations
-  const loadReservations = async () => {
+  // Charger le dashboard
+  const loadDashboard = async () => {
     if (!isAuthenticated || !user?.id) {
       setLoading(false);
       return;
@@ -70,279 +92,168 @@ const ClientReservations = () => {
     
     setLoading(true);
     try {
-      console.log('🔄 Chargement des réservations client...');
+      const response = await api.get(`/locations-saisonnieres/client/${user.id}/dashboard?month=${selectedMonth}&year=${selectedYear}`);
       
-      const response = await api.get(`/locations-saisonnieres/client/${user.id}`);
-      
-      console.log('📥 API Response:', {
-        status: response.status,
-        dataLength: response.data?.length
-      });
-
-      if (response.data && Array.isArray(response.data)) {
-        console.log(`✅ ${response.data.length} réservations chargées`);
-        
-        // Vérifier s'il y a de nouvelles réservations
-        const oldIds = reservations.map(r => r.id);
-        const newReservations = response.data.filter(r => !oldIds.includes(r.id));
-        
-        if (newReservations.length > 0 && reservations.length > 0) {
-          setHasNewReservation(true);
-          console.log(`🎉 ${newReservations.length} nouvelle(s) réservation(s)`);
-          
-          // Afficher une notification pour chaque nouvelle réservation
-          newReservations.forEach(reservation => {
-            toast({
-              title: "Nouvelle réservation !",
-              description: `Votre réservation pour "${reservation.property?.title}" a été créée`,
-              variant: "default",
-              duration: 5000
-            });
-          });
-        }
-        
-        setReservations(response.data);
-        
-        // Calculer les statistiques
-        const statsData = {
-          total: response.data.length,
-          en_attente: response.data.filter((r: LocationSaisonniere) => r.statut === 'en_attente').length,
-          confirmee: response.data.filter((r: LocationSaisonniere) => r.statut === 'confirmee').length,
-          annulee: response.data.filter((r: LocationSaisonniere) => r.statut === 'annulee').length,
-          terminee: response.data.filter((r: LocationSaisonniere) => r.statut === 'terminee').length,
-          en_cours: response.data.filter((r: LocationSaisonniere) => r.statut === 'en_cours').length,
-          revenueTotal: response.data
-            .filter((r: LocationSaisonniere) => ['confirmee', 'terminee', 'en_cours'].includes(r.statut))
-            .reduce((sum: number, r: LocationSaisonniere) => sum + r.prixTotal, 0),
-        };
-        
-        setStats(statsData);
+      if (response.data?.success) {
+        setDashboardData(response.data.dashboard);
       } else {
-        setReservations([]);
-      }
-
-    } catch (err: any) {
-      console.error("❌ Erreur chargement réservations:", err);
-      
-      setReservations([]);
-      
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger vos réservations",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Charger au montage avec écouteurs d'événements
-  useEffect(() => {
-    const handleReservationCreated = (event: CustomEvent) => {
-      console.log('🎯 Événement réservation créée reçu:', event.detail);
-      
-      // Vérifier si cette réservation concerne cet utilisateur
-      if (event.detail.clientId === user?.id) {
-        console.log('✅ Nouvelle réservation pour cet utilisateur, rechargement...');
-        
-        // Attendre 1 seconde pour laisser le backend terminer
-        setTimeout(() => {
-          loadReservations();
-          
-          toast({
-            title: "Nouvelle réservation",
-            description: "Votre réservation a été créée avec succès",
-            variant: "default",
-            duration: 5000
-          });
-        }, 1000);
-      }
-    };
-    
-    const handleDemandeStatusChanged = (event: CustomEvent) => {
-      const { statut, propertyId } = event.detail || {};
-      const statutLower = statut?.toLowerCase();
-      
-      // Si une demande est marquée comme "loué", vérifier les réservations
-      if (statutLower === 'loué' || statutLower === 'loue' || statutLower === 'rented') {
-        console.log('🏠 Demande marquée comme louée, vérification réservations...');
-        
-        // Attendre 2 secondes pour laisser le backend créer la réservation
-        setTimeout(() => {
-          loadReservations();
-        }, 2000);
-      }
-    };
-    
-    if (isAuthenticated && user?.id) {
-      console.log("🚀 Démarrage chargement réservations...");
-      loadReservations();
-      
-      // Écouter les événements
-      window.addEventListener('reservation:created', handleReservationCreated as EventListener);
-      window.addEventListener('demande:statusChanged', handleDemandeStatusChanged as EventListener);
-      
-      // Polling toutes les 30 secondes
-      const pollingInterval = setInterval(() => {
-        loadReservations();
-      }, 30000);
-      
-      return () => {
-        window.removeEventListener('reservation:created', handleReservationCreated as EventListener);
-        window.removeEventListener('demande:statusChanged', handleDemandeStatusChanged as EventListener);
-        clearInterval(pollingInterval);
-      };
-    } else {
-      setLoading(false);
-    }
-  }, [isAuthenticated, user?.id]);
-
-  // Filtrer les réservations
-  const filteredReservations = React.useMemo(() => {
-    let filtered = reservations;
-
-    if (activeTab !== "all") {
-      filtered = filtered.filter((reservation) => reservation.statut === activeTab);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter((reservation) =>
-        reservation.property?.title?.toLowerCase().includes(term) ||
-        reservation.property?.city?.toLowerCase().includes(term) ||
-        reservation.property?.address?.toLowerCase().includes(term)
-      );
-    }
-
-    return filtered;
-  }, [reservations, activeTab, searchTerm]);
-
-  // Changer le statut d'une réservation
-  const handleStatusChange = async (id: number, statut: LocationSaisonniere['statut']) => {
-    setUpdatingIds((s) => [...s, id]);
-    try {
-      const response = await api.patch(`/locations-saisonnieres/${id}/statut`, { statut });
-      
-      if (response.data) {
-        setReservations((prev) =>
-          prev.map((r) => r.id === id ? { ...r, statut, updatedAt: new Date().toISOString() } : r)
-        );
-
-        toast({ 
-          title: "Succès", 
-          description: `Statut changé en "${statut}"`,
-          variant: "default"
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger le dashboard",
+          variant: "destructive"
         });
       }
     } catch (err: any) {
-      console.error("❌ Erreur changement statut:", err);
-      
-      toast({ 
-        title: "Erreur", 
-        description: "Impossible de changer le statut",
+      console.error("Erreur chargement dashboard:", err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger vos données",
         variant: "destructive"
       });
     } finally {
-      setUpdatingIds((s) => s.filter((x) => x !== id));
+      setLoading(false);
     }
   };
 
-  const handleRemove = async (id: number) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?")) {
+  // Charger au montage
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      loadDashboard();
+    }
+  }, [isAuthenticated, user?.id, selectedMonth, selectedYear]);
+
+  // Gérer le paiement
+  const handlePayment = async (reservationId: number, simulate = true) => {
+    if (!paymentAmount || isNaN(parseFloat(paymentAmount))) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez entrer un montant valide",
+        variant: "destructive"
+      });
       return;
     }
 
-    setUpdatingIds((s) => [...s, id]);
+    setSimulatingPayment(reservationId);
     try {
-      await api.delete(`/locations-saisonnieres/${id}`);
-      
-      setReservations((prev) => prev.filter((r) => r.id !== id));
-      
+      const response = await api.post(`/locations-saisonnieres/${reservationId}/simuler-paiement`, {
+        montant: parseFloat(paymentAmount),
+        methode: paymentMethod,
+        simulate
+      });
+
+      if (simulate) {
+        // Afficher la simulation
+        toast({
+          title: "Simulation de paiement",
+          description: (
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Montant proposé:</span>
+                <span className="font-bold">{response.data.montantPropose} €</span>
+              </div>
+              {response.data.details.frais > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>Frais ({paymentMethod}):</span>
+                  <span>{response.data.details.frais.toFixed(2)} €</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold border-t pt-2">
+                <span>Total à payer:</span>
+                <span>{response.data.details.totalAPayer.toFixed(2)} €</span>
+              </div>
+            </div>
+          ),
+          variant: "default",
+          duration: 10000,
+          action: simulate ? (
+            <Button
+              size="sm"
+              onClick={() => handlePayment(reservationId, false)}
+              className="mt-2"
+            >
+              Confirmer le paiement
+            </Button>
+          ) : null
+        });
+      } else {
+        // Paiement réel
+        toast({
+          title: "Paiement effectué",
+          description: `Paiement de ${paymentAmount}€ enregistré avec succès`,
+          variant: "default"
+        });
+        loadDashboard(); // Recharger les données
+        setPaymentAmount("");
+        setSimulatingPayment(null);
+      }
+    } catch (err: any) {
+      console.error("Erreur paiement:", err);
       toast({
-        title: "Supprimée",
-        description: "La réservation a été supprimée",
+        title: "Erreur",
+        description: err.response?.data?.error || "Impossible de traiter le paiement",
+        variant: "destructive"
+      });
+    } finally {
+      if (!simulate) {
+        setSimulatingPayment(null);
+      }
+    }
+  };
+
+  // Générer un rapport financier
+  const generateFinancialReport = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await api.get(`/locations-saisonnieres/client/${user.id}/rapport-financier?format=csv`, {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `rapport-financier-${user.id}-${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast({
+        title: "Rapport généré",
+        description: "Le rapport financier a été téléchargé",
         variant: "default"
       });
     } catch (err: any) {
-      console.error("❌ Erreur suppression réservation:", err);
-      
+      console.error("Erreur génération rapport:", err);
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer la réservation",
+        description: "Impossible de générer le rapport",
         variant: "destructive"
       });
-    } finally {
-      setUpdatingIds((s) => s.filter((x) => x !== id));
     }
-  };
-
-  const handleViewDetails = (reservation: LocationSaisonniere) => {
-    if (reservation.propertyId) {
-      window.open(`/immobilier/${reservation.propertyId}`, '_blank');
-    }
-  };
-
-  const handleExport = () => {
-    if (filteredReservations.length === 0) {
-      toast({
-        title: "Aucune donnée",
-        description: "Aucune réservation à exporter",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const csvData = filteredReservations.map(r => ({
-      ID: r.id,
-      Statut: r.statut,
-      'Bien': r.property?.title,
-      'Adresse': `${r.property?.address}, ${r.property?.city}`,
-      'Date début': new Date(r.dateDebut).toLocaleDateString("fr-FR"),
-      'Date fin': new Date(r.dateFin).toLocaleDateString("fr-FR"),
-      'Prix total': r.prixTotal,
-      'Adultes': r.nombreAdultes,
-      'Enfants': r.nombreEnfants,
-      'Date création': new Date(r.createdAt).toLocaleDateString("fr-FR"),
-    }));
-
-    const headers = Object.keys(csvData[0] || {});
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `mes-reservations-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Export réussi",
-      description: `${filteredReservations.length} réservations exportées`,
-      variant: "default"
-    });
-  };
-
-  const clearNewReservationNotification = () => {
-    setHasNewReservation(false);
   };
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen mt-12 bg-gray-50 p-4 md:p-6 flex items-center justify-center">
-        <p className="text-gray-600">
-          Veuillez vous connecter pour voir vos réservations.
-        </p>
+        <p className="text-gray-600">Veuillez vous connecter pour voir vos réservations.</p>
       </div>
     );
   }
 
-  if (loading) {
-    return <LoadingSpinner text="Chargement de vos réservations" />;
+  if (loading || !dashboardData) {
+    return <LoadingSpinner text="Chargement de votre dashboard..." />;
   }
+
+  const { resume, prochainesReservations, statistiques, paiements, reservations } = dashboardData;
+
+  // Données pour les graphiques
+  const evolutionData = statistiques.evolutionDepenses || [];
+  const statusData = Object.entries(statistiques.repartitionStatut || {}).map(([name, value]) => ({
+    name: name.replace('_', ' ').toUpperCase(),
+    value
+  }));
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
     <div className="min-h-screen bg-gray-50 mt-10 p-4 md:p-6">
@@ -351,299 +262,653 @@ const ClientReservations = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <Home className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+              <BarChart3 className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
               <h1 className="text-xl md:text-3xl font-bold text-gray-900">
-                Mes réservations
+                Tableau de bord des locations
               </h1>
-              {hasNewReservation && (
-                <button
-                  onClick={clearNewReservationNotification}
-                  className="relative"
-                  title="Nouvelles réservations disponibles"
-                >
-                  <Bell className="w-6 h-6 text-green-600 animate-pulse" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                </button>
-              )}
             </div>
             <p className="text-gray-600 text-sm md:text-base">
-              Suivez vos réservations en location saisonnière
+              Gérez vos réservations et suivez vos dépenses
             </p>
             <p className="text-xs md:text-sm text-gray-500 mt-1">
               <span className="font-semibold text-gray-700">
-                {reservations.length} réservation(s)
+                {resume.totalReservations} réservations • {resume.reservationsActives} actives
               </span>
             </p>
           </div>
 
-          {/* Boutons d'action */}
           <div className="flex flex-wrap gap-2 md:gap-3">
-            <button
-              onClick={handleExport}
-              disabled={filteredReservations.length === 0}
-              className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
+              onClick={() => generateFinancialReport()}
+              variant="outline"
+              className="flex items-center gap-2"
             >
-              <Download className="w-4 h-4" />
-              <span className="hidden md:inline">Exporter</span>
-              <span className="md:hidden">CSV</span>
-            </button>
-            <button
-              onClick={loadReservations}
-              className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              <FileText className="w-4 h-4" />
+              <span className="hidden md:inline">Rapport financier</span>
+            </Button>
+            <Button
+              onClick={loadDashboard}
+              className="flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
-              <span className="hidden md:inline">Actualiser</span>
-              <span className="md:hidden">Rafraîchir</span>
-            </button>
+              Actualiser
+            </Button>
             <Link
               to="/immobilier?type=location&saisonnier=true"
-              className="flex-1 md:flex-none bg-purple-600 hover:bg-purple-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden md:inline">Nouvelle réservation</span>
-              <span className="md:hidden">Réserver</span>
+              Nouvelle réservation
             </Link>
           </div>
         </div>
 
-        {/* Guide d'utilisation */}
-        {reservations.length === 0 && (
-          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 md:p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-              <div className="bg-blue-100 p-3 rounded-full">
-                <Info className="w-6 h-6 text-blue-600" />
+        {/* Résumé financier */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Total dépensé
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{resume.montantTotalDepense.toLocaleString()} €</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {resume.depenseMois.toLocaleString()} € ce mois
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-blue-800 text-lg mb-2">
-                  Comment obtenir une réservation ?
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        1
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Montant payé
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {resume.montantTotalPaye.toLocaleString()} €
+              </div>
+              <Progress 
+                value={resume.montantTotalDepense > 0 ? (resume.montantTotalPaye / resume.montantTotalDepense) * 100 : 0} 
+                className="h-2 mt-2"
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                {Math.round((resume.montantTotalPaye / resume.montantTotalDepense) * 100) || 0}% payé
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Restant à payer
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">
+                {resume.montantRestantAPayer.toLocaleString()} €
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {paiements?.enAttente?.length || 0} paiements en attente
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Dépenses ce mois
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{resume.depenseMois.toLocaleString()} €</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {resume.reservationsMois} réservations
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs principaux */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid grid-cols-4 mb-4">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="reservations">Réservations</TabsTrigger>
+            <TabsTrigger value="paiements">Paiements</TabsTrigger>
+            <TabsTrigger value="statistiques">Statistiques</TabsTrigger>
+          </TabsList>
+
+          {/* Tab Dashboard */}
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* Graphiques */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Évolution des dépenses</CardTitle>
+                  <CardDescription>6 derniers mois</CardDescription>
+                </CardHeader>
+                <CardContent className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={evolutionData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="mois" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} €`, 'Dépense']} />
+                      <Legend />
+                      <Line type="monotone" dataKey="depense" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Répartition par statut</CardTitle>
+                </CardHeader>
+                <CardContent className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsPieChart>
+                      <Pie
+                        data={statusData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value} réservations`, 'Nombre']} />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Prochaines réservations */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Prochaines réservations</CardTitle>
+                <CardDescription>Dans les 7 prochains jours</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {prochainesReservations.length > 0 ? (
+                    prochainesReservations.map((res: any) => (
+                      <div key={res.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center gap-4">
+                          {res.image ? (
+                            <img src={res.image} alt={res.titre} className="w-16 h-16 rounded-lg object-cover" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
+                              <Home className="w-8 h-8 text-gray-400" />
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-semibold">{res.titre}</h4>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <MapPin className="w-3 h-3" />
+                              {res.ville}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(res.dateDebut).toLocaleDateString('fr-FR')} - {new Date(res.dateFin).toLocaleDateString('fr-FR')}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Badge className={
+                            res.statut === 'confirmee' ? 'bg-green-100 text-green-800' :
+                            res.statut === 'en_attente' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }>
+                            {res.statut}
+                          </Badge>
+                          <div className="text-right">
+                            <div className="font-bold">{res.prixTotal} €</div>
+                            <Button size="sm" variant="outline" className="mt-2">
+                              Détails
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-blue-700 text-sm">
-                        Faites une <strong>demande de visite</strong> pour un bien en location saisonnière
-                      </span>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p>Aucune réservation prévue dans les 7 prochains jours</p>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <div className="bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        2
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Réservations */}
+          <TabsContent value="reservations">
+            <Card>
+              <CardHeader>
+                <CardTitle>Toutes mes réservations</CardTitle>
+                <CardDescription>Gérez vos locations saisonnières</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {reservations.map((res: any) => (
+                    <div key={res.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-start gap-4">
+                          {res.image ? (
+                            <img src={res.image} alt={res.titre} className="w-20 h-20 rounded-lg object-cover" />
+                          ) : (
+                            <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center">
+                              <Home className="w-10 h-10 text-gray-400" />
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-semibold text-lg">{res.titre}</h4>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                              <MapPin className="w-3 h-3" />
+                              {res.ville}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm mt-2">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(res.dateDebut).toLocaleDateString('fr-FR')} - {new Date(res.dateFin).toLocaleDateString('fr-FR')}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Euro className="w-3 h-3" />
+                                {res.nuits} nuits • {res.prixTotal} €
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Badge className={
+                            res.statut === 'confirmee' ? 'bg-green-100 text-green-800' :
+                            res.statut === 'en_attente' ? 'bg-yellow-100 text-yellow-800' :
+                            res.statut === 'en_cours' ? 'bg-blue-100 text-blue-800' :
+                            res.statut === 'terminee' ? 'bg-purple-100 text-purple-800' :
+                            'bg-red-100 text-red-800'
+                          }>
+                            {res.statut}
+                          </Badge>
+                          
+                          <div className="text-sm">
+                            <div className="flex justify-between">
+                              <span>Payé:</span>
+                              <span className="font-semibold">{res.montantPaye} €</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Restant:</span>
+                              <span className="font-semibold text-orange-600">{res.montantRestant} €</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" className="flex-1">
+                              Détails
+                            </Button>
+                            {res.montantRestant > 0 && (
+                              <Button size="sm" className="flex-1" onClick={() => {
+                                setSimulatingPayment(res.id);
+                                setPaymentAmount(res.montantRestant.toString());
+                              }}>
+                                Payer
+                              </Button>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-blue-700 text-sm">
-                        Attendez que le <strong>propriétaire confirme</strong> votre visite
-                      </span>
+                      
+                      {/* Section paiements */}
+                      {res.paiements?.length > 0 && (
+                        <div className="mt-4 pt-4 border-t">
+                          <h5 className="font-medium mb-2">Historique des paiements</h5>
+                          <div className="space-y-2">
+                            {res.paiements.map((p: any) => (
+                              <div key={p.id} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                                <div className="flex items-center gap-2">
+                                  <CreditCard className="w-3 h-3" />
+                                  <span className="font-medium">{p.methode}</span>
+                                  <span className="text-gray-500">{p.reference}</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <span className="font-semibold">{p.montant} €</span>
+                                  <Badge variant={p.statut === 'paye' ? 'default' : 'secondary'}>
+                                    {p.statut}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Paiements */}
+          <TabsContent value="paiements">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestion des paiements</CardTitle>
+                <CardDescription>Payez vos réservations en attente</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {paiements?.enAttente?.length > 0 ? (
+                  <div className="space-y-4">
+                    {paiements.enAttente.map((p: any) => (
+                      <Card key={p.id}>
+                        <CardContent className="p-4">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <CreditCard className="w-4 h-4" />
+                                <span className="font-semibold">Paiement #{p.reference}</span>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Date d'échéance: {new Date(p.dateEcheance).toLocaleDateString('fr-FR')}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                Méthode: {p.methode}
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-orange-600 mb-2">
+                                {p.montant} €
+                              </div>
+                              <div className="space-y-2">
+                                <input
+                                  type="number"
+                                  value={paymentAmount}
+                                  onChange={(e) => setPaymentAmount(e.target.value)}
+                                  placeholder="Montant à payer"
+                                  className="w-full px-3 py-2 border rounded"
+                                />
+                                <select
+                                  value={paymentMethod}
+                                  onChange={(e) => setPaymentMethod(e.target.value)}
+                                  className="w-full px-3 py-2 border rounded"
+                                >
+                                  <option value="carte">Carte bancaire</option>
+                                  <option value="virement">Virement</option>
+                                  <option value="paypal">PayPal</option>
+                                  <option value="especes">Espèces</option>
+                                </select>
+                                <Button 
+                                  onClick={() => handlePayment(p.id, true)}
+                                  disabled={simulatingPayment === p.id}
+                                  className="w-full"
+                                >
+                                  {simulatingPayment === p.id ? 'Traitement...' : 'Simuler le paiement'}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    <Card className="bg-gray-50">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-semibold">Total des paiements en attente</h4>
+                            <p className="text-sm text-gray-600">
+                              {paiements.enAttente.length} paiement(s) à régler
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-red-600">
+                              {paiements.totalEnAttente} €
+                            </div>
+                            <Button 
+                              onClick={generateFinancialReport}
+                              variant="outline"
+                              className="mt-2"
+                            >
+                              Télécharger le récapitulatif
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">Aucun paiement en attente</h3>
+                    <p className="text-gray-600">Tous vos paiements sont à jour</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Statistiques */}
+          <TabsContent value="statistiques">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Top destinations</CardTitle>
+                  <CardDescription>Vos villes les plus visitées</CardDescription>
+                </CardHeader>
+                <CardContent className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={statistiques.topDestinations}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="ville" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} €`, 'Dépense']} />
+                      <Legend />
+                      <Bar dataKey="montant" fill="#8884d8" name="Dépense totale" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Métriques clés</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">Prix moyen par nuit</div>
+                    <div className="text-2xl font-bold">
+                      {reservations.length > 0 
+                        ? Math.round(resume.montantTotalDepense / reservations.reduce((sum: number, r: any) => sum + r.nuits, 0))
+                        : 0} €
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        3
-                      </div>
-                      <span className="text-blue-700 text-sm">
-                        Après la visite, le propriétaire marquera le bien comme <strong>"loué"</strong>
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        4
-                      </div>
-                      <span className="text-blue-700 text-sm">
-                        Une réservation sera <strong>automatiquement créée ici</strong>
-                      </span>
+                  
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">Durée moyenne</div>
+                    <div className="text-2xl font-bold">
+                      {reservations.length > 0 
+                        ? Math.round(reservations.reduce((sum: number, r: any) => sum + r.nuits, 0) / reservations.length)
+                        : 0} nuits
                     </div>
                   </div>
+                  
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">Taux de confirmation</div>
+                    <div className="text-2xl font-bold">
+                      {resume.totalReservations > 0
+                        ? Math.round((statistiques.repartitionStatut.confirmee / resume.totalReservations) * 100)
+                        : 0}%
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">Taux d'annulation</div>
+                    <div className="text-2xl font-bold text-red-600">
+                      {resume.totalReservations > 0
+                        ? Math.round((statistiques.repartitionStatut.annulee / resume.totalReservations) * 100)
+                        : 0}%
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Section conseils */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Info className="w-5 h-5" />
+              Conseils pour optimiser vos locations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Euro className="w-3 h-3 text-blue-600" />
+                  </div>
+                  <h4 className="font-semibold">Économisez sur les paiements</h4>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Link
-                    to="/immobilier?type=location&saisonnier=true"
-                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Trouver un bien en location
-                  </Link>
-                  <Link
-                    to="/mes-demandes"
-                    className="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-blue-600 border border-blue-600 px-4 py-2 rounded-lg text-sm font-medium"
-                  >
-                    <Calendar className="w-4 h-4" />
-                    Voir mes demandes de visite
-                  </Link>
+                <p className="text-sm text-gray-600">
+                  Payer en avance peut vous faire bénéficier de réductions. Certains propriétaires offrent jusqu'à 10% de réduction pour les paiements anticipés.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                    <Calendar className="w-3 h-3 text-green-600" />
+                  </div>
+                  <h4 className="font-semibold">Réservez hors saison</h4>
                 </div>
+                <p className="text-sm text-gray-600">
+                  Les prix peuvent être jusqu'à 30% moins chers en basse saison. Planifiez vos vacances en dehors des périodes de pointe.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                    <TrendingUp className="w-3 h-3 text-purple-600" />
+                  </div>
+                  <h4 className="font-semibold">Suivez vos dépenses</h4>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Utilisez notre tableau de bord pour analyser vos dépenses et identifier des opportunités d'économies.
+                </p>
               </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full">
+              Voir plus de conseils
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
 
-        {/* Notification nouvelles réservations */}
-        {hasNewReservation && (
-          <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-green-600" />
-              <div className="flex-1">
-                <p className="text-green-800 font-medium">
-                  De nouvelles réservations sont disponibles !
-                </p>
-                <p className="text-green-600 text-sm">
-                  Actualisez la page pour voir les dernières réservations créées.
-                </p>
-              </div>
-              <button
-                onClick={clearNewReservationNotification}
-                className="text-green-700 hover:text-green-800 text-sm font-medium"
-              >
-                Marquer comme lu
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Statistiques */}
-        {reservations.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-4 mb-6">
-            {[
-              { label: "Total", value: stats.total, color: "bg-white", icon: <Home className="w-4 h-4" /> },
-              { label: "En attente", value: stats.en_attente, color: "bg-yellow-50", icon: <Clock className="w-4 h-4" /> },
-              { label: "Confirmées", value: stats.confirmee, color: "bg-green-50", icon: <CheckCircle className="w-4 h-4" /> },
-              { label: "En cours", value: stats.en_cours, color: "bg-purple-50", icon: <DoorOpen className="w-4 h-4" /> },
-              { label: "Terminées", value: stats.terminee, color: "bg-blue-50", icon: <Check className="w-4 h-4" /> },
-              { label: "Annulées", value: stats.annulee, color: "bg-red-50", icon: <XCircle className="w-4 h-4" /> },
-            ].map((stat, index) => (
-              <div key={index} className={`${stat.color} rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 text-center shadow-sm`}>
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  {stat.icon}
-                  <div className="text-lg md:text-2xl font-bold text-gray-900">{stat.value}</div>
-                </div>
-                <div className="text-xs md:text-sm text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Barre de recherche */}
-        {reservations.length > 0 && (
-          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 mb-4 md:mb-6 shadow-sm">
-            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
-              <div className="flex-1 w-full relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+      {/* Modal de simulation de paiement */}
+      {simulatingPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Simulation de paiement</CardTitle>
+              <CardDescription>Vérifiez les détails avant de confirmer</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Montant à payer</label>
                 <input
-                  type="text"
-                  placeholder="Rechercher bien, dates..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  className="w-full px-3 py-2 border rounded"
+                  placeholder="Entrez le montant"
                 />
               </div>
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">Filtrer:</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tabs de filtrage */}
-        {reservations.length > 0 && (
-          <div className="flex items-center space-x-1 bg-white rounded-lg md:rounded-xl p-1 md:p-2 border border-gray-200 mb-4 md:mb-8 shadow-sm overflow-x-auto">
-            {[
-              { id: "all", label: "Toutes", count: stats.total },
-              { id: "en_attente", label: "En attente", count: stats.en_attente },
-              { id: "confirmee", label: "Confirmées", count: stats.confirmee },
-              { id: "en_cours", label: "En cours", count: stats.en_cours },
-              { id: "terminee", label: "Terminées", count: stats.terminee },
-              { id: "annulee", label: "Annulées", count: stats.annulee },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3 md:px-6 py-2 md:py-3 text-xs md:text-sm font-medium rounded-md md:rounded-lg transition-all duration-200 flex items-center gap-1 md:gap-2 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "bg-blue-500 text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-              >
-                {tab.label}
-                <span className={`px-1.5 md:px-2 py-0.5 md:py-1 text-xs rounded-full ${
-                  activeTab === tab.id
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-200 text-gray-600"
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Liste des réservations */}
-        <div className="space-y-4 md:space-y-6">
-          {filteredReservations.length > 0 ? (
-            filteredReservations.map((reservation) => (
-              <ReservationCard
-                key={reservation.id}
-                reservation={reservation}
-                isOwner={false}
-                onStatusChange={handleStatusChange}
-                onRemove={handleRemove}
-                onViewDetails={handleViewDetails}
-              />
-            ))
-          ) : reservations.length === 0 ? (
-            <div className="bg-white rounded-lg md:rounded-2xl border border-gray-200 p-6 md:p-12 text-center shadow-sm">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
-              </div>
-              <h4 className="text-gray-700 text-base md:text-lg font-medium mb-2">
-                Vous n'avez pas encore de réservation
-              </h4>
-              <p className="text-gray-500 text-sm md:text-base mb-4 md:mb-6">
-                Commencez par faire une demande de visite pour un bien en location saisonnière
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  to="/immobilier?type=location&saisonnier=true"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center justify-center gap-2"
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Méthode de paiement</label>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full px-3 py-2 border rounded"
                 >
-                  <Home className="w-4 h-4" />
-                  Trouver un bien en location
-                </Link>
-                <Link
-                  to="/mes-demandes"
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center justify-center gap-2"
-                >
-                  <Calendar className="w-4 h-4" />
-                  Mes demandes de visite
-                </Link>
+                  <option value="carte">Carte bancaire (+1.5% frais)</option>
+                  <option value="virement">Virement bancaire (sans frais)</option>
+                  <option value="paypal">PayPal (+2.9% frais)</option>
+                  <option value="especes">Espèces</option>
+                </select>
               </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg md:rounded-2xl border border-gray-200 p-6 md:p-12 text-center shadow-sm">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
+              
+              <div className="p-4 bg-gray-50 rounded">
+                <h4 className="font-semibold mb-2">Récapitulatif</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Montant:</span>
+                    <span>{paymentAmount} €</span>
+                  </div>
+                  {paymentMethod === 'carte' && (
+                    <div className="flex justify-between">
+                      <span>Frais carte (1.5%):</span>
+                      <span>{(parseFloat(paymentAmount || '0') * 0.015).toFixed(2)} €</span>
+                    </div>
+                  )}
+                  {paymentMethod === 'paypal' && (
+                    <div className="flex justify-between">
+                      <span>Frais PayPal (2.9%):</span>
+                      <span>{(parseFloat(paymentAmount || '0') * 0.029).toFixed(2)} €</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold border-t pt-2 mt-2">
+                    <span>Total:</span>
+                    <span>
+                      {paymentMethod === 'carte' 
+                        ? (parseFloat(paymentAmount || '0') * 1.015).toFixed(2)
+                        : paymentMethod === 'paypal'
+                        ? (parseFloat(paymentAmount || '0') * 1.029).toFixed(2)
+                        : parseFloat(paymentAmount || '0').toFixed(2)} €
+                    </span>
+                  </div>
+                </div>
               </div>
-              <h4 className="text-gray-700 text-base md:text-lg font-medium mb-2">
-                Aucune réservation trouvée
-              </h4>
-              <p className="text-gray-500 text-sm md:text-base mb-4 md:mb-6">
-                Essayez de modifier vos critères de recherche ou sélectionnez un autre filtre
-              </p>
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setActiveTab("all");
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center gap-2"
+            </CardContent>
+            <CardFooter className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setSimulatingPayment(null)}
               >
-                <RefreshCw className="w-4 h-4" />
-                Réinitialiser les filtres
-              </button>
-            </div>
-          )}
+                Annuler
+              </Button>
+              <Button 
+                className="flex-1"
+                onClick={() => handlePayment(simulatingPayment, false)}
+                disabled={!paymentAmount}
+              >
+                Confirmer le paiement
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default ClientReservations;
+export default ClientReservationsDashboard;
