@@ -340,8 +340,8 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
@@ -685,10 +685,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
         activeTab === "achat"
           ? typeBienAchat
           : activeTab === "location"
-          ? typeBienLocation
-          : activeTab === "saisonniere"
-          ? typeBienSaison
-          : undefined,
+            ? typeBienLocation
+            : activeTab === "saisonniere"
+              ? typeBienSaison
+              : undefined,
       priceMin,
       priceMax,
       location: localisation,
@@ -1112,11 +1112,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           <div className="grid grid-cols-2 lg:flex flex-wrap items-center gap-2">
             <Button
               variant={activeTab === "tous" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "tous"
-                  ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
-                  : "border-2"
-              }`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "tous"
+                ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
+                : "border-2"
+                }`}
               onClick={() => setActiveTab("tous")}
             >
               TOUS
@@ -1124,33 +1123,30 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
 
             <Button
               variant={activeTab === "achat" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "achat"
-                  ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
-                  : "border-2"
-              }`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "achat"
+                ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
+                : "border-2"
+                }`}
               onClick={() => setActiveTab("achat")}
             >
               ACHAT
             </Button>
             <Button
               variant={activeTab === "location" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "location"
-                  ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
-                  : "border-2"
-              }`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "location"
+                ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
+                : "border-2"
+                }`}
               onClick={() => setActiveTab("location")}
             >
               LOCATION LONGUE DURÉE
             </Button>
             <Button
               variant={activeTab === "saisonniere" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "saisonniere"
-                  ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
-                  : "border-2"
-              }`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "saisonniere"
+                ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
+                : "border-2"
+                }`}
               onClick={() => setActiveTab("saisonniere")}
             >
               LOCATION SAISONNIÈRE
@@ -1158,11 +1154,10 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
             {/* NOUVEL ONGLET HORS DU PAYS */}
             <Button
               variant={activeTab === "hors_pays" ? "default" : "outline"}
-              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${
-                activeTab === "hors_pays"
-                  ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
-                  : "border-2"
-              }`}
+              className={`px-2 py-1 text-xs lg:p-4 hover:border-slate-900 hover:text-slate-900 lg:text-sm ${activeTab === "hors_pays"
+                ? "bg-slate-900 text-primary-foreground hover:bg-transparent"
+                : "border-2"
+                }`}
               onClick={() => setActiveTab("hors_pays")}
             >
               HORS DU PAYS
@@ -1280,320 +1275,354 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
           </div>
         </div>
 
-        {/* Filtres */}
-        <div className=" mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-card rounded-2xl border border-border/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-full">
-              <Select
-                onValueChange={(v) => {
-                  if (activeTab === "achat") setTypeBienAchat(v || undefined);
-                  else if (activeTab === "location")
-                    setTypeBienLocation(v || undefined);
-                  else if (activeTab === "saisonniere")
-                    setTypeBienSaison(v || undefined);
-                }}
-                value={
-                  activeTab === "achat"
-                    ? typeBienAchat
-                    : activeTab === "location"
-                    ? typeBienLocation
-                    : activeTab === "saisonniere"
-                    ? typeBienSaison
-                    : undefined
-                }
-              >
-                {activeTab !== 'tous' && (
-                  <SelectTrigger className="h-11 border-2">
-                    <SelectValue placeholder="Type de bien" />
-                  </SelectTrigger>
-                )}
-                <SelectContent>
-                  {activeTab === "tous" && (
-                    <>
-                      <SelectItem value="maison">Maison / Villa</SelectItem>
-                      <SelectItem value="appartement">Appartement</SelectItem>
-                      <SelectItem value="professionnel">
-                        Local professionnel
-                      </SelectItem>
-                      <SelectItem value="fonds_de_commerce">
-                        Fonds de commerce
-                      </SelectItem>
-                      <SelectItem value="appartements_neufs">
-                        Appartement neufs (VEFA)
-                      </SelectItem>
-                      <SelectItem value="scpi">SCPI</SelectItem>
-                      <SelectItem value="villa_d_exception">
-                        Villa d'exception
-                      </SelectItem>
-                      <SelectItem value="villas_neuves">
-                        Villas neuves (VEFA)
-                      </SelectItem>
-                      <SelectItem value="parking">Parking</SelectItem>
-                      <SelectItem value="hotel">Hotel</SelectItem>
-                      <SelectItem value="gite">Gite</SelectItem>
-                      <SelectItem value="maison_d_hote">
-                        Maison d'hote
-                      </SelectItem>
-                      <SelectItem value="villa_d_exception">
-                        Villa d'exception
-                      </SelectItem>
-                      <SelectItem value="domaine">Domaine</SelectItem>
-                      <SelectItem value="appartement">
-                        Appartement meublée
-                      </SelectItem>
-                      <SelectItem value="villa">
-                        Appartement non meublée
-                      </SelectItem>
-                      <SelectItem value="studio">Villa meublée</SelectItem>
-                      <SelectItem value="studio">Villa non meublée</SelectItem>
-                      <SelectItem value="parking">Local commercial</SelectItem>
-                      <SelectItem value="parking">
-                        Local professionnel
-                      </SelectItem>
-                      <SelectItem value="terrain">Terrain</SelectItem>
-                      <SelectItem value="cellier">Cellier</SelectItem>
-                      <SelectItem value="cave">Cave</SelectItem>
-                    </>
-                  )}
-                  {activeTab === "achat" && (
-                    <>
-                      <SelectItem value="maison">Maison / Villa</SelectItem>
-                      <SelectItem value="appartement">Appartement</SelectItem>
-                      <SelectItem value="terrain">Terrain</SelectItem>
-                      <SelectItem value="commercial">
-                        Local commercial
-                      </SelectItem>
-                      <SelectItem value="professionnel">
-                        Local professionnel
-                      </SelectItem>
-                      <SelectItem value="fonds_de_commerce">
-                        Fonds de commerce
-                      </SelectItem>
-                      <SelectItem value="villas_neuves">
-                        Villas neuves (VEFA)
-                      </SelectItem>
-                      <SelectItem value="appartements_neufs">
-                        Appartement neufs (VEFA)
-                      </SelectItem>
-                      <SelectItem value="scpi">SCPI</SelectItem>
-                      <SelectItem value="cave">Cave</SelectItem>
-                      <SelectItem value="parking">Parking</SelectItem>
-                      <SelectItem value="hotel">Hotel</SelectItem>
-                      <SelectItem value="gite">Gite</SelectItem>
-                      <SelectItem value="maison_d_hote">
-                        Maison d'hote
-                      </SelectItem>
-                      <SelectItem value="villa_d_exception">
-                        Villa d'exception
-                      </SelectItem>
-                      <SelectItem value="domaine">Domaine</SelectItem>
-                    </>
-                  )}
+        {/* Filtres - Design Moderne */}
+        <div className="mt-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200 p-6 shadow-sm">
+          {/* Titre section */}
+          <div className="mb-5 flex items-center gap-2">
+            <div className="w-1 h-6 bg-gradient-to-b from-slate-900 to-slate-700 rounded-full"></div>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Affinez votre recherche</h3>
+          </div>
 
-                  {activeTab === "location" && (
-                    <>
-                      <SelectItem value="appartement">
-                        Appartement meublée
-                      </SelectItem>
-                      <SelectItem value="villa">
-                        Appartement non meublée
-                      </SelectItem>
-                      <SelectItem value="studio">Villa meublée</SelectItem>
-                      <SelectItem value="studio">Villa non meublée</SelectItem>
-                      <SelectItem value="parking">Local commercial</SelectItem>
-                      <SelectItem value="parking">
-                        Local professionnel
-                      </SelectItem>
-                      <SelectItem value="terrain">Terrain</SelectItem>
-                      <SelectItem value="parking">Parking</SelectItem>
-                      <SelectItem value="cellier">Cellier</SelectItem>
-                      <SelectItem value="cave">Cave</SelectItem>
-                    </>
-                  )}
+          {/* Grille principale des filtres */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+            {/* Type de bien */}
+            {activeTab !== 'tous' && (
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Type de bien</label>
+                <Select
+                  onValueChange={(v) => {
+                    if (activeTab === "achat") setTypeBienAchat(v || undefined);
+                    else if (activeTab === "location")
+                      setTypeBienLocation(v || undefined);
+                    else if (activeTab === "saisonniere")
+                      setTypeBienSaison(v || undefined);
+                  }}
+                  value={
+                    activeTab === "achat"
+                      ? typeBienAchat
+                      : activeTab === "location"
+                        ? typeBienLocation
+                        : activeTab === "saisonniere"
+                          ? typeBienSaison
+                          : undefined
+                  }
+                >
+                 
+                    <SelectTrigger className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 transition-colors rounded-xl">
+                      <SelectValue placeholder="Choisir..." />
+                    </SelectTrigger>
+                 
+                  <SelectContent>
+                    {/* {activeTab === "tous" && (
+                      <>
+                        <SelectItem value="maison">Maison / Villa</SelectItem>
+                        <SelectItem value="appartement">Appartement</SelectItem>
+                        <SelectItem value="professionnel">
+                          Local professionnel
+                        </SelectItem>
+                        <SelectItem value="fonds_de_commerce">
+                          Fonds de commerce
+                        </SelectItem>
+                        <SelectItem value="appartements_neufs">
+                          Appartement neufs (VEFA)
+                        </SelectItem>
+                        <SelectItem value="scpi">SCPI</SelectItem>
+                        <SelectItem value="villa_d_exception">
+                          Villa d'exception
+                        </SelectItem>
+                        <SelectItem value="villas_neuves">
+                          Villas neuves (VEFA)
+                        </SelectItem>
+                        <SelectItem value="parking">Parking</SelectItem>
+                        <SelectItem value="hotel">Hotel</SelectItem>
+                        <SelectItem value="gite">Gite</SelectItem>
+                        <SelectItem value="maison_d_hote">
+                          Maison d'hote
+                        </SelectItem>
+                        <SelectItem value="villa_d_exception">
+                          Villa d'exception
+                        </SelectItem>
+                        <SelectItem value="domaine">Domaine</SelectItem>
+                        <SelectItem value="appartement">
+                          Appartement meublée
+                        </SelectItem>
+                        <SelectItem value="villa">
+                          Appartement non meublée
+                        </SelectItem>
+                        <SelectItem value="studio">Villa meublée</SelectItem>
+                        <SelectItem value="studio">Villa non meublée</SelectItem>
+                        <SelectItem value="parking">Local commercial</SelectItem>
+                        <SelectItem value="parking">
+                          Local professionnel
+                        </SelectItem>
+                        <SelectItem value="terrain">Terrain</SelectItem>
+                        <SelectItem value="cellier">Cellier</SelectItem>
+                        <SelectItem value="cave">Cave</SelectItem>
+                      </>
+                    )} */}
+                    {activeTab === "achat" && (
+                      <>
+                        <SelectItem value="maison">Maison / Villa</SelectItem>
+                        <SelectItem value="appartement">Appartement</SelectItem>
+                        <SelectItem value="terrain">Terrain</SelectItem>
+                        <SelectItem value="commercial">
+                          Local commercial
+                        </SelectItem>
+                        <SelectItem value="professionnel">
+                          Local professionnel
+                        </SelectItem>
+                        <SelectItem value="fonds_de_commerce">
+                          Fonds de commerce
+                        </SelectItem>
+                        <SelectItem value="villas_neuves">
+                          Villas neuves (VEFA)
+                        </SelectItem>
+                        <SelectItem value="appartements_neufs">
+                          Appartement neufs (VEFA)
+                        </SelectItem>
+                        <SelectItem value="scpi">SCPI</SelectItem>
+                        <SelectItem value="cave">Cave</SelectItem>
+                        <SelectItem value="parking">Parking</SelectItem>
+                        <SelectItem value="hotel">Hotel</SelectItem>
+                        <SelectItem value="gite">Gite</SelectItem>
+                        <SelectItem value="maison_d_hote">
+                          Maison d'hote
+                        </SelectItem>
+                        <SelectItem value="villa_d_exception">
+                          Villa d'exception
+                        </SelectItem>
+                        <SelectItem value="domaine">Domaine</SelectItem>
+                      </>
+                    )}
 
-                  {activeTab === "saisonniere" && (
-                    <>
-                      <SelectItem value="appartement">Appartement</SelectItem>
-                      <SelectItem value="maison">Maison / Villa</SelectItem>
-                      <SelectItem value="villa_d_exception">
-                        Villa d'exception
-                      </SelectItem>
-                      <SelectItem value="location_journee">
-                        Location à la journée
-                      </SelectItem>
-                      <SelectItem value="location_salle_bureau">
-                        Location de salle de bureau
-                      </SelectItem>
-                      <SelectItem value="hotel">Hotel</SelectItem>
-                      <SelectItem value="chambre_d_hote">
-                        Chambre d'hote
-                      </SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
+                    {activeTab === "location" && (
+                      <>
+                        <SelectItem value="appartement">
+                          Appartement meublée
+                        </SelectItem>
+                        <SelectItem value="villa">
+                          Appartement non meublée
+                        </SelectItem>
+                        <SelectItem value="studio">Villa meublée</SelectItem>
+                        <SelectItem value="studio">Villa non meublée</SelectItem>
+                        <SelectItem value="parking">Local commercial</SelectItem>
+                        <SelectItem value="parking">
+                          Local professionnel
+                        </SelectItem>
+                        <SelectItem value="terrain">Terrain</SelectItem>
+                        <SelectItem value="parking">Parking</SelectItem>
+                        <SelectItem value="cellier">Cellier</SelectItem>
+                        <SelectItem value="cave">Cave</SelectItem>
+                      </>
+                    )}
+
+                    {activeTab === "saisonniere" && (
+                      <>
+                        <SelectItem value="appartement">Appartement</SelectItem>
+                        <SelectItem value="maison">Maison / Villa</SelectItem>
+                        <SelectItem value="villa_d_exception">
+                          Villa d'exception
+                        </SelectItem>
+                        <SelectItem value="location_journee">
+                          Location à la journée
+                        </SelectItem>
+                        <SelectItem value="location_salle_bureau">
+                          Location de salle de bureau
+                        </SelectItem>
+                        <SelectItem value="hotel">Hotel</SelectItem>
+                        <SelectItem value="chambre_d_hote">
+                          Chambre d'hote
+                        </SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+
+            {/* Localisation */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Localisation</label>
+              <div className="relative group">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 group-focus-within:text-slate-600 transition-colors" />
+                <Input
+                  value={localisation}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  onClick={() => setIsLocationModalOpen(true)}
+                  placeholder="Cliquez pour choisir..."
+                  className="pl-9 h-10 bg-white border-2 border-gray-300 hover:border-slate-900 cursor-pointer transition-colors rounded-xl"
+                  readOnly
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={localisation}
-              onChange={(e) => handleSearch(e.target.value)}
-              onClick={() => setIsLocationModalOpen(true)}
-              placeholder="Cliquez pour choisir sur la carte"
-              className="pl-9 h-11 border-2 cursor-pointer bg-white"
-              readOnly
-            />
-          </div>
-
-          {/* FILTRE RAYON MODIFIÉ AVEC BOUTON ON/OFF */}
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {/* BOUTON POUR ACTIVER/DÉSACTIVER LE FILTRE PAR RAYON */}
+            {/* Rayon de recherche */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Rayon (km)</label>
+              <div className="flex gap-2">
                 <Button
                   variant={radiusFilterEnabled ? "default" : "outline"}
                   size="sm"
                   onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                  className={`h-8 px-3 ${
-                    radiusFilterEnabled
-                      ? "bg-slate-900 hover:bg-slate-800"
-                      : "border-2"
-                  }`}
+                  className={`flex-1 h-10 rounded-xl transition-all ${radiusFilterEnabled
+                    ? "bg-gradient-to-r from-slate-900 to-slate-700 text-white hover:shadow-lg"
+                    : "border-2 border-gray-300 hover:border-slate-900"
+                    }`}
                 >
-                  {radiusFilterEnabled ? "Filtre ON" : "Filtre OFF"}
+                  {radiusFilterEnabled ? "✓ Actif" : "Inactif"}
                 </Button>
-                <span className="font-semibold text-sm text-muted-foreground">
-                  RAYON
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min="0"
-                  max="30"
-                  value={radiusKm}
-                  onChange={handleRadiusInputChange}
-                  onBlur={handleRadiusInputBlur}
-                  className={`h-8 w-16 text-center border-2 ${
-                    !radiusFilterEnabled ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={!radiusFilterEnabled}
-                />
-                <span className="font-medium text-sm">Km</span>
-              </div>
-            </div>
-            <Slider
-              value={[radiusKm]}
-              min={0}
-              max={30}
-              step={1}
-              onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
-              className={`mt-1 ${
-                !radiusFilterEnabled ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={!radiusFilterEnabled}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>0 Km</span>
-              <span>30 Km</span>
-            </div>
-          </div>
-
-          {/* Filtres supplémentaires */}
-          <div className="col-span-1 lg:col-span-3 mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {activeTab === "achat" && (
-              <>
-                <div className="flex items-center gap-2">
+                <div className="relative flex-1">
                   <Input
-                    placeholder="Prix min (€)"
+                    type="number"
+                    min="0"
+                    max="30"
+                    value={radiusKm}
+                    onChange={handleRadiusInputChange}
+                    onBlur={handleRadiusInputBlur}
+                    className={`h-10 text-center bg-white border-2 border-gray-300 rounded-xl transition-all ${!radiusFilterEnabled ? "opacity-50 cursor-not-allowed" : "hover:border-slate-900"
+                      }`}
+                    disabled={!radiusFilterEnabled}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">km</span>
+                </div>
+              </div>
+              <Slider
+                value={[radiusKm]}
+                min={0}
+                max={30}
+                step={1}
+                onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
+                className={`mt-2 ${!radiusFilterEnabled ? "opacity-40 cursor-not-allowed" : ""
+                  }`}
+                disabled={!radiusFilterEnabled}
+              />
+            </div>
+
+            {/* Prix */}
+            {activeTab === "achat" && (
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Budget (€)</label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Min"
                     value={priceMin ?? ""}
                     onChange={(e) =>
                       setPriceMin(
                         e.target.value ? Number(e.target.value) : undefined
                       )
                     }
-                    className="h-10"
+                    className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm"
                   />
                   <Input
-                    placeholder="Prix max (€)"
+                    placeholder="Max"
                     value={priceMax ?? ""}
                     onChange={(e) =>
                       setPriceMax(
                         e.target.value ? Number(e.target.value) : undefined
                       )
                     }
-                    className="h-10"
+                    className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm"
                   />
                 </div>
-              </>
+              </div>
             )}
+          </div>
+
+          {/* Filtres supplémentaires - Responsive */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Surface (Location/Saisonnière) */}
             {(activeTab === "location" || activeTab === "saisonniere") && (
-              <div className="flex w-full items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Prix MAX / mois (€)"
-                    value={priceMax ?? ""}
-                    onChange={(e) =>
-                      setPriceMax(
-                        e.target.value ? Number(e.target.value) : undefined
-                      )
-                    }
-                    className="h-10 w-32"
-                  />
-                  <Input
-                    placeholder="Surface min (m²)"
-                    value={surfaceMin ?? ""}
-                    onChange={(e) =>
-                      setSurfaceMin(
-                        e.target.value ? Number(e.target.value) : undefined
-                      )
-                    }
-                    className="h-10 w-32"
-                  />
-                  <Input
-                    placeholder="Surface max (m²)"
-                    value={surfaceMax ?? ""}
-                    onChange={(e) =>
-                      setSurfaceMax(
-                        e.target.value ? Number(e.target.value) : undefined
-                      )
-                    }
-                    className="h-10 w-32"
-                  />
+              <>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Surface (m²)</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Min"
+                      value={surfaceMin ?? ""}
+                      onChange={(e) =>
+                        setSurfaceMin(
+                          e.target.value ? Number(e.target.value) : undefined
+                        )
+                      }
+                      className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm"
+                    />
+                    <Input
+                      placeholder="Max"
+                      value={surfaceMax ?? ""}
+                      onChange={(e) =>
+                        setSurfaceMax(
+                          e.target.value ? Number(e.target.value) : undefined
+                        )
+                      }
+                      className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm"
+                    />
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Pièces</label>
                   <Input
-                    placeholder="Pièces"
+                    type="number"
+                    min="0"
+                    placeholder="Nombre de pièces"
                     value={pieces ?? ""}
                     onChange={(e) =>
                       setPieces(
                         e.target.value ? Number(e.target.value) : undefined
                       )
                     }
-                    className="h-10 w-32"
+                    className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm"
                   />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Chambres</label>
                   <Input
-                    placeholder="Chambres"
+                    type="number"
+                    min="0"
+                    placeholder="Nombre de chambres"
                     value={chambres ?? ""}
                     onChange={(e) =>
                       setChambres(
                         e.target.value ? Number(e.target.value) : undefined
                       )
                     }
-                    className="h-10 w-32"
+                    className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm"
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Prix max/mois</label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      placeholder="Montant"
+                      value={priceMax ?? ""}
+                      onChange={(e) =>
+                        setPriceMax(
+                          e.target.value ? Number(e.target.value) : undefined
+                        )
+                      }
+                      className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 rounded-xl transition-colors text-sm pr-8"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">€</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Équipements */}
+            {(activeTab === "location" || activeTab === "saisonniere") && (
+              <>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Extérieur</label>
                   <Select
                     onValueChange={(v) => setExterieur(v || undefined)}
                     value={exterieur}
                   >
-                    <SelectTrigger className="h-10 border-2 w-40">
-                      <SelectValue placeholder="Exterieur" />
+                    <SelectTrigger className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 transition-colors rounded-xl">
+                      <SelectValue placeholder="Choisir..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="piscine">Piscine</SelectItem>
@@ -1603,13 +1632,16 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                       <SelectItem value="garage">Garage</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
 
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Supplémentaires</label>
                   <Select
                     onValueChange={(v) => setExtras(v || undefined)}
                     value={extras}
                   >
-                    <SelectTrigger className="h-10 border-2 w-40">
-                      <SelectValue placeholder="En plus" />
+                    <SelectTrigger className="h-10 bg-white border-2 border-gray-300 hover:border-slate-900 transition-colors rounded-xl">
+                      <SelectValue placeholder="Choisir..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="balcon">Balcon</SelectItem>
@@ -1619,7 +1651,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -1684,14 +1716,14 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
                               property.status === "for_sale"
                                 ? "ACHAT"
                                 : property.status === "for_rent"
-                                ? "LOCATION"
-                                : "SAISONNIÈRE";
+                                  ? "LOCATION"
+                                  : "SAISONNIÈRE";
                             const badgeColor =
                               property.status === "for_sale"
                                 ? "bg-blue-600"
                                 : property.status === "for_rent"
-                                ? "bg-green-600"
-                                : "bg-orange-600";
+                                  ? "bg-green-600"
+                                  : "bg-orange-600";
                             return (
                               <div
                                 className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${badgeColor}`}
