@@ -47,7 +47,7 @@ import { ListingModal } from "@/components/admin/listings/listing-modal";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
-  draft: { label: "Brouillon", color: "bg-blue-100 text-blue-800" },
+  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   for_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
   for_rent: { label: "À louer", color: "bg-purple-100 text-purple-800" },
   sold: { label: "Vendu", color: "bg-gray-100 text-gray-800" },
@@ -441,8 +441,9 @@ const ListingsPage = () => {
 
     try {
       setLoading(true);
-      const response = await api.get(`/properties/user/${userId}`);
+      const response = await api.get(`/properties/user/${userId}?status=all`);
       setAnnonces(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {
@@ -576,7 +577,7 @@ const ListingsPage = () => {
     try {
       await api.patch(`/properties/${id}`, {
         status: nouveauStatut,
-        publishedAt: nouveauStatut === "draft" ? null : new Date().toISOString(),
+        publishedAt: nouveauStatut === "pending" ? null : new Date().toISOString(),
       });
       await fetchAnnonces(user?.id);
       await fetchStats(user?.id);
@@ -874,6 +875,22 @@ const ListingsPage = () => {
                         Saisonnière
                       </Badge>
                     )}
+                    {annonce.isPSLA && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-orange-100 text-orange-800 text-xs"
+                      >
+                        PSLA
+                      </Badge>
+                    )}
+                    {annonce.isSHLMR && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-indigo-100 text-indigo-800 text-xs"
+                      >
+                        SHLMR
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
@@ -1009,7 +1026,7 @@ const ListingsPage = () => {
                             <>
                               <button
                                 onClick={() => {
-                                  changerStatut(annonce.id, "draft");
+                                  changerStatut(annonce.id, "pending");
                                   setOpenMenu(null);
                                 }}
                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"

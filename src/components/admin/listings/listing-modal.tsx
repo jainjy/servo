@@ -198,7 +198,7 @@ export function ListingModal({
     // Étape 4 - Médias
     images: [] as string[],
     // Étape 5 - Publication
-    status: "draft",
+    status: "pending",
     latitude: null as number | null,
     longitude: null as number | null,
     // Nouveau champ
@@ -1015,20 +1015,58 @@ export function ListingModal({
           {etape === 5 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
-                <Label className="block mb-2">Statut de publication</Label>
-                <select
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                >
-                  {Object.entries(STATUT_ANNONCE).map(([key, statut]) => (
-                    <option key={key} value={key}>
-                      {statut.label}
-                    </option>
-                  ))}
-                </select>
+                <Label className="block mb-4">Statut de l'annonce</Label>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="status-draft"
+                      name="status"
+                      value="pending"
+                      checked={formData.status === "pending"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, status: e.target.value })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <Label htmlFor="status-draft" className="cursor-pointer">
+                      <div className="font-medium">Brouillon</div>
+                      <div className="text-sm text-gray-500">
+                        L'annonce ne sera pas visible publiquement. Vous pourrez la modifier et la publier plus tard.
+                      </div>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="status-publish"
+                      name="status"
+                      value="publish"
+                      checked={formData.status !== "pending"}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          const newStatus =
+                            formData.listingType === "rent" ? "for_rent" : "for_sale";
+                          setFormData({ ...formData, status: newStatus });
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <Label htmlFor="status-publish" className="cursor-pointer">
+                      <div className="font-medium">Publier maintenant</div>
+                      <div className="text-sm text-gray-500">
+                        L'annonce sera visible immédiatement sur le site
+                        {formData.listingType === "rent"
+                          ? " en tant qu'annonce de location"
+                          : formData.listingType === "sale"
+                            ? " en tant qu'annonce de vente"
+                            : " en tant qu'annonce de vente et location"}
+                        .
+                      </div>
+                    </Label>
+                  </div>
+                </div>
               </div>
 
               <Card className="p-6 bg-blue-50 border-blue-200">
@@ -1103,6 +1141,32 @@ export function ListingModal({
                       {allImages.length} image(s)
                       {temporaryImages.length > 0 &&
                         ` (${temporaryImages.length} nouvelle(s))`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t pt-3 mt-3">
+                    <span style={{ color: "#5A6470" }} className="font-medium">Statut après publication:</span>
+                    <span
+                      className="font-bold px-2 py-1 rounded text-xs"
+                      style={{
+                        backgroundColor:
+                          formData.status === "pending"
+                            ? "#fef3c7"
+                            : formData.listingType === "rent"
+                              ? "#dbeafe"
+                              : "#dcfce7",
+                        color:
+                          formData.status === "pending"
+                            ? "#92400e"
+                            : formData.listingType === "rent"
+                              ? "#1e40af"
+                              : "#15803d",
+                      }}
+                    >
+                      {formData.status === "pending"
+                        ? "Brouillon"
+                        : formData.listingType === "rent"
+                          ? "À louer"
+                          : "À vendre"}
                     </span>
                   </div>
                 </div>
