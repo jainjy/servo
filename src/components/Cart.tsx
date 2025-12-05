@@ -248,118 +248,89 @@ const Cart = ({ isOpen, onClose }) => {
     navigate("/login");
   };
 
-  // ✅ FONCTION CORRIGÉE : Création de commande avec le backend
-  const handleCheckout = async () => {
-    console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
+  // Fonction de checkout améliorée avec meilleur débogage
+const handleCheckout = async () => {
+  console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
+  
+  // DEBUG: Afficher les items
+  console.log("📦 Items dans le panier:", JSON.stringify(localCartItems, null, 2));
+
+  // Validation
+  if (!isAuthenticated) {
+    toast.error("❌ Veuillez vous connecter pour passer commande");
+    redirectToLogin();
+    return;
+  }
+
+  if (!localCartItems || localCartItems.length === 0) {
+    toast.error("Votre panier est vide !");
+    return;
+  }
+
+  setIsCheckingOut(true);
+  setValidationErrors([]);
+
+  try {
+    // ✅ Structure SIMPLIFIÉE
+    const orderData = {
+      items: localCartItems.map(item => ({
+        productId: item.id, // Garde l'ID tel quel
+        quantity: item.quantity || 1
+      })),
+      shippingAddress: {
+        firstName: user?.firstName || "Client",
+        lastName: user?.lastName || "",
+        address: user?.address || "",
+        city: user?.city || "",
+        postalCode: user?.zipCode || "",
+        country: "France"
+      },
+      paymentMethod: "card"
+    };
+
+    console.log("📤 Données envoyées au backend:", JSON.stringify(orderData, null, 2));
+
+    // Appel API
+    const response = await api.post('/orders', orderData);
     
-    // Re-vérifier l'authentification avant de commander
-    checkAuthentication();
+    if (response.data.success) {
+      // Succès
+      clearCart();
+      onClose();
+      
+      toast.success(
+        `🎉 Commande #${response.data.order.orderNumber} créée !`,
+        {
+          description: `Total: €${response.data.order.totalAmount?.toFixed(2) || '0.00'}`,
+          duration: 5000,
+        }
+      );
 
-    if (!isAuthenticated) {
-      console.log("❌ [CART CHECKOUT] - Utilisateur non authentifié");
-      toast.error("❌ Veuillez vous connecter pour passer commande");
+      // Redirection
+      setTimeout(() => {
+        navigate('/mon-compte/mes-commandes');
+      }, 2000);
+    } else {
+      throw new Error(response.data.message || "Erreur inconnue");
+    }
+
+  } catch (error) {
+    console.error("💥 Erreur détaillée:", error);
+    console.error("💥 Réponse erreur:", error.response?.data);
+    
+    if (error.response?.data?.errors) {
+      setValidationErrors(error.response.data.errors);
+      toast.error("❌ Problèmes détectés dans votre panier");
+    } else if (error.response?.status === 401) {
+      toast.error("❌ Session expirée");
       redirectToLogin();
-      return;
+    } else {
+      toast.error(error.response?.data?.message || "Erreur lors de la création de la commande");
     }
-
-    // Validation du panier
-    if (!localCartItems || localCartItems.length === 0) {
-      toast.error("Votre panier est vide !");
-      return;
-    }
-
-    console.log("✅ [CART CHECKOUT] - Panier valide, création de commande...");
-    setIsCheckingOut(true);
-    setValidationErrors([]);
-
-    try {
-      // ✅ STRUCTURE DES DONNÉES CORRIGÉE - SIMPLIFIÉE
-      const orderData = {
-        items: localCartItems.map(item => ({
-          productId: item.id, // ✅ SEULEMENT L'ID ET LA QUANTITÉ
-          quantity: item.quantity
-        })),
-        shippingAddress: {
-          firstName: user?.firstName || "Client",
-          lastName: user?.lastName || "Utilisateur",
-          address: user?.address || "À définir",
-          city: user?.city || "À définir",
-          postalCode: user?.zipCode || "00000",
-          country: "France"
-        },
-        paymentMethod: "card"
-      };
-
-      console.log("📦 [CART CHECKOUT] - Données envoyées:", orderData);
-
-      // ✅ APPEL API CORRECT
-      const response = await api.post('/orders', orderData);
-      
-      console.log("✅ [CART CHECKOUT] - Réponse API:", response.data);
-
-      if (response.data.success) {
-        // Succès - vider le panier et fermer
-        clearCart();
-        onClose();
-
-        // Track l'achat
-        await safeTrack(() => trackPurchase(localCartItems, calculateTotal()));
-
-        toast.success(
-          `🎉 Commande #${response.data.order.orderNumber} créée avec succès !`,
-          {
-            description: `Total: €${response.data.order.totalAmount.toFixed(2)}`,
-            duration: 5000,
-          }
-        );
-
-        // Rediriger vers les commandes après un délai
-        setTimeout(() => {
-          navigate('mon-compte/mes-commandes');
-        }, 2000);
-
-      } else {
-        throw new Error(response.data.message || "Erreur inconnue");
-      }
-
-    } catch (error) {
-      console.error("💥 [CART CHECKOUT] - Erreur détaillée:", error);
-      
-      // Gestion spécifique des erreurs
-      if (error.response?.data?.errors) {
-        // Erreurs de stock du backend
-        setValidationErrors(error.response.data.errors);
-        toast.error("❌ Problèmes de stock détectés");
-        
-      } else if (error.response?.status === 401) {
-        toast.error("❌ Session expirée, veuillez vous reconnecter");
-        redirectToLogin();
-        
-      } else if (error.response?.status === 400) {
-        // Erreur de validation
-        const errorMessage = error.response.data.message || "Erreur de validation";
-        setValidationErrors([errorMessage]);
-        toast.error(`❌ ${errorMessage}`);
-        
-      } else if (error.response?.data?.message) {
-        // Message d'erreur spécifique du backend
-        toast.error(`❌ ${error.response.data.message}`);
-        
-      } else if (error.message?.includes("stock")) {
-        toast.error("❌ Problèmes de stock détectés");
-        
-      } else if (error.message?.includes("Authentification")) {
-        toast.error("❌ Session expirée, veuillez vous reconnecter");
-        redirectToLogin();
-        
-      } else {
-        // Erreur générique
-        toast.error("❌ Erreur lors de la création de la commande");
-      }
-    } finally {
-      setIsCheckingOut(false);
-    }
-  };
+  } finally {
+    setIsCheckingOut(false);
+  }
+};
 
   // Test manuel d'authentification (optionnel - développement seulement)
   const testAuthManually = () => {
