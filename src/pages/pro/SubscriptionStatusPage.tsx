@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { pdf } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { subscriptionPlansAPI } from "@/lib/api/subscriptionPlans";
 import SubscriptionExpiredModal from "@/components/SubscriptionExpiredModal";
+import { ReceiptPDF } from "@/components/admin/payments/receipt-pdf";
 
 const SubscriptionStatusPage = () => {
   const { user } = useAuth();
@@ -295,8 +297,54 @@ const SubscriptionStatusPage = () => {
   };
 
   // AJOUT: Fonction pour télécharger la facture (placeholder)
-  const handleDownloadInvoice = (transactionId) => {
-    toast.success("Téléchargement de la facture en cours...");
+  const handleDownloadInvoice = async (transaction) => {
+    try {
+      // Transformer les données de transaction au format attendu par ReceiptPDF
+      const formattedTransaction = {
+        id: transaction.id,
+        date: new Date(transaction.createdAt).toLocaleDateString("fr-FR", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        customer: user?.firstName && user?.lastName 
+          ? `${user.firstName} ${user.lastName}` 
+          : user?.email || "Client",
+        type: "Abonnement",
+        amount: `${transaction.amount}€`,
+        method: transaction.paymentMethod || "Carte bancaire",
+        status: transaction.status || "completed",
+        reference: transaction.reference || transaction.id,
+        customerEmail: user?.email || "",
+        customerPhone: user?.phone || "",
+        billingAddress: user?.address || "",
+        cardLast4: transaction.cardLast4 || "",
+        cardBrand: transaction.cardBrand || "",
+        serviceDetails: transaction.description || "Abonnement",
+        duration: subscription?.plan?.period || "mensuel",
+        taxAmount: transaction.taxAmount || "0€",
+        subtotal: transaction.subtotal || `${transaction.amount}€`,
+        fees: transaction.fees || "0€",
+        paymentType: "subscription",
+      };
+
+      const doc = <ReceiptPDF transaction={formattedTransaction} />;
+      const blob = await pdf(doc).toBlob();
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `facture-${transaction.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Facture téléchargée avec succès");
+    } catch (err) {
+      console.error("Erreur lors du téléchargement de la facture:", err);
+      toast.error("Erreur lors du téléchargement de la facture");
+    }
   };
 
   if (loading) {
@@ -441,7 +489,7 @@ const SubscriptionStatusPage = () => {
                             <td className="py-3 px-4">
                               <div className="flex gap-2">
                                 <button
-                                  onClick={() => handleDownloadInvoice(transaction.id)}
+                                  onClick={() => handleDownloadInvoice(transaction)}
                                   className="p-1 hover:bg-gray-200 rounded transition-colors"
                                   title="Télécharger la facture"
                                 >

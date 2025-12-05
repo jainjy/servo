@@ -39,7 +39,7 @@ const navigation = [
   // { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
   { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-  { name: "Abonnements", href: "/pro/subscription", icon: WalletCards },
+  { name: "Mon abonnements", href: "/pro/subscription", icon: WalletCards },
   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
   // { name: "Tourisme", href: "/pro/tourisme", icon: Plane },

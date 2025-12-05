@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { pdf } from "@react-pdf/renderer";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search,
-  Filter,
   Eye,
   Download,
   RefreshCw,
@@ -20,9 +20,15 @@ import {
   CreditCard,
   FileText,
   MapPin,
+  Package,
+  Zap,
+  ShoppingCart,
+  Repeat2,
 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { PaymentsFilters, FilterConfig } from "./payments-filters";
+import { ReceiptPDF } from "./receipt-pdf";
 
 interface Transaction {
   id: string;
@@ -43,6 +49,7 @@ interface Transaction {
   taxAmount: string;
   subtotal: string;
   fees: string;
+  paymentType?: "subscription" | "product" | "demande" | "refund"; // NOUVEAU
 }
 
 export function PaymentsTable() {
@@ -53,12 +60,21 @@ export function PaymentsTable() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterConfig>({
+    type: "all",
+    status: "all",
+    method: "all",
+    dateRange: "all",
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/admin/payments/transactions");
+        const response = await api.get("/admin/payments/transactions", {
+          params: filters !== null ? filters : {},
+        });
         setTransactions(response.data);
       } catch (err) {
         console.error("Erreur lors du chargement des transactions:", err);
@@ -69,7 +85,42 @@ export function PaymentsTable() {
     };
 
     fetchTransactions();
-  }, []);
+  }, [filters]);
+
+  const getPaymentTypeBadge = (type?: string) => {
+    const variants: Record<
+      string,
+      { label: string; className: string; icon: React.ReactNode }
+    > = {
+      subscription: {
+        label: "Abonnement",
+        className: "bg-blue-100/20 text-blue-600 border-blue-200",
+        icon: <Zap className="h-3 w-3" />,
+      },
+      product: {
+        label: "Produit",
+        className: "bg-green-100/20 text-green-600 border-green-200",
+        icon: <Package className="h-3 w-3" />,
+      },
+      demande: {
+        label: "Service",
+        className: "bg-purple-100/20 text-purple-600 border-purple-200",
+        icon: <ShoppingCart className="h-3 w-3" />,
+      },
+      refund: {
+        label: "Remboursement",
+        className: "bg-red-100/20 text-red-600 border-red-200",
+        icon: <Repeat2 className="h-3 w-3" />,
+      },
+    };
+    const config = variants[type || "product"] || variants.product;
+    return (
+      <Badge variant="outline" className={`${config.className} gap-1`}>
+        {config.icon}
+        {config.label}
+      </Badge>
+    );
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
@@ -95,14 +146,10 @@ export function PaymentsTable() {
 
   const handleDownloadReceipt = async (transaction: Transaction) => {
     try {
-      const response = await api.get(
-        `/admin/payments/receipt/${transaction.id}`,
-        {
-          responseType: "blob",
-        }
-      );
+      const doc = <ReceiptPDF transaction={transaction} />;
+      const blob = await pdf(doc).toBlob();
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = `reçu-${transaction.id}.pdf`;
@@ -110,55 +157,12 @@ export function PaymentsTable() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+
+      toast.success("Reçu téléchargé avec succès");
     } catch (err) {
       console.error("Erreur lors du téléchargement du reçu:", err);
-      // Fallback vers la méthode simulée
-      downloadSimulatedReceipt(transaction);
+      toast.error("Erreur lors du téléchargement du reçu");
     }
-  };
-
-  const downloadSimulatedReceipt = (transaction: Transaction) => {
-    const receiptContent = `
-      REÇU DE PAIEMENT
-      =================
-      
-      ID Transaction: ${transaction.id}
-      Date: ${transaction.date}
-      Référence: ${transaction.reference}
-      
-      Client: ${transaction.customer}
-      Email: ${transaction.customerEmail}
-      Téléphone: ${transaction.customerPhone}
-      
-      Service: ${transaction.serviceDetails}
-      Type: ${transaction.type}
-      
-      DÉTAIL DU MONTANT:
-      Sous-total: ${transaction.subtotal}
-      Taxe: ${transaction.taxAmount}
-      Total: ${transaction.amount}
-      
-      Méthode de paiement: ${transaction.method}
-      ${
-        transaction.cardLast4
-          ? `Carte: ${transaction.cardBrand} ****${transaction.cardLast4}`
-          : ""
-      }
-      
-      Statut: ${transaction.status}
-      
-      Merci pour votre confiance !
-    `;
-
-    const blob = new Blob([receiptContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `reçu-${transaction.id}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const handleRefund = async (transaction: Transaction) => {
@@ -290,10 +294,11 @@ export function PaymentsTable() {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtres
-            </Button>
+            <PaymentsFilters
+              onFilterChange={setFilters}
+              isOpen={isFilterOpen}
+              onToggle={() => setIsFilterOpen(!isFilterOpen)}
+            />
           </div>
           <Button variant="outline" size="sm" onClick={handleExportAll}>
             <Download className="h-4 w-4 mr-2" />
@@ -317,6 +322,11 @@ export function PaymentsTable() {
                   </p>
                 </div>
                 {getStatusBadge(transaction.status)}
+              </div>
+
+              {/* Badge Type de paiement */}
+              <div className="mb-3">
+                {getPaymentTypeBadge(transaction.paymentType)}
               </div>
 
               <div className="space-y-3 mb-4">
