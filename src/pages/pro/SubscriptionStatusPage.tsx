@@ -120,41 +120,47 @@ const SubscriptionStatusPage = () => {
   };
 
   const handleUpgrade = (planId = null) => {
+    console.log("handleUpgrade called with planId:", planId);
     if (planId) {
       const selectedPlan = subscriptionPlans.find((plan) => plan.id == planId);
-      navigate("/pro/subscription/payment", {
-        state: {
-          subscriptionData: {
-            planId: selectedPlan?.id,
-            planTitle: selectedPlan?.title,
-            price: selectedPlan?.price,
-            period: selectedPlan?.period,
-            userTypes: selectedPlan?.userTypes,
+      if (selectedPlan) {
+        navigate("/pro/subscription/payment", {
+          state: {
+            subscriptionData: {
+              planId: selectedPlan.id,
+              truePlanId: selectedPlan.id,
+              planTitle: selectedPlan.title,
+              price: selectedPlan.price,
+              period: selectedPlan.period,
+              userTypes: selectedPlan.userTypes,
+              features: selectedPlan.features,
+            },
           },
-        },
-      });
+        });
+      } else {
+        toast.error("Plan non trouvé");
+      }
     } else {
-      navigate("/pro/subscription/payment");
+      toast.error("Veuillez sélectionner un plan");
     }
   };
 
   const handleRenew = async () => {
     try {
-      // Option 1: Renouveler le même plan
       if (subscription?.plan?.id) {
-        const currentPlan = subscriptionPlans.find(
-          (plan) => plan.id == subscription.plan.id
-        );
+        const currentPlan = subscription.plan;
         
         if (currentPlan) {
           navigate("/pro/subscription/payment", {
             state: {
               subscriptionData: {
                 planId: currentPlan.id,
+                truePlanId: currentPlan.id,
                 planTitle: currentPlan.title,
                 price: currentPlan.price,
                 period: currentPlan.period,
                 userTypes: currentPlan.userTypes,
+                features: currentPlan.features,
                 isRenewal: true,
               },
             },
@@ -163,8 +169,7 @@ const SubscriptionStatusPage = () => {
         }
       }
 
-      // Option 2: Rediriger vers la page de choix de plan
-      navigate("/pro/subscription/payment");
+      toast.error("Impossible de renouveler : plan non trouvé");
       
     } catch (error) {
       console.error("Erreur lors du renouvellement:", error);
@@ -417,14 +422,6 @@ const SubscriptionStatusPage = () => {
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Renouveler mon abonnement
                         <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                      <Button
-                        onClick={() => handleUpgrade()}
-                        variant="outline"
-                        className="flex-1"
-                      >
-                        <Crown className="h-4 w-4 mr-2" />
-                        Voir autres plans
                       </Button>
                     </>
                   ) : (
