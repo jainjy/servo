@@ -22,6 +22,8 @@ import {
   Plus,
   WalletCards,
   Wallet2Icon,
+  UserCircle2,
+  Contact2Icon,
 } from "lucide-react";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
@@ -29,33 +31,38 @@ const navigation = [
   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
-  {
-    name: "Art et commerce Services",
-    href: "/pro/Art-commerce-services",
-    icon: Wrench,
-  },
-  { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
+  // {
+  //   name: "Art et commerce Services",
+  //   href: "/pro/Art-commerce-services",
+  //   icon: Wrench,
+  // },
+  // { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
   { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
   { name: "Abonnements", href: "/pro/subscription", icon: WalletCards },
   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-  { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
+  // { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
-  {
-    name: "Reservations tourisme",
-    href: "/pro/reservations",
-    icon: ShoppingBag,
-  },
-  {
-    name: "Reservations bien-être",
-    href: "/pro/reservationbien-etre",
-    icon: ShoppingBag,
-  },
+  // {
+  //   name: "Reservations tourisme",
+  //   href: "/pro/reservations",
+  //   icon: ShoppingBag,
+  // },
+  // {
+  //   name: "Reservations bien-être",
+  //   href: "/pro/reservationbien-etre",
+  //   icon: ShoppingBag,
+  // },
   {
     name: "Mes Commandes",
     href: "/pro/orders",
     icon: ShoppingCart,
+  },
+  {
+    name: "Listes des Contacts messages",
+    href: "/pro/contact-messages",
+    icon: Contact2Icon,
   },
   {
     name: "Mes Demandes de financement",
@@ -69,16 +76,21 @@ const navigation = [
     icon: Wallet2Icon,
   },
   {
+    name: "Liste demande immobilier",
+    href: "/pro/demandes-immobilier",
+    icon: Building2,
+  },
+  {
     name: "Les demandes de devis",
     href: "/pro/demandes-devis",
     icon: FileText,
   },
-  {
-    name: "Cours à Domicile",
-    href: "/pro/cours-domicile",
-    icon: BookOpen,
-  },
-  { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
+  // {
+  //   name: "Cours à Domicile",
+  //   href: "/pro/cours-domicile",
+  //   icon: BookOpen,
+  // },
+  // { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
   // 🔥 NOUVEL ITEM : Gestion des Médias
   {
     name: "Gestion des Médias",
@@ -88,68 +100,6 @@ const navigation = [
   { name: "Avis", href: "/pro/reviews", icon: Star },
   { name: "Paramètres", href: "/pro/settings", icon: Settings },
 ];
-// const navigationPrestataire = [
-//   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
-//   { name: "Mes Services", href: "/pro/services", icon: Wrench },
-//   {
-//     name: "Art et commerce Services",
-//     href: "/pro/Art-commerce-services",
-//     icon: Wrench,
-//   },
-//   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
-//   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
-//   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-//   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
-//   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-//   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
-//   { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
-//   {
-//     name: "Mes Commandes",
-//     href: "/pro/orders",
-//     icon: ShoppingCart,
-//   },
-//   { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
-//   {
-//     name: "Les demandes de devis",
-//     href: "/pro/demandes-devis",
-//     icon: FileText,
-//   },
-//   {
-//     name: "Gestion des Médias",
-//     href: "/pro/media",
-//     icon: Video,
-//   },
-//   { name: "Avis", href: "/pro/reviews", icon: Star },
-//   { name: "Paramètres", href: "/pro/settings", icon: Settings },
-// ];
-// const navigationBienEtre = [
-//   { name: "Tableau de Bord", href: "/pro", icon: LayoutDashboard },
-
-//   { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
-//   { name: "Mes Planning", href: "/pro/calendar", icon: Calendar },
-//   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
-//   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
-//   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-//   { name: "Reservations", href: "/pro/reservations", icon: ShoppingBag },
-//   {
-//     name: "Mes Commandes",
-//     href: "/pro/orders",
-//     icon: ShoppingCart,
-//   },
-//   { name: "Mes Demandes de services", href: "/pro/demandes", icon: FileText },
-//   {
-//     name: "Liste demande immobilier",
-//     href: "/pro/demandes-immobilier",
-//     icon: Building2,
-//   },
-//   {
-//     name: "Gestion des Médias",
-//     href: "/pro/media",
-//     icon: Video,
-//   },
-//   { name: "Avis", href: "/pro/reviews", icon: Star },
-//   { name: "Paramètres", href: "/pro/settings", icon: Settings },
-// ];
 
 export function ProSidebar() {
   const location = useLocation();
@@ -274,12 +224,12 @@ export function ProSidebar() {
             <div className="p-1 rounded-full bg-white border-black border-2">
               <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
             </div>
-            <div>
+            {/* <div>
               <h1 className="text-sm font-semibold text-sidebar-foreground">
                 SERVO
               </h1>
               <p className="text-xs text-muted-foreground">Espace Pro</p>
-            </div>
+            </div> */}
           </Link>
         </div>
 

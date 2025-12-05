@@ -35,6 +35,9 @@ import {
   Star,
   Loader2,
   MoreVertical,
+  User,
+  Mail,
+  AlertCircle,
 } from "lucide-react";
 import api from "@/lib/api";
 import AuthService from "@/services/authService";
@@ -44,7 +47,7 @@ import { ListingModal } from "@/components/admin/listings/listing-modal";
 
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
-  draft: { label: "Brouillon", color: "bg-blue-100 text-blue-800" },
+  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   for_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
   for_rent: { label: "À louer", color: "bg-purple-100 text-purple-800" },
   sold: { label: "Vendu", color: "bg-gray-100 text-gray-800" },
@@ -120,7 +123,6 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
   );
 };
 
-
 // Composant Modal Statistiques
 const ModalStatistiques = ({ isOpen, onClose, annonce }) => {
   if (!annonce) return null;
@@ -186,6 +188,218 @@ const ModalStatistiques = ({ isOpen, onClose, annonce }) => {
   );
 };
 
+// Modal pour confirmer le marquage comme loué
+const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
+  const [loading, setLoading] = useState(false);
+  const [demandes, setDemandes] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState(null);
+  const [clientInfo, setClientInfo] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && annonce) {
+      chargerDemandes();
+    }
+  }, [isOpen, annonce]);
+
+  const chargerDemandes = async () => {
+    try {
+      const response = await api.get(`/demandes/immobilier/property/${annonce.id}`);
+      if (response.data && response.data.length > 0) {
+        setDemandes(response.data);
+        // Sélectionner automatiquement la dernière demande validée
+        const derniereValidee = response.data.find(d => d.statut === 'validée');
+        if (derniereValidee) {
+          setSelectedClientId(derniereValidee.clientId);
+          setClientInfo(derniereValidee);
+        }
+      }
+    } catch (error) {
+      console.error("Erreur chargement demandes:", error);
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!selectedClientId) {
+      toast.error("Veuillez sélectionner un client");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await onConfirm(selectedClientId);
+      onClose();
+    } catch (error) {
+      console.error("Erreur confirmation:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen || !annonce) return null;
+
+  const isLocationSaisonniere = annonce.rentType  === "saisonniere" && 
+                               (annonce.listingType === "rent" || annonce.listingType === "both");
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Marquer comme loué" size="md">
+      <div className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Home className="text-blue-600" size={20} />
+            <div>
+              <h4 className="font-semibold text-blue-800">{annonce.title}</h4>
+              <p className="text-sm text-blue-600">
+                {annonce.address}, {annonce.city}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {isLocationSaisonniere ? (
+          <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <CheckCircle size={18} />
+                <span className="font-medium">Location saisonnière détectée</span>
+              </div>
+              <p className="text-sm text-green-600 mt-1">
+                Une réservation de location saisonnière sera automatiquement créée.
+              </p>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium mb-3">Sélectionner le client</h4>
+              
+              {demandes.length > 0 ? (
+                <div className="space-y-2">
+                  {demandes.map((demande) => (
+                    <div
+                      key={demande.id}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        selectedClientId === demande.clientId
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:bg-gray-50'
+                      }`}
+                      onClick={() => {
+                        setSelectedClientId(demande.clientId);
+                        setClientInfo(demande);
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          selectedClientId === demande.clientId
+                            ? 'bg-blue-100 text-blue-600'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          <User size={16} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium">
+                            {demande.contactPrenom} {demande.contactNom}
+                          </div>
+                          <div className="text-sm text-gray-600 flex items-center gap-2">
+                            <Mail size={12} />
+                            {demande.contactEmail}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge className={`text-xs ${
+                              demande.statut === 'validée' 
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {demande.statut}
+                            </Badge>
+                            {demande.dateSouhaitee && (
+                              <span className="text-xs text-gray-500">
+                                Visite: {new Date(demande.dateSouhaitee).toLocaleDateString('fr-FR')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg">
+                  <AlertCircle className="mx-auto text-gray-400 mb-2" size={24} />
+                  <p className="text-gray-600">Aucune demande de visite trouvée</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Le client doit d'abord faire une demande de visite et vous devez la valider.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {clientInfo && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 className="font-medium mb-2">Détails de la réservation</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-gray-500">Client:</div>
+                    <div className="font-medium">{clientInfo.contactPrenom} {clientInfo.contactNom}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Email:</div>
+                    <div>{clientInfo.contactEmail}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Durée:</div>
+                    <div>7 nuits (par défaut)</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500">Prix total:</div>
+                    <div className="font-medium text-green-600">
+                      {((annonce.price || 0) * 7).toLocaleString()} €
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-yellow-700">
+              <AlertCircle size={18} />
+              <span className="font-medium">Attention</span>
+            </div>
+            <p className="text-sm text-yellow-600 mt-1">
+              Ce bien n'est pas en location saisonnière. Le marquage comme "loué" ne créera pas de réservation automatique.
+            </p>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+          >
+            Annuler
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={loading || (isLocationSaisonniere && !selectedClientId)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Traitement...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Confirmer
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const ListingsPage = () => {
   const [annonces, setAnnonces] = useState([]);
   const [filtres, setFiltres] = useState({
@@ -195,6 +409,7 @@ const ListingsPage = () => {
   });
   const [showModalCreation, setShowModalCreation] = useState(false);
   const [showModalStatistiques, setShowModalStatistiques] = useState(false);
+  const [showModalConfirmationLoue, setShowModalConfirmationLoue] = useState(false);
   const [annonceSelectionnee, setAnnonceSelectionnee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -213,7 +428,6 @@ const ListingsPage = () => {
     const init = async () => {
       const currentUser = AuthService.getCurrentUser();
       if (currentUser?.id) {
-        // Vérifier que l'ID existe
         setUser(currentUser);
         await fetchAnnonces(currentUser.id);
         await fetchStats(currentUser.id);
@@ -223,12 +437,13 @@ const ListingsPage = () => {
   }, []);
 
   const fetchAnnonces = async (userId) => {
-    if (!userId) return; // Ne pas faire la requête si pas d'ID
+    if (!userId) return;
 
     try {
       setLoading(true);
-      const response = await api.get(`/properties/user/${userId}`);
+      const response = await api.get(`/properties/user/${userId}?status=all`);
       setAnnonces(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {
@@ -237,13 +452,90 @@ const ListingsPage = () => {
   };
 
   const fetchStats = async (userId) => {
-    if (!userId) return; // Ne pas faire la requête si pas d'ID
+    if (!userId) return;
 
     try {
       const response = await api.get(`/properties/stats?userId=${userId}`);
       setStatsGlobales(response.data);
     } catch (error) {
       console.error("Error fetching stats:", error);
+    }
+  };
+
+  // Fonction pour créer une réservation automatique
+  const creerReservationAutomatique = async (annonce, clientId) => {
+    try {
+      console.log(`🔄 Création réservation automatique pour annonce: ${annonce.id}, client: ${clientId}`);
+      
+      // Calculer les dates (7 jours après aujourd'hui, durée 7 nuits)
+      const dateDebut = new Date();
+      dateDebut.setDate(dateDebut.getDate() + 7);
+      
+      const dateFin = new Date(dateDebut);
+      dateFin.setDate(dateFin.getDate() + 7);
+      
+      // Calculer le prix (7 nuits * prix par nuit)
+      const prixNuit = annonce.price || 0;
+      const prixTotal = prixNuit * 7;
+      
+      // Créer la réservation
+      const reservationData = {
+        propertyId: annonce.id,
+        clientId: clientId,
+        dateDebut: dateDebut.toISOString(),
+        dateFin: dateFin.toISOString(),
+        prixTotal: prixTotal,
+        nombreAdultes: 2,
+        nombreEnfants: 0,
+        remarques: `Réservation créée automatiquement suite au marquage "loué" du ${new Date().toLocaleDateString('fr-FR')}`,
+        statut: "confirmee"
+      };
+      
+      const response = await api.post('/locations-saisonnieres', reservationData);
+      
+      // Notifier le client via événement
+      window.dispatchEvent(new CustomEvent('reservation:created', {
+        detail: { 
+          propertyId: annonce.id, 
+          clientId: clientId,
+          reservationId: response.data.reservation?.id
+        }
+      }));
+      
+      console.log("✅ Réservation créée avec succès:", response.data);
+      
+      return { 
+        success: true, 
+        message: "Réservation créée avec succès",
+        reservation: response.data.reservation
+      };
+      
+    } catch (error) {
+      console.error("❌ Erreur création réservation automatique:", error);
+      
+      // Essayer avec l'endpoint spécial
+      try {
+        console.log("🔄 Tentative via endpoint spécial auto-from-property...");
+        
+        const responseAlt = await api.post(`/locations-saisonnieres/auto-from-property/${annonce.id}`, {
+          clientId: clientId
+        });
+        
+        console.log("✅ Réservation créée via endpoint spécial:", responseAlt.data);
+        
+        return { 
+          success: true, 
+          message: "Réservation créée via méthode alternative",
+          reservation: responseAlt.data.reservation
+        };
+      } catch (errorAlt) {
+        console.error("❌ Échec méthode alternative:", errorAlt);
+      }
+      
+      return { 
+        success: false, 
+        message: error.response?.data?.error || "Erreur lors de la création de la réservation"
+      };
     }
   };
 
@@ -285,8 +577,7 @@ const ListingsPage = () => {
     try {
       await api.patch(`/properties/${id}`, {
         status: nouveauStatut,
-        publishedAt:
-          nouveauStatut === "draft" ? null : new Date().toISOString(),
+        publishedAt: nouveauStatut === "pending" ? null : new Date().toISOString(),
       });
       await fetchAnnonces(user?.id);
       await fetchStats(user?.id);
@@ -295,6 +586,92 @@ const ListingsPage = () => {
       console.error("Error updating status:", error);
       toast.error("Erreur lors du changement de statut");
     }
+  };
+
+  // Marquer comme loué avec création de réservation
+  const handleMarquerCommeLoue = async (clientId = null) => {
+    if (!annonceSelectionnee) return;
+
+    try {
+      const annonce = annonceSelectionnee;
+      const isLocationSaisonniere = annonce.rentType  === "saisonniere" && 
+                                   (annonce.listingType === "rent" || annonce.listingType === "both");
+      
+      if (isLocationSaisonniere) {
+        // Si clientId fourni, utiliser celui-ci
+        const finalClientId = clientId || await getDefaultClientId(annonce.id);
+        
+        if (!finalClientId) {
+          toast.error("Impossible de trouver un client pour créer la réservation");
+          return;
+        }
+
+        // 1. Créer la réservation
+        const resultReservation = await creerReservationAutomatique(annonce, finalClientId);
+        
+        if (resultReservation.success) {
+          // 2. Marquer comme loué
+          await changerStatut(annonce.id, "rented");
+          
+          toast.success(
+            <div>
+              <p>✅ Annonce marquée comme louée</p>
+              <p className="text-sm">Réservation créée avec succès</p>
+            </div>
+          );
+          
+          // 3. Émettre un événement pour la demande
+          window.dispatchEvent(new CustomEvent('demande:statusChanged', {
+            detail: { 
+              statut: 'loué',
+              propertyId: annonce.id 
+            }
+          }));
+          
+        } else {
+          toast.error(
+            <div>
+              <p>❌ Impossible de créer la réservation</p>
+              <p className="text-sm">{resultReservation.message}</p>
+            </div>
+          );
+        }
+        
+      } else {
+        // Pour les locations non saisonnières
+        await changerStatut(annonce.id, "rented");
+        toast.success("Annonce marquée comme louée");
+      }
+      
+      // Fermer le modal
+      setShowModalConfirmationLoue(false);
+      setAnnonceSelectionnee(null);
+      
+    } catch (error) {
+      console.error("Erreur marquer comme loué:", error);
+      toast.error(
+        <div>
+          <p>❌ Erreur lors du marquage</p>
+          <p className="text-sm">{error.message}</p>
+        </div>
+      );
+    }
+  };
+
+  // Fonction pour récupérer un client par défaut
+  const getDefaultClientId = async (propertyId) => {
+    try {
+      const response = await api.get(`/demandes/immobilier/property/${propertyId}`);
+      if (response.data && response.data.length > 0) {
+        const derniereValidee = response.data.find(d => d.statut === 'validée');
+        if (derniereValidee) {
+          return derniereValidee.clientId;
+        }
+      }
+    } catch (error) {
+      console.error("Erreur récupération client:", error);
+    }
+    return null;
   };
 
   const getListingType = (annonce) => {
@@ -490,6 +867,30 @@ const ListingsPage = () => {
                         Location
                       </Badge>
                     )}
+                    {annonce.rentType === "saisonniere" && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-purple-100 text-purple-800 text-xs"
+                      >
+                        Saisonnière
+                      </Badge>
+                    )}
+                    {annonce.isPSLA && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-orange-100 text-orange-800 text-xs"
+                      >
+                        PSLA
+                      </Badge>
+                    )}
+                    {annonce.isSHLMR && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-indigo-100 text-indigo-800 text-xs"
+                      >
+                        SHLMR
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
@@ -554,8 +955,7 @@ const ListingsPage = () => {
                     <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
-                        style={{ color: "#0A0A0A" }}
-                      >
+                        style={{ color: "#0A0A0A" }}>
                         {annonce.favorites?.length || 0}
                       </div>
                       <div className="text-xs" style={{ color: "#5A6470" }}>
@@ -626,7 +1026,7 @@ const ListingsPage = () => {
                             <>
                               <button
                                 onClick={() => {
-                                  changerStatut(annonce.id, "draft");
+                                  changerStatut(annonce.id, "pending");
                                   setOpenMenu(null);
                                 }}
                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
@@ -653,10 +1053,11 @@ const ListingsPage = () => {
                               annonce.listingType === "both" ? (
                                 <button
                                   onClick={() => {
-                                    changerStatut(annonce.id, "rented");
+                                    setAnnonceSelectionnee(annonce);
+                                    setShowModalConfirmationLoue(true);
                                     setOpenMenu(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-600 border-b border-gray-100"
                                 >
                                   <CheckCircle size={14} />
                                   Marquer comme loué
@@ -721,6 +1122,16 @@ const ListingsPage = () => {
         isOpen={showModalStatistiques}
         onClose={() => setShowModalStatistiques(false)}
         annonce={annonceSelectionnee}
+      />
+
+      <ModalConfirmationLoue
+        isOpen={showModalConfirmationLoue}
+        onClose={() => {
+          setShowModalConfirmationLoue(false);
+          setAnnonceSelectionnee(null);
+        }}
+        annonce={annonceSelectionnee}
+        onConfirm={handleMarquerCommeLoue}
       />
 
       <style>{`

@@ -619,6 +619,12 @@ function EstimationWizard({
     { number: 5, title: 'Récapitulatif', icon: CheckCircle2 }
   ];
 
+  // Fenêtrage mobile: n'afficher que 2 étapes à la fois
+  const mobileWindow = 2;
+  const currentIndex = step - 1;
+  const startIndex = Math.min(Math.max(currentIndex - 1, 0), steps.length - mobileWindow);
+  const visibleSteps = steps.slice(startIndex, startIndex + mobileWindow);
+
   const renderStep = () => {
     if (isLoading) {
       return <AILoading />;
@@ -671,15 +677,123 @@ function EstimationWizard({
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mx-auto border border-slate-200">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className="text-lg lg:text-3xl font-bold text-slate-900">
           Estimation Immobilière
         </h1>
         <p className="text-slate-600 text-sm mt-2">Obtenez une estimation précise de votre bien en 5 minutes</p>
       </div>
 
       <div className="mb-12">
-        <div className="flex justify-between items-center mb-6 relative">
-          <div className="absolute top-4 left-0 right-0 h-1 bg-slate-200 -z-10 mx-8"></div>
+        {/* Mobile: n'affiche que 2 étapes à la fois */}
+        <div className="md:hidden">
+          <div className="flex justify-between items-center mb-6 relative">
+            <div className="absolute top-4 left-0 right-0 h-1 bg-slate-200 -z-10 mx-4"></div>
+
+            {visibleSteps.map((s, index) => {
+              const IconComponent = s.icon;
+              const isCompleted = s.number < step;
+              const isCurrent = s.number === step;
+
+              return (
+                <div key={s.number} className="flex flex-col items-center flex-1 relative">
+                  {/* Cercle de l'étape - taille ajustée pour mobile */}
+                  <motion.div
+                    className={`
+              w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-sm font-semibold
+              border-2 transition-all duration-500 relative z-10
+              ${isCompleted
+                        ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white shadow-lg shadow-emerald-200'
+                        : isCurrent
+                          ? 'bg-white border-3 border-blue-500 text-blue-600 shadow-2xl ring-4 ring-blue-100 scale-110'
+                          : 'bg-slate-50 border-slate-300 text-slate-400'
+                      }
+            `}
+                    whileHover={{
+                      scale: 1.1,
+                      transition: { type: "spring", stiffness: 500 }
+                    }}
+                    animate={{
+                      scale: isCurrent ? 1.1 : 1,
+                      boxShadow: isCurrent
+                        ? "0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.1)"
+                        : isCompleted
+                          ? "0 10px 15px -3px rgba(16, 185, 129, 0.3)"
+                          : "0 1px 3px 0px rgba(0, 0, 0, 0.1)"
+                    }}
+                  >
+                    {isCompleted ? (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                      >
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </motion.div>
+                    ) : (
+                      <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />
+                    )}
+                  </motion.div>
+
+                  {/* Ligne de progression - limitée aux 2 étapes visibles */}
+                  {index < visibleSteps.length - 1 && (
+                    <div className="absolute top-5 sm:top-6 left-1/2 w-full h-1 z-0 overflow-hidden">
+                      {/* Ligne de fond statique */}
+                      <div className="absolute inset-0 bg-slate-200 rounded-full"></div>
+
+                      {/* Ligne de progression animée */}
+                      <motion.div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 via-green-400 to-green-300 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: s.number < step ? '100%' : '0%' }}
+                        transition={{
+                          duration: 0.8,
+                          ease: [0.4, 0, 0.2, 1],
+                          delay: s.number < step ? 0.3 : 0
+                        }}
+                      />
+
+                      {/* Effet de brillance sur la ligne de progression */}
+                      {s.number < step && (
+                        <motion.div
+                          className="absolute inset-y-0 left-0 w-4 bg-white opacity-30 rounded-full"
+                          animate={{ x: ['0%', '100%'] }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Label - optimisé pour mobile */}
+                  <motion.span
+                    className={`
+              text-xs mt-2 sm:mt-3 font-medium text-center px-1 sm:px-2 max-w-[100px] sm:max-w-[120px] leading-tight
+              ${isCurrent
+                        ? 'text-blue-800 font-bold bg-blue-50 px-2 sm:px-3 py-1 rounded-full text-xs'
+                        : isCompleted
+                          ? 'text-green-700 font-semibold'
+                          : 'text-slate-500'
+                      }
+            `}
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    {s.title}
+                  </motion.span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Desktop: toutes les étapes visibles */}
+        <div className="hidden md:flex justify-between items-center mb-6 relative">
+          {/* Ligne de fond - ajustée pour mobile */}
+          <div className="absolute top-4 left-0 right-0 h-1 bg-slate-200 -z-10 mx-4 sm:mx-8"></div>
 
           {steps.map((s, index) => {
             const IconComponent = s.icon;
@@ -689,18 +803,18 @@ function EstimationWizard({
 
             return (
               <div key={s.number} className="flex flex-col items-center flex-1 relative">
-                {/* Cercle de l'étape */}
+                {/* Cercle de l'étape - taille ajustée pour mobile */}
                 <motion.div
                   className={`
-      w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold
-      border-2 transition-all duration-500 relative z-10
-      ${isCompleted
+              w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-sm font-semibold
+              border-2 transition-all duration-500 relative z-10
+              ${isCompleted
                       ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white shadow-lg shadow-emerald-200'
                       : isCurrent
                         ? 'bg-white border-3 border-blue-500 text-blue-600 shadow-2xl ring-4 ring-blue-100 scale-110'
                         : 'bg-slate-50 border-slate-300 text-slate-400'
                     }
-    `}
+            `}
                   whileHover={{
                     scale: 1.1,
                     transition: { type: "spring", stiffness: 500 }
@@ -720,16 +834,16 @@ function EstimationWizard({
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
                     >
-                      <CheckCircle2 className="w-5 h-5" />
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </motion.div>
                   ) : (
-                    <IconComponent className="w-4 h-4" />
+                    <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
                 </motion.div>
 
-                {/* Ligne de progression */}
+                {/* Ligne de progression - position ajustée pour mobile */}
                 {index < steps.length - 1 && (
-                  <div className="absolute top-6 left-1/2 w-full h-1 z-0 overflow-hidden">
+                  <div className="absolute top-5 sm:top-6 left-1/2 w-full h-1 z-0 overflow-hidden">
                     {/* Ligne de fond statique */}
                     <div className="absolute inset-0 bg-slate-200 rounded-full"></div>
 
@@ -760,17 +874,17 @@ function EstimationWizard({
                   </div>
                 )}
 
-                {/* Label */}
+                {/* Label - optimisé pour mobile */}
                 <motion.span
                   className={`
-      text-xs mt-3 font-medium text-center px-2 max-w-[120px] leading-tight
-      ${isCurrent
-                      ? 'text-blue-800 font-bold bg-blue-50 px-3 py-1 rounded-full'
+              text-xs mt-2 sm:mt-3 font-medium text-center px-1 sm:px-2 max-w-[100px] sm:max-w-[120px] leading-tight
+              ${isCurrent
+                      ? 'text-blue-800 font-bold bg-blue-50 px-2 sm:px-3 py-1 rounded-full text-xs'
                       : isCompleted
                         ? 'text-green-700 font-semibold'
                         : 'text-slate-500'
                     }
-    `}
+            `}
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.1 }}
@@ -803,7 +917,7 @@ function Step1({ data, onUpdate, onNext, propertyTypes }: any) {
   return (
     <div className="text-center">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Quel type de bien souhaitez-vous estimer ?</h2>
+        <h2 className="text-md lg:text-2xl font-bold text-slate-900 mb-2">Quel type de bien souhaitez-vous estimer ?</h2>
         <p className="text-slate-600 text-xs">Sélectionnez le type de bien qui correspond à votre propriété</p>
       </div>
 
@@ -894,7 +1008,7 @@ function Step2({ data, onUpdate, onNext, onBack }: any) {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Caractéristiques principales</h2>
+        <h2 className="text-md lg:text-2xl font-bold text-slate-900 mb-2">Caractéristiques principales</h2>
         <p className="text-slate-600 text-sm">Renseignez les informations de base de votre bien</p>
       </div>
 
@@ -1249,7 +1363,7 @@ function Step3({ data, onUpdate, onNext, onBack }: any) {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Localisation du bien</h2>
+        <h2 className="text-md lg:text-2xl font-bold text-slate-900 mb-2">Localisation du bien</h2>
         <p className="text-slate-600 text-sm">Recherchez n'importe quelle ville, région ou pays dans le monde</p>
       </div>
 
@@ -1525,7 +1639,7 @@ function Step4({ data, onUpdate, onNext, onBack }: any) {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">État et équipements</h2>
+        <h2 className="text-md lg:text-2xl font-bold text-slate-900 mb-2">État et équipements</h2>
         <p className="text-slate-600 text-xs">Décrivez l'état de votre bien et ses équipements</p>
       </div>
 
@@ -1720,14 +1834,14 @@ function Step5({
         >
           <CheckCircle2 className="w-8 h-8 text-green-500" />
         </motion.div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Vérifiez votre estimation</h2>
+        <h2 className="text-md lg:text-2xl font-bold text-slate-900 mb-2">Vérifiez votre estimation</h2>
         <p className="text-slate-600 text-xs">Toutes les informations sont-elles correctes ?</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="space-y-6">
           <div className="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-            <h3 className="font-bold text-slate-900 mb-4 text-lg flex items-center">
+            <h3 className="font-bold text-slate-900 mb-4 text-sm lg:text-lg flex items-center">
               <Home className="w-5 h-5 mr-2 text-blue-500" />
               Caractéristiques principales
             </h3>
@@ -1765,16 +1879,16 @@ function Step5({
               Localisation :
             </h3>
             <div className=" flex  flex-col">
-                <p className="mt-1 font-semibold text-slate-900 text-xs">{data.location?.address}</p>
-                <p className="text-slate-600 text-xs absolute right-2 bottom-2">{data.location?.city} {data.location?.postalCode}</p>
+              <p className="mt-1 font-semibold text-slate-900 text-xs">{data.location?.address}</p>
+              <p className="text-slate-600 text-xs absolute right-2 bottom-2">{data.location?.city} {data.location?.postalCode}</p>
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4 text-lg">État du bien</h3>
-            <div className={`inline-flex items-center px-4 py-2 rounded-full ${getConditionColor(data.condition)} border`}>
+            <h3 className="font-bold text-slate-900 mb-4 text-sm lg:text-lg">État du bien</h3>
+            <div className={`inline-flex items-center px-2 lg:px-4 py-1 lg:py-2 rounded-full ${getConditionColor(data.condition)} border`}>
               <span className="font-semibold">{getConditionLabel(data.condition)}</span>
             </div>
           </div>
@@ -1815,7 +1929,7 @@ function Step5({
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex lg:flex-row flex-col gap-4">
         <motion.button
           onClick={onBack}
           whileHover={{ scale: 1.02 }}

@@ -23,8 +23,9 @@ import {
   Star,
   ArrowDown,
   User,
+  ArrowLeft,
 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useSocket } from "../contexts/SocketContext";
 import { useMessaging } from "@/hooks/useMessaging";
@@ -33,6 +34,7 @@ import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { useAuth } from "@/hooks/useAuth";
 export default function ProDiscussions() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [demande, setDemande] = useState(null);
   const [notAssignedMe, setNotAssignedMe] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,11 @@ export default function ProDiscussions() {
   const [showFactureModal, setShowFactureModal] = useState(false);
   const [showDevisModal, setShowDevisModal] = useState(false);
   const [showActionsPanel, setShowActionsPanel] = useState(false);
+  const [loadingRendezVous, setLoadingRendezVous] = useState(false);
+  const [loadingFacture, setLoadingFacture] = useState(false);
+  const [loadingDevis, setLoadingDevis] = useState(false);
+  const [loadingEditRendezVous, setLoadingEditRendezVous] = useState(false);
+  const [loadingEditDevis, setLoadingEditDevis] = useState(false);
 
   // États pour les formulaires
   const [artisanDetails, setArtisanDetails] = useState(null);
@@ -134,6 +141,7 @@ export default function ProDiscussions() {
   // Fonctions pour les actions
   const handleSubmitRendezVous = async (date, heure, notes) => {
     try {
+      setLoadingRendezVous(true);
       const response = await api.post(`/demande-actions/${id}/proposer-rdv`, {
         date,
         heure,
@@ -151,6 +159,8 @@ export default function ProDiscussions() {
     } catch (error) {
       console.error("Erreur proposition rendez-vous:", error);
       toast.error("Erreur lors de la proposition du rendez-vous");
+    } finally {
+      setLoadingRendezVous(false);
     }
   };
   // Fonction pour confirmer le paiement
@@ -228,6 +238,7 @@ export default function ProDiscussions() {
   };
   const handleSubmitDevis = async (montant, description, file) => {
     try {
+      setLoadingDevis(true);
       const formData = new FormData();
       formData.append("montant", montant);
       formData.append("description", description);
@@ -254,11 +265,14 @@ export default function ProDiscussions() {
     } catch (error) {
       console.error("Erreur envoi devis:", error);
       toast.error("Erreur lors de l'envoi du devis");
+    } finally {
+      setLoadingDevis(false);
     }
   };
 
   const handleSubmitFacture = async (montant, file) => {
     try {
+      setLoadingFacture(true);
       const formData = new FormData();
       formData.append("montant", montant);
       formData.append("factureFile", file);
@@ -285,11 +299,14 @@ export default function ProDiscussions() {
     } catch (error) {
       console.error("Erreur envoi facture:", error);
       toast.error("Erreur lors de l'envoi de la facture");
+    } finally {
+      setLoadingFacture(false);
     }
   };
 
   const handleModifierRendezVous = async (date, heure, notes) => {
     try {
+      setLoadingEditRendezVous(true);
       const response = await api.put(`/demande-actions/${id}/modifier-rdv`, {
         date,
         heure,
@@ -307,11 +324,14 @@ export default function ProDiscussions() {
     } catch (error) {
       console.error("Erreur modification rendez-vous:", error);
       toast.error("Erreur lors de la modification du rendez-vous");
+    } finally {
+      setLoadingEditRendezVous(false);
     }
   };
 
   const handleModifierDevis = async (montant, description, file) => {
     try {
+      setLoadingEditDevis(true);
       const formData = new FormData();
       formData.append("montant", montant);
       formData.append("description", description);
@@ -341,6 +361,8 @@ export default function ProDiscussions() {
     } catch (error) {
       console.error("Erreur modification devis:", error);
       toast.error("Erreur lors de la modification du devis");
+    } finally {
+      setLoadingEditDevis(false);
     }
   };
 
@@ -621,6 +643,16 @@ export default function ProDiscussions() {
         {/* Côté gauche - Informations du projet */}
         <div className="w-full lg:w-1/2 lg:h-auto h-[680px] bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-0">
           <div className="overflow-y-auto max-w-2xl mx-auto">
+            {/* Bouton de retour */}
+            <div className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>Retour</span>
+              </button>
+            </div>
             {/* Header avec badge */}
             <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
               <div className="flex items-start gap-3">
@@ -1804,7 +1836,8 @@ export default function ProDiscussions() {
               </h3>
               <button
                 onClick={() => setShowEditRendezVousModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                disabled={loadingEditRendezVous}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1825,8 +1858,9 @@ export default function ProDiscussions() {
                         date: e.target.value,
                       }))
                     }
+                    disabled={loadingEditRendezVous}
                     min={new Date().toISOString().split("T")[0]}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
 
@@ -1843,7 +1877,8 @@ export default function ProDiscussions() {
                         heure: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingEditRendezVous}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
 
@@ -1859,8 +1894,9 @@ export default function ProDiscussions() {
                         notes: e.target.value,
                       }))
                     }
+                    disabled={loadingEditRendezVous}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="Informations complémentaires..."
                   />
                 </div>
@@ -1869,7 +1905,8 @@ export default function ProDiscussions() {
               <div className="flex gap-3 justify-end mt-6">
                 <button
                   onClick={() => setShowEditRendezVousModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  disabled={loadingEditRendezVous}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
                 >
                   Annuler
                 </button>
@@ -1882,11 +1919,20 @@ export default function ProDiscussions() {
                     )
                   }
                   disabled={
-                    !currentRendezVous?.date || !currentRendezVous?.heure
+                    !currentRendezVous?.date ||
+                    !currentRendezVous?.heure ||
+                    loadingEditRendezVous
                   }
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                 >
-                  Modifier le rendez-vous
+                  {loadingEditRendezVous ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Modification...
+                    </>
+                  ) : (
+                    "Modifier le rendez-vous"
+                  )}
                 </button>
               </div>
             </div>
@@ -1904,7 +1950,8 @@ export default function ProDiscussions() {
               </h3>
               <button
                 onClick={() => setShowEditDevisModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                disabled={loadingEditDevis}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1925,7 +1972,8 @@ export default function ProDiscussions() {
                         montant: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingEditDevis}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="0.00"
                     step="0.01"
                   />
@@ -1943,8 +1991,9 @@ export default function ProDiscussions() {
                         description: e.target.value,
                       }))
                     }
+                    disabled={loadingEditDevis}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="Détail des prestations..."
                   />
                 </div>
@@ -1959,7 +2008,8 @@ export default function ProDiscussions() {
                     onChange={handleFileChange((file) =>
                       setCurrentDevis((prev) => ({ ...prev, file }))
                     )}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingEditDevis}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                   {currentDevis?.file && (
                     <p className="text-sm text-green-600 mt-2">
@@ -1972,7 +2022,8 @@ export default function ProDiscussions() {
               <div className="flex gap-3 justify-end mt-6">
                 <button
                   onClick={() => setShowEditDevisModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  disabled={loadingEditDevis}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
                 >
                   Annuler
                 </button>
@@ -1985,11 +2036,20 @@ export default function ProDiscussions() {
                     )
                   }
                   disabled={
-                    !currentDevis?.montant || !currentDevis?.description
+                    !currentDevis?.montant ||
+                    !currentDevis?.description ||
+                    loadingEditDevis
                   }
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
                 >
-                  Modifier le devis
+                  {loadingEditDevis ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Modification...
+                    </>
+                  ) : (
+                    "Modifier le devis"
+                  )}
                 </button>
               </div>
             </div>
@@ -2007,7 +2067,8 @@ export default function ProDiscussions() {
               </h3>
               <button
                 onClick={() => setShowRendezVousModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                disabled={loadingRendezVous}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2024,7 +2085,8 @@ export default function ProDiscussions() {
                     min={new Date().toISOString().split("T")[0]}
                     value={rendezVousDate}
                     onChange={(e) => setRendezVousDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingRendezVous}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
 
@@ -2036,7 +2098,8 @@ export default function ProDiscussions() {
                     type="time"
                     value={rendezVousHeure}
                     onChange={(e) => setRendezVousHeure(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingRendezVous}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
 
@@ -2047,8 +2110,9 @@ export default function ProDiscussions() {
                   <textarea
                     value={rendezVousNotes}
                     onChange={(e) => setRendezVousNotes(e.target.value)}
+                    disabled={loadingRendezVous}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="Informations complémentaires sur le rendez-vous..."
                   />
                 </div>
@@ -2057,7 +2121,8 @@ export default function ProDiscussions() {
               <div className="flex gap-3 justify-end mt-6">
                 <button
                   onClick={() => setShowRendezVousModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  disabled={loadingRendezVous}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
                 >
                   Annuler
                 </button>
@@ -2069,16 +2134,26 @@ export default function ProDiscussions() {
                       rendezVousNotes
                     )
                   }
-                  disabled={!rendezVousDate || !rendezVousHeure}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={
+                    !rendezVousDate || !rendezVousHeure || loadingRendezVous
+                  }
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
-                  Proposer le rendez-vous
+                  {loadingRendezVous ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Proposing...
+                    </>
+                  ) : (
+                    "Proposer le rendez-vous"
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
       {/* Modale Facture */}
       {showFactureModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -2089,7 +2164,8 @@ export default function ProDiscussions() {
               </h3>
               <button
                 onClick={() => setShowFactureModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                disabled={loadingFacture}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2105,7 +2181,8 @@ export default function ProDiscussions() {
                     type="number"
                     value={factureMontant}
                     onChange={(e) => setFactureMontant(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingFacture}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="0.00"
                     step="0.01"
                   />
@@ -2119,7 +2196,8 @@ export default function ProDiscussions() {
                     type="file"
                     accept=".pdf"
                     onChange={handleFileChange(setFactureFile)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingFacture}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                   {factureFile && (
                     <p className="text-sm text-green-600 mt-2">
@@ -2132,7 +2210,8 @@ export default function ProDiscussions() {
               <div className="flex gap-3 justify-end mt-6">
                 <button
                   onClick={() => setShowFactureModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  disabled={loadingFacture}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
                 >
                   Annuler
                 </button>
@@ -2140,16 +2219,24 @@ export default function ProDiscussions() {
                   onClick={() =>
                     handleSubmitFacture(factureMontant, factureFile)
                   }
-                  disabled={!factureMontant || !factureFile}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={!factureMontant || !factureFile || loadingFacture}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
-                  Envoyer la facture
+                  {loadingFacture ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Envoi...
+                    </>
+                  ) : (
+                    "Envoyer la facture"
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
       {/* Modale Devis */}
       {showDevisModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -2160,7 +2247,8 @@ export default function ProDiscussions() {
               </h3>
               <button
                 onClick={() => setShowDevisModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                disabled={loadingDevis}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2176,7 +2264,8 @@ export default function ProDiscussions() {
                     type="number"
                     value={devisMontant}
                     onChange={(e) => setDevisMontant(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingDevis}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="0.00"
                     step="0.01"
                   />
@@ -2189,8 +2278,9 @@ export default function ProDiscussions() {
                   <textarea
                     value={devisDescription}
                     onChange={(e) => setDevisDescription(e.target.value)}
+                    disabled={loadingDevis}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                     placeholder="Détail des prestations et conditions..."
                   />
                 </div>
@@ -2203,7 +2293,8 @@ export default function ProDiscussions() {
                     type="file"
                     accept=".pdf"
                     onChange={handleFileChange(setDevisFile)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loadingDevis}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                   {devisFile && (
                     <p className="text-sm text-green-600 mt-2">
@@ -2216,7 +2307,8 @@ export default function ProDiscussions() {
               <div className="flex gap-3 justify-end mt-6">
                 <button
                   onClick={() => setShowDevisModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  disabled={loadingDevis}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
                 >
                   Annuler
                 </button>
@@ -2224,10 +2316,22 @@ export default function ProDiscussions() {
                   onClick={() =>
                     handleSubmitDevis(devisMontant, devisDescription, devisFile)
                   }
-                  disabled={!devisMontant || !devisDescription || !devisFile}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={
+                    !devisMontant ||
+                    !devisDescription ||
+                    !devisFile ||
+                    loadingDevis
+                  }
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
-                  Envoyer le devis
+                  {loadingDevis ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Envoi...
+                    </>
+                  ) : (
+                    "Envoyer le devis"
+                  )}
                 </button>
               </div>
             </div>

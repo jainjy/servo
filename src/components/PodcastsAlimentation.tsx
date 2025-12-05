@@ -1,7 +1,17 @@
 // components/PodcastsAlimentation.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download, Video, Apple } from 'lucide-react';
-import { MediaService } from '../lib/api';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Play,
+  Headphones,
+  Clock,
+  Heart,
+  Star,
+  Download,
+  Video,
+  Apple,
+} from "lucide-react";
+import { MediaService } from "../lib/api";
+import LoadingSpinner from "./Loading/LoadingSpinner";
 
 interface VideoEpisode {
   id: string;
@@ -23,11 +33,13 @@ const PodcastsAlimentation: React.FC = () => {
   const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedEpisode, setSelectedEpisode] = useState<VideoEpisode | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<VideoEpisode | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -39,7 +51,8 @@ const PodcastsAlimentation: React.FC = () => {
   ];
 
   // Image de background pour le titre
-  const headerBackgroundImage = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
+  const headerBackgroundImage =
+    "https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80";
 
   // États pour la barre de progression
   const [currentTime, setCurrentTime] = useState(0);
@@ -51,7 +64,7 @@ const PodcastsAlimentation: React.FC = () => {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   // Mise à jour du temps
@@ -102,55 +115,61 @@ const PodcastsAlimentation: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        console.log('🔄 Début du chargement des vidéos Alimentation...');
+        console.log("🔄 Début du chargement des vidéos Alimentation...");
 
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({
-          category: 'Alimentation',
-          limit: 50
+          category: "Alimentation",
+          limit: 50,
         });
 
-        console.log('📦 Réponse COMPLÈTE de l\'API:', response);
-        console.log('🔍 Structure de la réponse Axios:', {
+        console.log("📦 Réponse COMPLÈTE de l'API:", response);
+        console.log("🔍 Structure de la réponse Axios:", {
           data: response.data,
           status: response.status,
-          statusText: response.statusText
+          statusText: response.statusText,
         });
 
         // CORRECTION : Les données sont dans response.data (Axios)
         const apiData = response.data;
 
-        console.log('🔍 Structure des données API:', {
+        console.log("🔍 Structure des données API:", {
           success: apiData.success,
           hasData: !!apiData.data,
           dataIsArray: Array.isArray(apiData.data),
           dataLength: apiData.data?.length,
-          pagination: apiData.pagination
+          pagination: apiData.pagination,
         });
 
         if (apiData.success && Array.isArray(apiData.data)) {
-          console.log('✅ Structure de réponse valide');
-          console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
-          console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
+          console.log("✅ Structure de réponse valide");
+          console.log(
+            "🎯 Nombre total de vidéos dans apiData.data:",
+            apiData.data.length
+          );
+          console.log("🔍 Détail de la première vidéo:", apiData.data[0]);
 
           const alimentationVideos: VideoEpisode[] = apiData.data
             .filter((video: any) => {
               const isAlimentation = video.category === "Alimentation";
               const isActive = video.isActive !== false;
-              const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
+              const hasVideoUrl =
+                video.videoUrl && video.videoUrl.trim() !== "";
 
-              console.log('📋 Filtrage vidéo:', {
+              console.log("📋 Filtrage vidéo:", {
                 id: video.id,
                 title: video.title,
                 category: video.category,
                 isAlimentation: isAlimentation,
                 isActive: isActive,
                 hasVideoUrl: hasVideoUrl,
-                videoUrl: video.videoUrl
+                videoUrl: video.videoUrl,
               });
 
               const shouldInclude = isAlimentation && isActive && hasVideoUrl;
-              console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
+              console.log(
+                `📊 Vidéo "${video.title}" incluse: ${shouldInclude}`
+              );
 
               return shouldInclude;
             })
@@ -159,59 +178,73 @@ const PodcastsAlimentation: React.FC = () => {
                 id: video.id,
                 videoUrl: video.videoUrl,
                 thumbnailUrl: video.thumbnailUrl,
-                createdAt: video.createdAt
+                createdAt: video.createdAt,
               });
 
               const mappedVideo = {
                 id: video.id,
                 title: video.title,
-                description: video.description || 'Aucune description disponible',
+                description:
+                  video.description || "Aucune description disponible",
                 duration: video.duration || "00:00:00",
-                date: new Date(video.createdAt || new Date()).toLocaleDateString('fr-FR'),
+                date: new Date(
+                  video.createdAt || new Date()
+                ).toLocaleDateString("fr-FR"),
                 category: video.category,
                 views: video.views || 0,
                 featured: video.featured || video.isPremium || false,
                 videoUrl: video.videoUrl,
-                thumbnailUrl: video.thumbnailUrl || defaultThumbnails[index % defaultThumbnails.length],
+                thumbnailUrl:
+                  video.thumbnailUrl ||
+                  defaultThumbnails[index % defaultThumbnails.length],
                 isActive: video.isActive !== false,
-                mimeType: video.mimeType || 'video/mp4',
-                fileSize: video.fileSize || 0
+                mimeType: video.mimeType || "video/mp4",
+                fileSize: video.fileSize || 0,
               };
 
               console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
               return mappedVideo;
             });
 
-          console.log('🎉 Vidéos Alimentation après filtrage:', alimentationVideos.length);
-          console.log('📺 Liste complète des vidéos filtrées:', alimentationVideos);
+          console.log(
+            "🎉 Vidéos Alimentation après filtrage:",
+            alimentationVideos.length
+          );
+          console.log(
+            "📺 Liste complète des vidéos filtrées:",
+            alimentationVideos
+          );
 
           setVideoEpisodes(alimentationVideos);
 
           if (alimentationVideos.length === 0) {
-            console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
-            console.log('🔍 Contenu de apiData.data:', apiData.data);
+            console.log(
+              "⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:",
+              apiData.data.length,
+              "éléments"
+            );
+            console.log("🔍 Contenu de apiData.data:", apiData.data);
           }
-
         } else {
-          console.warn('⚠️ Structure de réponse inattendue:', {
+          console.warn("⚠️ Structure de réponse inattendue:", {
             success: apiData.success,
             hasData: !!apiData.data,
             dataIsArray: Array.isArray(apiData.data),
-            apiData: apiData
+            apiData: apiData,
           });
           setVideoEpisodes([]);
         }
       } catch (err: any) {
-        console.error('❌ Erreur lors du chargement des vidéos:', err);
-        console.error('📋 Détails de l\'erreur:', {
+        console.error("❌ Erreur lors du chargement des vidéos:", err);
+        console.error("📋 Détails de l'erreur:", {
           message: err.message,
           stack: err.stack,
-          response: err.response
+          response: err.response,
         });
         setError(err.message);
         setVideoEpisodes([]);
       } finally {
-        console.log('🏁 Chargement terminé');
+        console.log("🏁 Chargement terminé");
         setLoading(false);
       }
     };
@@ -221,9 +254,9 @@ const PodcastsAlimentation: React.FC = () => {
 
   // Test de débogage supplémentaire
   useEffect(() => {
-    console.log('📊 État actuel de videoEpisodes:', {
+    console.log("📊 État actuel de videoEpisodes:", {
       count: videoEpisodes.length,
-      videos: videoEpisodes
+      videos: videoEpisodes,
     });
   }, [videoEpisodes]);
 
@@ -240,7 +273,7 @@ const PodcastsAlimentation: React.FC = () => {
 
   const handleDownload = () => {
     if (selectedEpisode) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = selectedEpisode.videoUrl;
       link.download = `${selectedEpisode.title}.mp4`;
       document.body.appendChild(link);
@@ -250,9 +283,9 @@ const PodcastsAlimentation: React.FC = () => {
   };
 
   const toggleFavorite = (episodeId: string) => {
-    setFavorites(prev =>
+    setFavorites((prev) =>
       prev.includes(episodeId)
-        ? prev.filter(id => id !== episodeId)
+        ? prev.filter((id) => id !== episodeId)
         : [...prev, episodeId]
     );
   };
@@ -261,32 +294,34 @@ const PodcastsAlimentation: React.FC = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      'Alimentation': 'bg-gradient-to-r from-orange-500 to-amber-500',
-      'Bien-être': 'bg-gradient-to-r from-green-500 to-teal-500',
-      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
-      'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
-      'Crédit & Assurance': 'bg-gradient-to-r from-teal-500 to-blue-500',
-      'Domicile': 'bg-gradient-to-r from-pink-500 to-rose-500'
+      Alimentation: "bg-gradient-to-r from-orange-500 to-amber-500",
+      "Bien-être": "bg-gradient-to-r from-green-500 to-teal-500",
+      Entreprise: "bg-gradient-to-r from-purple-500 to-pink-500",
+      Immobilier: "bg-gradient-to-r from-blue-500 to-cyan-500",
+      "Bâtiment & Construction":
+        "bg-gradient-to-r from-orange-500 to-amber-500",
+      "Crédit & Assurance": "bg-gradient-to-r from-teal-500 to-blue-500",
+      Domicile: "bg-gradient-to-r from-pink-500 to-rose-500",
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-500';
+    return colors[category as keyof typeof colors] || "bg-gray-500";
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   // Composant de carte vidéo
   const VideoCard = ({ episode }: { episode: VideoEpisode }) => {
-    console.log('🎬 Rendu de VideoCard pour:', episode.title);
+    console.log("🎬 Rendu de VideoCard pour:", episode.title);
     return (
       <div
-        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-blue-600' : 'border-gray-200'
-          }`}
+        className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
+          episode.featured ? "border-2 border-blue-600" : "border-gray-200"
+        }`}
       >
         {episode.featured && (
           <div className="bg-blue-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
@@ -301,10 +336,15 @@ const PodcastsAlimentation: React.FC = () => {
             alt={episode.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             onError={(e) => {
-              console.warn('❌ Erreur de chargement de l\'image:', episode.thumbnailUrl);
+              console.warn(
+                "❌ Erreur de chargement de l'image:",
+                episode.thumbnailUrl
+              );
               e.currentTarget.src = defaultThumbnails[0];
             }}
-            onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
+            onLoad={() =>
+              console.log("✅ Image chargée:", episode.thumbnailUrl)
+            }
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
 
@@ -318,7 +358,11 @@ const PodcastsAlimentation: React.FC = () => {
 
         <div className="p-6">
           <div className="flex items-center justify-between mb-3">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getCategoryColor(episode.category)}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${getCategoryColor(
+                episode.category
+              )}`}
+            >
               {episode.category}
             </span>
             <div className="flex items-center text-gray-500 text-sm">
@@ -345,7 +389,7 @@ const PodcastsAlimentation: React.FC = () => {
             </div>
             <button
               onClick={() => {
-                console.log('🎯 Clic sur Regarder pour:', episode.title);
+                console.log("🎯 Clic sur Regarder pour:", episode.title);
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
               }}
@@ -360,24 +404,15 @@ const PodcastsAlimentation: React.FC = () => {
     );
   };
 
-  console.log('📱 Rendu du composant principal:', {
+  console.log("📱 Rendu du composant principal:", {
     loading,
     error,
     videoCount: videoEpisodes.length,
-    videos: videoEpisodes
+    videos: videoEpisodes,
   });
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center flex flex-col items-center justify-center">
-            <img src="/loading.gif" alt="" />
-            <div className="text-gray-600">Chargement des vidéos Alimentation...</div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner text="Chargement des vidéos Alimentation" />;
   }
 
   if (error) {
@@ -411,7 +446,8 @@ const PodcastsAlimentation: React.FC = () => {
 
             {/* Sous-titre */}
             <p className="text-md md:text-lg text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
-              Nutrition, recettes healthy et conseils pour une alimentation équilibrée au quotidien
+              Nutrition, recettes healthy et conseils pour une alimentation
+              équilibrée au quotidien
             </p>
 
             {/* Statistiques */}
@@ -424,7 +460,9 @@ const PodcastsAlimentation: React.FC = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-md lg:text-2xl font-black text-white drop-shadow-lg">
-                      {videoEpisodes.reduce((total, ep) => total + ep.views, 0).toLocaleString()}
+                      {videoEpisodes
+                        .reduce((total, ep) => total + ep.views, 0)
+                        .toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-200 font-light tracking-wide mt-1">
                       vues totales
@@ -462,7 +500,7 @@ const PodcastsAlimentation: React.FC = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-black text-white drop-shadow-lg">
-                      {videoEpisodes.filter(ep => ep.featured).length}
+                      {videoEpisodes.filter((ep) => ep.featured).length}
                     </div>
                     <div className="text-sm text-gray-200 font-light tracking-wide mt-1">
                       vidéos premium
@@ -487,23 +525,29 @@ const PodcastsAlimentation: React.FC = () => {
                 <Apple className="w-8 h-8 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Podcasts Alimentation</h2>
-                <p className="text-gray-600">Conseils nutrition, recettes healthy et techniques culinaires</p>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Podcasts Alimentation
+                </h2>
+                <p className="text-gray-600">
+                  Conseils nutrition, recettes healthy et techniques culinaires
+                </p>
               </div>
             </div>
             <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
-              {activeTab === 'all' ? videoEpisodes.length : favorites.length} vidéo(s) disponible(s)
+              {activeTab === "all" ? videoEpisodes.length : favorites.length}{" "}
+              vidéo(s) disponible(s)
             </div>
           </div>
 
           {/* Onglets */}
           <div className="flex gap-4 mb-8 border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('all')}
-              className={`pb-4 px-1 lg:px-6 font-semibold text-sm lg:text-lg transition-all duration-300 border-b-2 ${activeTab === 'all'
-                  ? 'border-orange-600 text-orange-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              onClick={() => setActiveTab("all")}
+              className={`pb-4 px-1 lg:px-6 font-semibold text-sm lg:text-lg transition-all duration-300 border-b-2 ${
+                activeTab === "all"
+                  ? "border-orange-600 text-orange-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
             >
               <div className="flex items-center space-x-2">
                 <Apple className="w-5 h-5" />
@@ -511,11 +555,12 @@ const PodcastsAlimentation: React.FC = () => {
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('favorites')}
-              className={`pb-4 px-1 lg:px-6 font-semibold text-sm lg:text-lg transition-all duration-300 border-b-2 ${activeTab === 'favorites'
-                  ? 'border-red-600 text-red-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              onClick={() => setActiveTab("favorites")}
+              className={`pb-4 px-1 lg:px-6 font-semibold text-sm lg:text-lg transition-all duration-300 border-b-2 ${
+                activeTab === "favorites"
+                  ? "border-red-600 text-red-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
             >
               <div className="flex items-center space-x-2">
                 <Heart className="w-5 h-5" />
@@ -525,7 +570,7 @@ const PodcastsAlimentation: React.FC = () => {
           </div>
 
           {/* Contenu de l'onglet */}
-          {activeTab === 'all' ? (
+          {activeTab === "all" ? (
             videoEpisodes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {videoEpisodes.map((episode) => (
@@ -535,12 +580,13 @@ const PodcastsAlimentation: React.FC = () => {
             ) : (
               <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
                 <Apple className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">
+                  Aucune vidéo disponible
+                </h3>
                 <p className="text-gray-500">
                   {error
                     ? "Une erreur est survenue lors du chargement des vidéos"
-                    : "Aucune vidéo Alimentation n'est disponible pour le moment"
-                  }
+                    : "Aucune vidéo Alimentation n'est disponible pour le moment"}
                 </p>
               </div>
             )
@@ -555,7 +601,9 @@ const PodcastsAlimentation: React.FC = () => {
           ) : (
             <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
               <Heart className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast en favoris</h3>
+              <h3 className="text-2xl font-bold text-gray-600 mb-2">
+                Aucun podcast en favoris
+              </h3>
               <p className="text-gray-500">
                 Cliquez sur le cœur d'un podcast pour l'ajouter à vos favoris
               </p>
@@ -566,227 +614,287 @@ const PodcastsAlimentation: React.FC = () => {
 
       {/* Modal Vidéo */}
       {isModalOpen && selectedEpisode && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md">
-    {/* Modal Container - Layout vertical sur mobile */}
-    <div className="relative w-full max-w-7xl h-[95vh] sm:h-[90vh] bg-gray-900/50 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
-      
-      {/* Bouton fermeture */}
-      <button
-        onClick={() => {
-          setIsModalOpen(false);
-          setIsPlaying(false);
-          if (videoRef.current) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
-          }
-        }}
-        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 sm:p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
-      >
-        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* Colonne de gauche - Vidéo */}
-      <div className="flex-1 lg:mr-5 rounded-t-xl sm:rounded-t-2xl overflow-hidden flex flex-col min-w-0">
-        {/* Container vidéo */}
-        <div className="relative flex-1 bg-black flex items-center justify-center min-h-[200px] sm:min-h-0">
-          <video
-            ref={videoRef}
-            src={selectedEpisode.videoUrl}
-            onEnded={() => setIsPlaying(false)}
-            onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain"
-            controls={false}
-            poster={selectedEpisode.thumbnailUrl}
-          />
-
-          {/* Overlay de contrôle custom */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
-
-            {/* Barre de progression */}
-            <div className="mb-3 sm:mb-4 px-1 sm:px-2">
-              <div
-                className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer group"
-                onClick={handleProgressClick}
-                ref={progressBarRef}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md">
+          {/* Modal Container - Layout vertical sur mobile */}
+          <div className="relative w-full max-w-7xl h-[95vh] sm:h-[90vh] bg-gray-900/50 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+            {/* Bouton fermeture */}
+            <button
+              onClick={() => {
+                setIsModalOpen(false);
+                setIsPlaying(false);
+                if (videoRef.current) {
+                  videoRef.current.pause();
+                  videoRef.current.currentTime = 0;
+                }
+              }}
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 sm:p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
+            >
+              <svg
+                className="h-4 w-4 sm:h-5 sm:w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <div className="absolute inset-0 bg-gray-600 rounded-full"></div>
-                <div
-                  className="absolute h-full bg-blue-600 rounded-full transition-all duration-100"
-                  style={{ width: `${progress}%` }}
-                ></div>
-                <div
-                  className="absolute top-1/2 w-3 h-3 bg-blue-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
-                  style={{ left: `calc(${progress}% - 6px)` }}
-                ></div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Colonne de gauche - Vidéo */}
+            <div className="flex-1 lg:mr-5 rounded-t-xl sm:rounded-t-2xl overflow-hidden flex flex-col min-w-0">
+              {/* Container vidéo */}
+              <div className="relative flex-1 bg-black flex items-center justify-center min-h-[200px] sm:min-h-0">
+                <video
+                  ref={videoRef}
+                  src={selectedEpisode.videoUrl}
+                  onEnded={() => setIsPlaying(false)}
+                  onTimeUpdate={handleTimeUpdate}
+                  className="w-full h-full object-contain"
+                  controls={false}
+                  poster={selectedEpisode.thumbnailUrl}
+                />
+
+                {/* Overlay de contrôle custom */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
+                  {/* Barre de progression */}
+                  <div className="mb-3 sm:mb-4 px-1 sm:px-2">
+                    <div
+                      className="relative w-full h-1 bg-gray-600 rounded-full cursor-pointer group"
+                      onClick={handleProgressClick}
+                      ref={progressBarRef}
+                    >
+                      <div className="absolute inset-0 bg-gray-600 rounded-full"></div>
+                      <div
+                        className="absolute h-full bg-blue-600 rounded-full transition-all duration-100"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                      <div
+                        className="absolute top-1/2 w-3 h-3 bg-blue-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                        style={{ left: `calc(${progress}% - 6px)` }}
+                      ></div>
+                    </div>
+
+                    {/* Temps */}
+                    <div className="flex justify-between items-center mt-1 sm:mt-2 text-xs text-gray-300">
+                      <span>{formatTime(currentTime)}</span>
+                      <span>{formatTime(duration)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                      <button
+                        onClick={handlePlayMedia}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 sm:p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                      >
+                        {isPlaying ? (
+                          <svg
+                            className="w-5 h-5 sm:w-6 sm:h-6"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          <svg
+                            className="w-5 h-5 sm:w-6 sm:h-6"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      {/* Bouton plein écran */}
+                      <button
+                        onClick={toggleFullscreen}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 sm:p-2 transition-all duration-200"
+                        title="Plein écran"
+                      >
+                        <svg
+                          className="w-4 h-4 sm:w-5 sm:h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Temps */}
-              <div className="flex justify-between items-center mt-1 sm:mt-2 text-xs text-gray-300">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
+              {/* Titre de la vidéo */}
+              <div className="p-3 sm:p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+                <h1 className="text-base sm:text-lg font-bold text-white line-clamp-2">
+                  {selectedEpisode.title}
+                </h1>
+                <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400 mt-1">
+                  <span>{selectedEpisode.views.toLocaleString()} vues</span>
+                  <span>{selectedEpisode.date}</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <button
-                  onClick={handlePlayMedia}
-                  className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 sm:p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
-                >
-                  {isPlaying ? (
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
+            {/* Colonne de droite - Contenu */}
+            <div className="w-full lg:w-80 bg-gray-800 border-t lg:border-l border-gray-700 flex flex-col max-h-[40vh] sm:max-h-none">
+              {/* Contenu défilant */}
+              <div className="flex-1 overflow-y-auto">
+                {/* Informations de base */}
+                <div className="p-3 sm:p-4 border-b border-gray-700">
+                  <div className="flex items-center space-x-3 mb-3">
+                    {/* Avatar */}
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Apple className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">
+                        Alimentation
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Nutrition saine
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                {/* Bouton plein écran */}
-                <button
-                  onClick={toggleFullscreen}
-                  className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 sm:p-2 transition-all duration-200"
-                  title="Plein écran"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
-                </button>
+                  <div className="flex items-center space-x-2 mb-2 sm:mb-3">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(
+                        selectedEpisode.category
+                      )}`}
+                    >
+                      {selectedEpisode.category}
+                    </span>
+                    {selectedEpisode.featured && (
+                      <span className="flex items-center text-yellow-400 text-xs font-medium">
+                        <Star className="w-3 h-3 mr-1 fill-current" />
+                        Vedette
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400">
+                    <span className="flex items-center">
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                      {selectedEpisode.duration}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="p-3 sm:p-4 border-b border-gray-700">
+                  <h3 className="text-sm font-semibold text-white mb-2">
+                    Description
+                  </h3>
+                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-none">
+                    {selectedEpisode.description}
+                  </p>
+                </div>
+
+                {/* Infos techniques */}
+                <div className="p-3 sm:p-4">
+                  <h3 className="text-sm font-semibold text-white mb-2 sm:mb-3">
+                    Détails
+                  </h3>
+                  <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Format</span>
+                      <span className="text-white">
+                        {selectedEpisode.mimeType}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Taille</span>
+                      <span className="text-white">
+                        {formatFileSize(selectedEpisode.fileSize || 0)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Durée</span>
+                      <span className="text-white">
+                        {selectedEpisode.duration}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions rapides */}
+                <div className="p-3 sm:p-4 border-t border-gray-700 bg-gray-900/50">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handlePlayMedia}
+                      className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm"
+                    >
+                      {isPlaying ? (
+                        <>
+                          <svg
+                            className="w-3 h-3 sm:w-4 sm:h-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                          <span>Pause</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-3 h-3 sm:w-4 sm:h-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                          <span>Lecture</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        selectedEpisode && toggleFavorite(selectedEpisode.id)
+                      }
+                      className={`p-2 rounded-lg transition-all duration-200 border text-xs ${
+                        selectedEpisode && isFavorite(selectedEpisode.id)
+                          ? "bg-red-500/20 border-red-500/50 text-red-400"
+                          : "bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                      }`}
+                    >
+                      <Heart
+                        className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                          selectedEpisode && isFavorite(selectedEpisode.id)
+                            ? "fill-current"
+                            : ""
+                        }`}
+                      />
+                    </button>
+
+                    <button
+                      onClick={handleDownload}
+                      className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600 text-xs"
+                    >
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Titre de la vidéo */}
-        <div className="p-3 sm:p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
-          <h1 className="text-base sm:text-lg font-bold text-white line-clamp-2">
-            {selectedEpisode.title}
-          </h1>
-          <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400 mt-1">
-            <span>{selectedEpisode.views.toLocaleString()} vues</span>
-            <span>{selectedEpisode.date}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Colonne de droite - Contenu */}
-      <div className="w-full lg:w-80 bg-gray-800 border-t lg:border-l border-gray-700 flex flex-col max-h-[40vh] sm:max-h-none">
-        {/* Contenu défilant */}
-        <div className="flex-1 overflow-y-auto">
-
-          {/* Informations de base */}
-          <div className="p-3 sm:p-4 border-b border-gray-700">
-            <div className="flex items-center space-x-3 mb-3">
-              {/* Avatar */}
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                <Apple className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-white">Alimentation</div>
-                <div className="text-xs text-gray-400">Nutrition saine</div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 mb-2 sm:mb-3">
-              <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
-                {selectedEpisode.category}
-              </span>
-              {selectedEpisode.featured && (
-                <span className="flex items-center text-yellow-400 text-xs font-medium">
-                  <Star className="w-3 h-3 mr-1 fill-current" />
-                  Vedette
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400">
-              <span className="flex items-center">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                {selectedEpisode.duration}
-              </span>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="p-3 sm:p-4 border-b border-gray-700">
-            <h3 className="text-sm font-semibold text-white mb-2">Description</h3>
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed line-clamp-3 sm:line-clamp-none">
-              {selectedEpisode.description}
-            </p>
-          </div>
-
-          {/* Infos techniques */}
-          <div className="p-3 sm:p-4">
-            <h3 className="text-sm font-semibold text-white mb-2 sm:mb-3">Détails</h3>
-            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Format</span>
-                <span className="text-white">{selectedEpisode.mimeType}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Taille</span>
-                <span className="text-white">{formatFileSize(selectedEpisode.fileSize || 0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Durée</span>
-                <span className="text-white">{selectedEpisode.duration}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions rapides */}
-          <div className="p-3 sm:p-4 border-t border-gray-700 bg-gray-900/50">
-            <div className="flex space-x-2">
-              <button
-                onClick={handlePlayMedia}
-                className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm"
-              >
-                {isPlaying ? (
-                  <>
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                    </svg>
-                    <span>Pause</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                    <span>Lecture</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                className={`p-2 rounded-lg transition-all duration-200 border text-xs ${selectedEpisode && isFavorite(selectedEpisode.id)
-                  ? 'bg-red-500/20 border-red-500/50 text-red-400'
-                  : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
-                  }`}
-              >
-                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
-              </button>
-
-              <button
-                onClick={handleDownload}
-                className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600 text-xs"
-              >
-                <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

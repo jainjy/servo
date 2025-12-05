@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from '../../assets/logo.png';
 import "../../styles/font.css";
 import { Link } from 'react-router-dom';
+import ApkDownloadModal from '../ApkDownloadModal';
+
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
+  const [isApkModalOpen, setIsApkModalOpen] = useState(false);
+
 
   return (
     <footer className="bg-gray-950 text-gray-300 py-10 relative overflow-hidden group/footer">
@@ -29,7 +33,7 @@ const Footer: React.FC = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Colonne Logo et description avec animations */}
           <div className="lg:col-span-4">
             <div className="relative mb-4">
@@ -55,7 +59,7 @@ const Footer: React.FC = () => {
                   </p>
                 </div>
                 {/* Traînée d'étoiles au survol */}
-                <div className="absolute -right-2 top-0 opacity-0 group-hover/logo:opacity-100 group-hover/logo:translate-x-2 transition-all duration-500">
+                <div className="absolute left-36 top-1/3 opacity-0 group-hover/logo:opacity-100 group-hover/logo:translate-x-2 transition-all duration-500">
                   <div className="flex space-x-1">
                     {[...Array(3)].map((_, i) => (
                       <div
@@ -68,7 +72,7 @@ const Footer: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             <p className="text-gray-400 text-sm leading-relaxed max-w-xs group-hover:text-gray-300 transition-colors duration-500 hover:pl-2 hover:border-l-2 hover:border-gradient-to-r hover:from-blue-500 hover:to-purple-500">
               Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité.
             </p>
@@ -84,7 +88,7 @@ const Footer: React.FC = () => {
               </h3>
               <div className="absolute -left-3 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full group-hover:h-8 group-hover:top-2 transition-all duration-300"></div>
             </div>
-            
+
             <div className="space-y-2">
               {[
                 { name: "Olimmo réunion", url: "https://www.olimmoreunion.re/" },
@@ -100,7 +104,7 @@ const Footer: React.FC = () => {
                 >
                   {/* Animation de fond au survol */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-lg opacity-0 group-hover/partner:opacity-100 transition-opacity duration-300 -z-10"></div>
-                  
+
                   {/* Texte avec animation de soulignement */}
                   <div className="relative overflow-hidden">
                     <span className="text-gray-400 group-hover/partner:text-white text-sm transition-colors duration-300 block transform group-hover/partner:translate-x-1">
@@ -108,22 +112,22 @@ const Footer: React.FC = () => {
                     </span>
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover/partner:w-full transition-all duration-500"></span>
                   </div>
-                  
+
                   {/* Icône avec animation de déplacement */}
                   <div className="relative overflow-hidden">
-                    <svg 
-                      className="w-4 h-4 text-gray-600 group-hover/partner:text-blue-400 transform group-hover/partner:translate-x-1 transition-all duration-300" 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className="w-4 h-4 text-gray-600 group-hover/partner:text-blue-400 transform group-hover/partner:translate-x-1 transition-all duration-300"
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                     </svg>
                     {/* Double traînée d'icône */}
-                    <svg 
-                      className="absolute top-0 left-0 w-4 h-4 text-purple-400/0 group-hover/partner:text-purple-400/30 transform group-hover/partner:translate-x-2 transition-all duration-500" 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className="absolute top-0 left-0 w-4 h-4 text-purple-400/0 group-hover/partner:text-purple-400/30 transform group-hover/partner:translate-x-2 transition-all duration-500"
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -141,7 +145,7 @@ const Footer: React.FC = () => {
                 Contact
               </span>
             </h3>
-            
+
             <div className="space-y-4">
               {[
                 {
@@ -170,10 +174,10 @@ const Footer: React.FC = () => {
                   {/* Icône avec animation de pulsation */}
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-sm opacity-0 group-hover/contact:opacity-100 group-hover/contact:scale-125 transition-all duration-500"></div>
-                    <svg 
-                      className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0 relative z-10 group-hover/contact:text-blue-300 group-hover/contact:scale-110 transition-all duration-300" 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0 relative z-10 group-hover/contact:text-blue-300 group-hover/contact:scale-110 transition-all duration-300"
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon.split(' ')[0]} />
@@ -182,7 +186,7 @@ const Footer: React.FC = () => {
                       )}
                     </svg>
                   </div>
-                  
+
                   <div className="overflow-hidden">
                     {item.href ? (
                       <a
@@ -227,7 +231,7 @@ const Footer: React.FC = () => {
                 Suivez-nous
               </span>
             </h3>
-            
+
             <div className="flex flex-wrap gap-2">
               {/* Facebook */}
               <a
@@ -239,18 +243,18 @@ const Footer: React.FC = () => {
               >
                 {/* Effet de fond animé */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover/facebook:from-white/20 group-hover/facebook:to-white/10 transition-all duration-500"></div>
-                
+
                 {/* Effet de pulsation au survol */}
                 <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover/facebook:border-white/30 group-hover/facebook:animate-ping-slow transition-all duration-300"></div>
-                
+
                 {/* Icône avec animation de rotation */}
-                <svg 
-                  className="w-4 h-4 fill-white relative z-10 group-hover/facebook:scale-110 group-hover/facebook:rotate-12 transition-all duration-300" 
+                <svg
+                  className="w-4 h-4 fill-white relative z-10 group-hover/facebook:scale-110 group-hover/facebook:rotate-12 transition-all duration-300"
                   viewBox="0 0 24 24"
                 >
                   <path d="M22 12c0-5.53-4.47-10-10-10S2 6.47 2 12c0 4.99 3.66 9.13 8.44 9.88v-6.99h-2.54v-2.89h2.54V9.83c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.23 0-1.61.77-1.61 1.56v1.87h2.74l-.44 2.89h-2.3v6.99C18.34 21.13 22 16.99 22 12z" />
                 </svg>
-                
+
                 {/* Effet de flash au survol */}
                 <div className="absolute inset-0 bg-white/0 group-hover/facebook:bg-white/10 group-hover/facebook:animate-flash transition-all duration-300"></div>
               </a>
@@ -265,18 +269,18 @@ const Footer: React.FC = () => {
               >
                 {/* Effet de fond animé */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover/twitter:from-white/20 group-hover/twitter:to-white/10 transition-all duration-500"></div>
-                
+
                 {/* Effet de pulsation au survol */}
                 <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover/twitter:border-white/30 group-hover/twitter:animate-ping-slow transition-all duration-300"></div>
-                
+
                 {/* Icône avec animation de rotation */}
-                <svg 
-                  className="w-4 h-4 fill-white relative z-10 group-hover/twitter:scale-110 group-hover/twitter:rotate-12 transition-all duration-300" 
+                <svg
+                  className="w-4 h-4 fill-white relative z-10 group-hover/twitter:scale-110 group-hover/twitter:rotate-12 transition-all duration-300"
                   viewBox="0 0 24 24"
                 >
                   <path d="M22.46 6c-.77.35-1.5.59-2.28.69a4.02 4.02 0 001.76-2.22 7.92 7.92 0 01-2.53.97A3.98 3.98 0 0015.5 4a4 4 0 00-4 4c0 .31.04.62.1.9A11.35 11.35 0 013 5.16a3.99 3.99 0 001.24 5.35 4.187 4.187 0 01-1.8-.5v.05a4 4 0 003.21 3.92 4.06 4.06 0 01-1.79.07 4.02 4.02 0 003.75 2.8A8 8 0 012 19.54 11.28 11.28 0 007.29 21c7.55 0 11.68-6.25 11.68-11.68 0-.18-.01-.35-.02-.53A8.35 8.35 0 0022.46 6z" />
                 </svg>
-                
+
                 {/* Effet de flash au survol */}
                 <div className="absolute inset-0 bg-white/0 group-hover/twitter:bg-white/10 group-hover/twitter:animate-flash transition-all duration-300"></div>
               </a>
@@ -291,25 +295,47 @@ const Footer: React.FC = () => {
               >
                 {/* Effet de fond animé */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover/linkedin:from-white/20 group-hover/linkedin:to-white/10 transition-all duration-500"></div>
-                
+
                 {/* Effet de pulsation au survol */}
                 <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover/linkedin:border-white/30 group-hover/linkedin:animate-ping-slow transition-all duration-300"></div>
-                
+
                 {/* Icône avec animation de rotation */}
-                <svg 
-                  className="w-4 h-4 fill-white relative z-10 group-hover/linkedin:scale-110 group-hover/linkedin:rotate-12 transition-all duration-300" 
+                <svg
+                  className="w-4 h-4 fill-white relative z-10 group-hover/linkedin:scale-110 group-hover/linkedin:rotate-12 transition-all duration-300"
                   viewBox="0 0 24 24"
                 >
                   <path d="M4.98 3.5A2.5 2.5 0 002.5 6c0 1.38 1.13 2.5 2.48 2.5h.02c1.38 0 2.5-1.12 2.5-2.5a2.5 2.5 0 00-2.5-2.5zM3 8.5h4v11H3v-11zm7.5 0h3.68v1.56h.05c.51-.96 1.76-1.97 3.63-1.97 3.88 0 4.6 2.55 4.6 5.86v6.55H17v-5.81c0-1.39-.02-3.19-1.94-3.19-1.94 0-2.24 1.52-2.24 3.08v5.92h-4v-11z" />
                 </svg>
-                
+
                 {/* Effet de flash au survol */}
                 <div className="absolute inset-0 bg-white/0 group-hover/linkedin:bg-white/10 group-hover/linkedin:animate-flash transition-all duration-300"></div>
               </a>
 
+              {/* Google Play */}
+              {/* Téléchargement APK */}
+              <button
+                onClick={() => setIsApkModalOpen(true)}
+                className=" w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden group/playstore transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                aria-label="Télécharger l'application Android"
+              >
+
+
+                {/* Icône Google Play avec animation */}
+                <img src="/google.png" alt="" className='w-8 h-8' />
+
+                {/* Effet de flash au survol */}
+                {/* Effet de flash au survol */}
+              </button>
+
             </div>
           </div>
         </div>
+
+        {/* Modale de téléchargement APK */}
+        <ApkDownloadModal
+          isOpen={isApkModalOpen}
+          onClose={() => setIsApkModalOpen(false)}
+        />
 
         {/* Section inférieure avec animations */}
         <div className="mt-8 pt-6 border-t border-gray-800 group/bottom">
@@ -321,12 +347,12 @@ const Footer: React.FC = () => {
               </span>
               . Tous droits réservés.
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-center gap-4">
               {[
                 { to: '/cookies', label: 'Cookies' },
                 { to: '/confidentialite', label: 'Confidentialité' },
-                { to: '/mentions-legales', label: 'Mentions légales' },
+                { to: '/mentions_legales', label: 'Mentions légales' },
               ].map((link) => (
                 <Link
                   key={link.to}

@@ -74,7 +74,11 @@ const Immobilier = () => {
         <img src="https://i.pinimg.com/1200x/c1/df/87/c1df875d53d18c0e8cd9ac21a20c035c.jpg"
           className='opacity-45 object-cover w-full' alt="" />
       </div>
-      <section className="container mx-auto px-1 py-8">
+      <div className=' pt-16 w-11/12 h-full flex flex-col'>
+        <span className='text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold'>Nos annonces immobilières</span>
+        <span className='text-center text-xs pt-5 text-white/60'>Trouvez la perle rare parmi nos annonces immobilières exclusives</span>
+      </div>
+      <section className="container -mt-32 mx-auto px-1">
         <Suspense fallback={
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
@@ -82,10 +86,7 @@ const Immobilier = () => {
             ))}
           </div>
         }>
-          <div className='absolute top-28 w-11/12 h-full flex flex-col'>
-            <span className='text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold'>Nos annonces immobilières</span>
-            <span className='text-center text-xs pt-5 text-white/60'>Trouvez la perle rare parmi nos annonces immobilières exclusives</span>
-          </div>
+
 
           {/* PropertyListings avec props de tracking */}
           <PropertyListings

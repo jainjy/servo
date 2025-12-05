@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { MediaService } from "../../lib/api";
 import MediaUpload from "./MediaUpload";
+import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
 // Types adaptés à votre structure de données
 interface MediaBase {
@@ -404,17 +405,6 @@ const EditMediaModal: React.FC<{
   );
 };
 
-// Composants de base
-const LoadingSpinner: React.FC<{ message?: string }> = ({
-  message = "Chargement..."
-}) => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center mt-20">
-    <div className="flex justify-center items-center py-12">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <span className="ml-2 text-gray-600">{message}</span>
-    </div>
-  </div>
-);
 
 const ErrorMessage: React.FC<{ message: string; onRetry?: () => void }> = ({
   message,
@@ -748,7 +738,7 @@ const AdminMedia: React.FC = () => {
               <Video className="w-8 h-8 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Gestion des Podcasts Vidéo</h2>
+              <h2 className="text-md lg:text-2xl font-bold text-gray-900">Gestion des Podcasts Vidéo</h2>
               <p className="text-gray-600">Administrez votre bibliothèque de podcasts vidéo</p>
             </div>
           </div>
@@ -930,7 +920,7 @@ const AdminMedia: React.FC = () => {
 
   // Rendu principal
   if (loading && !refreshing) {
-    return <LoadingSpinner message="Chargement des podcasts vidéo..." />;
+    return <LoadingSpinner text="Chargement des podcasts vidéo" />;
   }
 
   return (
@@ -948,7 +938,7 @@ const AdminMedia: React.FC = () => {
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Administration Podcasts Vidéo</h1>
+                <h1 className="text-lg lg:text-3xl font-bold text-slate-900">Administration Podcasts Vidéo</h1>
                 <p className="text-gray-600 mt-2">Gérez votre bibliothèque de podcasts vidéo</p>
               </div>
             </div>

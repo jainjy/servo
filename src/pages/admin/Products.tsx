@@ -17,7 +17,7 @@ const ProductsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Marketplace Produits</h1>
+          <h1 className="text-lg lg:text-3xl font-bold">Marketplace Produits</h1>
           <p className="text-muted-foreground mt-1">
             Gérez les produits, catégories et commandes du marketplace
           </p>

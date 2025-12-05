@@ -2332,7 +2332,7 @@ export default function TourismPage() {
 
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="lg:flex grid gap-4 justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">
               {currentContentType?.label || "Gestion du Tourisme"}
@@ -2343,7 +2343,7 @@ export default function TourismPage() {
             </p>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="grid gap-4 lg:flex items-center space-x-4">
             <div className="relative">
               <button
                 onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
@@ -2994,8 +2994,8 @@ export default function TourismPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 lg:p-0 py-4">
         <AdminInterface />
       </div>
 

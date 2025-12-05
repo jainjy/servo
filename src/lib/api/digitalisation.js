@@ -88,4 +88,14 @@ export const digitalisationApi = {
       throw error;
     }
   },
+  // Nouvelle fonction pour envoyer un message de contact
+  sendContactMessage: async (data) => {
+    try {
+      const response = await api.post("/contact-messages", data);
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message de contact:", error);
+      throw error;
+    }
+  },
 };

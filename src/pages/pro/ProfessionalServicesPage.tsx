@@ -29,14 +29,14 @@ export default function ProfessionalServicesPage() {
     <div className="space-y-6">
       <div className="flex items-center flex-col md:flex-row justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-lg lg:text-3xl font-bold tracking-tight text-foreground">
             Mes Services
           </h1>
           <p className="text-muted-foreground">
             Gérez les services que vous proposez
           </p>
         </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
+        <div className="grid lg:flex gap-2 mt-4 md:mt-0">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             variant="outline"
@@ -65,7 +65,7 @@ export default function ProfessionalServicesPage() {
               size="sm"
               onClick={() => setActiveTab("associated")}
               className={
-                activeTab === "associated" ? "bg-background shadow-sm" : ""
+                activeTab === "associated text-black" ? "bg-background shadow-sm" : ""
               }
             >
               Mes Services
@@ -75,7 +75,7 @@ export default function ProfessionalServicesPage() {
               size="sm"
               onClick={() => setActiveTab("available")}
               className={
-                activeTab === "available" ? "bg-background shadow-sm" : ""
+                activeTab === "available text-black" ? "bg-background shadow-sm" : ""
               }
             >
               Services Disponibles

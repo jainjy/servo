@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ImagePlus, X, Upload } from "lucide-react"
+import { ImagePlus, X, Upload, Search } from "lucide-react"
 import api from "@/lib/api"
 import { toast } from "sonner"
 
@@ -46,6 +46,7 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
   })
   const [categories, setCategories] = useState<Category[]>([])
   const [metiers, setMetiers] = useState<Metier[]>([])
+  const [metierSearch, setMetierSearch] = useState("")
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
 
@@ -87,6 +88,10 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
       console.error('Erreur lors du chargement des données:', error)
     }
   }
+
+  const filteredMetiers = metiers.filter(metier =>
+    metier.libelle.toLowerCase().includes(metierSearch.toLowerCase())
+  )
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -193,39 +198,40 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-foreground">
+      <DialogContent className="bg-card border-border sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="text-2xl font-bold text-foreground">
             {mode === "create" ? "Nouveau service" : "Modifier le service"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {mode === "create" ? "Créer un nouveau service" : "Modifier les détails du service"}
+            {mode === "create" ? "Créer un nouveau service pour votre catalogue" : "Modifier les détails du service existant"}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-foreground">
-                Nom du service *
+              <Label htmlFor="name" className="text-foreground font-semibold">
+                Nom du service <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-background border-input"
+                className="bg-background border-input focus-visible:ring-1 focus-visible:ring-primary"
+                placeholder="Ex: Réparation moteur"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-foreground">
+              <Label htmlFor="category" className="text-foreground font-semibold">
                 Catégorie
               </Label>
               <Select
                 value={formData.categoryId}
                 onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
               >
-                <SelectTrigger className="bg-background border-input">
+                <SelectTrigger className="bg-background border-input focus-visible:ring-1 focus-visible:ring-primary">
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
@@ -238,52 +244,80 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-foreground">
-                Métiers associés
-              </Label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border border-input rounded-md p-3 bg-background">
-                {metiers.map((metier) => (
-                  <div key={metier.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`metier-${metier.id}`}
-                      checked={formData.metierIds.includes(metier.id.toString())}
-                      onCheckedChange={(checked) => 
-                        handleMetierChange(metier.id.toString(), checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor={`metier-${metier.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {metier.libelle}
-                    </label>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-foreground font-semibold">
+                  Métiers associés
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  {formData.metierIds.length} sélectionné{formData.metierIds.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              {/* Barre de recherche des métiers */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Rechercher un métier..."
+                  value={metierSearch}
+                  onChange={(e) => setMetierSearch(e.target.value)}
+                  className="bg-background border-input pl-10 focus-visible:ring-1 focus-visible:ring-primary"
+                />
+              </div>
+
+              {/* Liste des métiers */}
+              <div className="border border-input rounded-lg bg-background max-h-48 overflow-y-auto p-3">
+                {filteredMetiers.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredMetiers.map((metier) => (
+                      <div key={metier.id} className="flex items-center space-x-3 hover:bg-accent p-2 rounded-md transition-colors">
+                        <Checkbox
+                          id={`metier-${metier.id}`}
+                          checked={formData.metierIds.includes(metier.id.toString())}
+                          onCheckedChange={(checked) => 
+                            handleMetierChange(metier.id.toString(), checked as boolean)
+                          }
+                          className="cursor-pointer"
+                        />
+                        <label
+                          htmlFor={`metier-${metier.id}`}
+                          className="text-sm font-medium cursor-pointer flex-1"
+                        >
+                          {metier.libelle}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Aucun métier trouvé
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-foreground">
+              <Label htmlFor="description" className="text-foreground font-semibold">
                 Description
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-background border-input min-h-[100px]"
+                className="bg-background border-input min-h-[100px] focus-visible:ring-1 focus-visible:ring-primary"
                 placeholder="Description détaillée du service..."
               />
             </div>
 
             {/* Section Images */}
-            <div className="space-y-2">
-              <Label className="text-foreground">
+            <div className="space-y-3">
+              <Label className="text-foreground font-semibold">
                 Images du service
               </Label>
               
               {/* Upload d'image */}
-              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+              <div className="border-2 border-dashed border-primary/30 hover:border-primary/60 rounded-lg p-8 text-center transition-colors bg-primary/5">
                 <input
                   type="file"
                   id="image-upload"
@@ -294,48 +328,55 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
                 />
                 <label
                   htmlFor="image-upload"
-                  className={`cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                  className={`cursor-pointer flex flex-col items-center justify-center gap-3 ${
                     uploading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {uploading ? (
-                    <Upload className="h-8 w-8 text-muted-foreground animate-pulse" />
+                    <Upload className="h-10 w-10 text-primary animate-pulse" />
                   ) : (
-                    <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                    <ImagePlus className="h-10 w-10 text-primary" />
                   )}
-                  <span className="text-sm text-muted-foreground">
-                    {uploading ? 'Upload en cours...' : 'Cliquez pour ajouter une image'}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    PNG, JPG, JPEG jusqu'à 5MB
-                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {uploading ? 'Upload en cours...' : 'Cliquez pour ajouter une image'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PNG, JPG, JPEG jusqu'à 5MB
+                    </p>
+                  </div>
                 </label>
               </div>
 
               {/* Aperçu des images */}
               {formData.images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={image}
-                        alt={`Service image ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-md"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {formData.images.length} image{formData.images.length !== 1 ? 's' : ''} ajoutée{formData.images.length !== 1 ? 's' : ''}
+                  </p>
+                  <div className="grid grid-cols-4 gap-3">
+                    {formData.images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image}
+                          alt={`Service image ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg border border-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-3 -right-3 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-destructive/90"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button 
               type="button" 
               variant="outline" 
@@ -350,7 +391,7 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={loading || uploading}
             >
-              {loading ? "Chargement..." : mode === "create" ? "Créer" : "Enregistrer"}
+              {loading ? "Chargement..." : mode === "create" ? "Créer le service" : "Enregistrer les modifications"}
             </Button>
           </DialogFooter>
         </form>

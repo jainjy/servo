@@ -78,7 +78,7 @@ export function ProductsTable() {
   if (loading) {
     return (
       <Card className="p-6">
-        <div className="text-center py-8">
+        <div className="text-center flex flex-col items-center justify-center py-8">
           <img src="/loading.gif" alt="" className='w-24 h-24'/>
           <p className="text-muted-foreground mt-2">Chargement des produits...</p>
         </div>

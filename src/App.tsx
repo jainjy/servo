@@ -100,8 +100,7 @@ import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
 //tracking page
 import GlobalTracking from "@/components/GlobalTracking";
-
-//import TestPage from "./pages/TestPage";
+import NetworkStatus from "./components/NetworkStatus";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
  
@@ -171,9 +170,13 @@ import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
 import { App as CapacitorApp } from '@capacitor/app';
 import Digitalisation from "./pages/Digitalisation";
+import  GestionLocationSaisonniere from "./pages/GestionLocationSaisonniere";
+import PrivacyPolicyWidget from "./components/Confidentialite";
+import LegalMentionsWidget from "./components/MentionLegal";
 import DigitalisationPartenaires from "./pages/DigitalisationPartenaires";
 import DigitalisationProfessionnelDetail from "./pages/DigitalisationProfessionnelDetail";
 import DigitalisationServiceDetail from "./pages/DigitalisationServiceDetail";
+import ContactMessagesPage from "./pages/pro/ContactMessagesPage";
 
 const queryClient = new QueryClient();
 
@@ -236,6 +239,7 @@ const App = () => {
             <Toaster />
             <ToastContainer />
             <Sonner />
+            <NetworkStatus />
             <BrowserRouter>
               {/* Intégration du GlobalTracking pour le tracking des pages */}
               <GlobalTracking />
@@ -318,6 +322,14 @@ const App = () => {
                     element={<FormationsTourisme />}
                   />
                   <Route path="/voyages" element={<Voyages />} />
+                  <Route
+                    path="/confidentialite"
+                    element={<PrivacyPolicyWidget />}
+                  />
+                  <Route
+                    path="/mentions_legales"
+                    element={<LegalMentionsWidget />}
+                  />
                   <Route
                     path="/plan_administratif"
                     element={<PlanAdministratifServices />}
@@ -571,6 +583,10 @@ const App = () => {
                     <Route path="listings" element={<ListingsPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
                     <Route
+                      path="contact-messages"
+                      element={<ContactMessagesPage />}
+                    />
+                    <Route
                       path="financement-demandes"
                       element={<FinancementDemandesPro />}
                     />
@@ -651,6 +667,10 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
+                    <Route
+                      path="locationSaisonniere"
+                      element={<GestionLocationSaisonniere />}
+                    />
                     <Route
                       path="mes-reservations-cours"
                       element={<UserReservations />}

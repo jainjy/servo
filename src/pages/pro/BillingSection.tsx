@@ -156,7 +156,7 @@ export default function BillingSection() {
   };
 
   return (
-    <section className="container mx-auto px-6 py-12">
+    <section className="container mx-auto ">
       <motion.div
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
@@ -164,9 +164,9 @@ export default function BillingSection() {
         className="space-y-10"
       >
         {/* HEADER */}
-        <div className="flex items-center justify-between">
+        <div className="grid lg:flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-lg lg:text-3xl font-bold tracking-tight">
               Gestion de la facturation
             </h1>
             <p className="text-muted-foreground">

@@ -23,8 +23,9 @@ import {
   Star,
   ArrowDown,
   X,
+  ArrowLeft,
 } from "lucide-react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
@@ -43,7 +44,7 @@ export default function AdminDiscussions() {
   const [showChatModal, setShowChatModal] = useState(false);
   const [showMobileActionsMenu, setShowMobileActionsMenu] = useState(false);
   const messagesContainerRef = useRef(null);
-
+  const navigate = useNavigate();
   const { socket, isConnected } = useSocket();
   const {
     messages,
@@ -351,6 +352,16 @@ export default function AdminDiscussions() {
         {/* Côté gauche - Informations du projet */}
         <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-20">
           <div className="max-w-2xl mx-auto">
+            {/* Bouton de retour */}
+            <div className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>Retour</span>
+              </button>
+            </div>
             {/* Informations principales */}
             <div className="relative space-y-1">
               <h1 className="text-xl font-bold text-gray-900">
@@ -529,7 +540,7 @@ export default function AdminDiscussions() {
           </div>
 
           {/* Messages */}
-          <div 
+          <div
             className="flex-1 overflow-y-auto p-6 scroll-smooth relative"
             ref={messagesContainerRef}
             onScroll={handleScroll}
@@ -934,9 +945,9 @@ export default function AdminDiscussions() {
                                       <Calendar className="w-4 h-4 text-blue-500" />
                                       <span className="text-gray-600">
                                         RDV:{" "}
-                                        {new Date(artisan.rdv).toLocaleDateString(
-                                          "fr-FR"
-                                        )}
+                                        {new Date(
+                                          artisan.rdv
+                                        ).toLocaleDateString("fr-FR")}
                                       </span>
                                     </div>
                                   )}
@@ -1031,7 +1042,9 @@ export default function AdminDiscussions() {
                             {message.evenementType === "AVIS_LAISSE" && (
                               <div className="mt-3 p-3 bg-white bg-opacity-20 rounded-lg">
                                 <RatingStars
-                                  rating={extractRatingFromMessage(message.contenu)}
+                                  rating={extractRatingFromMessage(
+                                    message.contenu
+                                  )}
                                 />
                               </div>
                             )}
@@ -1118,7 +1131,9 @@ export default function AdminDiscussions() {
                       className="hidden"
                       onChange={handleFileUpload}
                       disabled={
-                        uploadingFile || sending || demande?.statut == "terminée"
+                        uploadingFile ||
+                        sending ||
+                        demande?.statut == "terminée"
                       }
                     />
                   </label>

@@ -148,14 +148,14 @@ const ReviewsPage: FC = () => {
   const { reviews, statistics, badges } = reviewsData;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Avis & Réputation</h1>
+    <div className="container mx-auto p-2 lg:p-0 space-y-6">
+      <h1 className="text-lg lg:text-3xl font-bold mb-6">Avis & Réputation</h1>
 
       {/* Résumé des statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Note moyenne</CardTitle>
+            <CardTitle className="text-md lg:text-xl">Note moyenne</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
@@ -183,7 +183,7 @@ const ReviewsPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Distribution des notes</CardTitle>
+            <CardTitle className="text-md lg:text-xl">Distribution des notes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -202,7 +202,7 @@ const ReviewsPage: FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Certifications</CardTitle>
+            <CardTitle className="text-md lg:text-xl">Certifications</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
