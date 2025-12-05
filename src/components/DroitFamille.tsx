@@ -1,10 +1,30 @@
 import { useState } from "react";
-import { Scale, Heart, Users, Home, Shield, FileText, X, ArrowRight, Sparkles, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { Scale, Heart, Users, Home, Shield, FileText, X, ArrowRight, Calendar, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth"; // Import comme dans votre exemple
+import { toast } from "sonner"; // Pour les notifications
 
 export default function DroitFamille() {
-    const [openModal, setOpenModal] = useState(null);
+    const [openModal, setOpenModal] = useState<string | null>(null);
+    const [sousType, setSousType] = useState("");
+    const [description, setDescription] = useState("");
+    const [formErrors, setFormErrors] = useState({
+        sousType: false,
+        description: false
+    });
+    const [isLoading, setIsLoading] = useState(false); // État de chargement
+    
+    // Utilisation du hook useAuth pour récupérer les informations d'authentification
+    const { user, isAuthenticated } = useAuth();
 
-    const closeModal = () => setOpenModal(null);
+    const closeModal = () => {
+        if (isLoading) return; // Empêche la fermeture pendant le chargement
+        setOpenModal(null);
+        setSousType("");
+        setDescription("");
+        setFormErrors({ sousType: false, description: false });
+        setIsLoading(false);
+    };
 
     const interventionDomains = [
         {
@@ -84,12 +104,95 @@ export default function DroitFamille() {
         return colors[color as keyof typeof colors] || 'from-gray-500 to-gray-600';
     };
 
+    const handleOpenModal = (serviceId: string) => {
+        if (!isAuthenticated) {
+            toast.error("Veuillez vous connecter pour accéder à ce service.");
+            return;
+        }
+        setOpenModal(serviceId);
+    };
+
+    const handleSend = async () => {
+        // Validation
+        if (!sousType) {
+            setFormErrors(prev => ({ ...prev, sousType: true }));
+            toast.error("Veuillez sélectionner un type de demande.");
+            return;
+        }
+        
+        if (!description.trim()) {
+            setFormErrors(prev => ({ ...prev, description: true }));
+            toast.error("Veuillez décrire votre situation.");
+            return;
+        }
+
+        setIsLoading(true); // Activer le chargement
+
+        try {
+            const token = localStorage.getItem("auth-token");
+            if (!token || !isAuthenticated) {
+                toast.error("Vous devez être connecté pour envoyer une demande.");
+                setIsLoading(false);
+                return;
+            }
+
+            const payload = {
+                serviceType: openModal,
+                sousType,
+                description
+            };
+
+            console.log("📤 Sending data:", payload);
+
+            const response = await api.post(
+                "/droitFamille",
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            console.log("✅ Demande envoyée:", response.data);
+            toast.success("Votre demande a été envoyée !");
+            closeModal();
+
+        } catch (error: any) {
+            console.error("❌ Erreur:", error);
+            toast.error(error?.response?.data?.error || "Erreur lors de l'envoi de la demande");
+            setIsLoading(false); // Désactiver le chargement en cas d'erreur
+        }
+    };
+
+    // Fonction pour récupérer le nom complet de l'utilisateur
+    const getUserFullName = () => {
+        if (!user) return "";
+        return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    };
+
+    // Fonction pour gérer les changements dans les champs
+    const handleSousTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSousType(e.target.value);
+        if (formErrors.sousType) {
+            setFormErrors(prev => ({ ...prev, sousType: false }));
+        }
+    };
+
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setDescription(e.target.value);
+        if (formErrors.description) {
+            setFormErrors(prev => ({ ...prev, description: false }));
+        }
+    };
+
+    // Obtenir le service actuellement sélectionné
+    const currentService = services.find(s => s.id === openModal);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 text-gray-900">
             {/* HEADER HERO */}
-            <div
-                className="relative h-80 bg-black/50 overflow-hidden"
-            >
+            <div className="relative h-80 bg-black/50 overflow-hidden">
                 <div className="absolute inset-0 bg-black/90"></div>
                 <div className="absolute inset-0 bg-[url('/fam.jfif')] bg-cover bg-center mix-blend-overlay"></div>
 
@@ -111,7 +214,7 @@ export default function DroitFamille() {
                 {/* Section Domaines d'intervention */}
                 <section>
                     <div className="text-center mb-8">
-                        <h2 className="text-3xl md:text-4xl font-bold  text-slate-900 mb-4">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                             Nos Domaines d'Intervention
                         </h2>
                         <p className="text-md text-gray-600 max-w-2xl mx-auto">
@@ -162,7 +265,7 @@ export default function DroitFamille() {
                         {services.map((service) => (
                             <button
                                 key={service.id}
-                                onClick={() => setOpenModal(service.id)}
+                                onClick={() => handleOpenModal(service.id)}
                                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 p-6 text-left group hover:scale-105"
                             >
                                 <div className={`w-12 h-12 bg-gradient-to-r ${getServiceColor(service.color)} rounded-lg flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
@@ -227,21 +330,33 @@ export default function DroitFamille() {
             {openModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" style={{scrollbarWidth: "none"}}>
+                        {/* Overlay de chargement */}
+                        {isLoading && (
+                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-2xl">
+                                <div className="flex flex-col items-center">
+                                    <Loader2 className="w-10 h-10 animate-spin text-slate-900 mb-3" />
+                                    <p className="text-slate-800 font-medium">Envoi en cours...</p>
+                                    <p className="text-slate-600 text-sm mt-1">Veuillez patienter</p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Header Modal */}
                         <div className="bg-slate-800 rounded-t-2xl px-6 py-4 text-white">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-xl font-bold">
-                                    {services.find(s => s.id === openModal)?.title}
+                                    {currentService?.title}
                                 </h3>
                                 <button
                                     onClick={closeModal}
-                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                    disabled={isLoading}
+                                    className={`p-1 rounded-lg transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/20'}`}
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
                             <p className="text-blue-100 text-xs">
-                                {services.find(s => s.id === openModal)?.description}
+                                {currentService?.description}
                             </p>
                             <div className="absolute right-1 top-12 flex underline items-center justify-center mt-4 text-[10px] text-gray-500">
                                 <Calendar className="w-2.5 h-2.5 mr-1" />
@@ -251,7 +366,7 @@ export default function DroitFamille() {
 
                         {/* Formulaire */}
                         <div className="px-6 py-4">
-                            <form className="space-y-3">
+                            <div className="space-y-3">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Nom complet
@@ -259,7 +374,9 @@ export default function DroitFamille() {
                                     <input
                                         type="text"
                                         placeholder="Votre nom et prénom"
-                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        value={getUserFullName()}
+                                        readOnly
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
                                 </div>
 
@@ -270,7 +387,9 @@ export default function DroitFamille() {
                                     <input
                                         type="email"
                                         placeholder="votre@email.com"
-                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        value={user?.email || ""}
+                                        readOnly
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
                                 </div>
 
@@ -281,7 +400,9 @@ export default function DroitFamille() {
                                     <input
                                         type="tel"
                                         placeholder="+33 1 23 45 67 89"
-                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        value={user?.phone || ""}
+                                        readOnly
+                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     />
                                 </div>
 
@@ -291,7 +412,12 @@ export default function DroitFamille() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Type de conseil
                                         </label>
-                                        <select className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <select 
+                                            className={`w-full border ${formErrors.sousType ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 text-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                            value={sousType}
+                                            onChange={handleSousTypeChange}
+                                            disabled={isLoading}
+                                        >
                                             <option value="">Sélectionnez le type de conseil</option>
                                             <option value="patrimoine">Protection patrimoniale</option>
                                             <option value="succession">Succession et donation</option>
@@ -306,7 +432,12 @@ export default function DroitFamille() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Type de divorce
                                         </label>
-                                        <select className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <select 
+                                            className={`w-full border ${formErrors.sousType ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 text-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                            value={sousType}
+                                            onChange={handleSousTypeChange}
+                                            disabled={isLoading}
+                                        >
                                             <option value="">Type de divorce</option>
                                             <option value="consentement">Divorce par consentement mutuel</option>
                                             <option value="contentieux">Divorce contentieux</option>
@@ -321,7 +452,12 @@ export default function DroitFamille() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Type d'intervention
                                         </label>
-                                        <select className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                       <select 
+                                            className={`w-full border ${formErrors.sousType ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 text-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                            value={sousType}
+                                            onChange={handleSousTypeChange}
+                                            disabled={isLoading}
+                                        >
                                             <option value="">Type d'intervention</option>
                                             <option value="signification">Signification d'acte</option>
                                             <option value="paiement">Sommation de payer</option>
@@ -332,24 +468,61 @@ export default function DroitFamille() {
                                     </div>
                                 )}
 
+                                {/* Champs pour les autres services */}
+                                {!["conseil-notaire", "avocat-divorce", "huissier"].includes(openModal) && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Type de demande
+                                        </label>
+                                        <select 
+                                            className={`w-full border ${formErrors.sousType ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 text-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                            value={sousType}
+                                            onChange={handleSousTypeChange}
+                                            disabled={isLoading}
+                                        >
+                                            <option value="">Sélectionnez le type de demande</option>
+                                            <option value="information">Demande d'information</option>
+                                            <option value="devis">Demande de devis</option>
+                                            <option value="urgence">Situation urgente</option>
+                                            <option value="autre">Autre</option>
+                                        </select>
+                                    </div>
+                                )}
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Description de votre situation
                                     </label>
-                                    <textarea
-                                        placeholder="Décrivez votre situation et vos questions..."
+                                   <textarea
+                                        placeholder="Décrivez votre situation..."
                                         rows={4}
-                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                                        className={`w-full border ${formErrors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg p-3 text-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                        value={description}
+                                        onChange={handleDescriptionChange}
+                                        disabled={isLoading}
                                     ></textarea>
                                 </div>
 
                                 <button
                                     type="button"
-                                    className="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                                    onClick={handleSend}
+                                    disabled={isLoading}
+                                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-colors ${
+                                        isLoading 
+                                            ? 'bg-slate-700 cursor-not-allowed opacity-90' 
+                                            : 'bg-slate-900 hover:bg-slate-800'
+                                    } text-white`}
                                 >
-                                    Envoyer la demande
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Envoi en cours...
+                                        </>
+                                    ) : (
+                                        'Envoyer la demande'
+                                    )}
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
