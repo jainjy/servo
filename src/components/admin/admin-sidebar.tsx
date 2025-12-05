@@ -14,6 +14,7 @@ import {
   WalletCards,
   Globe,
   Wallet2Icon,
+  Scale
 } from "lucide-react";
 // Remplacement de Image de next/image par la balise <img>
 import logo from '../../assets/logo.png';
@@ -31,6 +32,7 @@ const navigation = [
     href: "/admin/service-categories",
     icon: Tag,
   },
+  { name: "Droit de famille", href: "/admin/demandeDroitFamille", icon: Scale },
   { name: "blog", href: "/admin/blog", icon: Newspaper },
   { name: "Réservations", href: "/admin/bookings", icon: Calendar },
   { name: "Produits", href: "/admin/products", icon: ShoppingBag },
