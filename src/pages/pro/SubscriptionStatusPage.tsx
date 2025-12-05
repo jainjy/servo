@@ -76,9 +76,12 @@ const SubscriptionStatusPage = () => {
     try {
       setPaymentsLoading(true);
       const response = await api.get("/transactions/history");
-      setPaymentHistory(response.data || []);
+      // Gérer la structure de réponse correctement
+      const transactions = response.data.data || response.data || [];
+      setPaymentHistory(Array.isArray(transactions) ? transactions : []);
     } catch (error) {
       console.error("Erreur lors du chargement de l'historique:", error);
+      setPaymentHistory([]); // Initialiser à un tableau vide en cas d'erreur
       toast.error("Impossible de charger l'historique des paiements");
     } finally {
       setPaymentsLoading(false);
