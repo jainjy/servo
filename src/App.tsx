@@ -182,6 +182,8 @@ import PropertyRent from "./pages/PropertyRent";
 import PropertyBuy from "./pages/PropertyBuy";
 import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 
+import AgencyCard from "./components/NosPartenaires/AgencyCard";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -416,6 +418,13 @@ const App = () => {
                     path="/formation-podcasts"
                     element={<BatimentsLayout />}
                   />
+
+                  {/* Routes Partenaires */}
+                  <Route
+                    path="/agences"
+                    element={<AgencyCard/>}
+                  />
+
                   {/* Routes Domicile */}
                   <Route path="/domicile" element={<DomicileLayout />} />
                   <Route
