@@ -7,14 +7,14 @@ const CardCarte: React.FC = () => {
     <div className="w-full px-3 lg:px-12 py-8">
       <div className="grid gap-8 lg:grid-cols-[1.1fr_minmax(0,1fr)] items-stretch">
         {/* Colonne gauche – contenu */}
-        <div className="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-3xl shadow-sm px-8 py-10 flex flex-col justify-between">
+        <div className="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-3xl shadow-sm px-8 py-2 lg:py-10 flex flex-col justify-between">
           {/* Header */}
           <div className="mb-8">
             <p className="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase mb-3 flex items-center gap-2">
               <Plane className="w-3.5 h-3.5 text-slate-600" />
               Réseau de partenaires
             </p>
-            <h2 className="text-3xl lg:text-4xl font-semibold text-slate-900 mb-4 leading-snug flex items-center gap-2">
+            <h2 className="text-lg lg:text-4xl font-semibold text-slate-900 mb-4 leading-snug flex items-center gap-2">
               <Map className="w-6 h-6 text-slate-700" />
               Carte des partenaires et propriétés
             </h2>
@@ -148,7 +148,7 @@ const CardCarte: React.FC = () => {
                   <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
                 </span>
-                <span className="text-xs font-medium text-slate-100 flex items-center gap-1.5">
+                <span className="text-[10px] lg:text-xs font-medium text-slate-100 flex items-center gap-1.5">
                   <SignalHigh className="w-3.5 h-3.5 text-emerald-300" />
                   Vue carte en temps réel
                 </span>
@@ -238,7 +238,7 @@ const CardCarte: React.FC = () => {
               </div>
 
               {/* Lien secondaire sous la mini carte */}
-              <div className="mt-4 flex items-center justify-between text-[11px] text-slate-300">
+              <div className="mt-4 grid gap-4 lg:flex items-center justify-between text-[11px] text-slate-300">
                 <p>Zoom, filtres et détails disponibles dans l’interface complète.</p>
                 <button
                   onClick={() => (window.location.href = "/carte")}
