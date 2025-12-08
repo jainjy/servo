@@ -51,6 +51,7 @@ import AuthService from "@/services/authService";
 import type { User as AuthUser } from "@/types/type";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api.js";
+import ServoLogo from "../components/ServoLogo";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -998,13 +999,7 @@ const Header = () => {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="p-1 rounded-full bg-white border-black border-2">
-            <img
-              src={logo}
-              alt="Servo Logo"
-              className="w-10 h-10 rounded-full"
-            />
-          </div>
+          <ServoLogo />
         </Link>
         <Button
           variant="ghost"
@@ -1238,13 +1233,7 @@ const Header = () => {
       >
         <div className="container flex h-16 items-center justify-between px-6">
           <Link to={"/"}>
-            <div className="p-1 rounded-full bg-white border-black border-2">
-              <img
-                src={logo}
-                alt="Servo Logo"
-                className="w-10 h-10 rounded-full"
-              />
-            </div>
+            <ServoLogo />
           </Link>
 
           {/* Menu desktop */}
@@ -1318,13 +1307,7 @@ const Header = () => {
                       <div className="w-full lg:w-64 border-gray-800/40 border-b lg:border-b-0 lg:border-r p-4 lg:sticky lg:top-4 lg:h-[500px]">
                         <Link to="/" onClick={() => setIsPopoverOpen(false)}>
                           <div className="flex items-center gap-2 mb-4">
-                            <div className="p-1 rounded-full bg-white border-black border-2">
-                              <img
-                                src={logo}
-                                alt="Servo Logo"
-                                className="w-10 h-10 rounded-full"
-                              />
-                            </div>
+                            <ServoLogo />
                             <div className="azonix text-lg font-bold text-slate-300">
                               SERVO
                             </div>
