@@ -45,6 +45,7 @@ const SubscriptionStatusPage = () => {
   const [paymentHistory, setPaymentHistory] = useState([]); // AJOUT: Historique des paiements
   const [paymentsLoading, setPaymentsLoading] = useState(false); // AJOUT: Chargement des paiements
   const [showAmounts, setShowAmounts] = useState(true); // AJOUT: Afficher/masquer les montants
+  const [showOtherPlans, setShowOtherPlans] = useState(false); // AJOUT: Afficher/masquer les autres plans
 
   useEffect(() => {
     const fetchData = async () => {
@@ -786,109 +787,137 @@ const SubscriptionStatusPage = () => {
             {/* Section des autres plans*/}
             {!plansLoading && subscriptionPlans.length > 0 && (
               <div className="mt-8">
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-xl">Autres Plans</CardTitle>
-                    <p className="text-gray-600">
-                      Découvrez nos autres offres adaptées à vos besoins
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {subscriptionPlans.map((plan) => {
-                        const color = getColorClasses(plan.color);
-                        const isCurrentPlan = subscription?.plan?.id == plan.id;
-
-                        return (
-                          <div
-                            key={plan.id}
-                            className={`border rounded-lg p-4 relative transition-all duration-300 hover:shadow-lg ${
-                              isCurrentPlan
-                                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
-                                : plan.popular
-                                ? "border-yellow-400 ring-2 ring-yellow-200 bg-yellow-50/50"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                          >
-                            {plan.popular && !isCurrentPlan && (
-                              <Badge className="mb-2 bg-yellow-500 text-white absolute -top-2 left-1/2 transform -translate-x-1/2">
-                                Populaire
-                              </Badge>
-                            )}
-
-                            {isCurrentPlan && (
-                              <Badge className="mb-2 bg-primary text-white absolute -top-2 left-1/2 transform -translate-x-1/2">
-                                Actuel
-                              </Badge>
-                            )}
-
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className={`p-2 rounded-lg ${color.bg}`}>
-                                <div className={color.text}>{plan.icon}</div>
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-lg text-gray-900">
-                                  {plan.title}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {plan.description}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="mb-4">
-                              <p className="text-2xl font-bold text-gray-900">
-                                {plan.price}€
-                                <span className="text-sm font-normal text-gray-600">
-                                  /{plan.period || "mois"}
-                                </span>
-                              </p>
-                            </div>
-
-                            <ul className="space-y-2 text-sm mb-4">
-                              {plan.features?.slice(0, 4).map((feature, idx) => (
-                                <li key={idx} className="flex items-center gap-2">
-                                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                  <span className="text-gray-700">{feature}</span>
-                                </li>
-                              ))}
-                              {plan.features?.length > 4 && (
-                                <li className="text-xs text-gray-500">
-                                  + {plan.features.length - 4} avantages
-                                  supplémentaires
-                                </li>
-                              )}
-                            </ul>
-
-                            <Button
-                              variant={
-                                isCurrentPlan
-                                  ? "outline"
-                                  : plan.popular
-                                  ? "default"
-                                  : "outline"
-                              }
-                              className={`w-full ${
-                                plan.popular && !isCurrentPlan
-                                  ? "bg-yellow-500 hover:bg-yellow-600"
-                                  : ""
-                              }`}
-                              onClick={() => handleUpgrade(plan.id)}
-                              disabled={isCurrentPlan && !isExpired}
-                            >
-                              {isCurrentPlan && !isExpired 
-                                ? "Plan actuel" 
-                                : isCurrentPlan && isExpired
-                                ? "Renouveler"
-                                : "Choisir ce plan"
-                              }
-                            </Button>
-                          </div>
-                        );
-                      })}
+                {/* Bouton pour afficher/masquer les plans */}
+                {!showOtherPlans ? (
+                  <div className="text-center">
+                    <Button
+                      onClick={() => setShowOtherPlans(true)}
+                      variant="outline"
+                      size="lg"
+                      className="gap-2"
+                    >
+                      Voir les autres plans
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-gray-900">Autres Plans</h2>
+                      <Button
+                        onClick={() => setShowOtherPlans(false)}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        Masquer
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+
+                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                      <CardHeader>
+                        <CardTitle className="text-xl">Découvrez nos offres</CardTitle>
+                        <p className="text-gray-600">
+                          Choisissez le plan adapté à vos besoins
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {subscriptionPlans.map((plan) => {
+                            const color = getColorClasses(plan.color);
+                            const isCurrentPlan = subscription?.plan?.id == plan.id;
+
+                            return (
+                              <div
+                                key={plan.id}
+                                className={`border rounded-lg p-4 relative transition-all duration-300 hover:shadow-lg ${
+                                  isCurrentPlan
+                                    ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                                    : plan.popular
+                                    ? "border-yellow-400 ring-2 ring-yellow-200 bg-yellow-50/50"
+                                    : "border-gray-200 hover:border-gray-300"
+                                }`}
+                              >
+                                {plan.popular && !isCurrentPlan && (
+                                  <Badge className="mb-2 bg-yellow-500 text-white absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                    Populaire
+                                  </Badge>
+                                )}
+
+                                {isCurrentPlan && (
+                                  <Badge className="mb-2 bg-primary text-white absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                    Actuel
+                                  </Badge>
+                                )}
+
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className={`p-2 rounded-lg ${color.bg}`}>
+                                    <div className={color.text}>{plan.icon}</div>
+                                  </div>
+                                  <div>
+                                    <h3 className="font-bold text-lg text-gray-900">
+                                      {plan.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-600">
+                                      {plan.description}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="mb-4">
+                                  <p className="text-2xl font-bold text-gray-900">
+                                    {plan.price}€
+                                    <span className="text-sm font-normal text-gray-600">
+                                      /{plan.period || "mois"}
+                                    </span>
+                                  </p>
+                                </div>
+
+                                <ul className="space-y-2 text-sm mb-4">
+                                  {plan.features?.slice(0, 4).map((feature, idx) => (
+                                    <li key={idx} className="flex items-center gap-2">
+                                      <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                      <span className="text-gray-700">{feature}</span>
+                                    </li>
+                                  ))}
+                                  {plan.features?.length > 4 && (
+                                    <li className="text-xs text-gray-500">
+                                      + {plan.features.length - 4} avantages
+                                      supplémentaires
+                                    </li>
+                                  )}
+                                </ul>
+
+                                <Button
+                                  variant={
+                                    isCurrentPlan
+                                      ? "outline"
+                                      : plan.popular
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  className={`w-full ${
+                                    plan.popular && !isCurrentPlan
+                                      ? "bg-yellow-500 hover:bg-yellow-600"
+                                      : ""
+                                  }`}
+                                  onClick={() => handleUpgrade(plan.id)}
+                                  disabled={isCurrentPlan && !isExpired}
+                                >
+                                  {isCurrentPlan && !isExpired 
+                                    ? "Plan actuel" 
+                                    : isCurrentPlan && isExpired
+                                    ? "Renouveler"
+                                    : "Choisir ce plan"
+                                  }
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             )}
 

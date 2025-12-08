@@ -460,22 +460,22 @@ const Header = () => {
           image:
             "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
-         {
+        {
           title: "Gestion",
           description: "Optimisez la gestion de vos biens",
           href: "/gestion-immobilier",
           image:
             "https://i.pinimg.com/1200x/a6/6e/47/a66e473e8ed32bb3d153017af507f83c.jpg",
         },
-         
-        // { 
+
+        // {
         //   title: "PSLA",
         //   description: "Profitez du Prêt Social Location Accession",
         //   href: "/PSLA",
         //   image:
         //     "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
         // },
-        
+
         {
           title: "Investissement",
           description: "Découvrez des opportunités mondiales",
@@ -483,7 +483,7 @@ const Header = () => {
           image:
             "https://i.pinimg.com/1200x/46/bb/5d/46bb5df4d9ca65648383226b41de80ec.jpg",
         },
-         {
+        {
           title: "Financement",
           description: "Solutions de crédit adaptées à votre projet",
           href: "/financement#partenaires",
@@ -568,7 +568,7 @@ const Header = () => {
         //     },
         //   ],
         // },
-        
+
         // {
         //   title: "PRODUITS & ACCESSOIRES",
         //   items: [
@@ -737,7 +737,7 @@ const Header = () => {
     // },
 
     ///**********************service
-     {
+    {
       title: "SERVICES",
       items: [
         // {
@@ -749,7 +749,7 @@ const Header = () => {
         {
           title: "Trouver un professionnel",
           description: "Experts pour vos besoins spécifiques",
-          href: "/reprise",
+          href: "/services-partners",
           image:
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
@@ -775,14 +775,14 @@ const Header = () => {
         //   image:
         //     "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
         // },
-         {
+        {
           title: "Entreprise",
           description: "Accompagnement pour entrepreneurs",
           href: "/reprise",
           image:
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
-      {
+        {
           title: "Conseil",
           description: "Experts en audit & résolution de conflits",
           href: "#",
@@ -1064,7 +1064,6 @@ const Header = () => {
     //   ],
     // },
 
-
     {
       title: "VIVRE À LA RÉUNION",
       items: [
@@ -1089,41 +1088,44 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
         },
-        
       ],
-    }, 
-    
+    },
+
     /*** Nos partenaire*/
-{
-  title: "NOS PARTENAIRES",
-  items: [
     {
-      title: "Agences",
-      description: "Decouvrir notre partenariat agences",
-      href: "#",
-      image: "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg"
+      title: "NOS PARTENAIRES",
+      items: [
+        {
+          title: "Agences",
+          description: "Decouvrir notre partenariat agences",
+          href: "#",
+          image:
+            "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
+        },
+        {
+          title: "Rchizcte",
+          description: "Fiche présentation et projets réalisés",
+          href: "#",
+          image:
+            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+        },
+        {
+          title: "Constructeurs",
+          description: "Fiche présentation et projets réalisés",
+          href: "#",
+          image:
+            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+        },
+        {
+          title: "Plombiers",
+          description: "Fiche présentation et projets réalisés",
+          href: "#",
+          image:
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
+      ],
     },
-    {
-      title: "Rchizcte",
-      description: "Fiche présentation et projets réalisés",
-      href: "#",
-      image: "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg"
-    },
-    {
-      title: "Constructeurs",
-      description: "Fiche présentation et projets réalisés",
-      href: "#",
-      image: "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg"
-    },
-    {
-      title: "Plombiers",
-      description: "Fiche présentation et projets réalisés",
-      href: "#",
-      image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg"
-    },
-  ],
-},
-    
+
     // {
     //   title: "ALIMENTATION",
     //   items: [

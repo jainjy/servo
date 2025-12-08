@@ -38,8 +38,9 @@ const SubscriptionExpiredModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={canClose ? onClose : undefined}>
-      {/* Classe DialogContent ajustée pour la responsivité en largeur et en hauteur */}
-      <DialogContent className="max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl w-[95%] sm:w-full h-auto max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl w-[95%] sm:w-full h-auto max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader className="relative pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-100 rounded-full">
@@ -54,17 +55,6 @@ const SubscriptionExpiredModal = ({
               </DialogDescription>
             </div>
           </div>
-
-          {canClose && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4 h-6 w-6"
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
         </DialogHeader>
 
         <div className="space-y-6 py-2">

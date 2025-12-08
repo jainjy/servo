@@ -30,8 +30,8 @@ export const SubscriptionStatusGuard = ({
         // Vérifier si l'abonnement est expiré
         if (data?.status === "expired") {
           // Afficher le modal seulement si l'utilisateur n'est pas sur /pro
-          const isDashboard = location.pathname === "/pro";
-          if (!isDashboard) {
+          const isSubscription =location.pathname.startsWith("/pro/subscription");
+          if (!isSubscription) {
             setShowExpiredModal(true);
           }
         }
@@ -59,6 +59,11 @@ export const SubscriptionStatusGuard = ({
     setShowExpiredModal(false);
   };
 
+  // Vérifier si l'utilisateur peut fermer le modal
+  const canCloseModal =
+    location.pathname === "/pro" ||
+    location.pathname.startsWith("/pro/subscription");
+
   // Afficher le modal d'expiration
   const shouldShowModal =
     showExpiredModal && subscriptionData?.status === "expired";
@@ -73,7 +78,7 @@ export const SubscriptionStatusGuard = ({
           onClose={handleCloseModal}
           onRenew={handleRenew}
           onGoToDashboard={handleGoToDashboard}
-          canClose={false}
+          canClose={canCloseModal}
           showGif={true}
         />
       )}

@@ -3,8 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronDown, Camera, Star, Clock, MapPin, Bed, Bath, Ruler, Wrench, Home, Car, Utensils } from "lucide-react";
 import PartnersPage from "./ServicesPartnersPage/PartnersPage";
 import ServicesPage from "./ServicesPartnersPage/ServicesPages";
-import AidesPage from "./ServicesPartnersPage/AidesPage";
-
 
 // Types pour TypeScript
 interface Service {
@@ -177,7 +175,6 @@ const ServicesPartnersPage = () => {
     if (section) {
       if (section === "partenaires") setView("partenaires");
       if (section === "prestations") setView("services");
-      if (section === "aides") setView("aides");
     } else {
       setView("default");
     }
