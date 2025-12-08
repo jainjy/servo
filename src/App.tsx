@@ -181,6 +181,7 @@ import DemandeDroitFamille from "./pages/admin/DemandeDroitFamille";
 import PropertyRent from "./pages/PropertyRent";
 import PropertyBuy from "./pages/PropertyBuy";
 import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
+import Assurance from "./pages/Assurance";
 
 const queryClient = new QueryClient();
 
@@ -485,6 +486,7 @@ const App = () => {
                   />
                   <Route path="/entreprise" element={<Entreprise />} />
                   <Route path="/financement" element={<Financement />} />
+                  <Route path="/assurance" element={<Assurance />} />
                   <Route
                     path="/financement/:id"
                     element={<FinancementPartenaireDetail />}
