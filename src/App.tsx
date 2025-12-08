@@ -60,7 +60,7 @@ import MesDemande from "./pages/mon-compte/MesDemande";
 import MesDemandesImmobilier from "./pages/mon-compte/MesDemandesImmobilier";
 import PropertyPage from "./pages/PropertyPage";
 import MessagesLayout from "./pages/MessagesLayout";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import ScrollToTop from "./ScrollToTop";
 import NotFound from "./pages/NotFound";
@@ -98,7 +98,6 @@ import { useAuth } from "./hooks/useAuth";
 import ProBookings from "./components/admin/tourism/ProBookings";
 import Recherche from "./pages/Recherche";
 import "leaflet/dist/leaflet.css";
-import LoadingScreen from "./components/Load";
 //tracking page
 import GlobalTracking from "@/components/GlobalTracking";
 import NetworkStatus from "./components/NetworkStatus";
@@ -214,8 +213,6 @@ const ScrollToHash = () => {
 
 const App = () => {
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     if (!user) {
       return;
@@ -237,16 +234,9 @@ const App = () => {
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      
       <TooltipProvider>
         <SocketProvider userId={user?.id}>
           <CartProvider>
-            {isLoading && (
-              <LoadingScreen 
-                onLoadingComplete={() => setIsLoading(false)}
-                minimumLoadingTime={1500}
-              />
-            )}
             <Toaster />
             <ToastContainer />
             <Sonner />
