@@ -58,7 +58,7 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
   const TextOnly = () => (
     <div className="flex flex-col">
       <div 
-        className="font-bold tracking-tight"
+        className="azonix font-bold tracking-tight"
         style={{ 
           color: primaryColor,
           fontSize: `${textSize}px`,
