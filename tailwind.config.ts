@@ -89,6 +89,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+
+        /* ===========================
+           🎨 Palette personnalisée Servo
+           =========================== */
+        logo: "#556B2F",           /* logo / accent - Olive green */
+        "primary-dark": "#6B8E23", /* Sruvol / fonds légers - Yellow-green */
+        "light-bg": "#FFFFFF0",    /* fond de page / bloc texte - White */
+        "separator": "#D3D3D3",    /* séparateurs / bordures, UI - Light gray */
+        "secondary-text": "#8B4513", /* touche premium / titres secondaires - Saddle brown */
       },
 
       /* ===========================
