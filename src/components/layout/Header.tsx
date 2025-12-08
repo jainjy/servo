@@ -493,7 +493,7 @@ const Header = () => {
         {
           title: "Assurance",
           description: "Protection complète pour votre logement",
-          href: "/financement#assurances",
+          href: "/assurance",
           image:
             "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
         },
