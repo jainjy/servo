@@ -73,7 +73,7 @@ export const SubscriptionStatusGuard = ({
           onClose={handleCloseModal}
           onRenew={handleRenew}
           onGoToDashboard={handleGoToDashboard}
-          canClose={true}
+          canClose={false}
           showGif={true}
         />
       )}

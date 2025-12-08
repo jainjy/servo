@@ -7,7 +7,6 @@ import { AuthHeader } from "@/components/layout/AuthHeader";
 import { Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
-import SubscriptionExpiredModal from "@/components/SubscriptionExpiredModal";
 import { useNavigate } from "react-router-dom";
 
 export default function ProLayout() {
@@ -77,18 +76,6 @@ export default function ProLayout() {
           <main className="flex-1 overflow-y-auto p-0 lg:p-6">
             <Outlet />
           </main>
-
-          {/* Modal d'expiration d'abonnement */}
-          {!loading && (
-            <SubscriptionExpiredModal
-              isOpen={showExpiredModal}
-              onClose={handleCloseModal}
-              onRenew={handleRenewSubscription}
-              onGoToDashboard={handleGoToDashboard}
-              canClose={isOnSubscriptionPage} // Permettre la fermeture uniquement sur les pages subscription
-              showGif={true}
-            />
-          )}
         </div>
       </div>
     </ProRoute>
