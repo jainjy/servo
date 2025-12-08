@@ -103,7 +103,7 @@ import GlobalTracking from "@/components/GlobalTracking";
 import NetworkStatus from "./components/NetworkStatus";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
- 
+
 import ReservationTable from "./pages/pro/ReservationBien-etre"
 // Import des nouveaux composants immobilier
 import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
@@ -170,7 +170,7 @@ import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
 import { App as CapacitorApp } from '@capacitor/app';
 import Digitalisation from "./pages/Digitalisation";
-import  GestionLocationSaisonniere from "./pages/GestionLocationSaisonniere";
+import GestionLocationSaisonniere from "./pages/GestionLocationSaisonniere";
 import PrivacyPolicyWidget from "./components/Confidentialite";
 import LegalMentionsWidget from "./components/MentionLegal";
 import DigitalisationPartenaires from "./pages/DigitalisationPartenaires";
@@ -178,6 +178,8 @@ import DigitalisationProfessionnelDetail from "./pages/DigitalisationProfessionn
 import DigitalisationServiceDetail from "./pages/DigitalisationServiceDetail";
 import ContactMessagesPage from "./pages/pro/ContactMessagesPage";
 import DemandeDroitFamille from "./pages/admin/DemandeDroitFamille";
+import PropertyRent from "./pages/PropertyRent";
+import PropertyBuy from "./pages/PropertyBuy";
 import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 
 const queryClient = new QueryClient();
@@ -221,7 +223,7 @@ const App = () => {
     console.log("User ID for Socket Connection:", user.id);
   }, [user]);
 
-   useEffect(() => {
+  useEffect(() => {
     // Gestion simple du bouton retour
     CapacitorApp.addListener('backButton', () => {
       if (window.history.length > 1) {
@@ -280,6 +282,9 @@ const App = () => {
                   /> */}
                   <Route path="/cookies" element={<CookiesPolicy />} />
                   <Route path="/immobilier" element={<Immobilier />} />
+                  <Route path="/achat" element={<PropertyBuy />} />
+                  <Route path="/location" element={<PropertyRent />} />
+                  <Route path="/location-saisonniere" element={<PropertyRent isSeasonal={true} />} />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   <Route path="/services-ibr" element={<ServicesIBRPage />} />
                   {/* /*entreprise link* */}
