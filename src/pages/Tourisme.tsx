@@ -37,6 +37,7 @@ import api from "../lib/api"; // Import de l'API configurée
 import { useAuth } from "../hooks/useAuth"; // Import de votre hook useAuth
 import { useInteractionTracking } from "../hooks/useInteractionTracking"; // Import du hook de tracking
 import "../styles/animationSlider.css";
+import TourismNavigation from "@/components/TourismNavigation";
 
 // Types basés sur le modèle de données
 interface TourismListing {
@@ -779,7 +780,7 @@ export const TourismSection = () => {
             className="w-full h-full object-cover opacity-90"
           />
         </div>
-
+        <TourismNavigation />
         <div className="text-center mb-16">
           <h2
             className="md:text-5xl text-3xl font-bold mb-6 text-slate-100 tracking-wider"

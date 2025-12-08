@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { tourismeAPI } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
+import TourismNavigation from '../TourismNavigation';
 
 interface LieuTouristique {
     id: string;
@@ -568,441 +569,532 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
     }
 
     return (
-        <div className="min-h-screen mt-16 py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* En-tête */}
-                <div className='relative h-64 mb-12 rounded-lg overflow-hidden'>
-                    <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-                    <img 
-                        src="https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                        alt="Lieux touristiques" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => handleImageError(e, 'default')}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center text-center">
-                        <div>
-                            <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
-                                Lieux Touristiques & Culturels
-                            </h1>
-                            <p className="text-xs lg:text-sm text-gray-200 max-w-3xl mx-auto">
-                                Explorez le patrimoine local et découvrez les trésors touristiques
-                            </p>
-                        </div>
-                    </div>
-                    {error && (
-                        <div className="absolute bottom-4 left-4 right-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-                            {error} - Affichage des données de démonstration
-                        </div>
-                    )}
-                </div>
-
-                {/* Filtres et tris */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Catégorie
-                            </label>
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category.value}
-                                        onClick={() => setFiltreType(category.value)}
-                                        className={`flex items-center justify-center space-x-2 p-3 rounded-lg border transition-all duration-200 ${filtreType === category.value
-                                            ? 'bg-blue-50 border-blue-200 text-blue-700'
-                                            : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        {category.icon}
-                                        <span className="text-sm font-medium">{category.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Trier par
-                            </label>
-                            <select
-                                value={tri}
-                                onChange={(e) => setTri(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            >
-                                {tris.map((triOption) => (
-                                    <option key={triOption.value} value={triOption.value}>
-                                        {triOption.label}
-                                    </option>
-                                ))}
-                            </select>
-                            <div className="mt-4 text-sm text-gray-600">
-                                {lieuxFiltres.length} lieu(x) touristique(s) trouvé(s)
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Grille des lieux */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {lieuxFiltres.map((lieu) => (
-                        <div
-                            key={lieu.id}
-                            className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden"
-                        >
-                            {/* Image de couverture */}
-                            <div className="h-48 bg-black relative overflow-hidden">
-                                {lieu.images && lieu.images.length > 0 ? (
-                                    <img
-                                        src={getSafeImageUrl(lieu.images[0], lieu.category)}
-                                        alt={lieu.title}
-                                        className="w-full h-full object-cover flex-shrink-0 opacity-60"
-                                        onError={(e) => handleImageError(e, lieu.category)}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                                        <Landmark className="w-12 h-12 text-white" />
-                                    </div>
-                                )}
-
-                                <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-                                <div className="absolute top-4 left-4">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white bg-opacity-90 text-gray-800">
-                                        {getCategoryIcon(lieu.category)}
-                                        <span className="ml-1">{getCategoryLabel(lieu.category)}</span>
-                                    </span>
-                                </div>
-                                <div className="absolute bottom-4 left-4 text-white">
-                                    <h3 className="text-xl font-bold">{lieu.title}</h3>
-                                    <div className="flex items-center text-sm opacity-90">
-                                        <MapPin className="w-4 h-4 mr-1" />
-                                        {lieu.city}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Contenu */}
-                            <div className="p-6">
-                                {/* Description */}
-                                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                    {lieu.description}
-                                </p>
-
-                                {/* Informations principales */}
-                                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                                    {lieu.openingHours && (
-                                        <div className="flex items-center text-gray-600">
-                                            <Clock className="w-4 h-4 mr-2" />
-                                            {lieu.openingHours}
-                                        </div>
-                                    )}
-                                    <div className="flex items-center text-gray-600">
-                                        <Calendar className="w-4 h-4 mr-2" />
-                                        {getCategoryLabel(lieu.category)}
-                                    </div>
-                                </div>
-
-                                {/* Horaires et prix */}
-                                <div className="flex justify-between items-center mb-4">
-                                    <div className="flex items-center space-x-2">
-                                        <div className={`w-2 h-2 rounded-full ${lieu.available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                        <span className="text-sm text-gray-600">
-                                            {lieu.available ? 'Ouvert' : 'Fermé'}
-                                        </span>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-lg font-bold text-gray-900">
-                                            {lieu.price === 0 ? 'Gratuit' : `${lieu.price}€`}
-                                        </div>
-                                        <div className="text-xs text-gray-500">entrée</div>
-                                    </div>
-                                </div>
-
-                                {/* Notation et avis */}
-                                <div className="flex justify-between items-center mb-4">
-                                    {renderStars(lieu.rating)}
-                                    <div className="text-sm text-gray-600">
-                                        {lieu.reviewCount.toLocaleString('fr-FR')} avis
-                                    </div>
-                                </div>
-
-                                {/* Équipements */}
-                                {lieu.amenities && lieu.amenities.length > 0 && (
-                                    <div className="mb-4">
-                                        {renderAmenities(lieu.amenities)}
-                                    </div>
-                                )}
-
-                                {/* Informations de contact */}
-                                {(lieu.website || lieu.contactInfo) && (
-                                    <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                                        <div className="flex items-center space-x-4">
-                                            {lieu.website && (
-                                                <a href={lieu.website} target="_blank" rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:text-blue-700 flex items-center">
-                                                    <Globe className="w-4 h-4 mr-1" />
-                                                    Site web
-                                                </a>
-                                            )}
-                                            {lieu.contactInfo && (
-                                                <div className="flex items-center text-gray-600">
-                                                    <Phone className="w-4 h-4 mr-1" />
-                                                    {lieu.contactInfo}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Bouton Achat billet uniquement */}
-                                <div className="flex space-x-3">
-                                    <button 
-                                        onClick={() => handleOpenReservation(lieu)}
-                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200"
-                                    >
-                                        <Ticket className="w-4 h-4 inline mr-2" />
-                                        {lieu.price === 0 ? 'Réserver visite' : 'Acheter billet'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Modal de Réservation */}
-                {isReservationOpen && lieuSelectionne && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                        <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
-                            {/* Header */}
-                            <div className="flex items-center justify-between border-b border-gray-200 p-6">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">Réservation de billet</h2>
-                                    <p className="text-gray-600 mt-1">{lieuSelectionne.title}</p>
-                                </div>
-                                <button
-                                    onClick={() => setIsReservationOpen(false)}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                >
-                                    <X className="w-6 h-6 text-gray-600" />
-                                </button>
-                            </div>
-
-                            {/* Contenu */}
-                            <div className="p-6 space-y-6">
-                                {/* Informations du lieu */}
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                    <div className="flex items-center space-x-3">
-                                        <img 
-                                            src={getSafeImageUrl(lieuSelectionne.images?.[0], lieuSelectionne.category)} 
-                                            alt={lieuSelectionne.title}
-                                            className="w-16 h-16 object-cover rounded"
-                                            onError={(e) => handleImageError(e, lieuSelectionne.category)}
-                                        />
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">{lieuSelectionne.title}</h3>
-                                            <p className="text-sm text-gray-600">{lieuSelectionne.city}</p>
-                                            <p className="text-lg font-bold text-blue-600">
-                                                {lieuSelectionne.price === 0 ? 'Gratuit' : `${lieuSelectionne.price}€`}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Disponibilité */}
-                                {availability && (
-                                    <div className={`p-3 rounded-lg ${availability.available ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                                        <div className="flex items-center justify-between">
-                                            <span className={`font-medium ${availability.available ? 'text-green-800' : 'text-red-800'}`}>
-                                                {availability.available ? 
-                                                    `✅ ${availability.availableSpots} places disponibles` : 
-                                                    '❌ Complet pour cette date'
-                                                }
-                                            </span>
-                                            <span className="text-sm text-gray-600">
-                                                Capacité: {availability.totalCapacity} places
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Formulaire de réservation */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Date de visite */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Date de visite
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={reservationData.visitDate}
-                                            onChange={(e) => handleDateChange(e.target.value)}
-                                            min={new Date().toISOString().split('T')[0]}
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        />
-                                    </div>
-
-                                    {/* Heure de visite */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Heure de visite
-                                        </label>
-                                        <select
-                                            value={reservationData.visitTime}
-                                            onChange={(e) => setReservationData({...reservationData, visitTime: e.target.value})}
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        >
-                                            <option value="">Sélectionner une heure</option>
-                                            {availableTimes.map(time => (
-                                                <option key={time} value={time}>{time}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* Type de billet */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Type de billet
-                                        </label>
-                                        <select
-                                            value={reservationData.ticketType}
-                                            onChange={(e) => setReservationData({...reservationData, ticketType: e.target.value})}
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        >
-                                            {ticketTypes.map(type => (
-                                                <option key={type.value} value={type.value}>
-                                                    {type.label} {lieuSelectionne.price > 0 ? `(${type.priceMultiplier * 100}%)` : ''}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* Nombre de billets */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Nombre de billets
-                                        </label>
-                                        <div className="flex items-center space-x-2">
-                                            <button
-                                                onClick={() => setReservationData({
-                                                    ...reservationData, 
-                                                    numberOfTickets: Math.max(1, reservationData.numberOfTickets - 1)
-                                                })}
-                                                className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
-                                            >
-                                                -
-                                            </button>
-                                            <span className="w-12 text-center font-medium">
-                                                {reservationData.numberOfTickets}
-                                            </span>
-                                            <button
-                                                onClick={() => setReservationData({
-                                                    ...reservationData, 
-                                                    numberOfTickets: reservationData.numberOfTickets + 1
-                                                })}
-                                                className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Demandes spéciales */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Demandes spéciales (optionnel)
-                                    </label>
-                                    <textarea
-                                        value={reservationData.specialRequests}
-                                        onChange={(e) => setReservationData({...reservationData, specialRequests: e.target.value})}
-                                        rows={3}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                        placeholder="Accessibilité, préférences particulières..."
-                                    />
-                                </div>
-
-                                {/* Récapitulatif et paiement */}
-                                <div className="bg-blue-50 rounded-lg p-4">
-                                    <h3 className="font-semibold text-gray-900 mb-3">Récapitulatif</h3>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span>Billets ({reservationData.numberOfTickets}x)</span>
-                                            <span>{calculateTotalPrice().toFixed(2)}€</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Frais de service</span>
-                                            <span>{(calculateTotalPrice() * 0.10).toFixed(2)}€</span>
-                                        </div>
-                                        <div className="border-t pt-2 flex justify-between font-bold">
-                                            <span>Total</span>
-                                            <span>{(calculateTotalPrice() * 1.10).toFixed(2)}€</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Méthode de paiement */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                                        Méthode de paiement
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => setReservationData({...reservationData, paymentMethod: 'card'})}
-                                            className={`p-3 border rounded-lg flex items-center justify-center space-x-2 ${
-                                                reservationData.paymentMethod === 'card' 
-                                                ? 'border-blue-500 bg-blue-50' 
-                                                : 'border-gray-300'
-                                            }`}
-                                        >
-                                            <CreditCard className="w-5 h-5" />
-                                            <span>Carte</span>
-                                        </button>
-                                        <button
-                                            onClick={() => setReservationData({...reservationData, paymentMethod: 'cash'})}
-                                            className={`p-3 border rounded-lg flex items-center justify-center space-x-2 ${
-                                                reservationData.paymentMethod === 'cash' 
-                                                ? 'border-blue-500 bg-blue-50' 
-                                                : 'border-gray-300'
-                                            }`}
-                                        >
-                                            <User className="w-5 h-5" />
-                                            <span>Sur place</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="border-t border-gray-200 p-6 bg-gray-50">
-                                <div className="flex space-x-3">
-                                    <button
-                                        onClick={() => setIsReservationOpen(false)}
-                                        className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                                    >
-                                        Annuler
-                                    </button>
-                                    <button
-                                        onClick={handleSubmitReservation}
-                                        disabled={reservationLoading || !availability?.available || !reservationData.visitTime}
-                                        className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                    >
-                                        {reservationLoading ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                Réservation...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <QrCode className="w-4 h-4 mr-2" />
-                                                {lieuSelectionne.price === 0 ? 'Réserver gratuitement' : `Payer ${(calculateTotalPrice() * 1.10).toFixed(2)}€`}
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+      <div className="min-h-screen mt-16 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* En-tête */}
+          <div className="relative h-64 mb-12 rounded-lg overflow-hidden">
+            <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50"></div>
+            <img
+              src="https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+              alt="Lieux touristiques"
+              className="w-full h-full object-cover"
+              onError={(e) => handleImageError(e, "default")}
+            />
+            <TourismNavigation />
+            <div className="absolute inset-0 flex items-center justify-center text-center">
+              <div>
+                <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">
+                  Lieux Touristiques & Culturels
+                </h1>
+                <p className="text-xs lg:text-sm text-gray-200 max-w-3xl mx-auto">
+                  Explorez le patrimoine local et découvrez les trésors
+                  touristiques
+                </p>
+              </div>
             </div>
+            {error && (
+              <div className="absolute bottom-4 left-4 right-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                {error} - Affichage des données de démonstration
+              </div>
+            )}
+          </div>
+
+          {/* Filtres et tris */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Catégorie
+                </label>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                  {categories.map((category) => (
+                    <button
+                      key={category.value}
+                      onClick={() => setFiltreType(category.value)}
+                      className={`flex items-center justify-center space-x-2 p-3 rounded-lg border transition-all duration-200 ${
+                        filtreType === category.value
+                          ? "bg-blue-50 border-blue-200 text-blue-700"
+                          : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                      }`}
+                    >
+                      {category.icon}
+                      <span className="text-sm font-medium">
+                        {category.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Trier par
+                </label>
+                <select
+                  value={tri}
+                  onChange={(e) => setTri(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  {tris.map((triOption) => (
+                    <option key={triOption.value} value={triOption.value}>
+                      {triOption.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="mt-4 text-sm text-gray-600">
+                  {lieuxFiltres.length} lieu(x) touristique(s) trouvé(s)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grille des lieux */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {lieuxFiltres.map((lieu) => (
+              <div
+                key={lieu.id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 overflow-hidden"
+              >
+                {/* Image de couverture */}
+                <div className="h-48 bg-black relative overflow-hidden">
+                  {lieu.images && lieu.images.length > 0 ? (
+                    <img
+                      src={getSafeImageUrl(lieu.images[0], lieu.category)}
+                      alt={lieu.title}
+                      className="w-full h-full object-cover flex-shrink-0 opacity-60"
+                      onError={(e) => handleImageError(e, lieu.category)}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                      <Landmark className="w-12 h-12 text-white" />
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white bg-opacity-90 text-gray-800">
+                      {getCategoryIcon(lieu.category)}
+                      <span className="ml-1">
+                        {getCategoryLabel(lieu.category)}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-xl font-bold">{lieu.title}</h3>
+                    <div className="flex items-center text-sm opacity-90">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {lieu.city}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contenu */}
+                <div className="p-6">
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {lieu.description}
+                  </p>
+
+                  {/* Informations principales */}
+                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    {lieu.openingHours && (
+                      <div className="flex items-center text-gray-600">
+                        <Clock className="w-4 h-4 mr-2" />
+                        {lieu.openingHours}
+                      </div>
+                    )}
+                    <div className="flex items-center text-gray-600">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {getCategoryLabel(lieu.category)}
+                    </div>
+                  </div>
+
+                  {/* Horaires et prix */}
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          lieu.available ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      ></div>
+                      <span className="text-sm text-gray-600">
+                        {lieu.available ? "Ouvert" : "Fermé"}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-gray-900">
+                        {lieu.price === 0 ? "Gratuit" : `${lieu.price}€`}
+                      </div>
+                      <div className="text-xs text-gray-500">entrée</div>
+                    </div>
+                  </div>
+
+                  {/* Notation et avis */}
+                  <div className="flex justify-between items-center mb-4">
+                    {renderStars(lieu.rating)}
+                    <div className="text-sm text-gray-600">
+                      {lieu.reviewCount.toLocaleString("fr-FR")} avis
+                    </div>
+                  </div>
+
+                  {/* Équipements */}
+                  {lieu.amenities && lieu.amenities.length > 0 && (
+                    <div className="mb-4">
+                      {renderAmenities(lieu.amenities)}
+                    </div>
+                  )}
+
+                  {/* Informations de contact */}
+                  {(lieu.website || lieu.contactInfo) && (
+                    <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                      <div className="flex items-center space-x-4">
+                        {lieu.website && (
+                          <a
+                            href={lieu.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700 flex items-center"
+                          >
+                            <Globe className="w-4 h-4 mr-1" />
+                            Site web
+                          </a>
+                        )}
+                        {lieu.contactInfo && (
+                          <div className="flex items-center text-gray-600">
+                            <Phone className="w-4 h-4 mr-1" />
+                            {lieu.contactInfo}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Bouton Achat billet uniquement */}
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => handleOpenReservation(lieu)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200"
+                    >
+                      <Ticket className="w-4 h-4 inline mr-2" />
+                      {lieu.price === 0 ? "Réserver visite" : "Acheter billet"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Modal de Réservation */}
+          {isReservationOpen && lieuSelectionne && (
+            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Réservation de billet
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                      {lieuSelectionne.title}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsReservationOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </button>
+                </div>
+
+                {/* Contenu */}
+                <div className="p-6 space-y-6">
+                  {/* Informations du lieu */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={getSafeImageUrl(
+                          lieuSelectionne.images?.[0],
+                          lieuSelectionne.category
+                        )}
+                        alt={lieuSelectionne.title}
+                        className="w-16 h-16 object-cover rounded"
+                        onError={(e) =>
+                          handleImageError(e, lieuSelectionne.category)
+                        }
+                      />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {lieuSelectionne.title}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {lieuSelectionne.city}
+                        </p>
+                        <p className="text-lg font-bold text-blue-600">
+                          {lieuSelectionne.price === 0
+                            ? "Gratuit"
+                            : `${lieuSelectionne.price}€`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Disponibilité */}
+                  {availability && (
+                    <div
+                      className={`p-3 rounded-lg ${
+                        availability.available
+                          ? "bg-green-50 border border-green-200"
+                          : "bg-red-50 border border-red-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`font-medium ${
+                            availability.available
+                              ? "text-green-800"
+                              : "text-red-800"
+                          }`}
+                        >
+                          {availability.available
+                            ? `✅ ${availability.availableSpots} places disponibles`
+                            : "❌ Complet pour cette date"}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          Capacité: {availability.totalCapacity} places
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Formulaire de réservation */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Date de visite */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Date de visite
+                      </label>
+                      <input
+                        type="date"
+                        value={reservationData.visitDate}
+                        onChange={(e) => handleDateChange(e.target.value)}
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {/* Heure de visite */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Heure de visite
+                      </label>
+                      <select
+                        value={reservationData.visitTime}
+                        onChange={(e) =>
+                          setReservationData({
+                            ...reservationData,
+                            visitTime: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Sélectionner une heure</option>
+                        {availableTimes.map((time) => (
+                          <option key={time} value={time}>
+                            {time}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Type de billet */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Type de billet
+                      </label>
+                      <select
+                        value={reservationData.ticketType}
+                        onChange={(e) =>
+                          setReservationData({
+                            ...reservationData,
+                            ticketType: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        {ticketTypes.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}{" "}
+                            {lieuSelectionne.price > 0
+                              ? `(${type.priceMultiplier * 100}%)`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Nombre de billets */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre de billets
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() =>
+                            setReservationData({
+                              ...reservationData,
+                              numberOfTickets: Math.max(
+                                1,
+                                reservationData.numberOfTickets - 1
+                              ),
+                            })
+                          }
+                          className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
+                        >
+                          -
+                        </button>
+                        <span className="w-12 text-center font-medium">
+                          {reservationData.numberOfTickets}
+                        </span>
+                        <button
+                          onClick={() =>
+                            setReservationData({
+                              ...reservationData,
+                              numberOfTickets:
+                                reservationData.numberOfTickets + 1,
+                            })
+                          }
+                          className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Demandes spéciales */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Demandes spéciales (optionnel)
+                    </label>
+                    <textarea
+                      value={reservationData.specialRequests}
+                      onChange={(e) =>
+                        setReservationData({
+                          ...reservationData,
+                          specialRequests: e.target.value,
+                        })
+                      }
+                      rows={3}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      placeholder="Accessibilité, préférences particulières..."
+                    />
+                  </div>
+
+                  {/* Récapitulatif et paiement */}
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3">
+                      Récapitulatif
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>
+                          Billets ({reservationData.numberOfTickets}x)
+                        </span>
+                        <span>{calculateTotalPrice().toFixed(2)}€</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Frais de service</span>
+                        <span>{(calculateTotalPrice() * 0.1).toFixed(2)}€</span>
+                      </div>
+                      <div className="border-t pt-2 flex justify-between font-bold">
+                        <span>Total</span>
+                        <span>{(calculateTotalPrice() * 1.1).toFixed(2)}€</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Méthode de paiement */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Méthode de paiement
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() =>
+                          setReservationData({
+                            ...reservationData,
+                            paymentMethod: "card",
+                          })
+                        }
+                        className={`p-3 border rounded-lg flex items-center justify-center space-x-2 ${
+                          reservationData.paymentMethod === "card"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <CreditCard className="w-5 h-5" />
+                        <span>Carte</span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          setReservationData({
+                            ...reservationData,
+                            paymentMethod: "cash",
+                          })
+                        }
+                        className={`p-3 border rounded-lg flex items-center justify-center space-x-2 ${
+                          reservationData.paymentMethod === "cash"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <User className="w-5 h-5" />
+                        <span>Sur place</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setIsReservationOpen(false)}
+                      className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleSubmitReservation}
+                      disabled={
+                        reservationLoading ||
+                        !availability?.available ||
+                        !reservationData.visitTime
+                      }
+                      className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                    >
+                      {reservationLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Réservation...
+                        </>
+                      ) : (
+                        <>
+                          <QrCode className="w-4 h-4 mr-2" />
+                          {lieuSelectionne.price === 0
+                            ? "Réserver gratuitement"
+                            : `Payer ${(calculateTotalPrice() * 1.1).toFixed(
+                                2
+                              )}€`}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
     );
 };
 

@@ -11,6 +11,7 @@ import {
   Search,
 } from "lucide-react";
 import { api } from "@/lib/axios";
+import TourismNavigation from "../TourismNavigation";
 
 interface ActivityCategory {
   id: number;
@@ -88,6 +89,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           className="absolute inset-0 w-full h-full object-cover opacity-20"
           alt="Hero"
         />
+        <TourismNavigation />
         <div className="relative text-center px-4">
           <h1 className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg tracking-wide">
             Activités & Loisirs

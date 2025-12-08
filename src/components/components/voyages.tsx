@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { flightsAPI } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
+import TourismNavigation from '../TourismNavigation';
 
 // Interfaces
 interface Prestataire {
@@ -424,6 +425,7 @@ const VoyagesAeriens: React.FC = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Section Hero */}
+                <TourismNavigation />
                 <div className="relative rounded-2xl overflow-hidden mb-8">
                     <div 
                         className="relative py-20 bg-cover bg-center bg-no-repeat"
