@@ -7,6 +7,10 @@ import {
   Bath,
   Ruler,
   Eye,
+  Calendar,
+  Home,
+  Search,
+  Filter,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import rentProperties1 from "@/assets/propertyLouer-1.jpg";
@@ -22,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import LocationPickerModal from "@/components/carte";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,7 +75,10 @@ const localRentProperties = [
 ];
 
 // Utilitaires
-const formatPrice = (price: number) => {
+const formatPrice = (price: number, rentType: string) => {
+  if (rentType === "saisonniere") {
+    return `${price.toLocaleString("fr-FR")} €/semaine`;
+  }
   return `${price.toLocaleString("fr-FR")} €/mois`;
 };
 
@@ -98,7 +105,6 @@ const normalizeAddress = (address: string) => {
 interface PropertyRentProps {
   cardsOnly?: boolean;
   maxItems?: number;
-  isSeasonal?: boolean;
   onPropertyView?: (property: any) => void;
   onPropertyClick?: (property: any) => void;
   onPropertyContact?: (property: any) => void;
@@ -109,7 +115,6 @@ interface PropertyRentProps {
 const PropertyRent: React.FC<PropertyRentProps> = ({
   cardsOnly = false,
   maxItems,
-  isSeasonal = false,
   onPropertyView,
   onPropertyClick,
   onPropertyContact,
@@ -137,6 +142,10 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const [typeBienLocation, setTypeBienLocation] = useState<string | undefined>(undefined);
   const [localisation, setLocalisation] = useState("");
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // État pour le type de location
+  const [rentType, setRentType] = useState<"longue_duree" | "saisonniere">("longue_duree");
 
   const [rentProperties, setRentProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,73 +158,16 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
   const { user, isAuthenticated } = useAuth();
 
-  // Animation variants
-  const containerVariants = {
+  // Animation variants améliorées
+  const pageTransition = {
     hidden: { opacity: 0 },
-    visible: {
+    visible: { 
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-    hover: {
-      y: -8,
-      boxShadow: "0 20px 40px rgba(85, 107, 47, 0.15)",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      },
-    },
-  };
-
-  const imageVariants = {
-    hidden: { scale: 1 },
-    hover: {
-      scale: 1.05,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const badgeVariants = {
-    hidden: { scale: 0 },
-    visible: {
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 15,
-      },
-    },
-  };
-
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
+      transition: { 
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
   };
 
   const staggerContainer = {
@@ -223,10 +175,100 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
+        staggerChildren: 0.08,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const fadeInUp = {
+    hidden: { 
+      opacity: 0, 
+      y: 30,
+      scale: 0.95
     },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1]
+      }
+    },
+    hover: {
+      y: -6,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const cardHover = {
+    hover: {
+      y: -8,
+      boxShadow: "0 25px 50px -12px rgba(85, 107, 47, 0.25)",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    }
+  };
+
+  const imageHover = {
+    hover: {
+      scale: 1.08,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const slideIn = {
+    hidden: { 
+      opacity: 0,
+      x: -20
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const scaleIn = {
+    hidden: { 
+      opacity: 0,
+      scale: 0.8
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  // Image de fond en ligne pour le titre (hauteur réduite)
+  const titleImageUrl = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80";
+
+  const titleBgStyle = {
+    backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4)), url('${titleImageUrl}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+    height: '50vh',
+    display: 'flex',
+    alignItems: 'center'
   };
 
   // Intersection Observer pour le tracking
@@ -288,7 +330,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     };
   }, [isAuthenticated, user?.id]);
 
-  // Fetch properties
+  // Fetch properties basé sur le type de location
   const fetchProperties = async () => {
     try {
       setError(null);
@@ -305,7 +347,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
         .filter((p: any) => 
           p.status === "for_rent" && 
           p.isActive && 
-          (isSeasonal ? p.rentType === "saisonniere" : p.rentType === "longue_duree")
+          p.rentType === rentType
         )
         .slice(0, 8)
         .map((p: any, i: number) => ({
@@ -325,7 +367,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
   useEffect(() => {
     fetchProperties();
-  }, [isSeasonal]);
+  }, [rentType]);
 
   // Initialize image indexes
   useEffect(() => {
@@ -346,7 +388,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const handlePropertyClick = (property: any) => {
     trackPropertyClick(property.id, property.title, property.price);
     if (onPropertyClick) onPropertyClick(property);
-    navigate(`/immobilier/location/${property.id}`);
+    navigate(`/location/${property.id}`);
   };
 
   const handlePropertyContact = (property: any) => {
@@ -372,6 +414,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       chambres,
       exterieur,
       extras,
+      rentType,
     };
 
     trackPropertyFilter(filters);
@@ -380,7 +423,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
   useEffect(() => {
     handleFilterChange();
-  }, [typeBienLocation, priceMax, localisation, pieces, surfaceMin, surfaceMax, chambres, exterieur, extras]);
+  }, [typeBienLocation, priceMax, localisation, pieces, surfaceMin, surfaceMax, chambres, exterieur, extras, rentType]);
 
   const displayed = useMemo(() => {
     const hasFeature = (p: any, token: string) => {
@@ -480,13 +523,16 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       <section className="w-full">
         <div className="container mx-auto px-4 py-6">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            >
               {[1, 2, 3, 4].map((i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
+                  variants={fadeInUp}
                   className="animate-pulse"
                 >
                   <div className="bg-[#FFFFFF0] h-64 rounded-2xl mb-4" />
@@ -494,7 +540,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   <div className="bg-[#D3D3D3] h-4 rounded w-1/2" />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <motion.div
               variants={staggerContainer}
@@ -507,12 +553,12 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 const totalImages = images.length;
                 const idx = currentImageIndexes[property.id] || 0;
                 const featuresArr = normalizeFeatures(property.features);
-                const priceLabel = formatPrice(property.price || 0);
+                const priceLabel = formatPrice(property.price || 0, rentType);
 
                 return (
                   <motion.div
                     key={property.id}
-                    variants={cardVariants}
+                    variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
                     whileHover="hover"
@@ -523,7 +569,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       className="home-card group cursor-pointer h-full border border-[#D3D3D3] rounded-2xl overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300"
                       onClick={() => handlePropertyClick(property)}
                     >
-                      <motion.div className="relative" variants={imageVariants}>
+                      <motion.div className="relative" variants={imageHover}>
                         <div className="relative rounded-lg h-52 overflow-hidden">
                           <motion.img
                             src={images[idx % totalImages]}
@@ -534,13 +580,17 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           />
 
                           <motion.div
-                            variants={badgeVariants}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
                             className="absolute bg-[#6B8E23] rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge shadow-md"
                           >
                             {property.type}
                           </motion.div>
                           <motion.div
-                            variants={badgeVariants}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
                             className="absolute bg-[#556B2F] p-2 text-white font-semibold text-sm rounded-lg bottom-3 right-3 home-card-price shadow-lg"
                           >
                             {priceLabel}
@@ -660,258 +710,349 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg z-50 mt-44 w-full"
+      initial="hidden"
+      animate="visible"
+      variants={pageTransition}
+      className="relative z-30 w-full"
+      // Ajout d'un margin-top pour laisser apparaître le header
+      style={{ marginTop: "10px" }}
     >
-      <div className="container mx-auto px-4 py-6">
-        {/* Header avec animation */}
+      {/* Header avec image de hauteur réduite */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative"
+        style={titleBgStyle}
+      >
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-4xl mx-auto text-center pt-12"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight"
+            >
+              Locations Immobilières
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="text-lg md:text-xl text-white/90 mb-6 max-w-2xl mx-auto"
+            >
+              Trouvez le logement idéal pour votre séjour à La Réunion
+            </motion.p>
+            
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+              className="h-1 bg-white/30 mx-auto mb-2 origin-left"
+              style={{ maxWidth: "180px" }}
+            />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8, delay: 0.9, ease: "easeOut" }}
+              className="h-1 bg-white mx-auto origin-left"
+              style={{ maxWidth: "80px" }}
+            />
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Contenu principal */}
+      <div className="container mx-auto px-4 -mt-16 relative z-20">
+        {/* Bouton filtre mobile */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8 text-center"
+          transition={{ delay: 0.3 }}
+          className="lg:hidden mb-4"
         >
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-3xl font-bold text-[#8B4513] mb-2"
+          <Button
+            variant="outline"
+            className="w-full bg-white border-[#D3D3D3] hover:border-[#556B2F] hover:bg-white"
+            onClick={() => setShowFilters(!showFilters)}
           >
-            {isSeasonal ? "Locations Saisonnières" : "Locations Longue Durée"}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-gray-600"
+            <Filter className="w-4 h-4 mr-2" />
+            {showFilters ? "Masquer les filtres" : "Afficher les filtres"}
+          </Button>
+        </motion.div>
+
+        {/* Boutons de sélection du type de location */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex justify-center gap-4 mb-8"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setRentType("longue_duree")}
+            className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${rentType === "longue_duree"
+              ? "bg-[#556B2F] text-white"
+              : "bg-white text-[#556B2F] border-2 border-[#D3D3D3] hover:border-[#556B2F]"
+            }`}
           >
-            {isSeasonal 
-              ? "Trouvez votre hébergement de vacances idéal" 
-              : "Découvrez nos biens disponibles à la location"}
-          </motion.p>
+            <Home className="h-5 w-5" />
+            <span>Location Longue Durée</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setRentType("saisonniere")}
+            className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${rentType === "saisonniere"
+              ? "bg-[#556B2F] text-white"
+              : "bg-white text-[#556B2F] border-2 border-[#D3D3D3] hover:border-[#556B2F]"
+            }`}
+          >
+            <Calendar className="h-5 w-5" />
+            <span>Location Saisonnière</span>
+          </motion.button>
         </motion.div>
 
         {/* Filtres */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="bg-[#FFFFFF0] rounded-2xl border border-[#D3D3D3] p-6 shadow-sm mb-8"
-        >
-          <div className="mb-5 flex items-center gap-2">
+        <AnimatePresence>
+          {(showFilters || window.innerWidth >= 1024) && (
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "4px" }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="h-6 bg-[#556B2F] rounded-full"
-            />
-            <h3 className="text-sm font-bold text-[#8B4513] uppercase tracking-wider">
-              Recherche de location
-            </h3>
-          </div>
-
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4"
-          >
-            {/* Type de bien */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Type de bien
-              </label>
-              <Select
-                onValueChange={(v) => setTypeBienLocation(v || undefined)}
-                value={typeBienLocation}
+              initial={{ opacity: 0, y: -20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-2xl border border-[#D3D3D3] p-6 shadow-lg mb-8"
+            >
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mb-6 flex items-center gap-3"
               >
-                <SelectTrigger 
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] transition-colors rounded-xl focus:ring-2 focus:ring-[#556B2F]/20"
-                >
-                  <SelectValue placeholder="Choisir..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {isSeasonal ? (
-                    <>
-                      <SelectItem value="appartement">Appartement</SelectItem>
-                      <SelectItem value="maison">Maison / Villa</SelectItem>
-                      <SelectItem value="villa_d_exception">Villa d'exception</SelectItem>
-                      <SelectItem value="location_journee">Location à la journée</SelectItem>
-                      <SelectItem value="hotel">Hotel</SelectItem>
-                      <SelectItem value="chambre_d_hote">Chambre d'hote</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="appartement">Appartement meublé</SelectItem>
-                      <SelectItem value="villa">Appartement non meublé</SelectItem>
-                      <SelectItem value="studio">Villa meublée</SelectItem>
-                      <SelectItem value="studio">Villa non meublée</SelectItem>
-                      <SelectItem value="parking">Local commercial</SelectItem>
-                      <SelectItem value="parking">Local professionnel</SelectItem>
-                      <SelectItem value="terrain">Terrain</SelectItem>
-                      <SelectItem value="parking">Parking</SelectItem>
-                      <SelectItem value="cellier">Cellier</SelectItem>
-                      <SelectItem value="cave">Cave</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </motion.div>
+                <div className="h-6 w-1 bg-[#556B2F] rounded-full"></div>
+                <h3 className="text-sm font-bold text-[#8B4513] uppercase tracking-wider">
+                  Recherche de {rentType === "longue_duree" ? "location longue durée" : "location saisonnière"}
+                </h3>
+              </motion.div>
 
-            {/* Localisation */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Localisation
-              </label>
-              <div className="relative group">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#556B2F] group-focus-within:text-[#6B8E23] transition-colors" />
-                <Input
-                  value={localisation}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  onClick={() => setIsLocationModalOpen(true)}
-                  placeholder="Cliquez pour choisir..."
-                  className="pl-9 h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] cursor-pointer transition-colors rounded-xl"
-                  readOnly
-                />
-              </div>
-            </motion.div>
-
-            {/* Prix max */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Prix max/mois
-              </label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="Montant"
-                  value={priceMax ?? ""}
-                  onChange={(e) =>
-                    setPriceMax(e.target.value ? Number(e.target.value) : undefined)
-                  }
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm pr-8"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">€</span>
-              </div>
-            </motion.div>
-
-            {/* Surface */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Surface (m²)
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Min"
-                  value={surfaceMin ?? ""}
-                  onChange={(e) =>
-                    setSurfaceMin(e.target.value ? Number(e.target.value) : undefined)
-                  }
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm"
-                />
-                <Input
-                  placeholder="Max"
-                  value={surfaceMax ?? ""}
-                  onChange={(e) =>
-                    setSurfaceMax(e.target.value ? Number(e.target.value) : undefined)
-                  }
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm"
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Filtres supplémentaires */}
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-          >
-            {/* Pièces */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Pièces
-              </label>
-              <Input
-                type="number"
-                min="0"
-                placeholder="Nombre de pièces"
-                value={pieces ?? ""}
-                onChange={(e) =>
-                  setPieces(e.target.value ? Number(e.target.value) : undefined)
-                }
-                className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm"
-              />
-            </motion.div>
-
-            {/* Chambres */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Chambres
-              </label>
-              <Input
-                type="number"
-                min="0"
-                placeholder="Nombre de chambres"
-                value={chambres ?? ""}
-                onChange={(e) =>
-                  setChambres(e.target.value ? Number(e.target.value) : undefined)
-                }
-                className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm"
-              />
-            </motion.div>
-
-            {/* Extérieur */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Extérieur
-              </label>
-              <Select
-                onValueChange={(v) => setExterieur(v || undefined)}
-                value={exterieur}
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-4"
               >
-                <SelectTrigger 
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] transition-colors rounded-xl focus:ring-2 focus:ring-[#556B2F]/20"
-                >
-                  <SelectValue placeholder="Choisir..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="piscine">Piscine</SelectItem>
-                  <SelectItem value="jardin">Jardin</SelectItem>
-                  <SelectItem value="terrasse">Terrasse</SelectItem>
-                  <SelectItem value="balcon">Balcon</SelectItem>
-                  <SelectItem value="garage">Garage</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
+                {/* Type de bien */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Type de bien
+                  </label>
+                  <Select
+                    onValueChange={(v) => setTypeBienLocation(v || undefined)}
+                    value={typeBienLocation}
+                  >
+                    <SelectTrigger 
+                      className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] transition-all rounded-xl"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Home className="w-4 h-4 text-[#8B4513]" />
+                        <SelectValue placeholder="Choisir..." />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rentType === "saisonniere" ? (
+                        <>
+                          <SelectItem value="appartement">Appartement</SelectItem>
+                          <SelectItem value="maison">Maison / Villa</SelectItem>
+                          <SelectItem value="villa_d_exception">Villa d'exception</SelectItem>
+                          <SelectItem value="location_journee">Location à la journée</SelectItem>
+                          <SelectItem value="hotel">Hotel</SelectItem>
+                          <SelectItem value="chambre_d_hote">Chambre d'hote</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="appartement">Appartement meublé</SelectItem>
+                          <SelectItem value="villa">Appartement non meublé</SelectItem>
+                          <SelectItem value="studio">Villa meublée</SelectItem>
+                          <SelectItem value="studio">Villa non meublée</SelectItem>
+                          <SelectItem value="parking">Local commercial</SelectItem>
+                          <SelectItem value="parking">Local professionnel</SelectItem>
+                          <SelectItem value="terrain">Terrain</SelectItem>
+                          <SelectItem value="parking">Parking</SelectItem>
+                          <SelectItem value="cellier">Cellier</SelectItem>
+                          <SelectItem value="cave">Cave</SelectItem>
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </motion.div>
 
-            {/* Bouton de recherche */}
-            <motion.div variants={fadeInUp} className="flex items-end">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleFilterChange}
-                className="w-full h-10 bg-[#556B2F] text-white font-semibold rounded-xl hover:bg-[#6B8E23] hover:shadow-lg transition-all shadow-md"
+                {/* Localisation */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Localisation
+                  </label>
+                  <div className="relative group">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#556B2F] transition-colors" />
+                    <Input
+                      value={localisation}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      onClick={() => setIsLocationModalOpen(true)}
+                      placeholder="Ville, code postal..."
+                      className="pl-10 h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] cursor-pointer transition-all rounded-xl"
+                      readOnly
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Prix max */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    {rentType === "saisonniere" ? "Prix max/semaine" : "Prix max/mois"}
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      placeholder="Montant"
+                      value={priceMax ?? ""}
+                      onChange={(e) =>
+                        setPriceMax(e.target.value ? Number(e.target.value) : undefined)
+                      }
+                      className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all pr-12"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">
+                      {rentType === "saisonniere" ? "€/sem" : "€"}
+                    </span>
+                  </div>
+                </motion.div>
+
+                {/* Surface */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Surface (m²)
+                  </label>
+                  <div className="flex gap-3">
+                    <Input
+                      placeholder="Min"
+                      value={surfaceMin ?? ""}
+                      onChange={(e) =>
+                        setSurfaceMin(e.target.value ? Number(e.target.value) : undefined)
+                      }
+                      className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all"
+                    />
+                    <Input
+                      placeholder="Max"
+                      value={surfaceMax ?? ""}
+                      onChange={(e) =>
+                        setSurfaceMax(e.target.value ? Number(e.target.value) : undefined)
+                      }
+                      className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all"
+                    />
+                  </div>
+                </motion.div>
+              </motion.div>
+
+              {/* Filtres supplémentaires */}
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5"
               >
-                Rechercher
-              </motion.button>
+                {/* Pièces */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Pièces
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Nombre de pièces"
+                    value={pieces ?? ""}
+                    onChange={(e) =>
+                      setPieces(e.target.value ? Number(e.target.value) : undefined)
+                    }
+                    className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all"
+                  />
+                </motion.div>
+
+                {/* Chambres */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Chambres
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Nombre de chambres"
+                    value={chambres ?? ""}
+                    onChange={(e) =>
+                      setChambres(e.target.value ? Number(e.target.value) : undefined)
+                    }
+                    className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all"
+                  />
+                </motion.div>
+
+                {/* Extérieur */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Extérieur
+                  </label>
+                  <Select
+                    onValueChange={(v) => setExterieur(v || undefined)}
+                    value={exterieur}
+                  >
+                    <SelectTrigger 
+                      className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] transition-all rounded-xl"
+                    >
+                      <SelectValue placeholder="Choisir..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="piscine">Piscine</SelectItem>
+                      <SelectItem value="jardin">Jardin</SelectItem>
+                      <SelectItem value="terrasse">Terrasse</SelectItem>
+                      <SelectItem value="balcon">Balcon</SelectItem>
+                      <SelectItem value="garage">Garage</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
+
+                {/* Bouton de recherche */}
+                <motion.div variants={scaleIn} className="flex items-end">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleFilterChange}
+                    className="w-full h-11 bg-[#556B2F] text-white font-semibold rounded-xl hover:bg-[#6B8E23] hover:shadow-lg transition-all shadow-md flex items-center justify-center gap-2"
+                  >
+                    <Search className="w-4 h-4" />
+                    Rechercher
+                  </motion.button>
+                </motion.div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Résultats */}
         <div className="mt-6">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
               {[1, 2, 3, 4].map((i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
+                  variants={fadeInUp}
                   className="animate-pulse"
                 >
                   <div className="bg-[#FFFFFF0] h-64 rounded-2xl mb-4" />
@@ -919,47 +1060,57 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   <div className="bg-[#D3D3D3] h-4 rounded w-1/2" />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : displayed.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-center py-12"
+              className="text-center py-16"
             >
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                className="text-[#8B4513] text-6xl mb-4"
+                initial={{ rotate: -10, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center justify-center w-24 h-24 bg-[#6B8E23]/10 rounded-full mb-6"
               >
-                {isSeasonal ? "🏝️" : "🏠"}
+                <Home className="w-12 h-12 text-[#8B4513]" />
               </motion.div>
-              <h3 className="text-xl font-semibold text-[#8B4513] mb-2">
+              <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-2xl font-semibold text-[#8B4513] mb-3"
+              >
                 Aucune location trouvée
-              </h3>
-              <p className="text-gray-600">
-                Essayez de modifier vos critères de recherche
-              </p>
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-gray-600 max-w-md mx-auto"
+              >
+                Essayez de modifier vos critères de recherche ou contactez-nous pour une recherche personnalisée.
+              </motion.p>
             </motion.div>
           ) : (
             <motion.div
-              variants={containerVariants}
+              variants={staggerContainer}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
               {displayed.map((property: any, index: number) => {
                 const images = getPropertyImages(property);
                 const totalImages = images.length;
                 const idx = currentImageIndexes[property.id] || 0;
                 const featuresArr = normalizeFeatures(property.features);
-                const priceLabel = formatPrice(property.price || 0);
+                const priceLabel = formatPrice(property.price || 0, rentType);
 
                 return (
                   <motion.div
                     key={property.id}
-                    variants={cardVariants}
+                    variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
                     whileHover="hover"
@@ -967,149 +1118,167 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   >
                     <Card
                       data-property-id={property.id}
-                      className="overflow-hidden border border-[#D3D3D3] hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
+                      className="overflow-hidden border border-[#D3D3D3] hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer h-full flex flex-col"
                       onClick={() => handlePropertyClick(property)}
                     >
-                      <div className="relative">
-                        {/* Image avec overlay */}
-                        <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
-                          <motion.img
+                      <motion.div
+                        className="relative flex-1"
+                        variants={cardHover}
+                      >
+                        {/* Image */}
+                        <motion.div 
+                          className="relative h-56 overflow-hidden"
+                          variants={imageHover}
+                        >
+                          <img
                             src={images[idx % totalImages]}
                             alt={property.title}
                             className="w-full h-full object-cover"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.3 }}
                           />
 
+                          {/* Badges overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="absolute top-3 left-3 bg-[#6B8E23] rounded-full px-3 py-1 text-xs font-semibold text-white shadow-md"
+                            className="absolute top-3 left-3"
                           >
-                            {property.type}
+                            <span className="bg-[#6B8E23] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                              {property.type}
+                            </span>
                           </motion.div>
+                          
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="absolute bottom-3 right-3 bg-[#556B2F] rounded-lg px-3 py-2 text-xs font-semibold text-white shadow-md"
-                          >
-                            {priceLabel}
-                          </motion.div>
-
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
                             className="absolute top-3 right-3"
                           >
-                            <div className="px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#8B4513] shadow-md">
-                              {isSeasonal ? "SAISONNIÈRE" : "À LOUER"}
-                            </div>
+                            <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                              {rentType === "saisonniere" ? "SAISONNIÈRE" : "À LOUER"}
+                            </span>
                           </motion.div>
 
+                          {/* Navigation d'images */}
                           {totalImages > 1 && (
                             <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                              <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                whileHover={{ scale: 1.1 }}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center"
                                 onClick={(e) => prevImage(property.id, totalImages, e)}
                               >
                                 <ChevronLeft className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                              </motion.button>
+                              <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                whileHover={{ scale: 1.1 }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center"
                                 onClick={(e) => nextImage(property.id, totalImages, e)}
                               >
                                 <ChevronRight className="h-4 w-4" />
-                              </Button>
-
-                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+                              </motion.button>
+                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs">
                                 {idx + 1}/{totalImages}
                               </div>
                             </>
                           )}
-                        </div>
+
+                          {/* Prix */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="absolute bottom-3 right-3"
+                          >
+                            <span className="bg-[#556B2F] text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg">
+                              {priceLabel}
+                            </span>
+                          </motion.div>
+                        </motion.div>
 
                         {/* Contenu */}
-                        <div className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-[#8B4513] text-sm flex-1 line-clamp-2 leading-tight">
+                        <div className="p-5 flex-1 flex flex-col">
+                          <div className="mb-3">
+                            <h3 className="font-bold text-[#8B4513] text-base mb-2 line-clamp-2 leading-snug">
                               {property.title}
                             </h3>
+                            <div className="flex items-center text-sm text-gray-600">
+                              <MapPin className="h-3.5 w-3.5 text-[#556B2F] mr-1.5" />
+                              <span>{property.city}</span>
+                            </div>
                           </div>
 
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs text-gray-600 flex items-center gap-1">
-                              <MapPin className="h-3 w-3 text-[#556B2F]" />
-                              {property.city}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                          {/* Caractéristiques */}
+                          <div className="flex items-center gap-4 text-sm text-gray-700 mb-4">
                             {property.surface && (
-                              <div className="flex items-center gap-1">
-                                <Ruler className="h-3 w-3" />
-                                <span>{property.surface} m²</span>
+                              <div className="flex items-center gap-1.5">
+                                <Ruler className="h-3.5 w-3.5" />
+                                <span className="font-medium">{property.surface} m²</span>
                               </div>
                             )}
                             {(property.bedrooms || property.rooms) && (
-                              <div className="flex items-center gap-1">
-                                <Bed className="h-3 w-3" />
-                                <span>{property.bedrooms || property.rooms} ch.</span>
+                              <div className="flex items-center gap-1.5">
+                                <Bed className="h-3.5 w-3.5" />
+                                <span className="font-medium">{property.bedrooms || property.rooms} ch.</span>
                               </div>
                             )}
                             {property.bathrooms && (
-                              <div className="flex items-center gap-1">
-                                <Bath className="h-3 w-3" />
-                                <span>{property.bathrooms} sdb</span>
+                              <div className="flex items-center gap-1.5">
+                                <Bath className="h-3.5 w-3.5" />
+                                <span className="font-medium">{property.bathrooms} sdb</span>
                               </div>
                             )}
                           </div>
 
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {featuresArr.slice(0, 2).map((feature, index) => (
-                              <motion.span
-                                key={index}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="inline-flex items-center gap-1 bg-[#6B8E23]/10 text-[#556B2F] px-2 py-1 rounded-full text-xs"
-                              >
-                                <div className="w-1 h-1 bg-[#556B2F] rounded-full" />
-                                {feature}
-                              </motion.span>
-                            ))}
-                          </div>
+                          {/* Features */}
+                          {featuresArr.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-5">
+                              {featuresArr.slice(0, 3).map((feature, index) => (
+                                <motion.span
+                                  key={index}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: index * 0.1 }}
+                                  className="inline-flex items-center gap-1.5 bg-[#6B8E23]/10 text-[#556B2F] px-3 py-1.5 rounded-full text-xs font-medium"
+                                >
+                                  <div className="w-1.5 h-1.5 bg-[#556B2F] rounded-full" />
+                                  {feature}
+                                </motion.span>
+                              ))}
+                            </div>
+                          )}
 
                           {/* Boutons d'action */}
-                          <div className="flex gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="flex-1 bg-[#556B2F] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#6B8E23] hover:shadow-lg transition-all shadow-md disabled:opacity-60"
-                              onClick={(e) => handleDemanderVisite(property, e)}
-                              disabled={!!sentRequests?.[property?.id]}
-                            >
-                              {sentRequests?.[property?.id]
-                                ? "Demande envoyée"
-                                : "Demander visite"}
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="border-2 border-[#D3D3D3] p-2 rounded-md hover:border-[#556B2F] hover:bg-[#6B8E23]/10 transition-colors shadow-sm"
-                              onClick={() => handlePropertyClick(property)}
-                            >
-                              <Eye className="w-4 h-4 text-[#8B4513]" />
-                            </motion.button>
+                          <div className="mt-auto pt-4 border-t border-[#D3D3D3]/50">
+                            <div className="flex gap-3">
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex-1 bg-[#556B2F] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6B8E23] transition-all shadow-md disabled:opacity-60 text-sm"
+                                onClick={(e) => handleDemanderVisite(property, e)}
+                                disabled={!!sentRequests?.[property?.id]}
+                              >
+                                {sentRequests?.[property?.id]
+                                  ? "Demande envoyée"
+                                  : "Demander visite"}
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="border border-[#D3D3D3] p-3 rounded-lg hover:border-[#556B2F] hover:bg-[#6B8E23]/5 transition-all shadow-sm"
+                                onClick={() => handlePropertyClick(property)}
+                              >
+                                <Eye className="w-4 h-4 text-[#8B4513]" />
+                              </motion.button>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     </Card>
                   </motion.div>
                 );

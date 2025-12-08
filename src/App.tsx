@@ -459,7 +459,8 @@ const App = () => {
                     element={<GestionImmobilier />}
                   />
                   <Route path="/recherche" element={<Recherche />} />
-                  <Route path="/immobilier/:id" element={<PropertyPage />} />
+                  <Route path="/achat/:id" element={<PropertyPage />} />
+                  <Route path="/location/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
                   {/* <Route path="/produits-generaux" element={<ProduitsGeneraux />} /> */}
