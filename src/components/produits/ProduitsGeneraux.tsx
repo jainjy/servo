@@ -3,13 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  Package,
-  ShoppingCart,
-  Star,
-  Tag
-} from "lucide-react";
+import { ArrowLeft, Package, ShoppingCart, Star, Tag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "../contexts/CartContext";
 import api from "@/lib/api";
@@ -19,7 +13,6 @@ const ProduitsGeneraux = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart, cartItems, getCartItemsCount } = useCart();
-
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addingProductId, setAddingProductId] = useState(null);
@@ -31,15 +24,12 @@ const ProduitsGeneraux = () => {
   const fetchGeneralProducts = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/products/all', {
-        params: {
-          productType: 'general',
-          status: 'active'
-        }
+      const response = await api.get("/products/all", {
+        params: { productType: "general", status: "active" },
       });
       setProducts(response.data.products);
     } catch (error) {
-      console.error('Erreur lors du chargement des produits généraux:', error);
+      console.error("Erreur chargement produits généraux:", error);
       setProducts([]);
       toast.error("Erreur lors du chargement des produits");
     } finally {
@@ -49,31 +39,15 @@ const ProduitsGeneraux = () => {
 
   const handleAddToCart = async (product) => {
     if (!user) {
-      toast.warning(
-        "Veuillez vous connecter pour ajouter des articles au panier"
-      );
+      toast.warning("Veuillez vous connecter pour ajouter au panier");
       return;
     }
-
     try {
       setAddingProductId(product.id);
-
-      // Ajouter le produit au panier
       addToCart(product);
-
-      // Petit délai pour laisser le temps à l'état de se mettre à jour
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Trouver l'article dans le panier pour afficher la bonne quantité
-      const cartItem = cartItems.find(item => item.id === product.id);
-      const quantity = cartItem ? cartItem.quantity : 1;
-      const totalItems = getCartItemsCount();
-
-      // Afficher une confirmation détaillée
-      toast.info(`${product.name} ajouté au panier !`);
-
+      await new Promise((r) => setTimeout(r, 100));
+      toast.success(`${product.name} ajouté au panier !`);
     } catch (error) {
-      console.error('Error adding to cart:', error);
       toast.error("Erreur lors de l'ajout au panier");
     } finally {
       setAddingProductId(null);
@@ -83,142 +57,134 @@ const ProduitsGeneraux = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center">
-          <img src="/loading.gif" className="w-32 h-32" alt="" />
-          <p className=" text-gray-600">Chargement des produits généraux...</p>
+        <div className="flex flex-col items-center">
+          <img src="/loading.gif" className="w-32 h-32" alt="chargement" />
+          <p className="text-gray-600 mt-4">
+            Chargement des produits généraux...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="">
-        {/* En-tête de la page */}
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="mb-8">
-          <div className="bg-white rounded-3xl p-6 border-b border-gray-100">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center flex-col md:flex-row  gap-3">
-                <div className="p-2 rounded-xl hidden md:block bg-[#0052FF]/10">
-                  <Tag className="h-6 w-6 text-slate-900" />
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-[#556B2F]/10">
+                  <Tag className="h-7 w-7 text-[#556B2F]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-[#0A0A0A]">
+                  <h2 className="text-3xl font-bold text-[#0A0A0A]">
                     Produits Généraux
                   </h2>
                   <p className="text-[#5A6470]">
-                    Découvrez tous nos produits généraux - une sélection variée pour tous vos besoins
+                    Une sélection variée pour tous vos besoins
                   </p>
                 </div>
-                 {/* Badge de comptage */}
-                 <Badge variant="secondary" className="px-3 py-1 ml-0 md:ml-96">
-                {products.length} produit{products.length > 1 ? 's' : ''}
-              </Badge>
               </div>
+              <Badge variant="secondary" className="text-lg px-4 py-2">
+                {products.length} produit{products.length > 1 ? "s" : ""}
+              </Badge>
             </div>
           </div>
         </div>
 
-        {/* Produits généraux */}
-        <div className="bg-white rounded-3xl  ">
-          {products && products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              {products.map((product) => (
-                <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
-                  {/* Image du produit */}
-                  {product.images && product.images.length > 0 ? (
+        {/* Grid produits */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.length > 0 ? (
+            products.map((product) => (
+              <Card
+                key={product.id}
+                className="overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200"
+              >
+                {/* Image */}
+                <div className="relative">
+                  {product.images?.[0] ? (
                     <div
-                      className="w-full h-48 bg-cover bg-center rounded-lg mb-4"
+                      className="h-56 bg-cover bg-center"
                       style={{ backgroundImage: `url(${product.images[0]})` }}
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-4 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-primary/40" />
+                    <div className="h-56 bg-gradient-to-br from-[#556B2F]/10 to-[#6B8E23]/10 flex items-center justify-center">
+                      <Package className="h-16 w-16 text-[#556B2F]/40" />
                     </div>
                   )}
+                  {product.featured && (
+                    <Badge className="absolute top-3 right-3 bg-yellow-500 text-white">
+                      <Star className="h-3 w-3 mr-1 fill-current" /> Populaire
+                    </Badge>
+                  )}
+                </div>
 
-                  {/* En-tête du produit avec badge */}
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-[#0052FF] transition-colors flex-1 mr-2">
-                      {product.name}
-                    </h3>
-                    {product.featured && (
-                      <Badge variant="default" className="bg-yellow-100 text-yellow-800 border-0">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        Populaire
-                      </Badge>
-                    )}
-                  </div>
-
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                <div className="p-5 space-y-4">
+                  <h3 className="font-bold text-lg line-clamp-2 group-hover:text-[#556B2F] transition-colors">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 line-clamp-2">
                     {product.description}
                   </p>
 
-                  {/* Prix et stock */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex flex-col">
-                      <span className="text-2xl font-bold text-slate-900">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <span className="text-2xl font-bold text-[#556B2F]">
                         €{product.price}
                       </span>
-                      {product.comparePrice && product.comparePrice > product.price && (
-                        <span className="text-sm text-gray-500 line-through">
+                      {product.comparePrice > product.price && (
+                        <span className="block text-sm text-gray-500 line-through">
                           €{product.comparePrice}
                         </span>
                       )}
                     </div>
-                    <Badge variant={product.quantity > 0 ? "default" : "destructive"}>
+                    <Badge
+                      variant={product.quantity > 0 ? "default" : "destructive"}
+                      className="text-xs"
+                    >
                       {product.quantity > 0 ? "En stock" : "Rupture"}
                     </Badge>
                   </div>
 
-                  {/* Informations vendeur */}
                   {product.vendor?.companyName && (
-                    <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
                       <ShoppingCart className="h-4 w-4" />
-                      <span className="line-clamp-1">{product.vendor.companyName}</span>
+                      <span>{product.vendor.companyName}</span>
                     </div>
                   )}
 
-                  {/* Catégorie */}
-                  {product.category && (
-                    <div className="mb-4">
-                      <Badge variant="outline" className="text-xs">
-                        {product.category}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Bouton Ajouter au panier */}
                   <Button
-                    className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 group-hover:scale-105 shadow-md"
+                    className="w-full bg-[#556B2F] hover:bg-[#6B8E23] text-white font-medium"
                     onClick={() => handleAddToCart(product)}
-                    disabled={product.quantity === 0 || addingProductId === product.id}
+                    disabled={
+                      product.quantity === 0 || addingProductId === product.id
+                    }
                   >
                     {addingProductId === product.id ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Ajout...
-                      </div>
+                      <>Ajout en cours...</>
                     ) : (
                       <>
                         <ShoppingCart className="h-4 w-4 mr-2" />
-                        {product.quantity > 0 ? "Ajouter au panier" : "Rupture de stock"}
+                        {product.quantity > 0
+                          ? "Ajouter au panier"
+                          : "Rupture de stock"}
                       </>
                     )}
                   </Button>
-                </Card>
-              ))}
-            </div>
+                </div>
+              </Card>
+            ))
           ) : (
-            <div className="text-center py-12">
-              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit général trouvé</h3>
-              <p className="text-muted-foreground">
-                Aucun produit de type général disponible pour le moment.
-              </p>
+            <div className="col-span-full text-center py-20">
+              <Package className="h-20 w-20 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold text-gray-700">
+                Aucun produit général trouvé
+              </h3>
               <Button
-                onClick={() => navigate('/produits')}
-                className="mt-4 bg-[#0052FF] hover:bg-[#003EE6]"
+                onClick={() => navigate("/produits")}
+                className="mt-6 bg-[#556B2F] hover:bg-[#6B8E23]"
               >
                 Voir toutes les catégories
               </Button>

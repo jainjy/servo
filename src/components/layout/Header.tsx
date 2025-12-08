@@ -1070,7 +1070,7 @@ const Header = () => {
         {
           title: "Produits et accessoires",
           description: "Tout pour votre domicile",
-          href: "/batiments#materiaux-viabilisations",
+          href: "/domicile#materiaux",
           image:
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },
@@ -1084,7 +1084,7 @@ const Header = () => {
         {
           title: "Manger à la Réunion",
           description: "Restaurants & courses & bien être",
-          href: "/#",
+          href: "/alimentation",
           image:
             "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
         },

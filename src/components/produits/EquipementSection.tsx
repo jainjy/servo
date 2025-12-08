@@ -3,19 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Home, Search, Filter, X } from "lucide-react";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { equipementService } from "@/services/equipement.service";
 import { EquipementCategory } from "@/types/produits";
-import { Flame, Zap, Sofa, Palette, Sprout, Wrench, Lock, Lamp, Package } from "lucide-react";
-
+import {
+  Flame,
+  Zap,
+  Sofa,
+  Palette,
+  Sprout,
+  Wrench,
+  Lock,
+  Lamp,
+  Package,
+} from "lucide-react";
 interface EquipementSectionProps {
   searchQuery?: string;
   onCategoryClick?: (categoryName: string, section: string) => void;
 }
-
-
 const iconComponents = {
   Flame,
   Zap,
@@ -27,31 +33,30 @@ const iconComponents = {
   Lamp,
   Package,
 };
-
-const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionProps) => {
+const EquipementSection = ({
+  searchQuery,
+  onCategoryClick,
+}: EquipementSectionProps) => {
   const [categories, setCategories] = useState<EquipementCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "count">("name");
   const navigate = useNavigate();
-
   useEffect(() => {
     const loadCategories = async () => {
       setIsLoading(true);
       try {
         const data = await equipementService.getCategories(localSearch);
-        setCategories(data.filter(cat => cat.productCount > 0));
+        setCategories(data.filter((cat) => cat.productCount > 0));
       } catch (error) {
-        console.error('Erreur lors du chargement des catégories:', error);
+        console.error("Erreur lors du chargement des catégories:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     loadCategories();
   }, [localSearch]);
-
   // Tri des catégories
   const sortedCategories = [...categories].sort((a, b) => {
     if (sortBy === "name") {
@@ -60,7 +65,6 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
       return b.productCount - a.productCount;
     }
   });
-
   const handleCategoryClick = (category: EquipementCategory) => {
     if (onCategoryClick) {
       onCategoryClick(category.name, "équipement");
@@ -70,38 +74,38 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
         name: category.name,
         description: category.description,
         image: category.image,
-        section: "équipement"
-      }
+        section: "équipement",
+      },
     });
   };
-
   const clearSearch = () => {
     setLocalSearch("");
   };
-
   if (categories.length === 0 && !isLoading && !localSearch) return null;
-
   return (
-    <div id="equipements-livraison" className="bg-white/70 p-5 pb-14 my-5 rounded-lg">
+    <div
+      id="equipements-livraison"
+      className="bg-[#FFFFFF]/70 p-5 pb-14 my-5 rounded-lg"
+    >
       {/* En-tête avec recherche */}
       <div className="flex flex-col lg:flex-row gap-6 mb-8">
         <div
           className="flex items-center gap-4 animate-slide-from-left flex-1"
           style={{ animationDelay: "0.2s" }}
         >
-          <div className="p-3 rounded-lg bg-slate-900 shadow-lg transform transition-transform duration-300 hover:scale-110">
+          <div className="p-3 rounded-xl bg-[#556B2F] shadow-lg transform transition-transform duration-300 hover:scale-110">
             <Home className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl lg:text-2xl font-bold text-slate-900">
+            <h2 className="text-xl lg:text-2xl font-bold text-[#556B2F]">
               Équipement Maison
             </h2>
-            <p className="text-xs lg:text-sm text-[#5A6470] mt-1">
-              Tout le matériel et équipement pour aménager et équiper votre intérieur
+            <p className="text-xs lg:text-sm text-[#8B4513] mt-1">
+              Tout le matériel et équipement pour aménager et équiper votre
+              intérieur
             </p>
           </div>
         </div>
-
         {/* Barre de recherche et filtres */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           <div className="relative flex-1 min-w-[250px]">
@@ -109,41 +113,45 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
               placeholder="Rechercher un équipement..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="pl-10 pr-10 rounded-xl border-gray-300 focus:border-[#0052FF]"
+              className="pl-10 pr-10 rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#8B4513]" />
             {localSearch && (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#8B4513] hover:text-[#556B2F]"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
-
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-[#D3D3D3]"
           >
             <Filter className="h-4 w-4" />
             Trier
           </Button>
         </div>
       </div>
-
       {/* Filtres avancés */}
       {showFilters && (
-        <div className="bg-white/50 p-4 rounded-lg mb-6 border border-gray-200 animate-fade-in">
+        <div className="bg-[#FFFFFF]/50 p-4 rounded-lg mb-6 border border-[#D3D3D3] animate-fade-in">
           <div className="flex flex-wrap gap-4 items-center">
-            <span className="text-sm font-medium text-gray-700">Trier par :</span>
+            <span className="text-sm font-medium text-[#8B4513]">
+              Trier par :
+            </span>
             <div className="flex gap-2">
               <Button
                 variant={sortBy === "name" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSortBy("name")}
-                className={sortBy === "name" ? "bg-[#0052FF] text-white" : ""}
+                className={
+                  sortBy === "name"
+                    ? "bg-[#556B2F] text-white"
+                    : "border-[#D3D3D3]"
+                }
               >
                 Nom A-Z
               </Button>
@@ -151,7 +159,11 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
                 variant={sortBy === "count" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSortBy("count")}
-                className={sortBy === "count" ? "bg-[#0052FF] text-white" : ""}
+                className={
+                  sortBy === "count"
+                    ? "bg-[#556B2F] text-white"
+                    : "border-[#D3D3D3]"
+                }
               >
                 Plus de produits
               </Button>
@@ -159,56 +171,60 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
           </div>
         </div>
       )}
-
       {/* Résultats de recherche */}
       {localSearch && (
         <div className="mb-6 animate-fade-in">
-          <p className="text-gray-600">
+          <p className="text-[#8B4513]">
             {sortedCategories.length > 0
               ? `${sortedCategories.length} résultat(s) pour "${localSearch}"`
-              : `Aucun résultat pour "${localSearch}"`
-            }
+              : `Aucun résultat pour "${localSearch}"`}
           </p>
         </div>
       )}
-
       {/* Loading */}
       {isLoading ? (
         <div className=" py-12 flex flex-col justify-center items-center">
-          <img src="/loading.gif" alt="" className='w-24 h-24' />
-          <p className="text-gray-500 mt-4">Chargement des équipements...</p>
+          <img src="/loading.gif" alt="" className="w-24 h-24" />
+          <p className="text-[#8B4513] mt-4">Chargement des équipements...</p>
         </div>
       ) : (
         <>
           {/* Grille des catégories */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
             {sortedCategories.map((category, index) => {
-              const IconComponent = iconComponents[category.iconName as keyof typeof iconComponents] || Package;
-
+              const IconComponent =
+                iconComponents[
+                  category.iconName as keyof typeof iconComponents
+                ] || Package;
               return (
                 <Card
                   key={category.name}
-                  className="group p-4 flex flex-col border-0 bg-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border-white/20 text-center animate-slide-from-left-card"
+                  className="group p-4 flex flex-col border-0 bg-[#FFFFFF]/80 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border-[#D3D3D3]/20 text-center animate-slide-from-left-card"
                   style={{
                     animationDelay: `${0.3 + index * 0.1}s`,
                   }}
                 >
                   <div className="relative flex mx-auto overflow-hidden bg-black/15 w-full h-32 rounded-md mb-4">
-                    <img src={category.image} alt="" className="w-full h-full object-cover" />
-                    <div className="flex justify-end absolute bg-blue-700 rounded-full text-white bottom-2 right-2">
+                    <img
+                      src={category.image}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="flex justify-end absolute bg-[#556B2F] rounded-full text-white bottom-2 right-2">
                       <Badge>
-                        {category.productCount} produit{category.productCount !== 1 ? 's' : ''}
+                        {category.productCount} produit
+                        {category.productCount !== 1 ? "s" : ""}
                       </Badge>
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-[#0A0A0A] group-hover:text-[#0052FF] transition-colors duration-300">
+                  <h3 className="text-xl font-semibold mb-2 text-[#556B2F] group-hover:text-[#6B8E23] transition-colors duration-300">
                     {category.name}
                   </h3>
-                  <p className="text-[#5A6470] text-xs mb-2 leading-relaxed">
+                  <p className="text-[#8B4513] text-xs mb-2 leading-relaxed">
                     {category.description}
                   </p>
                   <Button
-                    className="w-full border bg-transparent rounded-full hover:bg-slate-900 hover:text-white text-slate-900 transition-all duration-300 group-hover:shadow-lg"
+                    className="w-full border bg-transparent rounded-full hover:bg-[#6B8E23] hover:text-white text-[#556B2F] transition-all duration-300"
                     onClick={() => handleCategoryClick(category)}
                   >
                     Explorer
@@ -218,15 +234,14 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
               );
             })}
           </div>
-
           {/* Message aucun résultat */}
           {sortedCategories.length === 0 && !isLoading && (
             <div className="text-center py-12 animate-fade-in">
-              <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">
+              <Package className="h-16 w-16 text-[#D3D3D3] mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-[#8B4513] mb-2">
                 Aucun équipement trouvé
               </h3>
-              <p className="text-gray-500">
+              <p className="text-[#8B4513]">
                 Essayez de modifier vos critères de recherche
               </p>
             </div>
@@ -236,5 +251,4 @@ const EquipementSection = ({ searchQuery, onCategoryClick }: EquipementSectionPr
     </div>
   );
 };
-
 export default EquipementSection;
