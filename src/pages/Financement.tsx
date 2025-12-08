@@ -686,6 +686,7 @@ export default function Financement() {
           type={activeModal}
           data={modalData}
           onClose={closeModal}
+          onOpenModal={openModal}
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
@@ -698,10 +699,11 @@ interface UniversalModalProps {
   type: string;
   data: ModalData;
   onClose: () => void;
+  onOpenModal: (modalType: string, data?: Partial<ModalData>) => void;
   onSimulationSubmit: (data: any) => void;
 }
 
-function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalModalProps) {
+function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }: UniversalModalProps) {
   const [formData, setFormData] = useState<FormData>({
     nom: "",
     email: "",
@@ -721,6 +723,14 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
   const { isAuthenticated } = useAuth();
   const [estimation, setEstimation] = useState<SimulationResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Fonction utilitaire pour vérifier si c'est une URL d'image
+  const isImageUrl = (icon: any): boolean => {
+    if (typeof icon === 'string') {
+      return icon.startsWith('/') || icon.startsWith('https://');
+    }
+    return false;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -1267,7 +1277,7 @@ function UniversalModal({ type, data, onClose, onSimulationSubmit }: UniversalMo
           {type === 'service' && (
             <div className="flex gap-4 mt-8">
               <Button
-                onClick={() => openModal('contact')}
+                onClick={() => onOpenModal('contact')}
                 className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
               >
                 <Phone className="h-5 w-5 mr-3" />
