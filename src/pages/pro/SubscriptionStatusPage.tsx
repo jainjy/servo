@@ -906,13 +906,6 @@ const SubscriptionStatusPage = () => {
           </>
         )}
       </div>
-
-      {/* Modal d'abonnement expiré */}
-      <SubscriptionExpiredModal
-        isOpen={showExpiredModal}
-        onClose={() => setShowExpiredModal(false)}
-        onRenew={handleRenewFromModal}
-      />
     </div>
   );
 };

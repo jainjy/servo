@@ -178,6 +178,7 @@ import DigitalisationProfessionnelDetail from "./pages/DigitalisationProfessionn
 import DigitalisationServiceDetail from "./pages/DigitalisationServiceDetail";
 import ContactMessagesPage from "./pages/pro/ContactMessagesPage";
 import DemandeDroitFamille from "./pages/admin/DemandeDroitFamille";
+import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 
 const queryClient = new QueryClient();
 
@@ -576,7 +577,9 @@ const App = () => {
                     path="/pro"
                     element={
                       <AccountStatusGuard>
-                        <ProLayout />
+                        <SubscriptionStatusGuard>
+                          <ProLayout />
+                        </SubscriptionStatusGuard>
                       </AccountStatusGuard>
                     }
                   >
@@ -695,7 +698,10 @@ const App = () => {
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
-                    <Route path="demandeDroitFamille" element={<DemandeDroitFamille />} />
+                    <Route
+                      path="demandeDroitFamille"
+                      element={<DemandeDroitFamille />}
+                    />
                     <Route
                       path="financement-services"
                       element={<FinancementServicesAdmin />}

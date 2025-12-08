@@ -36,24 +36,24 @@ const navigation = [
   //   href: "/pro/Art-commerce-services",
   //   icon: Wrench,
   // },
-  // { name: "Harmonie", href: "/pro/harmonie", icon: Leaf },
+  { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
   { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
   { name: "Mon abonnements", href: "/pro/subscription", icon: WalletCards },
   // { name: "Mes Clients", href: "/pro/clients", icon: Users },
   { name: "Devis & Factures", href: "/pro/billing", icon: FileText },
-  // { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
+  { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
   { name: "Mes Produits", href: "/pro/products", icon: ShoppingBag },
-  // {
-  //   name: "Reservations tourisme",
-  //   href: "/pro/reservations",
-  //   icon: ShoppingBag,
-  // },
-  // {
-  //   name: "Reservations bien-être",
-  //   href: "/pro/reservationbien-etre",
-  //   icon: ShoppingBag,
-  // },
+  {
+    name: "Reservations tourisme",
+    href: "/pro/reservations",
+    icon: ShoppingBag,
+  },
+  {
+    name: "Reservations bien-être",
+    href: "/pro/reservationbien-etre",
+    icon: ShoppingBag,
+  },
   {
     name: "Mes Commandes",
     href: "/pro/orders",
@@ -85,12 +85,12 @@ const navigation = [
     href: "/pro/demandes-devis",
     icon: FileText,
   },
-  // {
-  //   name: "Cours à Domicile",
-  //   href: "/pro/cours-domicile",
-  //   icon: BookOpen,
-  // },
-  // { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
+  {
+    name: "Cours à Domicile",
+    href: "/pro/cours-domicile",
+    icon: BookOpen,
+  },
+  { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
   // 🔥 NOUVEL ITEM : Gestion des Médias
   {
     name: "Gestion des Médias",

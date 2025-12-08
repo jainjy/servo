@@ -1,9 +1,9 @@
-//pages/pro/layout.tsx
-import type React from "react"
-import { ProRoute } from "@/components/protected-route"
-import { ProSidebar } from "@/components/pro/pro-sidebar"
-import { AuthHeader } from "@/components/layout/AuthHeader"
-import { Outlet } from "react-router-dom"
+// pages/pro/layout.tsx
+import type React from "react";
+import { ProRoute } from "@/components/protected-route";
+import { ProSidebar } from "@/components/pro/pro-sidebar";
+import { AuthHeader } from "@/components/layout/AuthHeader";
+import { Outlet } from "react-router-dom";
 
 export default function ProLayout() {
   return (
@@ -18,5 +18,5 @@ export default function ProLayout() {
         </div>
       </div>
     </ProRoute>
-  )
+  );
 }
