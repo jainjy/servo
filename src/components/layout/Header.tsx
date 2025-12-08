@@ -439,82 +439,112 @@ const Header = () => {
     {
       title: "IMMOBILIER",
       items: [
+        // {
+        //   title: "Annonces immobilières",
+        //   description: "Trouvez votre prochaine maison",
+        //   href: "/immobilier",
+        //   image:
+        //     "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
+        // },
         {
-          title: "Annonces immobilières",
-          description: "Trouvez votre prochaine maison",
+          title: "Achat",
+          description: "Trouvez votre prochaine article",
           href: "/immobilier",
           image:
             "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
         {
-          title: "PSLA",
-          description: "Profitez du Prêt Social Location Accession",
-          href: "/PSLA",
+          title: "Location",
+          description: "Trouvez des arcticle à louer",
+          href: "/immobilier",
           image:
-            "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
+            "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
-        {
-          title: "Logement social",
-          description: "Accédez à un logement abordable",
-          href: "/SHLMR",
-          image:
-            "https://i.pinimg.com/1200x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg",
-        },
-        {
-          title: "Droit & formation immobilière",
-          description: "Divorce, succession, donation, . . .",
-          href: "/droitFamille",
-          image:
-            "https://i.pinimg.com/736x/a1/91/eb/a191ebeb94928180470add7e2e1284e2.jpg",
-        },
-        {
-          title: "Programme neuf",
-          description: "Investissez dans du neuf",
-          href: "/programme-neuf",
-          image:
-            "https://i.pinimg.com/1200x/8c/c1/22/8cc122eb07f85e3b4881b3d20b318bd2.jpg",
-        },
-        {
-          title: "Investir à l'etranger",
-          description: "Découvrez des opportunités mondiales",
-          href: "/investir-etranger",
-          image:
-            "https://i.pinimg.com/1200x/46/bb/5d/46bb5df4d9ca65648383226b41de80ec.jpg",
-        },
-        {
-          title: "Gestion & services immobiliers",
+         {
+          title: "Gestion",
           description: "Optimisez la gestion de vos biens",
           href: "/gestion-immobilier",
           image:
             "https://i.pinimg.com/1200x/a6/6e/47/a66e473e8ed32bb3d153017af507f83c.jpg",
         },
+         
+        // { 
+        //   title: "PSLA",
+        //   description: "Profitez du Prêt Social Location Accession",
+        //   href: "/PSLA",
+        //   image:
+        //     "https://i.pinimg.com/736x/cb/99/bd/cb99bd1328705c93baeed915b9e10d5d.jpg",
+        // },
+        
         {
-          title: "Audit patrimonial & finance",
-          description: "Optimisez votre patrimoine immobilier",
-          href: "/immobilier-sections",
+          title: "Investissement",
+          description: "Découvrez des opportunités mondiales",
+          href: "/investir-etranger",
           image:
-            "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
+            "https://i.pinimg.com/1200x/46/bb/5d/46bb5df4d9ca65648383226b41de80ec.jpg",
+        },
+         {
+          title: "Financement",
+          description: "Solutions de crédit adaptées à votre projet",
+          href: "/financement#partenaires",
+          image:
+            "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
         },
         {
-          title: "Blogs et conseils",
-          description: "Actualités et astuces immobilières",
-          href: "/blog",
+          title: "Assurance",
+          description: "Protection complète pour votre logement",
+          href: "/financement#assurances",
           image:
-            "https://i.pinimg.com/1200x/aa/e0/7d/aae07d295ac376efa051410403eacfec.jpg",
+            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
         },
+        {
+          title: "Social",
+          description: "Accédez à un logement abordable",
+          href: "/SHLMR",
+          image:
+            "https://i.pinimg.com/1200x/ba/4f/6c/ba4f6c637fdcdb2cb0d371a6a38db7a2.jpg",
+        },
+        // {
+        //   title: "Droit & formation immobilière",
+        //   description: "Divorce, succession, donation, . . .",
+        //   href: "/droitFamille",
+        //   image:
+        //     "https://i.pinimg.com/736x/a1/91/eb/a191ebeb94928180470add7e2e1284e2.jpg",
+        // },
+        // {
+        //   title: "Programme neuf",
+        //   description: "Investissez dans du neuf",
+        //   href: "/programme-neuf",
+        //   image:
+        //     "https://i.pinimg.com/1200x/8c/c1/22/8cc122eb07f85e3b4881b3d20b318bd2.jpg",
+        // },
+        // {
+        //   title: "Audit patrimonial & finance",
+        //   description: "Optimisez votre patrimoine immobilier",
+        //   href: "/immobilier-sections",
+        //   image:
+        //     "https://i.pinimg.com/736x/41/d8/69/41d8699229ed3bd63cf723faa543fc95.jpg",
+        // },
+        // {
+        //   title: "Blogs et conseils",
+        //   description: "Actualités et astuces immobilières",
+        //   href: "/blog",
+        //   image:
+        //     "https://i.pinimg.com/1200x/aa/e0/7d/aae07d295ac376efa051410403eacfec.jpg",
+        // },
         // {
         //   title: "Estimation & expertise",
         //   description: " Évaluez la valeur de votre bien",
         //   href: "/estimation-immobilier",
         //   image: "https://i.pinimg.com/1200x/2a/33/c7/2a33c7347de60d0c65be83a72c4495be.jpg"
         // },
-        {
-          title: "Podcasts",
-          description: "Vidéos fournies par des experts",
-          href: "/podcasts/immobilier",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
+        // {
+        //   title: "Podcasts",
+        //   description: "Vidéos fournies par des experts",
+        //   href: "/podcasts/immobilier",
+        //   image:
+        //     "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        // },
         // {
         //   title: "TRAVAUX & CONSTRUCTION ",
         //   items: [
@@ -538,6 +568,7 @@ const Header = () => {
         //     },
         //   ],
         // },
+        
         // {
         //   title: "PRODUITS & ACCESSOIRES",
         //   items: [
@@ -561,67 +592,89 @@ const Header = () => {
         //       image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
 
         //     },
-      ],
-    },
-    {
-      title: "BATIMENT",
-      items: [
-        // {
-        //   title: "Rénovation & construction",
-        //   description: "Experts en rénovation de bâtiments",
-        //   href: "/batiments#renovation-chantiers",
-        //   image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
-        // },
-        // {
-        //   title: "Construction & plans",
-        //   description: " De la conception à la réalisation",
-        //   href: "/batiments#construction-plans",
-        //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
-        // },
+        //   title: "Vivre à la Réunion",
+        //   items: [
+        //     {
+        //       title: "Équipements",
+        //       description: "Matériel & équipements haute performance",
+        //       href: "/produits#equipement",
+        //       image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+        //     },
+        //     {
+        //       title: "Matériaux",
+        //       description: "Matériaux de construction qualité premium",
+        //       href: "/produits#materiaux",
+        //       image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
 
-        {
-          title: "Rénovation & construction",
-          description: " Services de rénovation et construction professionnels",
-          href: "/travaux",
-          image:
-            "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg",
-        },
-        {
-          title: "Plan & administratifs",
-          description: "Documents administratifs simplifiés",
-          href: "/plan_administratif",
-          image:
-            "https://i.pinimg.com/736x/7d/05/6d/7d056d506f943d48a0ca9ad81b85e018.jpg",
-        },
-        {
-          title: "Matériaux de construction",
-          description: " Solutions durables pour vos projets",
-          href: "/batiments#materiaux-viabilisations",
-          image:
-            "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
-        },
-        // {
-        //   title: "Division parcellaire",
-        //   description: " Optimisation de l'espace foncier",
-        //   href: "/batiments#division-parcellaire",
-        //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
-        // },
-        {
-          title: "Formation",
-          description: " Formations pour professionnels du bâtiment",
-          href: "/formation-batiment",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: " Ressources pour le secteur du bâtiment",
-          href: "/batiments#podcasts-videos",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
+        //     },
+        //     {
+        //       title: "Design & Décoration",
+        //       description: "Solutions esthétiques pour votre intérieur",
+        //       href: "/produits#design",
+        //       image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+
+        //     },
       ],
     },
+    // {
+    //   title: "BATIMENT",
+    //   items: [
+    //     // {
+    //     //   title: "Rénovation & construction",
+    //     //   description: "Experts en rénovation de bâtiments",
+    //     //   href: "/batiments#renovation-chantiers",
+    //     //   image: "https://i.pinimg.com/736x/7a/f7/95/7af795aa69261731feae01375ad824df.jpg"
+    //     // },
+    //     // {
+    //     //   title: "Construction & plans",
+    //     //   description: " De la conception à la réalisation",
+    //     //   href: "/batiments#construction-plans",
+    //     //   image: "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg"
+    //     // },
+
+    //     {
+    //       title: "Rénovation & construction",
+    //       description: " Services de rénovation et construction professionnels",
+    //       href: "/travaux",
+    //       image:
+    //         "https://i.pinimg.com/1200x/75/d5/84/75d5848fde7b30cac973164b34836730.jpg",
+    //     },
+    //     {
+    //       title: "Plan & administratifs",
+    //       description: "Documents administratifs simplifiés",
+    //       href: "/plan_administratif",
+    //       image:
+    //         "https://i.pinimg.com/736x/7d/05/6d/7d056d506f943d48a0ca9ad81b85e018.jpg",
+    //     },
+    //     {
+    //       title: "Matériaux de construction",
+    //       description: " Solutions durables pour vos projets",
+    //       href: "/batiments#materiaux-viabilisations",
+    //       image:
+    //         "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
+    //     },
+    //     // {
+    //     //   title: "Division parcellaire",
+    //     //   description: " Optimisation de l'espace foncier",
+    //     //   href: "/batiments#division-parcellaire",
+    //     //   image: "https://i.pinimg.com/1200x/67/fe/59/67fe591357a9c5d9d5175476cc28d20a.jpg"
+    //     // },
+    //     {
+    //       title: "Formation",
+    //       description: " Formations pour professionnels du bâtiment",
+    //       href: "/formation-batiment",
+    //       image:
+    //         "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts",
+    //       description: " Ressources pour le secteur du bâtiment",
+    //       href: "/batiments#podcasts-videos",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
     // {
     //   title: "DOMICILE",
     //   items: [
@@ -682,92 +735,31 @@ const Header = () => {
     //     },
     //   ],
     // },
-    {
-      title: "CREDIT & ASSURANCE",
-      items: [
-        {
-          title: "Financement",
-          description: "Solutions de crédit adaptées à votre projet",
-          href: "/financement#partenaires",
-          image:
-            "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
-        },
-        {
-          title: "Assurance",
-          description: "Protection complète pour votre logement",
-          href: "/financement#assurances",
-          image:
-            "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
-        },
-        {
-          title: "Aides",
-          description: "Solutions d'aides au financement",
-          href: "/aide_financement",
-          image:
-            "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg",
-        },
-        {
-          title: "Formations ",
-          description: "Formations au financement et crédit",
-          href: "/formation_finance",
-          image:
-            "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
-        },
-        {
-          title: "Podcasts",
-          description: " Ressources sur le financement",
-          href: "/podcasts/assurance-finance",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
-      ],
-    },
-    {
-      title: "ENTREPRISE",
+
+    ///**********************service
+     {
+      title: "SERVICES",
       items: [
         // {
         //   title: "Devenir partenaire",
         //   description: "Rejoignez notre réseau d'experts",
         //   href: "/entreprise#partenaire",
         //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
-
         // },
-
         {
-          title: "Création & reprise",
-          description: "Accompagnement pour entrepreneurs",
+          title: "Trouver un professionnel",
+          description: "Experts pour vos besoins spécifiques",
           href: "/reprise",
           image:
             "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
-        {
-          title: "Audit & médiation",
-          description: "Experts en audit & résolution de conflits",
-          href: "/auditMediation",
-          image:
-            "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
-        },
-        {
-          title: "Aides & levées de fonds",
-          description: " Soutien financier pour entreprises",
-          href: "/aideFonds",
-          image:
-            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
-        },
-        {
-          title: "Juridique & liquidation",
-          description: " Services juridiques pour entreprises",
-          href: "/juridiqueLiquidation",
-          image:
-            "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
-        },
-        {
-          title: "Comptabilité",
-          description: " Services comptables professionnels",
-          href: "/comptabilite",
-          image:
-            "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
-        },
+        // {
+        //   title: "Création & reprise",
+        //   description: "Accompagnement pour entrepreneurs",
+        //   href: "/reprise",
+        //   image:
+        //     "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
+        // },
         {
           title: "Formation",
           description: "Formations pour entrepreneurs",
@@ -775,15 +767,175 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
         },
-        {
-          title: "Podcasts",
-          description: " Ressources pour entrepreneurs",
-          href: "/podcast_service",
+
+        // {
+        //   title: "Audit & médiation",
+        //   description: "Experts en audit & résolution de conflits",
+        //   href: "/auditMediation",
+        //   image:
+        //     "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
+        // },
+         {
+          title: "Entreprise",
+          description: "Accompagnement pour entrepreneurs",
+          href: "/reprise",
           image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
         },
+      {
+          title: "Conseil",
+          description: "Experts en audit & résolution de conflits",
+          href: "#",
+          image:
+            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
+        },
+        // {
+        //   title: "Aides & levées de fonds",
+        //   description: " Soutien financier pour entreprises",
+        //   href: "/aideFonds",
+        //   image:
+        //     "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
+        // },
+        // {
+        //   title: "Juridique & liquidation",
+        //   description: " Services juridiques pour entreprises",
+        //   href: "/juridiqueLiquidation",
+        //   image:
+        //     "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
+        // },
+        {
+          title: "Accompagnement",
+          description: "Accompagnement juridique pour entreprises",
+          href: "#",
+          image:
+            "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
+        },
+        // {
+        //   title: "Comptabilité",
+        //   description: " Services comptables professionnels",
+        //   href: "/comptabilite",
+        //   image:
+        //     "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
+        // },
+        // {
+        //   title: "Formation",
+        //   description: "Formations pour entrepreneurs",
+        //   href: "/entreprise#services",
+        //   image:
+        //     "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
+        // },
+        // {
+        //   title: "Podcasts",
+        //   description: " Ressources pour entrepreneurs",
+        //   href: "/podcast_service",
+        //   image:
+        //     "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        // },
       ],
     },
+
+    // {
+    //   title: "CREDIT & ASSURANCE",
+    //   items: [
+    //     {
+    //       title: "Financement",
+    //       description: "Solutions de crédit adaptées à votre projet",
+    //       href: "/financement#partenaires",
+    //       image:
+    //         "https://i.pinimg.com/1200x/95/70/a7/9570a740dff319b472f298de32eec435.jpg",
+    //     },
+    //     {
+    //       title: "Assurance",
+    //       description: "Protection complète pour votre logement",
+    //       href: "/financement#assurances",
+    //       image:
+    //         "https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg",
+    //     },
+    //     {
+    //       title: "Aides",
+    //       description: "Solutions d'aides au financement",
+    //       href: "/aide_financement",
+    //       image:
+    //         "https://i.pinimg.com/736x/0b/7c/04/0b7c04864983a272502185b97c5b9c35.jpg",
+    //     },
+    //     {
+    //       title: "Formations ",
+    //       description: "Formations au financement et crédit",
+    //       href: "/formation_finance",
+    //       image:
+    //         "https://i.pinimg.com/1200x/ff/71/1f/ff711ff866a562d1b9ee1c5ce68f8ecc.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts",
+    //       description: " Ressources sur le financement",
+    //       href: "/podcasts/assurance-finance",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "ENTREPRISE",
+    //   items: [
+    //     // {
+    //     //   title: "Devenir partenaire",
+    //     //   description: "Rejoignez notre réseau d'experts",
+    //     //   href: "/entreprise#partenaire",
+    //     //   image: "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg"
+
+    //     // },
+
+    //     {
+    //       title: "Création & reprise",
+    //       description: "Accompagnement pour entrepreneurs",
+    //       href: "/reprise",
+    //       image:
+    //         "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
+    //     },
+    //     {
+    //       title: "Audit & médiation",
+    //       description: "Experts en audit & résolution de conflits",
+    //       href: "/auditMediation",
+    //       image:
+    //         "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg",
+    //     },
+    //     {
+    //       title: "Aides & levées de fonds",
+    //       description: " Soutien financier pour entreprises",
+    //       href: "/aideFonds",
+    //       image:
+    //         "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg",
+    //     },
+    //     {
+    //       title: "Juridique & liquidation",
+    //       description: " Services juridiques pour entreprises",
+    //       href: "/juridiqueLiquidation",
+    //       image:
+    //         "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg",
+    //     },
+    //     {
+    //       title: "Comptabilité",
+    //       description: " Services comptables professionnels",
+    //       href: "/comptabilite",
+    //       image:
+    //         "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
+    //     },
+    //     {
+    //       title: "Formation",
+    //       description: "Formations pour entrepreneurs",
+    //       href: "/entreprise#services",
+    //       image:
+    //         "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts",
+    //       description: " Ressources pour entrepreneurs",
+    //       href: "/podcast_service",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
     // {
     //   title: "TOURISME",
     //   items: [
@@ -912,39 +1064,180 @@ const Header = () => {
     //   ],
     // },
 
+
     {
-      title: "INVESTISSEMENT",
+      title: "VIVRE À LA RÉUNION",
       items: [
         {
-          title: "SCPI & immobilier",
-          description: "Investissez dans l'immobilier locatif",
-          href: "/investir/scpi",
+          title: "Produits et accessoires",
+          description: "Tout pour votre domicile",
+          href: "/batiments#materiaux-viabilisations",
           image:
-            "https://i.pinimg.com/1200x/20/79/83/207983f864b7c516a64be40bc990df17.jpg",
+            "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },
         {
-          title: "Crowdfunding & actions ",
-          description: "Investissez dans des projets innovants",
-          href: "/investir/crowdfunding",
+          title: "Explorer la Réunion",
+          description: "Réservations d'hébergements",
+          href: "/tourisme",
           image:
-            "https://i.pinimg.com/736x/50/f9/69/50f969a3d27b9d0cb7dfc4bff0b8a80a.jpg",
+            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
         },
         {
-          title: "Obligations & associations",
-          description: "Soutenez des causes tout en investissant",
-          href: "/investir/isr",
+          title: "Manger à la Réunion",
+          description: "Restaurants & courses & bien être",
+          href: "/#",
           image:
-            "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg",
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
         },
-        {
-          title: "Podcasts",
-          description: "Ressources sur l'investissement",
-          href: "/podcasts/investissement",
-          image:
-            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        },
+        
       ],
+    }, 
+    
+    /*** Nos partenaire*/
+{
+  title: "NOS PARTENAIRES",
+  items: [
+    {
+      title: "Agences",
+      description: "Decouvrir notre partenariat agences",
+      href: "#",
+      image: "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg"
     },
+    {
+      title: "Rchizcte",
+      description: "Fiche présentation et projets réalisés",
+      href: "#",
+      image: "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg"
+    },
+    {
+      title: "Constructeurs",
+      description: "Fiche présentation et projets réalisés",
+      href: "#",
+      image: "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg"
+    },
+    {
+      title: "Plombiers",
+      description: "Fiche présentation et projets réalisés",
+      href: "#",
+      image: "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg"
+    },
+  ],
+},
+    
+    // {
+    //   title: "ALIMENTATION",
+    //   items: [
+    //     {
+    //       title: "Courses & épicerie",
+    //       description: "Livraison de produits frais & épicerie",
+    //       href: "/alimentation#cours-epicerie",
+    //       image:
+    //         "https://i.pinimg.com/1200x/11/80/35/11803586e48bb4b954c93493a2fae78d.jpg",
+    //     },
+    //     {
+    //       title: "Boulangerie & charcuterie",
+    //       description: "Produits artisanaux livrés chez vous",
+    //       href: "/alimentation#boulangerie-charcuterie",
+    //       image:
+    //         "https://i.pinimg.com/736x/28/42/f2/2842f2dfe1ffa1cbbee9b4401ed3b07c.jpg",
+    //     },
+    //     {
+    //       title: "Cave & vins",
+    //       description: "Sélection de vins & spiritueux",
+    //       href: "/alimentation#cave-vins",
+    //       image:
+    //         "https://i.pinimg.com/1200x/90/22/b3/9022b34f5669bf2657f32acb26d1d554.jpg",
+    //     },
+    //     {
+    //       title: "Restaurants",
+    //       description: "Livraison de plats de vos restaurants favoris",
+    //       href: "/alimentation#restaurant",
+    //       image:
+    //         "https://i.pinimg.com/1200x/52/4e/ea/524eea16c0ef4ed64a19a32f4c43652d.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts ",
+    //       description: " Ressources sur l'alimentation",
+    //       href: "/podcasts/alimentation",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "BIEN-ÊTRE",
+    //   items: [
+    //     {
+    //       title: "Cours à domicile",
+    //       description: "Formations & ateliers personnalisés",
+    //       href: "/bien-etre",
+    //       image:
+    //         "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+    //     },
+    //     {
+    //       title: "Arts & commerces",
+    //       description: "Artisans & boutiques bien-être",
+    //       href: "/art-commerce",
+    //       image:
+    //         "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+    //     },
+    //     {
+    //       title: "Thérapeutes & soins",
+    //       description: "Professionnels du bien-être à domicile",
+    //       href: "/bien-etre",
+    //       image:
+    //         "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+    //     },
+    //     {
+    //       title: "Boutique & produits naturels",
+    //       description: "Produits pour le bien-être",
+    //       href: "/produits-naturels",
+    //       image:
+    //         "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+    //     },
+    //     {
+    //       title: "Podcasts",
+    //       description: "Ressources pour le bien-être",
+    //       href: "/podcasts-bien_etre",
+    //       image:
+    //         "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     },
+    //   ],
+    // },
+
+    // {
+    //   title: "INVESTISSEMENT",
+    //   items: [
+    //     {
+    //       title: "SCPI & immobilier",
+    //       description: "Investissez dans l'immobilier locatif",
+    //       href: "/investir/scpi",
+    //       image:
+    //         "https://i.pinimg.com/1200x/20/79/83/207983f864b7c516a64be40bc990df17.jpg",
+    //     },
+    //     {
+    //       title: "Crowdfunding & actions ",
+    //       description: "Investissez dans des projets innovants",
+    //       href: "/investir/crowdfunding",
+    //       image:
+    //         "https://i.pinimg.com/736x/50/f9/69/50f969a3d27b9d0cb7dfc4bff0b8a80a.jpg",
+    //     },
+    //     {
+    //       title: "Obligations & associations",
+    //       description: "Soutenez des causes tout en investissant",
+    //       href: "/investir/isr",
+    //       image:
+    //         "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg",
+    //     },
+    //     // {
+    //     //   title: "Podcasts",
+    //     //   description: "Ressources sur l'investissement",
+    //     //   href: "/podcasts/investissement",
+    //     //   image:
+    //     //     "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+    //     // },
+    //   ],
+    // },
     // {
     //   title: "ACTUALITÉS",
     //   href: "/actualites",
@@ -965,10 +1258,10 @@ const Header = () => {
     //   title: "DONS",
     //   href: "/don",
     // },
-    {
-      title: "NOS OFFRES EXCLUSIVES",
-      href: "/pack",
-    },
+    // {
+    //   title: "NOS OFFRES EXCLUSIVES",
+    //   href: "/pack",
+    // },
   ];
 
   const profilePath =
