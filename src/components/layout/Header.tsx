@@ -449,14 +449,14 @@ const Header = () => {
         {
           title: "Achat",
           description: "Trouvez votre prochaine article",
-          href: "/immobilier",
+          href: "/achat",
           image:
             "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
         {
           title: "Location",
           description: "Trouvez des arcticle à louer",
-          href: "/immobilier",
+          href: "/location",
           image:
             "https://i.pinimg.com/1200x/31/a3/5e/31a35e5b52746b50a2407de125d35850.jpg",
         },
