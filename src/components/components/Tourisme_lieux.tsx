@@ -573,6 +573,11 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* En-tête */}
           <div className="relative h-64 mb-12 rounded-lg overflow-hidden">
+            {/* Placez TourismNavigation AVANT l'image de fond */}
+            <div className="relative z-10 p-4">
+              <TourismNavigation />
+            </div>
+
             <div className="absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50"></div>
             <img
               src="https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
@@ -580,7 +585,6 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = ({
               className="w-full h-full object-cover"
               onError={(e) => handleImageError(e, "default")}
             />
-            <TourismNavigation />
             <div className="absolute inset-0 flex items-center justify-center text-center">
               <div>
                 <h1 className="text-xl lg:text-4xl font-bold text-gray-100 mb-4">

@@ -83,23 +83,32 @@ const ActivitesLoisirsFAQ: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-900">
       {/* HERO */}
+      // Modifiez la section HERO comme ceci :{/* HERO */}
       <div className="relative py-24 md:py-32 bg-gradient-to-r from-purple-600/50 to-pink-500/50 overflow-hidden">
+        {/* Navigation en premier plan avec z-index élevé */}
+        <div className="relative z-50 px-4 max-w-7xl mx-auto pt-4">
+          <TourismNavigation />
+        </div>
+
+        {/* Image de fond et overlay */}
         <img
           src="https://i.pinimg.com/736x/fa/05/b9/fa05b9dba51cec6eb5e7441b75d0c153.jpg"
           className="absolute inset-0 w-full h-full object-cover opacity-20"
           alt="Hero"
         />
-        <TourismNavigation />
-        <div className="relative text-center px-4">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-pink-500/30"></div>
+
+        {/* Contenu principal */}
+        <div className="relative text-center px-4 pt-16">
           <h1 className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg tracking-wide">
             Activités & Loisirs
           </h1>
           <p className="mt-4 text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Découvrez nos expériences touristiques immersives et aventures nature.
+            Découvrez nos expériences touristiques immersives et aventures
+            nature.
           </p>
         </div>
       </div>
-
       {/* SEARCH BAR */}
       <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14">
         <div className="relative bg-white/95 backdrop-blur-md shadow-md rounded-3xl p-4 border border-gray-200 transition-all hover:shadow-lg">
@@ -113,15 +122,16 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           />
         </div>
       </div>
-
       {/* CATEGORY FILTERS */}
       <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">
         <button
           onClick={() => setActiveCategory("all")}
           className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold text-sm transition-all shadow-sm border
-            ${activeCategory === "all"
-              ? `bg-gradient-to-r ${defaultColor} text-white border-transparent shadow-lg`
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"} hover:scale-105`}
+            ${
+              activeCategory === "all"
+                ? `bg-gradient-to-r ${defaultColor} text-white border-transparent shadow-lg`
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+            } hover:scale-105`}
         >
           <Compass className="w-5 h-5" />
           Toutes
@@ -135,23 +145,30 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             key={cat.id}
             onClick={() => setActiveCategory(cat.name)}
             className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium text-sm transition-all shadow-sm border
-              ${activeCategory === cat.name
-                ? `bg-gradient-to-r ${cat.color || defaultColor} text-white border-transparent shadow-lg`
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"} hover:scale-105`}
+              ${
+                activeCategory === cat.name
+                  ? `bg-gradient-to-r ${
+                      cat.color || defaultColor
+                    } text-white border-transparent shadow-lg`
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              } hover:scale-105`}
           >
             {iconMap[cat.icon] ?? <Star className="w-5 h-5" />}
             {cat.name}
-            <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">{getCategoryCount(cat.name)}</span>
+            <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+              {getCategoryCount(cat.name)}
+            </span>
           </button>
         ))}
       </div>
-
       {/* LIST */}
       <div className="max-w-6xl mx-auto px-4 pb-20">
         {filtered.length === 0 && (
           <div className="text-center py-24">
             <Search className="mx-auto w-16 h-16 text-purple-500 mb-4" />
-            <p className="text-xl font-bold text-gray-700">Aucune activité trouvée</p>
+            <p className="text-xl font-bold text-gray-700">
+              Aucune activité trouvée
+            </p>
             <p className="text-gray-500">Essayez un autre mot-clé.</p>
           </div>
         )}
@@ -175,7 +192,9 @@ const ActivitesLoisirsFAQ: React.FC = () => {
 
               <div className="p-5">
                 {faq.highlight && (
-                  <p className="text-sm text-purple-600 font-semibold mb-2">{faq.highlight}</p>
+                  <p className="text-sm text-purple-600 font-semibold mb-2">
+                    {faq.highlight}
+                  </p>
                 )}
 
                 {faq.stats && (
