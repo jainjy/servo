@@ -28,7 +28,7 @@ const SubscriptionExpiredModal = ({
   onClose,
   onRenew,
   onGoToDashboard, // Nouveau prop pour la navigation
-  canClose = true, // Remis à true par défaut pour correspondre au code initial de la première réponse
+  canClose = true, // Pour que le modals puisse être fermé ou non
   showGif = true,
 }) => {
   const [gifLoaded, setGifLoaded] = useState(false);
@@ -181,31 +181,20 @@ const SubscriptionExpiredModal = ({
                 className="flex-1"
               >
                 <Home className="h-4 w-4 mr-2" />
-                Retourner à l'accueil
-              </Button>
-              <Button
-                onClick={onRenew}
-                className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg text-white font-semibold py-3"
-                size="lg"
-              >
-                <Crown className="h-5 w-5 mr-2" />
-                Renouveler l'abonnement
-                <ArrowRight className="h-5 w-5 ml-2" />
+                Retourner au tableau de bord
               </Button>
             </>
           )}
 
-          {canClose && (
-            <Button
-              onClick={onRenew}
-              className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg text-white font-semibold py-3"
-              size="lg"
-            >
-              <Crown className="h-5 w-5 mr-2" />
-              Renouveler l'abonnement
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          )}
+          <Button
+            onClick={onRenew}
+            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg text-white font-semibold py-3"
+            size="lg"
+          >
+            <Crown className="h-5 w-5 mr-2" />
+            Renouveler l'abonnement
+            <ArrowRight className="h-5 w-5 ml-2" />
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
