@@ -3,18 +3,30 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  User, 
   FileText, 
-  AlertCircle,
-  Calendar,
   Search,
   ChevronDown,
   ChevronUp,
-  Loader2
+  Loader2,
+  User
 } from 'lucide-react';
 import api from "../../lib/api.js";
 
-// Types TypeScript basés sur le schéma Prisma
+// Types TypeScript basés sur la réponse de l'API
+interface Service {
+  id: number;
+  libelle: string;
+  description: string;
+  images: string[];
+}
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
 interface DemandeDroitFamille {
   id: number;
   userId: string;
@@ -24,16 +36,13 @@ interface DemandeDroitFamille {
   description?: string;
   status: 'pending' | 'valider' | 'Annuler';
   createdAt: string;
-  user?: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
-  service?: {
-    id: number;
-    name: string;
-  };
+  service?: Service;
+  user?: User;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: DemandeDroitFamille[];
 }
 
 // Interface pour les données transformées
@@ -64,16 +73,22 @@ const DemandeDroitFamille: React.FC = () => {
   const [filtreStatut, setFiltreStatut] = useState<string>('Tous');
   const [tri, setTri] = useState<'date' | 'priorite' | 'nom'>('date');
   const [ordreTri, setOrdreTri] = useState<'asc' | 'desc'>('desc');
-  const [selection, setSelection] = useState<number[]>([]);
   const [message, setMessage] = useState<string>('');
   const [chargement, setChargement] = useState(true);
   const [miseAJourEnCours, setMiseAJourEnCours] = useState<number[]>([]);
-  const [miseAJourSelectionEnCours, setMiseAJourSelectionEnCours] = useState(false);
+  
+  // DEBUG: Log pour voir les données
+  useEffect(() => {
+    console.log('DEBUG - demandesOriginales:', demandesOriginales);
+    console.log('DEBUG - demandes transformées:', demandes);
+    console.log('DEBUG - statistiques:', statistiques);
+  }, [demandesOriginales, demandes, statistiques]);
 
   // Fonction pour transformer les données de l'API
   const transformerDonnees = (data: DemandeDroitFamille[]): DemandeTransformee[] => {
+    console.log('DEBUG - transformerDonnees appelée avec:', data);
+    
     return data.map((item, index) => {
-      // Déterminer le type de demande
       let typeDemande = item.serviceType || item.sousType || 'Non spécifié';
       if (typeDemande.includes('divorce')) typeDemande = 'Divorce';
       else if (typeDemande.includes('garde')) typeDemande = 'Garde d\'enfants';
@@ -81,70 +96,70 @@ const DemandeDroitFamille: React.FC = () => {
       else if (typeDemande.includes('autorite')) typeDemande = 'Autorité parentale';
       else if (typeDemande.includes('adoption')) typeDemande = 'Adoption';
 
-      // Transformer le statut
       let statut: 'En attente' | 'Validée' | 'Annulée' = 'En attente';
       if (item.status === 'valider') statut = 'Validée';
       else if (item.status === 'Annuler') statut = 'Annulée';
 
-      // Générer un numéro de dossier
       const numeroDossier = `DF-${new Date(item.createdAt).getFullYear()}-${(index + 1).toString().padStart(3, '0')}`;
 
-      // Nom du demandeur
       const nomDemandeur = item.user 
         ? `${item.user.firstName} ${item.user.lastName}`
-        : 'Demandeur inconnu';
+        : `Utilisateur ${item.userId.substring(0, 8)}...`;
 
-      // Priorité aléatoire (pour démo - à adapter selon vos règles)
       const priorites: ('Haute' | 'Moyenne' | 'Basse')[] = ['Haute', 'Moyenne', 'Basse'];
       const priorite = priorites[Math.floor(Math.random() * priorites.length)];
 
-      return {
+      const demandeTransformee: DemandeTransformee = {
         id: item.id,
         numeroDossier,
         nomDemandeur,
         typeDemande,
-        dateDepot: new Date(item.createdAt).toISOString().split('T')[0],
+        dateDepot: new Date(item.createdAt).toLocaleDateString('fr-FR'),
         statut,
         priorite,
-        piecesManquantes: Math.floor(Math.random() * 6), // Pour démo
-        derniereMiseAJour: new Date(item.createdAt).toISOString().split('T')[0],
+        piecesManquantes: Math.floor(Math.random() * 6),
+        derniereMiseAJour: new Date(item.createdAt).toLocaleDateString('fr-FR'),
         donneesOriginales: item
       };
+      
+      console.log('DEBUG - Item transformé:', demandeTransformee);
+      return demandeTransformee;
     });
   };
 
   // Récupérer les données depuis l'API
-  useEffect(() => {
-    const fetchDemandes = async () => {
-      try {
-        setChargement(true);
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setMessage('Veuillez vous connecter');
-          return;
-        }
+  const fetchDemandes = async () => {
+    try {
+      setChargement(true);
+      setMessage('');
+      
+      console.log('DEBUG - Début fetchDemandes');
+      const response = await api.get('/droitFamille');
+      const apiResponse: ApiResponse = response.data;
 
-        const response = await api.get('/droitFamille', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+      console.log('DEBUG - Réponse API complète:', apiResponse);
+      console.log('DEBUG - Données API:', apiResponse.data);
+      console.log('DEBUG - Nombre de demandes:', apiResponse.data?.length);
 
-        if (response.data.success) {
-          setDemandesOriginales(response.data.data);
-          const donneesTransformees = transformerDonnees(response.data.data);
-          setDemandes(donneesTransformees);
-        } else {
-          setMessage('Erreur lors du chargement des données');
-        }
-      } catch (error) {
-        console.error('Erreur fetch:', error);
-        setMessage('Erreur de connexion au serveur');
-      } finally {
-        setChargement(false);
+      if (apiResponse.success && apiResponse.data) {
+        setDemandesOriginales(apiResponse.data);
+        const donneesTransformees = transformerDonnees(apiResponse.data);
+        console.log('DEBUG - Données transformées:', donneesTransformees);
+        setDemandes(donneesTransformees);
+        setMessage(`${donneesTransformees.length} demandes chargées avec succès`);
+      } else {
+        setMessage('Erreur: Données invalides de l\'API');
       }
-    };
+    } catch (error: any) {
+      console.error('DEBUG - Erreur fetch:', error);
+      setMessage(`Erreur: ${error.message}`);
+    } finally {
+      setChargement(false);
+      console.log('DEBUG - Chargement terminé');
+    }
+  };
 
+  useEffect(() => {
     fetchDemandes();
   }, []);
 
@@ -161,41 +176,31 @@ const DemandeDroitFamille: React.FC = () => {
       validees,
       annulees,
     });
+    
+    console.log('DEBUG - Statistiques mises à jour:', { total, enAttente, validees, annulees });
   }, [demandes]);
 
   // Mettre à jour le statut via l'API
   const mettreAJourStatut = async (id: number, nouveauStatut: 'valider' | 'Annuler') => {
     try {
       setMiseAJourEnCours(prev => [...prev, id]);
-      
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setMessage('Veuillez vous reconnecter');
-        return false;
-      }
 
       const response = await api.put(`/droitFamille/update/${id}`, {
         status: nouveauStatut
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       });
 
       if (response.data.success) {
-        // Mettre à jour l'état local
         setDemandes(demandes.map(d => {
           if (d.id === id) {
             return {
               ...d,
               statut: nouveauStatut === 'valider' ? 'Validée' : 'Annulée',
-              derniereMiseAJour: new Date().toISOString().split('T')[0]
+              derniereMiseAJour: new Date().toLocaleDateString('fr-FR')
             };
           }
           return d;
         }));
 
-        // Mettre à jour les données originales
         setDemandesOriginales(demandesOriginales.map(d => {
           if (d.id === id) {
             return { ...d, status: nouveauStatut };
@@ -203,171 +208,31 @@ const DemandeDroitFamille: React.FC = () => {
           return d;
         }));
 
-        setMessage(`Demande ${id} ${nouveauStatut === 'valider' ? 'validée' : 'annulée'} avec succès`);
+        setMessage(`Demande ${nouveauStatut === 'valider' ? 'validée' : 'annulée'} avec succès`);
         setTimeout(() => setMessage(''), 3000);
         return true;
       } else {
         setMessage('Erreur lors de la mise à jour');
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur update:', error);
       setMessage('Erreur de connexion au serveur');
       return false;
     } finally {
-      setMiseAJourEnCours(prev => prev.filter(itemId => itemId !== id));
+      setTimeout(() => {
+        setMiseAJourEnCours(prev => prev.filter(itemId => itemId !== id));
+      }, 500);
     }
   };
 
-  // Fonctions de gestion avec animation
+  // Fonctions de gestion
   const validerDemande = async (id: number) => {
-    const success = await mettreAJourStatut(id, 'valider');
-    if (success) {
-      // Animation visuelle supplémentaire
-      const element = document.getElementById(`demande-${id}`);
-      if (element) {
-        element.classList.add('bg-green-50', 'transition-colors', 'duration-500');
-        setTimeout(() => {
-          element.classList.remove('bg-green-50');
-        }, 1000);
-      }
-    }
+    await mettreAJourStatut(id, 'valider');
   };
 
   const annulerDemande = async (id: number) => {
-    const success = await mettreAJourStatut(id, 'Annuler');
-    if (success) {
-      // Animation visuelle supplémentaire
-      const element = document.getElementById(`demande-${id}`);
-      if (element) {
-        element.classList.add('bg-red-50', 'transition-colors', 'duration-500');
-        setTimeout(() => {
-          element.classList.remove('bg-red-50');
-        }, 1000);
-      }
-    }
-  };
-
-  const validerSelection = async () => {
-    if (selection.length === 0) return;
-    
-    setMiseAJourSelectionEnCours(true);
-    
-    // Animer le bouton
-    const bouton = document.getElementById('btn-valider-selection');
-    if (bouton) {
-      bouton.classList.add('animate-pulse');
-    }
-    
-    try {
-      const promises = selection.map(id => mettreAJourStatut(id, 'valider'));
-      const results = await Promise.all(promises);
-      
-      const successCount = results.filter(r => r).length;
-      setMessage(`${successCount} demande(s) validée(s) avec succès`);
-      
-      // Animation de confirmation
-      const section = document.querySelector('.bg-blue-50');
-      if (section) {
-        section.classList.add('bg-green-50', 'border-green-200', 'transition-all', 'duration-700');
-        setTimeout(() => {
-          if (section) {
-            section.classList.remove('bg-green-50', 'border-green-200');
-          }
-        }, 2000);
-      }
-      
-    } catch (error) {
-      setMessage('Erreur lors de la validation de la sélection');
-    } finally {
-      setSelection([]);
-      setMiseAJourSelectionEnCours(false);
-      
-      if (bouton) {
-        bouton.classList.remove('animate-pulse');
-      }
-      
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
-
-  const annulerSelection = async () => {
-    if (selection.length === 0) return;
-    
-    setMiseAJourSelectionEnCours(true);
-    
-    // Animer le bouton
-    const bouton = document.getElementById('btn-annuler-selection');
-    if (bouton) {
-      bouton.classList.add('animate-pulse');
-    }
-    
-    try {
-      const promises = selection.map(id => mettreAJourStatut(id, 'Annuler'));
-      const results = await Promise.all(promises);
-      
-      const successCount = results.filter(r => r).length;
-      setMessage(`${successCount} demande(s) annulée(s)`);
-      
-      // Animation de confirmation
-      const section = document.querySelector('.bg-blue-50');
-      if (section) {
-        section.classList.add('bg-red-50', 'border-red-200', 'transition-all', 'duration-700');
-        setTimeout(() => {
-          if (section) {
-            section.classList.remove('bg-red-50', 'border-red-200');
-          }
-        }, 2000);
-      }
-      
-    } catch (error) {
-      setMessage('Erreur lors de l\'annulation de la sélection');
-    } finally {
-      setSelection([]);
-      setMiseAJourSelectionEnCours(false);
-      
-      if (bouton) {
-        bouton.classList.remove('animate-pulse');
-      }
-      
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
-
-  const toggleSelection = (id: number) => {
-    setSelection(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-    
-    // Animation sur la ligne sélectionnée
-    const element = document.getElementById(`demande-${id}`);
-    if (element) {
-      element.classList.add('scale-[1.02]', 'transition-transform', 'duration-300');
-      setTimeout(() => {
-        element.classList.remove('scale-[1.02]');
-      }, 300);
-    }
-  };
-
-  const toggleSelectionTout = () => {
-    if (selection.length === demandesFiltrees.length) {
-      setSelection([]);
-    } else {
-      setSelection(demandesFiltrees.map(d => d.id));
-      
-      // Animation sur toutes les lignes
-      demandesFiltrees.forEach(d => {
-        const element = document.getElementById(`demande-${d.id}`);
-        if (element) {
-          element.classList.add('scale-[1.01]', 'transition-transform', 'duration-200');
-          setTimeout(() => {
-            element.classList.remove('scale-[1.01]');
-          }, 200);
-        }
-      });
-    }
+    await mettreAJourStatut(id, 'Annuler');
   };
 
   // Filtrage et tri
@@ -375,7 +240,9 @@ const DemandeDroitFamille: React.FC = () => {
     .filter(d => {
       const matchRecherche = 
         d.nomDemandeur.toLowerCase().includes(recherche.toLowerCase()) ||
-        d.numeroDossier.toLowerCase().includes(recherche.toLowerCase());
+        d.numeroDossier.toLowerCase().includes(recherche.toLowerCase()) ||
+        d.typeDemande.toLowerCase().includes(recherche.toLowerCase()) ||
+        d.donneesOriginales.user?.email?.toLowerCase().includes(recherche.toLowerCase());
       
       const matchStatut = filtreStatut === 'Tous' || d.statut === filtreStatut;
 
@@ -383,9 +250,11 @@ const DemandeDroitFamille: React.FC = () => {
     })
     .sort((a, b) => {
       if (tri === 'date') {
+        const dateA = new Date(a.donneesOriginales.createdAt);
+        const dateB = new Date(b.donneesOriginales.createdAt);
         return ordreTri === 'asc' 
-          ? new Date(a.dateDepot).getTime() - new Date(b.dateDepot).getTime()
-          : new Date(b.dateDepot).getTime() - new Date(a.dateDepot).getTime();
+          ? dateA.getTime() - dateB.getTime()
+          : dateB.getTime() - dateA.getTime();
       }
       if (tri === 'nom') {
         return ordreTri === 'asc'
@@ -405,25 +274,26 @@ const DemandeDroitFamille: React.FC = () => {
   const getStatutStyle = (statut: string) => {
     switch (statut) {
       case 'Validée':
-        return 'bg-green-100 text-green-800 border-green-300';
+        return 'bg-green-100 text-green-800 border border-green-300';
       case 'Annulée':
-        return 'bg-red-100 text-red-800 border-red-300';
+        return 'bg-red-100 text-red-800 border border-red-300';
       case 'En attente':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return 'bg-gray-100 text-gray-800 border border-gray-300';
     }
   };
 
   // Filtres de statut
   const filtresStatut = ['Tous', 'En attente', 'Validée', 'Annulée'];
 
-  if (chargement) {
+  if (chargement && demandes.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Chargement des demandes...</p>
+          <p className="text-sm text-gray-400">Vérification de l'API...</p>
         </div>
       </div>
     );
@@ -436,23 +306,33 @@ const DemandeDroitFamille: React.FC = () => {
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">
             <FileText className="w-8 h-8 text-green-600" />
-            Gestion des Demandes de Droit de Famille
+            Toutes les Demandes de Droit de Famille
           </h1>
-          <p className="text-gray-600 mt-2">
-            Consultez, gérez et traitez les demandes de droit de famille
-          </p>
+         
         </div>
 
         {/* Message de notification */}
         {message && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between animate-fadeIn">
+          <div className={`mb-6 p-4 border rounded-lg flex items-center justify-between animate-fadeIn ${
+            message.includes('succès') || message.includes('chargées')
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : message.includes('Erreur')
+              ? 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-blue-50 border-blue-200 text-blue-700'
+          }`}>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="text-green-700">{message}</span>
+              {message.includes('succès') || message.includes('chargées') ? (
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              ) : message.includes('Erreur') ? (
+                <XCircle className="w-5 h-5 text-red-600" />
+              ) : (
+                <Clock className="w-5 h-5 text-blue-600" />
+              )}
+              <span>{message}</span>
             </div>
             <button 
               onClick={() => setMessage('')} 
-              className="text-green-700 hover:text-green-900 transition-colors"
+              className="hover:opacity-75 transition-opacity"
             >
               <XCircle className="w-5 h-5" />
             </button>
@@ -466,6 +346,7 @@ const DemandeDroitFamille: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-500">Total Demandes</p>
                 <p className="text-2xl font-bold text-gray-900">{statistiques.total}</p>
+                <p className="text-xs text-gray-400 mt-1">{demandesOriginales.length} données brutes</p>
               </div>
               <FileText className="w-8 h-8 text-blue-500" />
             </div>
@@ -510,7 +391,7 @@ const DemandeDroitFamille: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher par nom ou numéro de dossier..."
+                  placeholder="Rechercher par nom, numéro dossier, type ou email..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   value={recherche}
                   onChange={(e) => setRecherche(e.target.value)}
@@ -518,7 +399,7 @@ const DemandeDroitFamille: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <select
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 value={filtreStatut}
@@ -526,246 +407,198 @@ const DemandeDroitFamille: React.FC = () => {
               >
                 {filtresStatut.map(statut => (
                   <option key={statut} value={statut}>
-                    {statut}
+                    Statut: {statut}
                   </option>
                 ))}
               </select>
+              
+              <button
+                onClick={() => {
+                  setTri('date');
+                  setOrdreTri(ordreTri === 'asc' ? 'desc' : 'asc');
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+              >
+                Trier par date
+                {ordreTri === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+              
+              <button
+                onClick={() => fetchDemandes()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <Loader2 className={`w-4 h-4 ${chargement ? 'animate-spin' : ''}`} />
+                Rafraîchir
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Actions de sélection */}
-        {selection.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-blue-600" />
-              <span className="text-blue-700 font-medium">
-                {selection.length} demande(s) sélectionnée(s)
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                id="btn-valider-selection"
-                onClick={validerSelection}
-                disabled={miseAJourSelectionEnCours}
-                className={`flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all ${miseAJourSelectionEnCours ? 'opacity-75' : ''}`}
-              >
-                {miseAJourSelectionEnCours ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <CheckCircle className="w-4 h-4" />
-                )}
-                Valider la sélection
-              </button>
-              <button
-                id="btn-annuler-selection"
-                onClick={annulerSelection}
-                disabled={miseAJourSelectionEnCours}
-                className={`flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all ${miseAJourSelectionEnCours ? 'opacity-75' : ''}`}
-              >
-                {miseAJourSelectionEnCours ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <XCircle className="w-4 h-4" />
-                )}
-                Annuler la sélection
-              </button>
-              <button
-                onClick={() => setSelection([])}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Désélectionner
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Tableau des demandes */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selection.length === demandesFiltrees.length && demandesFiltrees.length > 0}
-                        onChange={toggleSelectionTout}
-                        className="rounded border-gray-300 focus:ring-blue-500 transition-all"
-                      />
-                      <span className="text-xs font-medium text-gray-500 uppercase">Sélection</span>
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <button
-                      className="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                      onClick={() => {
-                        setTri('numeroDossier');
-                        setOrdreTri(ordreTri === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      N° Dossier
-                      {tri === 'numeroDossier' && (
-                        ordreTri === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <button
-                      className="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                      onClick={() => {
-                        setTri('nom');
-                        setOrdreTri(ordreTri === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Demandeur
-                      {tri === 'nom' && (
-                        ordreTri === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <button
-                      className="flex items-center gap-1 hover:text-gray-700 transition-colors"
-                      onClick={() => {
-                        setTri('date');
-                        setOrdreTri(ordreTri === 'asc' ? 'desc' : 'asc');
-                      }}
-                    >
-                      Date dépôt
-                      {tri === 'date' && (
-                        ordreTri === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Statut
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {demandesFiltrees.map((demande) => (
-                  <tr 
-                    key={demande.id}
-                    id={`demande-${demande.id}`}
-                    className={`hover:bg-gray-50 transition-all ${selection.includes(demande.id) ? 'bg-blue-50' : ''}`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="checkbox"
-                        checked={selection.includes(demande.id)}
-                        onChange={() => toggleSelection(demande.id)}
-                        className="rounded border-gray-300 focus:ring-blue-500 transition-all"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {demande.numeroDossier}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-gray-400" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {demande.nomDemandeur}
+          {demandesFiltrees.length > 0 ? (
+            <>
+              <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+                <p className="text-sm text-gray-600">
+                  Affichage de {demandesFiltrees.length} demande{demandesFiltrees.length > 1 ? 's' : ''} 
+                  {recherche && ` pour "${recherche}"`}
+                  {filtreStatut !== 'Tous' && ` avec statut "${filtreStatut}"`}
+                </p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        N° Dossier
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Demandeur
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date dépôt
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Statut
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {demandesFiltrees.map((d) => (
+                      <tr 
+                        key={d.id} 
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-900">{d.numeroDossier}</div>
+                          <div className="text-xs text-gray-500">ID: {d.id}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <User className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">{d.nomDemandeur}</div>
+                              <div className="text-sm text-gray-500">{d.donneesOriginales.user?.email || 'Email non disponible'}</div>
+                              <div className="text-xs text-gray-400">UserID: {d.donneesOriginales.userId.substring(0, 8)}...</div>
+                            </div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-900">{d.typeDemande}</div>
+                          {d.donneesOriginales.serviceType && (
+                            <div className="text-xs text-gray-500">
+                              Service: {d.donneesOriginales.serviceType}
+                            </div>
+                          )}
+                          {d.donneesOriginales.sousType && (
+                            <div className="text-xs text-gray-500">
+                              Sous-type: {d.donneesOriginales.sousType}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-gray-900">{d.dateDepot}</div>
                           <div className="text-xs text-gray-500">
-                            Dernière maj: {demande.derniereMiseAJour}
+                            {new Date(d.donneesOriginales.createdAt).toLocaleTimeString('fr-FR')}
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{demande.typeDemande}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <div className="text-sm text-gray-900">{demande.dateDepot}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatutStyle(demande.statut)}`}>
-                        {demande.statut}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => validerDemande(demande.id)}
-                          disabled={demande.statut === 'Validée' || demande.statut === 'Annulée' || miseAJourEnCours.includes(demande.id)}
-                          className={`flex items-center gap-1 px-3 py-1 rounded text-sm transition-all ${demande.statut === 'Validée' || demande.statut === 'Annulée' 
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                            : 'bg-green-100 text-green-700 hover:bg-green-200 hover:scale-105'} ${miseAJourEnCours.includes(demande.id) ? 'animate-pulse' : ''}`}
-                        >
-                          {miseAJourEnCours.includes(demande.id) ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4" />
-                          )}
-                          Valider
-                        </button>
-                        <button
-                          onClick={() => annulerDemande(demande.id)}
-                          disabled={demande.statut === 'Annulée' || demande.statut === 'Validée' || miseAJourEnCours.includes(demande.id)}
-                          className={`flex items-center gap-1 px-3 py-1 rounded text-sm transition-all ${demande.statut === 'Annulée' || demande.statut === 'Validée'
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                            : 'bg-red-100 text-red-700 hover:bg-red-200 hover:scale-105'} ${miseAJourEnCours.includes(demande.id) ? 'animate-pulse' : ''}`}
-                        >
-                          {miseAJourEnCours.includes(demande.id) ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <XCircle className="w-4 h-4" />
-                          )}
-                          Annuler
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pied de tableau */}
-          {demandesFiltrees.length === 0 ? (
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatutStyle(d.statut)}`}>
+                            {d.statut}
+                          </span>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Origine: {d.donneesOriginales.status}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => validerDemande(d.id)}
+                              disabled={miseAJourEnCours.includes(d.id) || d.statut === 'Validée'}
+                              className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
+                                miseAJourEnCours.includes(d.id) || d.statut === 'Validée'
+                                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                  : 'bg-green-600 text-white hover:bg-green-700'
+                              }`}
+                            >
+                              {miseAJourEnCours.includes(d.id) ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Traitement...
+                                </>
+                              ) : d.statut === 'Validée' ? (
+                                <>
+                                  <CheckCircle className="w-4 h-4" />
+                                  Validée
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="w-4 h-4" />
+                                  Valider
+                                </>
+                              )}
+                            </button>
+                            
+                            <button
+                              onClick={() => annulerDemande(d.id)}
+                              disabled={miseAJourEnCours.includes(d.id) || d.statut === 'Annulée'}
+                              className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
+                                miseAJourEnCours.includes(d.id) || d.statut === 'Annulée'
+                                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                  : 'bg-red-600 text-white hover:bg-red-700'
+                              }`}
+                            >
+                              {miseAJourEnCours.includes(d.id) ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Traitement...
+                                </>
+                              ) : d.statut === 'Annulée' ? (
+                                <>
+                                  <XCircle className="w-4 h-4" />
+                                  Annulée
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-4 h-4" />
+                                  Annuler
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
             <div className="p-8 text-center">
               <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">Aucune demande trouvée</p>
-            </div>
-          ) : (
-            <div className="px-6 py-4 border-t border-gray-200 flex flex-col md:flex-row md:items-center justify-between">
-              <div className="text-sm text-gray-500 mb-2 md:mb-0">
-                Affichage de <span className="font-medium">{demandesFiltrees.length}</span> demandes
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-500">
-                  <span className="font-medium">{statistiques.enAttente}</span> en attente de validation
-                </div>
-              </div>
+              <p className="text-sm text-gray-400 mt-2">
+                Vérifiez vos filtres ou essayez de rafraîchir les données
+              </p>
+              <button
+                onClick={() => fetchDemandes()}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Rafraîchir les données
+              </button>
             </div>
           )}
         </div>
       </div>
-
-      {/* Styles d'animation */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 };
