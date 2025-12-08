@@ -8,6 +8,9 @@ import {
   Bath,
   Ruler,
   Eye,
+  Search,
+  Filter,
+  Navigation,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import property1 from "@/assets/property-1.jpg";
@@ -23,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import LocationPickerModal from "@/components/carte";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -98,6 +101,19 @@ const normalizeAddress = (address: string) => {
     .trim();
 };
 
+// Fonction pour calculer la distance entre deux points (formule de Haversine)
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
 interface PropertyBuyProps {
   cardsOnly?: boolean;
   maxItems?: number;
@@ -132,7 +148,10 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const [priceMax, setPriceMax] = useState<number | undefined>(undefined);
   const [typeBienAchat, setTypeBienAchat] = useState<string | undefined>(undefined);
   const [localisation, setLocalisation] = useState("");
+  const [rayon, setRayon] = useState<number | undefined>(undefined);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
 
   const [buyProperties, setBuyProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,60 +165,15 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const { user, isAuthenticated } = useAuth();
 
   // Animation variants
-  const containerVariants = {
+  const pageTransition = {
     hidden: { opacity: 0 },
-    visible: {
+    visible: { 
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-      },
-    },
-    hover: {
-      y: -8,
-      boxShadow: "0 20px 40px rgba(85, 107, 47, 0.15)",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      },
-    },
-  };
-
-  const imageVariants = {
-    hidden: { scale: 1 },
-    hover: {
-      scale: 1.05,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
+      transition: { 
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
   };
 
   const staggerContainer = {
@@ -207,10 +181,100 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
+        staggerChildren: 0.08,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const fadeInUp = {
+    hidden: { 
+      opacity: 0, 
+      y: 30,
+      scale: 0.95
     },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1]
+      }
+    },
+    hover: {
+      y: -6,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const cardHover = {
+    hover: {
+      y: -8,
+      boxShadow: "0 25px 50px -12px rgba(85, 107, 47, 0.25)",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    }
+  };
+
+  const imageHover = {
+    hover: {
+      scale: 1.08,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const slideIn = {
+    hidden: { 
+      opacity: 0,
+      x: -20
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const scaleIn = {
+    hidden: { 
+      opacity: 0,
+      scale: 0.8
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  // Image de fond en ligne pour le titre
+  const titleImageUrl = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80";
+
+  const titleBgStyle = {
+    backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4)), url('${titleImageUrl}')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+    height: '50vh',
+    display: 'flex',
+    alignItems: 'center'
   };
 
   // Intersection Observer pour le tracking
@@ -326,7 +390,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const handlePropertyClick = (property: any) => {
     trackPropertyClick(property.id, property.title, property.price);
     if (onPropertyClick) onPropertyClick(property);
-    navigate(`/immobilier/achat/${property.id}`);
+    navigate(`/achat/${property.id}`);
   };
 
   const handlePropertyContact = (property: any) => {
@@ -347,6 +411,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       priceMin,
       priceMax,
       location: localisation,
+      rayon,
     };
 
     trackPropertyFilter(filters);
@@ -355,7 +420,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
   useEffect(() => {
     handleFilterChange();
-  }, [typeBienAchat, priceMin, priceMax, localisation]);
+  }, [typeBienAchat, priceMin, priceMax, localisation, rayon]);
 
   const displayed = useMemo(() => {
     return buyProperties.filter((p) => {
@@ -378,6 +443,17 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         if (!matchesLocation) return false;
       }
 
+      // Rayon filter (si des coordonnées sont sélectionnées)
+      if (rayon && selectedCoordinates && p.latitude && p.longitude) {
+        const distance = calculateDistance(
+          selectedCoordinates.lat,
+          selectedCoordinates.lng,
+          p.latitude,
+          p.longitude
+        );
+        if (distance > rayon) return false;
+      }
+
       // Price filter
       if (priceMin !== undefined && (p.price === undefined || p.price < priceMin)) return false;
       if (priceMax !== undefined && (p.price === undefined || p.price > priceMax)) return false;
@@ -389,7 +465,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
       return true;
     });
-  }, [buyProperties, localisation, typeBienAchat, priceMin, priceMax]);
+  }, [buyProperties, localisation, typeBienAchat, priceMin, priceMax, rayon, selectedCoordinates]);
 
   const prevImage = (id: string, total: number, e?: any) => {
     e?.stopPropagation?.();
@@ -422,19 +498,32 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     setModalOpen(true);
   };
 
+  const handleLocationSelect = (location: any) => {
+    setLocalisation(location.address);
+    if (location.latitude && location.longitude) {
+      setSelectedCoordinates({
+        lat: location.latitude,
+        lng: location.longitude
+      });
+    }
+  };
+
   // Mode cartes seules
   if (cardsOnly) {
     return (
       <section className="w-full">
         <div className="container mx-auto px-4 py-6">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            >
               {[1, 2, 3, 4].map((i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
+                  variants={fadeInUp}
                   className="animate-pulse"
                 >
                   <div className="bg-[#FFFFFF0] h-64 rounded-2xl mb-4" />
@@ -442,7 +531,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   <div className="bg-[#D3D3D3] h-4 rounded w-1/2" />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <motion.div
               variants={staggerContainer}
@@ -460,7 +549,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 return (
                   <motion.div
                     key={property.id}
-                    variants={cardVariants}
+                    variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
                     whileHover="hover"
@@ -471,7 +560,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       className="home-card group cursor-pointer h-full border border-[#D3D3D3] rounded-2xl overflow-hidden bg-white hover:shadow-xl transition-shadow duration-300"
                       onClick={() => handlePropertyClick(property)}
                     >
-                      <motion.div className="relative" variants={imageVariants}>
+                      <motion.div className="relative" variants={imageHover}>
                         <div className="relative rounded-lg h-52 overflow-hidden">
                           <motion.img
                             src={images[idx % totalImages]}
@@ -481,12 +570,22 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                             transition={{ duration: 0.3 }}
                           />
 
-                          <div className="absolute bg-[#6B8E23] rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge">
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="absolute bg-[#6B8E23] rounded-full py-1 px-2 text-white font-semibold text-sm top-3 left-3 home-card-badge"
+                          >
                             {property.type}
-                          </div>
-                          <div className="absolute bg-[#556B2F] p-2 text-white font-semibold text-sm rounded-lg bottom-3 right-3 home-card-price shadow-lg">
+                          </motion.div>
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="absolute bg-[#556B2F] p-2 text-white font-semibold text-sm rounded-lg bottom-3 right-3 home-card-price shadow-lg"
+                          >
                             {priceLabel}
-                          </div>
+                          </motion.div>
                           
                           {totalImages > 1 && (
                             <>
@@ -602,159 +701,274 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg z-50 mt-44 w-full"
+      initial="hidden"
+      animate="visible"
+      variants={pageTransition}
+      className="relative z-30 w-full"
+      style={{ marginTop: "10px" }}
     >
-      <div className="container mx-auto px-4 py-6">
-        {/* Header avec animation */}
+      {/* Header avec image de hauteur réduite */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative"
+        style={titleBgStyle}
+      >
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-4xl mx-auto text-center pt-12"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight"
+            >
+              Propriétés à Vendre
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="text-lg md:text-xl text-white/90 mb-6 max-w-2xl mx-auto"
+            >
+              Découvrez notre sélection exclusive de biens immobiliers à La Réunion
+            </motion.p>
+            
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+              className="h-1 bg-white/30 mx-auto mb-2 origin-left"
+              style={{ maxWidth: "180px" }}
+            />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8, delay: 0.9, ease: "easeOut" }}
+              className="h-1 bg-white mx-auto origin-left"
+              style={{ maxWidth: "80px" }}
+            />
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Contenu principal */}
+      <div className="container mx-auto px-4 -mt-16 relative z-20">
+        {/* Bouton filtre mobile */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8 text-center"
+          transition={{ delay: 0.3 }}
+          className="lg:hidden mb-4"
         >
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-3xl font-bold text-[#8B4513] mb-2"
+          <Button
+            variant="outline"
+            className="w-full bg-white border-[#D3D3D3] hover:border-[#556B2F] hover:bg-white"
+            onClick={() => setShowFilters(!showFilters)}
           >
-            Propriétés à Vendre
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-gray-600"
-          >
-            Découvrez notre sélection exclusive de biens immobiliers
-          </motion.p>
+            <Filter className="w-4 h-4 mr-2" />
+            {showFilters ? "Masquer les filtres" : "Afficher les filtres"}
+          </Button>
         </motion.div>
 
         {/* Filtres */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="bg-[#FFFFFF0] rounded-2xl border border-[#D3D3D3] p-6 shadow-sm mb-8"
-        >
-          <div className="mb-5 flex items-center gap-2">
+        <AnimatePresence>
+          {(showFilters || window.innerWidth >= 1024) && (
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "4px" }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="h-6 bg-[#556B2F] rounded-full"
-            />
-            <h3 className="text-sm font-bold text-[#8B4513] uppercase tracking-wider">
-              Recherche de propriétés
-            </h3>
-          </div>
-
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-          >
-            {/* Type de bien */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Type de bien
-              </label>
-              <Select
-                onValueChange={(v) => setTypeBienAchat(v || undefined)}
-                value={typeBienAchat}
+              initial={{ opacity: 0, y: -20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-2xl border border-[#D3D3D3] p-6 shadow-lg mb-8"
+            >
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mb-6 flex items-center gap-3"
               >
-                <SelectTrigger 
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] transition-colors rounded-xl focus:ring-2 focus:ring-[#556B2F]/20"
-                >
-                  <SelectValue placeholder="Choisir..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="maison">Maison / Villa</SelectItem>
-                  <SelectItem value="appartement">Appartement</SelectItem>
-                  <SelectItem value="terrain">Terrain</SelectItem>
-                  <SelectItem value="commercial">Local commercial</SelectItem>
-                  <SelectItem value="professionnel">Local professionnel</SelectItem>
-                  <SelectItem value="fonds_de_commerce">Fonds de commerce</SelectItem>
-                  <SelectItem value="villas_neuves">Villas neuves (VEFA)</SelectItem>
-                  <SelectItem value="appartements_neufs">Appartement neufs (VEFA)</SelectItem>
-                  <SelectItem value="scpi">SCPI</SelectItem>
-                  <SelectItem value="cave">Cave</SelectItem>
-                  <SelectItem value="parking">Parking</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
+                <div className="h-6 w-1 bg-[#556B2F] rounded-full"></div>
+                <h3 className="text-sm font-bold text-[#8B4513] uppercase tracking-wider">
+                  Rechercher votre bien
+                </h3>
+              </motion.div>
 
-            {/* Localisation */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Localisation
-              </label>
-              <div className="relative group">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#556B2F] group-focus-within:text-[#6B8E23] transition-colors" />
-                <Input
-                  value={localisation}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  onClick={() => setIsLocationModalOpen(true)}
-                  placeholder="Cliquez pour choisir..."
-                  className="pl-9 h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] cursor-pointer transition-colors rounded-xl"
-                  readOnly
-                />
-              </div>
-            </motion.div>
-
-            {/* Prix */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Budget (€)
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Min"
-                  value={priceMin ?? ""}
-                  onChange={(e) =>
-                    setPriceMin(e.target.value ? Number(e.target.value) : undefined)
-                  }
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm"
-                />
-                <Input
-                  placeholder="Max"
-                  value={priceMax ?? ""}
-                  onChange={(e) =>
-                    setPriceMax(e.target.value ? Number(e.target.value) : undefined)
-                  }
-                  className="h-10 bg-white border-2 border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-colors text-sm"
-                />
-              </div>
-            </motion.div>
-
-            {/* Bouton de recherche */}
-            <motion.div variants={fadeInUp} className="flex items-end">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleFilterChange}
-                className="w-full h-10 bg-[#556B2F] text-white font-semibold rounded-xl hover:bg-[#6B8E23] hover:shadow-lg transition-all shadow-md"
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5"
               >
-                Rechercher
-              </motion.button>
+                {/* Type de bien */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Type de bien
+                  </label>
+                  <Select
+                    onValueChange={(v) => setTypeBienAchat(v || undefined)}
+                    value={typeBienAchat}
+                  >
+                    <SelectTrigger 
+                      className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] transition-all rounded-xl"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Home className="w-4 h-4 text-[#8B4513]" />
+                        <SelectValue placeholder="Choisir..." />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="maison">Maison / Villa</SelectItem>
+                      <SelectItem value="appartement">Appartement</SelectItem>
+                      <SelectItem value="terrain">Terrain</SelectItem>
+                      <SelectItem value="commercial">Local commercial</SelectItem>
+                      <SelectItem value="professionnel">Local professionnel</SelectItem>
+                      <SelectItem value="fonds_de_commerce">Fonds de commerce</SelectItem>
+                      <SelectItem value="villas_neuves">Villas neuves (VEFA)</SelectItem>
+                      <SelectItem value="appartements_neufs">Appartement neufs (VEFA)</SelectItem>
+                      <SelectItem value="scpi">SCPI</SelectItem>
+                      <SelectItem value="cave">Cave</SelectItem>
+                      <SelectItem value="parking">Parking</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
+
+                {/* Localisation */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Localisation
+                  </label>
+                  <div className="relative group">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#556B2F] transition-colors" />
+                    <Input
+                      value={localisation}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      onClick={() => setIsLocationModalOpen(true)}
+                      placeholder="Ville, code postal..."
+                      className="pl-10 h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] cursor-pointer transition-all rounded-xl"
+                      readOnly
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Rayon */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Rayon (km)
+                  </label>
+                  <div className="relative group">
+                    <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#556B2F] transition-colors" />
+                    <Select
+                      onValueChange={(v) => setRayon(v ? parseInt(v) : undefined)}
+                      value={rayon?.toString()}
+                    >
+                      <SelectTrigger 
+                        className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] transition-all rounded-xl pl-10"
+                      >
+                        <SelectValue placeholder="Rayon..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5 km</SelectItem>
+                        <SelectItem value="10">10 km</SelectItem>
+                        <SelectItem value="20">20 km</SelectItem>
+                        <SelectItem value="30">30 km</SelectItem>
+                        <SelectItem value="50">50 km</SelectItem>
+                        <SelectItem value="100">100 km</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </motion.div>
+
+                {/* Prix */}
+                <motion.div variants={slideIn} className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                    Budget (€)
+                  </label>
+                  <div className="flex gap-3">
+                    <div className="relative flex-1">
+                      <Input
+                        placeholder="Min"
+                        value={priceMin ?? ""}
+                        onChange={(e) =>
+                          setPriceMin(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all pl-8"
+                      />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                    </div>
+                    <div className="relative flex-1">
+                      <Input
+                        placeholder="Max"
+                        value={priceMax ?? ""}
+                        onChange={(e) =>
+                          setPriceMax(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        className="h-11 bg-white border border-[#D3D3D3] hover:border-[#556B2F] rounded-xl transition-all pl-8"
+                      />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+
+              {/* Indicateur de rayon sélectionné et bouton de recherche */}
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4"
+              >
+                {rayon && selectedCoordinates && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-3 bg-[#6B8E23]/10 text-[#556B2F] px-4 py-3 rounded-xl"
+                  >
+                    <Navigation className="w-5 h-5" />
+                    <div>
+                      <p className="text-sm font-medium">
+                        Rayon: {rayon} km autour de {localisation.split(',')[0]}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Coordonnées: {selectedCoordinates.lat.toFixed(4)}, {selectedCoordinates.lng.toFixed(4)}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+
+                <motion.div variants={scaleIn} className="w-full md:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleFilterChange}
+                    className="w-full md:w-48 h-11 bg-[#556B2F] text-white font-semibold rounded-xl hover:bg-[#6B8E23] hover:shadow-lg transition-all shadow-md flex items-center justify-center gap-2"
+                  >
+                    <Search className="w-4 h-4" />
+                    Rechercher
+                  </motion.button>
+                </motion.div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Résultats */}
         <div className="mt-6">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
               {[1, 2, 3, 4].map((i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
+                  variants={fadeInUp}
                   className="animate-pulse"
                 >
                   <div className="bg-[#FFFFFF0] h-64 rounded-2xl mb-4" />
@@ -762,35 +976,45 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   <div className="bg-[#D3D3D3] h-4 rounded w-1/2" />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : displayed.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-center py-12"
+              className="text-center py-16"
             >
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                className="text-[#8B4513] text-6xl mb-4"
+                initial={{ rotate: -10, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center justify-center w-24 h-24 bg-[#6B8E23]/10 rounded-full mb-6"
               >
-                🏠
+                <Home className="w-12 h-12 text-[#8B4513]" />
               </motion.div>
-              <h3 className="text-xl font-semibold text-[#8B4513] mb-2">
+              <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-2xl font-semibold text-[#8B4513] mb-3"
+              >
                 Aucune propriété trouvée
-              </h3>
-              <p className="text-gray-600">
-                Essayez de modifier vos critères de recherche
-              </p>
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-gray-600 max-w-md mx-auto"
+              >
+                Essayez de modifier vos critères de recherche ou contactez-nous pour une recherche personnalisée.
+              </motion.p>
             </motion.div>
           ) : (
             <motion.div
-              variants={containerVariants}
+              variants={staggerContainer}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
               {displayed.map((property: any, index: number) => {
                 const images = getPropertyImages(property);
@@ -799,10 +1023,31 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 const featuresArr = normalizeFeatures(property.features);
                 const priceLabel = formatPrice(property.price || 0, property.type, property.status);
 
+                // Calcul de la distance si applicable
+                let distanceInfo = null;
+                if (selectedCoordinates && property.latitude && property.longitude) {
+                  const distance = calculateDistance(
+                    selectedCoordinates.lat,
+                    selectedCoordinates.lng,
+                    property.latitude,
+                    property.longitude
+                  );
+                  distanceInfo = (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center gap-1 text-xs font-medium text-white bg-black/60 px-2 py-1 rounded-full"
+                    >
+                      <Navigation className="w-3 h-3" />
+                      {distance.toFixed(1)} km
+                    </motion.div>
+                  );
+                }
+
                 return (
                   <motion.div
                     key={property.id}
-                    variants={cardVariants}
+                    variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
                     whileHover="hover"
@@ -810,149 +1055,168 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   >
                     <Card
                       data-property-id={property.id}
-                      className="overflow-hidden border border-[#D3D3D3] hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
+                      className="overflow-hidden border border-[#D3D3D3] hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer h-full flex flex-col"
                       onClick={() => handlePropertyClick(property)}
                     >
-                      <div className="relative">
-                        {/* Image avec overlay */}
-                        <div className="relative h-48 w-11/12 rounded-lg mx-3 shadow-lg my-2 overflow-hidden">
-                          <motion.img
+                      <motion.div
+                        className="relative flex-1"
+                        variants={cardHover}
+                      >
+                        {/* Image */}
+                        <motion.div 
+                          className="relative h-56 overflow-hidden"
+                          variants={imageHover}
+                        >
+                          <img
                             src={images[idx % totalImages]}
                             alt={property.title}
                             className="w-full h-full object-cover"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.3 }}
                           />
 
+                          {/* Badges overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="absolute top-3 left-3 bg-[#6B8E23] rounded-full px-3 py-1 text-xs font-semibold text-white shadow-md"
+                            className="absolute top-3 left-3"
                           >
-                            {property.type}
+                            <span className="bg-[#6B8E23] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                              {property.type}
+                            </span>
                           </motion.div>
+                          
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="absolute bottom-3 right-3 bg-[#556B2F] rounded-lg px-3 py-2 text-xs font-semibold text-white shadow-md"
+                            className="absolute top-3 right-3 flex flex-col items-end gap-1"
                           >
-                            {priceLabel}
-                          </motion.div>
-
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="absolute top-3 right-3"
-                          >
-                            <div className="px-3 py-1 rounded-full text-xs font-semibold text-white bg-[#8B4513] shadow-md">
+                            <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                               À VENDRE
-                            </div>
+                            </span>
+                            {distanceInfo}
                           </motion.div>
 
+                          {/* Navigation d'images */}
                           {totalImages > 1 && (
                             <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                              <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                whileHover={{ scale: 1.1 }}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center"
                                 onClick={(e) => prevImage(property.id, totalImages, e)}
                               >
                                 <ChevronLeft className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                              </motion.button>
+                              <motion.button
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                whileHover={{ scale: 1.1 }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg flex items-center justify-center"
                                 onClick={(e) => nextImage(property.id, totalImages, e)}
                               >
                                 <ChevronRight className="h-4 w-4" />
-                              </Button>
-
-                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+                              </motion.button>
+                              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs">
                                 {idx + 1}/{totalImages}
                               </div>
                             </>
                           )}
-                        </div>
+
+                          {/* Prix */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="absolute bottom-3 right-3"
+                          >
+                            <span className="bg-[#556B2F] text-white text-sm font-bold px-4 py-2 rounded-lg shadow-lg">
+                              {priceLabel}
+                            </span>
+                          </motion.div>
+                        </motion.div>
 
                         {/* Contenu */}
-                        <div className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-[#8B4513] text-sm flex-1 line-clamp-2 leading-tight">
+                        <div className="p-5 flex-1 flex flex-col">
+                          <div className="mb-3">
+                            <h3 className="font-bold text-[#8B4513] text-base mb-2 line-clamp-2 leading-snug">
                               {property.title}
                             </h3>
+                            <div className="flex items-center text-sm text-gray-600">
+                              <MapPin className="h-3.5 w-3.5 text-[#556B2F] mr-1.5" />
+                              <span>{property.city}</span>
+                            </div>
                           </div>
 
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs text-gray-600 flex items-center gap-1">
-                              <MapPin className="h-3 w-3 text-[#556B2F]" />
-                              {property.city}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs text-gray-600 mb-3">
+                          {/* Caractéristiques */}
+                          <div className="flex items-center gap-4 text-sm text-gray-700 mb-4">
                             {property.surface && (
-                              <div className="flex items-center gap-1">
-                                <Ruler className="h-3 w-3" />
-                                <span>{property.surface} m²</span>
+                              <div className="flex items-center gap-1.5">
+                                <Ruler className="h-3.5 w-3.5" />
+                                <span className="font-medium">{property.surface} m²</span>
                               </div>
                             )}
                             {(property.bedrooms || property.rooms) && (
-                              <div className="flex items-center gap-1">
-                                <Bed className="h-3 w-3" />
-                                <span>{property.bedrooms || property.rooms} ch.</span>
+                              <div className="flex items-center gap-1.5">
+                                <Bed className="h-3.5 w-3.5" />
+                                <span className="font-medium">{property.bedrooms || property.rooms} ch.</span>
                               </div>
                             )}
                             {property.bathrooms && (
-                              <div className="flex items-center gap-1">
-                                <Bath className="h-3 w-3" />
-                                <span>{property.bathrooms} sdb</span>
+                              <div className="flex items-center gap-1.5">
+                                <Bath className="h-3.5 w-3.5" />
+                                <span className="font-medium">{property.bathrooms} sdb</span>
                               </div>
                             )}
                           </div>
 
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {featuresArr.slice(0, 2).map((feature, index) => (
-                              <motion.span
-                                key={index}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="inline-flex items-center gap-1 bg-[#6B8E23]/10 text-[#556B2F] px-2 py-1 rounded-full text-xs"
-                              >
-                                <div className="w-1 h-1 bg-[#556B2F] rounded-full" />
-                                {feature}
-                              </motion.span>
-                            ))}
-                          </div>
+                          {/* Features */}
+                          {featuresArr.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-5">
+                              {featuresArr.slice(0, 3).map((feature, index) => (
+                                <motion.span
+                                  key={index}
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: index * 0.1 }}
+                                  className="inline-flex items-center gap-1.5 bg-[#6B8E23]/10 text-[#556B2F] px-3 py-1.5 rounded-full text-xs font-medium"
+                                >
+                                  <div className="w-1.5 h-1.5 bg-[#556B2F] rounded-full" />
+                                  {feature}
+                                </motion.span>
+                              ))}
+                            </div>
+                          )}
 
                           {/* Boutons d'action */}
-                          <div className="flex gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="flex-1 bg-[#556B2F] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#6B8E23] hover:shadow-lg transition-all shadow-md disabled:opacity-60"
-                              onClick={(e) => handleDemanderVisite(property, e)}
-                              disabled={!!sentRequests?.[property?.id]}
-                            >
-                              {sentRequests?.[property?.id]
-                                ? "Demande envoyée"
-                                : "Demander visite"}
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="border-2 border-[#D3D3D3] p-2 rounded-md hover:border-[#556B2F] hover:bg-[#6B8E23]/10 transition-colors shadow-sm"
-                              onClick={() => handlePropertyClick(property)}
-                            >
-                              <Eye className="w-4 h-4 text-[#8B4513]" />
-                            </motion.button>
+                          <div className="mt-auto pt-4 border-t border-[#D3D3D3]/50">
+                            <div className="flex gap-3">
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex-1 bg-[#556B2F] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#6B8E23] transition-all shadow-md disabled:opacity-60 text-sm"
+                                onClick={(e) => handleDemanderVisite(property, e)}
+                                disabled={!!sentRequests?.[property?.id]}
+                              >
+                                {sentRequests?.[property?.id]
+                                  ? "Demande envoyée"
+                                  : "Demander visite"}
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="border border-[#D3D3D3] p-3 rounded-lg hover:border-[#556B2F] hover:bg-[#6B8E23]/5 transition-all shadow-sm"
+                                onClick={() => handlePropertyClick(property)}
+                              >
+                                <Eye className="w-4 h-4 text-[#8B4513]" />
+                              </motion.button>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     </Card>
                   </motion.div>
                 );
@@ -977,10 +1241,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         onClose={() => setIsLocationModalOpen(false)}
         value={localisation}
         onChange={setLocalisation}
-        onLocationSelect={(location) => {
-          setLocalisation(location.address);
-          console.log("Location selected:", location);
-        }}
+        onLocationSelect={handleLocationSelect}
         properties={buyProperties.map((p) => ({
           id: p.id,
           title: p.title,
