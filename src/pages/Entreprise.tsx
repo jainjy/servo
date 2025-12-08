@@ -16,20 +16,24 @@ import PodcastsServices from "@/components/Podcast_services";
 import { Link } from "react-router-dom";
 import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
+// Palette de couleurs basée sur vos spécifications exactes
 const colors = {
-  primary: "#0f172a", // slate-900
-  primaryHover: "#1e293b", // slate-800
-  primaryPress: "#334155", // slate-700
-  secondary: "#00C2A8",
-  accent: "#FFB800",
-  textPrimary: "#0A0A0A",
-  textSecondary: "#5A6470",
-  background: "#F6F8FA",
-  card: "rgba(255, 255, 255, 0.95)",
-  overlay: "rgba(255, 255, 255, 0.85)",
-  success: "#16A34A",
-  warning: "#D97706",
-  error: "#DC2626"
+  logo: "#556B2F",           /* logo / accent - Olive green */
+  primaryDark: "#6B8E23",    /* Sruvol / fonds légers - Yellow-green */
+  lightBg: "#FFFFF0",        /* fond de page / bloc texte - White */
+  separator: "#D3D3D3",      /* séparateurs / bordures, UI - Light gray */
+  secondaryText: "#8B4513",  /* touche premium / titres secondaires - Saddle brown */
+  
+  // Couleurs supplémentaires pour compléter la palette
+  primaryLight: "#8FBC8F",   // Version plus claire du primary
+  secondaryLight: "#A0522D", // Version plus claire du secondary
+  cardBg: "#FFFFFF",         // Blanc pur pour les cartes
+  textPrimary: "#2C3E50",    // Texte principal foncé
+  textSecondary: "#5D6D7E",  // Texte secondaire
+  success: "#27AE60",        // Vert pour succès
+  warning: "#F39C12",        // Orange pour avertissements
+  error: "#E74C3C",          // Rouge pour erreurs
+  accentGold: "#D4AF37",     // Or pour éléments premium
 };
 
 const partenaires = [
@@ -40,6 +44,7 @@ const partenaires = [
     rating: 4.8,
     projets: 127,
     badge: "Premium",
+    badgeColor: "#D4AF37", // Gold
     location: { lat: 48.8566, lng: 2.3522, address: "Paris, France" }
   },
   {
@@ -49,6 +54,7 @@ const partenaires = [
     rating: 4.6,
     projets: 89,
     badge: "Recommandé",
+    badgeColor: "#6B8E23", // primaryDark (Sruvol)
     location: { lat: 45.7640, lng: 4.8357, address: "Lyon, France" }
   },
   {
@@ -58,6 +64,7 @@ const partenaires = [
     rating: 4.9,
     projets: 203,
     badge: "Expert",
+    badgeColor: "#8B4513", // secondaryText (Saddle brown)
     location: { lat: 43.7102, lng: 7.2620, address: "Nice, France" }
   },
   {
@@ -67,6 +74,7 @@ const partenaires = [
     rating: 4.7,
     projets: 156,
     badge: "Partenaire Or",
+    badgeColor: "#D4AF37", // Gold
     location: { lat: 44.8378, lng: -0.5792, address: "Bordeaux, France" }
   },
 ];
@@ -79,7 +87,8 @@ const servicesEntreprise = [
     description: "Accompagnement complet pour la création de votre entreprise",
     icon: Plus,
     category: "creation",
-    details: "Formalités juridiques, choix du statut, immatriculation"
+    details: "Formalités juridiques, choix du statut, immatriculation",
+    color: "#6B8E23" // primaryDark
   },
   {
     id: 2,
@@ -87,7 +96,8 @@ const servicesEntreprise = [
     description: "Aide à l'obtention de financements et subventions",
     icon: BadgeDollarSign,
     category: "financement",
-    details: "Aides régionales, nationales et européennes"
+    details: "Aides régionales, nationales et européennes",
+    color: "#27AE60" // success
   },
   {
     id: 3,
@@ -95,7 +105,8 @@ const servicesEntreprise = [
     description: "Assistance pour toutes vos démarches administratives",
     icon: ClipboardList,
     category: "administratif",
-    details: "Accompagnement dans vos obligations légales"
+    details: "Accompagnement dans vos obligations légales",
+    color: "#556B2F" // logo
   },
   {
     id: 4,
@@ -103,7 +114,8 @@ const servicesEntreprise = [
     description: "Conseil et accompagnement pour la cession d'entreprise",
     icon: Handshake,
     category: "transmission",
-    details: "Évaluation, recherche d'acquéreurs, négociation"
+    details: "Évaluation, recherche d'acquéreurs, négociation",
+    color: "#8B4513" // secondaryText
   },
   {
     id: 5,
@@ -111,7 +123,8 @@ const servicesEntreprise = [
     description: "Portfolio d'entreprises disponibles à la reprise",
     icon: Search,
     category: "transmission",
-    details: "Opportunités de reprise vérifiées et qualifiées"
+    details: "Opportunités de reprise vérifiées et qualifiées",
+    color: "#A0522D" // secondaryLight
   },
   {
     id: 6,
@@ -119,7 +132,8 @@ const servicesEntreprise = [
     description: "Accompagnement dans les procédures de liquidation",
     icon: Scale,
     category: "juridique",
-    details: "Procédures légales et accompagnement juridique"
+    details: "Procédures légales et accompagnement juridique",
+    color: "#F39C12" // warning
   },
   {
     id: 7,
@@ -127,7 +141,8 @@ const servicesEntreprise = [
     description: "Réseau d'entreprises partenaires de la plateforme",
     icon: Users,
     category: "reseau",
-    details: "Mise en relation avec nos partenaires certifiés"
+    details: "Mise en relation avec nos partenaires certifiés",
+    color: "#556B2F" // logo
   },
   {
     id: 8,
@@ -135,7 +150,8 @@ const servicesEntreprise = [
     description: "Services d'expertise comptable professionnelle",
     icon: FileText,
     category: "comptabilite",
-    details: "Tenue de comptabilité, déclarations fiscales"
+    details: "Tenue de comptabilité, déclarations fiscales",
+    color: "#2C3E50" // textPrimary
   },
   {
     id: 9,
@@ -143,7 +159,8 @@ const servicesEntreprise = [
     description: "Audit et certification des comptes",
     icon: CheckCircle,
     category: "comptabilite",
-    details: "Audit légal et certification des états financiers"
+    details: "Audit légal et certification des états financiers",
+    color: "#27AE60" // success
   },
   {
     id: 10,
@@ -151,7 +168,8 @@ const servicesEntreprise = [
     description: "Résolution amiable des conflits d'entreprise",
     icon: Shield,
     category: "juridique",
-    details: "Médiation commerciale et conflits internes"
+    details: "Médiation commerciale et conflits internes",
+    color: "#F39C12" // warning
   }
 ];
 
@@ -354,14 +372,14 @@ const Entreprise = () => {
 
   // Catégories uniques pour les filtres
   const serviceCategories = [
-    { value: "tous", label: "Tous les services" },
-    { value: "creation", label: "Création" },
-    { value: "financement", label: "Financement" },
-    { value: "administratif", label: "Administratif" },
-    { value: "transmission", label: "Transmission" },
-    { value: "juridique", label: "Juridique" },
-    { value: "comptabilite", label: "Comptabilité" },
-    { value: "reseau", label: "Réseau" }
+    { value: "tous", label: "Tous les services", color: "#6B8E23" }, // primaryDark
+    { value: "creation", label: "Création", color: "#6B8E23" }, // primaryDark
+    { value: "financement", label: "Financement", color: "#27AE60" }, // success
+    { value: "administratif", label: "Administratif", color: "#556B2F" }, // logo
+    { value: "transmission", label: "Transmission", color: "#8B4513" }, // secondaryText
+    { value: "juridique", label: "Juridique", color: "#F39C12" }, // warning
+    { value: "comptabilite", label: "Comptabilité", color: "#2C3E50" }, // textPrimary
+    { value: "reseau", label: "Réseau", color: "#556B2F" } // logo
   ];
 
   // Composant pour la carte Google Maps intégrée
@@ -371,7 +389,7 @@ const Entreprise = () => {
       : `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=46.603354,1.888334&zoom=6&maptype=roadmap`;
 
     return (
-      <div className="w-full h-96 rounded-xl overflow-hidden border border-slate-200">
+      <div className="w-full h-96 rounded-xl overflow-hidden border" style={{ borderColor: colors.separator }}>
         <iframe
           width="100%"
           height="100%"
@@ -386,7 +404,7 @@ const Entreprise = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       <Header />
 
       {/* Hero Section avec background image */}
@@ -394,7 +412,7 @@ const Entreprise = () => {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`,
+            backgroundImage: `linear-gradient(rgba(107, 142, 35, 0.9), rgba(107, 142, 35, 0.8)), url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`,
           }}
         />
 
@@ -406,17 +424,31 @@ const Entreprise = () => {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-              Solutions <span className="text-blue-400">Professionnelles</span>
+              Solutions <span style={{ color: colors.lightBg }}>Professionnelles</span>
             </h1>
-            <p className="text-sm lg:text-xl text-slate-200 mb-10 leading-relaxed">
+            <p className="text-sm lg:text-xl" style={{ color: colors.lightBg, opacity: 0.9 }}> 
               Des services sur mesure pour répondre aux besoins spécifiques de
               votre entreprise. Accompagnement personnalisé de A à Z.
             </p>
 
-            <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
+            <div className="flex flex-wrap gap-2 lg:gap-5 justify-center mt-10">
+              {/* BOUTON 1 - Utilise #6B8E23 (primaryDark/Sruvol) */}
               <motion.div>
                 <Button
-                  className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
+                  className="rounded-xl px-8 py-5 text-lg font-semibold border-2 transition-all duration-300"
+                  style={{
+                    backgroundColor: colors.primaryDark,
+                    color: colors.lightBg,
+                    borderColor: colors.primaryDark
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryLight;
+                    e.currentTarget.style.borderColor = colors.primaryLight;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryDark;
+                    e.currentTarget.style.borderColor = colors.primaryDark;
+                  }}
                   onClick={() => {
                     trackBusinessInteraction('services_section', 'Services', 'navigate');
                     setActiveServiceCategory("tous");
@@ -429,9 +461,23 @@ const Entreprise = () => {
                 </Button>
               </motion.div>
 
+              {/* BOUTON 2 - Utilise #6B8E23 (primaryDark/Sruvol) */}
               <motion.div>
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
+                  className="rounded-xl px-8 py-5 text-lg font-semibold border-2 transition-all duration-300"
+                  style={{
+                    backgroundColor: colors.primaryDark,
+                    color: colors.lightBg,
+                    borderColor: colors.primaryDark
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryLight;
+                    e.currentTarget.style.borderColor = colors.primaryLight;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryDark;
+                    e.currentTarget.style.borderColor = colors.primaryDark;
+                  }}
                   onClick={handleOpenMap}
                 >
                   <MapPin className="h-5 w-5 mr-3" />
@@ -457,10 +503,10 @@ const Entreprise = () => {
           variants={itemVariants}
           className="text-center mb-0 lg:mb-8"
         >
-          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
-            Services <span className="text-slate-900">d'Entreprise</span>
+          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6" style={{ color: colors.primaryDark }}>
+            Services <span style={{ color: colors.secondaryText }}>d'Entreprise</span>
           </h1>
-          <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto mb-8">
+          <p className="text-sm lg:text-sm" style={{ color: colors.textSecondary }}>
             Tous les services essentiels pour le développement et la gestion de
             votre entreprise
           </p>
@@ -476,15 +522,33 @@ const Entreprise = () => {
           <div className="flex-1 relative">
             <Input
               placeholder="Rechercher un service..."
-              className="pl-12 pr-4 py-3 rounded-xl border-2 border-slate-300 bg-white focus:border-slate-900 transition-all duration-300"
+              className="pl-12 pr-4 py-3 rounded-xl border-2 bg-white transition-all duration-300"
+              style={{
+                borderColor: colors.separator,
+                backgroundColor: colors.cardBg
+              }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+            <Search className="absolute left-4 top-3.5 h-5 w-5" style={{ color: colors.textSecondary }} />
           </div>
+          {/* BOUTON RECHERCHE - Utilise #6B8E23 */}
           <motion.div>
             <Button 
-              className="rounded-xl px-8 py-3 text-white font-semibold bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
+              className="rounded-xl px-8 py-3 font-semibold border-2 transition-all duration-300"
+              style={{
+                backgroundColor: colors.primaryDark,
+                color: colors.lightBg,
+                borderColor: colors.primaryDark
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = colors.primaryLight;
+                e.currentTarget.style.borderColor = colors.primaryLight;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = colors.primaryDark;
+                e.currentTarget.style.borderColor = colors.primaryDark;
+              }}
               onClick={() => {
                 trackBusinessInteraction('search', 'Recherche services', 'search', {
                   term: searchTerm,
@@ -504,20 +568,28 @@ const Entreprise = () => {
             {serviceCategories.map((category, index) => (
               <motion.div key={index}>
                 <Button
-                  variant={
-                    activeServiceCategory === category.value
-                      ? "default"
-                      : "outline"
-                  }
-                  className={`rounded-xl font-semibold px-4 lg:px-6 py-3 ${activeServiceCategory === category.value
-                    ? "text-white"
-                    : "border-2 border-slate-300 text-slate-700 hover:border-slate-900 hover:text-slate-900"
-                    }`}
-                  style={{
-                    backgroundColor:
-                      activeServiceCategory === category.value
-                        ? colors.primary
-                        : "transparent",
+                  variant={activeServiceCategory === category.value ? "default" : "outline"}
+                  className="rounded-xl font-semibold px-4 lg:px-6 py-3 transition-all duration-300"
+                  style={activeServiceCategory === category.value ? {
+                    backgroundColor: colors.primaryDark, // TOUS LES FILTRES ACTIFS utilisent #6B8E23
+                    color: colors.lightBg,
+                    borderColor: colors.primaryDark
+                  } : {
+                    borderColor: colors.separator,
+                    color: colors.textPrimary,
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeServiceCategory !== category.value) {
+                      e.currentTarget.style.borderColor = colors.primaryDark;
+                      e.currentTarget.style.color = colors.primaryDark;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeServiceCategory !== category.value) {
+                      e.currentTarget.style.borderColor = colors.separator;
+                      e.currentTarget.style.color = colors.textPrimary;
+                    }
                   }}
                   onClick={() => {
                     trackBusinessInteraction('filter_category', category.label, 'filter_select', {
@@ -547,34 +619,54 @@ const Entreprise = () => {
             >
               <motion.div variants={cardHoverVariants} className="h-full">
                 <Card
-                  className="p-8 h-full border border-slate-200 rounded-2xl bg-white cursor-pointer hover:shadow-2xl transition-all duration-500 group"
+                  className="p-8 h-full rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-500 group"
+                  style={{
+                    borderColor: colors.separator,
+                    backgroundColor: colors.cardBg
+                  }}
                   onClick={() => handleServiceClick(service)}
                 >
                   {/* Icône du service */}
                   <motion.div
-                    className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center bg-slate-100 group-hover:bg-slate-900 transition-colors duration-300"
+                    className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center transition-colors duration-300"
+                    style={{
+                      backgroundColor: `${service.color}15`
+                    }}
                   >
-                    <service.icon className="h-8 w-8 text-slate-600  group-hover:text-white transition-colors duration-300" />
+                    <service.icon className="h-8 w-8 transition-colors duration-300" style={{ color: service.color }} />
                   </motion.div>
 
                   {/* Contenu */}
-                  <h3 className="text-2xl font-bold text-slate-900 mb-4">
+                  <h3 className="text-2xl font-bold mb-4" style={{ color: colors.textPrimary }}>
                     {service.nom}
                   </h3>
 
-                  <p className="text-slate-600 leading-relaxed mb-4">
+                  <p className="leading-relaxed mb-4" style={{ color: colors.textSecondary }}>
                     {service.description}
                   </p>
 
-                  <p className="text-sm text-slate-500 mb-6">
+                  <p className="text-sm mb-6" style={{ color: colors.textSecondary, opacity: 0.8 }}>
                     {service.details}
                   </p>
 
-                  {/* Bouton d'action */}
+                  {/* BOUTON D'ACTION - Utilise #6B8E23 */}
                   <motion.div>
                     <Button
-                      className="w-full font-semibold rounded-xl gap-3 py-4 border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-300"
+                      className="w-full font-semibold rounded-xl gap-3 py-4 border-2 transition-all duration-300"
                       variant="outline"
+                      style={{
+                        borderColor: colors.primaryDark,
+                        color: colors.primaryDark,
+                        backgroundColor: 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = colors.primaryDark;
+                        e.currentTarget.style.color = colors.lightBg;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = colors.primaryDark;
+                      }}
                     >
                       En savoir plus
                       <ChevronRight className="h-4 w-4" />
@@ -592,7 +684,7 @@ const Entreprise = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <p className="text-slate-500 text-lg">
+            <p style={{ color: colors.textSecondary }}>
               Aucun service trouvé pour votre recherche.
             </p>
           </motion.div>
@@ -601,21 +693,22 @@ const Entreprise = () => {
 
       {/* Section Devenir partenaire */}
       <motion.section
-        className="py-0 lg:py-8 bg-slate-50"
+        className="py-0 lg:py-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
         id="partenaire"
+        style={{ backgroundColor: colors.lightBg }}
       >
         <div className="container mx-auto px-4">
           <motion.div
             variants={itemVariants}
             className="text-center mb-4 lg:mb-8"
           >
-            <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-slate-900">
-              Devenir <span className="text-slate-900">Partenaire</span>
+            <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6" style={{ color: colors.primaryDark }}>
+              Devenir <span style={{ color: colors.secondaryText }}>Partenaire</span>
             </h1>
-            <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto mb-4 lg:mb-8">
+            <p className="text-sm lg:text-sm max-w-2xl mx-auto mb-4 lg:mb-8" style={{ color: colors.textSecondary }}>
               Rejoignez notre réseau d'experts et développez votre activité
             </p>
           </motion.div>
@@ -638,7 +731,7 @@ const Entreprise = () => {
                       toast.info(`Filtre ${filter.label} sélectionné: ${value}`);
                     }}
                   >
-                    <SelectTrigger className="w-[240px] border-2 border-slate-300 rounded-xl bg-white focus:border-slate-900">
+                    <SelectTrigger className="w-[240px] border-2 rounded-xl bg-white">
                       <SelectValue placeholder={filter.label} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -650,10 +743,23 @@ const Entreprise = () => {
                 </motion.div>
               ))}
 
+              {/* BOUTON LOCALISATION - Utilise #6B8E23 */}
               <motion.div>
                 <Button
                   variant="outline"
-                  className="gap-2 border-2 border-slate-900 text-slate-900 font-semibold rounded-xl bg-white hover:bg-slate-900 hover:text-white transition-all duration-300 px-6 py-3"
+                  className="gap-2 border-2 font-semibold rounded-xl bg-white transition-all duration-300 px-6 py-3"
+                  style={{
+                    borderColor: colors.primaryDark,
+                    color: colors.primaryDark
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryDark;
+                    e.currentTarget.style.color = colors.lightBg;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.cardBg;
+                    e.currentTarget.style.color = colors.primaryDark;
+                  }}
                   onClick={handleOpenMap}
                 >
                   Localisation
@@ -668,415 +774,189 @@ const Entreprise = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16"
             variants={containerVariants}
           >
-            {/* Architectes */}
-            <motion.div
-              variants={itemVariants}
-              whileHover="hover"
-              initial="initial"
-            >
-              <motion.div variants={cardHoverVariants} className="h-full">
-                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
-                  {/* Badge */}
-                  <motion.div
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-orange-700"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5 }}
+            {partenaires.map((partenaire) => (
+              <motion.div
+                key={partenaire.id}
+                variants={itemVariants}
+                whileHover="hover"
+                initial="initial"
+              >
+                <motion.div variants={cardHoverVariants} className="h-full">
+                  <Card className="p-6 h-full rounded-2xl overflow-hidden relative hover:shadow-2xl transition-all duration-500 group"
+                    style={{
+                      borderColor: colors.separator,
+                      backgroundColor: colors.cardBg
+                    }}
                   >
-                    Premium
-                  </motion.div>
-
-                  {/* Image spécifique pour Architectes */}
-                  <motion.div
-                    className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                      alt="Architectes - Conception et plans"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-blue-900/20 group-hover:bg-blue-900/40 transition-colors duration-300" />
-                  </motion.div>
-
-                  {/* Contenu */}
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">
-                      ARCHITECTES
-                    </h3>
-
-                    <p className="text-slate-600 leading-relaxed text-sm mb-4">
-                      Conception et plans de construction
-                    </p>
-
-                    {/* Localisation */}
+                    {/* Badge */}
                     <motion.div
-                      className="flex items-center gap-2 cursor-pointer group mb-4"
-                      onClick={() => handlePartnerLocation(partenaires[0])}
+                      className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10"
+                      style={{
+                        backgroundColor: partenaire.badgeColor,
+                        color: colors.lightBg
+                      }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5 }}
                     >
-                      <MapPin className="h-4 w-4 text-slate-600" />
-                      <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                        Paris, France
-                      </span>
+                      {partenaire.badge}
                     </motion.div>
 
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="font-semibold text-slate-900">
-                            4.8
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">127 projets</span>
+                    {/* Image spécifique */}
+                    <motion.div
+                      className="w-full h-32 rounded-xl relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/30 group-hover:to-black/50 transition-colors duration-300" />
+                    </motion.div>
+
+                    {/* Contenu */}
+                    <div className="p-4">
+                      <h3 className="text-xl font-bold mb-2" style={{ color: colors.textPrimary }}>
+                        {partenaire.nom}
+                      </h3>
+
+                      <p className="leading-relaxed text-sm mb-4" style={{ color: colors.textSecondary }}>
+                        {partenaire.description}
+                      </p>
+
+                      {/* Localisation */}
+                      <motion.div
+                        className="flex items-center gap-2 cursor-pointer group mb-4"
+                        onClick={() => handlePartnerLocation(partenaire)}
+                      >
+                        <MapPin className="h-4 w-4" style={{ color: colors.textSecondary }} />
+                        <span className="text-sm transition-colors" style={{ color: colors.textSecondary }}>
+                          {partenaire.location.address}
+                        </span>
+                      </motion.div>
+
+                      {/* Stats */}
+                      <div className="flex items-center justify-between text-sm mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4" style={{ color: colors.warning }} />
+                            <span className="font-semibold" style={{ color: colors.textPrimary }}>
+                              {partenaire.rating}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" style={{ color: colors.textSecondary }} />
+                            <span style={{ color: colors.textSecondary }}>{partenaire.projets} projets</span>
+                          </div>
                         </div>
                       </div>
+
+                      {/* BOUTON DE CONTACT - Utilise #6B8E23 */}
+                      <motion.div>
+                        <Button
+                          className="w-full font-semibold rounded-xl gap-2 border-2 transition-all duration-300 py-3"
+                          style={{
+                            backgroundColor: colors.primaryDark,
+                            color: colors.lightBg,
+                            borderColor: colors.primaryDark
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = colors.primaryLight;
+                            e.currentTarget.style.borderColor = colors.primaryLight;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = colors.primaryDark;
+                            e.currentTarget.style.borderColor = colors.primaryDark;
+                          }}
+                          onClick={() => handleContact(partenaire)}
+                        >
+                          REJOINDRE
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </motion.div>
                     </div>
-
-                    {/* Bouton de contact */}
-                    <motion.div>
-                      <Button
-                        className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
-                        onClick={() => handleContact(partenaires[0])}
-                      >
-                        REJOINDRE
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  </div>
-                </Card>
+                  </Card>
+                </motion.div>
               </motion.div>
-            </motion.div>
-
-            {/* Constructeur */}
-            <motion.div
-              variants={itemVariants}
-              whileHover="hover"
-              initial="initial"
-            >
-              <motion.div variants={cardHoverVariants} className="h-full">
-                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
-                  {/* Badge */}
-                  <motion.div
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    Recommandé
-                  </motion.div>
-
-                  {/* Image spécifique pour Constructeur */}
-                  <motion.div
-                    className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                      alt="Constructeur - Maisons neuves"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-orange-900/20 group-hover:bg-orange-900/40 transition-colors duration-300" />
-                  </motion.div>
-
-                  {/* Contenu */}
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">
-                      CONSTRUCTEUR
-                    </h3>
-
-                    <p className="text-slate-600 leading-relaxed text-sm mb-4">
-                      Construction de maisons neuves
-                    </p>
-
-                    {/* Localisation */}
-                    <motion.div
-                      className="flex items-center gap-2 cursor-pointer group mb-4"
-                      onClick={() => handlePartnerLocation(partenaires[1])}
-                    >
-                      <MapPin className="h-4 w-4 text-slate-600" />
-                      <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                        Lyon, France
-                      </span>
-                    </motion.div>
-
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="font-semibold text-slate-900">
-                            4.6
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">89 projets</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bouton de contact */}
-                    <motion.div>
-                      <Button
-                        className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
-                        onClick={() => handleContact(partenaires[1])}
-                      >
-                        REJOINDRE
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  </div>
-                </Card>
-              </motion.div>
-            </motion.div>
-
-            {/* Électricien */}
-            <motion.div
-              variants={itemVariants}
-              whileHover="hover"
-              initial="initial"
-            >
-              <motion.div variants={cardHoverVariants} className="h-full">
-                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
-                  {/* Badge */}
-                  <motion.div
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    Expert
-                  </motion.div>
-
-                  {/* Image spécifique pour Électricien */}
-                  <motion.div
-                    className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                      alt="Électricien - Installation électrique"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-yellow-900/20 group-hover:bg-yellow-900/40 transition-colors duration-300" />
-                  </motion.div>
-
-                  {/* Contenu */}
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">
-                      ÉLECTRICIEN
-                    </h3>
-
-                    <p className="text-slate-600 leading-relaxed text-sm mb-4">
-                      Installation et dépannage électrique
-                    </p>
-
-                    {/* Localisation */}
-                    <motion.div
-                      className="flex items-center gap-2 cursor-pointer group mb-4"
-                      onClick={() => handlePartnerLocation(partenaires[2])}
-                    >
-                      <MapPin className="h-4 w-4 text-slate-600" />
-                      <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                        Nice, France
-                      </span>
-                    </motion.div>
-
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="font-semibold text-slate-900">
-                            4.9
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">203 projets</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bouton de contact */}
-                    <motion.div>
-                      <Button
-                        className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
-                        onClick={() => handleContact(partenaires[2])}
-                      >
-                        REJOINDRE
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  </div>
-                </Card>
-              </motion.div>
-            </motion.div>
-
-            {/* Assurance */}
-            <motion.div
-              variants={itemVariants}
-              whileHover="hover"
-              initial="initial"
-            >
-              <motion.div variants={cardHoverVariants} className="h-full">
-                <Card className="p-6 h-full border border-slate-200 rounded-2xl overflow-hidden relative bg-white hover:shadow-2xl transition-all duration-500 group">
-                  {/* Badge */}
-                  <motion.div
-                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 text-white bg-slate-900"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    Partenaire Or
-                  </motion.div>
-
-                  {/* Image spécifique pour Assurance */}
-                  <motion.div
-                    className="w-full h-32 rounded-xl bg-slate-100 relative overflow-hidden group-hover:bg-slate-900 transition-colors duration-300"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                      alt="Assurance - Protection habitation"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-green-900/20 group-hover:bg-green-900/40 transition-colors duration-300" />
-                  </motion.div>
-
-                  {/* Contenu */}
-                  <div className="p-4">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">
-                      ASSURANCE
-                    </h3>
-
-                    <p className="text-slate-600 leading-relaxed text-sm mb-4">
-                      Assurance habitation et prêt
-                    </p>
-
-                    {/* Localisation */}
-                    <motion.div
-                      className="flex items-center gap-2 cursor-pointer group mb-4"
-                      onClick={() => handlePartnerLocation(partenaires[3])}
-                    >
-                      <MapPin className="h-4 w-4 text-slate-600" />
-                      <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                        Bordeaux, France
-                      </span>
-                    </motion.div>
-
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="font-semibold text-slate-900">
-                            4.7
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-slate-600" />
-                          <span className="text-slate-600">156 projets</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bouton de contact */}
-                    <motion.div>
-                      <Button
-                        className="w-full font-semibold rounded-xl gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-3"
-                        onClick={() => handleContact(partenaires[3])}
-                      >
-                        REJOINDRE
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </motion.div>
-                  </div>
-                </Card>
-              </motion.div>
-            </motion.div>
+            ))}
           </motion.div>
 
-          {/* Section Avantages partenariat avec images spécifiques */}
+          {/* Section Avantages partenariat */}
           <motion.div
             className="mb-16"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12 text-slate-900">
+            <h2 className="text-2xl lg:text-3xl font-bold text-center mb-8 lg:mb-12" style={{ color: colors.primaryDark }}>
               Avantages du partenariat
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Visibilité accrue */}
               <motion.div
-                className="text-center"
+                className="text-center p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
+                style={{
+                  backgroundColor: colors.cardBg,
+                  border: `1px solid ${colors.separator}`
+                }}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-full h-48 mb-6 rounded-2xl overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                    alt="Visibilité accrue - Analytics et données"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${colors.primaryDark}15` }}>
+                  <TrendingUp className="h-8 w-8" style={{ color: colors.primaryDark }} />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">
+                <h3 className="text-xl font-bold mb-3" style={{ color: colors.textPrimary }}>
                   Visibilité accrue
                 </h3>
-                <p className="text-slate-600">
-                  Bénéficiez d'une exposition privilégiée auprès de notre
-                  communauté
+                <p style={{ color: colors.textSecondary }}>
+                  Bénéficiez d'une exposition privilégiée auprès de notre communauté
                 </p>
               </motion.div>
 
               {/* Opportunités business */}
               <motion.div
-                className="text-center"
+                className="text-center p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
+                style={{
+                  backgroundColor: colors.cardBg,
+                  border: `1px solid ${colors.separator}`
+                }}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-full h-48 mb-6 rounded-2xl overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                    alt="Opportunités business - Réunion d'affaires"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${colors.secondaryText}15` }}>
+                  <Coins className="h-8 w-8" style={{ color: colors.secondaryText }} />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">
+                <h3 className="text-xl font-bold mb-3" style={{ color: colors.textPrimary }}>
                   Opportunités business
                 </h3>
-                <p className="text-slate-600">
-                  Accédez à de nouveaux marchés et développez votre chiffre
-                  d'affaires
+                <p style={{ color: colors.textSecondary }}>
+                  Accédez à de nouveaux marchés et développez votre chiffre d'affaires
                 </p>
               </motion.div>
 
               {/* Support dédié */}
               <motion.div
-                className="text-center"
+                className="text-center p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
+                style={{
+                  backgroundColor: colors.cardBg,
+                  border: `1px solid ${colors.separator}`
+                }}
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-full h-48 mb-6 rounded-2xl overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80&w=400&h=200&fit=crop"
-                    alt="Support dédié - Assistance client"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${colors.logo}15` }}>
+                  <Shield className="h-8 w-8" style={{ color: colors.logo }} />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-900">
+                <h3 className="text-xl font-bold mb-3" style={{ color: colors.textPrimary }}>
                   Support dédié
                 </h3>
-                <p className="text-slate-600">
+                <p style={{ color: colors.textSecondary }}>
                   Un accompagnement personnalisé pour maximiser votre réussite
                 </p>
               </motion.div>
             </div>
           </motion.div>
 
-          {/* CTA pour devenir partenaire */}
+          {/* CTA pour devenir partenaire - Utilise #6B8E23 */}
           <motion.div
             className="text-center"
             initial={{ opacity: 0, y: 30 }}
@@ -1085,7 +965,20 @@ const Entreprise = () => {
           >
             <motion.div>
               <Button
-                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-12 py-6 text-lg font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
+                className="rounded-xl px-12 py-6 text-lg font-semibold border-2 transition-all duration-300"
+                style={{
+                  backgroundColor: colors.primaryDark,
+                  color: colors.lightBg,
+                  borderColor: colors.primaryDark
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryLight;
+                  e.currentTarget.style.borderColor = colors.primaryLight;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryDark;
+                  e.currentTarget.style.borderColor = colors.primaryDark;
+                }}
                 onClick={() => {
                   trackBusinessInteraction('become_partner', 'Devenir partenaire', 'cta_click');
                   setShowMessageModal(true);
@@ -1100,23 +993,38 @@ const Entreprise = () => {
       </motion.section>
 
       {/* CTA Final Section */}
-      <section className="py-8 lg:py-20 bg-white shadow-inner">
+      <section className="py-8 lg:py-20 shadow-inner"
+        style={{ backgroundColor: colors.lightBg }}>
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-900">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6" style={{ color: colors.primaryDark }}>
               Prêt à développer votre entreprise ?
             </h2>
-            <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: colors.textSecondary }}>
               Nos experts sont à votre écoute pour vous accompagner dans tous
               vos projets d'entreprise
             </p>
+            {/* BOUTON FINAL - Utilise #6B8E23 */}
             <motion.div>
               <Button
-                className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
+                className="rounded-xl px-10 py-5 text-lg font-semibold border-2 transition-all duration-300"
+                style={{
+                  backgroundColor: colors.primaryDark,
+                  color: colors.lightBg,
+                  borderColor: colors.primaryDark
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryLight;
+                  e.currentTarget.style.borderColor = colors.primaryLight;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryDark;
+                  e.currentTarget.style.borderColor = colors.primaryDark;
+                }}
                 onClick={() => {
                   trackBusinessInteraction('general_contact', 'Contact général', 'cta_click');
                   setShowMessageModal(true);
@@ -1133,17 +1041,22 @@ const Entreprise = () => {
       {/* Modals */}
       {showMapModal && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
           <motion.div
             variants={mapModalVariants}
-            className="bg-white rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-200"
+            className="rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: colors.cardBg,
+              border: `1px solid ${colors.separator}`
+            }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
                 {selectedLocation
                   ? `Localisation - ${selectedLocation.address}`
                   : "Carte des partenaires"}
@@ -1155,7 +1068,16 @@ const Entreprise = () => {
                   setShowMapModal(false);
                   setSelectedLocation(null);
                 }}
-                className="h-10 w-10 p-0 hover:bg-slate-100 rounded-xl text-slate-600 hover:text-slate-800"
+                className="h-10 w-10 p-0 rounded-xl transition-all duration-300"
+                style={{
+                  color: colors.textSecondary
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -1165,39 +1087,53 @@ const Entreprise = () => {
 
             {!selectedLocation && (
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4 text-slate-900">
+                <h3 className="text-lg font-semibold mb-4" style={{ color: colors.textPrimary }}>
                   Nos partenaires sur la carte
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {partenaires.map((partenaire) => (
                     <motion.div
                       key={partenaire.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors"
+                      style={{
+                        border: `1px solid ${colors.separator}`,
+                        color: colors.textPrimary
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = `${colors.primaryDark}10`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                       whileHover={{ scale: 1.02 }}
                       onClick={() => handlePartnerLocation(partenaire)}
                     >
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100">
-                        <Building2 className="h-5 w-5 text-slate-600" />
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: `${colors.primaryDark}15` }}>
+                        <Building2 className="h-5 w-5" style={{ color: colors.primaryDark }} />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-slate-900">
+                        <p className="font-medium" style={{ color: colors.textPrimary }}>
                           {partenaire.nom}
                         </p>
-                        <p className="text-sm flex items-center gap-1 text-slate-600">
+                        <p className="text-sm flex items-center gap-1" style={{ color: colors.textSecondary }}>
                           <MapPin className="h-3 w-3" />
                           {partenaire.location.address}
                         </p>
                       </div>
-                      <Navigation className="h-4 w-4 text-slate-600" />
+                      <Navigation className="h-4 w-4" style={{ color: colors.textSecondary }} />
                     </motion.div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="mt-6 p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-sm flex items-center gap-2 text-slate-600">
-                <MapPin className="h-4 w-4 text-slate-600" />
+            <div className="mt-6 p-4 rounded-lg" style={{
+              backgroundColor: `${colors.primaryDark}08`,
+              border: `1px solid ${colors.separator}`
+            }}>
+              <p className="text-sm flex items-center gap-2" style={{ color: colors.textSecondary }}>
+                <MapPin className="h-4 w-4" style={{ color: colors.primaryDark }} />
                 {selectedLocation
                   ? "Cliquez sur les marqueurs pour voir les détails des partenaires"
                   : "Cliquez sur un partenaire pour voir sa localisation précise"}
@@ -1209,17 +1145,22 @@ const Entreprise = () => {
 
       {showMessageModal && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
           <motion.div
             variants={modalVariants}
-            className="bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200"
+            className="rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: colors.cardBg,
+              border: `1px solid ${colors.separator}`
+            }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
                 {selectedPartenaire
                   ? `Contacter ${selectedPartenaire.nom}`
                   : selectedService
@@ -1234,7 +1175,16 @@ const Entreprise = () => {
                   setSelectedPartenaire(null);
                   setSelectedService(null);
                 }}
-                className="h-10 w-10 p-0 hover:bg-slate-100 rounded-xl text-slate-600 hover:text-slate-800"
+                className="h-10 w-10 p-0 rounded-xl transition-all duration-300"
+                style={{
+                  color: colors.textSecondary
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -1242,7 +1192,7 @@ const Entreprise = () => {
 
             <form onSubmit={handleSubmitMessage} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-3 text-slate-900">
+                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
                   Nom complet *
                 </label>
                 <Input
@@ -1250,13 +1200,16 @@ const Entreprise = () => {
                   value={formData.nom}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+                  className="w-full rounded-xl"
+                  style={{
+                    borderColor: colors.separator
+                  }}
                   placeholder="Votre nom"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3 text-slate-900">
+                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
                   Email *
                 </label>
                 <Input
@@ -1265,26 +1218,32 @@ const Entreprise = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+                  className="w-full rounded-xl"
+                  style={{
+                    borderColor: colors.separator
+                  }}
                   placeholder="votre@email.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3 text-slate-900">
+                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
                   Téléphone
                 </label>
                 <Input
                   name="telephone"
                   value={formData.telephone}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+                  className="w-full rounded-xl"
+                  style={{
+                    borderColor: colors.separator
+                  }}
                   placeholder="Votre numéro"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3 text-slate-900">
+                <label className="block text-sm font-medium mb-3" style={{ color: colors.textPrimary }}>
                   Message *
                 </label>
                 <textarea
@@ -1293,7 +1252,19 @@ const Entreprise = () => {
                   onChange={handleInputChange}
                   required
                   rows={5}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 resize-none"
+                  className="w-full px-4 py-3 rounded-xl resize-none transition-all duration-300"
+                  style={{
+                    border: `1px solid ${colors.separator}`,
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.primaryDark;
+                    e.target.style.boxShadow = `0 0 0 2px ${colors.primaryDark}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = colors.separator;
+                    e.target.style.boxShadow = 'none';
+                  }}
                   placeholder={
                     selectedService
                       ? `Je souhaite en savoir plus sur ${selectedService.nom}...`
@@ -1304,9 +1275,23 @@ const Entreprise = () => {
                 />
               </div>
 
+              {/* BOUTON ENVOYER - Utilise #6B8E23 */}
               <Button
                 type="submit"
-                className="w-full font-semibold gap-2 text-white bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 hover:border-slate-800 transition-all duration-300 py-4 rounded-xl"
+                className="w-full font-semibold gap-2 border-2 transition-all duration-300 py-4 rounded-xl"
+                style={{
+                  backgroundColor: colors.primaryDark,
+                  color: colors.lightBg,
+                  borderColor: colors.primaryDark
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryLight;
+                  e.currentTarget.style.borderColor = colors.primaryLight;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryDark;
+                  e.currentTarget.style.borderColor = colors.primaryDark;
+                }}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -1317,7 +1302,11 @@ const Entreprise = () => {
                       repeat: Infinity,
                       ease: "linear",
                     }}
-                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                    className="w-4 h-4 border-2 rounded-full"
+                    style={{
+                      borderColor: colors.lightBg,
+                      borderTopColor: 'transparent'
+                    }}
                   />
                 ) : (
                   <>
