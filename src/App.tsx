@@ -190,6 +190,9 @@ import Plombier from "./components/NosPartenaires/Plombier";
 
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
+// IMPORT DE LA NOUVELLE PAGE D'ACCOMPAGNEMENT
+import AccompagnementPage from "./pages/AccompagnementPage";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -245,6 +248,7 @@ const App = () => {
       }
     });
   }, []);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -274,6 +278,10 @@ const App = () => {
                     element={<ServicesPartnersPage />}
                   />
                   <Route path="/" element={<Index />} />
+                  
+                  {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
+                  <Route path="/accompagnement" element={<AccompagnementPage />} />
+                  
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/digitalisation" element={<Digitalisation />} />
                   <Route
@@ -292,10 +300,6 @@ const App = () => {
                     path="/services/digitalisation/:id"
                     element={<DigitalisationServiceDetail />}
                   />
-                  {/* <Route
-                    path="/services/digitalisation/:id/reservation"
-                    element={<DigitalisationReservationPage />}
-                  /> */}
                   <Route path="/cookies" element={<CookiesPolicy />} />
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/achat" element={<PropertyBuy />} />
@@ -306,7 +310,8 @@ const App = () => {
                   />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   <Route path="/services-ibr" element={<ServicesIBRPage />} />
-                  {/* /*entreprise link* */}
+                  
+                  {/* Section entreprise */}
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
                   <Route path="/aideFonds" element={<AidesLeveesFonds />} />
@@ -400,7 +405,6 @@ const App = () => {
                     path="/professional/:id"
                     element={<ProfessionalProfilePage />}
                   />
-                  {/* /*entreprise link* */}
                   <Route
                     path="/immobilier-sections"
                     element={<ImmobilierSections />}
@@ -413,6 +417,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
+                  
                   {/* Routes Bâtiments */}
                   <Route path="/batiments" element={<BatimentsLayout />} />
                   <Route
@@ -435,6 +440,7 @@ const App = () => {
                     path="/formation-podcasts"
                     element={<BatimentsLayout />}
                   />
+                  
                   {/* Routes Partenaires */}
                   <Route path="/agences" element={<Agence />} />
                   <Route path="/constructeurs" element={<Constructeur />} />
@@ -486,9 +492,6 @@ const App = () => {
                   <Route path="/location/:id" element={<PropertyPage />} />
                   <Route path="/travaux" element={<Travaux />} />
                   <Route path="/produits" element={<Produits />} />
-                  {/* <Route path="/produits-generaux" element={<ProduitsGeneraux />} /> */}
-                  {/* <Route path="/services-maison" element={<ServicesMaison />} />
-                  <Route path="/utilitie" element={<UtilitiesProduits />} /> */}
                   <Route
                     path="/stripe-create"
                     element={<StripeConnectButton user={user} />}
@@ -529,12 +532,12 @@ const App = () => {
                     path="/services-partners"
                     element={<ServicesPartnersPage />}
                   />
-                  {/* <Route path="/publicite" element={<Publicite />} /> */}
                   <Route
                     path="/estimations"
                     element={<EstimationImmobilierPage />}
                   />
-                  {/* singular routes for legacy links <Route path="/publicite" element={<Publicite />} />*/}
+                  
+                  {/* Routes d'authentification */}
                   <Route path="/login" element={<LoginRoleSelectionPage />} />
                   <Route path="/login/professional" element={<ProLogin />} />
                   <Route
@@ -606,6 +609,7 @@ const App = () => {
                     path="/investir/:type"
                     element={<InvestissementDetail />}
                   />
+                  
                   {/* Section pro Routes */}
                   <Route
                     path="/pro"
@@ -636,7 +640,6 @@ const App = () => {
                       path="reservationbien-etre"
                       element={<ReservationTable />}
                     />
-                    {/* <Route path="clients" element={<ClientSection />} /> */}
                     <Route path="documents" element={<DocumentsPage />} />
                     <Route path="reviews" element={<ReviewsPage />} />
                     <Route path="tourisme" element={<TourismPage />} />
@@ -689,6 +692,7 @@ const App = () => {
                     />
                     <Route path="media" element={<AdminMedia />} />
                   </Route>
+                  
                   {/* Section Mon Compte Routes */}
                   <Route
                     path="/mon-compte"
@@ -713,7 +717,6 @@ const App = () => {
                       path="mes-reservations-cours"
                       element={<UserReservations />}
                     />
-
                     <Route
                       path="demandes/messages/:id"
                       element={<MessagesLayout />}
@@ -724,6 +727,7 @@ const App = () => {
                     />
                     <Route path="mes-commandes" element={<UserOrders />} />
                   </Route>
+                  
                   {/* Section Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
@@ -752,43 +756,35 @@ const App = () => {
                     <Route path="users" element={<Users />} />
                     <Route path="vendors" element={<Vendors />} />
                     <Route path="messages/:id" element={<MessagesLayout />} />
-
                     <Route
                       path="publicite"
                       element={<AdvertisementManager />}
                     />
-
                     <Route path="demandes" element={<ListeDemande />} />
-
                     <Route
                       path="service-categories"
                       element={<ServiceCategoriesPage />}
                     />
                     <Route path="metiers" element={<AdminMetiers />} />
-
-                    {/* NOUVELLE ROUTE FINANCEMENT DEMANDES */}
                     <Route
                       path="financement-demandes"
                       element={<FinancementDemandes />}
                     />
-
-                    {/* 🆕 ROUTE ADMIN POUR LES DEMANDES D'INVESTISSEMENT INTERNATIONAL */}
-
                     <Route
                       path="investissement-demandes"
                       element={<InvestmentDemandesPage />}
                     />
                   </Route>
-                  ={/* Section not found Routes */}
+                  
+                  {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
                   <Route path="/import-info" element={<ImportInfo />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                 </Routes>
-                {/* -------------------------
-                   Pop-up publicité globale
-                   ------------------------- */}
+                
+                {/* Pop-up publicité globale */}
                 {user && user.role !== "admin" && (
                   <AdvertisementPopup refreshMinutes={3} />
                 )}

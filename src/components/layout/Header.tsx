@@ -734,7 +734,7 @@ const Header = () => {
         {
           title: "Accompagnement",
           description: "Accompagnement juridique pour entreprises",
-          href: "#",
+          href: "/accompagnement",
           image:
             "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
         },
