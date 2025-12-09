@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,11 +23,11 @@ export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [formData, setFormData] = useState({
     newPassword: "",
-    confirmPassword: "",
+    confirmPassword: ""
   });
   const [showPassword, setShowPassword] = useState({
     newPassword: false,
-    confirmPassword: false,
+    confirmPassword: false
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,13 +43,11 @@ export default function ResetPasswordPage() {
       try {
         setLoading(true);
         const result = await verifyResetToken(token);
-
+        
         if (result.valid) {
           setValidToken(true);
           setEmail(result.email);
-          toast.success(
-            "Token valide. Vous pouvez maintenant réinitialiser votre mot de passe."
-          );
+          toast.success("Token valide. Vous pouvez maintenant réinitialiser votre mot de passe.");
         } else {
           setValidToken(false);
           toast.error("Token invalide ou expiré");
@@ -66,82 +64,72 @@ export default function ResetPasswordPage() {
     };
 
     verifyToken();
-  }, [token, navigate, verifyResetToken]);
-
-  // ✅ Utiliser useCallback pour stabiliser la référence
-  const togglePasswordVisibility = useCallback((field) => {
-    setShowPassword((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
   }, []);
 
-  // ✅ Optimiser handleChange pour éviter les re-rendus inutiles
-  const handleChange = useCallback((e) => {
+  const togglePasswordVisibility = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
+    
+    // Effacer l'erreur quand l'utilisateur tape
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
 
-    // ✅ Effacer l'erreur de manière optimisée
-    setErrors((prev) => {
-      if (prev[name]) {
-        return {
-          ...prev,
-          [name]: "",
-        };
-      }
-      return prev;
-    });
-  }, []);
-
-  const validateForm = useCallback(() => {
+  const validateForm = () => {
     const newErrors = {};
-
+    
     if (!formData.newPassword) {
-      newErrors.newPassword = "Nouveau mot de passe requis";
+      newErrors.newPassword = 'Nouveau mot de passe requis';
     } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword =
-        "Le mot de passe doit contenir au moins 6 caractères";
+      newErrors.newPassword = 'Le mot de passe doit contenir au moins 6 caractères';
     }
-
+    
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirmation du mot de passe requise";
+      newErrors.confirmPassword = 'Confirmation du mot de passe requise';
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData]);
+  };
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-
-      if (!validateForm()) return;
-
-      try {
-        setIsSubmitting(true);
-        await resetPassword(token, formData.newPassword);
-
-        toast.success("Mot de passe réinitialisé avec succès !");
-
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } catch (error) {
-        console.error("Erreur réinitialisation:", error);
-        toast.error(
-          error.message || "Erreur lors de la réinitialisation du mot de passe"
-        );
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [token, formData, validateForm, resetPassword, navigate]
-  );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    try {
+      setIsSubmitting(true);
+      await resetPassword(token, formData.newPassword);
+      
+      toast.success("Mot de passe réinitialisé avec succès !");
+      
+      // Redirection après 2 secondes
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error) {
+      console.error("Erreur réinitialisation:", error);
+      toast.error(error.message || "Erreur lors de la réinitialisation du mot de passe");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -241,8 +229,7 @@ export default function ResetPasswordPage() {
               </CardTitle>
 
               <CardDescription className="text-center text-gray-600">
-                Pour l'email :{" "}
-                <span className="font-medium">{email}</span>
+                Pour l'email : <span className="font-medium">{email}</span>
               </CardDescription>
             </CardHeader>
 
@@ -264,8 +251,8 @@ export default function ResetPasswordPage() {
                       type={showPassword.newPassword ? "text" : "password"}
                       placeholder="Minimum 6 caractères"
                       className={`pl-10 pr-10 h-11 bg-[#FFFFFF] ${
-                        errors.newPassword
-                          ? "border-red-300 focus:border-red-500"
+                        errors.newPassword 
+                          ? "border-red-300 focus:border-red-500" 
                           : "border-[#D3D3D3] focus:border-[#556B2F]"
                       } rounded-md`}
                       value={formData.newPassword}
@@ -284,9 +271,7 @@ export default function ResetPasswordPage() {
                     </button>
                   </div>
                   {errors.newPassword && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {errors.newPassword}
-                    </p>
+                    <p className="text-sm text-red-600 mt-1">{errors.newPassword}</p>
                   )}
                 </div>
 
@@ -306,8 +291,8 @@ export default function ResetPasswordPage() {
                       type={showPassword.confirmPassword ? "text" : "password"}
                       placeholder="Retapez votre mot de passe"
                       className={`pl-10 pr-10 h-11 bg-[#FFFFFF] ${
-                        errors.confirmPassword
-                          ? "border-red-300 focus:border-red-500"
+                        errors.confirmPassword 
+                          ? "border-red-300 focus:border-red-500" 
                           : "border-[#D3D3D3] focus:border-[#556B2F]"
                       } rounded-md`}
                       value={formData.confirmPassword}
@@ -316,9 +301,7 @@ export default function ResetPasswordPage() {
                     <button
                       type="button"
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      onClick={() =>
-                        togglePasswordVisibility("confirmPassword")
-                      }
+                      onClick={() => togglePasswordVisibility("confirmPassword")}
                     >
                       {showPassword.confirmPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -328,9 +311,7 @@ export default function ResetPasswordPage() {
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {errors.confirmPassword}
-                    </p>
+                    <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>
                   )}
                 </div>
 

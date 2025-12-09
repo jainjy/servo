@@ -17,6 +17,7 @@ function Layout({ children }) {
     "/messages/*?as=artisan",
     "/login/*",
     "/account-suspended",
+    "/reset-password/*"
   ];
   const hideFooter = excludedRoutes.some((pattern) => {
     if (pattern.endsWith("/*")) {
