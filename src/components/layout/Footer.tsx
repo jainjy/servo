@@ -1,332 +1,234 @@
 import React, { useState } from 'react';
 import logo from '../../assets/logo.png';
+import ServoLogo from "../components/ServoLogo";
 import "../../styles/font.css";
 import { Link } from 'react-router-dom';
 import ApkDownloadModal from '../ApkDownloadModal';
-
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [isApkModalOpen, setIsApkModalOpen] = useState(false);
 
-
   return (
-    <footer className="bg-gray-950 text-gray-300 py-10 relative overflow-hidden group/footer">
-      {/* Effets de fond animés */}
-      <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-gradient-to-br from-purple-900/5 to-blue-900/5 rounded-full blur-2xl group-hover/footer:scale-110 group-hover/footer:opacity-80 transition-all duration-700"></div>
-      <div className="absolute -top-20 -left-20 w-64 h-64 bg-gradient-to-tr from-blue-900/5 to-gray-900/5 rounded-full blur-2xl opacity-0 group-hover/footer:opacity-100 transition-all duration-1000"></div>
-
-      {/* Effet de particules subtiles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400/20 rounded-full animate-pulse"
-            style={{
-              left: `${10 + i * 20}%`,
-              top: `${30 + i * 10}%`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          />
-        ))}
-      </div>
+    <footer className="bg-gradient-to-br from-[#556B2F]/50 to-[#6B8E23] text-white py-16 relative overflow-hidden">
+      {/* Effets de fond décoratifs */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-20"></div>
+      
+      {/* Motifs décoratifs */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#8B4513]/10 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#556B2F]/20 rounded-full blur-3xl"></div>
+      
+      {/* Pattern subtil */}
+      <div className="absolute inset-0 opacity-[0.02] bg-[length:40px_40px] bg-repeat" style={{
+        backgroundImage: `radial-gradient(circle, #FFFFFF 1px, transparent 1px)`
+      }}></div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
 
-          {/* Colonne Logo et description avec animations */}
-          <div className="lg:col-span-4">
-            <div className="relative mb-4">
-              <div className="flex items-center gap-3 group/logo">
-                {/* Logo avec animation de glow au survol */}
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl blur opacity-0 group-hover/logo:opacity-30 transition-opacity duration-500"></div>
-                  <div className="relative p-1.5 rounded-xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 group-hover/logo:border-blue-500/50 transition-all duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg opacity-0 group-hover/logo:opacity-100 transition-opacity duration-300"></div>
-                    <img
-                      src={logo}
-                      alt="Servo Logo"
-                      className="w-10 h-10 rounded-lg relative z-10 group-hover/logo:scale-105 transition-transform duration-300"
-                    />
+          {/* Colonne Logo et description - Pleine largeur sur mobile */}
+          <div className="md:col-span-2 lg:col-span-4">
+            <div className="mb-8">
+              <Link to={"/"} className="inline-block group">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0  rounded-lg"></div>
+                    <ServoLogo />
                   </div>
                 </div>
-                <div>
-                  <h2 className="azonix text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover/logo:bg-gradient-to-r group-hover/logo:from-blue-300 group-hover/logo:to-purple-300 transition-all duration-500">
-                    Servo
-                  </h2>
-                  <p className="text-xs text-gray-500 font-medium group-hover/logo:text-gray-400 transition-colors duration-300">
-                    Excellence Immobilière
-                  </p>
-                </div>
-                {/* Traînée d'étoiles au survol */}
-                <div className="absolute left-36 top-1/3 opacity-0 group-hover/logo:opacity-100 group-hover/logo:translate-x-2 transition-all duration-500">
-                  <div className="flex space-x-1">
-                    {[...Array(3)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-1 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"
-                        style={{ animationDelay: `${i * 0.1}s` }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+              </Link>
             </div>
 
-            <p className="text-gray-400 text-sm leading-relaxed max-w-xs group-hover:text-gray-300 transition-colors duration-500 hover:pl-2 hover:border-l-2 hover:border-gradient-to-r hover:from-blue-500 hover:to-purple-500">
-              Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité.
-            </p>
+            <div className="relative p-6 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/10 backdrop-blur-sm">
+              <div className="absolute -top-3 left-6 px-3 py-1 bg-[#8B4513] text-white text-xs font-bold rounded-full">
+                Notre vision
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed">
+                Votre partenaire de confiance pour transformer vos rêves immobiliers en réalité. 
+                Nous allions expertise, innovation et passion pour vous offrir un service d'exception.
+              </p>
+            </div>
+
+            {/* Bouton d'action mobile */}
+            <div className="mt-8 lg:hidden">
+              <button
+                onClick={() => setIsApkModalOpen(true)}
+                className="w-full py-3 px-6 bg-gradient-to-r from-[#8B4513] to-[#6B8E23] hover:from-[#6B8E23] hover:to-[#556B2F] text-white rounded-xl font-medium flex items-center justify-center gap-3 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+              >
+                <img src="/google.png" alt="Google Play" className='w-6 h-6' />
+                <span>Télécharger l'application</span>
+              </button>
+            </div>
           </div>
 
-          {/* Colonne Partenaires avec animations */}
-          <div className="lg:col-span-3">
-            <div className="relative mb-6">
-              <h3 className="text-lg font-bold text-white group-hover:scale-105 transition-transform duration-300 inline-block">
-                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          {/* Colonne Partenaires */}
+          <div className="md:col-span-1 lg:col-span-3">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-white mb-6 pb-4 border-b border-white/20 relative">
+                <span className="relative">
                   Partenaires
+                  <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#8B4513] rounded-full"></span>
                 </span>
               </h3>
-              <div className="absolute -left-3 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full group-hover:h-8 group-hover:top-2 transition-all duration-300"></div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {[
-                { name: "Olimmo réunion", url: "https://www.olimmoreunion.re/" },
-                { name: "Partenaire 2", url: "#" },
-                { name: "Partenaire 3", url: "#" },
+                { name: "Olimmo Réunion", url: "https://www.olimmoreunion.re/" },
+                { name: "Agence Partenaire", url: "#" },
+                { name: "Expert Immobilier", url: "#" },
+                { name: "Banque Partenaire", url: "#" },
               ].map((partner, index) => (
                 <a
                   key={index}
                   href={partner.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group/partner relative flex items-center justify-between py-2 hover:pl-3 transition-all duration-300"
+                  className="group relative flex items-center justify-between py-3 px-4 hover:bg-gradient-to-r from-white/10 to-transparent rounded-xl transition-all duration-300 hover:pl-6 hover:shadow-lg"
                 >
-                  {/* Animation de fond au survol */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-lg opacity-0 group-hover/partner:opacity-100 transition-opacity duration-300 -z-10"></div>
-
-                  {/* Texte avec animation de soulignement */}
                   <div className="relative overflow-hidden">
-                    <span className="text-gray-400 group-hover/partner:text-white text-sm transition-colors duration-300 block transform group-hover/partner:translate-x-1">
-                      {partner.name}
-                    </span>
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover/partner:w-full transition-all duration-500"></span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8B4513] rounded-full group-hover:scale-125 transition-transform duration-300"></div>
+                      <span className="text-white/80 group-hover:text-white text-sm transition-colors duration-200 font-medium">
+                        {partner.name}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Icône avec animation de déplacement */}
-                  <div className="relative overflow-hidden">
-                    <svg
-                      className="w-4 h-4 text-gray-600 group-hover/partner:text-blue-400 transform group-hover/partner:translate-x-1 transition-all duration-300"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    {/* Double traînée d'icône */}
-                    <svg
-                      className="absolute top-0 left-0 w-4 h-4 text-purple-400/0 group-hover/partner:text-purple-400/30 transform group-hover/partner:translate-x-2 transition-all duration-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+                  <svg
+                    className="w-4 h-4 text-white/60 group-hover:text-[#8B4513] transform group-hover:translate-x-1 transition-all duration-200"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Colonne Contact avec animations */}
-          <div className="lg:col-span-3">
-            <h3 className="text-lg font-bold text-white mb-6 group-hover:scale-105 transition-transform duration-300 inline-block">
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Contact
-              </span>
+          {/* Colonne Contact */}
+         <div className="lg:col-span-3">
+            <h3 className="text-lg font-bold text-white mb-6 pb-3 border-b border-white/10">
+              Contact
             </h3>
 
-            <div className="space-y-4">
-              {[
-                {
-                  icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z',
-                  title: '123 Rue de l\'Immobilier',
-                  subtitle: '75000 Paris',
-                  type: 'address'
-                },
-                {
-                  icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
-                  title: '+33 1 23 45 67 89',
-                  href: 'tel:+33123456789',
-                  type: 'phone'
-                },
-                {
-                  icon: 'M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-                  title: 'contact@immoplus.fr',
-                  href: 'mailto:contact@immoplus.fr',
-                  type: 'email'
-                },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="group/contact flex items-start gap-3 hover:translate-x-1 transition-transform duration-300"
-                >
-                  {/* Icône avec animation de pulsation */}
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-sm opacity-0 group-hover/contact:opacity-100 group-hover/contact:scale-125 transition-all duration-500"></div>
-                    <svg
-                      className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0 relative z-10 group-hover/contact:text-blue-300 group-hover/contact:scale-110 transition-all duration-300"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon.split(' ')[0]} />
-                      {item.icon.split(' ')[1] && (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon.split(' ')[1]} />
-                      )}
-                    </svg>
-                  </div>
-
-                  <div className="overflow-hidden">
-                    {item.href ? (
-                      <a
-                        href={item.href}
-                        className="text-gray-300 hover:text-blue-400 transition-colors duration-300 text-sm block relative overflow-hidden group/link"
-                      >
-                        <span className="relative inline-block">
-                          {item.title}
-                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover/link:w-full transition-all duration-500"></span>
-                        </span>
-                        {/* Effet de particules au survol */}
-                        <span className="absolute -right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover/link:opacity-100 group-hover/link:translate-x-2 transition-all duration-300">
-                          <div className="flex space-x-0.5">
-                            {[...Array(2)].map((_, i) => (
-                              <div
-                                key={i}
-                                className="w-0.5 h-0.5 bg-blue-400 rounded-full"
-                                style={{ animationDelay: `${i * 0.1}s` }}
-                              />
-                            ))}
-                          </div>
-                        </span>
-                      </a>
-                    ) : (
-                      <p className="text-white text-sm">{item.title}</p>
-                    )}
-                    {item.subtitle && (
-                      <p className="text-gray-500 text-xs group-hover/contact:text-gray-400 transition-colors duration-300">
-                        {item.subtitle}
-                      </p>
-                    )}
+            <div className="space-y-6">
+              {/* Adresse */}
+              <div className="group flex items-start gap-4">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-lg bg-[#556B2F] flex items-center justify-center border border-white/10 group-hover:border-[#8B4513]/30 transition-colors duration-200">
+                    <MapPin className="w-5 h-5  text-white group-hover:text-[#8B4513] transition-colors duration-200" />
                   </div>
                 </div>
-              ))}
+
+                <div className="overflow-hidden flex-1">
+                  <p className="text-white text-sm font-medium">123 Rue de l'Immobilier</p>
+                  <p className="text-white/70 text-xs mt-1 group-hover:text-white/90 transition-colors duration-200">
+                    75000 Paris
+                  </p>
+                </div>
+              </div>
+
+              {/* Téléphone */}
+              <a href="tel:+33123456789" className="group flex items-start gap-4">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-lg bg-[#556B2F] flex items-center justify-center border border-white/10 group-hover:border-[#8B4513]/30 transition-colors duration-200">
+                    <Phone className="w-5 h-5 text-white group-hover:text-[#8B4513] transition-colors duration-200" />
+                  </div>
+                </div>
+
+                <div className="overflow-hidden flex-1">
+                  <span className="text-white/90 hover:text-[#8B4513] transition-colors duration-200 text-sm block relative overflow-hidden font-medium">
+                    +33 1 23 45 67 89
+                  </span>
+                </div>
+              </a>
+
+              {/* Email */}
+              <a href="mailto:contact@servo.fr" className="group flex items-start gap-4">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-lg bg-[#556B2F] flex items-center justify-center border border-white/10 group-hover:border-[#8B4513]/30 transition-colors duration-200">
+                    <Mail className="w-5 h-5 text-white group-hover:text-[#8B4513] transition-colors duration-200" />
+                  </div>
+                </div>
+
+                <div className="overflow-hidden flex-1">
+                  <span className="text-white/90 hover:text-[#8B4513] transition-colors duration-200 text-sm block relative overflow-hidden font-medium">
+                    contact@servo.fr
+                  </span>
+                </div>
+              </a>
             </div>
           </div>
 
-          {/* Colonne Réseaux sociaux avec animations */}
-          <div className="lg:col-span-2">
-            <h3 className="text-lg font-bold text-white mb-6 group-hover:scale-105 transition-transform duration-300 inline-block">
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+
+          {/* Colonne Réseaux sociaux et newsletter */}
+          <div className="md:col-span-2 lg:col-span-2">
+            <h3 className="text-xl font-bold text-white mb-6 pb-4 border-b border-white/20 relative">
+              <span className="relative">
                 Suivez-nous
+                <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#8B4513] rounded-full"></span>
               </span>
             </h3>
 
-            <div className="flex flex-wrap gap-2">
-              {/* Facebook */}
-              <a
-                href="https://facebook.com/immoplus"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/40 w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden group/facebook transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="Facebook"
-              >
-                {/* Effet de fond animé */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover/facebook:from-white/20 group-hover/facebook:to-white/10 transition-all duration-500"></div>
-
-                {/* Effet de pulsation au survol */}
-                <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover/facebook:border-white/30 group-hover/facebook:animate-ping-slow transition-all duration-300"></div>
-
-                {/* Icône avec animation de rotation */}
-                <svg
-                  className="w-4 h-4 fill-white relative z-10 group-hover/facebook:scale-110 group-hover/facebook:rotate-12 transition-all duration-300"
-                  viewBox="0 0 24 24"
+            {/* Réseaux sociaux */}
+            <div className="grid grid-cols-4 gap-3 mb-8">
+              {[
+                {
+                  name: 'Facebook',
+                  icon: 'M22 12c0-5.53-4.47-10-10-10S2 6.47 2 12c0 4.99 3.66 9.13 8.44 9.88v-6.99h-2.54v-2.89h2.54V9.83c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.23 0-1.61.77-1.61 1.56v1.87h2.74l-.44 2.89h-2.3v6.99C18.34 21.13 22 16.99 22 12z',
+                  color: 'hover:bg-blue-600',
+                  url: 'https://facebook.com/servo'
+                },
+                {
+                  name: 'Twitter',
+                  icon: 'M22.46 6c-.77.35-1.5.59-2.28.69a4.02 4.02 0 001.76-2.22 7.92 7.92 0 01-2.53.97A3.98 3.98 0 0015.5 4a4 4 0 00-4 4c0 .31.04.62.1.9A11.35 11.35 0 013 5.16a3.99 3.99 0 001.24 5.35 4.187 4.187 0 01-1.8-.5v.05a4 4 0 003.21 3.92 4.06 4.06 0 01-1.79.07 4.02 4.02 0 003.75 2.8A8 8 0 012 19.54 11.28 11.28 0 007.29 21c7.55 0 11.68-6.25 11.68-11.68 0-.18-.01-.35-.02-.53A8.35 8.35 0 0022.46 6z',
+                  color: 'hover:bg-sky-500',
+                  url: 'https://twitter.com/servo'
+                },
+                {
+                  name: 'LinkedIn',
+                  icon: 'M4.98 3.5A2.5 2.5 0 002.5 6c0 1.38 1.13 2.5 2.48 2.5h.02c1.38 0 2.5-1.12 2.5-2.5a2.5 2.5 0 00-2.5-2.5zM3 8.5h4v11H3v-11zm7.5 0h3.68v1.56h.05c.51-.96 1.76-1.97 3.63-1.97 3.88 0 4.6 2.55 4.6 5.86v6.55H17v-5.81c0-1.39-.02-3.19-1.94-3.19-1.94 0-2.24 1.52-2.24 3.08v5.92h-4v-11z',
+                  color: 'hover:bg-blue-700',
+                  url: 'https://linkedin.com/company/servo'
+                },
+                {
+                  name: 'Instagram',
+                  icon: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z',
+                  color: 'hover:bg-pink-600',
+                  url: 'https://instagram.com/servo'
+                },
+              ].map((social) => (
+                <a
+                  key={social.name}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 ${social.color} hover:border-transparent`}
+                  aria-label={social.name}
                 >
-                  <path d="M22 12c0-5.53-4.47-10-10-10S2 6.47 2 12c0 4.99 3.66 9.13 8.44 9.88v-6.99h-2.54v-2.89h2.54V9.83c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.23 0-1.61.77-1.61 1.56v1.87h2.74l-.44 2.89h-2.3v6.99C18.34 21.13 22 16.99 22 12z" />
-                </svg>
+                  <svg
+                    className="w-6 h-6 text-white"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d={social.icon} />
+                  </svg>
+                </a>
+              ))}
+            </div>
 
-                {/* Effet de flash au survol */}
-                <div className="absolute inset-0 bg-white/0 group-hover/facebook:bg-white/10 group-hover/facebook:animate-flash transition-all duration-300"></div>
-              </a>
-
-              {/* Twitter */}
-              <a
-                href="https://twitter.com/immoplus"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-sky-500 hover:bg-sky-600 hover:shadow-sky-500/40 w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden group/twitter transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="Twitter"
-              >
-                {/* Effet de fond animé */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover/twitter:from-white/20 group-hover/twitter:to-white/10 transition-all duration-500"></div>
-
-                {/* Effet de pulsation au survol */}
-                <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover/twitter:border-white/30 group-hover/twitter:animate-ping-slow transition-all duration-300"></div>
-
-                {/* Icône avec animation de rotation */}
-                <svg
-                  className="w-4 h-4 fill-white relative z-10 group-hover/twitter:scale-110 group-hover/twitter:rotate-12 transition-all duration-300"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M22.46 6c-.77.35-1.5.59-2.28.69a4.02 4.02 0 001.76-2.22 7.92 7.92 0 01-2.53.97A3.98 3.98 0 0015.5 4a4 4 0 00-4 4c0 .31.04.62.1.9A11.35 11.35 0 013 5.16a3.99 3.99 0 001.24 5.35 4.187 4.187 0 01-1.8-.5v.05a4 4 0 003.21 3.92 4.06 4.06 0 01-1.79.07 4.02 4.02 0 003.75 2.8A8 8 0 012 19.54 11.28 11.28 0 007.29 21c7.55 0 11.68-6.25 11.68-11.68 0-.18-.01-.35-.02-.53A8.35 8.35 0 0022.46 6z" />
-                </svg>
-
-                {/* Effet de flash au survol */}
-                <div className="absolute inset-0 bg-white/0 group-hover/twitter:bg-white/10 group-hover/twitter:animate-flash transition-all duration-300"></div>
-              </a>
-
-              {/* LinkedIn */}
-              <a
-                href="https://linkedin.com/company/immoplus"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-700 hover:bg-blue-800 hover:shadow-blue-600/40 w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden group/linkedin transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="LinkedIn"
-              >
-                {/* Effet de fond animé */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover/linkedin:from-white/20 group-hover/linkedin:to-white/10 transition-all duration-500"></div>
-
-                {/* Effet de pulsation au survol */}
-                <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover/linkedin:border-white/30 group-hover/linkedin:animate-ping-slow transition-all duration-300"></div>
-
-                {/* Icône avec animation de rotation */}
-                <svg
-                  className="w-4 h-4 fill-white relative z-10 group-hover/linkedin:scale-110 group-hover/linkedin:rotate-12 transition-all duration-300"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M4.98 3.5A2.5 2.5 0 002.5 6c0 1.38 1.13 2.5 2.48 2.5h.02c1.38 0 2.5-1.12 2.5-2.5a2.5 2.5 0 00-2.5-2.5zM3 8.5h4v11H3v-11zm7.5 0h3.68v1.56h.05c.51-.96 1.76-1.97 3.63-1.97 3.88 0 4.6 2.55 4.6 5.86v6.55H17v-5.81c0-1.39-.02-3.19-1.94-3.19-1.94 0-2.24 1.52-2.24 3.08v5.92h-4v-11z" />
-                </svg>
-
-                {/* Effet de flash au survol */}
-                <div className="absolute inset-0 bg-white/0 group-hover/linkedin:bg-white/10 group-hover/linkedin:animate-flash transition-all duration-300"></div>
-              </a>
-
-              {/* Google Play */}
-              {/* Téléchargement APK */}
+            {/* Bouton APK Desktop */}
+            <div className="hidden lg:block">
               <button
                 onClick={() => setIsApkModalOpen(true)}
-                className=" w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden group/playstore transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                aria-label="Télécharger l'application Android"
+                className="w-full py-3 px-4 bg-gradient-to-r from-[#8B4513] to-[#6B8E23] hover:from-[#6B8E23] hover:to-[#556B2F] text-white rounded-xl font-medium flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
               >
-
-
-                {/* Icône Google Play avec animation */}
-                <img src="/google.png" alt="" className='w-8 h-8' />
-
-                {/* Effet de flash au survol */}
-                {/* Effet de flash au survol */}
+                <img src="/google.png" alt="Google Play" className='w-5 h-5' />
+                <span className="text-sm">Télécharger l'app</span>
               </button>
-
             </div>
           </div>
         </div>
@@ -337,35 +239,44 @@ const Footer: React.FC = () => {
           onClose={() => setIsApkModalOpen(false)}
         />
 
-        {/* Section inférieure avec animations */}
-        <div className="mt-8 pt-6 border-t border-gray-800 group/bottom">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-gray-500 text-xs group-hover:text-gray-400 transition-colors duration-300">
-              &copy; {currentYear}{' '}
-              <span className="text-white font-medium group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-500">
-                Servo
-              </span>
-              . Tous droits réservés.
+        {/* Section inférieure */}
+        <div className="mt-16 pt-8 border-t border-white/20">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
+            {/* Copyright */}
+            <div className="text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-3 mb-3"> 
+                <div>
+                  <div className="text-white/70 text-sm">
+                    &copy; {currentYear} - Tous droits réservés
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-4">
+            {/* Liens légaux */}
+            <div className="flex flex-wrap items-center justify-center gap-6">
               {[
                 { to: '/cookies', label: 'Cookies' },
                 { to: '/confidentialite', label: 'Confidentialité' },
                 { to: '/mentions_legales', label: 'Mentions légales' },
-              ].map((link) => (
+                { to: '/cgv', label: 'CGV' },
+                { to: '/contact', label: 'Contact' },
+              ].map((link, index) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="group/link text-gray-500 hover:text-gray-300 transition-colors duration-300 text-xs relative"
+                  className="text-white/80 hover:text-[#8B4513] transition-colors duration-300 text-sm relative group"
                 >
-                  <span className="relative z-10">{link.label}</span>
-                  {/* Effet de point animé au survol */}
-                  <span className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover/link:opacity-100 group-hover/link:animate-pulse transition-opacity duration-300"></span>
-                  {/* Soulignement animé */}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover/link:w-full transition-all duration-500"></span>
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#8B4513] group-hover:w-full transition-all duration-300"></span>
                 </Link>
               ))}
+            </div>
+
+            {/* Badge certification */}
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-white/10 to-transparent rounded-full border border-white/20">
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-white/90 text-sm">Agréée • Certification</span>
             </div>
           </div>
         </div>
