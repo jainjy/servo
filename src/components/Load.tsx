@@ -469,7 +469,7 @@ export default function LoadingScreen({
             
             {/* Copyright discret */}
             <div className="mt-6 text-center">
-              <p className="text-[10px] uppercase tracking-[0.3em] opacity-30 text-white font-light">
+              <p className="text-[10px] azonix uppercase tracking-[0.3em] opacity-30 text-white font-light">
                 © 2025 SERVO
               </p>
             </div>
@@ -479,11 +479,11 @@ export default function LoadingScreen({
           /* PHASE 2: ZOOM EFFECT */
           <div className="absolute inset-0 flex items-center justify-center z-50">
             <div className="servo-animate relative">
-              <h1 className="text-8xl md:text-9xl font-bold tracking-tighter text-white mix-blend-overlay">
+              <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter text-white mix-blend-overlay">
                 SERVO
               </h1>
               <div className="absolute inset-0 flex items-center justify-center blur-xl opacity-50">
-                <h1 className="text-8xl md:text-9xl font-bold tracking-tighter" style={{ color: colors.logoAccent }}>
+                <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter" style={{ color: colors.logoAccent }}>
                   SERVO
                 </h1>
               </div>
