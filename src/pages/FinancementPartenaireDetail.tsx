@@ -405,7 +405,7 @@ export default function Financement() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-              Financement & <span className="text-white/90">Assurance</span>
+              Financement
             </h1>
             <p className="text-sm text-white/90 mb-4 lg:mb-10 leading-relaxed">
               Des solutions complètes pour financer votre projet et le protéger avec nos partenaires de confiance.
@@ -611,7 +611,7 @@ export default function Financement() {
       </section>
 
       {/* Section Assurance */}
-      <section className="py-8 lg:py-8 bg-[#FAFAFA]" id="assurances">
+      {/* <section className="py-8 lg:py-8 bg-[#FAFAFA]" id="assurances">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -683,7 +683,7 @@ export default function Financement() {
             </Button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-8 lg:py-20 bg-white" id="audit">
