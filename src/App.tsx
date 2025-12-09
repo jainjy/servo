@@ -184,7 +184,10 @@ import PropertyBuy from "./pages/PropertyBuy";
 import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 import Assurance from "./pages/Assurance";
 
-import AgencyCard from "./components/NosPartenaires/AgencyCard";
+import Agence from "./components/NosPartenaires/Agence";
+import Constructeur from "./components/NosPartenaires/Constructeur";
+import Plombier from "./components/NosPartenaires/Plombier";
+
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 const queryClient = new QueryClient();
@@ -433,7 +436,9 @@ const App = () => {
                     element={<BatimentsLayout />}
                   />
                   {/* Routes Partenaires */}
-                  <Route path="/agences" element={<AgencyCard />} />
+                  <Route path="/agences" element={<Agence />} />
+                  <Route path="/constructeurs" element={<Constructeur />} />
+                  <Route path="/plombiers" element={<Plombier />} />
                   {/* Routes Domicile */}
                   <Route path="/domicile" element={<DomicileLayout />} />
                   <Route
