@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,8 @@ import {
   CreditCard,
   PieChart,
   Car,
-  Plane
+  Plane,
+  ChevronRight
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -86,7 +87,7 @@ interface SimulationResult {
   estimation?: number;
 }
 
-// Données de fallback en cas d'erreur API
+// Données de fallback
 const partenairesFinancementFallback: FinancementPartenaire[] = [
   {
     id: 1,
@@ -223,6 +224,37 @@ const servicesAssuranceFallback: AssuranceService[] = [
   }
 ];
 
+const financementServices = [
+  {
+    icon: Home,
+    title: "Prêt Immobilier",
+    description: "Financez votre projet immobilier",
+    features: ["Calcul capacité d'emprunt", "Taux compétitifs", "Simulation en ligne"],
+    modalType: 'simulation-immobilier'
+  },
+  {
+    icon: TrendingUp,
+    title: "Rachat de Crédit",
+    description: "Regroupez vos crédits",
+    features: ["Baisse des mensualités", "Taux unique", "Allègement du budget"],
+    modalType: 'simulation-rachat'
+  },
+  {
+    icon: CreditCard,
+    title: "Crédit Consommation",
+    description: "Financez vos projets personnels",
+    features: ["Taux fixe", "Délais flexibles", "Dossier simplifié"],
+    modalType: 'simulation-consommation'
+  },
+  {
+    icon: PieChart,
+    title: "Analyse Patrimoniale",
+    description: "Optimisez votre patrimoine",
+    features: ["Bilan complet", "Conseils personnalisés", "Stratégie long terme"],
+    modalType: 'analyse-patrimoniale'
+  }
+];
+
 export default function Financement() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [modalData, setModalData] = useState<ModalData>({
@@ -230,7 +262,6 @@ export default function Financement() {
     selectedPartenaire: null,
     simulationData: null
   });
-
   const { isAuthenticated } = useAuth();
   const [partenairesFinancement, setPartenairesFinancement] = useState<FinancementPartenaire[]>([]);
   const [servicesAssurance, setServicesAssurance] = useState<AssuranceService[]>([]);
@@ -265,33 +296,33 @@ export default function Financement() {
     fetchData();
   }, []);
 
-  const openModal = (modalType: string, data: Partial<ModalData> = {}) => {
+  const openModal = useCallback((modalType: string, data: Partial<ModalData> = {}) => {
     setActiveModal(modalType);
     setModalData(prev => ({ ...prev, ...data }));
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setActiveModal(null);
     setModalData({
       selectedAssurance: null,
       selectedPartenaire: null,
       simulationData: null
     });
-  };
+  }, []);
 
-  const handleAssuranceClick = (assurance: AssuranceService) => {
+  const handleAssuranceClick = useCallback((assurance: AssuranceService) => {
     openModal('contact', { selectedAssurance: assurance });
-  };
+  }, [openModal]);
 
-  const handlePartenaireClick = (partenaire: FinancementPartenaire) => {
+  const handlePartenaireClick = useCallback((partenaire: FinancementPartenaire) => {
     if (isAuthenticated) {
       openModal("contact", { selectedPartenaire: partenaire });
     } else {
       alert("Veuillez vous connecter ou vous inscrire pour contacter un partenaire.");
     }
-  };
+  }, [isAuthenticated, openModal]);
 
-  const handleSimulationSubmit = async (simulationData: any) => {
+  const handleSimulationSubmit = useCallback(async (simulationData: any) => {
     try {
       const demandeData = {
         nom: simulationData.nom,
@@ -314,32 +345,29 @@ export default function Financement() {
       console.error('Erreur lors de l\'envoi de la demande:', error);
       alert("Erreur lors de l'envoi de la demande. Veuillez réessayer.");
     }
-  };
+  }, [closeModal]);
 
   // Fonction utilitaire pour vérifier si c'est une URL d'image
-  const isImageUrl = (icon: any): boolean => {
+  const isImageUrl = useCallback((icon: any): boolean => {
     if (typeof icon === 'string') {
       return icon.startsWith('/') || icon.startsWith('https://');
     }
     return false;
-  };
+  }, []);
 
-  // Fonction pour afficher l'icône ou l'image
-  const renderIcon = (icon: any, className: string = "h-7 w-7") => {
-    if (isImageUrl(icon)) {
-      return <img src={icon} alt="icon" className={className} />;
+  // Fonction pour faire défiler vers une section
+  const scrollToSection = useCallback((sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
     }
-    if (icon) {
-      return <icon className={className} />;
-    }
-    return <Building2 className={className} />;
-  };
+  }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-[#FFFFFF] via-white to-[#FAFAFA] flex flex-col">
         <div className="flex-col flex-1 flex items-center justify-center">
-          <img src="/loading.gif" alt="" className='w-24 h-24' />
+          <img src="/loading.gif" alt="Chargement" className='w-24 h-24' />
           <p className="text-slate-600">Chargement des données...</p>
         </div>
       </div>
@@ -347,7 +375,7 @@ export default function Financement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFFFFF] via-white to-[#FAFAFA] flex flex-col">
       {/* Message d'erreur */}
       {error && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mx-4 mt-4">
@@ -365,7 +393,7 @@ export default function Financement() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80')`
+            backgroundImage: `url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80')`
           }}
         />
 
@@ -377,40 +405,61 @@ export default function Financement() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-              Financement & <span className="text-blue-400">Assurance</span>
+              Financement & <span className="text-white/90">Assurance</span>
             </h1>
-            <p className="text-sm text-slate-200 mb-4 lg:mb-10 leading-relaxed">
+            <p className="text-sm text-white/90 mb-4 lg:mb-10 leading-relaxed">
               Des solutions complètes pour financer votre projet et le protéger avec nos partenaires de confiance.
               Accompagnement personnalisé de A à Z.
             </p>
 
-            <div className="flex flex-wrap gap-5 justify-center">
-              <motion.div>
-                <Button
-                  className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
-                  onClick={() => openModal('service')}
-                >
-                  <FileText className="h-5 w-5 mr-3" />
-                  Découvrir nos services
-                </Button>
-              </motion.div>
+          <div className="flex flex-wrap gap-5 justify-center">
+            <motion.div>
+              <Button
+                className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300"
+                onClick={() => openModal('service')}
+              >
+                <FileText className="h-5 w-5 mr-3" />
+                Découvrir nos service financement
+              </Button>
+            </motion.div>
 
-              <motion.div>
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
-                  onClick={() => openModal('simulation')}
-                >
-                  <Calculator className="h-5 w-5 mr-3" />
-                  Simuler mon financement
-                </Button>
-              </motion.div>
-            </div>
+            <motion.div>
+              <Button
+                className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
+                onClick={() => openModal('simulation')}
+              >
+                <Calculator className="h-5 w-5 mr-3" />
+                Simuler mon financement
+              </Button>
+            </motion.div>
+
+            <motion.div>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-600 hover:border-blue-700 transition-all duration-300"
+                onClick={() => scrollToSection('assurances')}
+              >
+                <Shield className="h-5 w-5 mr-3" />
+                Découvrir nos offres d'assurance
+              </Button>
+            </motion.div>
+
+            <motion.div>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-base font-semibold border-2 border-blue-600 hover:border-blue-700 transition-all duration-300"
+                onClick={() => scrollToSection('assurances')}
+              >
+                <Shield className="h-5 w-5 mr-3" />
+                Protéger mon projet avec nos assurances
+              </Button>
+            </motion.div>
+          </div>
+
           </motion.div>
         </div>
       </section>
 
       {/* Section Financement détaillé */}
-      <section className="py-8 lg:py-20 bg-slate-50" id="financement-detail">
+      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -418,8 +467,8 @@ export default function Financement() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
-              Nos Solutions de <span className="text-blue-600">Financement</span>
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+              Nos Solutions de <span className="text-[#556B2F]">Financement</span>
             </h2>
             <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
               Des solutions adaptées à tous vos projets financiers
@@ -427,36 +476,7 @@ export default function Financement() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {[
-              {
-                icon: Home,
-                title: "Prêt Immobilier",
-                description: "Financez votre projet immobilier",
-                features: ["Calcul capacité d'emprunt", "Taux compétitifs", "Simulation en ligne"],
-                onClick: () => openModal('simulation-immobilier')
-              },
-              {
-                icon: TrendingUp,
-                title: "Rachat de Crédit",
-                description: "Regroupez vos crédits",
-                features: ["Baisse des mensualités", "Taux unique", "Allègement du budget"],
-                onClick: () => openModal('simulation-rachat')
-              },
-              {
-                icon: CreditCard,
-                title: "Crédit Consommation",
-                description: "Financez vos projets personnels",
-                features: ["Taux fixe", "Délais flexibles", "Dossier simplifié"],
-                onClick: () => openModal('simulation-consommation')
-              },
-              {
-                icon: PieChart,
-                title: "Analyse Patrimoniale",
-                description: "Optimisez votre patrimoine",
-                features: ["Bilan complet", "Conseils personnalisés", "Stratégie long terme"],
-                onClick: () => openModal('analyse-patrimoniale')
-              }
-            ].map((service, index) => (
+            {financementServices.map((service, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -465,34 +485,36 @@ export default function Financement() {
                 whileHover={{ y: -5 }}
               >
                 <Card 
-                  className="p-6 h-full border border-slate-200 rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer bg-white group"
-                  onClick={service.onClick}
+                  className="p-6 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer bg-white group"
+                  onClick={() => openModal(service.modalType)}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-[#6B8E23]/10 flex items-center justify-center mb-4 group-hover:bg-[#6B8E23] transition-colors duration-300">
                     {isImageUrl(service.icon) ? (
                       <img src={service.icon} alt={service.title} className="h-6 w-6 object-cover rounded-lg" />
                     ) : (
-                      <service.icon className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                      <service.icon className="h-6 w-6 text-[#556B2F] group-hover:text-white transition-colors duration-300" />
                     )}
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
+                  <h3 className="text-xl font-bold text-[#8B4513] mb-3">{service.title}</h3>
                   <p className="text-slate-600 mb-4 text-sm leading-relaxed">{service.description}</p>
                   <ul className="space-y-2">
                     {service.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center text-sm text-slate-600">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-[#6B8E23] mr-2 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:text-blue-700 transition-colors duration-300">
+                  <div className="mt-4 flex items-center text-[#556B2F] font-semibold text-sm group-hover:text-[#6B8E23] transition-colors duration-300">
                     Simuler mon projet
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </Card>
               </motion.div>
             ))}
           </div>
+
+         
         </div>
       </section>
 
@@ -505,8 +527,8 @@ export default function Financement() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
-              Nos <span className="text-slate-900">Partenaires Financement</span>
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+              Nos <span className="text-[#556B2F]">Partenaires Financement</span>
             </h2>
             <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto">
               Travaillons avec les meilleurs acteurs du marché pour votre projet
@@ -522,10 +544,10 @@ export default function Financement() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
               >
-                <Card className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group"
+                <Card className="p-8 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-2xl transition-all duration-500 bg-white group"
                 >
                   <div className="flex items-center mb-6">
-                    <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mr-5 group-hover:bg-slate-900 transition-colors duration-300">
+                    <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mr-5 group-hover:bg-[#556B2F] transition-colors duration-300">
                       {isImageUrl(partenaire.icon) ? (
                         <img src={partenaire.icon} alt={partenaire.nom} className="h-7 w-7 object-cover rounded-lg" />
                       ) : partenaire.icon ? (
@@ -535,7 +557,7 @@ export default function Financement() {
                       )}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900">{partenaire.nom}</h3>
+                      <h3 className="text-2xl font-bold text-[#8B4513]">{partenaire.nom}</h3>
                       <div className="flex items-center mt-1">
                         <Star className="h-5 w-5 text-yellow-400 fill-current" />
                         <span className="text-sm text-slate-600 ml-2">{partenaire.rating}</span>
@@ -546,19 +568,19 @@ export default function Financement() {
                   <p className="text-slate-600 mb-6 leading-relaxed">{partenaire.description}</p>
 
                   <div className="space-y-3 mb-4">
-                    {partenaire.avantages && partenaire.avantages.map((avantage, idx) => (
+                    {partenaire.avantages?.map((avantage, idx) => (
                       <div key={idx} className="flex items-center text-sm">
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-[#6B8E23] mr-3 flex-shrink-0" />
                         <span className="text-slate-700">{avantage}</span>
                       </div>
                     ))}
                   </div>
 
                   <div className="mb-6">
-                    <h4 className="font-semibold text-slate-900 mb-2">Services proposés :</h4>
+                    <h4 className="font-semibold text-[#8B4513] mb-2">Services proposés :</h4>
                     <div className="flex flex-wrap gap-2">
-                      {partenaire.services && partenaire.services.map((service, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full border border-blue-200">
+                      {partenaire.services?.map((service, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-[#6B8E23]/10 text-[#556B2F] text-sm rounded-full border border-[#6B8E23]/20">
                           {service}
                         </span>
                       ))}
@@ -567,17 +589,17 @@ export default function Financement() {
 
                   <div className="flex gap-3">
                     <Button
-                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-slate-900 hover:border-slate-800"
+                      className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-[#556B2F] hover:border-[#6B8E23]"
                       onClick={() => handlePartenaireClick(partenaire)}
                     >
                       <Handshake className="h-5 w-5 mr-3" />
                       Contacter
                     </Button>
                     <Button
-                      className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-slate-200 hover:border-slate-300"
+                      className="flex-1 bg-slate-100 hover:bg-slate-200 text-[#8B4513] rounded-xl py-4 text-base font-semibold transition-all duration-300 border-2 border-[#D3D3D3] hover:border-slate-300"
                       onClick={() => navigate(`/financement/${partenaire.id}`)}
                     >
-                      <ArrowRight className="h-5 w-5 mr-3" />
+                      <ChevronRight className="h-5 w-5 mr-3" />
                       Détails
                     </Button>
                   </div>
@@ -589,7 +611,7 @@ export default function Financement() {
       </section>
 
       {/* Section Assurance */}
-      <section className="py-8 lg:py-8 bg-slate-50" id="assurances">
+      <section className="py-8 lg:py-8 bg-[#FAFAFA]" id="assurances">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -597,8 +619,8 @@ export default function Financement() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-slate-900">
-              Solutions <span className="text-slate-900">d'Assurance</span>
+            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+              Solutions <span className="text-[#556B2F]">d'Assurance</span>
             </h2>
             <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
               Protégez votre projet, votre patrimoine et votre activité avec nos assurances sur mesure
@@ -615,11 +637,11 @@ export default function Financement() {
                 whileHover={{ y: -8 }}
               >
                 <Card
-                  className="p-8 h-full border border-slate-200 rounded-2xl hover:shadow-2xl transition-all duration-500 cursor-pointer bg-white group"
+                  className="p-8 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-2xl transition-all duration-500 cursor-pointer bg-white group"
                   onClick={() => handleAssuranceClick(assurance)}
                 >
                   <div className="flex items-start justify-between mb-6">
-                    <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-slate-900 transition-colors duration-300">
+                    <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-[#556B2F] transition-colors duration-300">
                       {isImageUrl(assurance.icon) ? (
                         <img src={assurance.icon} alt={assurance.nom} className="h-7 w-7 object-cover rounded-lg" />
                       ) : assurance.icon ? (
@@ -629,26 +651,36 @@ export default function Financement() {
                       )}
                     </div>
                     {assurance.obligatoire && (
-                      <span className="px-3 py-1.5 bg-orange-100 text-orange-800 text-sm font-medium rounded-full border border-orange-200">
+                      <span className="px-3 py-1.5 bg-[#8B4513]/10 text-[#8B4513] text-sm font-medium rounded-full border border-[#8B4513]/20">
                         Obligatoire
                       </span>
                     )}
                   </div>
 
-                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{assurance.nom}</h3>
+                  <h3 className="text-2xl font-bold text-[#8B4513] mb-4">{assurance.nom}</h3>
                   <p className="text-slate-600 mb-4 leading-relaxed">{assurance.description}</p>
                   <p className="text-sm text-slate-500 mb-6 leading-relaxed">{assurance.details}</p>
 
                   <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                     <span className="text-sm text-slate-600 font-medium">{assurance.public}</span>
-                    <div className="flex items-center text-slate-900 font-semibold text-sm group-hover:text-slate-700 transition-colors duration-300">
+                    <div className="flex items-center text-[#556B2F] font-semibold text-sm group-hover:text-[#6B8E23] transition-colors duration-300">
                       Devis gratuit
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                      <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </div>
                 </Card>
               </motion.div>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-4 text-base font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300"
+              onClick={() => scrollToSection('financement-detail')}
+            >
+              <FileText className="h-5 w-5 mr-3" />
+              Revenir aux solutions de financement
+            </Button>
           </div>
         </div>
       </section>
@@ -661,7 +693,7 @@ export default function Financement() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-900">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-[#8B4513]">
               Prêt à concrétiser votre projet ?
             </h2>
             <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -669,7 +701,7 @@ export default function Financement() {
             </p>
             <motion.div>
               <Button
-                className="bg-white text-slate-900 hover:bg-slate-100 rounded-xl px-10 py-5 text-lg font-semibold border-2 border-white hover:border-slate-100 transition-all duration-300"
+                className="bg-[#556B2F] text-white hover:bg-[#6B8E23] rounded-xl px-10 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
                 onClick={() => openModal('contact')}
               >
                 <Phone className="h-5 w-5 mr-3" />
@@ -686,7 +718,7 @@ export default function Financement() {
           type={activeModal}
           data={modalData}
           onClose={closeModal}
-          onOpenModal={openModal} // AJOUTÉ
+          onOpenModal={openModal}
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
@@ -699,7 +731,7 @@ interface UniversalModalProps {
   type: string;
   data: ModalData;
   onClose: () => void;
-  onOpenModal: (modalType: string, data?: Partial<ModalData>) => void; // AJOUTÉ
+  onOpenModal: (modalType: string, data?: Partial<ModalData>) => void;
   onSimulationSubmit: (data: any) => void;
 }
 
@@ -724,40 +756,37 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
   const [estimation, setEstimation] = useState<SimulationResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fonction utilitaire pour vérifier si c'est une URL d'image - AJOUTÉE ICI
-  const isImageUrl = (icon: any): boolean => {
+  const isImageUrl = useCallback((icon: any): boolean => {
     if (typeof icon === 'string') {
       return icon.startsWith('/') || icon.startsWith('https://');
     }
     return false;
-  };
+  }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     calculateEstimation(name, value);
-  };
+  }, [formData]);
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = useCallback((name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     calculateEstimation(name, value);
-  };
+  }, [formData]);
 
-  const calculateEstimation = (name: string, value: string) => {
-    // Simulation prêt immobilier
+  const calculateEstimation = useCallback((name: string, value: string) => {
     if (type === 'simulation-immobilier') {
-      const revenus = name === 'revenus' ? parseFloat(value) : parseFloat(formData.revenus);
-      const charges = name === 'charges' ? parseFloat(value) : parseFloat(formData.charges);
-      const duree = name === 'duree' ? parseInt(value) : parseInt(formData.duree);
-      const taux = name === 'taux' ? parseFloat(value) : parseFloat(formData.taux);
+      const revenus = name === 'revenus' ? parseFloat(value) || 0 : parseFloat(formData.revenus) || 0;
+      const charges = name === 'charges' ? parseFloat(value) || 0 : parseFloat(formData.charges) || 0;
+      const duree = name === 'duree' ? parseInt(value) || 0 : parseInt(formData.duree) || 0;
+      const taux = name === 'taux' ? parseFloat(value) || 0 : parseFloat(formData.taux) || 0;
 
-      if (revenus && charges && duree && taux) {
+      if (revenus > 0 && duree > 0 && taux > 0) {
         const capacite = Math.round((revenus - charges) * 0.33 * duree * 12);
         const mensualite = Math.round((capacite * (taux / 100) / 12) / (1 - Math.pow(1 + (taux / 100) / 12, -duree * 12)));
         setEstimation({ capacite, mensualite });
       }
     }
-    // Simulation classique
     else if (type === 'simulation') {
       const montant = name === 'montant' ? value : formData.montant;
       const duree = name === 'duree' ? value : formData.duree;
@@ -766,9 +795,9 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         setEstimation({ estimation: mensualite });
       }
     }
-  };
+  }, [type, formData]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
       alert("Veuillez vous connecter ou vous inscrire pour envoyer une demande.");
@@ -785,7 +814,6 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         type: type.includes('simulation') ? 'simulation' : 'contact'
       };
 
-      // Ajouter les données spécifiques
       if (type.includes('simulation') && estimation) {
         Object.assign(demandeData, estimation);
       }
@@ -798,7 +826,6 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         demandeData.partenaireId = data.selectedPartenaire.id;
       }
 
-      // Envoyer à l'API
       const response = await financementAPI.submitDemande(demandeData);
 
       if (response.data.success) {
@@ -828,9 +855,9 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [formData, estimation, data, isAuthenticated, type, onClose]);
 
-  const getModalTitle = () => {
+  const getModalTitle = useCallback(() => {
     switch (type) {
       case 'service':
         return "Nos services de financement";
@@ -852,9 +879,9 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
       default:
         return "Demande d'information";
     }
-  };
+  }, [type, data]);
 
-  const getDefaultMessage = () => {
+  const getDefaultMessage = useCallback(() => {
     if (data.selectedAssurance) {
       return `Bonjour, je souhaite obtenir un devis pour l'assurance ${data.selectedAssurance.nom}.`;
     }
@@ -865,9 +892,9 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
       return data.simulationData.message;
     }
     return "Bonjour, je souhaite obtenir des informations sur vos services de financement et assurance.";
-  };
+  }, [data]);
 
-  const renderServiceContent = () => (
+  const renderServiceContent = useMemo(() => (
     <>
       <p className="text-slate-600 mb-8 text-lg leading-relaxed">
         Un accompagnement complet à chaque étape de votre projet
@@ -896,25 +923,25 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             description: "Accompagnement jusqu'à la concrétisation de votre projet"
           }
         ].map((service, index) => (
-          <Card key={index} className="p-6 border border-slate-200 rounded-xl hover:shadow-lg transition-all duration-300">
+          <Card key={index} className="p-6 border border-[#D3D3D3] rounded-xl hover:shadow-lg transition-all duration-300">
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center mr-4">
+              <div className="w-12 h-12 rounded-lg bg-[#6B8E23]/10 flex items-center justify-center mr-4">
                 {isImageUrl(service.icon) ? (
                   <img src={service.icon} alt={service.title} className="h-6 w-6 object-cover rounded-lg" />
                 ) : (
-                  <service.icon className="h-6 w-6 text-slate-600" />
+                  <service.icon className="h-6 w-6 text-[#556B2F]" />
                 )}
               </div>
-              <h3 className="font-semibold text-slate-900 text-lg">{service.title}</h3>
+              <h3 className="font-semibold text-[#8B4513] text-lg">{service.title}</h3>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed">{service.description}</p>
           </Card>
         ))}
       </div>
     </>
-  );
+  ), [isImageUrl]);
 
-  const renderSimulationContent = () => (
+  const renderSimulationContent = useMemo(() => (
     <>
       <p className="text-slate-600 mb-8 text-lg leading-relaxed">
         Estimez vos mensualités et obtenez une simulation personnalisée
@@ -931,7 +958,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             placeholder="Ex: 150000"
             value={formData.montant}
             onChange={handleInputChange}
-            className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             required={type === 'simulation'}
           />
         </div>
@@ -944,7 +971,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             value={formData.duree}
             onValueChange={(value) => handleSelectChange('duree', value)}
           >
-            <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+            <SelectTrigger className="rounded-xl border-[#D3D3D3] focus:border-[#556B2F]">
               <SelectValue placeholder="Sélectionnez la durée" />
             </SelectTrigger>
             <SelectContent>
@@ -957,19 +984,19 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         </div>
 
         {estimation?.estimation && (
-          <Card className="p-6 bg-green-50 border-green-200 rounded-xl">
-            <h4 className="font-semibold text-green-800 mb-3 text-lg">Estimation mensuelle</h4>
-            <p className="text-3xl font-bold text-green-600">
+          <Card className="p-6 bg-[#6B8E23]/10 border-[#6B8E23]/20 rounded-xl">
+            <h4 className="font-semibold text-[#556B2F] mb-3 text-lg">Estimation mensuelle</h4>
+            <p className="text-3xl font-bold text-[#556B2F]">
               {estimation.estimation} €/mois*
             </p>
-            <p className="text-sm text-green-600 mt-3">*Estimation hors assurance et frais</p>
+            <p className="text-sm text-[#6B8E23] mt-3">*Estimation hors assurance et frais</p>
           </Card>
         )}
       </div>
     </>
-  );
+  ), [formData, estimation, handleInputChange, handleSelectChange, type]);
 
-  const renderSimulationImmobilier = () => (
+  const renderSimulationImmobilier = useMemo(() => (
     <>
       <p className="text-slate-600 mb-8 text-lg leading-relaxed">
         Calculez votre capacité d'emprunt et simulez votre prêt immobilier
@@ -987,7 +1014,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               placeholder="Ex: 3000"
               value={formData.revenus}
               onChange={handleInputChange}
-              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+              className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             />
           </div>
           <div>
@@ -1000,7 +1027,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               placeholder="Ex: 800"
               value={formData.charges}
               onChange={handleInputChange}
-              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+              className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             />
           </div>
         </div>
@@ -1015,7 +1042,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             placeholder="Ex: 20000"
             value={formData.apport}
             onChange={handleInputChange}
-            className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
           />
         </div>
 
@@ -1028,7 +1055,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               value={formData.duree} 
               onValueChange={(value) => handleSelectChange('duree', value)}
             >
-              <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+              <SelectTrigger className="rounded-xl border-[#D3D3D3] focus:border-[#556B2F]">
                 <SelectValue placeholder="Sélectionnez la durée" />
               </SelectTrigger>
               <SelectContent>
@@ -1050,31 +1077,31 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               placeholder="Ex: 3.5"
               value={formData.taux}
               onChange={handleInputChange}
-              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+              className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             />
           </div>
         </div>
 
         {estimation && (
-          <Card className="p-6 bg-blue-50 border-blue-200 rounded-xl">
-            <h4 className="font-semibold text-blue-800 mb-3 text-lg">Résultats de simulation</h4>
+          <Card className="p-6 bg-[#6B8E23]/10 border-[#6B8E23]/20 rounded-xl">
+            <h4 className="font-semibold text-[#556B2F] mb-3 text-lg">Résultats de simulation</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-blue-600">Capacité d'emprunt</p>
-                <p className="text-2xl font-bold text-blue-800">{estimation.capacite} €</p>
+                <p className="text-sm text-[#6B8E23]">Capacité d'emprunt</p>
+                <p className="text-2xl font-bold text-[#556B2F]">{estimation.capacite} €</p>
               </div>
               <div>
-                <p className="text-sm text-blue-600">Mensualité estimée</p>
-                <p className="text-2xl font-bold text-blue-800">{estimation.mensualite} €/mois</p>
+                <p className="text-sm text-[#6B8E23]">Mensualité estimée</p>
+                <p className="text-2xl font-bold text-[#556B2F]">{estimation.mensualite} €/mois</p>
               </div>
             </div>
           </Card>
         )}
       </div>
     </>
-  );
+  ), [formData, estimation, handleInputChange, handleSelectChange]);
 
-  const renderAnalysePatrimoniale = () => (
+  const renderAnalysePatrimoniale = useMemo(() => (
     <>
       <p className="text-slate-600 mb-8 text-lg leading-relaxed">
         Analyse complète de votre situation patrimoniale
@@ -1092,7 +1119,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               placeholder="Ex: 50000"
               value={formData.revenus_annuels}
               onChange={handleInputChange}
-              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+              className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             />
           </div>
           <div>
@@ -1105,7 +1132,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               placeholder="Ex: 150000"
               value={formData.patrimoine}
               onChange={handleInputChange}
-              className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+              className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             />
           </div>
         </div>
@@ -1115,7 +1142,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             Objectifs patrimoniaux
           </label>
           <Select onValueChange={(value) => handleSelectChange('objectif', value)}>
-            <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+            <SelectTrigger className="rounded-xl border-[#D3D3D3] focus:border-[#556B2F]">
               <SelectValue placeholder="Sélectionnez votre objectif" />
             </SelectTrigger>
             <SelectContent>
@@ -1132,7 +1159,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             Profil de risque
           </label>
           <Select onValueChange={(value) => handleSelectChange('profil_risque', value)}>
-            <SelectTrigger className="rounded-xl border-slate-300 focus:border-slate-900">
+            <SelectTrigger className="rounded-xl border-[#D3D3D3] focus:border-[#556B2F]">
               <SelectValue placeholder="Sélectionnez votre profil" />
             </SelectTrigger>
             <SelectContent>
@@ -1144,9 +1171,9 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         </div>
       </div>
     </>
-  );
+  ), [formData, handleInputChange, handleSelectChange]);
 
-  const renderContactForm = () => (
+  const renderContactForm = useMemo(() => (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -1156,7 +1183,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             value={formData.nom}
             onChange={handleInputChange}
             required
-            className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             disabled={submitting}
           />
         </div>
@@ -1168,7 +1195,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
             value={formData.telephone}
             onChange={handleInputChange}
             required
-            className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+            className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
             disabled={submitting}
           />
         </div>
@@ -1181,7 +1208,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         value={formData.email}
         onChange={handleInputChange}
         required
-        className="w-full rounded-xl border-slate-300 focus:border-slate-900"
+        className="w-full rounded-xl border-[#D3D3D3] focus:border-[#556B2F]"
         disabled={submitting}
       />
 
@@ -1192,7 +1219,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
           rows={5}
           value={formData.message || getDefaultMessage()}
           onChange={handleInputChange}
-          className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 resize-none"
+          className="w-full px-4 py-3 border border-[#D3D3D3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] resize-none"
           required
           disabled={submitting}
         />
@@ -1201,7 +1228,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
       <div className="grid lg:flex gap-4">
         <Button
           type="submit"
-          className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
+          className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl py-4 text-base font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
           disabled={submitting}
         >
           {submitting ? (
@@ -1225,14 +1252,29 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
           type="button"
           onClick={onClose}
           variant="outline"
-          className="flex-1 rounded-xl py-4 text-base font-semibold border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
+          className="flex-1 rounded-xl py-4 text-base font-semibold border-[#D3D3D3] hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
           disabled={submitting}
         >
           Annuler
         </Button>
       </div>
     </form>
-  );
+  ), [formData, handleInputChange, handleSubmit, submitting, type, getDefaultMessage, onClose]);
+
+  const renderModalContent = useMemo(() => {
+    switch (type) {
+      case 'service':
+        return renderServiceContent;
+      case 'simulation':
+        return renderSimulationContent;
+      case 'simulation-immobilier':
+        return renderSimulationImmobilier;
+      case 'analyse-patrimoniale':
+        return renderAnalysePatrimoniale;
+      default:
+        return null;
+    }
+  }, [type, renderServiceContent, renderSimulationContent, renderSimulationImmobilier, renderAnalysePatrimoniale]);
 
   return (
     <motion.div
@@ -1246,13 +1288,13 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200"
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#D3D3D3]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-8">
           {/* En-tête avec bouton fermer */}
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl lg:text-3xl font-bold text-slate-900">{getModalTitle()}</h2>
+            <h2 className="text-xl lg:text-3xl font-bold text-[#8B4513]">{getModalTitle()}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -1265,20 +1307,17 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
           </div>
 
           {/* Contenu dynamique */}
-          {type === 'service' && renderServiceContent()}
-          {type === 'simulation' && renderSimulationContent()}
-          {type === 'simulation-immobilier' && renderSimulationImmobilier()}
-          {type === 'analyse-patrimoniale' && renderAnalysePatrimoniale()}
+          {renderModalContent}
 
           {/* Formulaire de contact pour tous les types */}
-          {(type === 'contact' || type.includes('simulation') || type === 'analyse-patrimoniale') && renderContactForm()}
+          {(type === 'contact' || type.includes('simulation') || type === 'analyse-patrimoniale') && renderContactForm}
 
           {/* Bouton de contact pour le modal service */}
           {type === 'service' && (
             <div className="flex gap-4 mt-8">
               <Button
-                onClick={() => onOpenModal('contact')} // MODIFIÉ ICI
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-4 text-base font-semibold border-2 border-slate-900 hover:border-slate-800 transition-all duration-300"
+                onClick={() => onOpenModal('contact')}
+                className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl py-4 text-base font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
               >
                 <Phone className="h-5 w-5 mr-3" />
                 Contacter un expert
@@ -1286,7 +1325,7 @@ function UniversalModal({ type, data, onClose, onOpenModal, onSimulationSubmit }
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="flex-1 rounded-xl py-4 text-base font-semibold border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
+                className="flex-1 rounded-xl py-4 text-base font-semibold border-[#D3D3D3] hover:border-slate-400 text-slate-700 hover:text-slate-800 transition-all duration-300"
               >
                 Fermer
               </Button>
