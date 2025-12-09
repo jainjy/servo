@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home } from "lucide-react";
+import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
@@ -15,6 +15,10 @@ import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { AutoSuggestInput } from "@/components/AutoSuggestInput";
 import ServoLogo from "@/components/components/ServoLogo";
+
+import GenericMap from "@/components/GenericMap";
+import { MapService } from "@/services/mapService";
+import { MapPoint } from "@/types/map";
 
 interface SearchItem {
   id: string | number;
@@ -36,6 +40,13 @@ interface SearchItem {
 }
 
 type Stage = "idle" | "loading" | "results";
+
+// Interfaces pour la carte
+interface MapFilters {
+  users: boolean;
+  properties: boolean;
+  searchTerm: string;
+}
 
 // SVG pour l'icône de position (remplace l'emoji 📍)
 const PositionIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -64,6 +75,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     // Rediriger vers la page d'accueil
     navigate('/');
   };
+
   const [stage, setStage] = useState<Stage>("idle");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchItem[]>([]);
@@ -88,6 +100,21 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     isOpen: false,
     property: null as any
   });
+
+  // =============== ÉTATS POUR LA CARTE ===============
+  const [mapPoints, setMapPoints] = useState<MapPoint[]>([]);
+  const [filteredMapPoints, setFilteredMapPoints] = useState<MapPoint[]>([]);
+  const [mapLoading, setMapLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [mapFilters, setMapFilters] = useState<MapFilters>({
+    users: true,
+    properties: true,
+    searchTerm: "",
+  });
+  const [showMapModal, setShowMapModal] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  // ===================================================
 
   // Contexte panier
   const { addToCart } = useCart();
@@ -115,6 +142,167 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       setIsAuthenticated(false);
     }
   };
+
+  // =============== FONCTIONS POUR LA CARTE ===============
+    const loadMapData = useCallback(async () => {
+      try {
+        setMapLoading(true);
+        const allPoints = await MapService.getAllMapPoints();
+        
+        // DEBUG: Vérifier les données
+        console.log("📊 Données carte chargées:", {
+          total: allPoints.length,
+          users: allPoints.filter(p => p.type === "user").length,
+          properties: allPoints.filter(p => p.type === "property").length,
+          firstPoints: allPoints.slice(0, 3).map(p => ({
+            id: p.id,
+            name: p.name,
+            type: p.type,
+            lat: p.latitude,
+            lng: p.longitude
+          }))
+        });
+        
+        setMapPoints(allPoints);
+        setFilteredMapPoints(allPoints);
+        setMapError(null);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
+        setMapError(errorMessage);
+        console.error("❌ Erreur chargement carte:", err);
+        setMapPoints([]);
+        setFilteredMapPoints([]);
+      } finally {
+        setMapLoading(false);
+      }
+    }, []);
+
+  // Fonction pour filtrer les points sur la carte
+  const filterMapPoints = useCallback((points: MapPoint[], filters: MapFilters, searchQuery: string = "") => {
+    let filtered = points;
+
+    // Filtre par type
+    if (!filters.users && !filters.properties) {
+      filtered = [];
+    } else if (!filters.users || !filters.properties) {
+      filtered = points.filter(
+        (point) =>
+          (filters.users && point.type === "user") ||
+          (filters.properties && point.type === "property")
+      );
+    }
+
+    // Filtre par recherche
+    if (searchQuery) {
+      const searchTerm = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (point) =>
+          point.name?.toLowerCase().includes(searchTerm) ||
+          point.city?.toLowerCase().includes(searchTerm) ||
+          point.address?.toLowerCase().includes(searchTerm) ||
+          (point.type === "user" &&
+            point.metiers?.some((metier) =>
+              metier.toLowerCase().includes(searchTerm)
+            )) ||
+          (point.type === "user" &&
+            point.services?.some((service) =>
+              service.name?.toLowerCase().includes(searchTerm)
+            ))
+      );
+    }
+
+    return filtered;
+  }, []);
+
+  // Fonction pour centrer sur la Réunion
+  const handleCenterToReunion = () => {
+    window.dispatchEvent(new CustomEvent('centerMap', {
+      detail: {
+        location: [-21.1351, 55.2471],
+        zoom: 10
+      }
+    }));
+  };
+
+  // Fonction pour gérer le clic sur un point de la carte
+  const handleMapPointClick = (point: MapPoint) => {
+    console.log("Point carte cliqué:", point);
+    
+    // Navigation selon le type
+    if (point.type === "property") {
+      navigate(`/immobilier/${point.id}`);
+    } else if (point.type === "user") {
+      navigate(`/professional/${point.id}`);
+    }
+  };
+
+  // Fonction pour obtenir la géolocalisation utilisateur
+  const handleGetUserLocation = () => {
+    if (!navigator.geolocation) {
+      setMapError("La géolocalisation n'est pas supportée par votre navigateur.");
+      setUserLocation([-21.1351, 55.2471]);
+      handleCenterToReunion();
+      return;
+    }
+
+    setGeoLoading(true);
+    setMapError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation([latitude, longitude]);
+        setGeoLoading(false);
+        
+        // Centrer la carte sur la position utilisateur
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('centerMap', { 
+            detail: { 
+              location: [latitude, longitude],
+              zoom: 14,
+              smooth: true
+            } 
+          }));
+        }, 300);
+      },
+      (error) => {
+        console.error("Erreur géolocalisation:", error);
+        setGeoLoading(false);
+        setMapError("Impossible d'obtenir votre position. Carte centrée sur la Réunion.");
+        setUserLocation([-21.1351, 55.2471]);
+        handleCenterToReunion();
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  };
+  // Ajoutez après l'effet de chargement des données de carte
+useEffect(() => {
+  if (!mapLoading && filteredMapPoints.length > 0) {
+    // Attendre que la carte soit rendue puis la centrer
+    setTimeout(() => {
+      handleCenterToReunion();
+    }, 500);
+  }
+}, [mapLoading, filteredMapPoints]);
+  // Initialiser la carte au chargement
+  useEffect(() => {
+    loadMapData();
+  }, [loadMapData]);
+
+  // Filtrer les points de carte en fonction de la recherche
+  useEffect(() => {
+    if (query.trim()) {
+      const filtered = filterMapPoints(mapPoints, mapFilters, query);
+      setFilteredMapPoints(filtered);
+    } else {
+      setFilteredMapPoints(filterMapPoints(mapPoints, mapFilters));
+    }
+  }, [query, mapPoints, mapFilters, filterMapPoints]);
+  // ===================================================
 
   // Fonction pour rediriger vers la connexion
   const redirectToLogin = () => {
@@ -196,14 +384,14 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   // NOUVELLE FONCTION : Obtenir une couleur de fond uni en dark
   const getBackgroundColor = (item: SearchItem): string => {
     const colors = [
-      'bg-gray-800', // Gris foncé
-      'bg-blue-800', // Bleu foncé
-      'bg-green-800', // Vert foncé
-      'bg-purple-800', // Violet foncé
-      'bg-indigo-800', // Indigo foncé
-      'bg-teal-800', // Teal foncé
-      'bg-cyan-800', // Cyan foncé
-      'bg-emerald-800', // Émeraude foncé
+      'bg-gray-800',
+      'bg-blue-800',
+      'bg-green-800',
+      'bg-purple-800',
+      'bg-indigo-800',
+      'bg-teal-800',
+      'bg-cyan-800',
+      'bg-emerald-800',
     ];
 
     // Générer un index basé sur le type ou l'ID pour une couleur cohérente
@@ -218,44 +406,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // Gestion de l'historique
-
-  // Dans handleSearch, ajouter l'enregistrement de l'activité :
-  const handleSearch = async (searchQuery?: string) => {
-    const q = (searchQuery || query).trim();
-
-    if (!q) {
-      setResults([]);
-      setFilteredResults([]);
-      setStage("results");
-      navigate('/recherche', { replace: true });
-      return;
-    }
-
-    // Ajouter à l'historique local
-    addHistory(q);
-
-    // Enregistrer dans l'historique serveur (asynchrone, ne pas attendre)
-    if (isAuthenticated) {
-      try {
-        await api.post('/suggestions/log', {
-          query: q,
-          userId: localStorage.getItem("user-id") || undefined,
-          resultsCount: 0 // Sera mis à jour après
-        });
-      } catch (error) {
-        console.error("Erreur enregistrement recherche:", error);
-      }
-    }
-
-    // Mettre à jour la query affichée
-    if (searchQuery) {
-      setQuery(searchQuery);
-    }
-
-    await runSearch(q);
-  };
-
-  // Simplifier addHistory :
   const addHistory = (q: string) => {
     if (!q) return;
     setSearchHistory((prev) => {
@@ -266,7 +416,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     });
   };
 
-  // Mettre à jour loadHistory et saveHistory pour enlever correctedFrom
   const loadHistory = () => {
     try {
       const raw = localStorage.getItem(HISTORY_KEY);
@@ -452,6 +601,48 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // Recherche avec l'API
+  const handleSearch = async (searchQuery?: string) => {
+    const q = (searchQuery || query).trim();
+
+    if (!q) {
+      setResults([]);
+      setFilteredResults([]);
+      setStage("results");
+      // Réinitialiser les filtres de carte
+      setFilteredMapPoints(filterMapPoints(mapPoints, mapFilters));
+      navigate('/recherche', { replace: true });
+      return;
+    }
+
+    // Ajouter à l'historique local
+    addHistory(q);
+
+    // Enregistrer dans l'historique serveur (asynchrone, ne pas attendre)
+    if (isAuthenticated) {
+      try {
+        await api.post('/suggestions/log', {
+          query: q,
+          userId: localStorage.getItem("user-id") || undefined,
+          resultsCount: 0 // Sera mis à jour après
+        });
+      } catch (error) {
+        console.error("Erreur enregistrement recherche:", error);
+      }
+    }
+
+    // Mettre à jour la query affichée
+    if (searchQuery) {
+      setQuery(searchQuery);
+    }
+
+    // Afficher la carte modal si elle est cachée
+    if (!showMapModal) {
+      setShowMapModal(true);
+    }
+
+    await runSearch(q);
+  };
+
   const runSearch = async (q: string) => {
     setStage("loading");
     setResults([]);
@@ -471,6 +662,27 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         setResults(normalizedResults);
         const filtered = filterResults(normalizedResults);
         setFilteredResults(filtered);
+        
+        // Synchroniser avec les points de la carte
+        if (q.trim()) {
+          // Filtrer les points de carte basés sur la recherche
+          const filteredMap = filterMapPoints(mapPoints, mapFilters, q);
+          setFilteredMapPoints(filteredMap);
+          
+          // Si des points correspondent, centrer sur le premier résultat
+          if (filteredMap.length > 0) {
+            const firstPoint = filteredMap[0];
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('centerMap', { 
+                detail: { 
+                  location: [firstPoint.latitude, firstPoint.longitude],
+                  zoom: 12,
+                  smooth: true
+                } 
+              }));
+            }, 500);
+          }
+        }
       } else {
         setResults([]);
         setFilteredResults([]);
@@ -484,8 +696,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       setStage("results");
     }
   };
-
-
 
   const handleSelect = (item: SearchItem) => {
     navigate(item.route);
@@ -740,7 +950,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   return (
     <div className="min-h-screen absolute z-50 w-full bg-gray-100 flex flex-col">
-
       <main className="flex-1 pt-1">
         <div className="container mx-auto px-4">
           {/* Barre de recherche normale (non fixe) */}
@@ -1013,6 +1222,148 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           </div>
         </div>
       </main>
+
+     {/* // =============== MODAL DE LA CARTE (EN BAS À DROITE) =============== */}
+        {showMapModal && (
+      <div className="fixed bottom-8 right-8 z-50 w-[600px] h-[500px] rounded-lg overflow-hidden shadow-2xl border border-gray-300 bg-white">
+        {/* Header de la carte */}
+        <div className="bg-white p-4 border-b flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MapPin className="h-5 w-5 text-blue-600" />
+            <span className="font-semibold text-base">Carte de la Réunion</span>
+            <div className="flex items-center gap-2 ml-3">
+              <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1.5 rounded">
+                {filteredMapPoints.length} points
+              </span>
+              {userLocation && (
+                <span className="text-sm bg-green-100 text-green-800 px-3 py-1.5 rounded">
+                  Position active
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleGetUserLocation}
+              disabled={geoLoading}
+              className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+              title="Ma position"
+            >
+              {geoLoading ? (
+                <Loader className="h-5 w-5 text-purple-600 animate-spin" />
+              ) : (
+                <MapPin className="h-5 w-5 text-purple-600" />
+              )}
+            </button>
+            
+            <button
+              onClick={handleCenterToReunion}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Centrer sur la Réunion"
+            >
+              <TreePalm className="h-5 w-5 text-orange-600" />
+            </button>
+            
+            <button
+              onClick={() => setShowMapModal(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Fermer la carte"
+            >
+              <X className="h-5 w-5 text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Contenu de la carte */}
+        <div className="h-[calc(500px-120px)] bg-gray-100 relative">
+          {mapLoading ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <Loader className="h-10 w-10 animate-spin mx-auto text-blue-600" />
+                <p className="mt-3 text-base text-gray-600">Chargement de la carte...</p>
+              </div>
+            </div>
+          ) : mapError ? (
+            <div className="h-full flex items-center justify-center p-6">
+              <div className="text-center">
+                <p className="text-base text-red-600">{mapError}</p>
+                <button
+                  onClick={loadMapData}
+                  className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Réessayer
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Log de debug */}
+              <div className="hidden">
+                {(() => {
+                  console.log("📍 Props envoyées à GenericMap:", {
+                    pointsCount: filteredMapPoints.length,
+                    points: filteredMapPoints.slice(0, 2),
+                    userLocation,
+                    center: [-21.1351, 55.2471],
+                    zoom: 10
+                  });
+                  return null;
+                })()}
+              </div>
+              
+              <GenericMap
+                points={filteredMapPoints}
+                center={[-21.1351, 55.2471]}
+                zoom={10}
+              />
+              
+              {/* Overlay de debug */}
+              <div className="absolute top-3 left-3 bg-black/70 text-white text-sm px-3 py-1.5 rounded pointer-events-none">
+                {filteredMapPoints.length} points visibles
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer avec statistiques */}
+        <div className="bg-white p-3 border-t flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-blue-500" />
+              <span className="text-gray-700">
+                {mapPoints.filter(p => p.type === "user").length} partenaires
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Home className="h-4 w-4 text-green-500" />
+              <span className="text-gray-700">
+                {mapPoints.filter(p => p.type === "property").length} propriétés
+              </span>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => navigate('/map')}
+            className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
+          >
+            Voir carte complète →
+          </button>
+        </div>
+      </div>
+    )}
+
+      {/* Bouton pour réafficher la carte si cachée */}
+      {!showMapModal && (
+        <button
+          onClick={() => setShowMapModal(true)}
+          className="fixed bottom-4 right-4 z-40 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+          title="Afficher la carte"
+        >
+          <MapPin className="h-6 w-6" />
+        </button>
+      )}
 
       {/* MODALES */}
       {devisModal.isOpen && (

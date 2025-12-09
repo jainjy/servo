@@ -216,38 +216,46 @@ const GenericMap: React.FC<GenericMapProps> = ({
 
     // Ajouter les nouveaux marqueurs
     points.forEach((point) => {
-      if (point.latitude && point.longitude) {
-        const icon = createCustomIcon(point.type);
+      // 🔥 Correction : accepter latitude|lat et longitude|lng
+      const lat = point.latitude ?? point.lat;
+      const lng = point.longitude ?? point.lng;
 
-        const marker = L.marker([point.latitude, point.longitude], { icon })
-          .addTo(map)
-          .bindPopup(
-            point.popupContent || `<div>${point.name || "Point sans nom"}</div>`
-          );
-
-        // Gestion du clic sur le marqueur
-        marker.on("click", () => {
-          setSelectedPoint(point);
-          if (onPointClick) {
-            onPointClick(point);
-          }
-        });
-
-        // Ajouter un effet de hover avec popup simplifié
-        marker.on("mouseover", function () {
-          this.setPopupContent(
-            `<div class="text-sm font-semibold">${point.name}</div>`
-          );
-          this.openPopup();
-        });
-
-        marker.on("mouseout", function () {
-          this.closePopup();
-        });
-
-        markersRef.current.push(marker);
+      // 🔥 Vérifier NUMÉRIQUEMENT (pas truthy)
+      if (typeof lat !== "number" || typeof lng !== "number") {
+        console.warn("Point ignoré (coords invalides) :", point);
+        return;
       }
+
+      const icon = createCustomIcon(point.type);
+
+      const marker = L.marker([lat, lng], { icon })
+        .addTo(map)
+        .bindPopup(
+          point.popupContent || `<div>${point.name || "Point sans nom"}</div>`
+        );
+
+      // Gestion du clic sur le marqueur
+      marker.on("click", () => {
+        setSelectedPoint(point);
+        if (onPointClick) {
+          onPointClick(point);
+        }
+      });
+
+      marker.on("mouseover", function () {
+        this.setPopupContent(
+          `<div class="text-sm font-semibold">${point.name}</div>`
+        );
+        this.openPopup();
+      });
+
+      marker.on("mouseout", function () {
+        this.closePopup();
+      });
+
+      markersRef.current.push(marker);
     });
+
 
     // Ajuster la vue pour montrer tous les marqueurs
     if (points.length > 0) {
