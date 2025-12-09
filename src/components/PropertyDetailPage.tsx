@@ -38,6 +38,7 @@ import {
 import gsap from "gsap";
 import PropertyMap from "@/components/PropertyMap";
 import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
+
 interface Property {
   id: string;
   title: string;
@@ -115,7 +116,6 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   }, [property.owner.email, property.title]);
 
   const handleScheduleVisit = useCallback(() => {
-    // Ouvrir le modal de demande de visite
     setIsVisitModalOpen(true);
   }, []);
 
@@ -125,7 +125,6 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    // TODO: Implémenter l'ajout aux favoris via API
   };
 
   const formatPrice = (price: number) => {
@@ -199,20 +198,18 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
     if (property.city) parts.push(property.city);
     return parts.join(", ");
   };
+
   const downloadAllImages = async (images: string[], propertyTitle: string) => {
     try {
-      // Créer un nom de dossier propre
       const folderName = propertyTitle
         .replace(/[^a-zA-Z0-9\s]/g, '')
         .replace(/\s+/g, '_')
         .toLowerCase();
 
-      // Téléchargement séquentiel
       for (let i = 0; i < images.length; i++) {
         const imageUrl = images[i];
         const fileName = `${folderName}_photo_${i + 1}.jpg`;
 
-        // Télécharger via blob pour éviter les blocages du navigateur
         const response = await fetch(imageUrl);
         const blob = await response.blob();
 
@@ -221,10 +218,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         link.download = fileName;
         link.click();
 
-        // Libérer l’URL pour éviter les fuites mémoire
         URL.revokeObjectURL(link.href);
-
-        // Petit délai (500 ms) pour éviter d’être bloqué par le navigateur
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
@@ -234,26 +228,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
     }
   };
 
-
-  const downloadImage = (imageUrl: string, filename: string) => {
-    return new Promise((resolve, reject) => {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = filename;
-      link.target = '_blank';
-
-      // Déclencher le téléchargement
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      resolve(true);
-    });
-  };
-
   const statusBadge = getStatusBadge();
   const isAvailable = (property.isActive);
   const mm = gsap.matchMedia();
+
   useEffect(() => {
     mm.add("(min-width: 1024px)", () => {
       ScrollTrigger.create({
@@ -262,34 +240,21 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         end: "bottom 55px",
         pin: true,
         scrub: 1,
-        //markers: true
       });
     })
   }, []);
 
   return (
-    <div className="min-h-screen bg-background pt-16">
-      {/* Header avec bouton retour */}
-      {/* <div className="container mx-auto px-4 py-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/immobilier")}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour aux propriétés
-        </Button>
-      </div> */}
-
+    <div className="min-h-screen bg-white pt-16">
       <div className="container mx-auto px-4 py-10">
         {/* Galerie d'images et sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
           {/* Galerie principale */}
-          <div className="lg:col-span-3 bg-white p-2 rounded-xl shadow-lg">
+          <div className="lg:col-span-3 bg-white p-2 rounded-xl shadow-lg border border-[#D3D3D3]">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Image principale */}
               <div className="lg:col-span-2">
-                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
                   {property.images && property.images.length > 0 ? (
                     <img
                       src={property.images[selectedImage]}
@@ -297,28 +262,28 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       className="object-cover w-full h-full"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <Building className="h-20 w-20 text-muted-foreground" />
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <Building className="h-20 w-20 text-gray-400" />
                     </div>
                   )}
 
                   {/* Badges */}
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
-                    <Badge className="bg-primary text-primary-foreground">
+                    <Badge className="bg-[#6B8E23] text-white">
                       {getTypeLabel(property.type)}
                     </Badge>
-                    <Badge className="bg-success hover:bg-green-900 text-primary-foreground">
+                    <Badge className="bg-[#8B4513]/90 text-white">
                       {statusBadge.label}
                     </Badge>
                     {property.isFeatured && (
-                      <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                      <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">
                         En vedette
                       </Badge>
                     )}
                   </div>
 
                   <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-background/90 backdrop-blur text-lg font-semibold">
+                    <Badge className="bg-white/90 backdrop-blur text-lg font-semibold border border-[#D3D3D3] text-[#8B4513]">
                       <Euro className="h-4 w-4 mr-1" />
                       {getPriceDisplay()}
                     </Badge>
@@ -326,7 +291,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
                   {/* Compteur de vues */}
                   <div className="absolute bottom-4 left-4">
-                    <Badge variant="secondary" className="bg-background/90 backdrop-blur">
+                    <Badge className="bg-white/90 backdrop-blur border border-[#D3D3D3] text-[#556B2F]">
                       <Eye className="h-3 w-3 mr-1" />
                       {property.views} vues
                     </Badge>
@@ -342,7 +307,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                          ? "border-primary"
+                          ? "border-[#6B8E23]"
                           : "border-transparent"
                           }`}
                       >
@@ -358,26 +323,25 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                   [1, 2, 3, 4].map((index) => (
                     <div
                       key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent bg-muted flex items-center justify-center"
+                      className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent bg-gray-100 flex items-center justify-center"
                     >
-                      <Building className="h-6 w-6 text-muted-foreground" />
+                      <Building className="h-6 w-6 text-gray-400" />
                     </div>
                   ))
                 )}
 
-                {/* BOUTON TÉLÉCHARGER TOUTES LES PHOTOS - EN DESSOUS DES IMAGES */}
+                {/* BOUTON TÉLÉCHARGER TOUTES LES PHOTOS */}
                 {property.images && property.images.length > 0 && (
                   <div className="col-span-2 mt-[-160px]">
                     <Button
                       onClick={() => downloadAllImages(property.images, property.title)}
                       variant="outline"
                       size="sm"
-                      className="w-full"
+                      className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
                     >
                       <UploadIcon className="h-4 w-4 mr-2" />
                       Télécharger toutes les photos ({property.images.length})
                     </Button>
-
                   </div>
                 )}
               </div>
@@ -387,20 +351,20 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
           {/* Sidebar - Agent & Actions */}
           <div id="agent" className="space-y-6 relative lg:absolute right-2 lg:w-80">
             {/* Carte Agent */}
-            <Card>
+            <Card className="border border-[#D3D3D3]">
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="flex justify-between gap-1 mt-1">
                     <div className="flex gap-3 items-center">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        <Users className="h-4 w-4 text-primary" />
+                      <div className="w-8 h-8 bg-[#6B8E23]/10 rounded-full flex items-center justify-center">
+                        <Users className="h-4 w-4 text-[#6B8E23]" />
                       </div>
                       <div className="text-left">
-                        <h3 className="font-semibold text-lg">
+                        <h3 className="font-semibold text-lg text-[#8B4513]">
                           {property.owner.firstName} {property.owner.lastName}
                         </h3>
                         {property.owner.companyName && (
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-gray-600">
                             {property.owner.companyName}
                           </p>
                         )}
@@ -411,14 +375,17 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
                 <div className="space-y-3">
                   {property.owner.phone && (
-                    <Button className="w-full bg-slate-900 hover:bg-slate-900/70" onClick={handleContact}>
+                    <Button 
+                      className="w-full bg-[#6B8E23] hover:bg-[#556B2F]" 
+                      onClick={handleContact}
+                    >
                       <Phone className="h-4 w-4 mr-2" />
                       {property.owner.phone}
                     </Button>
                   )}
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
                     onClick={handleEmail}
                   >
                     <Mail className="h-4 w-4 mr-2" />
@@ -429,27 +396,27 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
             </Card>
 
             {/* Actions */}
-            <Card>
+            <Card className="border border-[#D3D3D3]">
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-primary mb-2">
+                    <div className="text-2xl font-bold text-[#8B4513] mb-2">
                       {getPriceDisplay()}
                     </div>
                     {property.listingType === "rent" && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-600">
                         Charges non comprises
                       </p>
                     )}
                     {property.listingType === "sale" && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-600">
                         Honoraires inclus
                       </p>
                     )}
                   </div>
 
                   <Button
-                    className={`w-full ${!isAvailable ? "bg-black/80 cursor-move" : "bg-slate-950"
+                    className={`w-full ${!isAvailable ? "bg-gray-400 cursor-not-allowed" : "bg-[#556B2F] hover:bg-[#6B8E23]"
                       }`}
                     size="lg"
                     onClick={handleScheduleVisit}
@@ -462,7 +429,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                   {property.owner.phone && (
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
                       onClick={handleContact}
                     >
                       <Phone className="h-4 w-4 mr-2" />
@@ -470,8 +437,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                     </Button>
                   )}
 
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground pt-2">
-                    <Shield className="h-4 w-4" />
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600 pt-2">
+                    <Shield className="h-4 w-4 text-[#6B8E23]" />
                     <span>Transaction sécurisée</span>
                   </div>
                 </div>
@@ -481,29 +448,29 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         </div>
 
         {/* Contenu principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 bg-white p-2 rounded-lg shadow-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 bg-white p-2 rounded-lg shadow-lg border border-[#D3D3D3]">
           {/* Contenu principal */}
           <div className="lg:col-span-3 space-y-8">
             {/* En-tête */}
             <div>
-              <h1 className="text-2xl lg:text-2xl font-bold mb-4">
+              <h1 className="text-2xl lg:text-2xl font-bold mb-4 text-[#8B4513]">
                 {property.title}
               </h1>
-              <div className="flex items-center text-sm gap-2 text-muted-foreground mb-4">
-                <MapPin className="h-5 w-5" />
+              <div className="flex items-center text-sm gap-2 text-gray-600 mb-4">
+                <MapPin className="h-5 w-5 text-[#556B2F]" />
                 <span>{getFullAddress()}</span>
               </div>
 
               {/* Caractéristiques principales */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-[#D3D3D3]">
                 {property.surface && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-900/10 rounded-lg">
-                      <Ruler className="h-5 w-5 text-slate-900" />
+                    <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                      <Ruler className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold">{property.surface} m²</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-[#8B4513]">{property.surface} m²</div>
+                      <div className="text-sm text-gray-600">
                         Surface
                       </div>
                     </div>
@@ -511,12 +478,12 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
                 {property.bedrooms && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-900/10 rounded-lg">
-                      <Bed className="h-5 w-5 text-slate-900" />
+                    <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                      <Bed className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold">{property.bedrooms}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-[#8B4513]">{property.bedrooms}</div>
+                      <div className="text-sm text-gray-600">
                         Chambres
                       </div>
                     </div>
@@ -524,12 +491,12 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
                 {property.bathrooms && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-900/10 rounded-lg">
-                      <Bath className="h-5 w-5 text-slate-900" />
+                    <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                      <Bath className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold">{property.bathrooms}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-[#8B4513]">{property.bathrooms}</div>
+                      <div className="text-sm text-gray-600">
                         Salles de bain
                       </div>
                     </div>
@@ -537,12 +504,12 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 )}
                 {property.rooms && (
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-900/10 rounded-lg">
-                      <Home className="h-5 w-5 text-slate-900" />
+                    <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                      <Home className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold">{property.rooms}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-[#8B4513]">{property.rooms}</div>
+                      <div className="text-sm text-gray-600">
                         Pièces
                       </div>
                     </div>
@@ -553,83 +520,98 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
             {/* Tabs */}
             <Tabs defaultValue="description" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="description">Description</TabsTrigger>
-                <TabsTrigger value="features">Équipements</TabsTrigger>
-                <TabsTrigger value="location">Localisation</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 border-b border-[#D3D3D3]">
+                <TabsTrigger 
+                  value="description" 
+                  className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white text-[#8B4513]"
+                >
+                  Description
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="features" 
+                  className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white text-[#8B4513]"
+                >
+                  Équipements
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="location" 
+                  className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white text-[#8B4513]"
+                >
+                  Localisation
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="description" className="space-y-6 pt-6">
                 <div>
-                  <h3 className="text-xl font-semibold mb-4">Description</h3>
-                  <p className="text-lg leading-relaxed text-muted-foreground">
+                  <h3 className="text-xl font-semibold mb-4 text-[#8B4513]">Description</h3>
+                  <p className="text-lg leading-relaxed text-gray-700">
                     {property.description || "Aucune description disponible."}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
+                  <Card className="border border-[#D3D3D3]">
                     <CardContent className="p-6">
-                      <h4 className="font-semibold mb-4">Caractéristiques</h4>
+                      <h4 className="font-semibold mb-4 text-[#8B4513]">Caractéristiques</h4>
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Type</span>
-                          <span className="font-medium">{getTypeLabel(property.type)}</span>
+                          <span className="text-gray-600">Type</span>
+                          <span className="font-medium text-[#556B2F]">{getTypeLabel(property.type)}</span>
                         </div>
                         {property.surface && (
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Surface</span>
-                            <span className="font-medium">{property.surface} m²</span>
+                            <span className="text-gray-600">Surface</span>
+                            <span className="font-medium text-[#556B2F]">{property.surface} m²</span>
                           </div>
                         )}
                         {property.yearBuilt && (
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Année</span>
-                            <span className="font-medium">{property.yearBuilt}</span>
+                            <span className="text-gray-600">Année</span>
+                            <span className="font-medium text-[#556B2F]">{property.yearBuilt}</span>
                           </div>
                         )}
                         {property.energyClass && (
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">DPE</span>
-                            <span className="font-medium">{property.energyClass}</span>
+                            <span className="text-gray-600">DPE</span>
+                            <span className="font-medium text-[#556B2F]">{property.energyClass}</span>
                           </div>
                         )}
                         {property.floor && (
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Étage</span>
-                            <span className="font-medium">{property.floor}</span>
+                            <span className="text-gray-600">Étage</span>
+                            <span className="font-medium text-[#556B2F]">{property.floor}</span>
                           </div>
                         )}
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="border border-[#D3D3D3]">
                     <CardContent className="p-6">
-                      <h4 className="font-semibold mb-4">Informations</h4>
+                      <h4 className="font-semibold mb-4 text-[#8B4513]">Informations</h4>
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Statut</span>
-                          <Badge variant={statusBadge.variant}>
+                          <span className="text-gray-600">Statut</span>
+                          <Badge className="bg-[#8B4513]/10 text-[#8B4513] border border-[#8B4513]/30">
                             {statusBadge.label}
                           </Badge>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Type d'annonce</span>
-                          <span className="font-medium">
+                          <span className="text-gray-600">Type d'annonce</span>
+                          <span className="font-medium text-[#556B2F]">
                             {property.listingType === "rent" ? "Location" : "Vente"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Publié le</span>
-                          <span className="font-medium">
+                          <span className="text-gray-600">Publié le</span>
+                          <span className="font-medium text-[#556B2F]">
                             {new Date(property.createdAt).toLocaleDateString('fr-FR')}
                           </span>
                         </div>
                         {property.expiresAt && (
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">Expire le</span>
-                            <span className="font-medium">
+                            <span className="text-gray-600">Expire le</span>
+                            <span className="font-medium text-[#556B2F]">
                               {new Date(property.expiresAt).toLocaleDateString('fr-FR')}
                             </span>
                           </div>
@@ -645,29 +627,29 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                   {getFeaturesList().map((feature, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-3 p-3 border rounded-lg hover:border-primary transition-colors"
+                      className="flex items-center gap-3 p-3 border border-[#D3D3D3] rounded-lg hover:border-[#6B8E23] transition-colors"
                     >
-                      <div className="text-primary">
+                      <div className="text-[#6B8E23]">
                         {getAmenityIcon(feature.toLowerCase())}
                       </div>
-                      <span className="font-medium">{feature}</span>
+                      <span className="font-medium text-[#8B4513]">{feature}</span>
                     </div>
                   ))}
                 </div>
               </TabsContent>
 
               <TabsContent value="location" className="pt-6">
-                <Card>
+                <Card className="border border-[#D3D3D3]">
                   <CardContent className="p-6">
-                    <h4 className="font-semibold mb-4">Localisation</h4>
+                    <h4 className="font-semibold mb-4 text-[#8B4513]">Localisation</h4>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <MapPin className="h-4 w-4 text-[#556B2F]" />
                         <span>{getFullAddress()}</span>
                       </div>
 
                       {property.latitude && property.longitude ? (
-                        <div className="h-96 rounded-lg overflow-hidden">
+                        <div className="h-96 rounded-lg overflow-hidden border border-[#D3D3D3]">
                           <PropertyMap
                             latitude={property.latitude}
                             longitude={property.longitude}
@@ -675,8 +657,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                           />
                         </div>
                       ) : (
-                        <div className="h-48 bg-muted rounded-lg flex items-center justify-center">
-                          <p className="text-muted-foreground">
+                        <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-[#D3D3D3]">
+                          <p className="text-gray-600">
                             Localisation non disponible
                           </p>
                         </div>
