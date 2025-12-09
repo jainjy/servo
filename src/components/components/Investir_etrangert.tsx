@@ -59,13 +59,6 @@ const InvestirEtranger = () => {
     message: ''
   });
 
-  // Palette
-  // logo: #556B2F (olive)
-  // primary-dark: #6B8E23 (yellow-green)
-  // light-bg: #FFFFFF
-  // separator: #D3D3D3
-  // secondary-text: #8B4513
-
   const paysData: Record<string, PaysData> = {
     maurice: {
       nom: 'Île Maurice',
@@ -104,7 +97,7 @@ const InvestirEtranger = () => {
       fiscalite: 'Imposition sur les sociétés: 20%',
       rendement: 'Rendement locatif: 8-12% net',
       image: <FlagIcon />,
-      couleur: 'from-[#6B8E23] to-[#8B4513]'
+      couleur: 'from-[#6B8E23] to-[#556B2F]'
     },
     dubai: {
       nom: 'Dubaï',
@@ -123,7 +116,7 @@ const InvestirEtranger = () => {
       fiscalite: '0% impôt sur le revenu',
       rendement: 'Rendement locatif: 5-8% net',
       image: <Building2 />,
-      couleur: 'from-[#556B2F] to-[#8B4513]'
+      couleur: 'from-[#556B2F] to-[#556B2F]'
     },
     portugal: {
       nom: 'Portugal',
@@ -168,7 +161,7 @@ const InvestirEtranger = () => {
         'Entretien et maintenance',
         'Reporting mensuel'
       ],
-      couleur: 'from-[#6B8E23] to-[#8B4513]'
+      couleur: 'from-[#6B8E23] to-[#556B2F]'
     },
     gestion: {
       titre: 'Gestion de patrimoine',
@@ -180,7 +173,7 @@ const InvestirEtranger = () => {
         'Suivi personnalisé',
         'Diversification géographique'
       ],
-      couleur: 'from-[#556B2F] to-[#8B4513]'
+      couleur: 'from-[#556B2F] to-[#556B2F]'
     }
   };
 
@@ -273,7 +266,9 @@ const InvestirEtranger = () => {
                 </div>
                 <div className="container mx-auto px-4 mt-10">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-2xl lg:text-3xl font-bold mb-4 tracking-widest">Investissement </h1>
+                       <h1 className="text-4xl lg:text-5xl font-semibold mb-4 tracking-[0.2em] text-gray-100 dark:text-white">
+  INVESTISSEMENT
+</h1>
                         <p className="text-sm lg:text-md opacity-90 mb-8 max-w-2xl mx-auto">
                             Diversifiez votre patrimoine avec nos solutions clés en main
                             dans les marchés porteurs à fort potentiel

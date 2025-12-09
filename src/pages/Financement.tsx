@@ -1563,7 +1563,7 @@ export default function Financement() {
       </section>
 
       {/* Section Financement détaillé */}
-      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
+      <section className="py-2 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1571,15 +1571,13 @@ export default function Financement() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8 lg:mb-16"
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-2 text-[#8B4513]">
               Nos Solutions de <span className="text-[#556B2F]">Financement</span>
             </h2>
-            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
-              Des solutions adaptées à tous vos projets financiers
-            </p>
+            
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 icon: Home,
@@ -1650,7 +1648,7 @@ export default function Financement() {
       </section>
 
       {/* Section Partenaires Financement */}
-      <section className="py-8 lg:py-20 bg-white" id="partenaires">
+      <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
