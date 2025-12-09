@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -24,431 +24,209 @@ const colors = {
 // URL de l'image en dessin
 const sketchImageUrl = "/image.png";
 
-// Fonction pour générer un masque SVG avec des courbes de Bézier pour un blob organique
-const generateBlobPath = (centerX: number, centerY: number, radius: number, shapePoints: number[], viewportWidth: number, viewportHeight: number) => {
-  if (shapePoints.length < 4) return '';
-  
-  const numPoints = shapePoints.length;
-  const points: {x: number, y: number}[] = [];
-  
-  // Générer les points de base
-  for (let i = 0; i < numPoints; i++) {
-    const angle = (i / numPoints) * Math.PI * 2;
-    const distance = radius * shapePoints[i];
-    const x = centerX + Math.cos(angle) * distance;
-    const y = centerY + Math.sin(angle) * distance;
-    points.push({ x, y });
-  }
-  
-  // Convertir en chemin SVG avec courbes de Bézier
-  const d = points.reduce((acc, point, i, arr) => {
-    const x = (point.x / viewportWidth) * 100;
-    const y = (point.y / viewportHeight) * 100;
-    
-    if (i === 0) {
-      return `M ${x}% ${y}%`;
-    }
-    
-    const prev = arr[i - 1];
-    const prevX = (prev.x / viewportWidth) * 100;
-    const prevY = (prev.y / viewportHeight) * 100;
-    const next = arr[(i + 1) % arr.length];
-    const nextX = (next.x / viewportWidth) * 100;
-    const nextY = (next.y / viewportHeight) * 100;
-    
-    // Point de contrôle pour une courbe lisse
-    const cp1x = prevX + (x - prevX) / 2;
-    const cp1y = prevY + (y - prevY) / 2;
-    const cp2x = x + (nextX - x) / 2;
-    const cp2y = y + (nextY - y) / 2;
-    
-    return `${acc} C ${cp1x}% ${cp1y}%, ${cp2x}% ${cp2y}%, ${x}% ${y}%`;
-  }, '');
-  
-  return `${d} Z`;
-};
-
-// Fonction pour générer un masque clip-path avec des formes arrondies
-const generateBlobClipPath = (centerX: number, centerY: number, radius: number, shapePoints: number[], viewportWidth: number, viewportHeight: number) => {
-  if (shapePoints.length === 0) return '';
-  
-  const points = shapePoints.map((scale, idx) => {
-    const angle = (idx / shapePoints.length) * Math.PI * 2;
-    const distance = radius * scale;
-    const x = centerX + Math.cos(angle) * distance;
-    const y = centerY + Math.sin(angle) * distance;
-    
-    // Convertir en pourcentage
-    const xPercent = (x / viewportWidth) * 100;
-    const yPercent = (y / viewportHeight) * 100;
-    
-    return `${xPercent}% ${yPercent}%`;
-  }).join(', ');
-  
-  return `polygon(${points})`;
-};
-
 const Hero = () => {
   const [heroQuery, setHeroQuery] = useState("");
   const navigate = useNavigate();
 
-  const [targetRotation, setTargetRotation] = useState({ x: 0, y: 0 });
-  const [currentRotation, setCurrentRotation] = useState({ x: 0, y: 0 });
-  const [lightPosition, setLightPosition] = useState({ x: 50, y: 50, opacity: 0 });
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [revealPosition, setRevealPosition] = useState({ x: 0, y: 0, radius: 0 });
   const [isRevealing, setIsRevealing] = useState(false);
   const [mouseInactive, setMouseInactive] = useState(false);
-  const [liquidWave, setLiquidWave] = useState(0);
-  const [blobShape, setBlobShape] = useState<number[]>([]);
-  const [waterDroplets, setWaterDroplets] = useState<Array<{
+  const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [waveOffset, setWaveOffset] = useState(0);
+  const [revealRadius, setRevealRadius] = useState(0);
+  const animationRef = useRef<number | null>(null);
+  const [mouseTrail, setMouseTrail] = useState<Array<{
     id: number;
     x: number;
     y: number;
     size: number;
-    opacity: number;
-    speed: number;
+    life: number;
+    timestamp: number;
+    offsetX: number;
+    offsetY: number;
   }>>([]);
-  const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const waveAnimationRef = useRef<number | null>(null);
-  
-  const requestRef = useRef<number | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const sketchCanvasRef = useRef<HTMLCanvasElement>(null);
-  const dropletIdRef = useRef(0);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  // Particules effet
-  const particlesRef = useRef<Array<{
+  const [randomReveals, setRandomReveals] = useState<Array<{
+    id: number;
     x: number;
     y: number;
     size: number;
-    speedX: number;
-    speedY: number;
-    opacity: number;
-    color: string;
+    life: number;
+    createdAt: number;
   }>>([]);
+  
+  const trailIdRef = useRef(0);
+  const randomIdRef = useRef(0);
+  const lastMouseMoveTime = useRef(Date.now());
+  const [alwaysRevealing, setAlwaysRevealing] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const animate = () => {
-    setCurrentRotation((prev) => {
-      const lerp = 0.08;
-      const newX = prev.x + (targetRotation.x - prev.x) * lerp;
-      const newY = prev.y + (targetRotation.y - prev.y) * lerp;
-      return { x: newX, y: newY };
-    });
-    
-    // Animation du rayon du blob - réduit à 150px max (au lieu de 250px)
-    if (isRevealing && revealPosition.radius < 150) {
-      setRevealPosition(prev => ({
-        ...prev,
-        radius: prev.radius + (150 - prev.radius) * 0.12
-      }));
-    } else if (!isRevealing && revealPosition.radius > 0) {
-      setRevealPosition(prev => ({
-        ...prev,
-        radius: prev.radius * 0.92
-      }));
-    }
-    
-    requestRef.current = requestAnimationFrame(animate);
-  };
-
-  // Initialisation des particules
+  // Animation de l'onde, des traces et du rayon de révélation
   useEffect(() => {
-    particlesRef.current = Array.from({ length: 50 }).map(() => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      size: Math.random() * 3 + 1,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.5 + 0.2,
-      color: Math.random() > 0.7 ? colors.sruvol : colors.logoAccent,
-    }));
-    
-    // Initialiser la forme du blob avec des formes plus organiques et arrondies
-    const shapePoints = Array.from({ length: 16 }, () => {
-      // Créer des variations pour des formes arrondies de gouttes d'eau
-      const base = 0.7;
-      const variation = 0.4; // Réduit pour des formes plus douces
-      return base + Math.random() * variation;
-    });
-    setBlobShape(shapePoints);
-  }, []);
-
-  // Animation des gouttelettes d'eau
-  useEffect(() => {
-    if (!isRevealing || waterDroplets.length === 0) return;
-
-    const interval = setInterval(() => {
-      setWaterDroplets(prev => 
-        prev.map(droplet => ({
-          ...droplet,
-          opacity: Math.max(0, droplet.opacity - 0.01),
-          y: droplet.y - droplet.speed * 0.5,
-        })).filter(droplet => droplet.opacity > 0)
-      );
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, [isRevealing, waterDroplets.length]);
-
-  // Créer de nouvelles gouttelettes d'eau
-  useEffect(() => {
-    if (!isRevealing || blobShape.length === 0) return;
-
-    const createDroplet = () => {
-      const angle = Math.random() * Math.PI * 2;
-      const distance = revealPosition.radius * (0.8 + Math.random() * 0.4);
-      const x = revealPosition.x + Math.cos(angle) * distance;
-      const y = revealPosition.y + Math.sin(angle) * distance;
+    const animate = () => {
+      setWaveOffset(prev => prev + 0.02);
       
-      dropletIdRef.current += 1;
-      return {
-        id: dropletIdRef.current,
-        x,
-        y,
-        size: Math.random() * 3 + 1,
-        opacity: 0.6 + Math.random() * 0.4,
-        speed: 0.2 + Math.random() * 0.3,
-      };
-    };
-
-    const interval = setInterval(() => {
-      if (Math.random() > 0.8) { // 20% de chance de créer une gouttelette
-        setWaterDroplets(prev => [...prev, createDroplet()]);
-      }
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [isRevealing, blobShape, revealPosition]);
-
-  // Préchargement de l'image de dessin
-  useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = sketchImageUrl;
-    
-    img.onload = () => {
-      const canvas = sketchCanvasRef.current;
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      // Redimensionner le canvas à la taille de l'écran
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      
-      // Dessiner l'image de dessin
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
-      // Appliquer un filtre pour renforcer l'effet dessin
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      
-      // Améliorer le contraste pour l'effet dessin
-      for (let i = 0; i < data.length; i += 4) {
-        // Convertir en niveau de gris
-        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-        
-        // Créer un effet de dessin au trait
-        const threshold = 150;
-        const value = avg > threshold ? 255 : 0;
-        
-        data[i] = value;     // R
-        data[i + 1] = value; // G
-        data[i + 2] = value; // B
-        data[i + 3] = 255;   // Alpha
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-    };
-  }, []);
-
-  // Animer les points du blob avec la vague
-  useEffect(() => {
-    if (isRevealing && blobShape.length > 0) {
-      setBlobShape(prev => 
-        prev.map((_, idx) => {
-          // Animation plus douce pour des bords arrondis
-          const waveOffset = liquidWave * 0.02;
-          const pointOffset = idx * Math.PI / 8;
-          const wave = Math.sin(waveOffset + pointOffset) * 0.2;
-          return 0.7 + wave;
-        })
-      );
-    }
-  }, [liquidWave, isRevealing]);
-
-  // Animation des particules
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const animateParticles = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      particlesRef.current.forEach((particle) => {
-        // Mise à jour position
-        particle.x += particle.speedX;
-        particle.y += particle.speedY;
-
-        // Rebond sur les bords
-        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
-
-        // Effet de suivie de souris
-        const dx = mousePosition.x - particle.x;
-        const dy = mousePosition.y - particle.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 100) {
-          const force = 0.02;
-          particle.speedX += (dx / distance) * force;
-          particle.speedY += (dy / distance) * force;
-        }
-
-        // Limiter la vitesse
-        const maxSpeed = 1;
-        const speed = Math.sqrt(particle.speedX * particle.speedX + particle.speedY * particle.speedY);
-        if (speed > maxSpeed) {
-          particle.speedX = (particle.speedX / speed) * maxSpeed;
-          particle.speedY = (particle.speedY / speed) * maxSpeed;
-        }
-
-        // Dessiner la particule
-        ctx.beginPath();
-        ctx.fillStyle = `${particle.color}${Math.floor(particle.opacity * 255).toString(16).padStart(2, '0')}`;
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Dessiner des lignes entre particules proches
-        particlesRef.current.forEach((otherParticle) => {
-          const dx = otherParticle.x - particle.x;
-          const dy = otherParticle.y - particle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            ctx.beginPath();
-            ctx.strokeStyle = `${colors.logoAccent}20`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.stroke();
+      // Animer le rayon de révélation seulement si revealing
+      if (isRevealing || alwaysRevealing) {
+        setRevealRadius(prev => {
+          if (prev < 100) { // Réduit à 150px (au lieu de 220px)
+            return prev + (100 - prev) * 0.07; // Accélération douce
           }
+          return prev;
         });
-      });
+      } else if (revealRadius > 0) {
+        setRevealRadius(prev => prev * 0.92); // Décroissance douce
+      }
+      
+      // Mettre à jour les traces
+      setMouseTrail(prev => 
+        prev
+          .map(trail => ({
+            ...trail,
+            life: trail.life - 0.018, // Ralenti la disparition
+            size: trail.size * 0.985, // Ralenti la réduction
+            // Déplacement aléatoire pour effet réaliste
+            x: trail.x + Math.sin(waveOffset + trail.id) * 0.5,
+            y: trail.y + Math.cos(waveOffset + trail.id) * 0.3,
+          }))
+          .filter(trail => trail.life > 0)
+      );
+      
+      // Mettre à jour les révélations aléatoires
+      setRandomReveals(prev => 
+        prev
+          .map(reveal => ({
+            ...reveal,
+            life: reveal.life - 0.009, // Ralenti la disparition
+            size: reveal.size * 1.008, // Légère expansion
+          }))
+          .filter(reveal => reveal.life > 0)
+      );
 
-      requestAnimationFrame(animateParticles);
+      animationRef.current = requestAnimationFrame(animate);
     };
 
-    animateParticles();
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
-    };
-  }, [mousePosition]);
-
-  useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [targetRotation, isRevealing]);
+  }, [isRevealing, mouseTrail.length, randomReveals.length, revealRadius, alwaysRevealing, waveOffset]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const parent = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - parent.left) / parent.width - 0.5;
-    const y = (e.clientY - parent.top) / parent.height - 0.5;
+  // Ajouter une trace au déplacement de la souris avec décalage aléatoire
+  const addTrailPoint = useCallback((x: number, y: number) => {
+    const now = Date.now();
+    if (now - lastMouseMoveTime.current < 50) return; // Réduit à 50ms
+    
+    lastMouseMoveTime.current = now;
+    
+    trailIdRef.current += 1;
+    setMouseTrail(prev => {
+      // Décalage aléatoire pour que les traces sortent du cercle
+      const offsetX = (Math.random() - 0.5) * 60;
+      const offsetY = (Math.random() - 0.5) * 60;
+      
+      const newTrail = {
+        id: trailIdRef.current,
+        x: x + offsetX,
+        y: y + offsetY,
+        size: 90 + Math.random() * 70, // Augmenté la taille: 90-160px
+        life: 1,
+        timestamp: now,
+        offsetX,
+        offsetY
+      };
+      
+      // Garder seulement les 15 dernières traces
+      return [...prev.slice(-14), newTrail];
+    });
+  }, []);
 
-    const rotateY = x * -25;
-    const rotateX = y * 20;
+  // Créer une révélation aléatoire
+  const createRandomReveal = useCallback(() => {
+    randomIdRef.current += 1;
+    setRandomReveals(prev => {
+      const newReveal = {
+        id: randomIdRef.current,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        size: 70 + Math.random() * 100, // Augmenté la taille: 70-170px
+        life: 1,
+        createdAt: Date.now()
+      };
+      
+      // Garder seulement les 8 dernières révélations
+      return [...prev.slice(-7), newReveal];
+    });
+  }, []);
 
-    setTargetRotation({ x: rotateX, y: rotateY });
+  // Générer des révélations aléatoires TOUJOURS (même sans bouger)
+  useEffect(() => {
+    // Mode "toujours actif" après 3 secondes d'inactivité
+    const alwaysActiveTimeout = setTimeout(() => {
+      setAlwaysRevealing(true);
+    }, 3000);
 
-    const lightX = ((e.clientX - parent.left) / parent.width) * 100;
-    const lightY = ((e.clientY - parent.top) / parent.height) * 100;
-    setLightPosition({ x: lightX, y: lightY, opacity: 0.25 });
+    const interval = setInterval(() => {
+      // Révélations aléatoires continues
+      if (Math.random() > 0.4) { // 60% de chance
+        createRandomReveal();
+      }
+    }, 800); // Intervalle réduit
 
-    // Mettre à jour la position de la souris pour les particules
-    setMousePosition({ x: e.clientX, y: e.clientY });
+    return () => {
+      clearTimeout(alwaysActiveTimeout);
+      clearInterval(interval);
+    };
+  }, [createRandomReveal]);
 
-    // Activer l'effet de révélation et les vagues
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const x = e.clientX;
+    const y = e.clientY;
+    setMousePosition({ x, y });
+
     setIsRevealing(true);
     setMouseInactive(false);
-    
-    // Réinitialiser le timer d'inactivité
+    setAlwaysRevealing(false); // Désactive le mode toujours actif quand on bouge
+
+    // Ajouter une trace
+    addTrailPoint(x, y);
+
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
-    
-    // Mettre à jour la position du blob
-    setRevealPosition(prev => ({
-      x: e.clientX,
-      y: e.clientY,
-      radius: prev.radius
-    }));
-    
-    // Lancer l'animation des vagues
-    if (waveAnimationRef.current) {
-      cancelAnimationFrame(waveAnimationRef.current);
-    }
-    
-    let waveProgress = 0;
-    const waveAnimate = () => {
-      waveProgress += 0.1; // Plus lent
-      setLiquidWave(waveProgress % 100);
-      
-      if (isRevealing) {
-        waveAnimationRef.current = requestAnimationFrame(waveAnimate);
-      }
-    };
-    waveAnimationRef.current = requestAnimationFrame(waveAnimate);
-    
-    // Activer l'inactivité après 1.5 secondes sans mouvement
+
     mouseInactiveTimeoutRef.current = setTimeout(() => {
       setMouseInactive(true);
       setIsRevealing(false);
-      setWaterDroplets([]);
-      if (waveAnimationRef.current) {
-        cancelAnimationFrame(waveAnimationRef.current);
-      }
-    }, 1500);
-  };
+      // Après 2 secondes d'inactivité, on active le mode toujours actif
+      setTimeout(() => {
+        setAlwaysRevealing(true);
+      }, 2000);
+    }, 1000); // Réduit à 1 seconde
+  }, [addTrailPoint]);
 
-  const handleMouseLeave = () => {
-    setTargetRotation({ x: 0, y: 0 });
-    setLightPosition({ x: 50, y: 50, opacity: 0 });
+  const handleMouseLeave = useCallback(() => {
     setIsRevealing(false);
     setMouseInactive(false);
-    setWaterDroplets([]);
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
-    if (waveAnimationRef.current) {
-      cancelAnimationFrame(waveAnimationRef.current);
-    }
-  };
+    // Active le mode toujours actif quand on quitte
+    setTimeout(() => {
+      setAlwaysRevealing(true);
+    }, 500);
+  }, []);
 
-  // Effet de parallaxe au scroll
+  // Effet de parallaxe
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -457,12 +235,156 @@ const Hero = () => {
       setScrollProgress(progress);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Calcul de l'onde
+  const getWaveDistortion = (x: number, y: number, time: number) => {
+    const amplitude = (isRevealing || alwaysRevealing) ? 12 : 0; // Augmenté l'amplitude
+    const frequency = 0.007;
+    return Math.sin(x * frequency + y * frequency + time) * amplitude;
+  };
+
   return (
     <>
+      <style>{`
+        @keyframes wave-pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.7;
+          }
+          50% {
+            transform: scale(1.05);
+            opacity: 0.9;
+          }
+        }
+
+        @keyframes trail-fade {
+          0% {
+            opacity: 0.95;
+            transform: scale(1) rotate(0deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.25) rotate(5deg);
+          }
+        }
+
+        @keyframes random-reveal {
+          0% {
+            opacity: 0;
+            transform: scale(0.4) rotate(0deg);
+          }
+          15% {
+            opacity: 0.9;
+            transform: scale(1) rotate(180deg);
+          }
+          85% {
+            opacity: 0.9;
+            transform: scale(1) rotate(180deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.4) rotate(360deg);
+          }
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-5px) rotate(1deg);
+          }
+        }
+
+        .wave-distortion {
+          filter: url(#wave-filter);
+          transition: filter 0.3s ease-out;
+        }
+
+        .trail-point {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          animation: trail-fade linear forwards, float 3s ease-in-out infinite;
+          mix-blend-mode: multiply;
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 255, 255, 0.75) 20%,
+            rgba(255, 255, 255, 0.5) 50%,
+            transparent 80%
+          );
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          overflow: hidden;
+          box-shadow: 
+            0 0 25px rgba(255, 255, 255, 0.5),
+            0 0 50px rgba(255, 255, 255, 0.3),
+            inset 0 0 30px rgba(255, 255, 255, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .trail-image {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          filter: grayscale(100%) brightness(1.7) contrast(1.4);
+          opacity: 1; // OPAQUE À 100%
+          mix-blend-mode: multiply;
+        }
+
+        .random-reveal {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          animation: random-reveal linear forwards, float 4s ease-in-out infinite;
+          mix-blend-mode: multiply;
+          overflow: hidden;
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(255, 255, 255, 0.6) 40%,
+            transparent 80%
+          );
+          box-shadow: 
+            0 0 30px rgba(255, 255, 255, 0.6),
+            0 0 60px rgba(255, 255, 255, 0.4);
+          border: 1.5px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .reveal-content {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          filter: grayscale(100%) brightness(1.7) contrast(1.4);
+          opacity: 1; // OPAQUE À 100%
+          mix-blend-mode: multiply;
+        }
+
+        .reveal-mask {
+          clip-path: circle(var(--reveal-radius, 0px) at var(--mouse-x, 50%) var(--mouse-y, 50%));
+          transition: clip-path 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .reveal-overlay {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(
+            circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+            rgba(255, 255, 255, 0.4) 0%,
+            rgba(255, 255, 255, 0.2) 40%,
+            transparent 80%
+          );
+          mix-blend-mode: overlay;
+          opacity: var(--reveal-opacity, 0);
+          transition: opacity 0.3s ease-out;
+        }
+      `}</style>
+
       <section
         id="hero"
         ref={heroRef}
@@ -470,164 +392,137 @@ const Hero = () => {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Canvas pour les particules */}
-        <canvas
-          ref={canvasRef}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-0"
-        />
-
-        {/* Canvas pour l'image de dessin */}
-        <canvas
-          ref={sketchCanvasRef}
-          className="absolute top-0 left-0 w-full h-full object-cover pointer-events-none z-5"
-          style={{
-            mixBlendMode: 'multiply',
-            opacity: 0.7
-          }}
-        />
-
-        {/* Conteneur pour les images superposées */}
+        {/* Filtre SVG pour l'effet d'onde */}
+        <svg style={{ display: 'none' }}>
+          <defs>
+            <filter id="wave-filter" x="-20%" y="-20%" width="140%" height="140%">
+              <feTurbulence 
+                type="fractalNoise" 
+                baseFrequency="0.007 0.007" 
+                numOctaves="3" 
+                seed={Math.floor(waveOffset * 10)}
+                result="noise"
+              />
+              <feDisplacementMap 
+                in="SourceGraphic" 
+                in2="noise" 
+                scale={(isRevealing || alwaysRevealing) ? 7 : 0}
+                xChannelSelector="R" 
+                yChannelSelector="G"
+              />
+              <feGaussianBlur stdDeviation="0.5" />
+            </filter>
+          </defs>
+        </svg>
+        {/* Conteneur principal */}
         <div
           className="absolute inset-0 w-full h-full overflow-hidden"
           style={{
-            transform: `translateY(${scrollProgress * 50}px) scale(${1 + scrollProgress * 0.1})`,
-            transition: 'transform 0.1s ease-out',
+            transform: `translateY(${scrollProgress * 20}px)`,
+            transition: 'transform 0.2s ease-out',
           }}
         >
           {/* Image principale (photo) */}
-          <img
+          <motion.img
             src={heroImage}
             alt="Background"
             className="absolute top-0 left-0 w-full h-full object-cover"
             style={{
               filter: 'brightness(0.8) contrast(1.1) saturate(1.1)',
-              transform: `rotateX(${currentRotation.x}deg) rotateY(${currentRotation.y}deg) scale(1.1)`,
-              transition: 'transform 0.1s ease-out',
+            }}
+            animate={{
+              x: (mousePosition.x - window.innerWidth / 2) * 0.003,
+              y: (mousePosition.y - window.innerHeight / 2) * 0.003,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 250,
+              damping: 40
             }}
           />
 
-          {/* Image de dessin avec masque de révélation organique */}
+          {/* Image de dessin avec effet principal et masque progressif */}
           <div 
-            className="absolute top-0 left-0 w-full h-full transition-opacity duration-500"
+            className="absolute top-0 left-0 w-full h-full wave-distortion reveal-mask"
             style={{
-              opacity: isRevealing ? 1 : 0,
-              clipPath: generateBlobClipPath(revealPosition.x, revealPosition.y, Math.max(0, revealPosition.radius), blobShape, window.innerWidth, window.innerHeight),
-              transition: 'opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              pointerEvents: isRevealing ? 'auto' : 'none',
-              // Application de la transformation 3D à la deuxième image (sans déformation)
-              transform: `rotateX(${currentRotation.x * 0.5}deg) rotateY(${currentRotation.y * 0.5}deg) scale(1.1)`,
-            }}
+              opacity: (isRevealing || alwaysRevealing) ? 1 : 0, // OPAQUE À 100%
+              pointerEvents: 'none',
+              transition: 'opacity 0.4s ease-out',
+              "--mouse-x": `${mousePosition.x}px`,
+              "--mouse-y": `${mousePosition.y}px`,
+              "--reveal-radius": `${revealRadius}px`,
+            } as React.CSSProperties}
           >
             <img
               src={sketchImageUrl}
               alt="Dessin architectural"
               className="absolute top-0 left-0 w-full h-full object-cover"
               style={{
-                filter: 'grayscale(100%) brightness(1.5) contrast(1.2)',
+                filter: 'grayscale(100%) brightness(1.7) contrast(1.4)',
                 mixBlendMode: 'multiply',
-                opacity: 0.9,
+                opacity: 1,
+                transform: `
+                  translateX(${getWaveDistortion(mousePosition.x, mousePosition.y, waveOffset)}px)
+                  translateY(${getWaveDistortion(mousePosition.y, mousePosition.x, waveOffset + 1)}px)
+                `,
+                transition: 'transform 0.1s linear',
               }}
             />
+            
+            {/* Overlay de lumière sur la zone révélée */}
+            <div 
+              className="reveal-overlay"
+              style={{
+                "--mouse-x": `${mousePosition.x}px`,
+                "--mouse-y": `${mousePosition.y}px`,
+                "--reveal-opacity": (isRevealing || alwaysRevealing) ? 1 : 0,
+              } as React.CSSProperties}
+            />
           </div>
-
-          {/* Effet de bordure arrondie avec gouttelettes */}
-          {isRevealing && (
-            <>
-              {/* Gouttelettes d'eau */}
-              <svg
-                className="absolute pointer-events-none overflow-visible z-10"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                }}
-              >
-                {waterDroplets.map(droplet => (
-                  <circle
-                    key={droplet.id}
-                    cx={droplet.x}
-                    cy={droplet.y}
-                    r={droplet.size}
-                    fill="rgba(255, 255, 255, 0.7)"
-                    style={{
-                      opacity: droplet.opacity,
-                      filter: 'blur(0.5px)',
-                    }}
-                  />
-                ))}
-              </svg>
-
-              {/* Bordure du blob avec effet d'eau */}
-              <svg
-                className="absolute pointer-events-none overflow-visible"
-                style={{
-                  left: revealPosition.x - Math.max(0, revealPosition.radius) - 10,
-                  top: revealPosition.y - Math.max(0, revealPosition.radius) - 10,
-                  width: Math.max(0, revealPosition.radius) * 2 + 20,
-                  height: Math.max(0, revealPosition.radius) * 2 + 20,
-                }}
-              >
-                <defs>
-                  <linearGradient id="blobBorderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(107, 142, 35, 0.8)" />
-                    <stop offset="100%" stopColor="rgba(255, 255, 255, 0.4)" />
-                  </linearGradient>
-                </defs>
-                
-                <path
-                  d={generateBlobPath(
-                    Math.max(0, revealPosition.radius) + 10,
-                    Math.max(0, revealPosition.radius) + 10,
-                    Math.max(0, revealPosition.radius),
-                    blobShape,
-                    Math.max(0, revealPosition.radius) * 2 + 20,
-                    Math.max(0, revealPosition.radius) * 2 + 20
-                  )}
-                  fill="none"
-                  stroke="url(#blobBorderGradient)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                
-                {/* Points de goutte d'eau sur les bords */}
-                {blobShape.map((scale, idx) => {
-                  const angle = (idx / blobShape.length) * Math.PI * 2;
-                  const distance = Math.max(0, revealPosition.radius) * scale;
-                  const x = Math.max(0, revealPosition.radius) + 10 + Math.cos(angle) * distance;
-                  const y = Math.max(0, revealPosition.radius) + 10 + Math.sin(angle) * distance;
-                  
-                  return (
-                    <circle
-                      key={idx}
-                      cx={x}
-                      cy={y}
-                      r="3"
-                      fill="rgba(255, 255, 255, 0.9)"
-                      style={{
-                        filter: 'blur(0.5px)',
-                      }}
-                    />
-                  );
-                })}
-              </svg>
-            </>
-          )}
           
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
+          {/* Overlay gradient réduit */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/8 to-black/35" />
         </div>
 
         {/* Effet de lumière interactive */}
         <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none transition-opacity duration-500 z-10"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none transition-all duration-300 z-10"
           style={{
-            background: `radial-gradient(circle at ${lightPosition.x}% ${lightPosition.y}%, rgba(255,255,255,${lightPosition.opacity}) 0%, transparent 50%)`,
+            background: `
+              radial-gradient(
+                circle at ${mousePosition.x}px ${mousePosition.y}px,
+                rgba(255, 255, 255, ${(isRevealing || alwaysRevealing) ? 0.18 : 0}) 0%,
+                transparent ${(isRevealing || alwaysRevealing) ? Math.min(280, revealRadius * 1.6) + 'px' : '0px'}
+              )
+            `,
             mixBlendMode: "overlay",
+            opacity: (isRevealing || alwaysRevealing) ? 1 : 0,
           }}
         />
 
+        {/* Points lumineux autour du curseur */}
+        {(isRevealing || alwaysRevealing) && (
+          <div className="absolute inset-0 pointer-events-none z-15">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2.5 h-2.5 rounded-full bg-white"
+                style={{
+                  left: mousePosition.x + Math.sin(waveOffset + i * 1) * (revealRadius * 0.9),
+                  top: mousePosition.y + Math.cos(waveOffset + i * 1) * (revealRadius * 0.9),
+                  opacity: 0.6 + Math.sin(waveOffset + i * 2) * 0.3,
+                  transform: `scale(${0.7 + Math.sin(waveOffset + i * 1.5) * 0.7})`,
+                  filter: 'blur(2px)',
+                  boxShadow: '0 0 15px rgba(255, 255, 255, 0.9)',
+                  animation: `float ${3 + i}s ease-in-out infinite`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Contenu principal */}
-        <div className="container relative z-20 mx-auto px-4 py-20 text-center">
+        <div className="container relative z-25 mx-auto px-4 py-20 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -691,37 +586,16 @@ const Hero = () => {
           </motion.div>
         </div>
 
-        {/* Indicateur d'interaction */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: (isRevealing && !mouseInactive) ? 0 : 1 }}
-          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20 text-center"
-        >
-          <p className="text-white/60 text-sm tracking-wider mb-2">
-            SURVOLEZ POUR RÉVÉLER LE DESSIN
-          </p>
-          <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-6 mx-auto border-2 border-white/40 rounded-full flex items-center justify-center"
-          >
-            <div className="w-2 h-2 bg-white/60 rounded-full" />
-          </motion.div>
-        </motion.div>
       </section>
 
-      
-        {isModalOpen && (
-          <div
-            className="fixed inset-0 z-50 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal} />
-            <div className="relative h-full w-full">
-              <Recherche onClick={closeModal} />
-            </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative h-full w-full">
+            <Recherche onClick={closeModal} />
           </div>
-        )}
-      
+        </div>
+      )}
     </>
   );
 };
