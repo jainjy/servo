@@ -187,7 +187,7 @@ const ServicesPartnersPage = () => {
         <div className="py-12">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#556B2F]"></div>
               <span className="ml-3 text-gray-600 mt-4">Chargement des données...</span>
               <div className="mt-2 text-sm text-gray-500">
                 Services, biens, produits et aliments
@@ -211,7 +211,7 @@ const ServicesPartnersPage = () => {
               </div>
               <button
                 onClick={fetchAllData}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                className="bg-[#556B2F] text-white px-6 py-2 rounded-lg hover:bg-[#6B8E23] transition-colors"
               >
                 Réessayer
               </button>
@@ -248,7 +248,7 @@ const ServicesPartnersPage = () => {
               </div>
               <button
                 onClick={fetchAllData}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                className="bg-[#556B2F] text-white px-6 py-2 rounded-lg hover:bg-[#6B8E23] transition-colors"
               >
                 Actualiser
               </button>
@@ -264,36 +264,40 @@ const ServicesPartnersPage = () => {
       const getTypeConfig = (type: string) => {
         const configs = {
           service: { 
-            color: 'blue', 
+            color: '#556B2F', 
+            lightColor: '#556B2F/10',
             icon: Wrench, 
             label: 'Service',
-            bgFrom: 'from-blue-50',
-            bgTo: 'to-blue-100',
-            borderColor: 'border-blue-200'
+            bgFrom: 'from-[#556B2F]/10',
+            bgTo: 'to-[#6B8E23]/10',
+            borderColor: 'border-[#556B2F]/20'
           },
           property: { 
-            color: 'green', 
+            color: '#8B4513', 
+            lightColor: '#8B4513/10',
             icon: Home, 
             label: 'Bien Immobilier',
-            bgFrom: 'from-green-50',
-            bgTo: 'to-green-100',
-            borderColor: 'border-green-200'
+            bgFrom: 'from-[#8B4513]/10',
+            bgTo: 'to-[#8B4513]/20',
+            borderColor: 'border-[#8B4513]/20'
           },
           product: { 
-            color: 'purple', 
+            color: '#6B8E23', 
+            lightColor: '#6B8E23/10',
             icon: Car, 
             label: 'Produit',
-            bgFrom: 'from-purple-50',
-            bgTo: 'to-purple-100',
-            borderColor: 'border-purple-200'
+            bgFrom: 'from-[#6B8E23]/10',
+            bgTo: 'to-[#6B8E23]/20',
+            borderColor: 'border-[#6B8E23]/20'
           },
           aliment: { 
-            color: 'orange', 
+            color: '#556B2F', 
+            lightColor: '#556B2F/10',
             icon: Utensils, 
             label: 'Aliment',
-            bgFrom: 'from-orange-50',
-            bgTo: 'to-orange-100',
-            borderColor: 'border-orange-200'
+            bgFrom: 'from-[#556B2F]/10',
+            bgTo: 'to-[#556B2F]/20',
+            borderColor: 'border-[#556B2F]/20'
           }
         };
         return configs[type as keyof typeof configs] || configs.service;
@@ -309,7 +313,7 @@ const ServicesPartnersPage = () => {
       return (
         <div 
           key={item.id || `${item.type}-${index}`} 
-          className={`bg-white rounded-xl shadow-lg border ${config.borderColor} overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105`}
+          className={`bg-[#FFFFF0] rounded-xl shadow-lg border ${config.borderColor} overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105`}
         >
           {/* Image */}
           <div className={`aspect-video bg-gradient-to-br ${config.bgFrom} ${config.bgTo} relative`}>
@@ -328,13 +332,13 @@ const ServicesPartnersPage = () => {
               </div>
             )}
             <div className="absolute top-3 left-3">
-              <span className={`bg-${config.color}-500 text-white px-2 py-1 rounded-full text-xs font-medium`}>
+              <span className="bg-[#556B2F] text-white px-2 py-1 rounded-full text-xs font-medium">
                 {config.label}
               </span>
             </div>
             {displayPrice && (
-              <div className="absolute top-3 right-3 bg-white rounded-lg px-3 py-1 shadow-md">
-                <span className={`font-bold text-${config.color}-600 text-sm`}>
+              <div className="absolute top-3 right-3 bg-[#FFFFF0] rounded-lg px-3 py-1 shadow-md">
+                <span className="font-bold text-[#8B4513] text-sm">
                   {typeof displayPrice === 'number' ? displayPrice.toLocaleString() : displayPrice} €
                 </span>
               </div>
@@ -367,7 +371,7 @@ const ServicesPartnersPage = () => {
                   {(item as Service).metiers!.slice(0, 3).map((metier: any, idx: number) => (
                     <span
                       key={metier.id || `metier-${idx}`}
-                      className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs"
+                      className="bg-[#D3D3D3]/30 text-gray-700 px-2 py-1 rounded text-xs"
                     >
                       {metier.libelle || metier.name || 'Métier'}
                     </span>
@@ -379,7 +383,7 @@ const ServicesPartnersPage = () => {
               {((item as Property).rooms || (item as Property).bathrooms || (item as Property).surface) && (
                 <div className="grid grid-cols-3 gap-2 text-center">
                   {(item as Property).rooms && (
-                    <div className="bg-gray-50 rounded-lg p-2">
+                    <div className="bg-[#FFFFF0] rounded-lg p-2 border border-[#D3D3D3]">
                       <div className="flex items-center justify-center gap-1 text-gray-700">
                         <Bed className="w-4 h-4" />
                         <span className="text-sm font-medium">{(item as Property).rooms}</span>
@@ -388,7 +392,7 @@ const ServicesPartnersPage = () => {
                     </div>
                   )}
                   {(item as Property).bathrooms && (
-                    <div className="bg-gray-50 rounded-lg p-2">
+                    <div className="bg-[#FFFFF0] rounded-lg p-2 border border-[#D3D3D3]">
                       <div className="flex items-center justify-center gap-1 text-gray-700">
                         <Bath className="w-4 h-4" />
                         <span className="text-sm font-medium">{(item as Property).bathrooms}</span>
@@ -397,7 +401,7 @@ const ServicesPartnersPage = () => {
                     </div>
                   )}
                   {(item as Property).surface && (
-                    <div className="bg-gray-50 rounded-lg p-2">
+                    <div className="bg-[#FFFFF0] rounded-lg p-2 border border-[#D3D3D3]">
                       <div className="flex items-center justify-center gap-1 text-gray-700">
                         <Ruler className="w-4 h-4" />
                         <span className="text-sm font-medium">{(item as Property).surface}m²</span>
@@ -419,7 +423,7 @@ const ServicesPartnersPage = () => {
               {/* Catégorie pour les produits/aliments */}
               {((item as Product).category || (item as Aliment).category) && (
                 <div className="mb-2">
-                  <span className="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                  <span className="inline-block bg-[#D3D3D3]/30 text-gray-700 px-2 py-1 rounded text-xs">
                     {(item as Product).category || (item as Aliment).category}
                   </span>
                 </div>
@@ -427,11 +431,11 @@ const ServicesPartnersPage = () => {
             </div>
 
             {/* Informations supplémentaires */}
-            <div className="flex items-center justify-between text-sm text-gray-600 border-t border-gray-100 pt-3">
+            <div className="flex items-center justify-between text-sm text-gray-600 border-t border-[#D3D3D3] pt-3">
               <div className="flex items-center gap-4">
                 {displayPrice && (
                   <div className="flex items-center gap-1">
-                    <span className="font-bold text-green-600">
+                    <span className="font-bold text-[#8B4513]">
                       {displayPrice}€
                     </span>
                   </div>
@@ -447,7 +451,7 @@ const ServicesPartnersPage = () => {
 
             {/* Bouton d'action */}
             <button
-              className={`w-full mt-4 bg-${config.color}-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-${config.color}-600 transition-colors duration-300`}
+              className="w-full mt-4 bg-[#556B2F] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#6B8E23] transition-colors duration-300"
               onClick={() => {
                 console.log('Détails item:', item);
                 alert(`Détails: ${displayName}\nType: ${config.label}\nPrix: ${displayPrice || 'N/A'}€`);
@@ -464,14 +468,14 @@ const ServicesPartnersPage = () => {
       <div className="py-12">
         <div className="max-w-6xl mx-auto">
           {/* Bannière d'information */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+          <div className="bg-[#556B2F]/10 border border-[#556B2F]/20 rounded-lg p-4 mb-8">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-[#556B2F] mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
-              <span className="text-blue-800 font-medium">Tous nos services et produits</span>
+              <span className="text-[#556B2F] font-medium">Tous nos services et produits</span>
             </div>
-            <p className="text-blue-700 text-sm mt-2">
+            <p className="text-[#556B2F] text-sm mt-2">
               Découvrez l'ensemble de nos services, biens immobiliers, produits et aliments disponibles.
             </p>
           </div>
@@ -482,19 +486,19 @@ const ServicesPartnersPage = () => {
               Catalogue complet ({stats.total} éléments)
             </h2>
             <div className="flex flex-wrap gap-2 text-sm">
-              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-[#556B2F]/20 text-[#556B2F] px-3 py-1 rounded-full flex items-center gap-1">
                 <Wrench className="w-3 h-3" />
                 {stats.services} services
               </span>
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-[#8B4513]/20 text-[#8B4513] px-3 py-1 rounded-full flex items-center gap-1">
                 <Home className="w-3 h-3" />
                 {stats.properties} biens
               </span>
-              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-[#6B8E23]/20 text-[#6B8E23] px-3 py-1 rounded-full flex items-center gap-1">
                 <Car className="w-3 h-3" />
                 {stats.products} produits
               </span>
-              <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="bg-[#556B2F]/20 text-[#556B2F] px-3 py-1 rounded-full flex items-center gap-1">
                 <Utensils className="w-3 h-3" />
                 {stats.aliments} aliments
               </span>
@@ -510,7 +514,7 @@ const ServicesPartnersPage = () => {
           <div className="mt-8 flex justify-center">
             <button
               onClick={fetchAllData}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+              className="px-6 py-2 border border-[#D3D3D3] rounded-lg text-sm hover:bg-[#FFFFF0] flex items-center gap-2 transition-colors text-[#556B2F]"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -544,19 +548,31 @@ const ServicesPartnersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 antialiased mt-15">
+    <div className="min-h-screen bg-[#FFFFF0] text-gray-900 antialiased mt-15">
       <header
-        className="relative pt-12 px-8 pb-8 border-b border-gray-200 bg-gradient-to-b from-white to-gray-50"
+        className="relative pt-12 px-8 pb-8 border-b border-[#D3D3D3] bg-gradient-to-b from-[#FFFFF0] to-[#FFFFF0]/50"
       >
         <div className="max-w-[1200px] mx-auto flex flex-col gap-6 relative z-10">
           <div className="flex flex-col gap-2">{renderHeaderTitles()}</div>
 
           <div className="flex flex-wrap gap-4 justify-center">
-            
+            <button
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
+                view === "default" 
+                  ? "border-[#556B2F] bg-[#556B2F] text-white shadow-lg" 
+                  : "border-[#556B2F] bg-[#FFFFF0] text-[#556B2F] hover:bg-[#556B2F]/10 shadow-md"
+              } text-sm font-semibold transform hover:scale-105`}
+              onClick={() => navigate('/services-partners?section=')}
+            >
+              TOUS NOS SERVICES
+              <ChevronDown className="w-4 h-4" />
+            </button>
 
             <button
               className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "partenaires" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
+                view === "partenaires" 
+                  ? "border-[#8B4513] bg-[#8B4513] text-white shadow-lg" 
+                  : "border-[#8B4513] bg-[#FFFFF0] text-[#8B4513] hover:bg-[#8B4513]/10 shadow-md"
               } text-sm font-semibold transform hover:scale-105`}
               onClick={() => navigate('/services-partners?section=partenaires')}
             >
@@ -566,7 +582,9 @@ const ServicesPartnersPage = () => {
             
             <button
               className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "services" ? "border-blue-500 bg-blue-500 text-white shadow-lg" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-md"
+                view === "services" 
+                  ? "border-[#6B8E23] bg-[#6B8E23] text-white shadow-lg" 
+                  : "border-[#6B8E23] bg-[#FFFFF0] text-[#6B8E23] hover:bg-[#6B8E23]/10 shadow-md"
               } text-sm font-semibold transform hover:scale-105`}
               onClick={() => navigate('/services-partners?section=prestations')}
             >
