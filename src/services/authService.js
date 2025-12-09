@@ -91,7 +91,7 @@ class AuthService {
         },
         planId,
       });
-      const { user, token} = response.data;
+      const { user, token } = response.data;
       if (user && token) {
         this.setAuthData(user, token);
         this.startTokenRefresh();
@@ -256,7 +256,11 @@ class AuthService {
       const response = await api.get(`/auth/verify-reset-token/${token}`);
       return response.data;
     } catch (error) {
-      throw this.handleError(error, "Token invalide ou expiré");
+      // Si le token est invalide, le backend renvoie 400
+      if (error.response?.status === 400) {
+        throw new Error("Token invalide ou expiré");
+      }
+      throw this.handleError(error, "Erreur lors de la vérification du token");
     }
   }
   // Gestion des erreurs

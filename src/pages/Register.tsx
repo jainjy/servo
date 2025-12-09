@@ -28,7 +28,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -41,38 +40,30 @@ const RegisterPage = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-
     // Type d'utilisateur
     userType: "CLIENT",
     role: "particular",
     demandType: "particulier",
-
     // Informations entreprise (si professionnel)
     companyName: "",
     commercialName: "",
     siret: "",
-
     // Adresse
     address: "",
     addressComplement: "",
     zipCode: "",
     city: "",
-
     // Coordonnées GPS
     latitude: "",
     longitude: "",
-
     acceptTerms: false,
     importedContactsConsent: false,
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const { register } = useAuth();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     // 🎯 LOGIQUE DE L'ÉTAPE 1 : Validation de base et passage à l'étape 2
     if (step === 1) {
       // 1. Vérification des champs de base
@@ -87,27 +78,22 @@ const RegisterPage = () => {
         );
         return;
       }
-
       // 🛑 NOTA BENE : La vérification des conditions (acceptTerms) est maintenant ignorée ici.
-
       // 2. Si tout est bon, on passe à l'étape 2
       setStep(2);
       return;
     }
-
     if (!formData.acceptTerms) {
       toast.error(
         "Veuillez accepter les conditions d'utilisation et la politique de confidentialité"
       );
       return;
     }
-
     // Validation des mots de passe
     if (formData.password !== formData.confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
       return;
     }
-
     setIsLoading(true);
     try {
       const registerData = {
@@ -123,7 +109,6 @@ const RegisterPage = () => {
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
       };
-
       const { user, token, route } = await register(registerData);
       navigate(route);
     } catch (error: any) {
@@ -135,14 +120,12 @@ const RegisterPage = () => {
       setIsLoading(false);
     }
   };
-
   const handleInputChange = (
     field: string,
     value: string | boolean | number[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
   const features = [
     {
       icon: <Home className="h-6 w-6" />,
@@ -165,7 +148,6 @@ const RegisterPage = () => {
       description: "Tout votre habitat géré depuis une seule plateforme",
     },
   ];
-
   return (
     <div className="min-h-screen flex">
       {/* Background */}
@@ -177,13 +159,11 @@ const RegisterPage = () => {
           className="w-full h-full object-cover"
         />
       </div>
-
       <div className="w-[80vw] lg:w-[80vw] flex h-[90vh] m-auto rounded-3xl shadow-xl overflow-hidden">
         {/* Sidebar */}
         <div className="hidden lg:flex lg:flex-1 bg-gradient-to-r from-black via-gray-800 to-gray-900 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
-
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
             <div className="mb-8">
               <div className="flex items-center gap-3">
@@ -201,13 +181,12 @@ const RegisterPage = () => {
               <p className="text-md font-semibold">
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
               </p>
-              <p className="text-blue-100 text-sm mt-2">
+              <p className="text-[#8B4513] text-sm mt-2">
                 Des biens immobiliers, ses services additionnels, produits
                 adaptés à vos besoins et vos locations au sein d'une seule
                 plateforme
               </p>
             </div>
-
             <div className="space-y-6">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-4">
@@ -216,14 +195,13 @@ const RegisterPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold">{feature.title}</h3>
-                    <p className="text-blue-100 text-sm">
+                    <p className="text-[#8B4513] text-sm">
                       {feature.description}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
-
             <div className="mt-2 pt-8 border-t border-white/20">
               <div className="flex items-center gap-2 text-green-300 mb-2">
                 <CheckCircle className="h-4 w-4" />
@@ -231,15 +209,14 @@ const RegisterPage = () => {
                   Déjà 5,000+ utilisateurs satisfaits
                 </span>
               </div>
-              <p className="text-blue-100 text-sm">
+              <p className="text-[#8B4513] text-sm">
                 "Rejoignez la communauté des professionnels et particuliers qui
                 révolutionnent l'habitat"
               </p>
             </div>
           </div>
         </div>
-
-        <div className="relative flex-1 flex bg-white overflow-y-auto">
+        <div className="relative flex-1 flex bg-[#FFFFFF] overflow-y-auto">
           <div className="w-full max-w-2xl">
             <Card className="border-0 p-0 m-0 h-full rounded-none">
               <CardHeader>
@@ -254,22 +231,20 @@ const RegisterPage = () => {
                         : "Finalisez votre inscription"}
                     </CardDescription>
                   </div>
-
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
                       className={`w-3 h-3 rounded-full ${
-                        step === 1 ? "bg-blue-600" : "bg-green-500"
+                        step === 1 ? "bg-[#556B2F]" : "bg-[#6B8E23]"
                       }`}
                     ></div>
                     <div
                       className={`w-3 h-3 rounded-full ${
-                        step === 2 ? "bg-blue-600" : "bg-gray-300"
+                        step === 2 ? "bg-[#556B2F]" : "bg-[#D3D3D3]"
                       }`}
                     ></div>
                   </div>
                 </div>
               </CardHeader>
-
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {step === 1 ? (
@@ -284,7 +259,7 @@ const RegisterPage = () => {
                             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                               placeholder="Votre prénom"
-                              className="pl-10 h-11 bg-white border-gray-300"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.firstName}
                               onChange={(e) =>
                                 handleInputChange("firstName", e.target.value)
@@ -293,14 +268,13 @@ const RegisterPage = () => {
                             />
                           </div>
                         </div>
-
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Nom *
                           </label>
                           <Input
                             placeholder="Votre nom"
-                            className="h-11 bg-white border-gray-300"
+                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
@@ -309,7 +283,6 @@ const RegisterPage = () => {
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
                           Email *
@@ -319,7 +292,7 @@ const RegisterPage = () => {
                           <Input
                             type="email"
                             placeholder="votre@email.mg"
-                            className="pl-10 h-11 bg-white border-gray-300"
+                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.email}
                             onChange={(e) =>
                               handleInputChange("email", e.target.value)
@@ -328,7 +301,6 @@ const RegisterPage = () => {
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
                           Téléphone *
@@ -337,7 +309,7 @@ const RegisterPage = () => {
                           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
                             placeholder="+261 34 12 345 67"
-                            className="pl-10 h-11 bg-white border-gray-300"
+                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.phone}
                             onChange={(e) =>
                               handleInputChange("phone", e.target.value)
@@ -360,7 +332,7 @@ const RegisterPage = () => {
                             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                               placeholder="Votre adresse complète"
-                              className="pl-10 h-11 bg-white border-gray-300"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.address}
                               onChange={(e) =>
                                 handleInputChange("address", e.target.value)
@@ -369,14 +341,13 @@ const RegisterPage = () => {
                             />
                           </div>
                         </div>
-
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Complément d'adresse
                           </label>
                           <Input
                             placeholder="Appartement, étage, etc."
-                            className="h-11 bg-white border-gray-300"
+                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.addressComplement}
                             onChange={(e) =>
                               handleInputChange(
@@ -386,7 +357,6 @@ const RegisterPage = () => {
                             }
                           />
                         </div>
-
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
@@ -394,7 +364,7 @@ const RegisterPage = () => {
                             </label>
                             <Input
                               placeholder="75001"
-                              className="h-11 bg-white border-gray-300"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.zipCode}
                               onChange={(e) =>
                                 handleInputChange("zipCode", e.target.value)
@@ -402,14 +372,13 @@ const RegisterPage = () => {
                               required
                             />
                           </div>
-
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Ville *
                             </label>
                             <Input
                               placeholder="Paris"
-                              className="h-11 bg-white border-gray-300"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.city}
                               onChange={(e) =>
                                 handleInputChange("city", e.target.value)
@@ -419,7 +388,6 @@ const RegisterPage = () => {
                           </div>
                         </div>
                       </div>
-
                       {/* Mot de passe */}
                       <div className="space-y-2">
                         <div className="space-y-2">
@@ -431,7 +399,7 @@ const RegisterPage = () => {
                             <Input
                               type={showPassword ? "text" : "password"}
                               placeholder="Créez un mot de passe sécurisé"
-                              className="pl-10 pr-10 h-11 bg-white border-gray-300"
+                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.password}
                               onChange={(e) =>
                                 handleInputChange("password", e.target.value)
@@ -457,7 +425,6 @@ const RegisterPage = () => {
                             et chiffres
                           </p>
                         </div>
-
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-gray-700">
                             Confirmer le mot de passe *
@@ -467,7 +434,7 @@ const RegisterPage = () => {
                             <Input
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="Confirmez votre mot de passe"
-                              className="pl-10 pr-10 h-11 bg-white border-gray-300"
+                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.confirmPassword}
                               onChange={(e) =>
                                 handleInputChange(
@@ -496,7 +463,7 @@ const RegisterPage = () => {
                         </div>
                       </div>
                       {/* Conditions - Étape 1 */}
-                      <div className="space-y-4 pt-4 border-t border-gray-200">
+                      <div className="space-y-4 pt-4 border-t border-[#D3D3D3]">
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="acceptTerms"
@@ -516,20 +483,19 @@ const RegisterPage = () => {
                             J'accepte les{" "}
                             <a
                               href="/terms"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                             >
                               conditions d'utilisation
                             </a>{" "}
                             et la{" "}
                             <a
                               href="/privacy"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                             >
                               politique de confidentialité
                             </a>
                           </label>
                         </div>
-
                         {/* RGPD - Importation des contacts */}
                         <div className="flex items-start space-x-2">
                           <Checkbox
@@ -551,7 +517,7 @@ const RegisterPage = () => {
                             <span className="font-semibold">Servo</span>.{" "}
                             <a
                               href="/en-savoir-plus"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -562,14 +528,13 @@ const RegisterPage = () => {
                       </div>
                     </>
                   )}
-
                   {/* Boutons de navigation */}
                   <div className="flex gap-4">
                     {step === 2 && (
                       <Button
                         type="button"
                         variant="outline"
-                        className="flex-1 h-11 border-gray-300"
+                        className="flex-1 h-11 border-[#D3D3D3]"
                         onClick={() => setStep(1)}
                       >
                         Retour
@@ -579,7 +544,7 @@ const RegisterPage = () => {
                       type="submit"
                       className={`${
                         step === 2 ? "flex-1" : "w-full"
-                      } h-11 bg-gradient-to-r from-slate-500 to-slate-900 hover:from-slate-600 hover:to-blue-700 text-white font-semibold`}
+                      } h-11 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#556B2F]/90 hover:to-[#6B8E23]/90 text-white font-semibold`}
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -596,12 +561,11 @@ const RegisterPage = () => {
                       )}
                     </Button>
                   </div>
-
                   <div className="text-center text-sm text-gray-600 mb-4">
                     Vous avez déjà un compte ?{" "}
                     <a
                       href="/login"
-                      className="text-blue-600 ml-2 hover:text-blue-700 font-medium"
+                      className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
                     >
                       Se connecter
                     </a>
@@ -615,5 +579,4 @@ const RegisterPage = () => {
     </div>
   );
 };
-
 export default RegisterPage;

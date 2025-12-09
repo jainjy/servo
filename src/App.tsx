@@ -185,6 +185,7 @@ import { SubscriptionStatusGuard } from "./components/SubscriptionStatusGuard";
 import Assurance from "./pages/Assurance";
 
 import AgencyCard from "./components/NosPartenaires/AgencyCard";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -243,12 +244,11 @@ const App = () => {
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      
       <TooltipProvider>
         <SocketProvider userId={user?.id}>
           <CartProvider>
             {isLoading && (
-              <LoadingScreen 
+              <LoadingScreen
                 onLoadingComplete={() => setIsLoading(false)}
                 minimumLoadingTime={1500}
               />
@@ -297,7 +297,10 @@ const App = () => {
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
-                  <Route path="/location-saisonniere" element={<PropertyRent isSeasonal={true} />} />
+                  <Route
+                    path="/location-saisonniere"
+                    element={<PropertyRent isSeasonal={true} />}
+                  />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   <Route path="/services-ibr" element={<ServicesIBRPage />} />
                   {/* /*entreprise link* */}
@@ -429,13 +432,8 @@ const App = () => {
                     path="/formation-podcasts"
                     element={<BatimentsLayout />}
                   />
-
                   {/* Routes Partenaires */}
-                  <Route
-                    path="/agences"
-                    element={<AgencyCard/>}
-                  />
-
+                  <Route path="/agences" element={<AgencyCard />} />
                   {/* Routes Domicile */}
                   <Route path="/domicile" element={<DomicileLayout />} />
                   <Route
@@ -568,6 +566,10 @@ const App = () => {
                   <Route
                     path="/forgot-password"
                     element={<ForgotPasswordPage />}
+                  />
+                  <Route
+                    path="/reset-password/:token"
+                    element={<ResetPasswordPage />}
                   />
                   <Route path="/unauthorized" element={<UnauthorizedPage />} />
                   <Route path="/investissement" element={<Investissement />} />

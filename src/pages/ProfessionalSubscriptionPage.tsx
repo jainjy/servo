@@ -8,11 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle, Building, Users, Wrench, Sofa, ArrowLeft } from "lucide-react";
+import {
+  CheckCircle,
+  Building,
+  Users,
+  Wrench,
+  Sofa,
+  ArrowLeft,
+} from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { subscriptionPlansAPI } from "@/lib/api/subscriptionPlans";
-
 const ProfessionalSubscriptionPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,7 +26,6 @@ const ProfessionalSubscriptionPage = () => {
   const [subscriptionPlans, setSubscriptionPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
-
   // Fonction pour trier les plans par prix décroissant
   const sortPlansByPrice = (plans) => {
     return plans.sort((a, b) => {
@@ -29,13 +34,11 @@ const ProfessionalSubscriptionPage = () => {
       return priceB - priceA; // Décroissant
     });
   };
-
   // Fonction pour récupérer les plans depuis l'API
   const fetchSubscriptionPlans = async () => {
     try {
       setLoading(true);
       const response = await subscriptionPlansAPI.getAllPlans();
-
       if (response.success) {
         console.log("Plans récupérés:", response.data);
         // Mapper les données de l'API avec les icônes appropriées
@@ -57,13 +60,11 @@ const ProfessionalSubscriptionPage = () => {
             default:
               icon = <Building className="h-16 w-16" />;
           }
-
           return {
             ...plan,
             icon,
           };
         });
-
         // Trier les plans par prix décroissant
         const sortedPlans = sortPlansByPrice(plansWithIcons);
         setSubscriptionPlans(sortedPlans);
@@ -81,7 +82,6 @@ const ProfessionalSubscriptionPage = () => {
       setLoading(false);
     }
   };
-
   // Données de fallback en cas d'erreur API
   const getFallbackPlans = () => [
     {
@@ -91,7 +91,7 @@ const ProfessionalSubscriptionPage = () => {
       price: "139",
       period: "par mois",
       icon: <Building className="h-16 w-16" />,
-      color: "blue",
+      color: "olive",
       popular: true,
       features: [
         "Annonces illimitées",
@@ -111,7 +111,7 @@ const ProfessionalSubscriptionPage = () => {
       price: "39",
       period: "par mois",
       icon: <Wrench className="h-16 w-16" />,
-      color: "emerald",
+      color: "yellowgreen",
       popular: false,
       features: [
         "Profil professionnel",
@@ -131,7 +131,7 @@ const ProfessionalSubscriptionPage = () => {
       price: "49",
       period: "par mois",
       icon: <Sofa className="h-16 w-16" />,
-      color: "purple",
+      color: "brown",
       popular: false,
       features: [
         "Boutique en ligne",
@@ -151,7 +151,7 @@ const ProfessionalSubscriptionPage = () => {
       price: "19",
       period: "par mois",
       icon: <Users className="h-16 w-16" />,
-      color: "pink",
+      color: "lightgray",
       popular: false,
       features: [
         "Profil bien-être",
@@ -165,66 +165,62 @@ const ProfessionalSubscriptionPage = () => {
       userTypes: ["BIEN_ETRE"],
     },
   ];
-
   useEffect(() => {
     fetchSubscriptionPlans();
   }, []);
-
   const getColorClasses = (color: string) => {
     const colors = {
-      blue: {
-        bg: "bg-blue-50",
-        hoverBg: "bg-blue-100",
-        text: "text-blue-600",
-        border: "border-blue-200",
-        hoverBorder: "border-blue-500",
-        button: "bg-blue-600 hover:bg-blue-700",
-        gradient: "from-blue-500 to-blue-600",
+      olive: {
+        bg: "bg-[#556B2F]/10",
+        hoverBg: "bg-[#556B2F]/20",
+        text: "text-[#556B2F]",
+        border: "border-[#556B2F]/20",
+        hoverBorder: "border-[#556B2F]/50",
+        button: "bg-[#556B2F] hover:bg-[#556B2F]/90",
+        gradient: "from-[#556B2F] to-[#556B2F]/90",
       },
-      emerald: {
-        bg: "bg-emerald-50",
-        hoverBg: "bg-emerald-100",
-        text: "text-emerald-600",
-        border: "border-emerald-200",
-        hoverBorder: "border-emerald-500",
-        button: "bg-emerald-600 hover:bg-emerald-700",
-        gradient: "from-emerald-500 to-emerald-600",
+      yellowgreen: {
+        bg: "bg-[#6B8E23]/10",
+        hoverBg: "bg-[#6B8E23]/20",
+        text: "text-[#6B8E23]",
+        border: "border-[#6B8E23]/20",
+        hoverBorder: "border-[#6B8E23]/50",
+        button: "bg-[#6B8E23] hover:bg-[#6B8E23]/90",
+        gradient: "from-[#6B8E23] to-[#6B8E23]/90",
       },
-      purple: {
-        bg: "bg-purple-50",
-        hoverBg: "bg-purple-100",
-        text: "text-purple-600",
-        border: "border-purple-200",
-        hoverBorder: "border-purple-500",
-        button: "bg-purple-600 hover:bg-purple-700",
-        gradient: "from-purple-500 to-purple-600",
+      brown: {
+        bg: "bg-[#8B4513]/10",
+        hoverBg: "bg-[#8B4513]/20",
+        text: "text-[#8B4513]",
+        border: "border-[#8B4513]/20",
+        hoverBorder: "border-[#8B4513]/50",
+        button: "bg-[#8B4513] hover:bg-[#8B4513]/90",
+        gradient: "from-[#8B4513] to-[#8B4513]/90",
       },
-      pink: {
-        bg: "bg-pink-50",
-        hoverBg: "bg-pink-100",
-        text: "text-pink-600",
-        border: "border-pink-200",
-        hoverBorder: "border-pink-500",
-        button: "bg-pink-600 hover:bg-pink-700",
-        gradient: "from-pink-500 to-pink-600",
+      lightgray: {
+        bg: "bg-[#D3D3D3]/10",
+        hoverBg: "bg-[#D3D3D3]/20",
+        text: "text-[#D3D3D3]",
+        border: "border-[#D3D3D3]/20",
+        hoverBorder: "border-[#D3D3D3]/50",
+        button: "bg-[#D3D3D3] hover:bg-[#D3D3D3]/90",
+        gradient: "from-[#D3D3D3] to-[#D3D3D3]/90",
       },
     };
-    return colors[color as keyof typeof colors] || colors.blue;
+    return colors[color as keyof typeof colors] || colors.olive;
   };
-
   const handleSubscriptionSelect = async (planId: string) => {
     if (redirecting) return;
-    
+
     setSelectedPlan(planId);
     setRedirecting(true);
-    
+
     // Petit délai pour montrer le feedback visuel
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     const selectedPlanData = subscriptionPlans.find(
       (plan) => plan.id === planId
     );
-
     if (selectedPlanData) {
       navigate("/register/professional/form", {
         state: {
@@ -243,20 +239,17 @@ const ProfessionalSubscriptionPage = () => {
       toast.error("Erreur lors de la sélection du plan");
     }
   };
-
   const handleBack = () => {
     navigate("/register");
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex-col gap-4 flex items-center justify-center bg-gray-900">
-        <img src="/loading.gif" alt="" className='w-24 h-24'/>
+        <img src="/loading.gif" alt="" className="w-24 h-24" />
         <div className="text-white text-xl">Chargement des plans...</div>
       </div>
     );
   }
-
   return (
     <div className="min-h-screen flex overflow-hidden relative">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
@@ -267,10 +260,8 @@ const ProfessionalSubscriptionPage = () => {
           className="w-full h-full object-cover"
         />
       </div>
-
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
-
       {/* Bouton Retour stylé en haut à gauche */}
       <div className="absolute top-6 left-6 z-30">
         <Button
@@ -283,7 +274,6 @@ const ProfessionalSubscriptionPage = () => {
           <span className="font-semibold">Retour</span>
         </Button>
       </div>
-
       <div className="w-full p-6 pt-24">
         <div className="text-center mb-8">
           <div className="flex justify-center">
@@ -304,13 +294,11 @@ const ProfessionalSubscriptionPage = () => {
             14 jours.
           </CardDescription>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {subscriptionPlans.map((plan) => {
             const color = getColorClasses(plan.color);
             const isSelected = selectedPlan === plan.id;
             const isRedirecting = isSelected && redirecting;
-
             return (
               <div
                 key={plan.id}
@@ -319,7 +307,9 @@ const ProfessionalSubscriptionPage = () => {
                 } rounded-2xl p-6 hover:${
                   color.hoverBorder
                 } transition-all duration-500 cursor-pointer bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur-sm h-full flex flex-col shadow-lg hover:shadow-2xl border-opacity-30 hover:border-opacity-60 group ${
-                  redirecting && !isSelected ? 'opacity-50 pointer-events-none' : ''
+                  redirecting && !isSelected
+                    ? "opacity-50 pointer-events-none"
+                    : ""
                 }`}
                 onClick={() => handleSubscriptionSelect(plan.id)}
               >
@@ -334,14 +324,12 @@ const ProfessionalSubscriptionPage = () => {
                     </div>
                   </div>
                 )}
-
                 <div className="flex flex-col items-center text-center space-y-6 flex-1">
                   <div
                     className={`${color.text} text-2xl filter drop-shadow-lg`}
                   >
                     {plan.icon}
                   </div>
-
                   <div className="space-y-2">
                     <h3 className="text-xl font-bold text-white group-hover:scale-105 transition-transform duration-300 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                       {plan.title}
@@ -350,7 +338,6 @@ const ProfessionalSubscriptionPage = () => {
                       {plan.description}
                     </p>
                   </div>
-
                   <div className="space-y-2">
                     <div className="text-4xl flex font-semibold text-white">
                       {plan.price} € /
@@ -359,7 +346,6 @@ const ProfessionalSubscriptionPage = () => {
                       </div>
                     </div>
                   </div>
-
                   <ul className="text-xs text-gray-300 gap-5 text-left grid grid-cols-1 lg:grid-cols-2 w-full">
                     {plan.features.map((feature, index) => (
                       <li
@@ -375,13 +361,12 @@ const ProfessionalSubscriptionPage = () => {
                       </li>
                     ))}
                   </ul>
-
                   <Button
                     className={`w-full font-bold py-3 rounded-xl transition-all duration-500 transform hover:-translate-y-1 border ${
                       isSelected
                         ? `${color.button} bg-gradient-to-r ${color.gradient} text-white shadow-2xl hover:shadow-3xl border-white/20`
                         : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-gray-600 hover:border-gray-500"
-                    } ${isRedirecting ? 'animate-pulse' : ''}`}
+                    } ${isRedirecting ? "animate-pulse" : ""}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSubscriptionSelect(plan.id);
@@ -391,8 +376,18 @@ const ProfessionalSubscriptionPage = () => {
                     <span className="flex items-center justify-center gap-2">
                       {isRedirecting ? (
                         <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v4m0 12v4m8-10h-4M6 12H2" />
+                          <svg
+                            className="w-4 h-4 animate-spin"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 2v4m0 12v4m8-10h-4M6 12H2"
+                            />
                           </svg>
                           Redirection...
                         </>
@@ -434,13 +429,11 @@ const ProfessionalSubscriptionPage = () => {
                     </span>
                   </Button>
                 </div>
-
                 {isSelected && (
                   <div
                     className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-10 -z-10`}
                   ></div>
                 )}
-
                 <div
                   className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${color.gradient} opacity-0 group-hover:opacity-15 transition-opacity duration-500 -z-20`}
                 ></div>
@@ -448,7 +441,6 @@ const ProfessionalSubscriptionPage = () => {
             );
           })}
         </div>
-
         <div className="text-center mt-12 space-y-4">
           <div className="text-xs text-gray-500">
             © 2025 SERVO . Tous droits réservés.
@@ -458,5 +450,4 @@ const ProfessionalSubscriptionPage = () => {
     </div>
   );
 };
-
 export default ProfessionalSubscriptionPage;

@@ -314,7 +314,7 @@ const ProRegisterPage = () => {
               <p className="text-md font-semibold">
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
               </p>
-              <p className="text-blue-100 text-sm mt-2">
+              <p className="text-[#8B4513] text-sm mt-2">
                 Des biens immobiliers, ses services additionnels, produits
                 adaptés à vos besoins et vos locations au sein d’une seule
                 plateforme
@@ -328,7 +328,7 @@ const ProRegisterPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold">{feature.title}</h3>
-                    <p className="text-blue-100 text-sm">
+                    <p className="text-[#8B4513] text-sm">
                       {feature.description}
                     </p>
                   </div>
@@ -342,14 +342,14 @@ const ProRegisterPage = () => {
                   Déjà 5,000+ utilisateurs satisfaits
                 </span>
               </div>
-              <p className="text-blue-100 text-sm">
-                "Rejoignez la communauté des professionnels et particuliers qui
+              <p className="text-[#8B4513] text-sm">
+                "Rejoignez la communauté des professionnels et particulier qui
                 révolutionnent l'habitat"
               </p>
             </div>
           </div>
         </div>
-        <div className="relative flex-1 flex bg-white overflow-y-auto">
+        <div className="relative flex-1 flex bg-[#FFFFFF] overflow-y-auto">
           <div className="w-full max-w-2xl">
             <Card className="border-0 p-0 m-0 h-full rounded-none">
               <CardHeader>
@@ -366,12 +366,14 @@ const ProRegisterPage = () => {
                   </div>
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${step === 1 ? "bg-blue-600" : "bg-green-500"
-                        }`}
+                      className={`w-3 h-3 rounded-full ${
+                        step === 1 ? "bg-[#556B2F]" : "bg-[#6B8E23]"
+                      }`}
                     ></div>
                     <div
-                      className={`w-3 h-3 rounded-full ${step === 2 ? "bg-blue-600" : "bg-gray-300"
-                        }`}
+                      className={`w-3 h-3 rounded-full ${
+                        step === 2 ? "bg-[#556B2F]" : "bg-[#D3D3D3]"
+                      }`}
                     ></div>
                   </div>
                 </div>
@@ -390,7 +392,7 @@ const ProRegisterPage = () => {
                             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                               placeholder="Votre prénom"
-                              className="pl-10 h-11 bg-white border-gray-300"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.firstName}
                               onChange={(e) =>
                                 handleInputChange("firstName", e.target.value)
@@ -405,7 +407,7 @@ const ProRegisterPage = () => {
                           </label>
                           <Input
                             placeholder="Votre nom"
-                            className="h-11 bg-white border-gray-300"
+                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.lastName}
                             onChange={(e) =>
                               handleInputChange("lastName", e.target.value)
@@ -423,7 +425,7 @@ const ProRegisterPage = () => {
                           <Input
                             type="email"
                             placeholder="votre@email.mg"
-                            className="pl-10 h-11 bg-white border-gray-300"
+                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.email}
                             onChange={(e) =>
                               handleInputChange("email", e.target.value)
@@ -440,7 +442,7 @@ const ProRegisterPage = () => {
                           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
                             placeholder="+261 34 12 345 67"
-                            className="pl-10 h-11 bg-white border-gray-300"
+                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.phone}
                             onChange={(e) =>
                               handleInputChange("phone", e.target.value)
@@ -460,7 +462,7 @@ const ProRegisterPage = () => {
                               <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                               <Input
                                 placeholder="Nom de votre société"
-                                className="pl-10 h-11 bg-white border-gray-300"
+                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                                 value={formData.companyName}
                                 onChange={(e) =>
                                   handleInputChange(
@@ -478,7 +480,7 @@ const ProRegisterPage = () => {
                             </label>
                             <Input
                               placeholder="Nom commercial"
-                              className="h-11 bg-white border-gray-300"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.commercialName}
                               onChange={(e) =>
                                 handleInputChange(
@@ -496,7 +498,7 @@ const ProRegisterPage = () => {
                               <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                               <Input
                                 placeholder="123 456 789 00012"
-                                className="pl-10 h-11 bg-white border-gray-300"
+                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                                 value={formData.siret}
                                 onChange={(e) =>
                                   handleInputChange("siret", e.target.value)
@@ -516,10 +518,10 @@ const ProRegisterPage = () => {
                             Sélectionnez vos métiers *
                             {(formData.userType === "VENDEUR" ||
                               formData.userType === "BIEN_ETRE") && (
-                                <span className="ml-2 text-xs text-green-600 font-normal">
-                                  (Tous sélectionnés automatiquement)
-                                </span>
-                              )}
+                              <span className="ml-2 text-xs text-[#6B8E23] font-normal">
+                                (Tous sélectionnés automatiquement)
+                              </span>
+                            )}
                           </label>
 
                           {/* Barre de recherche */}
@@ -529,7 +531,7 @@ const ProRegisterPage = () => {
                               <Input
                                 type="text"
                                 placeholder="Rechercher un métier..."
-                                className="pl-10 pr-8 h-10 bg-gray-50 border-gray-300 rounded-lg text-sm"
+                                className="pl-10 pr-8 h-10 bg-gray-50 border-[#D3D3D3] rounded-lg text-sm"
                                 value={metiersSearchQuery}
                                 onChange={(e) =>
                                   setMetiersSearchQuery(e.target.value)
@@ -551,7 +553,7 @@ const ProRegisterPage = () => {
                           <div className="space-y-2">
                             {metiersLoading ? (
                               <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-                                <div className="w-5 h-5 border-2 border-gray-400 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+                                <div className="w-5 h-5 border-2 border-gray-400 border-t-[#556B2F] rounded-full animate-spin mx-auto mb-2"></div>
                                 Chargement des métiers...
                               </div>
                             ) : getSearchFilteredMetiers().length > 0 ? (
@@ -559,18 +561,22 @@ const ProRegisterPage = () => {
                                 {getSearchFilteredMetiers().map((metier) => (
                                   <div
                                     key={metier.id}
-                                    onClick={() => handleMetierToggle(metier.id)}
-                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${formData.metiers.includes(metier.id)
-                                      ? "border-blue-500 bg-gradient-to-r from-blue-50 to-blue-100 shadow-md"
-                                      : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
-                                      }`}
+                                    onClick={() =>
+                                      handleMetierToggle(metier.id)
+                                    }
+                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                                      formData.metiers.includes(metier.id)
+                                        ? "border-[#556B2F] bg-gradient-to-r from-[#556B2F]/10 to-[#556B2F]/20 shadow-md"
+                                        : "border-[#D3D3D3] bg-[#FFFFFF] hover:border-[#556B2F]/50 hover:shadow-sm"
+                                    }`}
                                   >
                                     {/* Checkbox personnalisé */}
                                     <div
-                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.metiers.includes(metier.id)
-                                        ? "border-blue-500 bg-blue-500"
-                                        : "border-gray-300 group-hover:border-blue-400"
-                                        }`}
+                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                        formData.metiers.includes(metier.id)
+                                          ? "border-[#556B2F] bg-[#556B2F]"
+                                          : "border-[#D3D3D3] group-hover:border-[#556B2F]/50"
+                                      }`}
                                     >
                                       {formData.metiers.includes(metier.id) && (
                                         <CheckCircle className="h-4 w-4 text-white fill-current" />
@@ -579,10 +585,11 @@ const ProRegisterPage = () => {
 
                                     {/* Texte du métier */}
                                     <span
-                                      className={`text-sm font-medium transition-all ${formData.metiers.includes(metier.id)
-                                        ? "text-blue-700"
-                                        : "text-gray-700 group-hover:text-gray-900"
-                                        }`}
+                                      className={`text-sm font-medium transition-all ${
+                                        formData.metiers.includes(metier.id)
+                                          ? "text-[#556B2F]"
+                                          : "text-gray-700 group-hover:text-gray-900"
+                                      }`}
                                     >
                                       {metier.libelle}
                                     </span>
@@ -599,10 +606,11 @@ const ProRegisterPage = () => {
                           </div>
 
                           {/* Compteur de sélection */}
-                          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <p className="text-xs text-blue-700 font-medium">
+                          <div className="mt-4 p-3 bg-[#556B2F]/10 rounded-lg border border-[#556B2F]/20">
+                            <p className="text-xs text-[#556B2F] font-medium">
                               {formData.metiers.length} métier
-                              {formData.metiers.length > 1 ? "s" : ""} sélectionné
+                              {formData.metiers.length > 1 ? "s" : ""}{" "}
+                              sélectionné
                               {formData.metiers.length > 1 ? "s" : ""}
                             </p>
                           </div>
@@ -619,7 +627,7 @@ const ProRegisterPage = () => {
                             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                               placeholder="Votre adresse complète"
-                              className="pl-10 h-11 bg-white border-gray-300"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.address}
                               onChange={(e) =>
                                 handleInputChange("address", e.target.value)
@@ -634,7 +642,7 @@ const ProRegisterPage = () => {
                           </label>
                           <Input
                             placeholder="Appartement, étage, etc."
-                            className="h-11 bg-white border-gray-300"
+                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                             value={formData.addressComplement}
                             onChange={(e) =>
                               handleInputChange(
@@ -651,7 +659,7 @@ const ProRegisterPage = () => {
                             </label>
                             <Input
                               placeholder="75001"
-                              className="h-11 bg-white border-gray-300"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.zipCode}
                               onChange={(e) =>
                                 handleInputChange("zipCode", e.target.value)
@@ -665,7 +673,7 @@ const ProRegisterPage = () => {
                             </label>
                             <Input
                               placeholder="Paris"
-                              className="h-11 bg-white border-gray-300"
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.city}
                               onChange={(e) =>
                                 handleInputChange("city", e.target.value)
@@ -684,15 +692,15 @@ const ProRegisterPage = () => {
                               type="button"
                               variant="outline"
                               onClick={() => setLocationModalOpen(true)}
-                              className="w-full justify-start h-11 border-gray-300"
+                              className="w-full justify-start h-11 border-[#D3D3D3]"
                             >
                               <MapPin className="h-4 w-4 mr-2" />
                               {formData.latitude && formData.longitude
                                 ? `Position définie: ${parseFloat(
-                                  formData.latitude
-                                ).toFixed(4)}, ${parseFloat(
-                                  formData.longitude
-                                ).toFixed(4)}`
+                                    formData.latitude
+                                  ).toFixed(4)}, ${parseFloat(
+                                    formData.longitude
+                                  ).toFixed(4)}`
                                 : "Cliquez pour sélectionner sur la carte"}
                             </Button>
                             <p className="text-xs text-gray-500">
@@ -732,7 +740,7 @@ const ProRegisterPage = () => {
                             <Input
                               type={showPassword ? "text" : "password"}
                               placeholder="Créez un mot de passe sécurisé"
-                              className="pl-10 pr-10 h-11 bg-white border-gray-300"
+                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.password}
                               onChange={(e) =>
                                 handleInputChange("password", e.target.value)
@@ -767,7 +775,7 @@ const ProRegisterPage = () => {
                             <Input
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="Confirmez votre mot de passe"
-                              className="pl-10 pr-10 h-11 bg-white border-gray-300"
+                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
                               value={formData.confirmPassword}
                               onChange={(e) =>
                                 handleInputChange(
@@ -817,14 +825,14 @@ const ProRegisterPage = () => {
                             J'accepte les{" "}
                             <a
                               href="/terms"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                             >
                               conditions d'utilisation
                             </a>{" "}
                             et la{" "}
                             <a
                               href="/privacy"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                             >
                               politique de confidentialité
                             </a>
@@ -851,7 +859,7 @@ const ProRegisterPage = () => {
                             importer vos coordonnées sur Servo.{" "}
                             <a
                               href="/import-info"
-                              className="text-blue-600 hover:text-blue-700 font-medium"
+                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                               target="_blank"
                               rel="noopener noreferrer"
                             >
@@ -869,7 +877,7 @@ const ProRegisterPage = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="flex-1 h-11 border-gray-300"
+                        className="flex-1 h-11 border-[#D3D3D3]"
                         onClick={() => setStep(1)}
                       >
                         Retour
@@ -877,8 +885,9 @@ const ProRegisterPage = () => {
                     )}
                     <Button
                       type="submit"
-                      className={`${step === 2 ? "flex-1" : "w-full"
-                        } h-11 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold`}
+                      className={`${
+                        step === 2 ? "flex-1" : "w-full"
+                      } h-11 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] hover:from-[#6B8E23]/90 hover:to-[#556B2F]/90 text-white font-semibold`}
                       disabled={isLoading}
                     >
                       {isLoading ? (
@@ -899,7 +908,7 @@ const ProRegisterPage = () => {
                     Déjà un compte ?{" "}
                     <a
                       href="/login"
-                      className="text-blue-600 ml-2 hover:text-blue-700 font-medium"
+                      className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
                     >
                       Se connecter
                     </a>

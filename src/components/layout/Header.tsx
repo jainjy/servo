@@ -1603,9 +1603,6 @@ const Header = () => {
                         <Link to="/" onClick={() => setIsPopoverOpen(false)}>
                           <div className="flex items-center gap-2 mb-4">
                             <ServoLogo />
-                            <div className="azonix text-lg font-bold text-slate-300">
-                              SERVO
-                            </div>
                           </div>
                         </Link>
                         <nav className="space-y-1 overflow-y-auto">

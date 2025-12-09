@@ -2,8 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth"; // Ajustez le chemin selon votre structure
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -11,30 +19,49 @@ export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
+  const navigate = useNavigate();
+  const { forgotPassword } = useAuth();
+
   // S'assurer que nous sommes côté client
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isClient) return;
 
+    if (!email) {
+      toast.error("Veuillez entrer votre adresse email");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Simulation d'envoi d'email - à remplacer par votre backend
-      console.log('Envoi du lien de réinitialisation à:', email);
-
-      // Simuler un délai d'envoi
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Appel à l'API backend
+      await forgotPassword(email);
 
       setIsSubmitted(true);
-
+      toast.success("Email envoyé ! Vérifiez votre boîte de réception.");
     } catch (error) {
-      console.error('Erreur:', error);
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+      console.error("Erreur:", error);
+
+      // Messages d'erreur plus spécifiques
+      if (error.message.includes("Email requis")) {
+        toast.error("Veuillez entrer votre adresse email");
+      } else if (error.message.includes("non trouvé")) {
+        // Pour des raisons de sécurité, on montre un message générique même si l'email n'existe pas
+        toast.success(
+          "Si votre email est enregistré, vous recevrez un lien de réinitialisation"
+        );
+        setIsSubmitted(true); // Toujours montrer le succès pour ne pas révéler si l'email existe
+      } else {
+        toast.error(
+          error.message || "Une erreur est survenue. Veuillez réessayer."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +76,7 @@ export default function ForgotPasswordPage() {
             <Card className="border-0 shadow-lg">
               <CardHeader className="space-y-1 pb-8">
                 <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#556B2F] to-[#6B8E23] rounded-2xl flex items-center justify-center">
                     <img src="/logo.png" className="h-10 w-10" alt="Logo" />
                   </div>
                 </div>
@@ -59,7 +86,7 @@ export default function ForgotPasswordPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex justify-center">
-                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-[#556B2F] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               </CardContent>
             </Card>
@@ -72,7 +99,6 @@ export default function ForgotPasswordPage() {
   return (
     <div className="h-screen flex relative overflow-hidden">
       {/* Effet de fond global */}
-      {/* Formes décoratives */}
       <div className="absolute top-0 left-[-5rem] w-72 h-72 bg-white/10 rounded-full blur-2xl"></div>
       <div className="absolute bottom-0 right-[-5rem] w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
 
@@ -85,7 +111,6 @@ export default function ForgotPasswordPage() {
         />
       </div>
 
-     
       {/* Contenu principal */}
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-10 px-6 py-16 lg:py-24 z-10 max-w-7xl">
         {/* Texte à gauche (caché sur petits écrans) */}
@@ -98,8 +123,10 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-2">Super-app de l'habitat</h2>
-            <p className="text-blue-100 text-md">
+            <h2 className="text-2xl font-semibold mb-2">
+              Super-app de l'habitat
+            </h2>
+            <p className="text-[#8B4513] text-md">
               Retrouvez l'accès à votre compte en toute sécurité
             </p>
           </div>
@@ -111,7 +138,7 @@ export default function ForgotPasswordPage() {
               </div>
               <div>
                 <h3 className="font-semibold">Processus sécurisé</h3>
-                <p className="text-blue-100 text-sm">
+                <p className="text-[#8B4513] text-sm">
                   Lien de réinitialisation envoyé par email
                 </p>
               </div>
@@ -123,7 +150,9 @@ export default function ForgotPasswordPage() {
               </div>
               <div>
                 <h3 className="font-semibold">Rapide et simple</h3>
-                <p className="text-blue-100 text-sm">Recevez le lien en quelques minutes</p>
+                <p className="text-[#8B4513] text-sm">
+                  Recevez le lien en quelques minutes
+                </p>
               </div>
             </div>
 
@@ -133,7 +162,9 @@ export default function ForgotPasswordPage() {
               </div>
               <div>
                 <h3 className="font-semibold">Support 24/7</h3>
-                <p className="text-blue-100 text-sm">Notre équipe est là pour vous aider</p>
+                <p className="text-[#8B4513] text-sm">
+                  Notre équipe est là pour vous aider
+                </p>
               </div>
             </div>
           </div>
@@ -141,18 +172,17 @@ export default function ForgotPasswordPage() {
 
         {/* Formulaire à droite dans une card */}
         <div className="flex justify-center w-full max-w-md">
-          <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-md">
+          <Card className="border-0 shadow-2xl bg-[#FFFFFF]/95 backdrop-blur-md">
             <CardHeader className="pt-8 px-8 pb-4">
-
               {/* Retour */}
               <div className="flex items-center mb-1">
-                <a
-                  href="/login"
-                  className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+                <Link
+                  to="/login"
+                  className="inline-flex items-center text-sm text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Retour à la connexion
-                </a>
+                </Link>
               </div>
 
               {/* Logo au-dessus du titre sur petits écrans */}
@@ -177,7 +207,10 @@ export default function ForgotPasswordPage() {
               {!isSubmitted ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-4">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700 block">
+                    <label
+                      htmlFor="email"
+                      className="text-sm font-medium text-gray-700 block"
+                    >
                       Email
                     </label>
                     <div className="relative">
@@ -186,7 +219,7 @@ export default function ForgotPasswordPage() {
                         id="email"
                         type="email"
                         placeholder="votre@email.mg"
-                        className="pl-10 h-11 bg-white border border-gray-300 focus:border-blue-500 rounded-md"
+                        className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3] focus:border-[#556B2F] rounded-md"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -194,17 +227,19 @@ export default function ForgotPasswordPage() {
                     </div>
                   </div>
 
-                  <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <p className="font-medium text-blue-800 mb-1">Important :</p>
+                  <div className="text-sm text-gray-600 bg-[#556B2F]/10 p-4 rounded-lg border border-[#556B2F]/20">
+                    <p className="font-medium text-[#556B2F] mb-1">
+                      Important :
+                    </p>
                     <p>
-                      Le lien de réinitialisation sera envoyé à l'adresse email associée à votre compte
-                      SERVO.
+                      Le lien de réinitialisation sera envoyé à l'adresse email
+                      associée à votre compte SERVO.
                     </p>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-md"
+                    className="w-full h-11 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#556B2F]/90 hover:to-[#6B8E23]/90 text-white font-semibold rounded-md"
                     disabled={isLoading || !isClient}
                   >
                     {isLoading ? (
@@ -219,57 +254,73 @@ export default function ForgotPasswordPage() {
 
                   <div className="text-center text-sm text-gray-600">
                     Vous vous souvenez de votre mot de passe ?{" "}
-                    <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                    <Link
+                      to="/login"
+                      className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
+                    >
                       Se connecter
-                    </a>
+                    </Link>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-6 text-center px-4">
                   {/* Icône de succès */}
                   <div className="flex justify-center">
-                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-10 w-10 text-green-600" />
+                    <div className="w-20 h-20 bg-[#6B8E23]/10 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-10 w-10 text-[#6B8E23]" />
                     </div>
                   </div>
 
                   {/* Message de confirmation */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Lien envoyé avec succès !</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {email
+                        ? `Lien envoyé à ${email}`
+                        : "Lien envoyé avec succès !"}
+                    </h3>
                     <p className="text-gray-600">
-                      Nous avons envoyé un lien de réinitialisation à <strong>{email}</strong>.
-                      Consultez votre boîte de réception et suivez les instructions.
+                      Si votre email est enregistré dans notre système, vous
+                      recevrez un lien de réinitialisation dans quelques
+                      minutes.
                     </p>
                   </div>
 
                   {/* Conseils */}
-                  <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-200 text-left">
+                  <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border border-[#D3D3D3] text-left">
                     <p className="font-medium text-gray-800 mb-2">Conseils :</p>
                     <ul className="space-y-1 list-disc list-inside">
-                      <li>Vérifiez votre dossier spam si vous ne trouvez pas l'email</li>
+                      <li>
+                        Vérifiez votre dossier spam si vous ne trouvez pas
+                        l'email
+                      </li>
                       <li>Le lien est valable pendant 24 heures</li>
-                      <li>Contactez le support si vous rencontrez des problèmes</li>
+                      <li>
+                        Contactez le support si vous rencontrez des problèmes
+                      </li>
                     </ul>
                   </div>
 
                   {/* Actions */}
                   <div className="space-y-3">
                     <Button
-                      onClick={() => setIsSubmitted(false)}
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        setEmail("");
+                      }}
                       variant="outline"
                       className="w-full h-11"
                     >
                       Réessayer avec un autre email
                     </Button>
 
-                    <a href="/login" className="block">
+                    <Link to="/login" className="block">
                       <Button
                         variant="ghost"
-                        className="w-full h-11 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="w-full h-11 text-[#556B2F] hover:text-[#556B2F]/90 hover:bg-[#556B2F]/10"
                       >
                         Retour à la connexion
                       </Button>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               )}
