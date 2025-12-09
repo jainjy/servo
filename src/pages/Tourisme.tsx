@@ -770,35 +770,30 @@ export const TourismSection = () => {
 
   return (
     <section className="min-h-screen">
-      <div className="container mx-auto px-4 pt-24">
-        {/* En-tête avec animation */}
-        <div className="-z-10 absolute inset-0 w-full h-96 overflow-hidden bg-black">
-          <div className="absolute inset-0 bg-gradient-to-t backdrop-blur-sm from-black/80 via-black/40 to-transparent z-10"></div>
-          <img
-            src="https://i.pinimg.com/1200x/19/f3/34/19f334c7d66cf3393f146a9bcfe911f4.jpg"
-            alt=""
-            className="w-full h-full object-cover opacity-90"
-          />
+      {/* Hero */}
+      <div className="relative rounded-2xl overflow-hidden mb-8">
+        <div
+          className="relative py-20 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage:
+              'url("https://i.pinimg.com/1200x/19/f3/34/19f334c7d66cf3393f146a9bcfe911f4.jpg")',
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="relative z-10 text-center text-white">
+            <TourismNavigation />
+            <h2 className="md:text-5xl text-3xl font-bold mb-6 tracking-wider">
+              Hébergements Touristiques
+            </h2>
+            <p className="text-xl max-w-2xl mx-auto leading-relaxed">
+              Découvrez nos hébergements partenaires et réservez votre séjour en toute simplicité
+            </p>
+          </div>
         </div>
-        <TourismNavigation />
-        <div className="text-center mb-16">
-          <h2
-            className="md:text-5xl text-3xl font-bold mb-6 text-slate-100 tracking-wider"
-            data-aos="fade-up"
-            data-aos-delay="200"
-          >
-            Hébergements Touristiques
-          </h2>
-          <p
-            className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
-            data-aos="fade-up"
-            data-aos-delay="300"
-          >
-            Découvrez nos hébergements partenaires et réservez votre séjour en
-            toute simplicité
-          </p>
-        </div>
+      </div>
+      {/* Fin Hero */}
 
+      <div className="container mx-auto px-4 pt-0">
         {/* Formulaire de recherche avec animations */}
         <div
           className="bg-[#FFFFFF] rounded-3xl shadow-lg p-8 mb-12 border border-[#D3D3D3] transition-all duration-300 hover:shadow-xl"

@@ -36,15 +36,15 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
-
 export default function MonComptePage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [pendingAvatar, setPendingAvatar] = useState<
-    { file: File; preview: string } | null
-  >(null);
+  const [pendingAvatar, setPendingAvatar] = useState<{
+    file: File;
+    preview: string;
+  } | null>(null);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -52,7 +52,6 @@ export default function MonComptePage() {
   });
   const [changingPassword, setChangingPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -66,12 +65,10 @@ export default function MonComptePage() {
     city: "",
     addressComplement: "",
   });
-
   useEffect(() => {
     const u = AuthService.getCurrentUser();
     setUser(u);
   }, []);
-
   useEffect(() => {
     if (user) {
       setForm({
@@ -89,7 +86,6 @@ export default function MonComptePage() {
       });
     }
   }, [user]);
-
   const initials = useMemo(() => {
     if (!user) return "US";
     let base = "";
@@ -101,29 +97,24 @@ export default function MonComptePage() {
     if (user.lastName) return user.lastName.slice(0, 2).toUpperCase();
     return "US";
   }, [user]);
-
   const roleLabel =
     user?.role === "admin"
       ? "Administrateur"
       : user?.role === "professional"
-        ? "Professionnel"
-        : "Utilisateur";
-
+      ? "Professionnel"
+      : "Utilisateur";
   const roleColor =
     user?.role === "admin"
-      ? "bg-purple-600"
+      ? "bg-[#8B4513]"
       : user?.role === "professional"
-        ? "bg-blue-600"
-        : "bg-gray-900";
-
+      ? "bg-[#556B2F]"
+      : "bg-[#6B8E23]";
   const createdAt = user?.createdAt ? new Date(user.createdAt) : null;
-
   const onChange =
     (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!isEditing) return;
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
     };
-
   const handleCancel = () => {
     if (!user) return;
     setForm({
@@ -146,13 +137,10 @@ export default function MonComptePage() {
       confirmPassword: "",
     });
   };
-
   const handleSave = async () => {
     if (!user) return;
-
     try {
       setSaving(true);
-
       // Préparer les données pour l'API
       const updateData = {
         firstName: form.firstName.trim(),
@@ -175,13 +163,10 @@ export default function MonComptePage() {
         city: form.city.trim() || undefined,
         addressComplement: form.addressComplement.trim() || undefined,
       };
-
       // Appel API pour mettre à jour le profil
       const updatedUser = await AuthService.updateProfile(updateData);
-
       setUser(updatedUser);
       setIsEditing(false);
-
       toast({
         title: "Profil mis à jour",
         description: "Vos informations ont été enregistrées.",
@@ -196,17 +181,14 @@ export default function MonComptePage() {
       setSaving(false);
     }
   };
-
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
-
   const handleAvatarChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
-
     // Vérifier le type de fichier
     if (!file.type.startsWith("image/")) {
       toast({
@@ -215,7 +197,6 @@ export default function MonComptePage() {
       });
       return;
     }
-
     // Vérifier la taille du fichier (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       toast({
@@ -224,30 +205,24 @@ export default function MonComptePage() {
       });
       return;
     }
-
     // Créer une URL temporaire pour la prévisualisation
     const preview = URL.createObjectURL(file);
     setPendingAvatar({ file, preview });
   };
-
   const handleConfirmAvatar = async () => {
     if (!pendingAvatar || !user) return;
-
     try {
       setUploadingAvatar(true);
       const uploadResult = await AuthService.uploadAvatar(pendingAvatar.file);
       const updatedUser = await AuthService.updateProfile({
         avatar: uploadResult.url,
       });
-
       setUser(updatedUser);
       setPendingAvatar(null);
-
       toast({
         title: "Avatar mis à jour",
         description: "Votre photo de profil a été changée avec succès",
       });
-
       // Réinitialiser l'input file
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -261,7 +236,6 @@ export default function MonComptePage() {
       setUploadingAvatar(false);
     }
   };
-
   const handleCancelAvatar = () => {
     if (pendingAvatar) {
       URL.revokeObjectURL(pendingAvatar.preview);
@@ -271,7 +245,6 @@ export default function MonComptePage() {
       fileInputRef.current.value = "";
     }
   };
-
   const handlePasswordChange = async () => {
     if (!passwordData.currentPassword || !passwordData.newPassword) {
       toast({
@@ -280,7 +253,6 @@ export default function MonComptePage() {
       });
       return;
     }
-
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         title: "Erreur",
@@ -288,7 +260,6 @@ export default function MonComptePage() {
       });
       return;
     }
-
     if (passwordData.newPassword.length < 6) {
       toast({
         title: "Erreur",
@@ -296,21 +267,17 @@ export default function MonComptePage() {
       });
       return;
     }
-
     try {
       setChangingPassword(true);
-
       await AuthService.changePassword(
         passwordData.currentPassword,
         passwordData.newPassword
       );
-
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
-
       toast({
         title: "Succès",
         description: "Mot de passe modifié avec succès",
@@ -324,11 +291,9 @@ export default function MonComptePage() {
       setChangingPassword(false);
     }
   };
-
   const handleNavigation = (path: string) => {
     window.location.href = path;
   };
-
   if (!user) {
     return (
       <main className="min-h-[80vh] pt-28 px-6">
@@ -356,25 +321,29 @@ export default function MonComptePage() {
       </main>
     );
   }
-
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-16">
+      <main className="min-h-screen bg-gradient-to-br from-[#556B2F]/10 via-[#6B8E23]/10 to-[#8B4513]/10 pt-16">
         {/* Couverture style Facebook */}
         <div className="h-64 relative">
           <div className="absolute flex justify-around inset-0 opacity-50 ">
-            <img src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
-            className="w-64 h-64 overflow-hidden rounded-full"
-            alt="" />
-            <img src="https://i.pinimg.com/736x/43/b9/1c/43b91c953ebadc481316a2f9230ddf8a.jpg"
-            className="w-64 h-64"
-            alt="" />
-            <img src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
-            className="w-64 h-64"
-            alt="" />
+            <img
+              src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
+              className="w-64 h-64 overflow-hidden rounded-full"
+              alt=""
+            />
+            <img
+              src="https://i.pinimg.com/736x/43/b9/1c/43b91c953ebadc481316a2f9230ddf8a.jpg"
+              className="w-64 h-64"
+              alt=""
+            />
+            <img
+              src="https://i.pinimg.com/1200x/c3/ef/8b/c3ef8ba8a70511021f9b3f0a50a852f7.jpg"
+              className="w-64 h-64"
+              alt=""
+            />
           </div>
         </div>
-
         {/* Conteneur principal */}
         <div className="px-4 sm:px-6 lg:px-8 pb-8">
           <div className="max-w-7xl mx-auto -mt-28 relative z-10">
@@ -383,19 +352,22 @@ export default function MonComptePage() {
               {/* COLONNE GAUCHE - Profil et infos */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Section Profil */}
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="bg-[#FFFFFF] rounded-lg shadow-lg overflow-hidden">
                   {/* En-tête du profil */}
                   <div className="px-6 py-6">
                     {/* Avatar */}
                     <div className="flex flex-col items-center mb-6">
                       <div className="relative mb-4">
-                        <div className="p-1 bg-purple-400 rounded-full shadow-lg">
+                        <div className="p-1 bg-[#556B2F] rounded-full shadow-lg">
                           <Avatar
-                            className="w-32 h-32 cursor-pointer border-4 border-white"
+                            className="w-32 h-32 cursor-pointer border-4 border-[#FFFFFF]"
                             onClick={handleAvatarClick}
                           >
                             {pendingAvatar ? (
-                              <AvatarImage src={pendingAvatar.preview} alt="Prévisualisation" />
+                              <AvatarImage
+                                src={pendingAvatar.preview}
+                                alt="Prévisualisation"
+                              />
                             ) : (
                               user.avatar && (
                                 <AvatarImage
@@ -404,7 +376,7 @@ export default function MonComptePage() {
                                 />
                               )
                             )}
-                            <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-3xl font-semibold">
+                            <AvatarFallback className="bg-gradient-to-br from-[#556B2F] to-[#8B4513] text-white text-3xl font-semibold">
                               {uploadingAvatar ? (
                                 <span className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
                               ) : (
@@ -434,7 +406,7 @@ export default function MonComptePage() {
                           <button
                             onClick={handleAvatarClick}
                             disabled={uploadingAvatar}
-                            className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full p-2 shadow-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            className="absolute -bottom-1 -right-1 bg-[#556B2F] text-white rounded-full p-2 shadow-lg hover:bg-[#6B8E23] transition-colors disabled:opacity-50"
                           >
                             <Camera className="w-4 h-4" />
                           </button>
@@ -447,26 +419,25 @@ export default function MonComptePage() {
                           className="hidden"
                         />
                       </div>
-
                       {/* Nom et badges */}
                       <h1 className="text-2xl font-bold text-gray-900 text-center">
                         {form.firstName
                           ? `${form.firstName} ${form.lastName ?? ""}`.trim()
                           : user.email}
                       </h1>
-                      <Badge className={`${roleColor} text-white text-sm py-1 px-3 mt-2`}>
+                      <Badge
+                        className={`${roleColor} text-white text-sm py-1 px-3 mt-2`}
+                      >
                         {roleLabel}
                       </Badge>
                     </div>
-
-                    <Separator className="my-4" />
-
+                    <Separator className="my-4 bg-[#D3D3D3]" />
                     {/* Infos principales */}
                     <div className="space-y-4 text-sm">
                       <div>
                         <p className="text-gray-500 mb-1">Email</p>
                         <p className="text-gray-900 font-medium flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-blue-600" />
+                          <Mail className="w-4 h-4 text-[#556B2F]" />
                           {user.email}
                         </p>
                       </div>
@@ -474,7 +445,7 @@ export default function MonComptePage() {
                         <div>
                           <p className="text-gray-500 mb-1">Téléphone</p>
                           <p className="text-gray-900 font-medium flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-blue-600" />
+                            <Phone className="w-4 h-4 text-[#556B2F]" />
                             {user.phone}
                           </p>
                         </div>
@@ -483,7 +454,7 @@ export default function MonComptePage() {
                         <div>
                           <p className="text-gray-500 mb-1">Localisation</p>
                           <p className="text-gray-900 font-medium flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-blue-600" />
+                            <MapPin className="w-4 h-4 text-[#556B2F]" />
                             {user.city} {user.zipCode && `(${user.zipCode})`}
                           </p>
                         </div>
@@ -492,93 +463,105 @@ export default function MonComptePage() {
                         <div>
                           <p className="text-gray-500 mb-1">Inscrit le</p>
                           <p className="text-gray-900 font-medium flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-blue-600" />
-                            {createdAt.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            <Calendar className="w-4 h-4 text-[#556B2F]" />
+                            {createdAt.toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-
                 {/* Raccourcis */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-blue-600" />
+                    <Star className="w-5 h-5 text-[#556B2F]" />
                     Raccourcis
                   </h3>
                   <div className="space-y-2">
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
-                      onClick={() => handleNavigation("/mon-compte/mes-commandes")}
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
+                      onClick={() =>
+                        handleNavigation("/mon-compte/mes-commandes")
+                      }
                     >
                       <Box /> Mes commandes
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
-                      onClick={() => handleNavigation("/mon-compte/reservation")}
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
+                      onClick={() =>
+                        handleNavigation("/mon-compte/reservation")
+                      }
                     >
                       <Calendar /> Mes réservations
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
                       onClick={() => handleNavigation("/mon-compte/demandes")}
                     >
                       <Settings2 /> Demandes de services
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
-                      onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
+                      onClick={() =>
+                        handleNavigation("/mon-compte/demandes-immobilier")
+                      }
                     >
                       🏠 Demandes immobilières
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
                       onClick={() => handleNavigation("/mon-compte/payement")}
                     >
                       <DollarSign /> Mes paiements
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
                       onClick={() => handleNavigation("/mon-compte/documents")}
                     >
                       <FileText /> Mes documents
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left hover:bg-blue-50 border-gray-200"
+                      className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
                       onClick={() => handleNavigation("/mon-compte/agenda")}
                     >
                       <Calendar1 /> Mon Agenda
                     </Button>
                   </div>
                 </div>
-
                 {/* Infos compte */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-blue-600" />
+                    <Shield className="w-5 h-5 text-[#556B2F]" />
                     Compte
                   </h3>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Type</span>
-                      <Badge className="bg-blue-600">{roleLabel}</Badge>
+                      <Badge className={`${roleColor} text-white`}>
+                        {roleLabel}
+                      </Badge>
                     </div>
-                    <Separator />
+                    <Separator className="bg-[#D3D3D3]" />
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Statut</span>
-                      <span className="text-green-600 font-semibold">✓ Actif</span>
+                      <span className="text-green-600 font-semibold">
+                        ✓ Actif
+                      </span>
                     </div>
                     {user.kycStatus && (
                       <>
-                        <Separator />
+                        <Separator className="bg-[#D3D3D3]" />
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Vérification</span>
                           <span className="font-semibold capitalize text-orange-600">
@@ -590,19 +573,18 @@ export default function MonComptePage() {
                   </div>
                 </div>
               </div>
-
               {/* COLONNE DROITE - Formulaires d'édition */}
               <div className="lg:col-span-2 space-y-6">
                 {/* En-tête avec boutons action */}
-                <div className="bg-white rounded-lg shadow-md p-6 flex items-center justify-between">
+                <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6 flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <Edit3 className="w-6 h-6 text-blue-600" />
+                    <Edit3 className="w-6 h-6 text-[#556B2F]" />
                     {isEditing ? "Modifier mon profil" : "Mon profil"}
                   </h2>
                   <div className="flex items-center gap-2">
                     {!isEditing ? (
                       <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                        className="bg-[#556B2F] hover:bg-[#6B8E23] text-white gap-2"
                         onClick={() => setIsEditing(true)}
                       >
                         <Edit3 className="w-4 h-4" />
@@ -610,15 +592,12 @@ export default function MonComptePage() {
                       </Button>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={handleCancel}
-                        >
+                        <Button variant="outline" onClick={handleCancel}>
                           <X className="w-4 h-4 mr-2" />
                           Annuler
                         </Button>
                         <Button
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                           onClick={handleSave}
                           disabled={saving}
                         >
@@ -635,137 +614,159 @@ export default function MonComptePage() {
                     )}
                   </div>
                 </div>
-
                 {/* Informations personnelles */}
                 {isEditing ? (
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <UserIcon className="w-5 h-5 text-blue-600" />
+                  <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold text-[#8B4513] mb-6 flex items-center gap-2">
+                      <UserIcon className="w-5 h-5 text-[#556B2F]" />
                       Informations personnelles
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Prénom</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Prénom
+                        </Label>
                         <Input
                           value={form.firstName}
                           onChange={onChange("firstName")}
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Nom</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Nom
+                        </Label>
                         <Input
                           value={form.lastName}
                           onChange={onChange("lastName")}
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Téléphone</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Téléphone
+                        </Label>
                         <Input
                           value={form.phone}
                           onChange={onChange("phone")}
                           placeholder="Ex: +33 6 12 34 56 78"
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Ville</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Ville
+                        </Label>
                         <Input
                           value={form.city}
                           onChange={onChange("city")}
                           placeholder="Ex: Paris"
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Code postal</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Code postal
+                        </Label>
                         <Input
                           value={form.zipCode}
                           onChange={onChange("zipCode")}
                           placeholder="Ex: 75001"
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Complément d'adresse</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Complément d'adresse
+                        </Label>
                         <Input
                           value={form.addressComplement}
                           onChange={onChange("addressComplement")}
                           placeholder="Apt, Suite..."
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2 md:col-span-2">
-                        <Label className="text-gray-700 font-semibold">Adresse</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Adresse
+                        </Label>
                         <Input
                           value={form.address}
                           onChange={onChange("address")}
                           placeholder="Rue..."
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2 md:col-span-2">
-                        <Label className="text-gray-700 font-semibold">Bio / Descriptif</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Bio / Descriptif
+                        </Label>
                         <Input
                           value={form.bio}
                           onChange={onChange("bio")}
                           placeholder="Dites-nous quelque chose sur vous..."
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                     </div>
                   </div>
                 ) : null}
-
                 {/* Informations professionnelles */}
                 {user.role === "professional" && isEditing && (
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <Building className="w-5 h-5 text-blue-600" />
+                  <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6">
+                    <h3 className="text-xl font-bold text-[#8B4513] mb-6 flex items-center gap-2">
+                      <Building className="w-5 h-5 text-[#556B2F]" />
                       Informations professionnelles
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2 md:col-span-2">
-                        <Label className="text-gray-700 font-semibold">Nom de l'entreprise</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Nom de l'entreprise
+                        </Label>
                         <Input
                           value={form.companyName}
                           onChange={onChange("companyName")}
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">Nom commercial</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          Nom commercial
+                        </Label>
                         <Input
                           value={form.commercialName}
                           onChange={onChange("commercialName")}
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-semibold">SIRET</Label>
+                        <Label className="text-[#8B4513] font-semibold">
+                          SIRET
+                        </Label>
                         <Input
                           value={form.siret}
                           onChange={onChange("siret")}
-                          className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </div>
                     </div>
                   </div>
                 )}
-
                 {/* Sécurité et mot de passe */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-blue-600" />
+                <div className="bg-[#FFFFFF] rounded-lg shadow-md p-6">
+                  <h3 className="text-xl font-bold text-[#8B4513] mb-6 flex items-center gap-2">
+                    <Lock className="w-5 h-5 text-[#556B2F]" />
                     Sécurité et mot de passe
                   </h3>
                   <p className="text-gray-600 text-sm mb-6">
-                    Changez votre mot de passe régulièrement pour sécuriser votre compte.
+                    Changez votre mot de passe régulièrement pour sécuriser
+                    votre compte.
                   </p>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-gray-700 font-semibold">Mot de passe actuel</Label>
+                      <Label className="text-[#8B4513] font-semibold">
+                        Mot de passe actuel
+                      </Label>
                       <Input
                         type="password"
                         value={passwordData.currentPassword}
@@ -776,11 +777,13 @@ export default function MonComptePage() {
                           }))
                         }
                         placeholder="••••••••"
-                        className="border-gray-300"
+                        className="border-[#D3D3D3]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-gray-700 font-semibold">Nouveau mot de passe</Label>
+                      <Label className="text-[#8B4513] font-semibold">
+                        Nouveau mot de passe
+                      </Label>
                       <Input
                         type="password"
                         value={passwordData.newPassword}
@@ -791,11 +794,13 @@ export default function MonComptePage() {
                           }))
                         }
                         placeholder="••••••••"
-                        className="border-gray-300"
+                        className="border-[#D3D3D3]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-gray-700 font-semibold">Confirmer le mot de passe</Label>
+                      <Label className="text-[#8B4513] font-semibold">
+                        Confirmer le mot de passe
+                      </Label>
                       <Input
                         type="password"
                         value={passwordData.confirmPassword}
@@ -806,7 +811,7 @@ export default function MonComptePage() {
                           }))
                         }
                         placeholder="••••••••"
-                        className="border-gray-300"
+                        className="border-[#D3D3D3]"
                       />
                     </div>
                     <div className="flex justify-end pt-4">
@@ -817,7 +822,7 @@ export default function MonComptePage() {
                           !passwordData.currentPassword ||
                           !passwordData.newPassword
                         }
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                       >
                         {changingPassword ? (
                           <span className="inline-flex items-center gap-2">
@@ -833,7 +838,6 @@ export default function MonComptePage() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </main>

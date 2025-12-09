@@ -476,26 +476,28 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
       className="min-h-screen py-8"
       style={{ backgroundColor: colors.lightBg }}
     >
-      <TourismNavigation />
-
       {/* Hero */}
-      <div className="relative h-80 mb-12 rounded-2xl overflow-hidden shadow-xl">
-        <img
-          src="https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-          alt="Patrimoine"
-          className="w-full h-full object-cover"
-          onError={(e) => handleImageError(e)}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-          <h1 className="text-5xl font-bold mb-3">
-            Lieux Touristiques & Culturels
-          </h1>
-          <p className="text-xl opacity-90">
-            Découvrez les trésors du patrimoine
-          </p>
+      <div className="relative rounded-2xl overflow-hidden mb-8">
+        <div
+          className="relative py-20 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80")',
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="relative z-10 text-center text-white">
+            <TourismNavigation />
+            <h1 className="text-5xl font-bold mb-3">
+              Lieux Touristiques & Culturels
+            </h1>
+            <p className="text-xl max-w-2xl mx-auto opacity-90">
+              Découvrez les trésors du patrimoine
+            </p>
+          </div>
         </div>
       </div>
+      {/* Fin Hero */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Filtres */}

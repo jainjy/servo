@@ -102,42 +102,35 @@ const ActivitesLoisirsFAQ: React.FC = () => {
   return (
     // Utilisation de la couleur de fond claire du thème
     <div className={`min-h-screen bg-[${lightBg}] text-gray-900`}>
-      {/* HERO */}
-      {/* Utilisation des couleurs du thème pour le dégradé de fond */}
-      <div
-        className={`relative py-24 md:py-32 bg-gradient-to-r from-[${THEME_COLORS["primary-dark"]}]/80 to-[${accentColor}]/80 overflow-hidden`}
-      >
-        {/* Navigation en premier plan avec z-index élevé */}
-        <div className="relative z-50 px-4 max-w-7xl mx-auto pt-4">
-          <TourismNavigation />
-        </div>
-
-        {/* Image de fond et overlay */}
-        <img
-          src="https://i.pinimg.com/736x/fa/05/b9/fa05b9dba51cec6eb5e7441b75d0c153.jpg"
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
-          alt="Hero"
-        />
-        {/* Utilisation des couleurs du thème pour l'overlay */}
+      {/* Hero */}
+      <div className="relative rounded-2xl overflow-hidden mb-8">
         <div
-          className={`absolute inset-0 bg-gradient-to-r from-[${THEME_COLORS["primary-dark"]}]/40 to-[${accentColor}]/40`}
-        ></div>
-
-        {/* Contenu principal */}
-        <div className="relative text-center px-4 pt-16">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg tracking-wide">
-            Activités & Loisirs
-          </h1>
-          <p className="mt-4 text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Découvrez nos expériences touristiques immersives et aventures
-            nature.
-          </p>
+          className="relative py-20 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage:
+              'url("https://i.pinimg.com/736x/fa/05/b9/fa05b9dba51cec6eb5e7441b75d0c153.jpg")',
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="relative z-10 text-center text-white">
+            <TourismNavigation />
+            <h1 className="text-4xl md:text-6xl font-extrabold drop-shadow-2xl tracking-wide mb-6">
+              Activités & Loisirs
+            </h1>
+            <p className="mt-4 text-xl md:text-2xl max-w-3xl mx-auto font-medium leading-relaxed">
+              Découvrez nos expériences touristiques immersives et aventures nature
+              au cœur des paysages exceptionnels.
+            </p>
+            <div className="w-24 h-1.5 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] mx-auto mt-8 rounded-full"></div>
+          </div>
         </div>
       </div>
+      {/* Fin Hero */}
+
       {/* SEARCH BAR */}
-      <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14">
+      <div className="max-w-3xl mx-auto px-4 -mt-10 mb-14 relative z-20">
         <div
-          className={`relative bg-white/95 backdrop-blur-md shadow-md rounded-3xl p-4 border border-[${separatorColor}] transition-all hover:shadow-lg`}
+          className={`relative bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl p-4 border-2 border-[${separatorColor}] transition-all hover:shadow-2xl`}
         >
           {/* Utilisation de la couleur d'accent pour l'icône */}
           <Search
@@ -145,30 +138,31 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           />
           <input
             type="text"
-            placeholder="Rechercher une activité..."
+            placeholder="Rechercher une activité, une randonnée, une aventure..."
             // Utilisation de la couleur d'accent pour le focus
-            className={`w-full pl-14 pr-4 py-3 text-lg rounded-2xl outline-none focus:ring-2 focus:ring-[${accentColor}] transition`}
+            className={`w-full pl-14 pr-4 py-4 text-lg rounded-2xl outline-none focus:ring-3 focus:ring-[${accentColor}]/50 transition bg-white/90`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
+
       {/* CATEGORY FILTERS */}
       <div className="flex flex-wrap justify-center gap-3 px-4 mb-16">
         <button
           onClick={() => setActiveCategory("all")}
-          className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold text-sm transition-all shadow-sm border
+          className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all shadow-md border-2
             ${
               activeCategory === "all"
                 ? // Utilisation du dégradé du thème pour l'état actif
                   `bg-gradient-to-r ${defaultGradient} text-white border-transparent shadow-lg`
                 : // Utilisation de la couleur de bordure du thème pour l'état inactif
-                  `bg-white text-gray-700 border-[${separatorColor}] hover:bg-gray-100`
-            } hover:scale-105`}
+                  `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+            } hover:scale-105 hover:shadow-lg`}
         >
           <Compass className="w-5 h-5" />
           Toutes
-          <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+          <span className="px-2.5 py-1 rounded-full text-xs bg-white/20 text-white">
             {categories.length}
           </span>
         </button>
@@ -177,24 +171,25 @@ const ActivitesLoisirsFAQ: React.FC = () => {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.name)}
-            className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium text-sm transition-all shadow-sm border
+            className={`flex items-center gap-2 px-5 py-3 rounded-full font-medium text-sm transition-all shadow-md border-2
               ${
                 activeCategory === cat.name
                   ? // Si cat.color est défini, on l'utilise, sinon le dégradé du thème
                     `bg-gradient-to-r ${
                       cat.color || defaultGradient
                     } text-white border-transparent shadow-lg`
-                  : `bg-white text-gray-700 border-[${separatorColor}] hover:bg-gray-100`
-              } hover:scale-105`}
+                  : `bg-white text-gray-800 border-[${separatorColor}] hover:bg-gray-50`
+              } hover:scale-105 hover:shadow-lg`}
           >
             {iconMap[cat.icon] ?? <Star className="w-5 h-5" />}
             {cat.name}
-            <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+            <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
               {getCategoryCount(cat.name)}
             </span>
           </button>
         ))}
       </div>
+
       {/* LIST */}
       <div className="max-w-6xl mx-auto px-4 pb-20">
         {filtered.length === 0 && (
@@ -215,48 +210,57 @@ const ActivitesLoisirsFAQ: React.FC = () => {
             <div
               key={faq.id}
               // Utilisation de la couleur de bordure du thème
-              className={`bg-white rounded-2xl shadow-md border border-[${separatorColor}] overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl`}
+              className={`bg-white rounded-2xl shadow-lg border border-[${separatorColor}] overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl group`}
             >
-              <div className="relative">
+              <div className="relative overflow-hidden">
                 <img
                   src={faq.image}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                   alt={faq.name}
                 />
-                <div className="absolute bottom-4 left-4 px-3 py-1 bg-black/40 backdrop-blur-md text-white rounded-lg text-sm flex items-center gap-2">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 px-4 py-2 bg-black/60 backdrop-blur-md text-white rounded-lg text-sm flex items-center gap-2 font-medium">
                   {iconMap[faq.icon] ?? <Star className="w-4 h-4" />} {faq.name}
                 </div>
               </div>
 
-              <div className="p-5">
+              <div className="p-6">
                 {faq.highlight && (
                   // Utilisation de la couleur secondary-text pour les faits saillants
                   <p
-                    className={`text-sm text-[${secondaryAccentColor}] font-semibold mb-2`}
+                    className={`text-sm text-[${secondaryAccentColor}] font-bold mb-3 uppercase tracking-wide`}
                   >
                     {faq.highlight}
                   </p>
                 )}
 
                 {faq.stats && (
-                  <div className="flex flex-wrap gap-3 text-sm text-gray-700 mb-4">
-                    <span>👥 {faq.stats.participants}</span>
-                    <span>⏱ {faq.stats.duration}</span>
-                    <span>⭐ {faq.stats.level}</span>
+                  <div className="flex flex-wrap gap-3 text-sm text-gray-700 mb-4 bg-gray-50 p-3 rounded-lg">
+                    <span className="flex items-center gap-1">
+                      👥 {faq.stats.participants}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      ⏱ {faq.stats.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      ⭐ {faq.stats.level}
+                    </span>
                   </div>
                 )}
 
                 {openFAQ === faq.id && (
-                  <div className="mb-4 transition-all duration-300">
-                    <p className="text-gray-700 mb-3">{faq.description}</p>
+                  <div className="mb-4 transition-all duration-300 animate-fadeIn">
+                    <p className="text-gray-700 mb-4 leading-relaxed">
+                      {faq.description}
+                    </p>
 
                     {faq.features && (
-                      <ul className="grid grid-cols-2 gap-2 text-sm">
+                      <ul className="grid grid-cols-2 gap-3 text-sm">
                         {faq.features.map((f, i) => (
                           <li key={i} className="flex items-center gap-2">
                             {/* Utilisation de la couleur d'accent pour les puces */}
-                            <Star className={`w-4 h-4 text-[${accentColor}]`} />{" "}
-                            {f}
+                            <Star className={`w-4 h-4 text-[${accentColor}]`} />
+                            <span className="text-gray-600">{f}</span>
                           </li>
                         ))}
                       </ul>
@@ -267,7 +271,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                 <button
                   onClick={() => toggleFAQ(faq.id)}
                   // Utilisation de la couleur d'accent pour le bouton Voir plus/Réduire
-                  className={`flex items-center gap-2 text-[${accentColor}] font-semibold transition hover:text-[${THEME_COLORS["primary-dark"]}]`}
+                  className={`flex items-center gap-2 text-[${accentColor}] font-bold transition hover:text-[${THEME_COLORS["primary-dark"]}] hover:gap-3`}
                 >
                   {openFAQ === faq.id ? (
                     <>
@@ -275,7 +279,7 @@ const ActivitesLoisirsFAQ: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      Voir plus <ChevronDown className="w-5 h-5" />
+                      Voir plus de détails <ChevronDown className="w-5 h-5" />
                     </>
                   )}
                 </button>

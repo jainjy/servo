@@ -434,7 +434,6 @@ const VoyagesAeriens: React.FC = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       {/* Navigation */}
-      <TourismNavigation />
 
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8">
@@ -447,6 +446,7 @@ const VoyagesAeriens: React.FC = () => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white">
+            <TourismNavigation />
             <h1 className="text-5xl font-bold mb-4">Explorer le Monde</h1>
             <p className="text-xl max-w-2xl mx-auto">
               Découvrez des destinations incroyables avec nos vols exclusifs
