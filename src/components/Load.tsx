@@ -7,8 +7,8 @@ interface LoadingScreenProps {
   minimumLoadingTime?: number; // Temps minimum d'affichage en ms
 }
 
-export default function LoadingScreen({ 
-  onLoadingComplete, 
+export default function LoadingScreen({
+  onLoadingComplete,
   minimumLoadingTime = 3500 // Augmenté pour laisser le temps de lire
 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
@@ -18,6 +18,20 @@ export default function LoadingScreen({
   const [showServoZoom, setShowServoZoom] = useState(false);
   const [typingComplete, setTypingComplete] = useState(false);
   const [forceComplete, setForceComplete] = useState(false);
+
+  useEffect(() => {
+    const hasAnimationPlayed = sessionStorage.getItem('VisitAnimation');
+    if (!hasAnimationPlayed) {
+      // Marquer l'animation comme jouée pour cet onglet uniquement
+      sessionStorage.setItem('VisitAnimation', 'true');
+    }
+  }, []);
+
+  
+  const hasAnimationPlayed = sessionStorage.getItem('VisitAnimation');
+  if (hasAnimationPlayed) {
+    return null; // Ne rien afficher si l'animation a déjà été jouée dans cet onglet
+  }
 
   // Couleurs depuis la palette fournie
   const colors = {
@@ -73,7 +87,7 @@ export default function LoadingScreen({
 
       // Logique de progression basée sur la complétion du texte
       let calculatedProgress = 0;
-      
+
       if (!typingComplete) {
         // Pendant la dactylographie, progression lente jusqu'à 70%
         calculatedProgress = Math.min(70, (elapsedTime / minimumLoadingTime) * 70);
@@ -91,7 +105,7 @@ export default function LoadingScreen({
       setProgress(Math.min(100, calculatedProgress));
 
       // Conditions pour compléter le chargement
-      const shouldComplete = forceComplete || 
+      const shouldComplete = forceComplete ||
         (typingComplete && minTimeReached && elapsedTime > minimumLoadingTime + 1000);
 
       if (!shouldComplete) {
@@ -99,11 +113,11 @@ export default function LoadingScreen({
       } else if (!hasCompleted) {
         // Marquer comme complété
         hasCompleted = true;
-        
+
         // Phase 1: Afficher l'écran de zoom SERVO
         setTimeout(() => {
           setShowServoZoom(true);
-          
+
           // Phase 2: Disparaître avec le zoom
           setTimeout(() => {
             setStartFadeOut(true);
@@ -133,7 +147,7 @@ export default function LoadingScreen({
       const timer = setTimeout(() => {
         setForceComplete(true);
       }, 2000); // Attendre 2 secondes supplémentaires après la fin du texte
-      
+
       return () => clearTimeout(timer);
     }
   }, [typingComplete, progress]);
@@ -146,16 +160,16 @@ export default function LoadingScreen({
       transition-opacity duration-500
       ${startFadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'}
     `}
-    style={{
-      background: `linear-gradient(135deg, ${colors.darkBg} 0%, #2a2f20 100%)`
-    }}
+      style={{
+        background: `linear-gradient(135deg, ${colors.darkBg} 0%, #2a2f20 100%)`
+      }}
     >
       {!showServoZoom ? (
         <div className="relative w-full max-w-4xl px-6">
-          
+
           {/* Texte de description avec typing animation - PLACÉ EN HAUT */}
           <div className="mb-12 px-4 w-full max-w-4xl">
-            <div 
+            <div
               className="rounded-lg p-8 backdrop-blur-sm h-[400px] overflow-hidden"
               style={{
                 background: 'transparent',
@@ -163,7 +177,7 @@ export default function LoadingScreen({
               }}
             >
               <div className="h-full overflow-y-auto pr-4">
-                <div 
+                <div
                   className="text-2xl text-justify leading-relaxed font-sans"
                   style={{ color: colors.logoAccent }}
                 >
@@ -187,7 +201,7 @@ export default function LoadingScreen({
                         whiteSpace: 'pre-wrap',
                         wordWrap: 'break-word',
                         letterSpacing: '0.02em',
-                        
+
                         color: colors.logoAccent
                       }}
                     />
@@ -202,13 +216,13 @@ export default function LoadingScreen({
           </div>
 
           {/* Ligne de progression */}
-          <div 
+          <div
             className="relative h-[2px] w-full overflow-hidden rounded-full"
             style={{ backgroundColor: colors.separators }}
           >
-            <div 
+            <div
               className="absolute top-0 left-0 h-full transition-all duration-300 ease-out"
-              style={{ 
+              style={{
                 width: `${progress}%`,
                 background: `linear-gradient(to right, ${colors.logoAccent}, ${colors.sruvol})`
               }}
@@ -220,32 +234,32 @@ export default function LoadingScreen({
             <div className="flex items-center space-x-2">
               {/* Logo KPR-like */}
               <div className="relative">
-                <div 
+                <div
                   className="w-6 h-6 border-2 rounded-full animate-pulse"
                   style={{ borderColor: colors.sruvol }}
                 />
-                <div 
+                <div
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
                   style={{ backgroundColor: colors.sruvol }}
                 />
               </div>
-              
-              <span 
+
+              <span
                 className="font-medium text-lg tracking-wider"
                 style={{ color: colors.logoAccent }}
               >
                 SER<span style={{ color: colors.sruvol }}>VO</span>
               </span>
             </div>
-            
+
             <div className="text-right">
-              <div 
+              <div
                 className="text-sm tracking-wider"
                 style={{ color: colors.logoAccent }}
               >
                 CHARGEMENT{dots}
               </div>
-              <div 
+              <div
                 className="font-mono text-xl font-bold tracking-tighter"
                 style={{ color: colors.premium }}
               >
@@ -255,29 +269,29 @@ export default function LoadingScreen({
           </div>
 
           {/* Éléments décoratifs */}
-          <div 
+          <div
             className="absolute -top-20 -left-20 w-40 h-40 rounded-full blur-3xl"
             style={{ backgroundColor: `${colors.logoAccent}30` }}
           />
-          <div 
+          <div
             className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-3xl"
             style={{ backgroundColor: `${colors.sruvol}30` }}
           />
-          <div 
+          <div
             className="absolute top-1/2 right-1/4 w-32 h-32 rounded-full blur-3xl"
             style={{ backgroundColor: `${colors.premium}20` }}
           />
-          
+
           {/* Particules flottantes */}
-          <div 
+          <div
             className="absolute top-1/4 left-1/4 w-1.5 h-1.5 rounded-full animate-pulse"
             style={{ backgroundColor: colors.logoAccent }}
           />
-          <div 
+          <div
             className="absolute top-1/3 right-1/3 w-1.5 h-1.5 rounded-full animate-pulse delay-300"
             style={{ backgroundColor: colors.sruvol }}
           />
-          <div 
+          <div
             className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 rounded-full animate-pulse delay-700"
             style={{ backgroundColor: colors.premium }}
           />
@@ -288,9 +302,9 @@ export default function LoadingScreen({
           {/* Copie du contenu principal pour l'effet de loupe */}
           <div className="servo-zoom-text-window">
             <div className="servo-zoom-content">
-              <div 
+              <div
                 className="servo-zoom-text"
-               
+
               >
                 SER<span style={{ color: colors.sruvol }}>VO</span>
               </div>
@@ -302,7 +316,7 @@ export default function LoadingScreen({
       {/* Copyright - visible seulement en phase 1 */}
       {!showServoZoom && (
         <div className="absolute bottom-8 text-center">
-          <p 
+          <p
             className="azonix text-xs tracking-widest"
             style={{ color: colors.logoAccent }}
           >
@@ -310,7 +324,7 @@ export default function LoadingScreen({
           </p>
         </div>
       )}
-    
+
     </div>
   )
 }

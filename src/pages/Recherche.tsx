@@ -14,6 +14,7 @@ import { useCart } from "@/components/contexts/CartContext";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 import { AutoSuggestInput } from "@/components/AutoSuggestInput";
+import ServoLogo from "@/components/components/ServoLogo";
 
 interface SearchItem {
   id: string | number;
@@ -72,7 +73,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const prevStageRef = useRef<Stage>("idle");
 
   const [historyOpen, setHistoryOpen] = useState(false);
- const [searchHistory, setSearchHistory] = useState<Array<{ q: string; date: number }>>([]);
+  const [searchHistory, setSearchHistory] = useState<Array<{ q: string; date: number }>>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const HISTORY_KEY = "hero-search-history";
   const inputRef = useRef<HTMLInputElement>(null);
@@ -218,64 +219,64 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
   // Gestion de l'historique
 
-// Dans handleSearch, ajouter l'enregistrement de l'activité :
-    const handleSearch = async (searchQuery?: string) => {
-      const q = (searchQuery || query).trim();
-      
-      if (!q) {
-        setResults([]);
-        setFilteredResults([]);
-        setStage("results");
-        navigate('/recherche', { replace: true });
-        return;
-      }
-      
-      // Ajouter à l'historique local
-      addHistory(q);
-      
-      // Enregistrer dans l'historique serveur (asynchrone, ne pas attendre)
-      if (isAuthenticated) {
-        try {
-          await api.post('/suggestions/log', {
-            query: q,
-            userId: localStorage.getItem("user-id") || undefined,
-            resultsCount: 0 // Sera mis à jour après
-          });
-        } catch (error) {
-          console.error("Erreur enregistrement recherche:", error);
-        }
-      }
-      
-      // Mettre à jour la query affichée
-      if (searchQuery) {
-        setQuery(searchQuery);
-      }
-      
-      await runSearch(q);
-    };
+  // Dans handleSearch, ajouter l'enregistrement de l'activité :
+  const handleSearch = async (searchQuery?: string) => {
+    const q = (searchQuery || query).trim();
 
-// Simplifier addHistory :
-    const addHistory = (q: string) => {
-      if (!q) return;
-      setSearchHistory((prev) => {
-        const withoutDup = prev.filter((i) => i.q.toLowerCase() !== q.toLowerCase());
-        const next = [{ q, date: Date.now() }, ...withoutDup].slice(0, 50);
-        saveHistory(next);
-        return next;
-      });
-    };
+    if (!q) {
+      setResults([]);
+      setFilteredResults([]);
+      setStage("results");
+      navigate('/recherche', { replace: true });
+      return;
+    }
 
-// Mettre à jour loadHistory et saveHistory pour enlever correctedFrom
-    const loadHistory = () => {
+    // Ajouter à l'historique local
+    addHistory(q);
+
+    // Enregistrer dans l'historique serveur (asynchrone, ne pas attendre)
+    if (isAuthenticated) {
       try {
-        const raw = localStorage.getItem(HISTORY_KEY);
-        if (!raw) return [] as Array<{ q: string; date: number }>;
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [] as Array<{ q: string; date: number }>;
+        await api.post('/suggestions/log', {
+          query: q,
+          userId: localStorage.getItem("user-id") || undefined,
+          resultsCount: 0 // Sera mis à jour après
+        });
+      } catch (error) {
+        console.error("Erreur enregistrement recherche:", error);
       }
-    };
+    }
+
+    // Mettre à jour la query affichée
+    if (searchQuery) {
+      setQuery(searchQuery);
+    }
+
+    await runSearch(q);
+  };
+
+  // Simplifier addHistory :
+  const addHistory = (q: string) => {
+    if (!q) return;
+    setSearchHistory((prev) => {
+      const withoutDup = prev.filter((i) => i.q.toLowerCase() !== q.toLowerCase());
+      const next = [{ q, date: Date.now() }, ...withoutDup].slice(0, 50);
+      saveHistory(next);
+      return next;
+    });
+  };
+
+  // Mettre à jour loadHistory et saveHistory pour enlever correctedFrom
+  const loadHistory = () => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) return [] as Array<{ q: string; date: number }>;
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [] as Array<{ q: string; date: number }>;
+    }
+  };
 
   const saveHistory = (list: Array<{ q: string; date: number }>) => {
     try {
@@ -745,12 +746,8 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           {/* Barre de recherche normale (non fixe) */}
           <div className="mb-6">
             <div className="p-4 flex items-center gap-3">
-              <div className="p-1 lg:block hidden rounded-full bg-white border-black border-2">
-                <img
-                  src={logo}
-                  alt="Servo Logo"
-                  className="w-10 h-10 rounded-full"
-                />
+              <div className="p-1 lg:block hidden">
+                <ServoLogo />
               </div>
 
               <div className="relative bg-white rounded-lg flex-1">
@@ -768,7 +765,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                 <Button
                   onClick={() => handleSearch()}
                   disabled={isLoading}
-                  className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 h-10 min-w-24 bg-black/90 hover:bg-black overflow-hidden text-sm"
+                  className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 h-10 min-w-24 bg-logo hover:bg-primary-dark overflow-hidden text-sm"
                 >
                   {runnerVisible ? (
                     <span className="inline-flex items-center">
@@ -795,13 +792,13 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <div className="w-10 h-full bg-slate-900 rounded-sm grid place-items-center"> 
+                    <div className="w-10 h-full bg-slate-900 rounded-sm grid place-items-center">
                       <Search className="h-10 w-10 z-50 rounded-sm text-slate-100" />
                     </div>
                   )}
                 </Button>
               </div>
-              
+
               <Button
                 onClick={() => setHistoryOpen(true)}
                 variant="ghost"
@@ -822,56 +819,56 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
 
           {/* Historique latéral */}
           {historyOpen && (
-  <>
-    <div
-      className="fixed inset-0 bg-black/10 w-screen h-screen overflow-hidden backdrop-blur-sm z-50"
-      onClick={() => setHistoryOpen(false)}
-    />
-    <aside className="absolute z-50 h-96 w-11/12 lg:w-1/2 bg-white border border-gray-200 rounded-xl lg:rounded-b-xl left-1/2 top-0 transform -translate-x-1/2">
-      <div className="h-full flex flex-col">
-        <div className="px-4 py-3 border-b flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-gray-700" />
-            <span className="text-sm font-semibold text-gray-800">Historique des recherches</span>
-          </div>
-          <button
-            className="text-xs text-red-600 hover:underline"
-            onClick={() => { setSearchHistory([]); saveHistory([]); }}
-          >
-            Vider
-          </button>
-        </div>
-        <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
-          {searchHistory.length === 0 ? (
-            <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
-          ) : (
-            <ul className="divide-y">
-              {searchHistory.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
-                  onClick={() => {
-                    setQuery(item.q);
-                    setHistoryOpen(false);
-                    setStage('loading');
-                    runSearch(item.q);
-                  }}
-                >
-                  <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                    {item.q}
+            <>
+              <div
+                className="fixed inset-0 bg-black/10 w-screen h-screen overflow-hidden backdrop-blur-sm z-50"
+                onClick={() => setHistoryOpen(false)}
+              />
+              <aside className="absolute z-50 h-96 w-11/12 lg:w-1/2 bg-white border border-gray-200 rounded-xl lg:rounded-b-xl left-1/2 top-0 transform -translate-x-1/2">
+                <div className="h-full flex flex-col">
+                  <div className="px-4 py-3 border-b flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <History className="h-4 w-4 text-gray-700" />
+                      <span className="text-sm font-semibold text-gray-800">Historique des recherches</span>
+                    </div>
+                    <button
+                      className="text-xs text-red-600 hover:underline"
+                      onClick={() => { setSearchHistory([]); saveHistory([]); }}
+                    >
+                      Vider
+                    </button>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(item.date).toLocaleString()}
+                  <div className="flex-1 grid lg:grid-cols-2 grid-cols-1 overflow-y-auto">
+                    {searchHistory.length === 0 ? (
+                      <div className="p-4 text-sm text-gray-500">Aucun historique.</div>
+                    ) : (
+                      <ul className="divide-y">
+                        {searchHistory.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="p-3 hover:bg-gray-50 hover:rounded-lg cursor-pointer"
+                            onClick={() => {
+                              setQuery(item.q);
+                              setHistoryOpen(false);
+                              setStage('loading');
+                              runSearch(item.q);
+                            }}
+                          >
+                            <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                              {item.q}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(item.date).toLocaleString()}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                </li>
-              ))}
-            </ul>
+                </div>
+              </aside>
+            </>
           )}
-        </div>
-      </div>
-    </aside>
-  </>
-)}
 
           {/* Contenu des résultats */}
           <div className="max-w-7xl mx-auto">

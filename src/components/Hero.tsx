@@ -24,8 +24,52 @@ const colors = {
 // URL de l'image en dessin
 const sketchImageUrl = "/image.png";
 
-// Fonction pour générer un masque SVG polygonal organique avec pourcentages
-const generateBlobPolygon = (centerX: number, centerY: number, radius: number, shapePoints: number[], viewportWidth: number, viewportHeight: number) => {
+// Fonction pour générer un masque SVG avec des courbes de Bézier pour un blob organique
+const generateBlobPath = (centerX: number, centerY: number, radius: number, shapePoints: number[], viewportWidth: number, viewportHeight: number) => {
+  if (shapePoints.length < 4) return '';
+  
+  const numPoints = shapePoints.length;
+  const points: {x: number, y: number}[] = [];
+  
+  // Générer les points de base
+  for (let i = 0; i < numPoints; i++) {
+    const angle = (i / numPoints) * Math.PI * 2;
+    const distance = radius * shapePoints[i];
+    const x = centerX + Math.cos(angle) * distance;
+    const y = centerY + Math.sin(angle) * distance;
+    points.push({ x, y });
+  }
+  
+  // Convertir en chemin SVG avec courbes de Bézier
+  const d = points.reduce((acc, point, i, arr) => {
+    const x = (point.x / viewportWidth) * 100;
+    const y = (point.y / viewportHeight) * 100;
+    
+    if (i === 0) {
+      return `M ${x}% ${y}%`;
+    }
+    
+    const prev = arr[i - 1];
+    const prevX = (prev.x / viewportWidth) * 100;
+    const prevY = (prev.y / viewportHeight) * 100;
+    const next = arr[(i + 1) % arr.length];
+    const nextX = (next.x / viewportWidth) * 100;
+    const nextY = (next.y / viewportHeight) * 100;
+    
+    // Point de contrôle pour une courbe lisse
+    const cp1x = prevX + (x - prevX) / 2;
+    const cp1y = prevY + (y - prevY) / 2;
+    const cp2x = x + (nextX - x) / 2;
+    const cp2y = y + (nextY - y) / 2;
+    
+    return `${acc} C ${cp1x}% ${cp1y}%, ${cp2x}% ${cp2y}%, ${x}% ${y}%`;
+  }, '');
+  
+  return `${d} Z`;
+};
+
+// Fonction pour générer un masque clip-path avec des formes arrondies
+const generateBlobClipPath = (centerX: number, centerY: number, radius: number, shapePoints: number[], viewportWidth: number, viewportHeight: number) => {
   if (shapePoints.length === 0) return '';
   
   const points = shapePoints.map((scale, idx) => {
@@ -57,6 +101,14 @@ const Hero = () => {
   const [mouseInactive, setMouseInactive] = useState(false);
   const [liquidWave, setLiquidWave] = useState(0);
   const [blobShape, setBlobShape] = useState<number[]>([]);
+  const [waterDroplets, setWaterDroplets] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    opacity: number;
+    speed: number;
+  }>>([]);
   const mouseInactiveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const waveAnimationRef = useRef<number | null>(null);
   
@@ -64,6 +116,7 @@ const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const sketchCanvasRef = useRef<HTMLCanvasElement>(null);
+  const dropletIdRef = useRef(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -90,11 +143,11 @@ const Hero = () => {
       return { x: newX, y: newY };
     });
     
-    // Animation du rayon du blob - réduit à 250px max
-    if (isRevealing && revealPosition.radius < 250) {
+    // Animation du rayon du blob - réduit à 150px max (au lieu de 250px)
+    if (isRevealing && revealPosition.radius < 150) {
       setRevealPosition(prev => ({
         ...prev,
-        radius: prev.radius + (250 - prev.radius) * 0.12
+        radius: prev.radius + (150 - prev.radius) * 0.12
       }));
     } else if (!isRevealing && revealPosition.radius > 0) {
       setRevealPosition(prev => ({
@@ -118,10 +171,62 @@ const Hero = () => {
       color: Math.random() > 0.7 ? colors.sruvol : colors.logoAccent,
     }));
     
-    // Initialiser la forme du blob avec des valeurs aléatoires
-    const shapePoints = Array.from({ length: 12 }, () => 0.8 + Math.random() * 0.4);
+    // Initialiser la forme du blob avec des formes plus organiques et arrondies
+    const shapePoints = Array.from({ length: 16 }, () => {
+      // Créer des variations pour des formes arrondies de gouttes d'eau
+      const base = 0.7;
+      const variation = 0.4; // Réduit pour des formes plus douces
+      return base + Math.random() * variation;
+    });
     setBlobShape(shapePoints);
   }, []);
+
+  // Animation des gouttelettes d'eau
+  useEffect(() => {
+    if (!isRevealing || waterDroplets.length === 0) return;
+
+    const interval = setInterval(() => {
+      setWaterDroplets(prev => 
+        prev.map(droplet => ({
+          ...droplet,
+          opacity: Math.max(0, droplet.opacity - 0.01),
+          y: droplet.y - droplet.speed * 0.5,
+        })).filter(droplet => droplet.opacity > 0)
+      );
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [isRevealing, waterDroplets.length]);
+
+  // Créer de nouvelles gouttelettes d'eau
+  useEffect(() => {
+    if (!isRevealing || blobShape.length === 0) return;
+
+    const createDroplet = () => {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = revealPosition.radius * (0.8 + Math.random() * 0.4);
+      const x = revealPosition.x + Math.cos(angle) * distance;
+      const y = revealPosition.y + Math.sin(angle) * distance;
+      
+      dropletIdRef.current += 1;
+      return {
+        id: dropletIdRef.current,
+        x,
+        y,
+        size: Math.random() * 3 + 1,
+        opacity: 0.6 + Math.random() * 0.4,
+        speed: 0.2 + Math.random() * 0.3,
+      };
+    };
+
+    const interval = setInterval(() => {
+      if (Math.random() > 0.8) { // 20% de chance de créer une gouttelette
+        setWaterDroplets(prev => [...prev, createDroplet()]);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [isRevealing, blobShape, revealPosition]);
 
   // Préchargement de l'image de dessin
   useEffect(() => {
@@ -171,7 +276,11 @@ const Hero = () => {
     if (isRevealing && blobShape.length > 0) {
       setBlobShape(prev => 
         prev.map((_, idx) => {
-          return 0.75 + Math.sin(liquidWave * 0.03 + idx * Math.PI / 6) * 0.35;
+          // Animation plus douce pour des bords arrondis
+          const waveOffset = liquidWave * 0.02;
+          const pointOffset = idx * Math.PI / 8;
+          const wave = Math.sin(waveOffset + pointOffset) * 0.2;
+          return 0.7 + wave;
         })
       );
     }
@@ -291,7 +400,7 @@ const Hero = () => {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
     
-    // Mettre à jour la position du blob avec l'effet liquide
+    // Mettre à jour la position du blob
     setRevealPosition(prev => ({
       x: e.clientX,
       y: e.clientY,
@@ -305,7 +414,7 @@ const Hero = () => {
     
     let waveProgress = 0;
     const waveAnimate = () => {
-      waveProgress += 0.15;
+      waveProgress += 0.1; // Plus lent
       setLiquidWave(waveProgress % 100);
       
       if (isRevealing) {
@@ -318,6 +427,7 @@ const Hero = () => {
     mouseInactiveTimeoutRef.current = setTimeout(() => {
       setMouseInactive(true);
       setIsRevealing(false);
+      setWaterDroplets([]);
       if (waveAnimationRef.current) {
         cancelAnimationFrame(waveAnimationRef.current);
       }
@@ -329,6 +439,7 @@ const Hero = () => {
     setLightPosition({ x: 50, y: 50, opacity: 0 });
     setIsRevealing(false);
     setMouseInactive(false);
+    setWaterDroplets([]);
     if (mouseInactiveTimeoutRef.current) {
       clearTimeout(mouseInactiveTimeoutRef.current);
     }
@@ -352,28 +463,6 @@ const Hero = () => {
 
   return (
     <>
-      {/* Filtre SVG pour l'effet liquide */}
-      <svg style={{ display: 'none' }}>
-        <defs>
-          <filter id="liquidWave">
-            <feTurbulence 
-              type="fractalNoise" 
-              baseFrequency={`0.02`} 
-              numOctaves="4" 
-              result="noise"
-              seed={liquidWave}
-            />
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="noise" 
-              scale={`${isRevealing ? 50 : 0}`}
-              xChannelSelector="R" 
-              yChannelSelector="G"
-            />
-          </filter>
-        </defs>
-      </svg>
-
       <section
         id="hero"
         ref={heroRef}
@@ -417,14 +506,16 @@ const Hero = () => {
             }}
           />
 
-          {/* Image de dessin avec masque de révélation liquide organique */}
+          {/* Image de dessin avec masque de révélation organique */}
           <div 
             className="absolute top-0 left-0 w-full h-full transition-opacity duration-500"
             style={{
               opacity: isRevealing ? 1 : 0,
-              clipPath: generateBlobPolygon(revealPosition.x, revealPosition.y, Math.max(0, revealPosition.radius), blobShape, window.innerWidth, window.innerHeight),
+              clipPath: generateBlobClipPath(revealPosition.x, revealPosition.y, Math.max(0, revealPosition.radius), blobShape, window.innerWidth, window.innerHeight),
               transition: 'opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
               pointerEvents: isRevealing ? 'auto' : 'none',
+              // Application de la transformation 3D à la deuxième image (sans déformation)
+              transform: `rotateX(${currentRotation.x * 0.5}deg) rotateY(${currentRotation.y * 0.5}deg) scale(1.1)`,
             }}
           >
             <img
@@ -434,31 +525,76 @@ const Hero = () => {
               style={{
                 filter: 'grayscale(100%) brightness(1.5) contrast(1.2)',
                 mixBlendMode: 'multiply',
-                opacity: 0.9
+                opacity: 0.9,
               }}
             />
           </div>
 
-          {/* Effet de bordure liquide animée avec forme organique */}
+          {/* Effet de bordure arrondie avec gouttelettes */}
           {isRevealing && (
-            <svg
-              className="absolute pointer-events-none overflow-visible"
-              style={{
-                left: revealPosition.x - Math.max(0, revealPosition.radius) - 20,
-                top: revealPosition.y - Math.max(0, revealPosition.radius) - 20,
-                width: Math.max(0, revealPosition.radius) * 2 + 40,
-                height: Math.max(0, revealPosition.radius) * 2 + 40,
-              }}
-            >
-              <g>
+            <>
+              {/* Gouttelettes d'eau */}
+              <svg
+                className="absolute pointer-events-none overflow-visible z-10"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+              >
+                {waterDroplets.map(droplet => (
+                  <circle
+                    key={droplet.id}
+                    cx={droplet.x}
+                    cy={droplet.y}
+                    r={droplet.size}
+                    fill="rgba(255, 255, 255, 0.7)"
+                    style={{
+                      opacity: droplet.opacity,
+                      filter: 'blur(0.5px)',
+                    }}
+                  />
+                ))}
+              </svg>
+
+              {/* Bordure du blob avec effet d'eau */}
+              <svg
+                className="absolute pointer-events-none overflow-visible"
+                style={{
+                  left: revealPosition.x - Math.max(0, revealPosition.radius) - 10,
+                  top: revealPosition.y - Math.max(0, revealPosition.radius) - 10,
+                  width: Math.max(0, revealPosition.radius) * 2 + 20,
+                  height: Math.max(0, revealPosition.radius) * 2 + 20,
+                }}
+              >
+                <defs>
+                  <linearGradient id="blobBorderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(107, 142, 35, 0.8)" />
+                    <stop offset="100%" stopColor="rgba(255, 255, 255, 0.4)" />
+                  </linearGradient>
+                </defs>
+                
+                <path
+                  d={generateBlobPath(
+                    Math.max(0, revealPosition.radius) + 10,
+                    Math.max(0, revealPosition.radius) + 10,
+                    Math.max(0, revealPosition.radius),
+                    blobShape,
+                    Math.max(0, revealPosition.radius) * 2 + 20,
+                    Math.max(0, revealPosition.radius) * 2 + 20
+                  )}
+                  fill="none"
+                  stroke="url(#blobBorderGradient)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                
+                {/* Points de goutte d'eau sur les bords */}
                 {blobShape.map((scale, idx) => {
                   const angle = (idx / blobShape.length) * Math.PI * 2;
-                  const nextAngle = ((idx + 1) / blobShape.length) * Math.PI * 2;
                   const distance = Math.max(0, revealPosition.radius) * scale;
-                  const nextDistance = Math.max(0, revealPosition.radius) * blobShape[(idx + 1) % blobShape.length];
-                  
-                  const x = Math.max(0, revealPosition.radius) + Math.cos(angle) * distance + 20;
-                  const y = Math.max(0, revealPosition.radius) + Math.sin(angle) * distance + 20;
+                  const x = Math.max(0, revealPosition.radius) + 10 + Math.cos(angle) * distance;
+                  const y = Math.max(0, revealPosition.radius) + 10 + Math.sin(angle) * distance;
                   
                   return (
                     <circle
@@ -466,15 +602,15 @@ const Hero = () => {
                       cx={x}
                       cy={y}
                       r="3"
-                      fill={`rgba(107, 142, 35, ${0.5 + Math.sin(liquidWave * Math.PI / 100) * 0.3})`}
+                      fill="rgba(255, 255, 255, 0.9)"
                       style={{
-                        filter: `blur(${1 + Math.sin(liquidWave * Math.PI / 100)}px)`,
+                        filter: 'blur(0.5px)',
                       }}
                     />
                   );
                 })}
-              </g>
-            </svg>
+              </svg>
+            </>
           )}
           
           {/* Overlay gradient */}

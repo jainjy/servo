@@ -1579,9 +1579,9 @@ const Header = () => {
                 onOpenChange={handlePopoverOpenChange}
               >
                 <PopoverTrigger asChild>
-                  <Button className="h-9 hover:bg-slate-800 bg-slate-900">
+                  {/* <Button className="h-9 hover:bg-slate-800 bg-slate-900">
                     <Menu className="text-white" />
-                  </Button>
+                  </Button> */}
                 </PopoverTrigger>
                 <PopoverContent
                   side="bottom"
