@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,8 @@ import {
   Calendar,
   Euro,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import gsap from "gsap";
 
 const GestionImmobilier = () => {
   const [activeService, setActiveService] = useState("gestion");
@@ -62,6 +64,11 @@ const GestionImmobilier = () => {
     sujet: "",
     message: "",
   });
+
+  const heroRef = useRef(null);
+  const statsRef = useRef(null);
+  const servicesRef = useRef(null);
+  const ctaRef = useRef(null);
 
   const services = [
     {
@@ -143,6 +150,82 @@ const GestionImmobilier = () => {
     "Autre",
   ];
 
+  // Animations GSAP
+  useEffect(() => {
+    // Animation Hero
+    gsap.fromTo(
+      heroRef.current,
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+    );
+
+    // Animation Stats avec stagger
+    gsap.fromTo(
+      ".stat-item",
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: statsRef.current,
+          start: "top 80%",
+        },
+      }
+    );
+
+    // Animation Services
+    gsap.fromTo(
+      ".service-card",
+      { opacity: 0, scale: 0.9 },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: servicesRef.current,
+          start: "top 70%",
+        },
+      }
+    );
+
+    // Animation CTA
+    gsap.fromTo(
+      ".cta-content",
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ctaRef.current,
+          start: "top 80%",
+        },
+      }
+    );
+
+    // Animation des titres
+    gsap.fromTo(
+      ".title-animate",
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ".title-animate",
+          start: "top 85%",
+        },
+      }
+    );
+  }, []);
+
   const handleServiceClick = (serviceId) => {
     setSelectedService(serviceId);
     setIsModalOpen(true);
@@ -168,15 +251,7 @@ const GestionImmobilier = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Debug logs
-    console.log("État de l'authentification:", {
-      user,
-      isAuthenticated: Boolean(user),
-    });
-    console.log("Token stocké:", localStorage.getItem("auth-token"));
-
     if (!user || !isAuthenticated) {
-      console.error("Utilisateur non authentifié:", { user, isAuthenticated });
       toast({
         title: "Erreur d'authentification",
         description: "Vous devez être connecté pour faire une demande de devis",
@@ -185,10 +260,8 @@ const GestionImmobilier = () => {
       return;
     }
 
-    // Vérifier le token
     const token = localStorage.getItem("auth-token");
     if (!token) {
-      console.error("Token manquant");
       toast({
         title: "Erreur de session",
         description: "Votre session a expiré, veuillez vous reconnecter",
@@ -199,13 +272,13 @@ const GestionImmobilier = () => {
 
     try {
       const demandeData = {
-        serviceId: parseInt(selectedService), // Assurons-nous que c'est un nombre
+        serviceId: parseInt(selectedService),
         description: formData.message,
         dateSouhaitee: formData.dateSouhaitee ? new Date(formData.dateSouhaitee).toISOString() : null,
-        montantHT: 0, // Sera défini par le prestataire
-        tva: 20, // Taux par défaut
+        montantHT: 0,
+        tva: 20,
         conditions: formData.typeBien ? `Type de bien: ${formData.typeBien}\nAdresse: ${formData.adresse}` : undefined,
-        clientId: user.id // Important : identifiant du client
+        clientId: user.id
       };
 
       const response = await demandeDevisAPI.creerDemande(demandeData);
@@ -240,7 +313,6 @@ const GestionImmobilier = () => {
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    // Simulation d'envoi
     console.log("Formulaire contact soumis:", contactFormData);
     alert(
       "Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."
@@ -259,125 +331,201 @@ const GestionImmobilier = () => {
     (service) => service.id === activeService
   );
 
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 }
+  };
+
+  const staggerChildren = {
+    animate: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero Section Améliorée */}
-      <section className="relative py-16 bg-slate-900 overflow-hidden">
+      {/* Hero Section avec animation */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative py-16 bg-[#556B2F]  overflow-hidden"
+        ref={heroRef}
+      >
         {/* Image de fond avec opacité */}
-        <div
+        <motion.div
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
           className="absolute inset-0 bg-cover bg-center z-0 opacity-70"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+            backgroundImage: `linear-gradient(rgba(85, 107, 47, 0.9), rgba(85, 107, 47, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
           }}
         />
 
         {/* Contenu */}
         <div className="container mx-auto px-4 py-8 relative z-10">
-          <div className="max-w-4xl mx-auto text-center h-40">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-4xl mx-auto text-center"
+          >
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
               Gestion Immobilière{" "}
-              <span className=" text-blue-900">Professionnelle</span>
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="text-[#6B8E23] inline-block"
+              >
+                Professionnelle
+              </motion.span>
             </h1>
-            <p className="text-sm text-slate-200 mb-6 max-w-2xl mx-auto leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="text-sm text-white mb-6 max-w-2xl mx-auto leading-relaxed opacity-90"
+            >
               Des solutions complètes pour propriétaires bailleurs. Confiez-nous
-              la gestion de votre patrimoine en toute sérénité. Des solutions
-              complètes pour propriétaires bailleurs. Confiez-nous la gestion de
-              votre patrimoine en toute sérénité.
-            </p>
+              la gestion de votre patrimoine en toute sérénité.
+            </motion.p>
 
-            <div className="flex flex-wrap gap-3 pt-4 justify-center">
-              <Button
-                className="bg-blue-950 hover:bg-slate-700 text-white px-6 py-3 text-base rounded-lg transition-all duration-300"
-                onClick={() =>
-                  document
-                    .getElementById("services")
-                    .scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                Découvrir nos services
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                className="border-white text-black bg-white hover:bg-white hover:text-slate-900 px-6 py-3 text-base rounded-lg transition-all duration-300"
-                onClick={() => setIsModalOpen(true)}
-              >
-                Demander un devis
-              </Button>
-            </div>
-          </div>
+            <motion.div
+              variants={staggerChildren}
+              initial="initial"
+              animate="animate"
+              className="flex flex-wrap gap-3 pt-4 justify-center"
+            >
+              <motion.div variants={fadeInUp}>
+                <Button
+                  className="bg-[#8B4513] hover:bg-[#6B8E23] text-white px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
+                  onClick={() =>
+                    document
+                      .getElementById("services")
+                      .scrollIntoView({ behavior: "smooth" })
+                  }
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Découvrir nos services
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
+              <motion.div variants={fadeInUp}>
+                <Button
+                  className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#556B2F] px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
+                  onClick={() => setIsModalOpen(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Demander un devis
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Stats Section */}
-      <section className="">
+      <section className="py-12" ref={statsRef}>
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
             {stats.map((stat, index) => (
-              <div
+              <motion.div
                 key={index}
-                className="text-center bg-white py-8 rounded-lg shadow-sm"
+                className="stat-item text-center bg-white py-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-default"
+                whileHover={{ scale: 1.05 }}
               >
-                <div className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-[#8B4513] mb-2">
                   {stat.number}
                 </div>
-                <div className="text-slate-600 font-medium text-sm">
+                <div className="text-gray-800 font-medium text-sm">
                   {stat.label}
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-8 mt-5 rounded-lg bg-white ">
+      <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+         
+            <h2 className=" text-2xl text-center md:text-3xl font-bold text-[#8B4513] mb-4">
               Nos Services de Gestion
             </h2>
-            <p className="text-md text-slate-600 max-w-2xl mx-auto">
+            <p className="text-gray-600 max-w-2xl mx-auto">
               Une gamme complète de services pour optimiser la gestion de votre
               bien immobilier
             </p>
-          </div>
+          
 
           {/* Service Navigation */}
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-wrap justify-center gap-3 mb-10"
+          >
             {services.map((service) => (
-              <Button
+              <motion.div
                 key={service.id}
-                variant={activeService === service.id ? "default" : "outline"}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold ${
-                  activeService === service.id
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-700 border-slate-300 hover:bg-slate-100"
-                }`}
-                onClick={() => setActiveService(service.id)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <service.icon className="h-3 w-3 mr-2" />
-                {service.title.split(" ")[0]}
-              </Button>
+                <Button
+                  variant={activeService === service.id ? "default" : "outline"}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${
+                    activeService === service.id
+                      ? "bg-[#6B8E23] text-white"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setActiveService(service.id)}
+                >
+                  <service.icon className="h-3 w-3 mr-2" />
+                  {service.title.split(" ")[0]}
+                </Button>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Service Details */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="bg-white rounded-xl shadow-lg p-6 mb-12 border border-gray-200"
+          >
             {currentService && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Column - Content */}
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
-                      <currentService.icon className="h-6 w-6 text-slate-600" />
+                    <div className="w-12 h-12 bg-[#6B8E23] bg-opacity-10 rounded-xl flex items-center justify-center mr-3">
+                      <currentService.icon className="h-6 w-6 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900">
+                      <h3 className="text-xl font-bold text-[#8B4513]">
                         {currentService.title}
                       </h3>
-                      <p className="text-slate-600 text-sm mt-1">
+                      <p className="text-gray-600 text-sm mt-1">
                         {currentService.description}
                       </p>
                     </div>
@@ -385,124 +533,183 @@ const GestionImmobilier = () => {
 
                   <div className="space-y-3 mb-6">
                     {currentService.features.map((feature, index) => (
-                      <div key={index} className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                        <span className="text-slate-700 text-sm">
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className="flex items-center"
+                      >
+                        <CheckCircle className="h-4 w-4 text-[#6B8E23] mr-2 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm">
                           {feature}
                         </span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div>
-                      <div className="text-base font-bold text-slate-900">
+                      <div className="text-base font-bold text-[#8B4513]">
                         {currentService.price}
                       </div>
-                      <div className="text-slate-600 text-xs flex items-center">
+                      <div className="text-gray-600 text-xs flex items-center">
                         <Clock className="h-3 w-3 mr-1" />
                         {currentService.duration}
                       </div>
                     </div>
-                    <Button
-                      className="bg-transparent border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 rounded-lg text-sm px-4 py-2"
-                      onClick={() => handleServiceClick(currentService.id)}
-                    >
-                      Choisir ce service
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        className="bg-transparent border-2 border-[#8B4513] hover:bg-[#8B4513] hover:text-white text-[#8B4513] rounded-lg text-sm px-4 py-2 transition-all duration-300"
+                        onClick={() => handleServiceClick(currentService.id)}
+                      >
+                        Choisir ce service
+                      </Button>
+                    </motion.div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Right Column - Visual */}
-                <div className="bg-gradient-to-br from-blue-50 to-slate-100 rounded-xl p-6 flex items-center justify-center">
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="bg-gradient-to-br from-[#6B8E23]/10 to-[#556B2F]/10 rounded-xl p-6 flex items-center justify-center"
+                >
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-white rounded-xl shadow-md flex items-center justify-center mx-auto mb-4">
-                      <Shield className="h-8 w-8 text-blue-600" />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-900 mb-2">
+                    <motion.div
+                      animate={{
+                        rotate: [0, 10, -10, 0],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                      className="w-16 h-16 bg-white rounded-xl shadow-md flex items-center justify-center mx-auto mb-4 border border-gray-200"
+                    >
+                      <Shield className="h-8 w-8 text-[#6B8E23]" />
+                    </motion.div>
+                    <h4 className="text-lg font-bold text-[#8B4513] mb-2">
                       Garantie Satisfaction
                     </h4>
-                    <p className="text-slate-600 text-sm">
+                    <p className="text-gray-600 text-sm">
                       Service professionnel avec accompagnement personnalisé et
                       suivi rigoureux
                     </p>
                   </div>
-                </div>
+                </motion.div>
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Additional Services Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {services.map((service) => (
-              <Card
+          <motion.div
+            variants={staggerChildren}
+            initial="initial"
+            whileInView="animate"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
+            {services.map((service, index) => (
+              <motion.div
                 key={service.id}
-                className="p-5 border-0 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                onClick={() => setActiveService(service.id)}
+                variants={fadeInUp}
+                className="service-card"
               >
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-blue-600 transition-colors">
-                  <service.icon className="h-5 w-5 text-blue-600 group-hover:text-white transition-colors" />
-                </div>
-                <h3 className="font-bold text-slate-900 text-sm mb-2">
-                  {service.title}
-                </h3>
-                <p className="text-slate-600 text-xs mb-3">
-                  {service.description}
-                </p>
-                <div className="text-blue-600 font-semibold text-xs">
-                  {service.price}
-                </div>
-              </Card>
+                <Card
+                  className="p-5 border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group hover:-translate-y-2"
+                  onClick={() => setActiveService(service.id)}
+                >
+                  <div className="w-10 h-10 bg-[#6B8E23] bg-opacity-10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#6B8E23] transition-colors">
+                    <service.icon className="h-5 w-5 text-[#6B8E23] group-hover:text-white transition-colors" />
+                  </div>
+                  <h3 className="font-bold text-[#8B4513] text-sm mb-2">
+                    {service.title}
+                  </h3>
+                  <p className="text-gray-600 text-xs mb-3">
+                    {service.description}
+                  </p>
+                  <div className="text-[#6B8E23] font-semibold text-xs">
+                    {service.price}
+                  </div>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-white">
+      <motion.section
+        ref={ctaRef}
+        transition={{ duration: 0.8 }}
+        className="py-16 bg-[#556B2F] rounded-lg mx-4 md:mx-8 lg:mx-16 mb-16"
+      >
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+          <div className="max-w-4xl mx-auto text-center cta-content">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
               Prêt à optimiser votre patrimoine ?
             </h2>
-            <p className="text-lg text-slate-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-lg text-white/90 mb-6 max-w-2xl mx-auto">
               Rejoignez les centaines de propriétaires qui nous font confiance
               pour la gestion de leur bien immobilier
             </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button
-                className="bg-slate-900 hover:border-2 border-slate-900 hover:bg-transparent text-white hover:text-slate-900 px-6 py-3 text-base rounded-lg"
-                onClick={() => setIsModalOpen(true)}
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                Demander un audit gratuit
-              </Button>
-              <Button
-                variant="outline"
-                className="border-slate-300 text-slate-700 hover:bg-slate-100 px-6 py-3 text-base rounded-lg"
-                onClick={() => setIsContactModalOpen(true)}
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                Nous écrire
-              </Button>
-            </div>
+            <motion.div
+              variants={staggerChildren}
+              initial="initial"
+              whileInView="animate"
+              className="flex flex-wrap gap-3 justify-center"
+            >
+              <motion.div variants={fadeInUp}>
+                <Button
+                  className="bg-white hover:bg-gray-100 text-[#556B2F] px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105"
+                  onClick={() => setIsModalOpen(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Phone className="h-4 w-4 mr-2" />
+                  Demander un audit gratuit
+                </Button>
+              </motion.div>
+              <motion.div variants={fadeInUp}>
+                <Button
+                  className="border-white bg-[#556B2F] text-white hover:bg-white/10 px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105"
+                  onClick={() => setIsContactModalOpen(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Nous écrire
+                </Button>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Modal Devis */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-gray-200">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
+            <DialogTitle className="flex items-center justify-between text-[#8B4513]">
               <span>Demande de Devis</span>
             </DialogTitle>
           </DialogHeader>
-          <hr />
-          <form onSubmit={handleSubmit} className="space-y-6 p-1">
+          <hr className="border-gray-200" />
+          <motion.form
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            onSubmit={handleSubmit}
+            className="space-y-6 p-1"
+          >
             {/* Service Selection */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Service souhaité *
               </label>
               <Select
@@ -510,26 +717,30 @@ const GestionImmobilier = () => {
                 onValueChange={setSelectedService}
                 required
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-gray-300">
                   <SelectValue placeholder="Sélectionnez un service" />
                 </SelectTrigger>
                 <SelectContent>
                   {services.map((service) => (
                     <SelectItem key={service.id} value={service.id}>
                       <div className="flex items-center">
-                        <service.icon className="h-4 w-4 mr-2" />
+                        <service.icon className="h-4 w-4 mr-2 text-[#6B8E23]" />
                         {service.title}
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </motion.div>
 
             {/* Personal Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nom *
                 </label>
                 <Input
@@ -538,10 +749,15 @@ const GestionImmobilier = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Votre nom"
+                  className="border-gray-300"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Prénom *
                 </label>
                 <Input
@@ -550,10 +766,15 @@ const GestionImmobilier = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Votre prénom"
+                  className="border-gray-300"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Téléphone *
                 </label>
                 <Input
@@ -562,12 +783,17 @@ const GestionImmobilier = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Votre numéro"
+                  className="border-gray-300"
                 />
-              </div>
+              </motion.div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email *
               </label>
               <Input
@@ -577,13 +803,18 @@ const GestionImmobilier = () => {
                 onChange={handleInputChange}
                 required
                 placeholder="votre@email.com"
+                className="border-gray-300"
               />
-            </div>
+            </motion.div>
 
             {/* Property Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Type de bien
                 </label>
                 <Select
@@ -593,7 +824,7 @@ const GestionImmobilier = () => {
                     setFormData({ ...formData, typeBien: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300">
                     <SelectValue placeholder="Type de bien" />
                   </SelectTrigger>
                   <SelectContent>
@@ -605,9 +836,13 @@ const GestionImmobilier = () => {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Date souhaitée
                 </label>
                 <Input
@@ -616,12 +851,17 @@ const GestionImmobilier = () => {
                   min={new Date().toISOString().split("T")[0]}
                   value={formData.dateSouhaitee}
                   onChange={handleInputChange}
+                  className="border-gray-300"
                 />
-              </div>
+              </motion.div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Adresse du bien
               </label>
               <Input
@@ -629,11 +869,16 @@ const GestionImmobilier = () => {
                 value={formData.adresse}
                 onChange={handleInputChange}
                 placeholder="Adresse complète du bien"
+                className="border-gray-300"
               />
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Message supplémentaire
               </label>
               <Textarea
@@ -642,42 +887,61 @@ const GestionImmobilier = () => {
                 onChange={handleInputChange}
                 placeholder="Décrivez votre situation et vos besoins..."
                 rows={4}
+                className="border-gray-300"
               />
-            </div>
+            </motion.div>
 
-            <Button
-              type="submit"
-              className="w-full bg-slate-900 hover:bg-blue-700 text-white py-3 rounded-lg text-base font-semibold"
-              disabled={!selectedService}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
             >
-              Envoyer ma demande
-            </Button>
+              <Button
+                type="submit"
+                className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
+                disabled={!selectedService}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Envoyer ma demande
+              </Button>
+            </motion.div>
 
-            <p className="text-xs text-slate-500 text-center">
+            <p className="text-xs text-gray-500 text-center">
               * Champs obligatoires. Nous vous recontacterons dans les 24 heures
               ouvrables.
             </p>
-          </form>
+          </motion.form>
         </DialogContent>
       </Dialog>
 
       {/* Modal Contact - Nous écrire */}
       <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-gray-200">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
+            <DialogTitle className="flex items-center justify-between text-[#8B4513]">
               <span className="flex items-center">
-                <Mail className="h-5 w-5 mr-2 text-slate-600" />
+                <Mail className="h-5 w-5 mr-2 text-[#6B8E23]" />
                 Nous écrire
               </span>
             </DialogTitle>
           </DialogHeader>
-          <hr />
-          <form onSubmit={handleContactSubmit} className="space-y-6 p-1">
+          <hr className="border-gray-200" />
+          <motion.form
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            onSubmit={handleContactSubmit}
+            className="space-y-6 p-1"
+          >
             {/* Informations personnelles */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nom complet *
                 </label>
                 <Input
@@ -686,10 +950,15 @@ const GestionImmobilier = () => {
                   onChange={handleContactInputChange}
                   required
                   placeholder="Votre nom"
+                  className="border-gray-300"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Téléphone
                 </label>
                 <Input
@@ -697,12 +966,17 @@ const GestionImmobilier = () => {
                   value={contactFormData.telephone}
                   onChange={handleContactInputChange}
                   placeholder="Votre numéro"
+                  className="border-gray-300"
                 />
-              </div>
+              </motion.div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email *
               </label>
               <Input
@@ -712,11 +986,16 @@ const GestionImmobilier = () => {
                 onChange={handleContactInputChange}
                 required
                 placeholder="votre@email.com"
+                className="border-gray-300"
               />
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Sujet *
               </label>
               <Select
@@ -726,7 +1005,7 @@ const GestionImmobilier = () => {
                 }
                 required
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-gray-300">
                   <SelectValue placeholder="Sélectionnez un sujet" />
                 </SelectTrigger>
                 <SelectContent>
@@ -737,10 +1016,14 @@ const GestionImmobilier = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Message *
               </label>
               <Textarea
@@ -750,38 +1033,52 @@ const GestionImmobilier = () => {
                 placeholder="Décrivez votre demande en détail..."
                 rows={6}
                 required
+                className="border-gray-300"
               />
-            </div>
+            </motion.div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6 }}
+              className="bg-[#6B8E23] bg-opacity-10 p-4 rounded-lg border border-[#6B8E23] border-opacity-20"
+            >
               <div className="flex items-start">
-                <Phone className="h-4 w-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
+                <Phone className="h-4 w-4 text-[#6B8E23] mr-2 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-blue-800 font-medium">
+                  <p className="text-sm text-[#6B8E23] font-medium">
                     Besoin d'une réponse rapide ?
                   </p>
-                  <p className="text-xs text-blue-600">
+                  <p className="text-xs text-gray-600">
                     Appelez-nous au{" "}
                     <span className="font-semibold">01 23 45 67 89</span> du
                     lundi au vendredi de 9h à 18h
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <Button
-              type="submit"
-              className="w-full bg-slate-900 hover:bg-slate-700 text-white py-3 rounded-lg text-base font-semibold"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
             >
-              <Mail className="h-4 w-4 mr-2" />
-              Envoyer mon message
-            </Button>
+              <Button
+                type="submit"
+                className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Envoyer mon message
+              </Button>
+            </motion.div>
 
-            <p className="text-xs text-slate-500 text-center">
+            <p className="text-xs text-gray-500 text-center">
               * Champs obligatoires. Nous vous répondrons dans les plus brefs
               délais.
             </p>
-          </form>
+          </motion.form>
         </DialogContent>
       </Dialog>
     </div>
