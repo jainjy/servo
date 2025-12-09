@@ -275,6 +275,9 @@ const Entreprise = () => {
     typeAvis: "positif"
   });
 
+  // États pour gérer le hover sur chaque carte
+  const [hoveredCard, setHoveredCard] = useState(null);
+
   const handleServiceClick = (service) => {
     trackBusinessInteraction(service.id.toString(), service.nom, 'click', {
       category: service.category
@@ -407,12 +410,12 @@ const Entreprise = () => {
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       <Header />
 
-      {/* Hero Section avec background image */}
+      {/* Hero Section avec background image - MODIFICATIONS APPLIQUÉES */}
       <section className="relative py-8 pt-24 lg:py-24 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `linear-gradient(rgba(107, 142, 35, 0.9), rgba(107, 142, 35, 0.8)), url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`,
+            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`,
           }}
         />
 
@@ -423,31 +426,30 @@ const Entreprise = () => {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
+            {/* TITRE MODIFIÉ - "Professionnelles" en vert #6B8E23 */}
             <h1 className="text-xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-              Solutions <span style={{ color: colors.lightBg }}>Professionnelles</span>
+              Solutions <span style={{ color: colors.primaryDark }}>Professionnelles</span>
             </h1>
-            <p className="text-sm lg:text-xl" style={{ color: colors.lightBg, opacity: 0.9 }}> 
+            <p className="text-sm lg:text-xl text-slate-200 mb-10 leading-relaxed">
               Des services sur mesure pour répondre aux besoins spécifiques de
               votre entreprise. Accompagnement personnalisé de A à Z.
             </p>
 
-            <div className="flex flex-wrap gap-2 lg:gap-5 justify-center mt-10">
-              {/* BOUTON 1 - Utilise #6B8E23 (primaryDark/Sruvol) */}
+            <div className="flex flex-wrap gap-2 lg:gap-5 justify-center">
+              {/* BOUTON MODIFIÉ - Hover en vert #6B8E23 */}
               <motion.div>
                 <Button
-                  className="rounded-xl px-8 py-5 text-lg font-semibold border-2 transition-all duration-300"
+                  className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-slate-700 hover:border-slate-600 transition-all duration-300"
                   style={{
-                    backgroundColor: colors.primaryDark,
-                    color: colors.lightBg,
-                    borderColor: colors.primaryDark
+                    backgroundColor: "#0f172a", // slate-900
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.primaryLight;
-                    e.currentTarget.style.borderColor = colors.primaryLight;
+                    e.currentTarget.style.backgroundColor = colors.primaryDark; // #6B8E23 au hover
+                    e.currentTarget.style.borderColor = colors.primaryDark; // #6B8E23 au hover
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.primaryDark;
-                    e.currentTarget.style.borderColor = colors.primaryDark;
+                    e.currentTarget.style.backgroundColor = "#0f172a"; // Retour à slate-900
+                    e.currentTarget.style.borderColor = "#334155"; // Retour à slate-700
                   }}
                   onClick={() => {
                     trackBusinessInteraction('services_section', 'Services', 'navigate');
@@ -461,23 +463,10 @@ const Entreprise = () => {
                 </Button>
               </motion.div>
 
-              {/* BOUTON 2 - Utilise #6B8E23 (primaryDark/Sruvol) */}
+              {/* BOUTON NON MODIFIÉ */}
               <motion.div>
                 <Button
-                  className="rounded-xl px-8 py-5 text-lg font-semibold border-2 transition-all duration-300"
-                  style={{
-                    backgroundColor: colors.primaryDark,
-                    color: colors.lightBg,
-                    borderColor: colors.primaryDark
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.primaryLight;
-                    e.currentTarget.style.borderColor = colors.primaryLight;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.primaryDark;
-                    e.currentTarget.style.borderColor = colors.primaryDark;
-                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
                   onClick={handleOpenMap}
                 >
                   <MapPin className="h-5 w-5 mr-3" />
@@ -605,7 +594,7 @@ const Entreprise = () => {
           </div>
         </motion.div>
 
-        {/* Grille des services */}
+        {/* Grille des services - MODIFIÉ POUR HOVER SUR TOUTE LA CARTE */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
           variants={containerVariants}
@@ -616,6 +605,8 @@ const Entreprise = () => {
               variants={itemVariants}
               whileHover="hover"
               initial="initial"
+              onMouseEnter={() => setHoveredCard(service.id)}
+              onMouseLeave={() => setHoveredCard(null)}
             >
               <motion.div variants={cardHoverVariants} className="h-full">
                 <Card
@@ -626,14 +617,23 @@ const Entreprise = () => {
                   }}
                   onClick={() => handleServiceClick(service)}
                 >
-                  {/* Icône du service */}
+                  {/* Icône du service - Hover déclenché par la carte */}
                   <motion.div
                     className="w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center transition-colors duration-300"
                     style={{
-                      backgroundColor: `${service.color}15`
+                      backgroundColor: hoveredCard === service.id 
+                        ? colors.primaryDark  // Vert #6B8E23 au hover
+                        : `${service.color}15` // Couleur d'origine sans hover
                     }}
                   >
-                    <service.icon className="h-8 w-8 transition-colors duration-300" style={{ color: service.color }} />
+                    <service.icon 
+                      className="h-8 w-8 transition-colors duration-300" 
+                      style={{ 
+                        color: hoveredCard === service.id 
+                          ? colors.lightBg  // Blanc au hover
+                          : service.color   // Couleur d'origine sans hover
+                      }} 
+                    />
                   </motion.div>
 
                   {/* Contenu */}
@@ -649,23 +649,21 @@ const Entreprise = () => {
                     {service.details}
                   </p>
 
-                  {/* BOUTON D'ACTION - Utilise #6B8E23 */}
+                  {/* BOUTON D'ACTION - Hover déclenché par la carte */}
                   <motion.div>
                     <Button
                       className="w-full font-semibold rounded-xl gap-3 py-4 border-2 transition-all duration-300"
                       variant="outline"
                       style={{
-                        borderColor: colors.primaryDark,
-                        color: colors.primaryDark,
-                        backgroundColor: 'transparent'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = colors.primaryDark;
-                        e.currentTarget.style.color = colors.lightBg;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = colors.primaryDark;
+                        borderColor: hoveredCard === service.id 
+                          ? colors.primaryDark  // Bordure verte au hover
+                          : colors.primaryDark, // Bordure verte sans hover
+                        color: hoveredCard === service.id 
+                          ? colors.lightBg      // Texte blanc au hover
+                          : colors.primaryDark, // Texte vert sans hover
+                        backgroundColor: hoveredCard === service.id 
+                          ? colors.primaryDark  // Fond vert au hover
+                          : 'transparent'       // Transparent sans hover
                       }}
                     >
                       En savoir plus
