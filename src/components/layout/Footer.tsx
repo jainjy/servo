@@ -259,8 +259,7 @@ const Footer: React.FC = () => {
                 { to: '/cookies', label: 'Cookies' },
                 { to: '/confidentialite', label: 'Confidentialité' },
                 { to: '/mentions_legales', label: 'Mentions légales' },
-                { to: '/cgv', label: 'CGV' },
-                { to: '/contact', label: 'Contact' },
+                
               ].map((link, index) => (
                 <Link
                   key={link.to}
