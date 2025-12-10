@@ -152,22 +152,16 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
         </div>
 
         {/* Filtres */}
-        <div style={{
-          backgroundColor: "white",
-          padding: "24px 32px",
-          borderRadius: 16,
-          boxShadow: `0 4px 20px #D3D3D320`,
-          border: `1px solid #D3D3D3`,
-          marginBottom: 32
-        }}>
+        
           <div style={{
             display: "flex",
             gap: 16,
             flexWrap: "wrap",
-            alignItems: "center"
+            alignItems: "center",
+            justifyContent: "center" 
           }}>
-            {/* Recherche par nom/métier/email */}
-            <div style={{ flex: 1, minWidth: 300 }}>
+            {/* Recherche unique combinée */}
+            <div style={{ flex: 1, maxWidth: 600, minWidth: 300 }}>
               <div style={{ position: "relative" }}>
                 <Search size={22} style={{
                   position: "absolute",
@@ -178,7 +172,7 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
                 }} />
                 <input
                   type="text"
-                  placeholder="Nom, métier, email..."
+                  placeholder="Rechercher par nom, email, téléphone, ville..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{
@@ -194,39 +188,8 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
                 />
               </div>
             </div>
-            
-            {/* Filtre par ville */}
-            <div style={{ minWidth: 200 }}>
-              <div style={{ position: "relative" }}>
-                <MapPin size={18} style={{
-                  position: "absolute",
-                  left: 16,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#6B8E23"
-                }} />
-                <input
-                  type="text"
-                  placeholder="Ville..."
-                  value={cityFilter}
-                  onChange={(e) => setCityFilter(e.target.value)}
-                  style={{
-                    padding: "14px 20px 14px 42px",
-                    width: "100%",
-                    borderRadius: 12,
-                    border: `2px solid #D3D3D3`,
-                    fontSize: 15,
-                    outline: "none",
-                    transition: "all 0.3s",
-                    backgroundColor: "white"
-                  }}
-                />
-              </div>
-            </div>
-            
-            
           </div>
-        </div>
+
 
         {/* Compteur de résultats */}
         <div style={{
@@ -284,7 +247,7 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
             <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))",
-              gap: 32
+              gap: 24
             }}>
               {filteredProfessionals.map((p) => (
                 <ProfessionalCard key={p.id} professional={p} />
@@ -308,7 +271,7 @@ const ProfessionalCategory: React.FC<ProfessionalCategoryProps> = ({
   );
 };
 
-// Composant Carte Professionnel
+// Composant Carte Professionnel - VERSION SIMPLIFIÉE
 const ProfessionalCard: React.FC<{ professional: Professional }> = ({ professional }) => {
   const theme = {
     logo: "#556B2F",
@@ -321,12 +284,6 @@ const ProfessionalCard: React.FC<{ professional: Professional }> = ({ profession
     professional.firstName && professional.lastName
       ? `${professional.firstName} ${professional.lastName}`
       : professional.commercialName || professional.companyName || "Professionnel";
-
-  const getJob = () =>
-    professional.metiers?.[0]?.metier.libelle ||
-    professional.companyName ||
-    professional.commercialName ||
-    "Métier non spécifié";
 
   const handleClick = () => {
     window.location.href = `/professional/${professional.id}`;
@@ -347,7 +304,7 @@ const ProfessionalCard: React.FC<{ professional: Professional }> = ({ profession
         boxShadow: `0 8px 30px ${theme.separator}40`,
         border: `1px solid ${theme.separator}`,
         transition: "all 0.3s ease",
-        height: 220
+        height: 200 // Réduit la hauteur car moins d'informations
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-8px)";
@@ -379,11 +336,11 @@ const ProfessionalCard: React.FC<{ professional: Professional }> = ({ profession
         flexShrink: 0
       }}>
         <div style={{
-          width: 100,
-          height: 100,
+          width: 80, // Taille réduite
+          height: 80, // Taille réduite
           borderRadius: "50%",
-          border: `4px solid ${theme.logo}`,
-          padding: 3,
+          border: `3px solid ${theme.logo}`,
+          padding: 2,
           background: "white",
           overflow: "hidden"
         }}>
@@ -408,7 +365,7 @@ const ProfessionalCard: React.FC<{ professional: Professional }> = ({ profession
                   initial.style.justifyContent = "center";
                   initial.style.backgroundColor = theme.primaryDark;
                   initial.style.color = "white";
-                  initial.style.fontSize = "32px";
+                  initial.style.fontSize = "24px"; // Taille réduite
                   initial.style.fontWeight = "bold";
                   initial.textContent = professional.firstName?.[0]?.toUpperCase() || professional.companyName?.[0]?.toUpperCase() || "P";
                   parent.appendChild(initial);
@@ -424,7 +381,7 @@ const ProfessionalCard: React.FC<{ professional: Professional }> = ({ profession
               justifyContent: "center",
               backgroundColor: theme.primaryDark,
               color: "white",
-              fontSize: "32px",
+              fontSize: "24px", // Taille réduite
               fontWeight: "bold"
             }}>
               {professional.firstName?.[0]?.toUpperCase() || professional.companyName?.[0]?.toUpperCase() || "P"}
@@ -433,85 +390,38 @@ const ProfessionalCard: React.FC<{ professional: Professional }> = ({ profession
         </div>
       </div>
 
-      {/* Informations */}
+      {/* Informations - VERSION SIMPLIFIÉE */}
       <div style={{ flex: 1, zIndex: 5 }}>
+        {/* Nom complet uniquement */}
         <h2 style={{
           fontSize: 20,
           fontWeight: 700,
-          marginBottom: 8,
+          marginBottom: 16, // Plus d'espace après le nom
           color: theme.secondaryText
         }}>
           {getName()}
         </h2>
 
-        <div style={{
-          fontSize: 14,
-          color: theme.primaryDark,
-          marginBottom: 12,
-          fontWeight: 600,
-          display: "flex",
-          alignItems: "center",
-          gap: 8
-        }}>
-          <div style={{
-            width: 8,
-            height: 8,
-            backgroundColor: theme.logo,
-            borderRadius: "50%"
-          }} />
-          {getJob()}
-        </div>
-
-        {/* Métiers */}
-        {professional.metiers && professional.metiers.length > 1 && (
-          <div style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 6,
-            marginBottom: 12
-          }}>
-            {professional.metiers.slice(0, 3).map((m, index) => (
-              <span key={index} style={{
-                fontSize: 11,
-                backgroundColor: `${theme.logo}20`,
-                color: theme.logo,
-                padding: "2px 8px",
-                borderRadius: 12,
-                fontWeight: 500
-              }}>
-                {m.metier.libelle}
-              </span>
-            ))}
-            {professional.metiers.length > 3 && (
-              <span style={{
-                fontSize: 11,
-                backgroundColor: `${theme.separator}50`,
-                color: "#666",
-                padding: "2px 8px",
-                borderRadius: 12,
-                fontWeight: 500
-              }}>
-                +{professional.metiers.length - 3}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Contact */}
-        <div style={{ fontSize: 13, lineHeight: "20px", color: "#555" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-            <Phone size={12} color={theme.primaryDark} />
-            <span>{professional.phone || "Téléphone non renseigné"}</span>
-          </div>
+        {/* Contact - Email - Ville uniquement */}
+        <div style={{ fontSize: 14, lineHeight: "24px", color: "#555" }}>
+          {/* Téléphone */}
+          {professional.phone && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <Phone size={14} color={theme.primaryDark} />
+              <span>{professional.phone}</span>
+            </div>
+          )}
           
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-            <Mail size={12} color={theme.logo} />
+          {/* Email (toujours affiché) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Mail size={14} color={theme.logo} />
             <span style={{ wordBreak: "break-word" }}>{professional.email}</span>
           </div>
           
+          {/* Ville (si disponible) */}
           {professional.city && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <MapPin size={12} color={theme.secondaryText} />
+              <MapPin size={14} color={theme.secondaryText} />
               <span>{professional.city}</span>
             </div>
           )}
