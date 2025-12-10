@@ -64,6 +64,15 @@ const PropertyPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Défilement fluide vers le haut
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth", // Pour un défilement fluide
+    });
+  }, []);
+
+  useEffect(() => {
     const fetchProperty = async () => {
       try {
         setLoading(true);
