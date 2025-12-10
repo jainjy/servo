@@ -638,7 +638,6 @@ const GestionImmobilier = () => {
       {/* CTA Section */}
       <motion.section
         ref={ctaRef}
-        transition={{ duration: 0.8 }}
         className="py-16 bg-[#556B2F] rounded-lg mx-4 md:mx-8 lg:mx-16 mb-16"
       >
         <div className="container mx-auto px-4">
@@ -1056,7 +1055,7 @@ const GestionImmobilier = () => {
             >
               <Button
                 type="submit"
-                className="w-full  hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
+                className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
               >
                 <Mail className="h-4 w-4 mr-2" />
                 Envoyer mon message

@@ -34,26 +34,35 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
+// Nouvelle palette de couleurs
+const COLORS = {
+  LOGO: "#556B2F",           /* Olive green - accent */
+  PRIMARY_DARK: "#6B8E23",   /* Yellow-green - primary */
+  LIGHT_BG: "#FFFFFF",       /* White - fond clair */
+  SEPARATOR: "#D3D3D3",      /* Light gray - séparateurs */
+  SECONDARY_TEXT: "#8B4513", /* Saddle brown - textes secondaires */
+};
+
 // Types d'événements basés sur votre base de données
 const TYPES_EVENEMENTS = {
-  DEMANDE: { label: "Demande", color: "bg-blue-500", icon: FileText },
+  DEMANDE: { label: "Demande", color: "bg-blue-100 text-blue-800", icon: FileText },
   DEMANDE_ARTISAN: {
     label: "Demande Artisan",
-    color: "bg-orange-500",
+    color: "bg-orange-100 text-orange-800",
     icon: Building,
   },
   RENDEZ_VOUS: {
     label: "Rendez-vous",
-    color: "bg-purple-500",
+    color: "bg-purple-100 text-purple-800",
     icon: CalendarIcon,
   },
-  DEVIS: { label: "Devis", color: "bg-green-500", icon: CreditCard },
-  COMMANDE: { label: "Commande", color: "bg-yellow-500", icon: ShoppingCart },
-  FACTURE: { label: "Facture", color: "bg-red-500", icon: FileText },
-  RESERVATION: { label: "Réservation", color: "bg-indigo-500", icon: Plane },
-  AUDIT: { label: "Audit", color: "bg-gray-500", icon: Scissors },
-  BIENETRE: { label: "Bien-être", color: "bg-pink-500", icon: Heart },
-  MESSAGE: { label: "Message", color: "bg-cyan-500", icon: MessageCircle },
+  DEVIS: { label: "Devis", color: "bg-green-100 text-green-800", icon: CreditCard },
+  COMMANDE: { label: "Commande", color: "bg-yellow-100 text-yellow-800", icon: ShoppingCart },
+  FACTURE: { label: "Facture", color: "bg-red-100 text-red-800", icon: FileText },
+  RESERVATION: { label: "Réservation", color: "bg-indigo-100 text-indigo-800", icon: Plane },
+  AUDIT: { label: "Audit", color: "bg-gray-100 text-gray-800", icon: Scissors },
+  BIENETRE: { label: "Bien-être", color: "bg-pink-100 text-pink-800", icon: Heart },
+  MESSAGE: { label: "Message", color: "bg-cyan-100 text-cyan-800", icon: MessageCircle },
 };
 
 const STATUT_EVENEMENT = {
@@ -124,9 +133,11 @@ const PopupDateMultiple = ({
       }}
     >
       {/* Header du popup */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-xl">
+      <div className="flex items-center justify-between p-4 border-b rounded-t-xl"
+           style={{ backgroundColor: COLORS.LIGHT_BG, borderColor: COLORS.SEPARATOR }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+               style={{ backgroundColor: COLORS.LOGO }}>
             <CalendarIcon className="text-white" size={16} />
           </div>
           <div>
@@ -137,7 +148,7 @@ const PopupDateMultiple = ({
                 month: "long",
               })}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
               {evenements.length} événement(s)
             </p>
           </div>
@@ -160,9 +171,10 @@ const PopupDateMultiple = ({
           return (
             <div
               key={evenement.id}
-              className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+              className={`p-3 border-b hover:bg-gray-50 cursor-pointer transition-colors ${
                 index === evenements.length - 1 ? "border-b-0" : ""
               }`}
+              style={{ borderColor: COLORS.SEPARATOR }}
               onClick={() => onEventClick(evenement)}
             >
               <div className="flex items-start gap-3">
@@ -182,11 +194,17 @@ const PopupDateMultiple = ({
                     )}
                   </div>
                   
-                  {/* NOM DE L'UTILISATEUR BIEN VISIBLE */}
+                  {/* NOM DE L'UTILISATEUR */}
                   {evenement.client?.nom && (
-                    <div className="flex items-center gap-2 mb-2 p-1 bg-blue-50 rounded-md border border-blue-100">
-                      <User size={12} className="text-blue-600 flex-shrink-0" />
-                      <span className="text-xs font-semibold text-blue-700 truncate">
+                    <div className="flex items-center gap-2 mb-2 p-1 rounded-md border"
+                         style={{ 
+                           backgroundColor: `${COLORS.PRIMARY_DARK}10`,
+                           borderColor: `${COLORS.PRIMARY_DARK}30`
+                         }}>
+                      <User size={12} className="flex-shrink-0" 
+                            style={{ color: COLORS.PRIMARY_DARK }} />
+                      <span className="text-xs font-semibold truncate"
+                            style={{ color: COLORS.PRIMARY_DARK }}>
                         {evenement.client.nom}
                       </span>
                     </div>
@@ -214,7 +232,11 @@ const PopupDateMultiple = ({
       </div>
 
       {/* Footer */}
-      <div className="p-3 bg-gray-50 rounded-b-xl border-t border-gray-100">
+      <div className="p-3 rounded-b-xl border-t"
+           style={{ 
+             backgroundColor: `${COLORS.SEPARATOR}20`,
+             borderColor: COLORS.SEPARATOR 
+           }}>
         <p className="text-xs text-gray-500 text-center">
           Cliquez sur un événement pour voir les détails
         </p>
@@ -239,7 +261,8 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
       <div
         className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-scaleIn ${sizeClasses[size]}`}
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div className="flex justify-between items-center p-6 border-b"
+             style={{ borderColor: COLORS.SEPARATOR }}>
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
@@ -296,7 +319,11 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
         {/* Informations de base */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="rounded-lg p-4"
+                 style={{ 
+                   backgroundColor: `${COLORS.SEPARATOR}10`,
+                   borderColor: COLORS.SEPARATOR 
+                 }}>
               <Label className="block mb-2 font-semibold text-gray-900">
                 Date et heure
               </Label>
@@ -322,14 +349,18 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
               )}
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="rounded-lg p-4"
+                 style={{ 
+                   backgroundColor: `${COLORS.SEPARATOR}10`,
+                   borderColor: COLORS.SEPARATOR 
+                 }}>
               <Label className="block mb-2 font-semibold text-gray-900">
                 Type
               </Label>
               <Badge
                 className={`text-sm ${TYPES_EVENEMENTS[evenement.type]?.color
                   .replace("bg-", "bg-")
-                  .replace("text-", "text-")} text-white border-0`}
+                  .replace("text-", "text-")} border-0`}
                 style={{ backgroundColor: evenement.couleur }}
               >
                 <TypeIcon size={14} className="mr-1" />
@@ -340,7 +371,11 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
 
           <div className="space-y-4">
             {evenement.client && (
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+                   style={{ 
+                     backgroundColor: `${COLORS.SEPARATOR}10`,
+                     borderColor: COLORS.SEPARATOR 
+                   }}>
                 <Label className="block mb-2 font-semibold text-gray-900">
                   Client
                 </Label>
@@ -366,7 +401,11 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
             )}
 
             {evenement.lieu && (
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="rounded-lg p-4"
+                   style={{ 
+                     backgroundColor: `${COLORS.SEPARATOR}10`,
+                     borderColor: COLORS.SEPARATOR 
+                   }}>
                 <Label className="block mb-2 font-semibold text-gray-900">
                   Lieu
                 </Label>
@@ -381,7 +420,11 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
 
         {/* Description et détails */}
         {(evenement.description || evenement.details) && (
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="rounded-lg p-4"
+               style={{ 
+                 backgroundColor: `${COLORS.SEPARATOR}10`,
+                 borderColor: COLORS.SEPARATOR 
+               }}>
             <Label className="block mb-2 font-semibold text-gray-900">
               {evenement.description ? "Description" : "Détails"}
             </Label>
@@ -393,11 +436,15 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
 
         {/* Informations spécifiques selon le type */}
         {evenement.montant && (
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4">
+          <div className="rounded-lg p-4"
+               style={{ 
+                 backgroundColor: `${COLORS.LOGO}10`,
+                 borderColor: COLORS.LOGO 
+               }}>
             <Label className="block mb-2 font-semibold text-gray-900">
               Montant
             </Label>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold" style={{ color: COLORS.LOGO }}>
               {evenement.montant.toLocaleString("fr-FR", {
                 style: "currency",
                 currency: "EUR",
@@ -408,7 +455,7 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
 
         {/* Métadonnées */}
         {evenement.metadata && Object.keys(evenement.metadata).length > 0 && (
-          <div className="border-t pt-6">
+          <div className="border-t pt-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <Label className="block mb-4 font-semibold text-gray-900 text-lg">
               Informations supplémentaires
             </Label>
@@ -416,7 +463,11 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
               {Object.entries(evenement.metadata).map(([key, value]) => (
                 <div
                   key={key}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 rounded-lg"
+                  style={{ 
+                    backgroundColor: `${COLORS.SEPARATOR}10`,
+                    borderColor: COLORS.SEPARATOR 
+                  }}
                 >
                   <span className="font-medium text-gray-700 capitalize">
                     {key.replace(/([A-Z])/g, " $1").toLowerCase()}:
@@ -431,11 +482,13 @@ const ModalDetailsEvenement = ({ isOpen, onClose, evenement }) => {
         )}
 
         {/* Actions */}
-        <div className="flex justify-end pt-6 border-t">
+        <div className="flex justify-end pt-6 border-t" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
           <Button
             onClick={onClose}
             variant="outline"
             className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            style={{ borderColor: COLORS.SEPARATOR }}
           >
             Fermer
           </Button>
@@ -460,7 +513,7 @@ const EventItem = ({ evenement, isMobile = false }) => {
         minHeight: isMobile ? '50px' : '70px',
       }}
     >
-      {/* Version Bureau - Structure complète */}
+      {/* Version Bureau */}
       {!isMobile && (
         <>
           <div className="font-semibold truncate mb-1 leading-tight">
@@ -470,7 +523,7 @@ const EventItem = ({ evenement, isMobile = false }) => {
             <TypeIcon size={12} />
             <span>{evenement.heureDebut}</span>
           </div>
-          {/* NOM DU CLIENT BIEN VISIBLE - BUREAU */}
+          {/* NOM DU CLIENT */}
           {evenement.client?.nom && (
             <div className="flex items-center gap-1 text-xs font-semibold bg-white/20 rounded px-1 py-0.5 mt-1">
               <User size={10} />
@@ -480,7 +533,7 @@ const EventItem = ({ evenement, isMobile = false }) => {
         </>
       )}
       
-      {/* Version Mobile - Structure simplifiée */}
+      {/* Version Mobile */}
       {isMobile && (
         <>
           <div className="font-semibold truncate mb-1 leading-tight text-[10px]">
@@ -491,7 +544,7 @@ const EventItem = ({ evenement, isMobile = false }) => {
               <TypeIcon size={10} />
               <span>{evenement.heureDebut}</span>
             </div>
-            {/* NOM DU CLIENT BIEN VISIBLE - MOBILE */}
+            {/* NOM DU CLIENT */}
             {evenement.client?.nom && (
               <div className="flex items-center gap-1 text-[10px] font-semibold bg-white/20 rounded px-1">
                 <User size={8} />
@@ -554,7 +607,6 @@ const AgendaPage = () => {
     const aujourdhui = new Date();
     const evenementsDemo = [];
 
-    // Créer plusieurs événements pour certaines dates
     const datesAvecMultiples = [
       new Date(aujourdhui),
       new Date(aujourdhui.getTime() + 2 * 24 * 60 * 60 * 1000),
@@ -562,13 +614,11 @@ const AgendaPage = () => {
     ];
 
     datesAvecMultiples.forEach((date, dateIndex) => {
-      // 3-5 événements pour ces dates
       const nbEvenements = 3 + Math.floor(Math.random() * 3);
 
       for (let i = 0; i < nbEvenements; i++) {
         const types = Object.keys(TYPES_EVENEMENTS);
         const type = types[Math.floor(Math.random() * types.length)];
-        const TypeIcon = TYPES_EVENEMENTS[type].icon;
 
         evenementsDemo.push({
           id: `event-${dateIndex}-${i}`,
@@ -757,19 +807,25 @@ const AgendaPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pt-16">
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+    <div className="min-h-screen" style={{ backgroundColor: COLORS.LIGHT_BG }}>
+      <div className="container mx-auto px-2 sm:px-4 mt-12 py-4 sm:py-8">
         {/* En-tête */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-4 lg:mb-0">
-            <div className="p-2 sm:p-3 rounded-xl bg-white shadow-lg border border-blue-100">
-              <CalendarIcon size={24} className="sm:w-8 sm:h-8 text-blue-500" />
+            <div className="p-2 sm:p-3 rounded-xl shadow-lg border"
+                 style={{ 
+                   backgroundColor: COLORS.LIGHT_BG,
+                   borderColor: COLORS.SEPARATOR 
+                 }}>
+              <CalendarIcon size={24} className="sm:w-8 sm:h-8" 
+                           style={{ color: COLORS.LOGO }} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-4xl font-bold"
+                  style={{ color: COLORS.PRIMARY_DARK }}>
                 Agenda Global
               </h1>
-              <p className="text-sm sm:text-lg text-gray-600">
+              <p className="text-sm sm:text-lg" style={{ color: COLORS.SECONDARY_TEXT }}>
                 Tous vos événements et rendez-vous en un seul endroit
               </p>
             </div>
@@ -782,6 +838,10 @@ const AgendaPage = () => {
               size="sm"
               onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
               className="flex items-center gap-2"
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.SECONDARY_TEXT 
+              }}
             >
               <Menu size={16} />
               Menu
@@ -790,10 +850,15 @@ const AgendaPage = () => {
         </div>
 
         {/* Filtres par type de date */}
-        <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+        <Card className="p-4 sm:p-6 mb-4 sm:mb-6 backdrop-blur-sm border"
+              style={{ 
+                backgroundColor: `${COLORS.LIGHT_BG}`,
+                borderColor: COLORS.SEPARATOR 
+              }}>
           <div className="flex flex-col gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
-              <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+              <Filter size={18} className="sm:w-5 sm:h-5" 
+                     style={{ color: COLORS.SECONDARY_TEXT }} />
               <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                 Filtrer par période
               </h3>
@@ -813,9 +878,16 @@ const AgendaPage = () => {
                     }
                     className={`flex items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
                       isActive
-                        ? "bg-blue-500 text-white border-blue-500"
-                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                        ? "text-white"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
+                    style={isActive ? {
+                      backgroundColor: COLORS.PRIMARY_DARK,
+                      borderColor: COLORS.PRIMARY_DARK
+                    } : {
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.SECONDARY_TEXT
+                    }}
                   >
                     <FiltreIcon size={12} className="sm:w-3 sm:h-3" />
                     <span className="hidden xs:inline">{filtre.label}</span>
@@ -835,43 +907,55 @@ const AgendaPage = () => {
             {
               label: "Total",
               value: statistiques.total,
-              color: "blue",
+              color: COLORS.LOGO,
               icon: CalendarIcon,
             },
             {
               label: "Aujourd'hui",
               value: statistiques.aujourdhui,
-              color: "green",
+              color: COLORS.PRIMARY_DARK,
               icon: Star,
             },
             {
               label: "Semaine",
               value: statistiques.cetteSemaine,
-              color: "purple",
+              color: "#8B4513",
               icon: Clock,
             },
             {
               label: "En attente",
               value: statistiques.enAttente,
-              color: "yellow",
+              color: "#D3D3D3",
               icon: Clock4,
             },
           ].map((stat, index) => (
             <Card
               key={index}
-              className="p-3 sm:p-4 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:shadow-lg transition-shadow"
+              className="p-3 sm:p-4 backdrop-blur-sm border hover:shadow-lg transition-shadow"
+              style={{ 
+                backgroundColor: COLORS.LIGHT_BG,
+                borderColor: COLORS.SEPARATOR 
+              }}
             >
               <div className="flex items-center justify-between">
                 <div>
                   <div
-                    className={`text-lg sm:text-2xl font-bold text-${stat.color}-600 mb-1 sm:mb-2`}
+                    className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2"
+                    style={{ color: stat.color }}
                   >
                     {stat.value}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
+                  <div className="text-xs sm:text-sm" 
+                       style={{ color: COLORS.SECONDARY_TEXT }}>
+                    {stat.label}
+                  </div>
                 </div>
                 <div
-                  className={`p-2 sm:p-3 rounded-xl bg-${stat.color}-100 text-${stat.color}-600`}
+                  className="p-2 sm:p-3 rounded-xl"
+                  style={{ 
+                    backgroundColor: `${stat.color}20`,
+                    color: stat.color 
+                  }}
                 >
                   <stat.icon size={18} className="sm:w-6 sm:h-6" />
                 </div>
@@ -884,26 +968,38 @@ const AgendaPage = () => {
           {/* Colonne principale - Calendrier */}
           <div className={`xl:col-span-3 ${menuMobileOuvert ? 'hidden lg:block' : 'block'}`}>
             {/* Barre de filtres avancés */}
-            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 backdrop-blur-sm border"
+                  style={{ 
+                    backgroundColor: COLORS.LIGHT_BG,
+                    borderColor: COLORS.SEPARATOR 
+                  }}>
               <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 sm:gap-4">
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   <Button
                     variant="outline"
                     onClick={aujourdhui}
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm"
+                    className="text-xs sm:text-sm"
+                    style={{ 
+                      borderColor: COLORS.PRIMARY_DARK,
+                      color: COLORS.PRIMARY_DARK
+                    }}
                   >
                     Aujourd'hui
                   </Button>
-                  <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-lg p-1 border border-gray-200">
-                    <Button variant="ghost" size="icon" onClick={precedenteSemaine} className="w-8 h-8">
+                  <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-lg p-1 border"
+                       style={{ borderColor: COLORS.SEPARATOR }}>
+                    <Button variant="ghost" size="icon" onClick={precedenteSemaine} 
+                            className="w-8 h-8 hover:bg-gray-100">
                       <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={semaineSuivante} className="w-8 h-8">
+                    <Button variant="ghost" size="icon" onClick={semaineSuivante} 
+                            className="w-8 h-8 hover:bg-gray-100">
                       <ChevronRight size={14} className="sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                   <select
-                    className="p-2 border border-gray-200 rounded-lg bg-white shadow-sm text-xs sm:text-sm"
+                    className="p-2 border rounded-lg bg-white shadow-sm text-xs sm:text-sm"
+                    style={{ borderColor: COLORS.SEPARATOR }}
                     value={vue}
                     onChange={(e) => setVue(e.target.value)}
                   >
@@ -914,17 +1010,23 @@ const AgendaPage = () => {
                   <Button
                     variant="outline"
                     onClick={chargerEvenements}
-                    className="border-green-200 text-green-600 hover:bg-green-50 text-xs sm:text-sm"
+                    className="text-xs sm:text-sm"
+                    style={{ 
+                      borderColor: COLORS.LOGO,
+                      color: COLORS.LOGO
+                    }}
                   >
                     <RefreshCw size={14} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Actualiser
                   </Button>
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-start md:items-center pt-4 border-t border-gray-200/50">
+              <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-start md:items-center pt-4 border-t"
+                   style={{ borderColor: COLORS.SEPARATOR }}>
                 <div className="flex-1 grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3">
                   <select
-                    className="p-2 border border-gray-200 rounded-lg text-xs sm:text-sm bg-white shadow-sm"
+                    className="p-2 border rounded-lg text-xs sm:text-sm bg-white shadow-sm"
+                    style={{ borderColor: COLORS.SEPARATOR }}
                     value={filtres.type}
                     onChange={(e) =>
                       setFiltres({ ...filtres, type: e.target.value })
@@ -939,7 +1041,8 @@ const AgendaPage = () => {
                   </select>
 
                   <select
-                    className="p-2 border border-gray-200 rounded-lg text-xs sm:text-sm bg-white shadow-sm"
+                    className="p-2 border rounded-lg text-xs sm:text-sm bg-white shadow-sm"
+                    style={{ borderColor: COLORS.SEPARATOR }}
                     value={filtres.statut}
                     onChange={(e) =>
                       setFiltres({ ...filtres, statut: e.target.value })
@@ -957,6 +1060,7 @@ const AgendaPage = () => {
                     type="date"
                     placeholder="Date début"
                     className="text-xs sm:text-sm bg-white"
+                    style={{ borderColor: COLORS.SEPARATOR }}
                     value={filtres.dateDebut}
                     onChange={(e) =>
                       setFiltres({ ...filtres, dateDebut: e.target.value })
@@ -967,6 +1071,7 @@ const AgendaPage = () => {
                     type="date"
                     placeholder="Date fin"
                     className="text-xs sm:text-sm bg-white"
+                    style={{ borderColor: COLORS.SEPARATOR }}
                     value={filtres.dateFin}
                     onChange={(e) =>
                       setFiltres({ ...filtres, dateFin: e.target.value })
@@ -986,7 +1091,11 @@ const AgendaPage = () => {
                       filtreDate: "TOUT",
                     })
                   }
-                  className="border-red-200 text-red-600 hover:bg-red-50 text-xs sm:text-sm mt-2 sm:mt-0"
+                  className="text-xs sm:text-sm mt-2 sm:mt-0"
+                  style={{ 
+                    borderColor: COLORS.SEPARATOR,
+                    color: COLORS.SECONDARY_TEXT 
+                  }}
                 >
                   <Filter size={14} className="sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Réinitialiser
@@ -996,8 +1105,12 @@ const AgendaPage = () => {
 
             {/* Calendrier Semaine - Version Responsive */}
             {vue === "semaine" && (
-              <Card className="p-3 sm:p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50 overflow-x-auto">
-                {/* En-tête des jours - Version mobile compacte */}
+              <Card className="p-3 sm:p-6 backdrop-blur-sm border overflow-x-auto"
+                    style={{ 
+                      backgroundColor: COLORS.LIGHT_BG,
+                      borderColor: COLORS.SEPARATOR 
+                    }}>
+                {/* En-tête des jours */}
                 <div className="grid grid-cols-8 gap-1 sm:gap-2 mb-4 sm:mb-6 min-w-[800px]">
                   <div className="p-2 sm:p-3"></div>
                   {joursSemaine.map((date, index) => {
@@ -1012,9 +1125,15 @@ const AgendaPage = () => {
                         key={index}
                         className={`p-2 sm:p-3 sm:p-4 text-center rounded-lg sm:rounded-xl transition-all cursor-pointer ${
                           estAujourdhui
-                            ? "bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-lg transform -translate-y-1"
-                            : "bg-white border border-gray-200 hover:shadow-md"
+                            ? "text-white shadow-lg transform -translate-y-1"
+                            : "border hover:shadow-md"
                         } ${hasMultipleEvents ? "ring-1 sm:ring-2 ring-yellow-400" : ""}`}
+                        style={estAujourdhui ? {
+                          backgroundColor: COLORS.PRIMARY_DARK
+                        } : {
+                          backgroundColor: COLORS.LIGHT_BG,
+                          borderColor: COLORS.SEPARATOR
+                        }}
                         onClick={(e) => {
                           if (hasMultipleEvents) {
                             ouvrirPopupDate(
@@ -1027,8 +1146,9 @@ const AgendaPage = () => {
                       >
                         <div
                           className={`font-semibold capitalize mb-1 text-xs sm:text-sm ${
-                            estAujourdhui ? "text-white" : "text-gray-600"
+                            estAujourdhui ? "text-white" : ""
                           }`}
+                          style={!estAujourdhui ? { color: COLORS.SECONDARY_TEXT } : {}}
                         >
                           {date.toLocaleDateString("fr-FR", {
                             weekday: "short",
@@ -1057,14 +1177,16 @@ const AgendaPage = () => {
                   })}
                 </div>
 
-                {/* Grille horaire améliorée et responsive */}
+                {/* Grille horaire */}
                 <div className="relative min-w-[800px]">
                   {heuresJournee.map((heure) => (
                     <div
                       key={heure}
-                      className="flex border-t border-gray-200/50"
+                      className="flex border-t"
+                      style={{ borderColor: COLORS.SEPARATOR }}
                     >
-                      <div className="w-16 sm:w-20 py-3 sm:py-4 pr-2 sm:pr-4 text-right text-xs sm:text-sm text-gray-500 font-medium">
+                      <div className="w-16 sm:w-20 py-3 sm:py-4 pr-2 sm:pr-4 text-right text-xs sm:text-sm font-medium"
+                           style={{ color: COLORS.SECONDARY_TEXT }}>
                         {heure.toString().padStart(2, "0")}:00
                       </div>
 
@@ -1081,7 +1203,8 @@ const AgendaPage = () => {
                         return (
                           <div
                             key={jourIndex}
-                            className="flex-1 min-h-16 sm:min-h-20 border-l border-gray-200/50 relative group"
+                            className="flex-1 min-h-16 sm:min-h-20 border-l relative group"
+                            style={{ borderColor: COLORS.SEPARATOR }}
                           >
                             {evenementsDuJour.map((evenement, eventIndex) => (
                               <div
@@ -1110,12 +1233,17 @@ const AgendaPage = () => {
             )}
           </div>
 
-          {/* Colonne latérale - Cachée sur mobile quand le menu est fermé */}
+          {/* Colonne latérale */}
           <div className={`space-y-4 sm:space-y-6 ${menuMobileOuvert ? 'block' : 'hidden lg:block'}`}>
             {/* Événements du jour */}
-            <Card className="p-4 sm:p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+            <Card className="p-4 sm:p-6 backdrop-blur-sm border"
+                  style={{ 
+                    backgroundColor: COLORS.LIGHT_BG,
+                    borderColor: COLORS.SEPARATOR 
+                  }}>
               <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2 text-gray-900">
-                <Star size={18} className="sm:w-5 sm:h-5 text-yellow-500" />
+                <Star size={18} className="sm:w-5 sm:h-5" 
+                     style={{ color: COLORS.SECONDARY_TEXT }} />
                 Aujourd'hui
               </h3>
 
@@ -1134,7 +1262,11 @@ const AgendaPage = () => {
                     return (
                       <div
                         key={evenement.id}
-                        className="p-2 sm:p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:shadow-md transition-all bg-white"
+                        className="p-2 sm:p-3 border rounded-lg cursor-pointer hover:shadow-md transition-all bg-white"
+                        style={{ 
+                          borderColor: COLORS.SEPARATOR,
+                          backgroundColor: COLORS.LIGHT_BG
+                        }}
                         onClick={() => ouvrirDetailsEvenement(evenement)}
                       >
                         <div className="flex items-start justify-between mb-1 sm:mb-2">
@@ -1160,17 +1292,23 @@ const AgendaPage = () => {
                           {evenement.titre}
                         </div>
 
-                        {/* NOM DU CLIENT BIEN VISIBLE DANS LA COLONNE LATÉRALE */}
+                        {/* NOM DU CLIENT */}
                         {evenement.client?.nom && (
-                          <div className="flex items-center gap-2 mb-1 p-1 bg-blue-50 rounded border border-blue-100">
-                            <User size={12} className="text-blue-600 flex-shrink-0" />
-                            <span className="text-xs font-semibold text-blue-700">
+                          <div className="flex items-center gap-2 mb-1 p-1 rounded border"
+                               style={{ 
+                                 backgroundColor: `${COLORS.PRIMARY_DARK}10`,
+                                 borderColor: `${COLORS.PRIMARY_DARK}30`
+                               }}>
+                            <User size={12} className="flex-shrink-0" 
+                                  style={{ color: COLORS.PRIMARY_DARK }} />
+                            <span className="text-xs font-semibold"
+                                  style={{ color: COLORS.PRIMARY_DARK }}>
                               {evenement.client.nom}
                             </span>
                           </div>
                         )}
 
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs" style={{ color: COLORS.SECONDARY_TEXT }}>
                           {TYPES_EVENEMENTS[evenement.type]?.label ||
                             evenement.type}
                         </div>
@@ -1182,10 +1320,12 @@ const AgendaPage = () => {
                   (evenement) =>
                     evenement.date === new Date().toISOString().split("T")[0]
                 ).length === 0 && (
-                  <div className="text-center py-6 sm:py-8 text-gray-500">
+                  <div className="text-center py-6 sm:py-8"
+                       style={{ color: COLORS.SECONDARY_TEXT }}>
                     <CalendarIcon
                       size={24}
-                      className="sm:w-8 sm:h-8 mx-auto mb-2 text-gray-300"
+                      className="sm:w-8 sm:h-8 mx-auto mb-2"
+                      style={{ color: COLORS.SEPARATOR }}
                     />
                     <p className="text-sm sm:text-base">Aucun événement aujourd'hui</p>
                   </div>
@@ -1194,7 +1334,11 @@ const AgendaPage = () => {
             </Card>
 
             {/* Types d'événements */}
-            <Card className="p-4 sm:p-6 bg-white/80 backdrop-blur-sm border border-gray-200/50">
+            <Card className="p-4 sm:p-6 backdrop-blur-sm border"
+                  style={{ 
+                    backgroundColor: COLORS.LIGHT_BG,
+                    borderColor: COLORS.SEPARATOR 
+                  }}>
               <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900">
                 Types d'événements
               </h3>
@@ -1209,9 +1353,13 @@ const AgendaPage = () => {
                       key={key}
                       className={`flex items-center justify-between p-2 sm:p-3 rounded-lg cursor-pointer transition-all ${
                         isActive
-                          ? "bg-blue-50 border border-blue-200"
+                          ? "border"
                           : "hover:bg-gray-50 border border-transparent"
                       }`}
+                      style={isActive ? {
+                        backgroundColor: `${COLORS.PRIMARY_DARK}10`,
+                        borderColor: COLORS.PRIMARY_DARK
+                      } : {}}
                       onClick={() =>
                         setFiltres((prev) => ({
                           ...prev,
@@ -1228,13 +1376,17 @@ const AgendaPage = () => {
                               .replace("-500", ""),
                           }}
                         />
-                        <span className="text-xs sm:text-sm font-medium text-gray-700">
+                        <span className="text-xs sm:text-sm font-medium"
+                              style={{ color: COLORS.SECONDARY_TEXT }}>
                           {type.label}
                         </span>
                       </div>
                       <Badge
                         variant="secondary"
-                        className={`text-xs ${isActive ? "bg-blue-500 text-white" : ""}`}
+                        className={`text-xs ${isActive ? "text-white" : ""}`}
+                        style={isActive ? {
+                          backgroundColor: COLORS.PRIMARY_DARK
+                        } : {}}
                       >
                         {count}
                       </Badge>
