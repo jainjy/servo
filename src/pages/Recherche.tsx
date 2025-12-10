@@ -120,6 +120,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const [nearbyPoints, setNearbyPoints] = useState<MapPoint[]>([]); // Points dans un rayon de 5km
   const [showNearbyModal, setShowNearbyModal] = useState(false); // Modal pour les points proches
   const [nearbyLoading, setNearbyLoading] = useState(false); // Loading pour la recherche 5km
+  const [hasPositionBeenFetched, setHasPositionBeenFetched] = useState(false); // Nouvel état pour suivre si la position a été récupérée
   // ===================================================
 
   // Contexte panier
@@ -196,8 +197,6 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     return R * c;
   };
 
-
-
   // Fonction pour filtrer les points sur la carte
   const filterMapPoints = useCallback((points: MapPoint[], filters: MapFilters, searchQuery: string = "") => {
     let filtered = points;
@@ -268,51 +267,92 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     }
   };
 
-  // Fonction pour obtenir la géolocalisation utilisateur
-  const handleGetUserLocation = () => {
-    if (!navigator.geolocation) {
-      setMapError("La géolocalisation n'est pas supportée par votre navigateur.");
+  // Fonction pour obtenir la géolocalisation utilisateur (MANUELLE)
+// Fonction pour obtenir la géolocalisation utilisateur (MANUELLE uniquement)
+const handleGetUserLocation = () => {
+  // Empêcher les appels multiples si déjà en cours
+  if (geoLoading) return;
+  
+  // Vérifier si la position a déjà été récupérée
+  if (userLocation && hasPositionBeenFetched) {
+    // Recentrer simplement sur la position existante
+    window.dispatchEvent(new CustomEvent('centerMap', { 
+      detail: { 
+        location: userLocation,
+        zoom: 14,
+        smooth: true
+      } 
+    }));
+    return;
+  }
+  
+  if (!navigator.geolocation) {
+    setMapError("La géolocalisation n'est pas supportée par votre navigateur.");
+    setUserLocation([-21.1351, 55.2471]);
+    handleCenterToReunion();
+    return;
+  }
+
+  setGeoLoading(true);
+  setMapError(null);
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      setUserLocation([latitude, longitude]);
+      setHasPositionBeenFetched(true); // Marquer que la position a été récupérée
+      setGeoLoading(false);
+      
+      // Centrer la carte sur la position utilisateur
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('centerMap', { 
+          detail: { 
+            location: [latitude, longitude],
+            zoom: 14,
+            smooth: true
+          } 
+        }));
+      }, 300);
+    },
+    (error) => {
+      console.error("Erreur géolocalisation:", error);
+      setGeoLoading(false);
+      setMapError("Impossible d'obtenir votre position. Carte centrée sur la Réunion.");
       setUserLocation([-21.1351, 55.2471]);
       handleCenterToReunion();
-      return;
+    },
+    {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 300000,
     }
+  );
+};
 
-    setGeoLoading(true);
-    setMapError(null);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation([latitude, longitude]);
-        setGeoLoading(false);
-        
-        // Centrer la carte sur la position utilisateur
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('centerMap', { 
-            detail: { 
-              location: [latitude, longitude],
-              zoom: 14,
-              smooth: true
-            } 
-          }));
-        }, 300);
-      },
-      (error) => {
-        console.error("Erreur géolocalisation:", error);
-        setGeoLoading(false);
-        setMapError("Impossible d'obtenir votre position. Carte centrée sur la Réunion.");
-        setUserLocation([-21.1351, 55.2471]);
-        handleCenterToReunion();
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 300000,
-      }
-    );
+  // Fonction pour réinitialiser la position (bouton actualiser)
+  const handleRefreshLocation = () => {
+    // Réinitialiser l'état pour permettre une nouvelle récupération
+    setUserLocation(null);
+    setHasPositionBeenFetched(false);
+    setGeoLoading(false);
+    
+    // Optionnel : centrer sur la Réunion
+    handleCenterToReunion();
   };
 
- 
+  // Fonction pour ouvrir le modal de la carte
+  // Fonction pour ouvrir le modal de la carte SANS récupérer la position automatiquement
+const handleShowMapModal = () => {
+  setShowMapModal(true);
+  
+  // IMPORTANT: NE PAS récupérer la position automatiquement
+  // La position ne sera récupérée QUE lorsque l'utilisateur cliquera sur le bouton "Obtenir ma position"
+  
+  // Optionnel : centrer sur la Réunion par défaut
+  setTimeout(() => {
+    handleCenterToReunion();
+  }, 100);
+};
 
   // Ajoutez après l'effet de chargement des données de carte
   useEffect(() => {
@@ -1274,7 +1314,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
           <span className="text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
             {filteredMapPoints.length} points
           </span>
-          {userLocation && (
+          {userLocation && hasPositionBeenFetched && (
             <span className="text-xs md:text-sm bg-green-100 text-green-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
               Position active
             </span>
@@ -1287,7 +1327,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
           {filteredMapPoints.length}
         </span>
-        {userLocation && (
+        {userLocation && hasPositionBeenFetched && (
           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
             Position
           </span>
@@ -1295,19 +1335,49 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       </div>
       
       <div className="flex items-center gap-1 md:gap-2">
-        <button
-          onClick={handleGetUserLocation}
-          disabled={geoLoading}
-          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
-          title="Ma position"
-        >
-          {geoLoading ? (
-            <Loader className="h-4 w-4 md:h-5 md:w-5 text-purple-600 animate-spin" />
-          ) : (
-            <MapPin className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
-          )}
-        </button>
-        
+        {/* Bouton pour obtenir la position (une seule fois) */}
+       {/* Bouton pour obtenir la position (une seule fois) */}
+{!userLocation ? (
+  <button
+    onClick={handleGetUserLocation}
+    disabled={geoLoading}
+    className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+    title={geoLoading ? "Récupération..." : "Obtenir ma position"}
+  >
+    {geoLoading ? (
+      <Loader className="h-4 w-4 md:h-5 md:w-5 text-purple-600 animate-spin" />
+    ) : (
+      <MapPin className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
+    )}
+  </button>
+) : (
+  /* Bouton pour actualiser la position */
+  <div className="flex items-center gap-1">
+    <button
+      onClick={() => {
+        // Recentrer sur la position
+        window.dispatchEvent(new CustomEvent('centerMap', { 
+          detail: { 
+            location: userLocation,
+            zoom: 14,
+            smooth: true
+          } 
+        }));
+      }}
+      className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+      title="Me recentrer"
+    >
+      <PositionIcon className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
+    </button>
+    <button
+      onClick={handleRefreshLocation}
+      className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+      title="Actualiser ma position"
+    >
+      <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+    </button>
+  </div>
+)}
         <button
           onClick={handleCenterToReunion}
           className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1412,7 +1482,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
     {/* Bouton pour réafficher la carte si cachée */}
     {!showMapModal && (
       <button
-        onClick={() => setShowMapModal(true)}
+        onClick={handleShowMapModal}
         className="fixed z-40 p-3 bg-logo hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors
           // Mobile: plus petit
           bottom-4 right-4
