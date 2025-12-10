@@ -2030,12 +2030,16 @@ const Header = () => {
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       {/* Logout Confirmation Dialog */}
       {isLogoutDialogOpen && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={handleCancelLogout}
           />
+
+          {/* Dialog Content */}
           <div className="relative z-50 w-full max-w-sm bg-[#FFFFFF] rounded-xl shadow-xl overflow-hidden border border-[#D3D3D3] animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
             <div className="flex items-center gap-3 p-6 border-b border-[#D3D3D3] bg-gradient-to-r from-red-50 to-orange-50">
               <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
                 <AlertCircle className="w-6 h-6 text-red-600" />
@@ -2044,29 +2048,33 @@ const Header = () => {
                 <h2 className="text-lg font-semibold text-gray-900">
                   Confirmer la déconnexion
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[#8B4513]">
                   Cette action ne peut pas être annulée
                 </p>
               </div>
             </div>
+
+            {/* Body */}
             <div className="p-6">
-              <p className="text-gray-700 text-sm leading-relaxed">
+              <p className="text-[#8B4513] text-sm leading-relaxed">
                 Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous
                 reconnecter pour accéder à votre compte.
               </p>
             </div>
-            <div className="flex gap-3 p-6 border-t border-[#D3D3D3] bg-gray-50">
+
+            {/* Footer */}
+            <div className="flex gap-3 p-6 border-t border-[#D3D3D3] bg-[#D3D3D3]/20">
               <Button
                 variant="outline"
                 onClick={handleCancelLogout}
-                className="flex-1 border-[#D3D3D3] text-gray-700 hover:bg-gray-100"
+                className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#D3D3D3]/20"
               >
                 Annuler
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleLogout}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-[#FFFFFF]"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Se déconnecter

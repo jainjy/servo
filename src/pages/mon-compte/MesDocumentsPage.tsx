@@ -310,11 +310,26 @@ const MesDocumentsPage = () => {
   const getStatusColor = (statut: string) => {
     switch (statut) {
       case "VALIDE":
-        return "bg-green-500/10 text-green-700 border-green-200";
+        return "bg-[#6B8E23]/10 text-[#556B2F] border-[#6B8E23]"; // primary-dark bg, logo text
       case "EXPIRÉ":
         return "bg-red-500/10 text-red-700 border-red-200";
       case "EN_ATTENTE":
-        return "bg-amber-500/10 text-amber-700 border-amber-200";
+        return "bg-yellow-400/10 text-yellow-700 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getCategoryColor = (categorie: string) => {
+    switch (categorie) {
+      case "identite":
+        return "bg-[#556B2F]/10 text-[#556B2F] border-[#556B2F]"; // logo
+      case "financier":
+        return "bg-[#6B8E23]/10 text-[#6B8E23] border-[#6B8E23]"; // primary-dark
+      case "immobilier":
+        return "bg-[#8B4513]/10 text-[#8B4513] border-[#8B4513]"; // secondary-text
+      case "juridique":
+        return "bg-[#D3D3D3]/10 text-[#556B2F] border-[#D3D3D3]"; // separator
       default:
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
@@ -345,21 +360,6 @@ const MesDocumentsPage = () => {
         return <Shield className="h-4 w-4" />;
       default:
         return <File className="h-4 w-4" />;
-    }
-  };
-
-  const getCategoryColor = (categorie: string) => {
-    switch (categorie) {
-      case "identite":
-        return "bg-blue-500/10 text-blue-700 border-blue-200";
-      case "financier":
-        return "bg-purple-500/10 text-purple-700 border-purple-200";
-      case "immobilier":
-        return "bg-orange-500/10 text-orange-700 border-orange-200";
-      case "juridique":
-        return "bg-red-500/10 text-red-700 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
     }
   };
 
@@ -467,8 +467,8 @@ const MesDocumentsPage = () => {
       <div className="container mx-auto px-4 py-8 pt-20">
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Chargement de vos documents...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6B8E23] mx-auto mb-4"></div>
+            <p className="text-[#556B2F]">Chargement de vos documents...</p>
           </div>
         </div>
       </div>
@@ -476,13 +476,13 @@ const MesDocumentsPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-20">
+    <div className="container mx-auto px-4 py-8 pt-20 bg-[#FFFFFF]">
       {/* En-tête */}
       <div className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start md:items-center mb-4">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-gray-900">Mes Documents</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-[#556B2F]">Mes Documents</h1>
+            <p className="text-[#8B4513]">
               Gérez tous vos documents personnels stockés en sécurité
             </p>
           </div>
@@ -491,7 +491,7 @@ const MesDocumentsPage = () => {
               variant="outline"
               size="sm"
               onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-              className="hidden md:grid"
+              className="hidden md:grid border-[#D3D3D3] text-[#556B2F]"
             >
               {viewMode === "grid" ? (
                 <>
@@ -508,7 +508,7 @@ const MesDocumentsPage = () => {
             <Button
               asChild
               disabled={uploading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
             >
               <label htmlFor="file-upload" className="cursor-pointer">
                 <Upload className="h-4 w-4 mr-2" />
@@ -525,37 +525,36 @@ const MesDocumentsPage = () => {
             />
           </div>
         </div>
-
         {/* Statistiques */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <Card className="bg-[#FFFFFF] border-[#D3D3D3]">
               <CardContent className="p-4">
                 <div className="grid grid-cols-[1fr_auto] items-center">
                   <div>
-                    <p className="text-sm font-medium text-blue-700">Total</p>
-                    <p className="text-2xl font-bold text-blue-900">{stats.total}</p>
+                    <p className="text-sm font-medium text-[#556B2F]">Total</p>
+                    <p className="text-2xl font-bold text-[#6B8E23]">{stats.total}</p>
                   </div>
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <FileText className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 bg-[#556B2F]/20 rounded-lg">
+                    <FileText className="h-6 w-6 text-[#556B2F]" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <Card className="bg-[#FFFFFF] border-[#D3D3D3]">
               <CardContent className="p-4">
                 <div className="grid grid-cols-[1fr_auto] items-center">
                   <div>
-                    <p className="text-sm font-medium text-green-700">Valides</p>
-                    <p className="text-2xl font-bold text-green-900">{stats.parStatut.VALIDE}</p>
+                    <p className="text-sm font-medium text-[#6B8E23]">Valides</p>
+                    <p className="text-2xl font-bold text-[#556B2F]">{stats.parStatut.VALIDE}</p>
                   </div>
-                  <div className="p-2 bg-green-500/20 rounded-lg">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  <div className="p-2 bg-[#6B8E23]/20 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-[#6B8E23]" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+            <Card className="bg-[#FFFFFF] border-[#D3D3D3]">
               <CardContent className="p-4">
                 <div className="grid grid-cols-[1fr_auto] items-center">
                   <div>
@@ -568,15 +567,15 @@ const MesDocumentsPage = () => {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+            <Card className="bg-[#FFFFFF] border-[#D3D3D3]">
               <CardContent className="p-4">
                 <div className="grid grid-cols-[1fr_auto] items-center">
                   <div>
-                    <p className="text-sm font-medium text-amber-700">En attente</p>
-                    <p className="text-2xl font-bold text-amber-900">{stats.parStatut.EN_ATTENTE}</p>
+                    <p className="text-sm font-medium text-yellow-700">En attente</p>
+                    <p className="text-2xl font-bold text-yellow-900">{stats.parStatut.EN_ATTENTE}</p>
                   </div>
-                  <div className="p-2 bg-amber-500/20 rounded-lg">
-                    <Clock className="h-6 w-6 text-amber-600" />
+                  <div className="p-2 bg-yellow-400/20 rounded-lg">
+                    <Clock className="h-6 w-6 text-yellow-600" />
                   </div>
                 </div>
               </CardContent>
@@ -584,26 +583,24 @@ const MesDocumentsPage = () => {
           </div>
         )}
       </div>
-
       {/* Barre de recherche et filtres */}
-      <Card className="mb-8 shadow-sm">
+      <Card className="mb-8 shadow-sm border-[#D3D3D3] bg-[#FFFFFF]">
         <CardContent className="p-6">
           <div className="space-y-6">
             {/* Première ligne : Recherche et tri */}
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start md:items-center">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] h-4 w-4" />
                 <Input
                   placeholder="Rechercher un document, une description ou un tag..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-gray-50"
+                  className="pl-10 bg-[#FFFFFF] text-[#556B2F] border-[#D3D3D3]"
                 />
               </div>
-
               <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full border-[#D3D3D3] text-[#556B2F]">
                     <SelectValue placeholder="Trier par" />
                   </SelectTrigger>
                   <SelectContent>
@@ -613,25 +610,23 @@ const MesDocumentsPage = () => {
                     <SelectItem value="nameDesc">Nom (Z-A)</SelectItem>
                   </SelectContent>
                 </Select>
-
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="shrink-0"
+                  className="shrink-0 border-[#D3D3D3] text-[#556B2F]"
                 >
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-
             {/* Filtres rapides */}
             <div className="grid grid-cols-1 sm:grid-cols-[auto_auto_1fr] gap-2 items-center">
               <Select
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-[#D3D3D3] text-[#556B2F]">
                   <SelectValue placeholder="Catégorie" />
                 </SelectTrigger>
                 <SelectContent>
@@ -642,12 +637,11 @@ const MesDocumentsPage = () => {
                   ))}
                 </SelectContent>
               </Select>
-
               <Select
                 value={selectedStatus}
                 onValueChange={setSelectedStatus}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-[#D3D3D3] text-[#556B2F]">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -658,7 +652,6 @@ const MesDocumentsPage = () => {
                   ))}
                 </SelectContent>
               </Select>
-
               {(searchTerm ||
                 selectedCategory !== "tous" ||
                 selectedStatus !== "tous" ||
@@ -670,17 +663,16 @@ const MesDocumentsPage = () => {
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="text-gray-600 hover:text-gray-900 justify-self-start"
+                  className="text-[#8B4513] hover:text-[#556B2F] justify-self-start"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Effacer les filtres
                 </Button>
               )}
             </div>
-
             {/* Filtres avancés */}
             {showAdvancedFilters && (
-              <div className="p-4 bg-gray-50/50 rounded-lg border border-gray-200">
+              <div className="p-4 bg-[#FFFFFF] rounded-lg border border-[#D3D3D3]">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date-start" className="text-sm font-medium">
@@ -757,11 +749,10 @@ const MesDocumentsPage = () => {
           </div>
         </CardContent>
       </Card>
-
       {/* Onglets */}
       <Tabs defaultValue="tous" className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-center">
-          <TabsList className="w-full sm:w-auto">
+          <TabsList className="w-full sm:w-auto bg-[#FFFFFF] border-[#D3D3D3]">
             <TabsTrigger value="tous" className="flex-1 sm:flex-none">
               Tous ({filteredDocuments.length})
             </TabsTrigger>
@@ -774,13 +765,11 @@ const MesDocumentsPage = () => {
               Stats
             </TabsTrigger>
           </TabsList>
-
-          <div className="grid grid-cols-[auto_1fr] gap-2 items-center text-sm text-gray-600">
+          <div className="grid grid-cols-[auto_1fr] gap-2 items-center text-sm text-[#556B2F]">
             <FileText className="h-4 w-4" />
             <span>{sortedDocuments.length} document{sortedDocuments.length !== 1 ? 's' : ''} trouvé{sortedDocuments.length !== 1 ? 's' : ''}</span>
           </div>
         </div>
-
         {/* Tous les documents */}
         <TabsContent value="tous" className="space-y-4">
           {sortedDocuments.length === 0 ? (
@@ -859,7 +848,6 @@ const MesDocumentsPage = () => {
             </div>
           )}
         </TabsContent>
-
         {/* Documents expirant bientôt */}
         <TabsContent value="expirant" className="space-y-4">
           {expiringSoonDocuments.length === 0 ? (
@@ -902,7 +890,6 @@ const MesDocumentsPage = () => {
             </div>
           )}
         </TabsContent>
-
         {/* Statistiques */}
         <TabsContent value="statistiques">
           {stats && (
@@ -938,7 +925,6 @@ const MesDocumentsPage = () => {
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold mb-6 pb-3 border-b">
@@ -996,7 +982,6 @@ const MesDocumentsPage = () => {
           )}
         </TabsContent>
       </Tabs>
-
       {/* Modals */}
       <UploadModal
         open={isUploadModalOpen}
@@ -1006,7 +991,6 @@ const MesDocumentsPage = () => {
         uploading={uploading}
         uploadProgress={uploadProgress}
       />
-
       <EditModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
@@ -1613,7 +1597,11 @@ const DocumentCardGrid = ({
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-3">
           <div className="text-xl sm:text-2xl">{getFileIcon()}</div>
           <div>
-            <Badge className={`${getStatusColor(document.statut)} text-xs sm:text-sm`}>
+            <Badge
+              className={`${getStatusColor(
+                document.statut
+              )} text-xs sm:text-sm`}
+            >
               <span className="grid grid-cols-[auto_1fr] items-center gap-1">
                 {getStatusIcon(document.statut)}
                 <span className="hidden sm:inline">{document.statut}</span>
@@ -1621,7 +1609,7 @@ const DocumentCardGrid = ({
               </span>
             </Badge>
           </div>
-          
+
           <div className="relative">
             <Button
               variant="ghost"
@@ -1631,11 +1619,11 @@ const DocumentCardGrid = ({
             >
               <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
-            
+
             {showActions && (
               <>
-                <div 
-                  className="fixed inset-0 z-40" 
+                <div
+                  className="fixed inset-0 z-40"
                   onClick={() => setShowActions(false)}
                 />
                 <div className="absolute right-0 top-8 z-50 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
@@ -1690,14 +1678,24 @@ const DocumentCardGrid = ({
         {/* Métadonnées */}
         <div className="grid gap-2 sm:gap-3">
           <div className="grid grid-cols-[auto_auto] gap-1 sm:gap-2">
-            <Badge variant="outline" className={`${getCategoryColor(document.categorie)} text-xs sm:text-sm`}>
+            <Badge
+              variant="outline"
+              className={`${getCategoryColor(
+                document.categorie
+              )} text-xs sm:text-sm`}
+            >
               <span className="grid grid-cols-[auto_1fr] items-center gap-1">
                 {getCategoryIcon(document.categorie)}
                 <span className="hidden sm:inline">{document.categorie}</span>
-                <span className="sm:hidden">{document.categorie.slice(0, 3)}</span>
+                <span className="sm:hidden">
+                  {document.categorie.slice(0, 3)}
+                </span>
               </span>
             </Badge>
-            <Badge variant="secondary" className="text-xs">
+            <Badge
+              variant="secondary"
+              className="text-xs hidden sm:inline-flex"
+            >
               {document.format.toUpperCase().slice(0, 3)}
             </Badge>
           </div>
@@ -1705,7 +1703,7 @@ const DocumentCardGrid = ({
           <div className="grid grid-cols-2 gap-1 sm:gap-2 text-xs sm:text-sm">
             <div className="text-gray-600">Taille:</div>
             <div className="font-medium truncate">{formatFileSize()}</div>
-            
+
             <div className="text-gray-600">Ajouté:</div>
             <div className="font-medium">
               {format(new Date(document.dateUpload), "dd/MM/yy")}
@@ -1713,9 +1711,20 @@ const DocumentCardGrid = ({
           </div>
 
           {document.dateExpiration && (
-            <div className={`grid grid-cols-[auto_1fr] items-center gap-1 sm:gap-2 text-xs sm:text-sm ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
+            <div
+              className={`grid grid-cols-[auto_1fr] items-center gap-1 sm:gap-2 text-xs sm:text-sm ${
+                isExpired
+                  ? "text-red-600"
+                  : isExpiringSoon
+                  ? "text-amber-600"
+                  : "text-gray-600"
+              }`}
+            >
               <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Expire le {format(new Date(document.dateExpiration), "dd/MM/yy")}</span>
+              <span>
+                Expire le{" "}
+                {format(new Date(document.dateExpiration), "dd/MM/yy")}
+              </span>
             </div>
           )}
         </div>
@@ -1744,7 +1753,7 @@ const DocumentCardGrid = ({
           <Button
             variant="default"
             size="sm"
-            className="h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+            className="h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r from-[#556B2F] to-[#556F1F] hover:bg-[#6B8E23]"
             onClick={onDownload}
             disabled={isDownloading}
           >
@@ -1762,7 +1771,7 @@ const DocumentCardGrid = ({
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             className="h-8 w-8 sm:h-9 sm:w-9 p-0 grid place-items-center"
             onClick={onView}
           >
@@ -1810,21 +1819,27 @@ const DocumentCardList = ({
     new Date(document.dateExpiration) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
   return (
-    <Card className={`group hover:shadow-md transition-all duration-200 border-l-4 ${
-      highlightExpiring && isExpiringSoon && !isExpired 
-        ? 'border-l-amber-500' 
-        : isExpired 
-        ? 'border-l-red-500' 
-        : 'border-l-gray-200'
-    } hover:border-l-blue-500`}>
+    <Card
+      className={`group hover:shadow-md transition-all duration-200 border-l-4 ${
+        highlightExpiring && isExpiringSoon && !isExpired
+          ? "border-l-amber-500"
+          : isExpired
+          ? "border-l-red-500"
+          : "border-l-gray-200"
+      } hover:border-l-blue-500`}
+    >
       <CardContent className="p-3 sm:p-4">
         <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-3 sm:gap-4">
           {/* Partie gauche : Icône */}
-          <div className={`p-2 sm:p-3 rounded-lg ${
-            isExpired ? 'bg-red-100' : 
-            highlightExpiring && isExpiringSoon ? 'bg-amber-100' : 
-            'bg-blue-100'
-          } grid place-items-center`}>
+          <div
+            className={`p-2 sm:p-3 rounded-lg ${
+              isExpired
+                ? "bg-red-100"
+                : highlightExpiring && isExpiringSoon
+                ? "bg-amber-100"
+                : "bg-blue-100"
+            } grid place-items-center`}
+          >
             <div className="text-lg sm:text-xl">{getFileIcon()}</div>
           </div>
 
@@ -1834,7 +1849,7 @@ const DocumentCardList = ({
               <h3 className="font-semibold text-base sm:text-lg truncate hover:text-blue-600">
                 {document.nom}
               </h3>
-              
+
               {document.description && (
                 <p className="text-gray-600 text-xs sm:text-sm line-clamp-1">
                   {document.description}
@@ -1843,23 +1858,39 @@ const DocumentCardList = ({
             </div>
 
             <div className="grid grid-cols-[auto_auto] sm:grid-cols-[auto_auto_auto] gap-1.5 sm:gap-2 items-center">
-              <Badge className={`${getStatusColor(document.statut)} text-xs sm:text-sm`}>
+              <Badge
+                className={`${getStatusColor(
+                  document.statut
+                )} text-xs sm:text-sm`}
+              >
                 <span className="grid grid-cols-[auto_1fr] items-center gap-1">
                   {getStatusIcon(document.statut)}
                   <span className="hidden sm:inline">{document.statut}</span>
-                  <span className="sm:hidden">{document.statut.slice(0, 3)}</span>
+                  <span className="sm:hidden">
+                    {document.statut.slice(0, 3)}
+                  </span>
                 </span>
               </Badge>
-              
-              <Badge variant="outline" className={`${getCategoryColor(document.categorie)} text-xs sm:text-sm`}>
+
+              <Badge
+                variant="outline"
+                className={`${getCategoryColor(
+                  document.categorie
+                )} text-xs sm:text-sm`}
+              >
                 <span className="grid grid-cols-[auto_1fr] items-center gap-1">
                   {getCategoryIcon(document.categorie)}
                   <span className="hidden sm:inline">{document.categorie}</span>
-                  <span className="sm:hidden">{document.categorie.slice(0, 3)}</span>
+                  <span className="sm:hidden">
+                    {document.categorie.slice(0, 3)}
+                  </span>
                 </span>
               </Badge>
-              
-              <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
+
+              <Badge
+                variant="secondary"
+                className="text-xs hidden sm:inline-flex"
+              >
                 {document.format.toUpperCase()}
               </Badge>
             </div>
@@ -1877,10 +1908,19 @@ const DocumentCardList = ({
                 {format(new Date(document.dateUpload), "dd/MM/yy")}
               </span>
               {document.dateExpiration && (
-                <span className={`grid grid-cols-[auto_1fr] items-center gap-1 ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-amber-600' : 'text-gray-600'}`}>
+                <span
+                  className={`grid grid-cols-[auto_1fr] items-center gap-1 ${
+                    isExpired
+                      ? "text-red-600"
+                      : isExpiringSoon
+                      ? "text-amber-600"
+                      : "text-gray-600"
+                  }`}
+                >
                   <Calendar className="h-3 w-3" />
                   <span className="hidden sm:inline">
-                    Expire le {format(new Date(document.dateExpiration), "dd/MM/yyyy")}
+                    Expire le{" "}
+                    {format(new Date(document.dateExpiration), "dd/MM/yyyy")}
                   </span>
                   <span className="sm:hidden">
                     {format(new Date(document.dateExpiration), "dd/MM/yy")}
@@ -1915,7 +1955,7 @@ const DocumentCardList = ({
             <Button
               variant="default"
               size="sm"
-              className="h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+              className="h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r bg-[#556B2F] hover:bg-[#6B8E23]"
               onClick={onDownload}
               disabled={isDownloading}
             >
@@ -1931,7 +1971,7 @@ const DocumentCardList = ({
                 </>
               )}
             </Button>
-            
+
             {/* Actions supplémentaires sur mobile */}
             <div className="sm:hidden relative">
               <Button
@@ -1942,11 +1982,11 @@ const DocumentCardList = ({
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </Button>
-              
+
               {showMobileActions && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40" 
+                  <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setShowMobileActions(false)}
                   />
                   <div className="absolute right-0 top-10 z-50 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
@@ -1984,7 +2024,7 @@ const DocumentCardList = ({
                 </>
               )}
             </div>
-            
+
             {/* Actions sur desktop */}
             <div className="hidden sm:grid grid-cols-3 gap-1">
               <Button

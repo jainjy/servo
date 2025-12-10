@@ -134,29 +134,31 @@ export function ProSidebar() {
   const getNotificationColor = (itemName: string) => {
     switch (itemName) {
       case "Mes Commandes":
-        return "bg-orange-500 text-white";
+        return "bg-[#8B4513] text-white";
       case "Messages":
         return "bg-red-500 text-white";
       case "Réservations":
-        return "bg-blue-500 text-white";
+        return "bg-[#556B2F] text-white";
       default:
-        return "bg-gray-500 text-white";
+        return "bg-[#D3D3D3] text-[#8B4513]";
     }
   };
 
   const sidebarContent = (
     <>
       {/* Logo & header */}
-      <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-        <Link to='/pro' className="flex items-center gap-2">
-          <div className="p-1 rounded-full bg-white border-black border-2">
-            <img src={logo} alt="Servo Logo" className="w-10 h-10 rounded-full" />
+      <div className="flex h-16 items-center gap-2 border-b border-[#D3D3D3] px-6">
+        <Link to="/pro" className="flex items-center gap-2">
+          <div className="p-1 rounded-full bg-[#FFFFFF] border-black border-2">
+            <img
+              src={logo}
+              alt="Servo Logo"
+              className="w-10 h-10 rounded-full"
+            />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-sidebar-foreground">
-              SERVO
-            </h1>
-            <p className="text-xs text-muted-foreground">Espace Pro</p>
+            <h1 className="text-lg font-semibold text-gray-900">SERVO</h1>
+            <p className="text-xs text-[#8B4513]">Espace Pro</p>
           </div>
         </Link>
       </div>
@@ -177,16 +179,14 @@ export function ProSidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors group relative",
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  ? "bg-[#6B8E23]/10 text-[#556B2F] shadow-sm"
+                  : "text-gray-900 hover:bg-[#6B8E23]/5 hover:text-[#556B2F]"
               )}
             >
               <item.icon
                 className={cn(
                   "h-4 w-4 transition-transform group-hover:scale-110",
-                  isActive
-                    ? "text-sidebar-accent-foreground"
-                    : "text-muted-foreground"
+                  isActive ? "text-[#556B2F]" : "text-[#8B4513]"
                 )}
               />
               <span className="flex-1">{item.name}</span>
@@ -213,16 +213,20 @@ export function ProSidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-sidebar-border bg-sidebar">
+      <aside className="hidden md:flex w-64 flex-col border-r border-[#D3D3D3] bg-[#FFFFFF]">
         {sidebarContent}
       </aside>
 
       {/* Mobile: header */}
-      <div className="flex md:hidden  items-center h-16 border-b border-sidebar-border px-4  w-screen fixed top-0 left-0 z-40">
+      <div className="flex md:hidden  items-center h-16 border-b border-[#D3D3D3] px-4  w-screen fixed top-0 left-0 z-40">
         <div className="flex items-center gap-2">
-          <Link to='/pro'>
-            <div className="p-1 rounded-full bg-white border-black border-2">
-              <img src={logo} alt="Servo Logo" className="w-8 h-8 rounded-full" />
+          <Link to="/pro">
+            <div className="p-1 rounded-full bg-[#FFFFFF] border-black border-2">
+              <img
+                src={logo}
+                alt="Servo Logo"
+                className="w-8 h-8 rounded-full"
+              />
             </div>
             {/* <div>
               <h1 className="text-sm font-semibold text-sidebar-foreground">
@@ -233,12 +237,11 @@ export function ProSidebar() {
           </Link>
         </div>
 
-
         {/* Bouton menu mobile */}
         <button
           aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           onClick={() => setMenuOpen((v) => !v)}
-          className="ml-auto p-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent"
+          className="ml-auto p-2 rounded-lg text-gray-900 hover:bg-[#6B8E23]/10"
         >
           {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -247,7 +250,7 @@ export function ProSidebar() {
       {/* Mobile: Drawer sidebar */}
       <aside
         className={cn(
-          "fixed bg-white inset-y-0 left-0 top-0 w-64 flex-col border-r border-sidebar-border z-50 transition-transform duration-300 ease-in-out md:hidden",
+          "fixed bg-[#FFFFFF] inset-y-0 left-0 top-0 w-64 flex-col border-r border-[#D3D3D3] z-50 transition-transform duration-300 ease-in-out md:hidden",
           menuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

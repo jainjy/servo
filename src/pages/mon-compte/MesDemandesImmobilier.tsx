@@ -80,22 +80,22 @@ const DemandeImmoCard = ({
     switch (statut?.toLowerCase()) {
       case "en cours":
       case "pending":
-        return `${baseStyles} bg-orange-500/10 text-orange-300 border-orange-500/30`;
+        return `${baseStyles} bg-[#6B8E23]/10 text-[#556B2F] border-[#6B8E23]/20`;
       case "terminé":
       case "completed":
-        return `${baseStyles} bg-green-500/10 text-green-300 border-green-500/30`;
+        return `${baseStyles} bg-[#556B2F]/10 text-[#556B2F] border-[#556B2F]/20`;
       case "annulé":
       case "cancelled":
         return `${baseStyles} bg-red-500/10 text-red-300 border-red-500/30`;
       case "confirmé":
       case "confirmed":
-        return `${baseStyles} bg-blue-500/10 text-blue-300 border-blue-500/30`;
+        return `${baseStyles} bg-[#6B8E23]/10 text-[#556B2F] border-[#6B8E23]/20`;
       default:
-        return `${baseStyles} bg-gray-500/10 text-gray-300 border-gray-500/30`;
+        return `${baseStyles} bg-[#D3D3D3]/10 text-[#8B4513] border-[#D3D3D3]/20`;
     }
   };
   return (
-    <div className=" bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl md:rounded-2xl border border-gray-700 p-4 md:p-6 hover:border-blue-500/50 hover:shadow-2xl transition-all duration-500 group">
+    <div className=" bg-[#FFFFFF] rounded-xl md:rounded-2xl border border-[#D3D3D3] p-4 md:p-6 hover:border-[#6B8E23]/20 hover:shadow-2xl transition-all duration-500 group">
       <div className="flex flex-col space-y-4">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-start gap-3">
@@ -108,13 +108,13 @@ const DemandeImmoCard = ({
               />
             )}
             <div className="flex flex-col">
-              <h3 className="font-bold text-white text-base md:text-xl group-hover:text-blue-400 transition-colors duration-300 line-clamp-1">
+              <h3 className="font-bold text-gray-900 text-base md:text-xl group-hover:text-[#556B2F] transition-colors duration-300 line-clamp-1">
                 {demande.property?.title || "Demande pour un bien"}
               </h3>
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-blue-400" />
-                <span className="text-white font-bold tracking-wider">
-                  <span className="text-white font-bold tracking-wider">
+                <DollarSign className="w-4 h-4 text-[#556B2F]" />
+                <span className="text-gray-900 font-bold tracking-wider">
+                  <span className="text-gray-900 font-bold tracking-wider">
                     {(() => {
                       const price = demande.property?.price;
                       const duration = demande.property?.duration;
@@ -144,15 +144,15 @@ const DemandeImmoCard = ({
               </div>
 
               {/* Localisation */}
-              <div className="mt-2 md:mt-3 flex items-center gap-2 text-gray-300">
-                <MapPin className="w-4 h-4 text-blue-400" />
+              <div className="mt-2 md:mt-3 flex items-center gap-2 text-[#8B4513]">
+                <MapPin className="w-4 h-4 text-[#556B2F]" />
                 <span className="text-xs md:text-sm line-clamp-1">
                   {demande.property?.address || formatLieu()}
                 </span>
               </div>
 
               {/* Description */}
-              <p className="text-gray-400 mt-3 md:mt-4 mb-3 line-clamp-2 md:line-clamp-3 leading-relaxed text-xs md:text-sm">
+              <p className="text-[#8B4513] mt-3 md:mt-4 mb-3 line-clamp-2 md:line-clamp-3 leading-relaxed text-xs md:text-sm">
                 <span className="underline">Déscription </span>: &nbsp;
                 {demande.property?.description || "Aucune description fournie."}
               </p>
@@ -161,12 +161,12 @@ const DemandeImmoCard = ({
 
           {/* Statut et Date */}
           <div className="w-full md:w-auto text-left md:text-right min-w-[unset] md:min-w-[120px]">
-            <div className="flex md:justify-end items-center gap-2 text-gray-400 text-xs md:text-sm mb-2 md:mb-3">
-              <Calendar className="w-4 h-4 text-blue-400" />
+            <div className="flex md:justify-end items-center gap-2 text-[#8B4513] text-xs md:text-sm mb-2 md:mb-3">
+              <Calendar className="w-4 h-4 text-[#556B2F]" />
               <span>{formatDate(demande)}</span>
             </div>
-            <div className="flex md:justify-end items-center gap-2 text-gray-400 text-xs md:text-sm mb-2 md:mb-3">
-              <Clock className="w-4 h-4 text-blue-400" />
+            <div className="flex md:justify-end items-center gap-2 text-[#8B4513] text-xs md:text-sm mb-2 md:mb-3">
+              <Clock className="w-4 h-4 text-[#556B2F]" />
               <span>{formatHeure(demande)}</span>
             </div>
             {/* <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${statutColor(demande.statut)}`}>
@@ -177,7 +177,7 @@ const DemandeImmoCard = ({
         </div>
 
         {/* Separator */}
-        <div className="border-t border-gray-700/50 pt-3 md:pt-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
+        <div className="border-t border-[#D3D3D3] pt-3 md:pt-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
           {/* Action Button */}
           <div className="flex items-center gap-2 order-2 md:order-1">
             <Link
@@ -186,7 +186,7 @@ const DemandeImmoCard = ({
                   ? `/immobilier/${demande.propertyId || demande.property?.id}`
                   : "#"
               }
-              className="group/btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20"
+              className="group/btn bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#6B8E23] hover:to-[#556B2F] text-white px-4 md:px-5 py-2.5 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 border border-[#556B2F]/30 hover:border-[#6B8E23]/50 hover:shadow-lg hover:shadow-[#556B2F]/20"
             >
               <span>Voir le bien</span>
               <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
@@ -207,7 +207,7 @@ const DemandeImmoCard = ({
                       onAddHistory={onAddHistory}
                       onStatusChange={onStatusChange}
                     />
-                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-orange-500 text-white">
+                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-[#6B8E23]/10 text-[#556B2F]">
                       En attente
                     </span>
                   </div>
@@ -223,7 +223,7 @@ const DemandeImmoCard = ({
                       onAddHistory={onAddHistory}
                       onStatusChange={onStatusChange}
                     />
-                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-red-500 text-white">
+                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-red-500/10 text-red-500">
                       Refusée
                     </span>
                   </div>
@@ -243,27 +243,27 @@ const DemandeImmoCard = ({
                       onAddHistory={onAddHistory}
                       onStatusChange={onStatusChange}
                     />
-                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-green-500 text-white">
+                    <span className="px-2.5 py-1 rounded-full text-xs md:text-sm font-semibold bg-[#6B8E23]/10 text-[#556B2F]">
                       Validée
                     </span>
 
                     {/* Informations de contact du propriétaire */}
                     {demande.property?.owner && (
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-2.5 py-1.5 rounded-lg">
+                        <div className="flex items-center gap-2 bg-[#6B8E23]/10 text-[#556B2F] px-2.5 py-1.5 rounded-lg">
                           <Phone className="w-4 h-4" />
                           <span className="text-xs md:text-sm">
                             {demande.property.owner.phone || "Non renseigné"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-2.5 py-1.5 rounded-lg">
+                        <div className="flex items-center gap-2 bg-[#6B8E23]/10 text-[#556B2F] px-2.5 py-1.5 rounded-lg">
                           <Mail className="w-4 h-4" />
                           <span className="text-xs md:text-sm">
                             {demande.property.owner.email || "Non renseigné"}
                           </span>
                         </div>
                         {demande.property.owner.companyName && (
-                          <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-2.5 py-1.5 rounded-lg">
+                          <div className="flex items-center gap-2 bg-[#6B8E23]/10 text-[#556B2F] px-2.5 py-1.5 rounded-lg">
                             <User className="w-4 h-4" />
                             <span className="text-xs md:text-sm">
                               {demande.property.owner.companyName}
@@ -304,7 +304,7 @@ const ResendButton = ({ demande, onStatusChange }: any) => {
       description: "Cliquez confirmer pour renvoyer la demande.",
       action: (
         <button
-          className="px-3 py-1 rounded bg-blue-600 text-white text-sm"
+          className="px-3 py-1 rounded bg-[#556B2F] text-white text-sm"
           onClick={async () => {
             toastRef?.dismiss?.();
             setSending(true);
@@ -339,7 +339,7 @@ const ResendButton = ({ demande, onStatusChange }: any) => {
     <button
       onClick={handleResend}
       disabled={sending}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+      className="bg-[#556B2F] hover:bg-[#6B8E23] text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
     >
       {sending ? "Envoi..." : "Renvoyer"}
     </button>
@@ -667,9 +667,9 @@ const MesDemandesImmobilier = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen mt-12 bg-gray-50 p-6 flex items-center justify-center">
+      <div className="min-h-screen mt-12 bg-[#FFFFFF] p-6 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">
+          <p className="text-[#8B4513]">
             Veuillez vous connecter pour voir vos demandes immobilières.
           </p>
         </div>
@@ -682,20 +682,20 @@ const MesDemandesImmobilier = () => {
   }
 
   return (
-    <div className="min-h-screen mt-12">
+    <div className="min-h-screen mt-12 bg-[#FFFFFF]">
       <div className="flex flex-col gap-6 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex relative overflow-hidden h-24 lg:h-44 w-full items-center gap-3">
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40 backdrop-blur-[1px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#556B2F]/80 via-[#556B2F]/60 to-[#556B2F]/40 backdrop-blur-[1px]"></div>
             {/* Effet de lumière */}
-            <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl transform translate-x-1/3 translate-y-1/3"></div>
+            <div className="absolute top-0 left-0 w-72 h-72 bg-[#6B8E23]/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#556B2F]/10 rounded-full blur-3xl transform translate-x-1/3 translate-y-1/3"></div>
 
             <img
               className="absolute -z-0 w-full opacity-45 object-cover object-center"
               src="https://i.pinimg.com/1200x/23/26/d5/2326d5fc9fdbff00492a8f7c6390a88c.jpg"
             />
-            <h1 className="text-xl lg:text-5xl tracking-wider font-serif font-bold text-slate-100 z-10">
+            <h1 className="text-xl lg:text-5xl tracking-wider font-serif font-bold text-[#FFFFFF] z-10">
               Mes demandes immobilières
             </h1>
           </div>
@@ -728,13 +728,13 @@ const MesDemandesImmobilier = () => {
 
         <div className="flex flex-col space-y-4 px-6 py-2">
           {/* Tabs de filtrage */}
-          <div className="flex items-center space-x-2 bg-white rounded-lg p-1 border border-gray-200 self-stretch md:self-start overflow-x-auto no-scrollbar">
+          <div className="flex items-center space-x-2 bg-[#FFFFFF] rounded-lg p-1 border border-[#D3D3D3] self-stretch md:self-start overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab("all")}
               className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "all"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#556B2F] text-[#FFFFFF]"
+                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
               }`}
             >
               Toutes
@@ -743,8 +743,8 @@ const MesDemandesImmobilier = () => {
               onClick={() => setActiveTab("en_attente")}
               className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "en_attente"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#556B2F] text-[#FFFFFF]"
+                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
               }`}
             >
               En attente
@@ -753,8 +753,8 @@ const MesDemandesImmobilier = () => {
               onClick={() => setActiveTab("validees")}
               className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "validees"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#556B2F] text-[#FFFFFF]"
+                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
               }`}
             >
               Validées
@@ -763,8 +763,8 @@ const MesDemandesImmobilier = () => {
               onClick={() => setActiveTab("refusees")}
               className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "refusees"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#556B2F] text-[#FFFFFF]"
+                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
               }`}
             >
               Refusées
@@ -773,8 +773,8 @@ const MesDemandesImmobilier = () => {
               onClick={() => setActiveTab("archivees")}
               className={`shrink-0 px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors ${
                 activeTab === "archivees"
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#556B2F] text-[#FFFFFF]"
+                  : "text-[#8B4513] hover:bg-[#6B8E23]/10"
               }`}
             >
               Archivées
@@ -796,12 +796,12 @@ const MesDemandesImmobilier = () => {
                   />
                 ))
             ) : (
-              <div className="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+              <div className="col-span-full bg-[#FFFFFF] rounded-2xl border border-[#D3D3D3] p-12 text-center shadow-sm">
                 <h4 className="text-gray-700 text-lg font-medium mb-2">
                   Aucune demande{" "}
                   {activeTab !== "all" ? "dans cette catégorie" : "immobilière"}
                 </h4>
-                <p className="text-gray-500 text-sm mb-6">
+                <p className="text-[#8B4513] text-sm mb-6">
                   {activeTab !== "all"
                     ? "Essayez de sélectionner une autre catégorie"
                     : "Vous n'avez pas encore envoyé de demande liée à un bien."}
@@ -853,33 +853,36 @@ const MesDemandesImmobilier = () => {
             {/* Chargement automatique de l'historique lors de l'ouverture */}
             <div className="mb-3 flex items-center justify-end gap-2">
               {historyLoading && (
-                <div className="text-sm text-gray-500">Chargement...</div>
+                <div className="text-sm text-[#8B4513]">Chargement...</div>
               )}
             </div>
 
             {historyLoading ? (
-              <div className="text-center text-sm text-gray-500">
+              <div className="text-center text-sm text-[#8B4513]">
                 Chargement...
               </div>
             ) : historyItems && historyItems.length > 0 ? (
               <div className="space-y-3 overflow-auto max-h-[70vh]">
                 {historyItems.map((h: any, idx: number) => (
-                  <div key={idx} className="p-3 bg-white rounded-lg border">
+                  <div
+                    key={idx}
+                    className="p-3 bg-[#FFFFFF] rounded-lg border border-[#D3D3D3]"
+                  >
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="text-sm font-medium text-gray-800">
                           {h.title || h.action || h.type || "Événement"}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-[#8B4513] mt-1">
                           {h.message || h.note || h.description || ""}
                         </div>
                         {h._sourceTitre && (
-                          <div className="text-xs text-gray-400 mt-1">
+                          <div className="text-xs text-[#8B4513] mt-1">
                             Source: {h._sourceTitre}
                           </div>
                         )}
                       </div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-[#8B4513]">
                         {h.date
                           ? new Date(h.date).toLocaleString("fr-FR")
                           : h.createdAt
@@ -891,7 +894,7 @@ const MesDemandesImmobilier = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center text-sm text-gray-500">
+              <div className="text-center text-sm text-[#8B4513]">
                 Aucun historique disponible.
               </div>
             )}

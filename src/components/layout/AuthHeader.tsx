@@ -20,7 +20,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AuthService from "@/services/authService";
-import NotificationService, { Notification } from "@/services/notificationService";
+import NotificationService, {
+  Notification,
+} from "@/services/notificationService";
 import { api } from "@/lib/axios";
 
 interface SearchResult {
@@ -45,7 +47,9 @@ export function AuthHeader() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
-  const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>({});
+  const [deletingStates, setDeletingStates] = useState<Record<number, boolean>>(
+    {}
+  );
 
   const searchRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -168,13 +172,22 @@ export function AuthHeader() {
   // Fermer les dropdowns quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setShowResults(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
         setShowNotifications(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setShowUserMenu(false);
       }
     };
@@ -211,7 +224,7 @@ export function AuthHeader() {
         // Recherche utilisateurs
         try {
           const usersResponse = await api.get(`/users`, {
-            params: { search: query }
+            params: { search: query },
           });
           console.log("👥 Réponse utilisateurs:", usersResponse.data);
 
@@ -225,7 +238,9 @@ export function AuthHeader() {
               ...usersData.slice(0, 2).map((user: any) => ({
                 id: user.id,
                 type: "user" as const,
-                title: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Utilisateur",
+                title:
+                  `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+                  "Utilisateur",
                 subtitle: user.email || user.companyName || "Utilisateur",
                 url: `/admin/users/${user.id}`,
                 image: user.avatar,
@@ -239,7 +254,7 @@ export function AuthHeader() {
         // Recherche annonces
         try {
           const listingsResponse = await api.get(`/anonce/affiche_anonce`, {
-            params: { search: query }
+            params: { search: query },
           });
           console.log("🏠 Réponse annonces brute:", listingsResponse.data);
 
@@ -254,9 +269,14 @@ export function AuthHeader() {
                 id: listing.id,
                 type: "listing" as const,
                 title: listing.titre || listing.title || "Annonce",
-                subtitle: `${listing.prixVente || listing.price || "N/A"} Ar • ${listing.type || "Annonce"}`,
+                subtitle: `${
+                  listing.prixVente || listing.price || "N/A"
+                } Ar • ${listing.type || "Annonce"}`,
                 url: `/admin/listings/${listing.id}`,
-                image: listing.image || listing.photos?.[0]?.url || listing.photos?.[0],
+                image:
+                  listing.image ||
+                  listing.photos?.[0]?.url ||
+                  listing.photos?.[0],
               }))
             );
           }
@@ -267,13 +287,15 @@ export function AuthHeader() {
         // Recherche services
         try {
           const servicesResponse = await api.get(`/services`, {
-            params: { search: query }
+            params: { search: query },
           });
           console.log("🔧 Réponse services:", servicesResponse.data);
 
           let servicesData = Array.isArray(servicesResponse.data)
             ? servicesResponse.data
-            : servicesResponse.data?.data || servicesResponse.data?.services || [];
+            : servicesResponse.data?.data ||
+              servicesResponse.data?.services ||
+              [];
 
           if (servicesData && servicesData.length > 0) {
             results.push(
@@ -310,84 +332,94 @@ export function AuthHeader() {
 
     if (success) {
       setNotifications((prev) =>
-        prev.map((n) => n.id === id ? { ...n, read: true } : n)
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
       console.log(`✅ Notification ${id} marquée comme lue avec succès`);
     } else {
-      console.error(`❌ Échec du marquage comme lue pour la notification ${id}`);
+      console.error(
+        `❌ Échec du marquage comme lue pour la notification ${id}`
+      );
     }
   };
 
-const markAllAsRead = async () => {
-  console.log("🟡 Marquage de toutes les notifications comme lues");
-  
-  setIsDeletingAll(true);
-  
-  // Animation avant la mise à jour
-  await new Promise(resolve => setTimeout(resolve, 600));
-  
-  const unreadNotifications = notifications.filter(n => !n.read);
-  
-  if (unreadNotifications.length === 0) {
-    setIsDeletingAll(false);
-    return;
-  }
+  const markAllAsRead = async () => {
+    console.log("🟡 Marquage de toutes les notifications comme lues");
 
-  let successCount = 0;
+    setIsDeletingAll(true);
 
-  // Marquer chaque notification non lue comme lue
-  const results = await Promise.allSettled(
-    unreadNotifications.map(notif => NotificationService.markAsRead(notif.id))
-  );
+    // Animation avant la mise à jour
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
-  results.forEach((result, index) => {
-    if (result.status === 'fulfilled' && result.value === true) {
-      successCount++;
-    } else {
-      console.warn(`⚠️ Échec pour la notification ${unreadNotifications[index].id}`);
+    const unreadNotifications = notifications.filter((n) => !n.read);
+
+    if (unreadNotifications.length === 0) {
+      setIsDeletingAll(false);
+      return;
     }
-  });
 
-  if (successCount > 0) {
-    // Mettre à jour l'état pour marquer toutes les notifications comme lues
-    setNotifications(prev => 
-      prev.map(notification => ({
-        ...notification,
-        read: true
-      }))
+    let successCount = 0;
+
+    // Marquer chaque notification non lue comme lue
+    const results = await Promise.allSettled(
+      unreadNotifications.map((notif) =>
+        NotificationService.markAsRead(notif.id)
+      )
     );
-    setUnreadCount(0);
-    console.log(`✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`);
-  } else {
-    console.error("❌ Aucune notification n'a pu être marquée comme lue");
-  }
-  
-  setIsDeletingAll(false);
-  setShowNotifications(false);
-};
+
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled" && result.value === true) {
+        successCount++;
+      } else {
+        console.warn(
+          `⚠️ Échec pour la notification ${unreadNotifications[index].id}`
+        );
+      }
+    });
+
+    if (successCount > 0) {
+      // Mettre à jour l'état pour marquer toutes les notifications comme lues
+      setNotifications((prev) =>
+        prev.map((notification) => ({
+          ...notification,
+          read: true,
+        }))
+      );
+      setUnreadCount(0);
+      console.log(
+        `✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`
+      );
+    } else {
+      console.error("❌ Aucune notification n'a pu être marquée comme lue");
+    }
+
+    setIsDeletingAll(false);
+    setShowNotifications(false);
+  };
 
   const deleteNotification = async (id: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette notification ?")) {
-      setDeletingStates(prev => ({ ...prev, [id]: true }));
-      
+
+    if (
+      window.confirm("Êtes-vous sûr de vouloir supprimer cette notification ?")
+    ) {
+      setDeletingStates((prev) => ({ ...prev, [id]: true }));
+
       // Animation avant suppression
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
       const success = await NotificationService.deleteNotification(id);
       if (success) {
-        setNotifications(prev => prev.filter(notif => notif.id !== id));
-        const deletedNotif = notifications.find(n => n.id === id);
+        setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+        const deletedNotif = notifications.find((n) => n.id === id);
         if (deletedNotif && !deletedNotif.read) {
-          setUnreadCount(prev => prev - 1);
+          setUnreadCount((prev) => prev - 1);
         }
       } else {
         alert("Erreur lors de la suppression de la notification");
       }
-      
-      setDeletingStates(prev => {
+
+      setDeletingStates((prev) => {
         const newState = { ...prev };
         delete newState[id];
         return newState;
@@ -415,11 +447,11 @@ const markAllAsRead = async () => {
       case "warning":
         return "text-yellow-500";
       case "success":
-        return "text-green-500";
+        return "text-[#556B2F]";
       case "error":
         return "text-red-500";
       default:
-        return "text-blue-500";
+        return "text-[#556B2F]";
     }
   };
 
@@ -436,430 +468,461 @@ const markAllAsRead = async () => {
     if (diffHours < 24) return `Il y a ${diffHours} h`;
     if (diffDays < 7) return `Il y a ${diffDays} j`;
 
-    return date.toLocaleDateString('fr-FR');
+    return date.toLocaleDateString("fr-FR");
   };
 
   return (
     <>
-      <header className="flex h-16 items-center justify-between border-b border-border bg-white lg:mt-0 mt-16 px-0 lg:px-6">
-      {/* Barre de Recherche */}
-      <div className="flex flex-1 items-center">
-        {currentUser?.role === "admin" && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 lg:hidden bg-white/95 backdrop-blur-sm border border-gray-300 shadow-xl z-50 rounded-2xl px-4 py-2 flex items-center gap-3">
-            <img
-              src={logo}
-              alt="Servo Logo"
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200"
+      <header className="flex h-16 items-center justify-between border-b border-[#D3D3D3] bg-[#FFFFFF] lg:mt-0 mt-16 px-0 lg:px-6">
+        {/* Barre de Recherche */}
+        <div className="flex flex-1 items-center">
+          {currentUser?.role === "admin" && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 lg:hidden bg-[#FFFFFF]/95 backdrop-blur-sm border border-[#D3D3D3] shadow-xl z-50 rounded-2xl px-4 py-2 flex items-center gap-3">
+              <img
+                src={logo}
+                alt="Servo Logo"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-[#D3D3D3]"
+              />
+              <span className="azonix tracking-widest text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">
+                Servo Admin
+              </span>
+            </div>
+          )}
+          <div
+            className="lg:left-0 md:left-0 w-11/12 left-2 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96"
+            ref={searchRef}
+          >
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B4513]" />
+            <Input
+              type="search"
+              placeholder="Rechercher utilisateurs, annonces, services..."
+              className="pl-10 bg-[#FFFFFF] border-[#D3D3D3]"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
             />
-            <span className="azonix tracking-widest text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">
-              Servo Admin
-            </span>
-          </div>
-        )}
-        <div
-          className="lg:left-0 md:left-0 w-11/12 left-2 relative lg:ml-0 md:ml-0 md:w-96 lg:w-96"
-          ref={searchRef}
-        >
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Rechercher utilisateurs, annonces, services..."
-            className="pl-10 bg-background border-input"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
-          />
 
-          {/* Afficher le conteneur dès que l'utilisateur tape (même s'il n'y a pas de résultats encore) */}
-          {searchQuery.length >= 2 && (
-            <div className="absolute top-full mt-2 w-full rounded-lg border border-border bg-card shadow-lg z-50 max-h-[80vh] overflow-y-auto fade-in">
-              {/* Header */}
-              <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border bg-card">
-                <span className="text-sm font-semibold">
-                  {isSearching ? "Recherche en cours..." : `${searchResults.length} résultat(s) pour "${searchQuery}"`}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => {
-                    setShowResults(false);
-                    setSearchQuery("");
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* État de chargement */}
-              {isSearching && (
-                <div className="p-12 flex flex-col items-center justify-center gap-4">
-                  <div className="relative w-10 h-10">
-                    <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-                    <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Recherche en cours...</p>
+            {/* Afficher le conteneur dès que l'utilisateur tape (même s'il n'y a pas de résultats encore) */}
+            {searchQuery.length >= 2 && (
+              <div className="absolute top-full mt-2 w-full rounded-lg border border-[#D3D3D3] bg-[#FFFFFF] shadow-lg z-50 max-h-[80vh] overflow-y-auto fade-in">
+                {/* Header */}
+                <div className="sticky top-0 flex items-center justify-between p-4 border-b border-[#D3D3D3] bg-[#FFFFFF]">
+                  <span className="text-sm font-semibold">
+                    {isSearching
+                      ? "Recherche en cours..."
+                      : `${searchResults.length} résultat(s) pour "${searchQuery}"`}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      setShowResults(false);
+                      setSearchQuery("");
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
 
-              {/* Résultats en grille style YouTube */}
-              {!isSearching && searchResults.length > 0 && (
-                <div className="p-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    {searchResults.map((result) => (
-                      <Link
-                        key={result.id}
-                        to={result.url}
-                        onClick={() => {
-                          setShowResults(false);
-                          setSearchQuery("");
-                        }}
-                        className="group flex items-center gap-4 p-4 rounded-2xl bg-background border-2 border-transparent hover:border-primary/30 transition-all duration-500"
-                      >
-                        {/* Album art */}
-                        <div className="relative flex-shrink-0">
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden shadow-sm bg-gradient-to-br from-primary/20 to-primary/10">
-                            {result.image ? (
-                              <img
-                                src={result.image}
-                                alt={result.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <div className="text-slate-900 group-hover:text-slate-900 transition-colors text-lg">
-                                  {getIcon(result.type)}
+                {/* État de chargement */}
+                {isSearching && (
+                  <div className="p-12 flex flex-col items-center justify-center gap-4">
+                    <div className="relative w-10 h-10">
+                      <div className="absolute inset-0 border-4 border-[#D3D3D3] rounded-full"></div>
+                      <div className="absolute inset-0 border-4 border-transparent border-t-[#556B2F] rounded-full animate-spin"></div>
+                    </div>
+                    <p className="text-sm text-[#8B4513]">
+                      Recherche en cours...
+                    </p>
+                  </div>
+                )}
+
+                {/* Résultats en grille style YouTube */}
+                {!isSearching && searchResults.length > 0 && (
+                  <div className="p-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      {searchResults.map((result) => (
+                        <Link
+                          key={result.id}
+                          to={result.url}
+                          onClick={() => {
+                            setShowResults(false);
+                            setSearchQuery("");
+                          }}
+                          className="group flex items-center gap-4 p-4 rounded-2xl bg-[#FFFFFF] border-2 border-transparent hover:border-[#556B2F]/30 transition-all duration-500"
+                        >
+                          {/* Album art */}
+                          <div className="relative flex-shrink-0">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden shadow-sm bg-gradient-to-br from-[#556B2F]/20 to-[#556B2F]/10">
+                              {result.image ? (
+                                <img
+                                  src={result.image}
+                                  alt={result.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <div className="text-[#556B2F] group-hover:text-[#556B2F] transition-colors text-lg">
+                                    {getIcon(result.type)}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Track info */}
-                        <div className="flex-1 min-w-0 space-y-2">
-                          <div>
-                            <h3 className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1 group-hover:text-slate-700 transition-colors">
-                              {result.title}
-                            </h3>
-                            <p className="text-xs font-bold text-muted-foreground line-clamp-1 mt-1">
-                              {result.subtitle}
+                          {/* Track info */}
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div>
+                              <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-[#556B2F] transition-colors">
+                                {result.title}
+                              </h3>
+                              <p className="text-xs font-bold text-[#8B4513] line-clamp-1 mt-1">
+                                {result.subtitle}
+                              </p>
+                            </div>
+                          </div>
+                          {/* Genre tags */}
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-[#556B2F]/10 text-[#556B2F] border-0"
+                            >
+                              {result.type === "user" && " Utilisateur"}
+                              {result.type === "listing" && " Immobilier"}
+                              {result.type === "service" && " Service"}
+                            </Badge>
+                            <span className="text-xs text-[#8B4513]">
+                              {getIcon(result.type)}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Aucun résultat */}
+                {!isSearching && searchResults.length === 0 && (
+                  <div className="p-12 flex flex-col items-center justify-center gap-3">
+                    <Search className="w-8 h-8 text-[#8B4513]" />
+                    <p className="text-sm text-[#8B4513]">
+                      Aucun résultat trouvé
+                    </p>
+                    <p className="text-xs text-[#8B4513]">
+                      Essayez une autre recherche
+                    </p>
+                  </div>
+                )}
+
+                {/* Footer avec info */}
+                {!isSearching && searchResults.length > 0 && (
+                  <div className="sticky bottom-0 p-3 border-t border-[#D3D3D3] bg-[#FFFFFF] text-center text-xs text-[#8B4513]">
+                    Affichage de {searchResults.length} résultat(s)
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Menus d'Actions */}
+        <div className="flex items-center gap-4">
+          {/* Notifications Dropdown */}
+          <div className="relative" ref={notificationRef}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+
+            {showNotifications && (
+              <div className="absolute -right-12 lg:right-0 top-full mt-2 w-96 rounded-lg border border-[#D3D3D3] bg-[#FFFFFF] shadow-lg z-50 max-h-96 overflow-hidden fade-in">
+                {/* Injecter les styles d'animation */}
+                <style>{deleteAnimationStyles}</style>
+
+                <div className="flex items-center justify-between p-4 border-b border-[#D3D3D3]">
+                  <span className="font-semibold">Notifications</span>
+                  <div className="flex gap-2">
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`h-7 text-xs transition-all duration-300 relative ${
+                          isDeletingAll
+                            ? "delete-all-shaking delete-button-loading bg-red-50 text-red-600 border border-red-200"
+                            : "hover:bg-red-50 hover:text-red-600"
+                        }`}
+                        onClick={markAllAsRead}
+                        disabled={isDeletingAll}
+                      >
+                        {isDeletingAll ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            ...
+                          </div>
+                        ) : (
+                          "Tout marquer lu"
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`
+                        p-4 border-b last:border-b-0 hover:bg-[#6B8E23]/5 cursor-pointer group relative 
+                        transition-all duration-500 ease-in-out
+                        ${
+                          deletingStates[notification.id]
+                            ? "notification-deleting"
+                            : ""
+                        }
+                        ${isDeletingAll ? "opacity-50" : ""}
+                      `}
+                        onClick={() => {
+                          if (
+                            !notification.read &&
+                            !deletingStates[notification.id] &&
+                            !isDeletingAll
+                          ) {
+                            markAsRead(notification.id);
+                          }
+                          setShowNotifications(false);
+                        }}
+                      >
+                        <button
+                          onClick={(e) =>
+                            !isDeletingAll &&
+                            deleteNotification(notification.id, e)
+                          }
+                          className={`
+                          absolute right-2 top-2 p-1 rounded transition-all duration-300
+                          ${
+                            deletingStates[notification.id]
+                              ? "opacity-100 bg-red-100 text-red-600"
+                              : "opacity-0 group-hover:opacity-100 hover:bg-red-100 text-black"
+                          }
+                          ${
+                            isDeletingAll
+                              ? "pointer-events-none opacity-30"
+                              : ""
+                          }
+                        `}
+                          title="Supprimer la notification"
+                          disabled={
+                            isDeletingAll || deletingStates[notification.id]
+                          }
+                        >
+                          {deletingStates[notification.id] ? (
+                            <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3 w-3" />
+                          )}
+                        </button>
+
+                        <div className="flex gap-3 w-full pr-6">
+                          <div
+                            className={`mt-1 flex-shrink-0 ${getNotificationColor(
+                              notification.type
+                            )}`}
+                          >
+                            <Bell className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <p
+                                className={`text-sm font-medium transition-colors ${
+                                  !notification.read
+                                    ? "text-gray-900"
+                                    : "text-[#8B4513]"
+                                }`}
+                              >
+                                {notification.title}
+                              </p>
+                              {!notification.read &&
+                                !deletingStates[notification.id] && (
+                                  <div className="h-2 w-2 rounded-full bg-[#556B2F] flex-shrink-0 mt-1.5 animate-pulse" />
+                                )}
+                            </div>
+                            <p className="text-xs text-[#8B4513] mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-[#8B4513] mt-1">
+                              {formatTime(notification.createdAt)}
                             </p>
                           </div>
                         </div>
-                        {/* Genre tags */}
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs bg-primary/10 text-slate-900 border-0">
-                            {result.type === "user" && " Utilisateur"}
-                            {result.type === "listing" && " Immobilier"}
-                            {result.type === "service" && " Service"}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {getIcon(result.type)}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Aucun résultat */}
-              {!isSearching && searchResults.length === 0 && (
-                <div className="p-12 flex flex-col items-center justify-center gap-3">
-                  <Search className="w-8 h-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Aucun résultat trouvé</p>
-                  <p className="text-xs text-muted-foreground">Essayez une autre recherche</p>
-                </div>
-              )}
-
-              {/* Footer avec info */}
-              {!isSearching && searchResults.length > 0 && (
-                <div className="sticky bottom-0 p-3 border-t border-border bg-card text-center text-xs text-muted-foreground">
-                  Affichage de {searchResults.length} résultat(s)
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Menus d'Actions */}
-      <div className="flex items-center gap-4">
-        {/* Notifications Dropdown */}
-        <div className="relative" ref={notificationRef}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={() => setShowNotifications(!showNotifications)}
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center text-white">
-                {unreadCount}
-              </span>
-            )}
-          </Button>
-
-          {showNotifications && (
-            <div className="absolute -right-12 lg:right-0 top-full mt-2 w-96 rounded-lg border border-border bg-card shadow-lg z-50 max-h-96 overflow-hidden fade-in">
-              {/* Injecter les styles d'animation */}
-              <style>{deleteAnimationStyles}</style>
-              
-              <div className="flex items-center justify-between p-4 border-b">
-                <span className="font-semibold">Notifications</span>
-                <div className="flex gap-2">
-                  {unreadCount > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`h-7 text-xs transition-all duration-300 relative ${
-                        isDeletingAll 
-                          ? 'delete-all-shaking delete-button-loading bg-red-50 text-red-600 border border-red-200' 
-                          : 'hover:bg-red-50 hover:text-red-600'
-                      }`}
-                      onClick={markAllAsRead}
-                      disabled={isDeletingAll}
-                    >
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-sm text-[#8B4513]">
                       {isDeletingAll ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                          ...
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          <span>Nettoyage en cours...</span>
                         </div>
                       ) : (
-                        "Tout marquer lu"
+                        "Aucune notification"
                       )}
-                    </Button>
+                    </div>
                   )}
                 </div>
               </div>
+            )}
+          </div>
 
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`
-                        p-4 border-b last:border-b-0 hover:bg-accent cursor-pointer group relative 
-                        transition-all duration-500 ease-in-out
-                        ${deletingStates[notification.id] ? 'notification-deleting' : ''}
-                        ${isDeletingAll ? 'opacity-50' : ''}
-                      `}
-                      onClick={() => {
-                        if (!notification.read && !deletingStates[notification.id] && !isDeletingAll) {
-                          markAsRead(notification.id);
-                        }
-                        setShowNotifications(false);
-                      }}
-                    >
-                      <button
-                        onClick={(e) => !isDeletingAll && deleteNotification(notification.id, e)}
-                        className={`
-                          absolute right-2 top-2 p-1 rounded transition-all duration-300
-                          ${deletingStates[notification.id] 
-                            ? 'opacity-100 bg-red-100 text-red-600' 
-                            : 'opacity-0 group-hover:opacity-100 hover:bg-red-100 text-black'
-                          }
-                          ${isDeletingAll ? 'pointer-events-none opacity-30' : ''}
-                        `}
-                        title="Supprimer la notification"
-                        disabled={isDeletingAll || deletingStates[notification.id]}
+          {/* Menu Utilisateur */}
+          <div className="relative" ref={userMenuRef}>
+            <Button
+              variant="ghost"
+              className="relative h-9 w-9 rounded-full p-0"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
+              {currentUser?.avatar ? (
+                <img
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-[#556B2F] to-[#6B8E23] text-white font-semibold text-sm"
+                  src={currentUser.avatar}
+                  alt="avatar"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-[#556B2F] to-[#6B8E23] text-white font-semibold text-sm">
+                  {currentUser
+                    ? `${currentUser.firstName?.[0]}${currentUser.lastName?.[0]}`
+                    : "US"}
+                </div>
+              )}
+            </Button>
+            {showUserMenu && (
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-[#FFFFFF] shadow-lg z-50 fade-in">
+                <div className="p-3 border-b border-[#D3D3D3]">
+                  <p className="text-sm font-medium">
+                    {currentUser?.firstName} {currentUser?.lastName}
+                  </p>
+                  <p className="text-xs text-[#8B4513]">{currentUser?.email}</p>
+                </div>
+                <div className="p-1">
+                  {currentUser?.role === "admin" ? (
+                    <>
+                      <Link
+                        to="/admin/profile"
+                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors"
+                        onClick={() => setShowUserMenu(false)}
                       >
-                        {deletingStates[notification.id] ? (
-                          <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="h-3 w-3" />
-                        )}
-                      </button>
-
-                      <div className="flex gap-3 w-full pr-6">
-                        <div
-                          className={`mt-1 flex-shrink-0 ${getNotificationColor(
-                            notification.type
-                          )}`}
-                        >
-                          <Bell className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <p
-                              className={`text-sm font-medium transition-colors ${
-                                !notification.read
-                                  ? "text-foreground"
-                                  : "text-muted-foreground"
-                              }`}
-                            >
-                              {notification.title}
-                            </p>
-                            {!notification.read && !deletingStates[notification.id] && (
-                              <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5 animate-pulse" />
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatTime(notification.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-sm text-muted-foreground">
-                    {isDeletingAll ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                        <span>Nettoyage en cours...</span>
-                      </div>
-                    ) : (
-                      "Aucune notification"
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Menu Utilisateur */}
-        <div className="relative" ref={userMenuRef}>
-          <Button
-            variant="ghost"
-            className="relative h-9 w-9 rounded-full p-0"
-            onClick={() => setShowUserMenu(!showUserMenu)}
-          >
-            {currentUser?.avatar ? (
-              <img
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm"
-                src={currentUser.avatar}
-                alt="avatar"
-              />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-sm">
-                {currentUser
-                  ? `${currentUser.firstName?.[0]}${currentUser.lastName?.[0]}`
-                  : "US"}
+                        <User className="mr-2 h-4 w-4" />
+                        Profil
+                      </Link>
+                      <Link
+                        to="/admin/settings"
+                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        Paramètres
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/pro/profile"
+                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profil
+                      </Link>
+                      <Link
+                        to="/pro/settings"
+                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        Paramètres
+                      </Link>
+                    </>
+                  )}
+                  <div className="border-t my-1"></div>
+                  <button
+                    onClick={() => setIsLogoutDialogOpen(true)}
+                    className="flex items-center px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded w-full"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Déconnexion
+                  </button>
+                </div>
               </div>
             )}
-          </Button>
-          {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-white shadow-lg z-50 fade-in">
-              <div className="p-3 border-b">
-                <p className="text-sm font-medium">
-                  {currentUser?.firstName} {currentUser?.lastName}
-                </p>
-                <p className="text-xs text-gray-500">{currentUser?.email}</p>
-              </div>
-              <div className="p-1">
-                {currentUser?.role === "admin" ? (
-                  <>
-                    <Link
-                      to="/admin/profile"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profil
-                    </Link>
-                    <Link
-                      to="/admin/settings"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Paramètres
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/pro/profile"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profil
-                    </Link>
-                    <Link
-                      to="/pro/settings"
-                      className="flex items-center px-2 py-2 text-sm hover:bg-gray-100 rounded transition-colors"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Paramètres
-                    </Link>
-                  </>
-                )}
-                <div className="border-t my-1"></div>
-                <button
-                  onClick={() => setIsLogoutDialogOpen(true)}
-                  className="flex items-center px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded w-full"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Déconnexion
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    {/* Logout Confirmation Dialog */}
-    {isLogoutDialogOpen && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={handleCancelLogout}
-        />
+      {/* Logout Confirmation Dialog */}
+      {isLogoutDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleCancelLogout}
+          />
 
-        {/* Dialog Content */}
-        <div className="relative z-50 w-full max-w-sm bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
-          {/* Header */}
-          <div className="flex items-center gap-3 p-6 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+          {/* Dialog Content */}
+          <div className="relative z-50 w-full max-w-sm bg-[#FFFFFF] rounded-xl shadow-xl overflow-hidden border border-[#D3D3D3] animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center gap-3 p-6 border-b border-[#D3D3D3] bg-gradient-to-r from-red-50 to-orange-50">
+              <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Confirmer la déconnexion
+                </h2>
+                <p className="text-sm text-[#8B4513]">
+                  Cette action ne peut pas être annulée
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Confirmer la déconnexion
-              </h2>
-              <p className="text-sm text-gray-500">
-                Cette action ne peut pas être annulée
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-[#8B4513] text-sm leading-relaxed">
+                Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous
+                reconnecter pour accéder à votre compte.
               </p>
             </div>
-          </div>
 
-          {/* Body */}
-          <div className="p-6">
-            <p className="text-gray-700 text-sm leading-relaxed">
-              Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous reconnecter pour accéder à votre compte.
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="flex gap-3 p-6 border-t border-gray-100 bg-gray-50">
-            <Button
-              variant="outline"
-              onClick={handleCancelLogout}
-              className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-100"
-            >
-              Annuler
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleLogout}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Se déconnecter
-            </Button>
+            {/* Footer */}
+            <div className="flex gap-3 p-6 border-t border-[#D3D3D3] bg-[#D3D3D3]/20">
+              <Button
+                variant="outline"
+                onClick={handleCancelLogout}
+                className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#D3D3D3]/20"
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleLogout}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Se déconnecter
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }
