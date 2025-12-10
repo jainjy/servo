@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   const [isApkModalOpen, setIsApkModalOpen] = useState(false);
 
   return (
-    <footer className="bg-gradient-to-br from-[#556B2F]/50 to-[#6B8E23] text-white py-16 relative overflow-hidden">
+    <footer className="bg-gradient-to-br from-[#556B2F] to-[#6B8E23] text-white py-16 relative overflow-hidden">
       {/* Effets de fond décoratifs */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-20"></div>
       

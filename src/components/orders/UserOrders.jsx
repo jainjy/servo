@@ -41,6 +41,16 @@ import { toast } from "sonner";
 import api from '@/lib/api';
 
 const UserOrders = () => {
+  // Couleurs personnalisées
+  const COLORS = {
+    logo: "#556B2F",           /* Olive green - accent */
+    primaryDark: "#6B8E23",    /* Yellow-green - fonds légers */
+    lightBg: "#FFFFFF",        /* White - fond de page */
+    separator: "#D3D3D3",      /* Light gray - séparateurs */
+    secondaryText: "#8B4513",  /* Saddle brown - titres secondaires */
+    smallText: "#000000",      /* Noir pour les petits textes */
+  };
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -528,10 +538,10 @@ const UserOrders = () => {
                 <IconComponent className={`h-6 w-6 ${statusConfig.color}`} />
               </div>
               <div>
-                <CardTitle className="text-lg font-bold text-gray-900">
+                <CardTitle className="text-lg font-bold" style={{ color: COLORS.secondaryText }}>
                   Commande {order.orderNumber}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-2 text-gray-600 mt-1">
+                <CardDescription className="flex items-center gap-2 mt-1" style={{ color: COLORS.smallText }}>
                   <Calendar className="h-4 w-4" />
                   {new Date(order.createdAt).toLocaleDateString('fr-FR', { 
                     day: 'numeric',
@@ -549,17 +559,17 @@ const UserOrders = () => {
                 <IconComponent className="h-4 w-4 mr-2" />
                 {statusConfig.label}
               </Badge>
-              <p className={`text-xs font-medium ${statusConfig.color}`}>
+              <p className={`text-xs font-medium`} style={{ color: COLORS.smallText }}>
                 {getStatusDescription(order.status)}
               </p>
             </div>
 
             <div className="flex items-center justify-between lg:justify-end gap-4">
               <div className="text-right">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                   €{order.totalAmount.toFixed(2)}
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm" style={{ color: COLORS.smallText }}>
                   {order.items?.length} article{order.items?.length > 1 ? 's' : ''}
                 </div>
               </div>
@@ -575,7 +585,7 @@ const UserOrders = () => {
           <CollapsibleContent>
             <CardContent className="p-6 space-y-6">
               {/* Barre de progression */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border" style={{ borderColor: COLORS.separator }}>
                 <div className="flex items-center justify-between mb-4">
                   {['pending', 'confirmed', 'processing', 'shipped', 'delivered'].map((status, index) => {
                     const stepConfig = getStatusConfig(status);
@@ -601,9 +611,9 @@ const UserOrders = () => {
                         } transition-all duration-300`}>
                           <StepIcon className="h-4 w-4" />
                         </div>
-                        <span className={`text-xs mt-2 font-medium text-center ${
-                          isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
-                        }`}>
+                        <span className={`text-xs mt-2 font-medium text-center`} style={{ 
+                          color: isActive ? COLORS.logo : isCompleted ? '#16a34a' : COLORS.smallText 
+                        }}>
                           {status === 'pending' ? 'Attente' :
                            status === 'confirmed' ? 'Confirmée' :
                            status === 'processing' ? 'Traitement' :
@@ -619,13 +629,13 @@ const UserOrders = () => {
 
               {/* Articles de la commande */}
               <div>
-                <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-lg">
-                  <ShoppingBag className="h-5 w-5 text-blue-600" />
+                <h4 className="font-semibold mb-4 flex items-center gap-2 text-lg" style={{ color: COLORS.secondaryText }}>
+                  <ShoppingBag className="h-5 w-5" style={{ color: COLORS.logo }} />
                   Articles commandés ({order.items?.length || 0})
                 </h4>
                 <div className="space-y-4">
                   {order.items?.map((item, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-colors">
+                    <div key={index} className="flex items-center gap-4 p-4 bg-white border rounded-xl hover:border-gray-300 transition-colors" style={{ borderColor: COLORS.separator }}>
                       <div className="flex-shrink-0">
                         {item.images && item.images.length > 0 ? (
                           <img
@@ -634,24 +644,27 @@ const UserOrders = () => {
                             className="w-16 h-16 object-cover rounded-lg shadow-sm"
                           />
                         ) : (
-                          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <Package className="h-6 w-6 text-gray-400" />
+                          <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                            <Package className="h-6 w-6" style={{ color: COLORS.logo }} />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 truncate">{item.name}</p>
-                        <p className="text-gray-600 text-sm mt-1">
+                        <p className="font-semibold truncate" style={{ color: COLORS.secondaryText }}>{item.name}</p>
+                        <p className="text-sm mt-1" style={{ color: COLORS.smallText }}>
                           Quantité: {item.quantity} × €{item.price.toFixed(2)}
                         </p>
                         {item.category && (
-                          <Badge variant="outline" className="mt-1 text-xs">
+                          <Badge variant="outline" className="mt-1 text-xs" style={{ 
+                            borderColor: COLORS.separator,
+                            color: COLORS.secondaryText
+                          }}>
                             {item.category}
                           </Badge>
                         )}
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-gray-900 text-lg">
+                        <div className="font-bold text-lg" style={{ color: COLORS.logo }}>
                           €{item.itemTotal.toFixed(2)}
                         </div>
                       </div>
@@ -664,15 +677,15 @@ const UserOrders = () => {
 
               {/* Informations de livraison et paiement */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="border border-gray-200">
+                <Card style={{ borderColor: COLORS.separator }}>
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                      <MapPin className="h-4 w-4 text-blue-600" />
+                    <CardTitle className="flex items-center gap-2 text-sm font-semibold" style={{ color: COLORS.secondaryText }}>
+                      <MapPin className="h-4 w-4" style={{ color: COLORS.logo }} />
                       Adresse de livraison
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-gray-600 space-y-1 text-sm">
+                    <div className="space-y-1 text-sm" style={{ color: COLORS.smallText }}>
                       <p className="font-medium">{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</p>
                       <p>{order.shippingAddress?.address}</p>
                       <p>{order.shippingAddress?.postalCode} {order.shippingAddress?.city}</p>
@@ -681,15 +694,15 @@ const UserOrders = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="border border-gray-200">
+                <Card style={{ borderColor: COLORS.separator }}>
                   <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                      <CreditCard className="h-4 w-4 text-green-600" />
+                    <CardTitle className="flex items-center gap-2 text-sm font-semibold" style={{ color: COLORS.secondaryText }}>
+                      <CreditCard className="h-4 w-4" style={{ color: COLORS.logo }} />
                       Paiement
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <p className="text-gray-600 capitalize">
+                    <p className="capitalize" style={{ color: COLORS.smallText }}>
                       {order.paymentMethod === 'card' ? 'Carte bancaire' : 
                        order.paymentMethod === 'paypal' ? 'PayPal' : 
                        order.paymentMethod}
@@ -709,6 +722,10 @@ const UserOrders = () => {
                   variant="outline" 
                   size="sm" 
                   className="flex items-center gap-2"
+                  style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.smallText
+                  }}
                   onClick={() => downloadInvoice(order.id, order.orderNumber)}
                   disabled={!canDownloadInvoice(order) || downloadingInvoice[order.id]}
                 >
@@ -736,6 +753,10 @@ const UserOrders = () => {
                     variant="outline" 
                     size="sm" 
                     className="flex items-center gap-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     onClick={() => leaveReview(order.id, order.orderNumber)}
                     disabled={leavingReview[order.id]}
                   >
@@ -753,6 +774,7 @@ const UserOrders = () => {
                   size="sm"
                   onClick={() => toggleOrderExpansion(order.id)}
                   className="ml-auto flex items-center gap-2"
+                  style={{ color: COLORS.smallText }}
                 >
                   {isExpanded ? 'Réduire' : 'Détails'}
                 </Button>
@@ -767,7 +789,7 @@ const UserOrders = () => {
   // Squelette d'une carte de commande
   const OrderCardSkeleton = () => (
     <Card className="border-0 shadow-sm bg-white overflow-hidden">
-      <CardHeader className="pb-4 border-b-2 border-gray-200 bg-gray-50">
+      <CardHeader className="pb-4 border-b-2" style={{ borderColor: COLORS.separator, backgroundColor: `${COLORS.primaryDark}08` }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
           <div className="flex items-center gap-4">
             <Skeleton className="w-12 h-12 rounded-xl" />
@@ -810,7 +832,7 @@ const UserOrders = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
+      <div className="min-h-screen py-8" style={{ backgroundColor: COLORS.lightBg }}>
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
           {/* En-tête avec skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start lg:items-center mb-8">
@@ -831,7 +853,7 @@ const UserOrders = () => {
           </div>
 
           {/* Filtres avec skeleton */}
-          <Card className="border-0 shadow-sm mb-8">
+          <Card className="border-0 shadow-sm mb-8" style={{ backgroundColor: COLORS.lightBg }}>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Skeleton className="w-5 h-5" />
@@ -864,15 +886,15 @@ const UserOrders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 mt-10 to-white py-8">
+    <div className="min-h-screen mt-10 py-8" style={{ backgroundColor: COLORS.lightBg }}>
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         {/* En-tête */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start lg:items-center mb-8">
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold" style={{ color: COLORS.secondaryText }}>
               Mes Commandes
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl">
+            <p className="text-lg max-w-2xl" style={{ color: COLORS.smallText }}>
               Suivez l'état de vos commandes en temps réel et gérez vos achats
             </p>
           </div>
@@ -880,7 +902,12 @@ const UserOrders = () => {
             <Button 
               onClick={fetchUserOrders} 
               variant="outline" 
-              className="border-2 border-gray-200 hover:border-gray-300 bg-white shadow-sm hover:shadow-md transition-all duration-200"
+              className="border-2 shadow-sm hover:shadow-md transition-all duration-200"
+              style={{ 
+                borderColor: COLORS.separator,
+                color: COLORS.smallText,
+                backgroundColor: COLORS.lightBg
+              }}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Actualiser
@@ -891,60 +918,69 @@ const UserOrders = () => {
         {/* Cartes de statistiques avancées */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Carte Commandes Total */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group" style={{ 
+            backgroundColor: `${COLORS.primaryDark}08`,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <ShoppingCart className="h-4 w-4" />
                 Total Commandes
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-900">{stats.total}</div>
+              <div className="text-3xl font-bold" style={{ color: COLORS.logo }}>{stats.total}</div>
               <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-blue-600 font-medium">
+                <p className="text-xs font-medium" style={{ color: COLORS.smallText }}>
                   {stats.thisWeek} cette semaine
                 </p>
-                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <TrendingUp className="h-4 w-4" style={{ color: COLORS.logo }} />
               </div>
             </CardContent>
           </Card>
 
           {/* Carte Total Dépensé */}
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group" style={{ 
+            backgroundColor: `${COLORS.primaryDark}08`,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-green-700 flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <Euro className="h-4 w-4" />
                 Total Dépensé
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-900">
+              <div className="text-3xl font-bold" style={{ color: COLORS.logo }}>
                 €{stats.totalSpent.toFixed(2)}
               </div>
               <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-green-600 font-medium">
+                <p className="text-xs font-medium" style={{ color: COLORS.smallText }}>
                   Moyenne: €{stats.averageOrder.toFixed(2)}
                 </p>
-                <DollarSign className="h-4 w-4 text-green-600" />
+                <DollarSign className="h-4 w-4" style={{ color: COLORS.logo }} />
               </div>
             </CardContent>
           </Card>
 
           {/* Carte Taux de Complétion */}
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group" style={{ 
+            backgroundColor: `${COLORS.primaryDark}08`,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-purple-700 flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <Award className="h-4 w-4" />
                 Taux de Livraison
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-900">
+              <div className="text-3xl font-bold" style={{ color: COLORS.logo }}>
                 {stats.completionRate.toFixed(0)}%
               </div>
               <div className="mt-2 space-y-1">
                 <Progress value={stats.completionRate} className="h-2" />
-                <p className="text-xs text-purple-600 font-medium">
+                <p className="text-xs font-medium" style={{ color: COLORS.smallText }}>
                   {stats.delivered} sur {stats.total - stats.cancelled} livrées
                 </p>
               </div>
@@ -952,48 +988,61 @@ const UserOrders = () => {
           </Card>
 
           {/* Carte Activité Récente */}
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-200 group" style={{ 
+            backgroundColor: `${COLORS.primaryDark}08`,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-orange-700 flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <TrendingUp className="h-4 w-4" />
                 Activité Mensuelle
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-900">{stats.thisMonth}</div>
+              <div className="text-3xl font-bold" style={{ color: COLORS.logo }}>{stats.thisMonth}</div>
               <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-orange-600 font-medium">
+                <p className="text-xs font-medium" style={{ color: COLORS.smallText }}>
                   {stats.thisWeek} cette semaine
                 </p>
-                <Calendar className="h-4 w-4 text-orange-600" />
+                <Calendar className="h-4 w-4" style={{ color: COLORS.logo }} />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Filtres */}
-        <Card className="border-0 shadow-sm mb-8 bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-sm mb-8" style={{ 
+          backgroundColor: COLORS.lightBg,
+          border: `1px solid ${COLORS.separator}`
+        }}>
           <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-gray-900">
-              <Filter className="h-5 w-5 text-gray-600" />
+            <CardTitle className="flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
+              <Filter className="h-5 w-5" />
               Filtrer mes Commandes
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <div className="md:col-span-2 lg:col-span-2 xl:col-span-3 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={{ color: COLORS.separator }} />
                 <Input
                   placeholder="Rechercher par numéro de commande, produit..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 border-2 border-gray-200 focus:border-blue-500 transition-colors w-full"
+                  className="pl-10 h-12 border-2 transition-colors w-full"
+                  style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.smallText
+                  }}
                 />
               </div>
               
               <div className="md:col-span-1">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-blue-500 w-full">
+                  <SelectTrigger className="h-12 border-2 w-full" style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.smallText
+                  }}>
                     <SelectValue placeholder="Statut de commande" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1013,35 +1062,35 @@ const UserOrders = () => {
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge 
                 variant={activeTab === 'all' ? 'default' : 'outline'}
-                className="cursor-pointer hover:bg-blue-50 transition-colors"
+                className="cursor-pointer transition-colors"
                 onClick={() => setActiveTab('all')}
               >
                 Toutes ({orders.length})
               </Badge>
               <Badge 
                 variant={activeTab === 'pending' ? 'default' : 'outline'}
-                className="cursor-pointer hover:bg-orange-50 transition-colors"
+                className="cursor-pointer transition-colors"
                 onClick={() => setActiveTab('pending')}
               >
                 En attente ({stats.pending})
               </Badge>
               <Badge 
                 variant={activeTab === 'processing' ? 'default' : 'outline'}
-                className="cursor-pointer hover:bg-blue-50 transition-colors"
+                className="cursor-pointer transition-colors"
                 onClick={() => setActiveTab('processing')}
               >
                 En cours ({stats.confirmed + stats.processing + stats.shipped})
               </Badge>
               <Badge 
                 variant={activeTab === 'delivered' ? 'default' : 'outline'}
-                className="cursor-pointer hover:bg-green-50 transition-colors"
+                className="cursor-pointer transition-colors"
                 onClick={() => setActiveTab('delivered')}
               >
                 Livrées ({stats.delivered})
               </Badge>
               <Badge 
                 variant={activeTab === 'cancelled' ? 'default' : 'outline'}
-                className="cursor-pointer hover:bg-red-50 transition-colors"
+                className="cursor-pointer transition-colors"
                 onClick={() => setActiveTab('cancelled')}
               >
                 Annulées ({stats.cancelled})
@@ -1053,35 +1102,46 @@ const UserOrders = () => {
         {/* Liste des commandes avec séparations */}
         <div className="space-y-6">
           {orders.length === 0 ? (
-            <Card className="border-0 shadow-sm bg-white text-center py-12">
+            <Card className="border-0 shadow-sm text-center py-12" style={{ 
+              backgroundColor: COLORS.lightBg,
+              border: `1px solid ${COLORS.separator}`
+            }}>
               <CardContent>
-                <Package className="h-20 w-20 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Aucune commande trouvée</h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                <Package className="h-20 w-20 mx-auto mb-4" style={{ color: COLORS.separator }} />
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.secondaryText }}>Aucune commande trouvée</h3>
+                <p className="mb-6 max-w-md mx-auto" style={{ color: COLORS.smallText }}>
                   Vous n'avez pas encore passé de commande. Découvrez nos produits et trouvez ce qui vous correspond.
                 </p>
                 <Button 
                   onClick={() => window.location.href = '/products'}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="shadow-lg hover:shadow-xl transition-all duration-200"
+                  style={{ 
+                    backgroundColor: COLORS.logo,
+                    borderColor: COLORS.logo,
+                    color: COLORS.lightBg
+                  }}
                 >
                   Découvrir nos produits
                 </Button>
               </CardContent>
             </Card>
           ) : filteredOrders.length === 0 ? (
-            <Card className="border-0 shadow-sm bg-white text-center py-8">
+            <Card className="border-0 shadow-sm text-center py-8" style={{ 
+              backgroundColor: COLORS.lightBg,
+              border: `1px solid ${COLORS.separator}`
+            }}>
               <CardContent>
-                <p className="text-gray-500 text-lg">Aucune commande ne correspond aux filtres sélectionnés</p>
+                <p className="text-lg" style={{ color: COLORS.smallText }}>Aucune commande ne correspond aux filtres sélectionnés</p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-6">
               {/* En-tête des résultats */}
               <div className="flex items-center justify-between">
-                <p className="text-gray-600">
+                <p style={{ color: COLORS.smallText }}>
                   {filteredOrders.length} commande{filteredOrders.length > 1 ? 's' : ''} trouvée{filteredOrders.length > 1 ? 's' : ''}
                 </p>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm" style={{ color: COLORS.smallText }}>
                   <FileText className="h-4 w-4" />
                   <span>Cliquez sur une commande pour voir les détails</span>
                 </div>
@@ -1097,8 +1157,11 @@ const UserOrders = () => {
                     {/* Séparateur entre les cartes (sauf pour la dernière) */}
                     {index < filteredOrders.length - 1 && (
                       <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center border" style={{ 
+                          backgroundColor: `${COLORS.primaryDark}08`,
+                          borderColor: COLORS.separator
+                        }}>
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS.separator }}></div>
                         </div>
                       </div>
                     )}
@@ -1110,10 +1173,13 @@ const UserOrders = () => {
         </div>
 
         {/* Légende des statuts */}
-        <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm mt-12">
+        <Card className="border-0 shadow-sm mt-12" style={{ 
+          backgroundColor: COLORS.lightBg,
+          border: `1px solid ${COLORS.separator}`
+        }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900">
-              <User className="h-5 w-5 text-gray-600" />
+            <CardTitle className="flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
+              <User className="h-5 w-5" />
               Signification des statuts
             </CardTitle>
           </CardHeader>
@@ -1131,11 +1197,13 @@ const UserOrders = () => {
                 const IconComponent = config.icon;
                 
                 return (
-                  <div key={status} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div key={status} className="flex items-start gap-3 p-3 rounded-lg transition-colors" style={{ 
+                    backgroundColor: `${COLORS.primaryDark}08`
+                  }}>
                     <Badge variant={config.variant} className="flex-shrink-0">
                       <IconComponent className="h-3 w-3" />
                     </Badge>
-                    <span className="text-sm text-gray-700 leading-relaxed">{description}</span>
+                    <span className="text-sm leading-relaxed" style={{ color: COLORS.smallText }}>{description}</span>
                   </div>
                 );
               })}
