@@ -364,12 +364,12 @@ const GestionImmobilier = () => {
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="absolute inset-0 bg-cover bg-center z-0 opacity-70"
           style={{
-            backgroundImage: `linear-gradient(rgba(85, 107, 47, 0.9), rgba(85, 107, 47, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8)),url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
           }}
         />
 
         {/* Contenu */}
-        <div className="container mx-auto px-4 py-8 relative z-10">
+        <div className="container mx-auto px-4 py-2 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -411,8 +411,6 @@ const GestionImmobilier = () => {
                       .getElementById("services")
                       .scrollIntoView({ behavior: "smooth" })
                   }
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Découvrir nos services
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -422,8 +420,6 @@ const GestionImmobilier = () => {
                 <Button
                   className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#556B2F] px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                   onClick={() => setIsModalOpen(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Demander un devis
                 </Button>
@@ -664,8 +660,6 @@ const GestionImmobilier = () => {
                 <Button
                   className="bg-white hover:bg-gray-100 text-[#556B2F] px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105"
                   onClick={() => setIsModalOpen(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <Phone className="h-4 w-4 mr-2" />
                   Demander un audit gratuit
@@ -675,8 +669,6 @@ const GestionImmobilier = () => {
                 <Button
                   className="border-white bg-[#556B2F] text-white hover:bg-white/10 px-6 py-3 text-base rounded-lg transition-all duration-300 hover:scale-105"
                   onClick={() => setIsContactModalOpen(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <Mail className="h-4 w-4 mr-2" />
                   Nous écrire
@@ -900,8 +892,7 @@ const GestionImmobilier = () => {
                 type="submit"
                 className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
                 disabled={!selectedService}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+        
               >
                 Envoyer ma demande
               </Button>
@@ -1065,9 +1056,7 @@ const GestionImmobilier = () => {
             >
               <Button
                 type="submit"
-                className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full  hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
               >
                 <Mail className="h-4 w-4 mr-2" />
                 Envoyer mon message

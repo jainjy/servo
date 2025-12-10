@@ -102,11 +102,11 @@ const PropertyPage: React.FC = () => {
       window.location.href = `tel:${property.owner.phone}`;
     } else {
       // Rediriger vers le formulaire de contact
-      navigate("/contact", { 
-        state: { 
+      navigate("/contact", {
+        state: {
           propertyId: property?.id,
-          propertyTitle: property?.title 
-        } 
+          propertyTitle: property?.title
+        }
       });
     }
   };
@@ -138,14 +138,14 @@ const PropertyPage: React.FC = () => {
           <h2 className="text-xl font-bold text-[#8B4513] mb-2">Oups !</h2>
           <p className="text-gray-700 mb-6">{error || "Propriété non trouvée"}</p>
           <div className="space-y-3">
-            <Button 
+            <Button
               onClick={() => navigate("/immobilier")}
               className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour aux propriétés
             </Button>
-            <Button 
+            <Button
               onClick={() => navigate("/")}
               variant="outline"
               className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
@@ -160,12 +160,9 @@ const PropertyPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#6B8E23]/5 to-white">
-          
-      {/* Contenu principal */}
-      <PropertyDetailPage property={property} />     
+    <div className="min-h-screen bg-gradient-to-b pt-10 from-[#6B8E23]/5 to-white">
       {/* Bouton retour flottant pour desktop */}
-      <div className="fixed top-24 left-4 z-30 hidden lg:block">
+      <div className="mt-10 z-30 hidden lg:block">
         <Button
           onClick={handleBackClick}
           variant="outline"
@@ -175,6 +172,9 @@ const PropertyPage: React.FC = () => {
           <span>Retour</span>
         </Button>
       </div>
+      {/* Contenu principal */}
+      <PropertyDetailPage property={property} />
+
     </div>
   );
 };

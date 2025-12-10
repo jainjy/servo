@@ -403,7 +403,7 @@ export default function LoadingScreen({
               {/* Zone de texte Typer */}
               <div className="min-h-[280px] flex items-center justify-center mb-8 relative">
                 {progress > 5 ? (
-                  <div className="font-serif text-xl md:text-2xl leading-relaxed text-justify tracking-wide opacity-90"
+                  <div className="font-serif text-sm md:text-2xl leading-relaxed text-justify tracking-wide opacity-90"
                        style={{ color: '#E5E5E5' }}>
                     <span className="text-4xl absolute -top-2 -left-2 opacity-30 font-serif">"</span>
                     <p style={{ 

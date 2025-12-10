@@ -396,7 +396,7 @@ const LogementsSHLMR = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8 }}
-                className="relative pt-32 pb-20 overflow-hidden"
+                className="relative pt-24 overflow-hidden"
             >
                 {/* Image de fond avec overlay */}
                 <div className="absolute inset-0 z-0">
@@ -423,7 +423,7 @@ const LogementsSHLMR = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4, duration: 0.6 }}
-                            className="text-lg text-white mb-8 max-w-2xl mx-auto leading-relaxed"
+                            className="text-sm lg:text-md text-white mb-8 max-w-2xl mx-auto leading-relaxed"
                         >
                             Découvrez les logements SHLMR (Sociétés d'Habitation à Loyer Modéré de Réinsertion) 
                             pour un parcours résidentiel sécurisé avec des loyers encadrés
@@ -716,7 +716,7 @@ const LogementsSHLMR = () => {
                                             key={logement.id}
                                             ref={el => propertiesRef.current[index] = el}
                                             whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                                            className="overflow-hidden border-0 hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer border"
+                                            className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl group cursor-pointer"
                                             style={{ borderColor: COLORS.separator }}
                                         >
                                             {/* Image avec badges */}

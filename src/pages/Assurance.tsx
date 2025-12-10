@@ -256,12 +256,19 @@ export default function Assurance() {
 
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: ` url('https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg')`
-          }}
-        />
+        {/* Image de fond avec overlay */}
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url('https://i.pinimg.com/1200x/23/18/ba/2318ba8d8dd3bcc8f5e0bd17347032bd.jpg')`
+            }}
+          />
+          {/* Overlay noir avec opacité */}
+          <div className="absolute inset-0 bg-black/60"></div>
+          {/* Option: dégradé supplémentaire pour plus de contraste */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/70"></div>
+        </div>
 
         <div className="container mx-auto px-4 h-24 relative z-10">
           <motion.div
@@ -270,10 +277,10 @@ export default function Assurance() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-            Assurance
+            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+              Assurance
             </h1>
-            <p className="text-sm text-slate-200 mb-4 lg:mb-10 leading-relaxed">
+            <p className="text-sm text-slate-100 mb-4 lg:mb-10 leading-relaxed drop-shadow">
               Protégez votre projet, votre patrimoine et votre activité avec nos assurances sur mesure.
               Des solutions adaptées à vos besoins spécifiques.
             </p>
@@ -281,7 +288,7 @@ export default function Assurance() {
             <div className="flex flex-wrap gap-5 justify-center">
               <motion.div>
                 <Button
-                  className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300"
+                  className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300 shadow-lg hover:shadow-xl"
                   onClick={() => openModal('service-assurance')}
                 >
                   <Shield className="h-5 w-5 mr-3" />
@@ -291,7 +298,7 @@ export default function Assurance() {
 
               <motion.div>
                 <Button
-                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
+                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300 shadow-lg hover:shadow-xl"
                   onClick={() => openModal('devis')}
                 >
                   <Calculator className="h-5 w-5 mr-3" />
@@ -366,7 +373,7 @@ export default function Assurance() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -5 }}
               >
-                <Card 
+                <Card
                   className="p-6 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 bg-white group"
                 >
                   <div className={`w-12 h-12 rounded-xl ${categorie.color} flex items-center justify-center mb-4 group-hover:${categorie.textColor.replace('text-', 'bg-')} transition-colors duration-300`}>
@@ -523,8 +530,8 @@ export default function Assurance() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-8 lg:py-20 bg-white" id="devis-assurance">
-        <div className="container mx-auto px-4 text-center">
+      <section className="px-10 py-8 lg:py-20" id="devis-assurance">
+        <div className="container mx-auto py-10 rounded-lg  bg-white shadow-xl px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

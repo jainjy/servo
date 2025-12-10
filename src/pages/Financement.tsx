@@ -1515,52 +1515,59 @@ export default function Financement() {
 
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: ` url('https://i.pinimg.com/736x/f5/54/90/f55490b75ccfbbb66a4ba58fc2724328.jpg')`,
-          }}
-        />
+  {/* Image de fond avec overlay */}
+  <div className="absolute inset-0">
+    <div
+      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('https://i.pinimg.com/736x/f5/54/90/f55490b75ccfbbb66a4ba58fc2724328.jpg')`,
+      }}
+    />
+    {/* Overlay noir avec opacité */}
+    <div className="absolute inset-0 bg-black/60"></div>
+    {/* Option: dégradé supplémentaire pour plus de contraste */}
+    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/70"></div>
+  </div>
+  
+  <div className="container mx-auto px-4 h-24 relative z-10">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      className="text-center max-w-4xl mx-auto"
+    >
+      <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+        Financement
+      </h1>
+      <p className="text-sm text-slate-100 mb-4 lg:mb-10 leading-relaxed drop-shadow">
+        Des solutions adaptées pour financer tous vos projets avec nos partenaires de confiance.
+        Accompagnement personnalisé de A à Z.
+      </p>
 
-        <div className="container mx-auto px-4 h-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
+      <div className="flex flex-wrap gap-5 justify-center">
+        <motion.div>
+          <Button
+            className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300 shadow-lg hover:shadow-xl"
+            onClick={() => openModal('service')}
           >
-            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-             Financement
-            </h1>
-            <p className="text-sm text-slate-200 mb-4 lg:mb-10 leading-relaxed">
-              Des solutions adaptées pour financer tous vos projets avec nos partenaires de confiance.
-              Accompagnement personnalisé de A à Z.
-            </p>
+            <FileText className="h-5 w-5 mr-3" />
+            Découvrir nos services
+          </Button>
+        </motion.div>
 
-            <div className="flex flex-wrap gap-5 justify-center">
-              <motion.div>
-                <Button
-                  className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300"
-                  onClick={() => openModal('service')}
-                >
-                  <FileText className="h-5 w-5 mr-3" />
-                  Découvrir nos services
-                </Button>
-              </motion.div>
-
-              <motion.div>
-                <Button
-                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
-                  onClick={() => openModal('simulation')}
-                >
-                  <Calculator className="h-5 w-5 mr-3" />
-                  Simuler mon financement
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+        <motion.div>
+          <Button
+            className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300 shadow-lg hover:shadow-xl"
+            onClick={() => openModal('simulation')}
+          >
+            <Calculator className="h-5 w-5 mr-3" />
+            Simuler mon financement
+          </Button>
+        </motion.div>
+      </div>
+    </motion.div>
+  </div>
+</section>
 
       {/* Section Financement détaillé */}
       <section className="py-2 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
@@ -1740,22 +1747,22 @@ export default function Financement() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="audit">
-        <div className="container mx-auto px-4 text-center">
+      <section className="px-10 py-8 lg:pb-5 bg-[#FAFAFA]" id="audit">
+        <div className="container mx-auto rounded-lg px-4 py-10 bg-logo text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-[#8B4513]">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-secondary-text">
               Prêt à concrétiser votre projet ?
             </h2>
-            <p className="text-sm text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-slate-900 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans votre financement
             </p>
             <motion.div>
               <Button
-                className="bg-[#556B2F] text-white hover:bg-[#6B8E23] rounded-xl px-10 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300"
+                className="bg-secondary-text text-white hover:bg-secondary-text/50 rounded-xl px-10 py-5 text-lg font-semibold  transition-all duration-300"
                 onClick={() => openModal('contact')}
               >
                 <Phone className="h-5 w-5 mr-3" />

@@ -95,9 +95,14 @@ interface PropertyDetailPageProps {
 }
 
 const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
-  gsap.registerPlugin(ScrollTrigger);
-  console.log("Détails de la propriété:", property);
   const navigate = useNavigate();
+  
+  // Enregistrer ScrollTrigger une seule fois
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+  }, []);
+
+  console.log("Détails de la propriété:", property);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
@@ -235,7 +240,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   useEffect(() => {
     mm.add("(min-width: 1024px)", () => {
       ScrollTrigger.create({
-        trigger: "#agent",
+        trigger: "#agents",
         start: "top 90px",
         end: "bottom 55px",
         pin: true,
@@ -245,7 +250,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white pt-16">
+    <div className="min-h-screen bg-white ">
       <div className="container mx-auto px-4 py-10">
         {/* Galerie d'images et sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
@@ -307,7 +312,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                          ? "border-[#6B8E23]"
+                          ? ""
                           : "border-transparent"
                           }`}
                       >
@@ -349,7 +354,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
           </div>
 
           {/* Sidebar - Agent & Actions */}
-          <div id="agent" className="space-y-6 relative lg:absolute right-2 lg:w-80">
+          <div id="agents" className="space-y-6 relative lg:absolute right-2 lg:w-80">
             {/* Carte Agent */}
             <Card className="border border-[#D3D3D3]">
               <CardContent className="p-6">
@@ -448,7 +453,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         </div>
 
         {/* Contenu principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 bg-white p-2 rounded-lg shadow-lg border border-[#D3D3D3]">
+        <div className=" gap-8 p-2 rounded-lg shadow-lg border border-[#D3D3D3]">
           {/* Contenu principal */}
           <div className="lg:col-span-3 space-y-8">
             {/* En-tête */}

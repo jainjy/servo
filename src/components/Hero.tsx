@@ -22,7 +22,7 @@ const colors = {
 };
 
 // URL de l'image en dessin
-const sketchImageUrl = "/image.png";
+const sketchImageUrl = "/2em.png";
 
 const Hero = () => {
   const [heroQuery, setHeroQuery] = useState("");
@@ -388,7 +388,7 @@ const Hero = () => {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
+        className="relative h-[500px] lg:min-h-screen flex items-center justify-center overflow-hidden bg-black"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -458,7 +458,7 @@ const Hero = () => {
               alt="Dessin architectural"
               className="absolute top-0 left-0 w-full h-full object-cover"
               style={{
-                filter: 'grayscale(100%) brightness(1.7) contrast(1.4)',
+                // filter: 'grayscale(100%) brightness(1.7) contrast(1.4)',
                 mixBlendMode: 'multiply',
                 opacity: 1,
                 transform: `
@@ -506,7 +506,7 @@ const Hero = () => {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-2.5 h-2.5 rounded-full bg-white"
+                className="absolute w-2.5 h-2.5 rounded-full bg-white/40"
                 style={{
                   left: mousePosition.x + Math.sin(waveOffset + i * 1) * (revealRadius * 0.9),
                   top: mousePosition.y + Math.cos(waveOffset + i * 1) * (revealRadius * 0.9),
@@ -522,16 +522,16 @@ const Hero = () => {
         )}
 
         {/* Contenu principal */}
-        <div className="container relative z-25 mx-auto px-4 py-20 text-center">
+        <div className="container relative z-25 mx-auto px-1 lg:px-4 py-5 lg:py-20 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="mb-6 text-4xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white"
+            className="mb-2 lg:mb-6 text-2xl md:text-6xl lg:text-8xl tracking-tight font-bold text-white"
           >
             <span className="block">La super-application</span>
             <span 
-              className="block mt-4"
+              className="block mt-1 lg:mt-4"
               style={{ 
                 color: colors.sruvol,
                 textShadow: '0 2px 10px rgba(0,0,0,0.3)'
@@ -545,7 +545,7 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="mb-12 text-lg lg:text-2xl text-white/90 font-light tracking-wide"
+            className="mb-12 text-md lg:text-2xl text-white/90 font-light tracking-wide"
             style={{ textShadow: '0 1px 5px rgba(0,0,0,0.3)' }}
           >
             Immobilier, services et produits — tout en un, guidé par l'IA
