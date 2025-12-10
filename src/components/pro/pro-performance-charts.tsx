@@ -6,6 +6,15 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import api from "@/lib/api"
 import { useAuth } from "@/hooks/useAuth"
 
+// Définition du thème
+const theme = {
+  logo: "#556B2F",           
+  primaryDark: "#6B8E23",   
+  lightBg: "#FFFFFF",       
+  separator: "#D3D3D3",     
+  secondaryText: "#8B4513", 
+};
+
 interface TourismeBooking {
   id: string;
   confirmationNumber: string;
@@ -275,20 +284,20 @@ export function ProPerformanceCharts() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <Card className="p-6 bg-card border-border">
+        <Card className="p-6" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Revenus et réservations</h3>
-            <p className="text-sm text-muted-foreground">Évolution sur les 7 derniers jours</p>
+            <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Revenus et réservations</h3>
+            <p className="text-sm" style={{ color: theme.secondaryText }}>Évolution sur les 7 derniers jours</p>
           </div>
           <ChartContainer
             config={{
               revenue: {
                 label: "Revenus (€)",
-                color: "hsl(var(--chart-1))",
+                color: theme.logo,
               },
               bookings: {
                 label: "Réservations",
-                color: "hsl(var(--chart-2))",
+                color: theme.primaryDark,
               },
             }}
             className="h-[200px]"
@@ -297,29 +306,29 @@ export function ProPerformanceCharts() {
               <AreaChart data={defaultRevenueData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                    <stop offset="5%" stopColor={theme.logo} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={theme.logo} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                    <stop offset="5%" stopColor={theme.primaryDark} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={theme.primaryDark} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.separator} />
+                <XAxis dataKey="date" stroke={theme.secondaryText} fontSize={12} />
+                <YAxis stroke={theme.secondaryText} fontSize={12} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="hsl(var(--chart-1))"
+                  stroke={theme.logo}
                   fillOpacity={1}
                   fill="url(#colorRevenue)"
                 />
                 <Area
                   type="monotone"
                   dataKey="bookings"
-                  stroke="hsl(var(--chart-2))"
+                  stroke={theme.primaryDark}
                   fillOpacity={1}
                   fill="url(#colorBookings)"
                 />
@@ -328,33 +337,33 @@ export function ProPerformanceCharts() {
           </ChartContainer>
         </Card>
 
-        <Card className="p-6 bg-card border-border">
+        <Card className="p-6" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Évolution de la note</h3>
-            <p className="text-sm text-muted-foreground">Moyenne sur les 6 derniers mois</p>
+            <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Évolution de la note</h3>
+            <p className="text-sm" style={{ color: theme.secondaryText }}>Moyenne sur les 6 derniers mois</p>
           </div>
           <ChartContainer
             config={{
               rating: {
                 label: "Note",
-                color: "hsl(var(--chart-3))",
+                color: theme.secondaryText,
               },
             }}
             className="h-[150px] lg:w-full w-4/5"
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={defaultRatingData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.separator} />
+                <XAxis dataKey="month" stroke={theme.secondaryText} fontSize={12} />
                 <YAxis 
-                  stroke="hsl(var(--muted-foreground))" 
+                  stroke={theme.secondaryText} 
                   fontSize={12}
                   domain={[0, 5]}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="rating"
-                  fill="hsl(var(--chart-3))"
+                  fill={theme.secondaryText}
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -375,20 +384,24 @@ export function ProPerformanceCharts() {
 
   return (
     <div className="space-y-6">
-      <Card className="p-0 lg:p-6  border-none bg-transparent lg:bg-card lg:border-border">
+      <Card className="p-0 lg:p-6 border-none bg-transparent lg:border" style={{ 
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        ...(window.innerWidth >= 1024 && { backgroundColor: theme.lightBg, borderColor: theme.separator })
+      }}>
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Revenus et réservations</h3>
-          <p className="text-sm text-muted-foreground">Évolution sur les 7 derniers jours</p>
+          <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Revenus et réservations</h3>
+          <p className="text-sm" style={{ color: theme.secondaryText }}>Évolution sur les 7 derniers jours</p>
         </div>
         <ChartContainer
           config={{
             revenue: {
               label: "Revenus (€)",
-              color: "hsl(var(--chart-1))",
+              color: theme.logo,
             },
             bookings: {
               label: "Réservations",
-              color: "hsl(var(--chart-2))",
+              color: theme.primaryDark,
             },
           }}
           className="h-[200px] lg:w-full w-4/5"
@@ -397,29 +410,29 @@ export function ProPerformanceCharts() {
             <AreaChart data={hasRevenueData ? revenueData : defaultRevenueData}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                  <stop offset="5%" stopColor={theme.logo} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={theme.logo} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                  <stop offset="5%" stopColor={theme.primaryDark} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={theme.primaryDark} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.separator} />
+              <XAxis dataKey="date" stroke={theme.secondaryText} fontSize={12} />
+              <YAxis stroke={theme.secondaryText} fontSize={12} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="hsl(var(--chart-1))"
+                stroke={theme.logo}
                 fillOpacity={1}
                 fill="url(#colorRevenue)"
               />
               <Area
                 type="monotone"
                 dataKey="bookings"
-                stroke="hsl(var(--chart-2))"
+                stroke={theme.primaryDark}
                 fillOpacity={1}
                 fill="url(#colorBookings)"
               />
@@ -427,46 +440,50 @@ export function ProPerformanceCharts() {
           </ResponsiveContainer>
         </ChartContainer>
         {!hasRevenueData && (
-          <div className="text-center text-muted-foreground mt-4">
+          <div className="text-center mt-4" style={{ color: theme.secondaryText }}>
             Aucune donnée de revenus pour les 7 derniers jours
           </div>
         )}
       </Card>
 
-      <Card className="p-0 lg:p-6 bg-transparent lg:bg-card border-none lg:border-border">
+      <Card className="p-0 lg:p-6 bg-transparent lg:border border-none" style={{ 
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        ...(window.innerWidth >= 1024 && { backgroundColor: theme.lightBg, borderColor: theme.separator })
+      }}>
         <div className=" mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Évolution de la note</h3>
-          <p className="text-sm text-muted-foreground">Moyenne sur les 6 derniers mois</p>
+          <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Évolution de la note</h3>
+          <p className="text-sm" style={{ color: theme.secondaryText }}>Moyenne sur les 6 derniers mois</p>
         </div>
         <ChartContainer
           config={{
             rating: {
               label: "Note",
-              color: "hsl(var(--chart-3))",
+              color: theme.secondaryText,
             },
           }}
           className="h-[150px]"
         >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={hasRatingData ? ratingData : defaultRatingData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.separator} />
+              <XAxis dataKey="month" stroke={theme.secondaryText} fontSize={12} />
               <YAxis 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke={theme.secondaryText} 
                 fontSize={12}
                 domain={[0, 5]}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar
                 dataKey="rating"
-                fill="hsl(var(--chart-3))"
+                fill={theme.secondaryText}
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
         {!hasRatingData && (
-          <div className="text-center text-muted-foreground mt-4">
+          <div className="text-center mt-4" style={{ color: theme.secondaryText }}>
             Aucune donnée de notes pour les 6 derniers mois
           </div>
         )}

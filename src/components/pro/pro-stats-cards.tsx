@@ -5,6 +5,15 @@ import { Calendar, Euro, Star, Users, Clock, TrendingUp } from "lucide-react"
 import api from "@/lib/api"
 import { useAuth } from "@/hooks/useAuth"
 
+// DÉFINITION DU THÈME PERSONNALISÉ
+const theme = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFFF",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+};
+
 interface TourismeBooking {
   id: string;
   confirmationNumber: string;
@@ -541,15 +550,19 @@ export function ProStatsCards() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {getDefaultStats().map((stat, index) => (
-          <Card key={stat.name + index} className="p-6 bg-card border-border hover:shadow-md transition-shadow">
+          <Card 
+            key={stat.name + index} 
+            className="p-6 hover:shadow-md transition-shadow"
+            style={{backgroundColor: theme.lightBg,borderColor: theme.separator}}
+          >
             <div className="animate-pulse">
               <div className="flex items-center justify-between">
-                <div className={`h-12 w-12 rounded-lg ${stat.bgColor}`}></div>
-                <div className="h-4 w-12 bg-gray-200 rounded"></div>
+                <div className={`h-12 w-12 rounded-lg`} style={{ backgroundColor: `${theme.separator}80` }}></div>
+                <div className="h-4 w-12 rounded" style={{ backgroundColor: theme.separator }}></div>
               </div>
               <div className="mt-4">
-                <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                <div className="h-6 w-16 bg-gray-200 rounded"></div>
+                <div className="h-4 w-24 rounded mb-2" style={{ backgroundColor: theme.separator }}></div>
+                <div className="h-6 w-16 rounded" style={{ backgroundColor: theme.separator }}></div>
               </div>
             </div>
           </Card>
@@ -561,20 +574,46 @@ export function ProStatsCards() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {stats.map((stat, index) => (
-        <Card key={stat.name + index} className="p-6 bg-card border-border hover:shadow-md transition-shadow">
+        <Card 
+          key={stat.name + index} 
+          className="p-6 hover:shadow-md transition-shadow"
+          style={{backgroundColor: theme.lightBg,borderColor: theme.separator,transition: 'all 0.3s ease'}}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = `0 4px 12px ${theme.primaryDark}20`;
+            e.currentTarget.style.borderColor = theme.primaryDark;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '';
+            e.currentTarget.style.borderColor = theme.separator;
+          }}
+        >
           <div className="flex items-center justify-between">
-            <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.bgColor}`}>
+            <div 
+              className={`flex h-12 w-12 items-center justify-center rounded-lg`}
+              style={{ backgroundColor: `${theme.logo}15`}}
+            >
               <stat.icon className={`h-6 w-6 ${stat.color}`} />
             </div>
-            <span className={`text-sm font-medium ${
-              stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-            }`}>
+            <span 
+              className={`text-sm font-medium`}
+              style={{ 
+                color: stat.trend === 'up' ? theme.primaryDark : theme.secondaryText
+              }}
+            >
               {stat.change}
             </span>
           </div>
-          <div className="mt-4">
-            <p className="text-sm font-medium text-muted-foreground">{stat.name}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{stat.value}</p>
+          <div className="mt-4">            <p 
+              className="text-sm font-medium"
+              style={{ color: theme.secondaryText }}
+            >
+              {stat.name}
+            </p>            <p 
+              className="mt-1 text-2xl font-bold"
+              style={{ color: theme.logo }}
+            >
+              {stat.value}
+            </p>
           </div>
         </Card>
       ))}
