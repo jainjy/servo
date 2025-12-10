@@ -1132,7 +1132,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           />
         </div>
         
-        <div className="pt-24 w-11/12 mx-auto flex flex-col">
+        <div className="pt-2 w-11/12 mx-auto flex flex-col">
           <span className="text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold">
             Locations Immobilières
           </span>
@@ -1415,7 +1415,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           </div>
           
           {/* Résultats */}
-          <div className="mt-4">
+          <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">
                 {rentType === "saisonniere" ? "Locations Saisonnières" : "Locations Longue Durée"} ({displayed.length})

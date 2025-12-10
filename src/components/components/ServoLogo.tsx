@@ -14,6 +14,7 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
   showTagline = false,
 }) => {
   const primaryColor = '#556B2F';
+  const secondaryColor = "#8B4513";
   const iconSize = size * 0.4;
   const textSize = size * 0.2;
 
@@ -32,7 +33,7 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
       <circle cx="50" cy="50" r="30" fill="white" />
       
       {/* Engrenage stylisé */}
-      <circle cx="50" cy="50" r="15" fill={primaryColor} />
+      <circle cx="50" cy="50" r="15" fill={secondaryColor} />
       
       {/* Croix intérieure (représentant le mouvement servo) */}
       <rect x="47.5" y="30" width="5" height="40" rx="2.5" fill="white" />
@@ -58,9 +59,9 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
   const TextOnly = () => (
     <div className="flex flex-col">
       <div 
-        className="azonix font-bold tracking-tight"
+        className="azonix lg:block hidden font-bold tracking-tight"
         style={{ 
-          color: primaryColor,
+          color: secondaryColor,
           fontSize: `${textSize}px`,
           lineHeight: 1
         }}

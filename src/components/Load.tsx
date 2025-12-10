@@ -16,6 +16,7 @@ export default function LoadingScreen({
   const [showServoZoom, setShowServoZoom] = useState(false);
   const [typingComplete, setTypingComplete] = useState(false);
   const [forceComplete, setForceComplete] = useState(false);
+  const [hideBackground, setHideBackground] = useState(false);
 
   // Gestion du SessionStorage (inchangé)
   const [hasAnimationPlayed, setHasAnimationPlayed] = useState(() => {
@@ -115,14 +116,17 @@ export default function LoadingScreen({
         setTimeout(() => {
           setShowServoZoom(true); // Phase Zoom
           setTimeout(() => {
-            setStartFadeOut(true); // Fade global
+            setHideBackground(true); // Animation du background disparait en cercle
             setTimeout(() => {
-              setIsVisible(false); // Unmount visuel
+              setStartFadeOut(true); // Fade global
               setTimeout(() => {
-                onLoadingComplete?.(); // Callback final
-              }, 300);
-            }, 800);
-          }, 600);
+                setIsVisible(false); // Unmount visuel
+                setTimeout(() => {
+                  onLoadingComplete?.(); // Callback final
+                }, 300);
+              }, 800);
+            }, 600);
+          }, 1000);
         }, 200);
       }
     };
@@ -150,6 +154,10 @@ export default function LoadingScreen({
           20% { transform: scale(1); opacity: 1; filter: blur(0px); }
           80% { transform: scale(1.5); opacity: 1; letter-spacing: 1rem; }
           100% { transform: scale(50); opacity: 0; letter-spacing: 5rem; filter: blur(20px); }
+        }
+        @keyframes circleDisappear {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(0); opacity: 0; }
         }
         @keyframes scan {
           0% { transform: translateY(-50vh); opacity: 0; }
@@ -184,6 +192,20 @@ export default function LoadingScreen({
         .animate-spin-reverse {
           animation: spin 3s linear infinite reverse;
         }
+        .circle-mask {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          width: 150vmax;
+          height: 150vmax;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 10000;
+        }
+        .circle-mask.background-circle-disappear {
+          animation: circleDisappear 0.8s cubic-bezier(0.7, 0, 0.3, 1) 0s forwards;
+        }
         @keyframes floatOrb1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(30px, -20px) scale(1.1); }
@@ -203,13 +225,13 @@ export default function LoadingScreen({
       <div 
         className="fixed inset-0 z-[9999] flex flex-col items-center justify-center transition-opacity duration-700 ease-out overflow-hidden"
         style={{ 
-          background: 'linear-gradient(135deg, #0a0f08 0%, #1a1f15 50%, #12160f 100%)',
+          background: 'transparent',
           opacity: startFadeOut ? 0 : 1,
           pointerEvents: startFadeOut ? 'none' : 'auto'
         }}
       >
         {/* ARRIÈRE-PLAN MODERNE AVEC GRILLES EN PROFONDEUR */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ opacity: hideBackground ? 0 : 1, transition: 'opacity 0.8s ease-out' }}>
           
           {/* Fond de base dégradé */}
           <div className="absolute inset-0" 
@@ -403,7 +425,7 @@ export default function LoadingScreen({
               {/* Zone de texte Typer */}
               <div className="min-h-[280px] flex items-center justify-center mb-8 relative">
                 {progress > 5 ? (
-                  <div className="font-serif text-xl md:text-2xl leading-relaxed text-justify tracking-wide opacity-90"
+                  <div className="font-serif text-sm md:text-2xl leading-relaxed text-justify tracking-wide opacity-90"
                        style={{ color: '#E5E5E5' }}>
                     <span className="text-4xl absolute -top-2 -left-2 opacity-30 font-serif">"</span>
                     <p style={{ 
@@ -476,7 +498,7 @@ export default function LoadingScreen({
 
           </div>
         ) : (
-          /* PHASE 2: ZOOM EFFECT */
+          /* PHASE 2: ZOOM EFFECT - COMMENTED FOR TESTING */
           <div className="absolute inset-0 flex items-center justify-center z-50">
             <div className="servo-animate relative">
               <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter text-white mix-blend-overlay">
@@ -488,6 +510,16 @@ export default function LoadingScreen({
                 </h1>
               </div>
             </div>
+          </div>
+        )}
+        
+        {/* Masque circulaire qui disparaît */}
+        {hideBackground && (
+          <div className={`circle-mask ${hideBackground ? 'background-circle-disappear' : ''}`}
+               style={{
+                 background: 'linear-gradient(135deg, #0a0f08 0%, #1a1f15 50%, #12160f 100%)',
+                 boxShadow: 'inset 0 0 100px rgba(0, 0, 0, 0.8)'
+               }}>
           </div>
         )}
       </div>
