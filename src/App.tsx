@@ -192,7 +192,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 // IMPORT DE LA NOUVELLE PAGE D'ACCOMPAGNEMENT
 import AccompagnementPage from "./pages/AccompagnementPage";
-
+import ConseilPage from "./pages/ConseilPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -281,7 +281,7 @@ const App = () => {
                   
                   {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
                   <Route path="/accompagnement" element={<AccompagnementPage />} />
-                  
+                  <Route path="conseil" element={<ConseilPage />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/digitalisation" element={<Digitalisation />} />
                   <Route
