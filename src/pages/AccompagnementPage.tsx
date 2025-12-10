@@ -572,7 +572,7 @@ const AccompagnementPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Section Notre Méthode - Cercles alignés horizontalement avec ligne de connexion uniquement sur les cercles */}
+      {/* Section Notre Méthode - Timeline horizontale avec ligne connectant les cercles */}
       <motion.section
         className="container mx-auto px-4 py-16"
         initial="hidden"
@@ -591,13 +591,12 @@ const AccompagnementPage: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Timeline horizontale avec cercles */}
-        <div className="relative">
+        {/* Timeline horizontale */}
+        <div className="relative max-w-6xl mx-auto">
           {/* Ligne horizontale connectant les cercles */}
-          <div className="absolute left-0 right-0 top-1/2 h-0.5 hidden lg:block" 
+          <div className="absolute left-0 right-0 top-8 h-0.5 hidden lg:block" 
             style={{ 
               backgroundColor: colors.separator,
-              transform: 'translateY(-50%)',
               zIndex: 0
             }}
           ></div>
@@ -612,19 +611,16 @@ const AccompagnementPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <div className="flex flex-col items-center text-center">
+                <div className="flex flex-col items-center text-center h-full">
                   {/* Cercle avec numéro */}
                   <div className="relative mb-4">
-                    {/* Cercle extérieur avec fond clair */}
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto relative"
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto relative z-10"
                       style={{ 
                         backgroundColor: `${etape.color}15`,
                         border: `2px solid ${etape.color}`,
-                        zIndex: 20
                       }}
                     >
-                      {/* Cercle intérieur avec numéro */}
-                      <div className="w-16 h-16 rounded-full flex items-center justify-center"
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center"
                         style={{ 
                           backgroundColor: etape.color,
                           color: colors.lightBg
@@ -650,15 +646,15 @@ const AccompagnementPage: React.FC = () => {
                   </div>
 
                   {/* Contenu de l'étape */}
-                  <div className="px-2">
-                    <h3 className="text-lg font-bold mb-2" style={{ color: colors.textPrimary }}>
+                  <div className="px-2 flex-1">
+                    <h3 className="text-xl font-bold mb-2" style={{ color: colors.textPrimary }}>
                       {etape.title}
                     </h3>
-                    <p className="text-sm mb-2" style={{ color: colors.textSecondary }}>
+                    <p className="text-sm mb-3" style={{ color: colors.textSecondary }}>
                       {etape.description}
                     </p>
-                    <div className="flex items-center justify-center gap-1 text-xs text-gray-500">
-                      <etape.icon className="h-3 w-3" />
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <etape.icon className="h-4 w-4" />
                       <span>{etape.details}</span>
                     </div>
                   </div>
@@ -775,7 +771,7 @@ const AccompagnementPage: React.FC = () => {
                     borderColor: selectedType === type.id ? type.color : colors.separator,
                     backgroundColor: colors.cardBg,
                     borderWidth: selectedType === type.id ? '2px' : '1px',
-                    boxShadow: selectedType === type.id ? `0 10px 30px ${type.color}30` : 'none'
+                    boxShadow: selectedType === type.id ? `0 10px 30px ${type.color}30` : '0 4px 20px rgba(0,0,0,0.08)'
                   }}
                 >
                   <div className={`w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center transition-colors duration-300 ${
@@ -920,125 +916,130 @@ const AccompagnementPage: React.FC = () => {
         )}
       </motion.section>
 
-      {/* Section Nos Experts - Carte Grand Format */}
+      {/* Section Nos Experts - Cartes avec bordures et ombres seulement */}
       <motion.section
         className="container mx-auto px-4 py-16"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <Card className="rounded-3xl overflow-hidden border-0 shadow-2xl" 
-          style={{ backgroundColor: colors.cardBg }}>
-          <div className="p-8 lg:p-12">
-            <motion.div
-              variants={itemVariants}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4" style={{ color: colors.textPrimary }}>
-                Nos <span style={{ color: colors.secondaryText }}>Experts</span>
-              </h2>
-              <p className="text-lg max-w-3xl mx-auto" style={{ color: colors.textSecondary }}>
-                Rencontrez notre équipe d'experts dédiés à votre réussite
-              </p>
-            </motion.div>
+        <div className="p-8 lg:p-12">
+          <motion.div
+            variants={itemVariants}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4" style={{ color: colors.textPrimary }}>
+              Nos <span style={{ color: colors.secondaryText }}>Experts</span>
+            </h2>
+            <p className="text-lg max-w-3xl mx-auto" style={{ color: colors.textSecondary }}>
+              Rencontrez notre équipe d'experts dédiés à votre réussite
+            </p>
+          </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-              {conseillers.map((conseiller) => (
-                <motion.div
-                  key={conseiller.id}
-                  variants={itemVariants}
-                  whileHover={{ y: -8 }}
-                >
-                  <Card className="p-6 rounded-2xl text-center h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
-                    style={{ backgroundColor: colors.cardBg }}>
-                    
-                    {/* Badge disponibilité */}
-                    <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 ${
-                      conseiller.disponibilite === 'disponible' ? 'bg-green-100 text-green-800' :
-                      conseiller.disponibilite === 'limitee' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {conseiller.disponibilite === 'disponible' ? 'Disponible' :
-                       conseiller.disponibilite === 'limitee' ? 'Limité' : 'Complet'}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {conseillers.map((conseiller) => (
+              <motion.div
+                key={conseiller.id}
+                variants={itemVariants}
+                whileHover={{ y: -8 }}
+              >
+                <Card className="p-6 rounded-2xl text-center h-full transition-all duration-300 overflow-hidden group bg-white"
+                  style={{ 
+                    border: `2px solid ${colors.separator}`,
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+                  }}>
+                  
+                  {/* Badge disponibilité */}
+                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 shadow-md ${
+                    conseiller.disponibilite === 'disponible' ? 'bg-green-100 text-green-800 border border-green-200' :
+                    conseiller.disponibilite === 'limitee' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                    'bg-red-100 text-red-800 border border-red-200'
+                  }`}>
+                    {conseiller.disponibilite === 'disponible' ? 'Disponible' :
+                     conseiller.disponibilite === 'limitee' ? 'Limité' : 'Complet'}
+                  </div>
+
+                  <div className="w-24 h-24 rounded-full mx-auto mb-6 mt-2 flex items-center justify-center text-white text-2xl font-bold relative group-hover:scale-105 transition-transform duration-300 border-4 border-white shadow-lg"
+                    style={{ 
+                      backgroundColor: conseiller.avatarColor,
+                      boxShadow: `0 8px 25px ${conseiller.avatarColor}40`
+                    }}>
+                    {conseiller.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+
+                  <h3 className="text-xl font-bold mb-2" style={{ color: colors.textPrimary }}>
+                    {conseiller.name}
+                  </h3>
+
+                  <div className="inline-block px-3 py-1 rounded-full mb-3 text-sm font-semibold"
+                    style={{ 
+                      backgroundColor: `${colors.primaryDark}10`,
+                      color: colors.primaryDark,
+                      border: `1px solid ${colors.primaryDark}20`
+                    }}>
+                    {conseiller.title}
+                  </div>
+
+                  <p className="text-sm mb-4 px-2" style={{ color: colors.textSecondary }}>
+                    {conseiller.specialty}
+                  </p>
+
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-4 w-4"
+                          style={{ 
+                            color: i < Math.floor(conseiller.rating) ? colors.warning : colors.separator,
+                            fill: i < Math.floor(conseiller.rating) ? colors.warning : 'transparent'
+                          }}
+                        />
+                      ))}
                     </div>
+                    <span className="text-sm font-bold" style={{ color: colors.textPrimary }}>
+                      {conseiller.rating}
+                    </span>
+                  </div>
 
-                    <div className="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-2xl font-bold relative group-hover:scale-105 transition-transform duration-300"
-                      style={{ 
-                        backgroundColor: conseiller.avatarColor,
-                        boxShadow: `0 8px 25px ${conseiller.avatarColor}40`
-                      }}>
-                      {conseiller.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-
-                    <h3 className="text-xl font-bold mb-2" style={{ color: colors.textPrimary }}>
-                      {conseiller.name}
-                    </h3>
-
-                    <p className="text-sm mb-3 font-semibold" style={{ color: conseiller.avatarColor }}>
-                      {conseiller.title}
-                    </p>
-
-                    <p className="text-sm mb-4 px-2" style={{ color: colors.textSecondary }}>
-                      {conseiller.specialty}
-                    </p>
-
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4"
-                            style={{ 
-                              color: i < Math.floor(conseiller.rating) ? colors.warning : colors.separator,
-                              fill: i < Math.floor(conseiller.rating) ? colors.warning : 'transparent'
-                            }}
-                          />
-                        ))}
+                  <div className="flex justify-center items-center gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-lg font-bold" style={{ color: colors.textPrimary }}>
+                        {conseiller.projects}
                       </div>
-                      <span className="text-sm font-bold" style={{ color: colors.textPrimary }}>
-                        {conseiller.rating}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-center items-center gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-lg font-bold" style={{ color: colors.textPrimary }}>
-                          {conseiller.projects}
-                        </div>
-                        <div className="text-xs" style={{ color: colors.textSecondary }}>
-                          Projets
-                        </div>
-                      </div>
-                      <div className="h-8 w-px" style={{ backgroundColor: colors.separator }}></div>
-                      <div className="text-center">
-                        <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                          {conseiller.experience}
-                        </div>
-                        <div className="text-xs" style={{ color: colors.textSecondary }}>
-                          Expérience
-                        </div>
+                      <div className="text-xs" style={{ color: colors.textSecondary }}>
+                        Projets
                       </div>
                     </div>
+                    <div className="h-8 w-px" style={{ backgroundColor: colors.separator }}></div>
+                    <div className="text-center">
+                      <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                        {conseiller.experience}
+                      </div>
+                      <div className="text-xs" style={{ color: colors.textSecondary }}>
+                        Expérience
+                      </div>
+                    </div>
+                  </div>
 
-                    <Button
-                      className="w-full font-semibold rounded-xl gap-2 shadow-md hover:shadow-lg transition-all duration-300"
-                      style={{
-                        background: colors.gradient1,
-                        color: colors.lightBg,
-                        borderColor: colors.primaryDark
-                      }}
-                      disabled={conseiller.disponibilite === 'complet'}
-                      onClick={() => handleConseillerSelect(conseiller)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      Contacter l'expert
-                    </Button>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+                  <Button
+                    className="w-full font-semibold rounded-xl gap-2 shadow-md hover:shadow-lg transition-all duration-300"
+                    style={{
+                      background: colors.gradient1,
+                      color: colors.lightBg,
+                      border: '1px solid transparent'
+                    }}
+                    disabled={conseiller.disponibilite === 'complet'}
+                    onClick={() => handleConseillerSelect(conseiller)}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Contacter l'expert
+                  </Button>
+                </Card>
+              </motion.div>
+            ))}
           </div>
-        </Card>
+        </div>
       </motion.section>
 
       {/* Section Témoignages - Carte Grand Format */}
@@ -1365,7 +1366,6 @@ const AccompagnementPage: React.FC = () => {
         </motion.div>
       )}
 
-      <Footer />
     </div>
   );
 };
