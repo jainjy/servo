@@ -23,6 +23,8 @@ const GenericMap: React.FC<GenericMapProps> = ({
   const userLocationMarkerRef = useRef<L.Marker | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const isInitialMount = useRef(true);
+  const fitBoundsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     initializeLeaflet();
@@ -57,6 +59,24 @@ const GenericMap: React.FC<GenericMapProps> = ({
 
   useEffect(() => {
     if (!mapRef.current) return;
+
+    // Nettoyer les timeouts
+    if (fitBoundsTimeoutRef.current) {
+      clearTimeout(fitBoundsTimeoutRef.current);
+      fitBoundsTimeoutRef.current = null;
+    }
+
+    // Nettoyer l'instance précédente si elle existe
+    if (mapInstanceRef.current) {
+      try {
+        mapInstanceRef.current.remove();
+      } catch (error) {
+        console.warn("Erreur lors du nettoyage de la carte:", error);
+      }
+      mapInstanceRef.current = null;
+      markersRef.current = [];
+      userLocationMarkerRef.current = null;
+    }
 
     const map = L.map(mapRef.current).setView(center, zoom);
     mapInstanceRef.current = map;
@@ -164,9 +184,22 @@ const GenericMap: React.FC<GenericMapProps> = ({
     new (LocationControl as any)({ position: "bottomright" }).addTo(map);
 
     return () => {
+      // Nettoyer le timeout
+      if (fitBoundsTimeoutRef.current) {
+        clearTimeout(fitBoundsTimeoutRef.current);
+        fitBoundsTimeoutRef.current = null;
+      }
+
+      // Nettoyer la carte
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch (error) {
+          console.warn("Erreur lors du nettoyage de la carte (cleanup):", error);
+        }
         mapInstanceRef.current = null;
+        markersRef.current = [];
+        userLocationMarkerRef.current = null;
       }
     };
   }, [center, zoom]);
@@ -180,6 +213,7 @@ const GenericMap: React.FC<GenericMapProps> = ({
     // Supprimer l'ancien marqueur de position
     if (userLocationMarkerRef.current) {
       userLocationMarkerRef.current.removeFrom(map);
+      userLocationMarkerRef.current = null;
     }
 
     // Créer un marqueur personnalisé pour la position de l'utilisateur
@@ -206,21 +240,40 @@ const GenericMap: React.FC<GenericMapProps> = ({
 
   // Gérer les marqueurs des points
   useEffect(() => {
-    if (!mapInstanceRef.current || !points.length) return;
+    if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
 
+    // Vérifier que la carte est complètement initialisée et toujours valide
+    if (!map || !map._container || map._container._leaflet_id === undefined) {
+      console.warn("Carte non prête pour l'ajout de marqueurs");
+      return;
+    }
+
     // Supprimer les anciens marqueurs
-    markersRef.current.forEach((marker) => marker.removeFrom(map));
+    markersRef.current.forEach((marker) => {
+      if (marker && map.hasLayer(marker)) {
+        try {
+          marker.removeFrom(map);
+        } catch (error) {
+          console.warn("Erreur lors de la suppression d'un marqueur:", error);
+        }
+      }
+    });
     markersRef.current = [];
+
+    // Si pas de points, ne rien faire
+    if (!points || points.length === 0) {
+      // Reset pour le prochain rendu
+      isInitialMount.current = true;
+      return;
+    }
 
     // Ajouter les nouveaux marqueurs
     points.forEach((point) => {
-      // 🔥 Correction : accepter latitude|lat et longitude|lng
       const lat = point.latitude ?? point.lat;
       const lng = point.longitude ?? point.lng;
 
-      // 🔥 Vérifier NUMÉRIQUEMENT (pas truthy)
       if (typeof lat !== "number" || typeof lng !== "number") {
         console.warn("Point ignoré (coords invalides) :", point);
         return;
@@ -228,40 +281,79 @@ const GenericMap: React.FC<GenericMapProps> = ({
 
       const icon = createCustomIcon(point.type);
 
-      const marker = L.marker([lat, lng], { icon })
-        .addTo(map)
-        .bindPopup(
-          point.popupContent || `<div>${point.name || "Point sans nom"}</div>`
-        );
+      try {
+        const marker = L.marker([lat, lng], { icon })
+          .addTo(map)
+          .bindPopup(
+            point.popupContent || `<div>${point.title || point.name || "Point sans nom"}</div>`
+          );
 
-      // Gestion du clic sur le marqueur
-      marker.on("click", () => {
-        setSelectedPoint(point);
-        if (onPointClick) {
-          onPointClick(point);
-        }
-      });
+        // Gestion du clic sur le marqueur
+        marker.on("click", () => {
+          setSelectedPoint(point);
+          if (onPointClick) {
+            onPointClick(point);
+          }
+        });
 
-      marker.on("mouseover", function () {
-        this.setPopupContent(
-          `<div class="text-sm font-semibold">${point.name}</div>`
-        );
-        this.openPopup();
-      });
+        marker.on("mouseover", function () {
+          this.setPopupContent(
+            `<div class="text-sm font-semibold">${point.title || point.name}</div>`
+          );
+          this.openPopup();
+        });
 
-      marker.on("mouseout", function () {
-        this.closePopup();
-      });
+        marker.on("mouseout", function () {
+          this.closePopup();
+        });
 
-      markersRef.current.push(marker);
+        markersRef.current.push(marker);
+      } catch (error) {
+        console.error("Erreur lors de l'ajout du marqueur:", error);
+      }
     });
 
-
     // Ajuster la vue pour montrer tous les marqueurs
-    if (points.length > 0) {
-      const group = new L.FeatureGroup(markersRef.current);
-      map.fitBounds(group.getBounds().pad(0.1));
+    if (points.length > 0 && markersRef.current.length > 0) {
+      // Annuler le timeout précédent s'il existe
+      if (fitBoundsTimeoutRef.current) {
+        clearTimeout(fitBoundsTimeoutRef.current);
+      }
+
+      // Attendre que les marqueurs soient complètement ajoutés
+      fitBoundsTimeoutRef.current = setTimeout(() => {
+        if (!mapInstanceRef.current || 
+            !mapInstanceRef.current._container || 
+            markersRef.current.length === 0) {
+          return;
+        }
+
+        try {
+          const group = new L.FeatureGroup(markersRef.current);
+          const bounds = group.getBounds();
+          
+          // Vérifier que les bounds sont valides
+          if (bounds && bounds.isValid && bounds.isValid()) {
+            // Ne faire fitBounds qu'au premier rendu
+            if (isInitialMount.current) {
+              mapInstanceRef.current.fitBounds(bounds.pad(0.1));
+              isInitialMount.current = false;
+            }
+          }
+        } catch (error) {
+          console.warn("Erreur lors de l'ajustement de la vue:", error);
+          // Pas de fallback ici pour éviter d'autres erreurs
+        }
+      }, 100); // Délai un peu plus long pour être sûr
     }
+
+    return () => {
+      // Nettoyer le timeout dans le cleanup
+      if (fitBoundsTimeoutRef.current) {
+        clearTimeout(fitBoundsTimeoutRef.current);
+        fitBoundsTimeoutRef.current = null;
+      }
+    };
   }, [points, onPointClick]);
 
   return (
