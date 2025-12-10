@@ -296,40 +296,40 @@ const MapPage: React.FC = () => {
     <div className="px-8 pb-5 pt-28">
       {/* En-tête avec statistiques */}
       <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
-        <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+        <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-[#ffffff]/60'></div>
         <img src="https://i.pinimg.com/1200x/01/2d/ea/012dea65a1f79da54266c118fe39e07e.jpg" className='h-full object-cover w-full' alt="" />
       </div>
       <div className="mb-6">
-        <h1 className="text-lg lg:text-3xl pb-8 -tracking-tighter text-center font-bold text-gray-100 mb-2">
+        <h1 className="text-lg lg:text-3xl pb-8 -tracking-tighter text-center font-bold text-[#556B2F] mb-2">
           Carte des partenaires et propriétés
         </h1>
         {/* Version Desktop */}
         <div className="hidden md:grid grid-cols-2 lg:flex flex-wrap items-center justify-center gap-3 mb-6">
-          <div className="bg-white/20 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
-            <div className="flex items-center text-white">
-              <Users className="w-4 h-4 text-blue-300 mr-3" />
+          <div className="bg-[#556B2F]/20 backdrop-blur-lg rounded-full px-4 py-1 border border-[#D3D3D3] shadow-lg">
+            <div className="flex items-center text-[#556B2F]">
+              <Users className="w-4 h-4 text-[#6B8E23] mr-3" />
               <span className="font-medium">Partenaires: </span>
-              <span className="ml-2 bg-blue-500/20 px-2 py-1 text-xs rounded-lg text-blue-100 font-bold">
+              <span className="ml-2 bg-[#6B8E23]/20 px-2 py-1 text-xs rounded-lg text-[#556B2F] font-bold">
                 {points.filter((p) => p.type === "user").length}
               </span>
             </div>
           </div>
 
-          <div className="bg-white/20 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
-            <div className="flex items-center text-white">
-              <Home className="w-4 h-4 text-green-300 mr-3" />
+          <div className="bg-[#556B2F]/20 backdrop-blur-lg rounded-full px-4 py-1 border border-[#D3D3D3] shadow-lg">
+            <div className="flex items-center text-[#6B8E23]">
+              <Home className="w-4 h-4 text-[#556B2F] mr-3" />
               <span className="font-medium">Propriétés: </span>
-              <span className="ml-2 bg-green-500/20 px-2 text-xs py-1 rounded-lg text-green-100 font-bold">
+              <span className="ml-2 bg-[#556B2F]/20 px-2 text-xs py-1 rounded-lg text-[#6B8E23] font-bold">
                 {points.filter((p) => p.type === "property").length}
               </span>
             </div>
           </div>
 
-          <div className="bg-white/20 col-span-1 backdrop-blur-lg rounded-full px-4 py-1 border border-white/30 shadow-lg">
-            <div className="flex items-center text-white">
-              <MapPin className="w-4 h-4 text-red-300 mr-3" />
+          <div className="bg-[#556B2F]/20 col-span-1 backdrop-blur-lg rounded-full px-4 py-1 border border-[#D3D3D3] shadow-lg">
+            <div className="flex items-center text-[#8B4513]">
+              <MapPin className="w-4 h-4 text-[#8B4513] mr-3" />
               <span className="font-medium">Affichés: </span>
-              <span className="ml-2 bg-red-500/20 text-xs px-2 py-1 rounded-lg text-red-100 font-bold">
+              <span className="ml-2 bg-[#8B4513]/20 text-xs px-2 py-1 rounded-lg text-[#8B4513] font-bold">
                 {filteredPoints.length} points
               </span>
             </div>
@@ -338,39 +338,39 @@ const MapPage: React.FC = () => {
 
         {/* Version Mobile */}
         <div className="md:hidden flex justify-between items-center px-4 py-3">
-          <div className="flex items-center text-white text-sm">
-            <Users className="w-4 h-4 text-blue-300 mr-2" />
+          <div className="flex items-center text-[#556B2F] text-sm">
+            <Users className="w-4 h-4 text-[#6B8E23] mr-2" />
             <span className="font-bold">{points.filter((p) => p.type === "user").length}</span>
           </div>
 
-          <div className="flex items-center text-white text-sm">
-            <Home className="w-4 h-4 text-green-300 mr-2" />
+          <div className="flex items-center text-[#6B8E23] text-sm">
+            <Home className="w-4 h-4 text-[#556B2F] mr-2" />
             <span className="font-bold">{points.filter((p) => p.type === "property").length}</span>
           </div>
 
-          <div className="flex items-center text-white text-sm">
-            <MapPin className="w-4 h-4 text-red-300 mr-2" />
+          <div className="flex items-center text-[#8B4513] text-sm">
+            <MapPin className="w-4 h-4 text-[#8B4513] mr-2" />
             <span className="font-bold">{filteredPoints.length}</span>
           </div>
         </div>
 
         {/* Barre de recherche et filtres */}
-        <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
+        <div className="bg-[#FFFFFF] rounded-lg shadow-sm border border-[#D3D3D3] p-4 mb-4">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Barre de recherche */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] h-5 w-5" />
               <input
                 type="text"
                 placeholder="Rechercher par nom, ville, adresse, métier..."
                 value={filters.searchTerm}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#6B8E23] focus:border-[#6B8E23]"
               />
               {filters.searchTerm && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#8B4513] hover:text-[#556B2F]"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -382,8 +382,8 @@ const MapPage: React.FC = () => {
               <button
                 onClick={() => handleFilterChange("users")}
                 className={`flex-1 min-w-[120px] sm:flex-none px-4 py-2 rounded-lg border transition-colors flex items-center justify-center gap-2 ${filters.users
-                  ? "bg-blue-500 text-white border-blue-500"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  ? "bg-[#556B2F] text-white border-[#556B2F]"
+                  : "bg-white text-[#556B2F] border-[#D3D3D3] hover:bg-[#556B2F]/10"
                   }`}
               >
                 <Users className="h-4 w-4" />
@@ -393,8 +393,8 @@ const MapPage: React.FC = () => {
               <button
                 onClick={() => handleFilterChange("properties")}
                 className={`flex-1 min-w-[120px] sm:flex-none px-4 py-2 rounded-lg border transition-colors flex items-center justify-center gap-2 ${filters.properties
-                  ? "bg-green-500 text-white border-green-500"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  ? "bg-[#6B8E23] text-white border-[#6B8E23]"
+                  : "bg-white text-[#6B8E23] border-[#D3D3D3] hover:bg-[#6B8E23]/10"
                   }`}
               >
                 <Home className="h-4 w-4" />
@@ -404,7 +404,7 @@ const MapPage: React.FC = () => {
               <button
                 onClick={handleGetUserLocation}
                 disabled={geoLoading}
-                className="flex-1 min-w-[120px] sm:flex-none px-4 py-2 bg-purple-500 text-white rounded-lg border border-purple-500 hover:bg-purple-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 min-w-[120px] sm:flex-none px-4 py-2 bg-[#8B4513] text-white rounded-lg border border-[#8B4513] hover:bg-[#6B8E23] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {geoLoading ? (
                   <>
@@ -421,14 +421,14 @@ const MapPage: React.FC = () => {
               <button
                 onClick={handleCenterToUserLocation}
                 disabled={!userLocation}
-                className="px-3 py-2 sm:px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="px-3 py-2 sm:px-4 bg-[#556B2F] text-white rounded-lg border border-[#556B2F] hover:bg-[#6B8E23] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 title="Centrer sur votre position"
               >
                 <MapPin className="h-4 w-4" />
               </button>
               <button
                 onClick={handleCenterToReunion}
-                className="px-3 py-2 flex sm:px-4 bg-orange-500 text-white rounded-lg border border-orange-500 hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                className="px-3 py-2 flex sm:px-4 bg-[#6B8E23] text-white rounded-lg border border-[#6B8E23] hover:bg-[#556B2F] transition-colors text-sm sm:text-base"
                 title="Centrer sur la Réunion"
               >
                 <TreePalm className="h-4 w-4" />
@@ -437,7 +437,7 @@ const MapPage: React.FC = () => {
               <button
                 onClick={handleSearch5km}
                 disabled={!userLocation || nearbyLoading}
-                className="px-3 py-2 flex sm:px-4 bg-red-700 text-white rounded-lg border border-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                className="px-3 py-2 flex sm:px-4 bg-[#8B4513] text-white rounded-lg border border-[#8B4513] hover:bg-[#6B8E23] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                 title="Chercher 5 km autour de moi"
               >
                 {nearbyLoading ? (
@@ -461,19 +461,19 @@ const MapPage: React.FC = () => {
         points={filteredPoints}
         userLocation={userLocation}
         height="600px"
-        className="rounded-lg shadow-lg border"
+        className="rounded-lg shadow-lg border border-[#D3D3D3]"
         onPointClick={handlePointClick}
       />
 
       {/* Message si erreur lors du chargement des données */}
       {error && (
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-yellow-800">
+        <div className="mt-4 p-4 bg-[#8B4513]/10 border border-[#8B4513] rounded-lg">
+          <p className="text-[#8B4513]">
             <span className="font-bold">⚠️ Attention :</span> {error}
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+            className="mt-2 px-4 py-2 bg-[#8B4513] text-white rounded hover:bg-[#6B8E23] transition-colors"
           >
             Réessayer
           </button>
@@ -489,20 +489,20 @@ const MapPage: React.FC = () => {
 
       {/* Modal des résultats 5km */}
       {showNearbyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#556B2F]/60">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col border border-[#D3D3D3]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-[#556B2F] to-[#6B8E23] px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-white" />
                 <div>
                   <h2 className="text-white font-bold">Points à proximité (5 km)</h2>
-                  <p className="text-red-100 text-sm">{nearbyPoints.length} résultat{nearbyPoints.length !== 1 ? 's' : ''}</p>
+                  <p className="text-[#D3D3D3] text-sm">{nearbyPoints.length} résultat{nearbyPoints.length !== 1 ? 's' : ''}</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowNearbyModal(false)}
-                className="text-white hover:bg-red-500/30 p-2 rounded-lg transition-colors"
+                className="text-white hover:bg-[#556B2F]/30 p-2 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -512,11 +512,11 @@ const MapPage: React.FC = () => {
             <div className="flex-1 overflow-y-auto">
               {nearbyPoints.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4">
-                  <MapPin className="w-12 h-12 text-gray-300 mb-3" />
-                  <p className="text-gray-600 text-center">Aucun point trouvé dans un rayon de 5 km</p>
+                  <MapPin className="w-12 h-12 text-[#D3D3D3] mb-3" />
+                  <p className="text-[#8B4513] text-center">Aucun point trouvé dans un rayon de 5 km</p>
                 </div>
               ) : (
-                <div className="divide-y">
+                <div className="divide-y divide-[#D3D3D3]">
                   {nearbyPoints.map((point, index) => {
                     const distance = calculateDistance(
                       userLocation![0],
@@ -527,7 +527,7 @@ const MapPage: React.FC = () => {
                     return (
                       <div
                         key={point.id}
-                        className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="p-4 hover:bg-[#556B2F]/10 transition-colors cursor-pointer"
                         onClick={() => {
                           setShowNearbyModal(false);
                           handleViewDetails(point);
@@ -535,22 +535,22 @@ const MapPage: React.FC = () => {
                       >
                         <div className="flex gap-4">
                           {/* Numéro de rang */}
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                            <span className="text-red-600 font-bold text-sm">{index + 1}</span>
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#556B2F]/10 flex items-center justify-center">
+                            <span className="text-[#556B2F] font-bold text-sm">{index + 1}</span>
                           </div>
 
                           {/* Contenu */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-bold text-gray-900 truncate">{point.name}</h3>
-                              <span className="flex-shrink-0 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                              <h3 className="font-bold text-[#8B4513] truncate">{point.name}</h3>
+                              <span className="flex-shrink-0 px-2 py-1 bg-[#D3D3D3] text-[#556B2F] text-xs font-semibold rounded">
                                 {distance.toFixed(1)} km
                               </span>
                             </div>
 
                             {/* Type et ville */}
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                              <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium">
+                            <div className="flex items-center gap-2 text-sm text-[#8B4513] mb-2">
+                              <span className="inline-block px-2 py-1 bg-[#8B4513]/10 rounded text-xs font-medium">
                                 {point.type === "user" ? "Partenaire" : "Propriété"}
                               </span>
                               {point.city && (
@@ -563,7 +563,7 @@ const MapPage: React.FC = () => {
 
                             {/* Description */}
                             {point.type === "user" && point.metiers && point.metiers.length > 0 && (
-                              <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+                              <p className="text-xs text-[#6B8E23] mb-2 line-clamp-1">
                                 {point.metiers.join(", ")}
                               </p>
                             )}
@@ -575,7 +575,7 @@ const MapPage: React.FC = () => {
                                   {point.phone && (
                                     <a
                                       href={`tel:${point.phone}`}
-                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                                      className="flex items-center gap-1 text-[#556B2F] hover:text-[#6B8E23]"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <Phone className="w-3 h-3" />
@@ -585,7 +585,7 @@ const MapPage: React.FC = () => {
                                   {point.email && (
                                     <a
                                       href={`mailto:${point.email}`}
-                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                                      className="flex items-center gap-1 text-[#556B2F] hover:text-[#6B8E23]"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <Mail className="w-3 h-3" />
@@ -598,7 +598,7 @@ const MapPage: React.FC = () => {
                           </div>
 
                           {/* Arrow */}
-                          <div className="flex-shrink-0 text-gray-400">
+                          <div className="flex-shrink-0 text-[#D3D3D3]">
                             <ChevronDown className="w-5 h-5 rotate-180" />
                           </div>
                         </div>
@@ -610,13 +610,13 @@ const MapPage: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
-              <p className="text-xs text-gray-500">
+            <div className="bg-[#F8F8F8] px-6 py-3 border-t border-[#D3D3D3] flex items-center justify-between">
+              <p className="text-xs text-[#8B4513]">
                 Cliquez sur un résultat pour voir les détails
               </p>
               <button
                 onClick={() => setShowNearbyModal(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+                className="px-4 py-2 bg-[#D3D3D3] hover:bg-[#556B2F]/10 text-[#8B4513] rounded-lg font-medium transition-colors"
               >
                 Fermer
               </button>

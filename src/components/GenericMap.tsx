@@ -92,8 +92,8 @@ const GenericMap: React.FC<GenericMapProps> = ({
     const LocationControl = L.Control.extend({
       onAdd: (map: L.Map) => {
         const div = L.DomUtil.create("div", "leaflet-bar leaflet-control");
-        div.style.backgroundColor = "white";
-        div.style.border = "2px solid #ccc";
+        div.style.backgroundColor = "#FFFFFF";
+        div.style.border = "2px solid #D3D3D3";
         div.style.borderRadius = "4px";
         div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
         div.style.cursor = "pointer";
@@ -101,7 +101,7 @@ const GenericMap: React.FC<GenericMapProps> = ({
         
         const button = L.DomUtil.create("button", "", div);
         button.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6; padding: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#556B2F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="padding: 8px;">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
           </svg>
