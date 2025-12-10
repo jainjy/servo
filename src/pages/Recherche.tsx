@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X } from "lucide-react";
+import { Search, History, ArrowLeft, ShoppingCart, Calendar, FileText, Play, RefreshCw, Home, MapPin, Users, Loader, TreePalm, X, Mail, Phone, DollarSign, Ruler, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
@@ -19,6 +19,7 @@ import ServoLogo from "@/components/components/ServoLogo";
 import GenericMap from "@/components/GenericMap";
 import { MapService } from "@/services/mapService";
 import { MapPoint } from "@/types/map";
+import PointDetailsModal from "@/components/PointDetailsModal"; // Import du modal
 
 interface SearchItem {
   id: string | number;
@@ -84,6 +85,7 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const [runnerExit, setRunnerExit] = useState(false);
   const prevStageRef = useRef<Stage>("idle");
 
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [searchHistory, setSearchHistory] = useState<Array<{ q: string; date: number }>>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -114,6 +116,10 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   const [showMapModal, setShowMapModal] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [selectedMapPoint, setSelectedMapPoint] = useState<MapPoint | null>(null); // Nouvel état pour le point sélectionné
+  const [nearbyPoints, setNearbyPoints] = useState<MapPoint[]>([]); // Points dans un rayon de 5km
+  const [showNearbyModal, setShowNearbyModal] = useState(false); // Modal pour les points proches
+  const [nearbyLoading, setNearbyLoading] = useState(false); // Loading pour la recherche 5km
   // ===================================================
 
   // Contexte panier
@@ -144,38 +150,53 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   };
 
   // =============== FONCTIONS POUR LA CARTE ===============
-    const loadMapData = useCallback(async () => {
-      try {
-        setMapLoading(true);
-        const allPoints = await MapService.getAllMapPoints();
-        
-        // DEBUG: Vérifier les données
-        console.log("📊 Données carte chargées:", {
-          total: allPoints.length,
-          users: allPoints.filter(p => p.type === "user").length,
-          properties: allPoints.filter(p => p.type === "property").length,
-          firstPoints: allPoints.slice(0, 3).map(p => ({
-            id: p.id,
-            name: p.name,
-            type: p.type,
-            lat: p.latitude,
-            lng: p.longitude
-          }))
-        });
-        
-        setMapPoints(allPoints);
-        setFilteredMapPoints(allPoints);
-        setMapError(null);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
-        setMapError(errorMessage);
-        console.error("❌ Erreur chargement carte:", err);
-        setMapPoints([]);
-        setFilteredMapPoints([]);
-      } finally {
-        setMapLoading(false);
-      }
-    }, []);
+  const loadMapData = useCallback(async () => {
+    try {
+      setMapLoading(true);
+      const allPoints = await MapService.getAllMapPoints();
+      
+      // DEBUG: Vérifier les données
+      console.log("📊 Données carte chargées:", {
+        total: allPoints.length,
+        users: allPoints.filter(p => p.type === "user").length,
+        properties: allPoints.filter(p => p.type === "property").length,
+        firstPoints: allPoints.slice(0, 3).map(p => ({
+          id: p.id,
+          name: p.name,
+          type: p.type,
+          lat: p.latitude,
+          lng: p.longitude
+        }))
+      });
+      
+      setMapPoints(allPoints);
+      setFilteredMapPoints(allPoints);
+      setMapError(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
+      setMapError(errorMessage);
+      console.error("❌ Erreur chargement carte:", err);
+      setMapPoints([]);
+      setFilteredMapPoints([]);
+    } finally {
+      setMapLoading(false);
+    }
+  }, []);
+
+  // Fonction pour calculer la distance entre deux points (formule Haversine)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+
 
   // Fonction pour filtrer les points sur la carte
   const filterMapPoints = useCallback((points: MapPoint[], filters: MapFilters, searchQuery: string = "") => {
@@ -227,8 +248,19 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
   // Fonction pour gérer le clic sur un point de la carte
   const handleMapPointClick = (point: MapPoint) => {
     console.log("Point carte cliqué:", point);
-    
-    // Navigation selon le type
+    setSelectedMapPoint(point);
+  };
+
+  // Fonction pour fermer le modal de détail
+  const handleClosePointModal = () => {
+    setSelectedMapPoint(null);
+  };
+
+  // Fonction pour voir les détails complets (navigation)
+  const handleViewDetails = (point: MapPoint) => {
+    handleClosePointModal();
+
+    // Navigation vers les détails selon le type
     if (point.type === "property") {
       navigate(`/immobilier/${point.id}`);
     } else if (point.type === "user") {
@@ -279,29 +311,24 @@ const Recherche = ({ onClick }: { onClick?: () => void }) => {
       }
     );
   };
+
+ 
+
   // Ajoutez après l'effet de chargement des données de carte
-useEffect(() => {
-  if (!mapLoading && filteredMapPoints.length > 0) {
-    // Attendre que la carte soit rendue puis la centrer
-    setTimeout(() => {
-      handleCenterToReunion();
-    }, 500);
-  }
-}, [mapLoading, filteredMapPoints]);
+  useEffect(() => {
+    if (!mapLoading && filteredMapPoints.length > 0) {
+      // Attendre que la carte soit rendue puis la centrer
+      setTimeout(() => {
+        handleCenterToReunion();
+      }, 500);
+    }
+  }, [mapLoading, filteredMapPoints]);
+
   // Initialiser la carte au chargement
   useEffect(() => {
     loadMapData();
   }, [loadMapData]);
 
-  // Filtrer les points de carte en fonction de la recherche
-  useEffect(() => {
-    if (query.trim()) {
-      const filtered = filterMapPoints(mapPoints, mapFilters, query);
-      setFilteredMapPoints(filtered);
-    } else {
-      setFilteredMapPoints(filterMapPoints(mapPoints, mapFilters));
-    }
-  }, [query, mapPoints, mapFilters, filterMapPoints]);
   // ===================================================
 
   // Fonction pour rediriger vers la connexion
@@ -483,12 +510,6 @@ useEffect(() => {
           route = `/produits/${item.id}`;
           break;
 
-        // case "BlogArticle":
-        //   title = item.title || "Article";
-        //   image = extractFirstValidImage(item.coverUrl || item.images);
-        //   route = `/blog/${item.slug || item.id}`;
-        //   break;
-
         case "Service":
           title = item.libelle || "Service";
           image = extractFirstValidImage(item.images);
@@ -600,7 +621,7 @@ useEffect(() => {
     return removeDuplicates(similarityFiltered);
   };
 
-  // Recherche avec l'API
+  // Recherche avec l'API - MODIFIÉE
   const handleSearch = async (searchQuery?: string) => {
     const q = (searchQuery || query).trim();
 
@@ -608,8 +629,10 @@ useEffect(() => {
       setResults([]);
       setFilteredResults([]);
       setStage("results");
-      // Réinitialiser les filtres de carte
-      setFilteredMapPoints(filterMapPoints(mapPoints, mapFilters));
+      
+      // 🔥 Réafficher TOUTES les données sur la carte
+      setFilteredMapPoints(mapPoints);
+      
       navigate('/recherche', { replace: true });
       return;
     }
@@ -643,6 +666,7 @@ useEffect(() => {
     await runSearch(q);
   };
 
+  // Fonction de recherche principale - MODIFIÉE
   const runSearch = async (q: string) => {
     setStage("loading");
     setResults([]);
@@ -663,25 +687,31 @@ useEffect(() => {
         const filtered = filterResults(normalizedResults);
         setFilteredResults(filtered);
         
-        // Synchroniser avec les points de la carte
-        if (q.trim()) {
-          // Filtrer les points de carte basés sur la recherche
-          const filteredMap = filterMapPoints(mapPoints, mapFilters, q);
-          setFilteredMapPoints(filteredMap);
-          
-          // Si des points correspondent, centrer sur le premier résultat
-          if (filteredMap.length > 0) {
-            const firstPoint = filteredMap[0];
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('centerMap', { 
-                detail: { 
-                  location: [firstPoint.latitude, firstPoint.longitude],
-                  zoom: 12,
-                  smooth: true
-                } 
-              }));
-            }, 500);
-          }
+        // 🔥 Synchroniser la carte avec les résultats API (filtrés)
+        const idsFromResults = filtered.map(r => r.id);
+
+        // Si la table source est "Property", on filtre par id
+        const mappedPoints = mapPoints.filter(mp => 
+          filtered.some(r => 
+            r.id === mp.id && r.source_table === "Property"
+          )
+        );
+
+        // Mettre à jour les points de carte
+        setFilteredMapPoints(mappedPoints);
+
+        // 🔥 Si on a au moins un point → centrer dessus
+        if (mappedPoints.length > 0) {
+          const p = mappedPoints[0];
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('centerMap', {
+              detail: {
+                location: [p.latitude, p.longitude],
+                zoom: 13,
+                smooth: true
+              }
+            }));
+          }, 300);
         }
       } else {
         setResults([]);
@@ -1225,145 +1255,206 @@ useEffect(() => {
 
      {/* // =============== MODAL DE LA CARTE (EN BAS À DROITE) =============== */}
         {showMapModal && (
-      <div className="fixed bottom-8 right-8 z-50 w-[600px] h-[500px] rounded-lg overflow-hidden shadow-2xl border border-gray-300 bg-white">
-        {/* Header de la carte */}
-        <div className="bg-white p-4 border-b flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <MapPin className="h-5 w-5 text-blue-600" />
-            <span className="font-semibold text-base">Carte de la Réunion</span>
-            <div className="flex items-center gap-2 ml-3">
-              <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1.5 rounded">
-                {filteredMapPoints.length} points
-              </span>
-              {userLocation && (
-                <span className="text-sm bg-green-100 text-green-800 px-3 py-1.5 rounded">
-                  Position active
-                </span>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleGetUserLocation}
-              disabled={geoLoading}
-              className="p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
-              title="Ma position"
-            >
-              {geoLoading ? (
-                <Loader className="h-5 w-5 text-purple-600 animate-spin" />
-              ) : (
-                <MapPin className="h-5 w-5 text-purple-600" />
-              )}
-            </button>
-            
-            <button
-              onClick={handleCenterToReunion}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Centrer sur la Réunion"
-            >
-              <TreePalm className="h-5 w-5 text-orange-600" />
-            </button>
-            
-            <button
-              onClick={() => setShowMapModal(false)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Fermer la carte"
-            >
-              <X className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
-        </div>
-
-        {/* Contenu de la carte */}
-        <div className="h-[calc(500px-120px)] bg-gray-100 relative">
-          {mapLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <Loader className="h-10 w-10 animate-spin mx-auto text-blue-600" />
-                <p className="mt-3 text-base text-gray-600">Chargement de la carte...</p>
-              </div>
-            </div>
-          ) : mapError ? (
-            <div className="h-full flex items-center justify-center p-6">
-              <div className="text-center">
-                <p className="text-base text-red-600">{mapError}</p>
-                <button
-                  onClick={loadMapData}
-                  className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Réessayer
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Log de debug */}
-              <div className="hidden">
-                {(() => {
-                  console.log("📍 Props envoyées à GenericMap:", {
-                    pointsCount: filteredMapPoints.length,
-                    points: filteredMapPoints.slice(0, 2),
-                    userLocation,
-                    center: [-21.1351, 55.2471],
-                    zoom: 10
-                  });
-                  return null;
-                })()}
-              </div>
-              
-              <GenericMap
-                points={filteredMapPoints}
-                center={[-21.1351, 55.2471]}
-                zoom={10}
-              />
-              
-              {/* Overlay de debug */}
-              <div className="absolute top-3 left-3 bg-black/70 text-white text-sm px-3 py-1.5 rounded pointer-events-none">
-                {filteredMapPoints.length} points visibles
-              </div>
-            </>
+  <div className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
+    // Mobile: prend tout l'écran
+    bottom-0 right-0 w-full h-3/4
+    // Tablet: taille moyenne
+    md:bottom-4 md:right-4 md:w-[calc(100vw-2rem)] md:h-3/5 md:max-w-[700px] md:max-h-[600px]
+    // Desktop: taille fixe
+    lg:bottom-8 lg:right-8 lg:w-[600px] lg:h-[500px]"
+  >
+    {/* Header de la carte */}
+    <div className="bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+        <MapPin className="h-4 w-4 md:h-5 md:w-5 text-blue-600 flex-shrink-0" />
+        <span className="font-semibold text-sm md:text-base truncate">
+          Carte de la Réunion
+        </span>
+        <div className="hidden md:flex items-center gap-2 ml-3">
+          <span className="text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
+            {filteredMapPoints.length} points
+          </span>
+          {userLocation && (
+            <span className="text-xs md:text-sm bg-green-100 text-green-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
+              Position active
+            </span>
           )}
         </div>
+      </div>
+      
+      {/* Badges mobiles */}
+      <div className="flex md:hidden gap-2">
+        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+          {filteredMapPoints.length}
+        </span>
+        {userLocation && (
+          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+            Position
+          </span>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-1 md:gap-2">
+        <button
+          onClick={handleGetUserLocation}
+          disabled={geoLoading}
+          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+          title="Ma position"
+        >
+          {geoLoading ? (
+            <Loader className="h-4 w-4 md:h-5 md:w-5 text-purple-600 animate-spin" />
+          ) : (
+            <MapPin className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
+          )}
+        </button>
+        
+        <button
+          onClick={handleCenterToReunion}
+          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Centrer sur la Réunion"
+        >
+          <TreePalm className="h-4 w-4 md:h-5 md:w-5 text-orange-600" />
+        </button>
 
-        {/* Footer avec statistiques */}
-        <div className="bg-white p-3 border-t flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-blue-500" />
-              <span className="text-gray-700">
-                {mapPoints.filter(p => p.type === "user").length} partenaires
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Home className="h-4 w-4 text-green-500" />
-              <span className="text-gray-700">
-                {mapPoints.filter(p => p.type === "property").length} propriétés
-              </span>
-            </div>
+        <button
+          onClick={() => setShowMapModal(false)}
+          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Fermer la carte"
+        >
+          <X className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+        </button>
+      </div>
+    </div>
+
+    {/* Contenu de la carte */}
+    <div className="h-[calc(100%-120px)] md:h-[calc(100%-130px)] bg-gray-100 relative">
+      {mapLoading ? (
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center">
+            <Loader className="h-8 w-8 md:h-10 md:w-10 animate-spin mx-auto text-blue-600" />
+            <p className="mt-2 md:mt-3 text-sm md:text-base text-gray-600">
+              Chargement de la carte...
+            </p>
+          </div>
+        </div>
+      ) : mapError ? (
+        <div className="h-full flex items-center justify-center p-4 md:p-6">
+          <div className="text-center">
+            <p className="text-sm md:text-base text-red-600">{mapError}</p>
+            <button
+              onClick={loadMapData}
+              className="mt-2 md:mt-3 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Réessayer
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Log de debug */}
+          <div className="hidden">
+            {(() => {
+              console.log("📍 Props envoyées à GenericMap:", {
+                pointsCount: filteredMapPoints.length,
+                points: filteredMapPoints.slice(0, 2),
+                userLocation,
+                center: [-21.1351, 55.2471],
+                zoom: 10
+              });
+              return null;
+            })()}
           </div>
           
-          <button
-            onClick={() => navigate('/map')}
-            className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
-          >
-            Voir carte complète →
-          </button>
+          <GenericMap
+            points={filteredMapPoints}
+            userLocation={userLocation}
+            center={[-21.1351, 55.2471]}
+            zoom={10}
+            onPointClick={handleMapPointClick} // Ajout du handler pour les clics
+          />
+          
+          {/* Overlay de debug */}
+          <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
+            {filteredMapPoints.length} points
+          </div>
+        </>
+      )}
+    </div>
+
+    {/* Footer avec statistiques */}
+    <div className="bg-white p-2 md:p-3 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <div className="flex flex-wrap gap-3 md:gap-4">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <Users className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
+          <span className="text-xs md:text-sm text-gray-700">
+            {mapPoints.filter(p => p.type === "user").length} partenaires
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <Home className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+          <span className="text-xs md:text-sm text-gray-700">
+            {mapPoints.filter(p => p.type === "property").length} propriétés
+          </span>
+        </div>
+      </div>
+      
+      <button
+        onClick={() => navigate('/map')}
+        className="text-xs md:text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors self-end sm:self-auto"
+      >
+        Voir carte complète →
+      </button>
+    </div>
+  </div>
+)}
+
+    {/* Bouton pour réafficher la carte si cachée */}
+    {!showMapModal && (
+      <button
+        onClick={() => setShowMapModal(true)}
+        className="fixed z-40 p-3 bg-logo hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors
+          // Mobile: plus petit
+          bottom-4 right-4
+          // Desktop: taille normale
+          md:bottom-8 md:right-8"
+        title="Afficher la carte"
+      >
+        <MapPin className="h-5 w-5 md:h-6 md:w-6" />
+      </button>
+    )}
+
+    {/* Modal des détails du point (comme dans MapPage) */}
+    <PointDetailsModal
+      point={selectedMapPoint}
+      onClose={handleClosePointModal}
+      onViewDetails={handleViewDetails}
+    />
+
+    {/* Modal des résultats 5km (comme dans MapPage) */}
+    {showNearbyModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+          {/* Header */}
+         
+
+         
+
+          {/* Footer */}
+          <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+            <p className="text-xs text-gray-500">
+              Cliquez sur un résultat pour voir les détails
+            </p>
+            <button
+              onClick={() => setShowNearbyModal(false)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+            >
+              Fermer
+            </button>
+          </div>
         </div>
       </div>
     )}
-
-      {/* Bouton pour réafficher la carte si cachée */}
-      {!showMapModal && (
-        <button
-          onClick={() => setShowMapModal(true)}
-          className="fixed bottom-4 right-4 z-40 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          title="Afficher la carte"
-        >
-          <MapPin className="h-6 w-6" />
-        </button>
-      )}
 
       {/* MODALES */}
       {devisModal.isOpen && (

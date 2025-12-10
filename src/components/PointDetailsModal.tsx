@@ -18,51 +18,56 @@ const PointDetailsModal: React.FC<PointDetailsModalProps> = ({
   const isUser = point.type === "user";
 
   return (
-    <div className="fixed inset-0 bg-[#556B2F]/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#FFFFFF] rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#D3D3D3]">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-separator">
         {/* En-tête du modal */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] text-white p-6 flex items-center justify-between">
+        <div 
+          className="sticky top-0 p-6 flex items-center justify-between"
+          style={{ 
+            background: "linear-gradient(135deg, #556B2F 0%, #6B8E23 100%)" 
+          }}
+        >
           <div className="flex items-center gap-3">
             {isUser ? (
-              <Users className="h-6 w-6 text-[#8B4513]" />
+              <Users className="h-7 w-7 text-white" />
             ) : (
-              <Home className="h-6 w-6 text-[#556B2F]" />
+              <Home className="h-7 w-7 text-white" />
             )}
-            <h2 className="text-2xl font-bold text-[#8B4513]">{point.name}</h2>
+            <h2 className="text-2xl font-bold text-white">{point.name}</h2>
           </div>
           <button
             onClick={onClose}
-            className="hover:bg-[#556B2F]/20 p-1 rounded transition-colors"
+            className="hover:bg-white/20 p-2 rounded-lg transition-colors"
           >
-            <X className="h-6 w-6" />
+            <X className="h-6 w-6 text-white" />
           </button>
         </div>
 
         {/* Contenu du modal */}
-        <div className="p-6 bg-[#FFFFFF]">
+        <div className="p-6 bg-light-bg">
           {/* Informations communes */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-5 mb-6">
             {point.address && (
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-[#556B2F] mt-1 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-separator">
+                <MapPin className="h-5 w-5 text-logo mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-[#8B4513]">Adresse</p>
-                  <p className="font-medium text-gray-900">{point.address}</p>
+                  <p className="text-sm text-secondary-text font-medium">Adresse</p>
+                  <p className="font-semibold text-gray-900 mt-1">{point.address}</p>
                   {point.city && (
-                    <p className="text-sm text-gray-600">{point.city}</p>
+                    <p className="text-gray-600 mt-1">{point.city}</p>
                   )}
                 </div>
               </div>
             )}
 
             {point.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-[#6B8E23]" />
+              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-separator">
+                <Phone className="h-5 w-5 text-logo" />
                 <div>
-                  <p className="text-sm text-[#8B4513]">Téléphone</p>
+                  <p className="text-sm text-secondary-text font-medium">Téléphone</p>
                   <a
                     href={`tel:${point.phone}`}
-                    className="font-medium text-[#556B2F] hover:underline"
+                    className="font-semibold text-primary-dark hover:underline mt-1 block"
                   >
                     {point.phone}
                   </a>
@@ -71,13 +76,13 @@ const PointDetailsModal: React.FC<PointDetailsModalProps> = ({
             )}
 
             {point.email && (
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-[#6B8E23]" />
+              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-separator">
+                <Mail className="h-5 w-5 text-logo" />
                 <div>
-                  <p className="text-sm text-[#8B4513]">Email</p>
+                  <p className="text-sm text-secondary-text font-medium">Email</p>
                   <a
                     href={`mailto:${point.email}`}
-                    className="font-medium text-[#556B2F] hover:underline"
+                    className="font-semibold text-primary-dark hover:underline mt-1 block"
                   >
                     {point.email}
                   </a>
@@ -88,22 +93,23 @@ const PointDetailsModal: React.FC<PointDetailsModalProps> = ({
 
           {/* Informations spécifiques aux utilisateurs */}
           {isUser && point.type === "user" && (
-            <div className="border-t border-[#D3D3D3] pt-6 space-y-4">
+            <div className="border-t border-separator pt-6 space-y-5">
               {point.company && (
-                <div>
-                  <p className="text-sm text-[#8B4513]">Entreprise</p>
-                  <p className="font-medium text-gray-900">{point.company}</p>
+                <div className="p-3 bg-white rounded-lg border border-separator">
+                  <p className="text-sm text-secondary-text font-medium">Entreprise</p>
+                  <p className="font-semibold text-gray-900 mt-1">{point.company}</p>
                 </div>
               )}
 
               {point.metiers && point.metiers.length > 0 && (
-                <div>
-                  <p className="text-sm text-[#8B4513] mb-2">Métiers</p>
+                <div className="p-3 bg-white rounded-lg border border-separator">
+                  <p className="text-sm text-secondary-text font-medium mb-3">Métiers</p>
                   <div className="flex flex-wrap gap-2">
                     {point.metiers.map((metier, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 bg-[#556B2F]/10 text-[#556B2F] rounded-full text-sm"
+                        style={{ backgroundColor: '#556B2F' }}
+                        className="px-3 py-1.5 text-white rounded-lg text-sm font-medium"
                       >
                         {metier}
                       </span>
@@ -113,14 +119,23 @@ const PointDetailsModal: React.FC<PointDetailsModalProps> = ({
               )}
 
               {point.services && point.services.length > 0 && (
-                <div>
-                  <p className="text-sm text-[#8B4513] mb-2">Services</p>
-                  <ul className="space-y-2">
+                <div className="p-3 bg-white rounded-lg border border-separator">
+                  <p className="text-sm text-secondary-text font-medium mb-3">Services</p>
+                  <ul className="space-y-3">
                     {point.services.map((service, idx) => (
-                      <li key={idx} className="flex justify-between items-center text-sm">
-                        <span className="text-gray-700">{service.name}</span>
+                      <li 
+                        key={idx} 
+                        className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                      >
+                        <span className="text-gray-800 font-medium">{service.name}</span>
                         {service.price && (
-                          <span className="font-medium text-gray-900">
+                          <span 
+                            className="font-bold px-3 py-1 rounded"
+                            style={{ 
+                              backgroundColor: '#6B8E23',
+                              color: 'white'
+                            }}
+                          >
                             {service.price}€
                           </span>
                         )}
@@ -134,56 +149,56 @@ const PointDetailsModal: React.FC<PointDetailsModalProps> = ({
 
           {/* Informations spécifiques aux propriétés */}
           {!isUser && point.type === "property" && (
-            <div className="border-t border-[#D3D3D3] pt-6 space-y-4">
+            <div className="border-t border-separator pt-6 space-y-5">
               {point.price && (
-                <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-[#8B4513]" />
+                <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-separator">
+                  <DollarSign className="h-6 w-6" style={{ color: '#8B4513' }} />
                   <div>
-                    <p className="text-sm text-[#8B4513]">Prix</p>
-                    <p className="text-2xl font-bold text-[#556B2F]">
+                    <p className="text-sm text-secondary-text font-medium">Prix</p>
+                    <p className="text-2xl font-bold mt-1" style={{ color: '#8B4513' }}>
                       {point.price.toLocaleString("fr-FR")}€
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {point.surface && (
-                  <div>
-                    <div className="flex items-center gap-2 text-sm text-[#8B4513] mb-1">
+                  <div className="p-3 bg-white rounded-lg border border-separator">
+                    <div className="flex items-center gap-2 text-sm text-secondary-text font-medium mb-1">
                       <Ruler className="h-4 w-4" />
                       Surface
                     </div>
-                    <p className="text-lg font-semibold">{point.surface} m²</p>
+                    <p className="text-lg font-bold text-logo">{point.surface} m²</p>
                   </div>
                 )}
 
                 {point.rooms && (
-                  <div>
-                    <p className="text-sm text-[#8B4513] mb-1">Pièces</p>
-                    <p className="text-lg font-semibold">{point.rooms}</p>
+                  <div className="p-3 bg-white rounded-lg border border-separator">
+                    <p className="text-sm text-secondary-text font-medium mb-1">Pièces</p>
+                    <p className="text-lg font-bold text-logo">{point.rooms}</p>
                   </div>
                 )}
 
                 {point.bedrooms && (
-                  <div>
-                    <p className="text-sm text-[#8B4513] mb-1">Chambres</p>
-                    <p className="text-lg font-semibold">{point.bedrooms}</p>
+                  <div className="p-3 bg-white rounded-lg border border-separator">
+                    <p className="text-sm text-secondary-text font-medium mb-1">Chambres</p>
+                    <p className="text-lg font-bold text-logo">{point.bedrooms}</p>
                   </div>
                 )}
 
                 {point.bathrooms && (
-                  <div>
-                    <p className="text-sm text-[#8B4513] mb-1">Salles de bain</p>
-                    <p className="text-lg font-semibold">{point.bathrooms}</p>
+                  <div className="p-3 bg-white rounded-lg border border-separator">
+                    <p className="text-sm text-secondary-text font-medium mb-1">Salles de bain</p>
+                    <p className="text-lg font-bold text-logo">{point.bathrooms}</p>
                   </div>
                 )}
               </div>
 
               {point.status && (
-                <div>
-                  <p className="text-sm text-[#8B4513]">Statut</p>
-                  <p className="text-sm font-medium text-gray-900">{point.status}</p>
+                <div className="p-3 bg-white rounded-lg border border-separator">
+                  <p className="text-sm text-secondary-text font-medium">Statut</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-1">{point.status}</p>
                 </div>
               )}
             </div>
@@ -191,16 +206,20 @@ const PointDetailsModal: React.FC<PointDetailsModalProps> = ({
         </div>
 
         {/* Pied de page avec bouton d'action */}
-        <div className="border-t border-[#D3D3D3] bg-[#F8F8F8] p-6 flex gap-3 sticky bottom-0">
+        <div className="border-t border-separator bg-gray-50 p-6 flex gap-3 sticky bottom-0">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-[#D3D3D3] text-[#8B4513] rounded-lg hover:bg-[#556B2F]/10 transition-colors font-medium"
+            className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium border border-separator"
           >
             Fermer
           </button>
           <button
             onClick={() => onViewDetails(point)}
-            className="flex-1 px-4 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors font-medium"
+            style={{ 
+              backgroundColor: '#556B2F',
+              color: 'white'
+            }}
+            className="flex-1 px-4 py-3 rounded-lg hover:opacity-90 transition-all font-medium"
           >
             Voir les détails complets
           </button>
