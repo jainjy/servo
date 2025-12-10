@@ -65,6 +65,16 @@ import {
 } from 'recharts';
 
 const ClientReservationsDashboard = () => {
+  // Couleurs personnalisées
+  const COLORS = {
+    logo: "#556B2F",           /* Olive green - accent */
+    primaryDark: "#6B8E23",    /* Yellow-green - fonds légers */
+    lightBg: "#FFFFFF",        /* White - fond de page */
+    separator: "#D3D3D3",      /* Light gray - séparateurs */
+    secondaryText: "#8B4513",  /* Saddle brown - titres secondaires */
+    smallText: "#000000",      /* Noir pour les petits textes */
+  };
+
   const { user, isAuthenticated } = useAuth();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -312,6 +322,11 @@ const ClientReservationsDashboard = () => {
               size="sm"
               onClick={() => handlePayment(reservationId, false)}
               className="mt-2"
+              style={{ 
+                backgroundColor: COLORS.logo,
+                borderColor: COLORS.logo,
+                color: COLORS.lightBg
+              }}
             >
               Confirmer le paiement
             </Button>
@@ -409,28 +424,28 @@ const ClientReservationsDashboard = () => {
           <style>
             body { font-family: Arial, sans-serif; margin: 40px; }
             .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-            .header h1 { color: #1e40af; margin-bottom: 10px; }
-            .user-info { background: #f3f4f6; padding: 15px; border-radius: 5px; margin-bottom: 30px; }
+            .header h1 { color: ${COLORS.logo}; margin-bottom: 10px; }
+            .user-info { background: ${COLORS.primaryDark}15; padding: 15px; border-radius: 5px; margin-bottom: 30px; border: 1px solid ${COLORS.separator}; }
             .section { margin-bottom: 30px; }
-            .section-title { color: #374151; border-bottom: 1px solid #d1d5db; padding-bottom: 10px; margin-bottom: 20px; }
+            .section-title { color: ${COLORS.secondaryText}; border-bottom: 1px solid ${COLORS.separator}; padding-bottom: 10px; margin-bottom: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th { background: #1e40af; color: white; padding: 12px; text-align: left; }
-            td { padding: 10px; border: 1px solid #d1d5db; }
-            .total-row { background: #f3f4f6; font-weight: bold; }
-            .footer { text-align: center; margin-top: 50px; color: #6b7280; font-size: 12px; }
+            th { background: ${COLORS.logo}; color: ${COLORS.lightBg}; padding: 12px; text-align: left; }
+            td { padding: 10px; border: 1px solid ${COLORS.separator}; color: ${COLORS.smallText}; }
+            .total-row { background: ${COLORS.primaryDark}08; font-weight: bold; }
+            .footer { text-align: center; margin-top: 50px; color: ${COLORS.smallText}; font-size: 12px; }
           </style>
         </head>
         <body>
           <div class="header">
             <h1>Rapport Financier - Locations Saisonnières</h1>
-            <p>Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
+            <p style="color: ${COLORS.smallText}">Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
           </div>
           
           <div class="user-info">
-            <p><strong>Client:</strong> ${user?.firstName || ''} ${user?.lastName || ''}</p>
-            <p><strong>Email:</strong> ${user?.email || ''}</p>
-            <p><strong>ID Client:</strong> ${user?.id || ''}</p>
-            <p><strong>Période:</strong> ${selectedMonth}/${selectedYear}</p>
+            <p style="color: ${COLORS.smallText}"><strong>Client:</strong> ${user?.firstName || ''} ${user?.lastName || ''}</p>
+            <p style="color: ${COLORS.smallText}"><strong>Email:</strong> ${user?.email || ''}</p>
+            <p style="color: ${COLORS.smallText}"><strong>ID Client:</strong> ${user?.id || ''}</p>
+            <p style="color: ${COLORS.smallText}"><strong>Période:</strong> ${selectedMonth}/${selectedYear}</p>
           </div>
           
           <div class="section">
@@ -500,8 +515,8 @@ const ClientReservationsDashboard = () => {
           ` : ''}
           
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Plateforme Locations Saisonnières - Document généré automatiquement</p>
-            <p>Ce document est confidentiel et destiné uniquement à l'usage personnel du client.</p>
+            <p style="color: ${COLORS.smallText}">© ${new Date().getFullYear()} Plateforme Locations Saisonnières - Document généré automatiquement</p>
+            <p style="color: ${COLORS.smallText}">Ce document est confidentiel et destiné uniquement à l'usage personnel du client.</p>
           </div>
         </body>
         </html>
@@ -599,14 +614,31 @@ const ClientReservationsDashboard = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen mt-12 bg-gray-50 p-4 md:p-6 flex items-center justify-center">
-        <p className="text-gray-600">Veuillez vous connecter pour voir vos réservations.</p>
+      <div 
+        className="min-h-screen mt-12 p-4 md:p-6 flex items-center justify-center"
+        style={{ backgroundColor: COLORS.lightBg }}
+      >
+        <p style={{ color: COLORS.smallText }}>Veuillez vous connecter pour voir vos réservations.</p>
       </div>
     );
   }
 
   if (loading) {
-    return <LoadingSpinner text="Chargement de votre dashboard..." />;
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: COLORS.lightBg
+      }}>
+        <LoadingSpinner 
+          text="Chargement de votre dashboard..." 
+          spinnerColor={COLORS.logo}
+          textColor={COLORS.smallText}
+        />
+      </div>
+    );
   }
 
   const safeData = getSafeDashboardData();
@@ -620,25 +652,31 @@ const ClientReservationsDashboard = () => {
       value: Number(value) || 0
     })).filter(item => item.value > 0) : [];
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
-    <div className="min-h-screen bg-gray-50 mt-10 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div 
+      className="min-h-screen  p-4 md:p-6"
+      style={{ backgroundColor: COLORS.lightBg }}
+    >
+      <div className="max-w-7xl mt-16 mx-auto">
         {/* En-tête */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <BarChart3 className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900">
+              <BarChart3 className="w-6 h-6 md:w-8 md:h-8" style={{ color: COLORS.logo }} />
+              <h1 
+                className="text-xl md:text-3xl font-bold"
+                style={{ color: COLORS.secondaryText }}
+              >
                 Tableau de bord des locations
               </h1>
             </div>
-            <p className="text-gray-600 text-sm md:text-base">
+            <p className="text-sm md:text-base" style={{ color: COLORS.smallText }}>
               Gérez vos réservations et suivez vos dépenses
             </p>
-            <p className="text-xs md:text-sm text-gray-500 mt-1">
-              <span className="font-semibold text-gray-700">
+            <p className="text-xs md:text-sm mt-1" style={{ color: COLORS.smallText }}>
+              <span className="font-semibold">
                 {resume.totalReservations || 0} réservations • {resume.reservationsActives || 0} actives
               </span>
             </p>
@@ -651,6 +689,10 @@ const ClientReservationsDashboard = () => {
                 variant="outline"
                 className="flex items-center gap-2"
                 disabled={generatingReport}
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
               >
                 {generatingReport ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -661,18 +703,29 @@ const ClientReservationsDashboard = () => {
                   {generatingReport ? 'Génération...' : 'Rapport PDF'}
                 </span>
               </Button>
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50">
+              <div className="absolute right-0 top-full mt-1 w-48 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50" style={{ 
+                backgroundColor: COLORS.lightBg,
+                border: `1px solid ${COLORS.separator}`
+              }}>
                 <div className="py-1">
                   <button
                     onClick={generateFinancialReportPDF}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:opacity-90"
+                    style={{ 
+                      backgroundColor: `${COLORS.primaryDark}08`,
+                      color: COLORS.smallText
+                    }}
                   >
                     <Printer className="w-4 h-4" />
                     Télécharger PDF
                   </button>
                   <button
                     onClick={generateFinancialReportCSV}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:opacity-90"
+                    style={{ 
+                      backgroundColor: `${COLORS.primaryDark}08`,
+                      color: COLORS.smallText
+                    }}
                   >
                     <FileText className="w-4 h-4" />
                     Télécharger CSV
@@ -683,13 +736,23 @@ const ClientReservationsDashboard = () => {
             <Button
               onClick={loadDashboard}
               className="flex items-center gap-2"
+              style={{ 
+                borderColor: COLORS.separator,
+                color: COLORS.smallText,
+                backgroundColor: `${COLORS.primaryDark}08`
+              }}
             >
               <RefreshCw className="w-4 h-4" />
               Actualiser
             </Button>
             <Link
-              to="/immobilier?type=location&saisonnier=true"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              to="/location-saisonniere"
+              className="px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              style={{ 
+                backgroundColor: COLORS.logo,
+                color: COLORS.lightBg,
+                borderColor: COLORS.logo
+              }}
             >
               <Plus className="w-4 h-4" />
               Nouvelle réservation
@@ -699,69 +762,81 @@ const ClientReservationsDashboard = () => {
 
         {/* Résumé financier */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
+          <Card style={{ 
+            backgroundColor: COLORS.lightBg,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <Wallet className="w-4 h-4" />
                 Total dépensé
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{resume.montantTotalDepense?.toLocaleString() || '0'} €</div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>{resume.montantTotalDepense?.toLocaleString() || '0'} €</div>
+              <div className="text-xs mt-1" style={{ color: COLORS.smallText }}>
                 {resume.depenseMois?.toLocaleString() || '0'} € ce mois
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card style={{ 
+            backgroundColor: COLORS.lightBg,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <CreditCard className="w-4 h-4" />
                 Montant payé
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                 {resume.montantTotalPaye?.toLocaleString() || '0'} €
               </div>
               <Progress 
                 value={resume.montantTotalDepense > 0 ? (resume.montantTotalPaye / resume.montantTotalDepense) * 100 : 0} 
                 className="h-2 mt-2"
               />
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs mt-1" style={{ color: COLORS.smallText }}>
                 {Math.round((resume.montantTotalPaye / resume.montantTotalDepense) * 100) || 0}% payé
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card style={{ 
+            backgroundColor: COLORS.lightBg,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <AlertCircle className="w-4 h-4" />
                 Restant à payer
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                 {resume.montantRestantAPayer?.toLocaleString() || '0'} €
               </div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs mt-1" style={{ color: COLORS.smallText }}>
                 {paiements?.enAttente?.length || 0} paiements en attente
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card style={{ 
+            backgroundColor: COLORS.lightBg,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
                 <TrendingUp className="w-4 h-4" />
                 Dépenses ce mois
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{resume.depenseMois?.toLocaleString() || '0'} €</div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>{resume.depenseMois?.toLocaleString() || '0'} €</div>
+              <div className="text-xs mt-1" style={{ color: COLORS.smallText }}>
                 {resume.reservationsMois || 0} réservations
               </div>
             </CardContent>
@@ -770,21 +845,27 @@ const ClientReservationsDashboard = () => {
 
         {/* Tabs principaux */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="reservations">Réservations</TabsTrigger>
-            <TabsTrigger value="paiements">Paiements</TabsTrigger>
-            <TabsTrigger value="statistiques">Statistiques</TabsTrigger>
+          <TabsList className="grid grid-cols-4 mb-4" style={{ 
+            backgroundColor: `${COLORS.primaryDark}08`,
+            border: `1px solid ${COLORS.separator}`
+          }}>
+            <TabsTrigger value="dashboard" style={{ color: COLORS.smallText }}>Dashboard</TabsTrigger>
+            <TabsTrigger value="reservations" style={{ color: COLORS.smallText }}>Réservations</TabsTrigger>
+            <TabsTrigger value="paiements" style={{ color: COLORS.smallText }}>Paiements</TabsTrigger>
+            <TabsTrigger value="statistiques" style={{ color: COLORS.smallText }}>Statistiques</TabsTrigger>
           </TabsList>
 
           {/* Tab Dashboard */}
           <TabsContent value="dashboard" className="space-y-6">
             {/* Graphiques */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card style={{ 
+                backgroundColor: COLORS.lightBg,
+                border: `1px solid ${COLORS.separator}`
+              }}>
                 <CardHeader>
-                  <CardTitle>Évolution des dépenses</CardTitle>
-                  <CardDescription>6 derniers mois</CardDescription>
+                  <CardTitle style={{ color: COLORS.secondaryText }}>Évolution des dépenses</CardTitle>
+                  <CardDescription style={{ color: COLORS.smallText }}>6 derniers mois</CardDescription>
                 </CardHeader>
                 <CardContent className="h-80">
                   {evolutionData.length > 0 ? (
@@ -795,20 +876,23 @@ const ClientReservationsDashboard = () => {
                         <YAxis />
                         <Tooltip formatter={(value) => [`${value} €`, 'Dépense']} />
                         <Legend />
-                        <Line type="monotone" dataKey="depense" stroke="#8884d8" activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="depense" stroke={COLORS.logo} activeDot={{ r: 8 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
+                    <div className="h-full flex items-center justify-center" style={{ color: COLORS.smallText }}>
                       <p>Aucune donnée disponible</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card style={{ 
+                backgroundColor: COLORS.lightBg,
+                border: `1px solid ${COLORS.separator}`
+              }}>
                 <CardHeader>
-                  <CardTitle>Répartition par statut</CardTitle>
+                  <CardTitle style={{ color: COLORS.secondaryText }}>Répartition par statut</CardTitle>
                 </CardHeader>
                 <CardContent className="h-80">
                   {statusData.length > 0 ? (
@@ -825,14 +909,14 @@ const ClientReservationsDashboard = () => {
                           dataKey="value"
                         >
                           {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [`${value} réservations`, 'Nombre']} />
                       </RechartsPieChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
+                    <div className="h-full flex items-center justify-center" style={{ color: COLORS.smallText }}>
                       <p>Aucune donnée disponible</p>
                     </div>
                   )}
@@ -841,31 +925,37 @@ const ClientReservationsDashboard = () => {
             </div>
 
             {/* Prochaines réservations */}
-            <Card>
+            <Card style={{ 
+              backgroundColor: COLORS.lightBg,
+              border: `1px solid ${COLORS.separator}`
+            }}>
               <CardHeader>
-                <CardTitle>Prochaines réservations</CardTitle>
-                <CardDescription>Dans les 7 prochains jours</CardDescription>
+                <CardTitle style={{ color: COLORS.secondaryText }}>Prochaines réservations</CardTitle>
+                <CardDescription style={{ color: COLORS.smallText }}>Dans les 7 prochains jours</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {prochainesReservations && prochainesReservations.length > 0 ? (
                     prochainesReservations.map((res: any) => (
-                      <div key={res.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div key={res.id} className="flex items-center justify-between p-4 border rounded-lg hover:opacity-90" style={{ 
+                        borderColor: COLORS.separator,
+                        backgroundColor: `${COLORS.primaryDark}08`
+                      }}>
                         <div className="flex items-center gap-4">
                           {res.image ? (
                             <img src={res.image} alt={res.titre} className="w-16 h-16 rounded-lg object-cover" />
                           ) : (
-                            <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
-                              <Home className="w-8 h-8 text-gray-400" />
+                            <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                              <Home className="w-8 h-8" style={{ color: COLORS.logo }} />
                             </div>
                           )}
                           <div>
-                            <h4 className="font-semibold">{res.titre}</h4>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <h4 className="font-semibold" style={{ color: COLORS.secondaryText }}>{res.titre}</h4>
+                            <div className="flex items-center gap-2 text-sm" style={{ color: COLORS.smallText }}>
                               <MapPin className="w-3 h-3" />
                               {res.ville}
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center gap-2 text-sm" style={{ color: COLORS.smallText }}>
                               <Calendar className="w-3 h-3" />
                               {new Date(res.dateDebut).toLocaleDateString('fr-FR')} - {new Date(res.dateFin).toLocaleDateString('fr-FR')}
                             </div>
@@ -880,11 +970,15 @@ const ClientReservationsDashboard = () => {
                             {res.statut}
                           </Badge>
                           <div className="text-right">
-                            <div className="font-bold">{res.prixTotal} €</div>
+                            <div className="font-bold" style={{ color: COLORS.logo }}>{res.prixTotal} €</div>
                             <Button 
                               size="sm" 
                               variant="outline" 
                               className="mt-2"
+                              style={{ 
+                                borderColor: COLORS.separator,
+                                color: COLORS.smallText
+                              }}
                               onClick={() => showReservationDetail(res)}
                             >
                               <Eye className="w-4 h-4 mr-2" />
@@ -895,8 +989,8 @@ const ClientReservationsDashboard = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <div className="text-center py-8" style={{ color: COLORS.smallText }}>
+                      <Calendar className="w-12 h-12 mx-auto mb-4" style={{ color: COLORS.separator }} />
                       <p>Aucune réservation prévue dans les 7 prochains jours</p>
                     </div>
                   )}
@@ -907,37 +1001,43 @@ const ClientReservationsDashboard = () => {
 
           {/* Tab Réservations */}
           <TabsContent value="reservations">
-            <Card>
+            <Card style={{ 
+              backgroundColor: COLORS.lightBg,
+              border: `1px solid ${COLORS.separator}`
+            }}>
               <CardHeader>
-                <CardTitle>Toutes mes réservations</CardTitle>
-                <CardDescription>Gérez vos locations saisonnières</CardDescription>
+                <CardTitle style={{ color: COLORS.secondaryText }}>Toutes mes réservations</CardTitle>
+                <CardDescription style={{ color: COLORS.smallText }}>Gérez vos locations saisonnières</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {reservations && reservations.length > 0 ? (
                     reservations.map((res: any) => (
-                      <div key={res.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div key={res.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow" style={{ 
+                        borderColor: COLORS.separator,
+                        backgroundColor: COLORS.lightBg
+                      }}>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="flex items-start gap-4">
                             {res.image ? (
                               <img src={res.image} alt={res.titre} className="w-20 h-20 rounded-lg object-cover" />
                             ) : (
-                              <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center">
-                                <Home className="w-10 h-10 text-gray-400" />
+                              <div className="w-20 h-20 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                                <Home className="w-10 h-10" style={{ color: COLORS.logo }} />
                               </div>
                             )}
                             <div>
-                              <h4 className="font-semibold text-lg">{res.titre}</h4>
-                              <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                              <h4 className="font-semibold text-lg" style={{ color: COLORS.secondaryText }}>{res.titre}</h4>
+                              <div className="flex items-center gap-2 text-sm mt-1" style={{ color: COLORS.smallText }}>
                                 <MapPin className="w-3 h-3" />
                                 {res.ville}
                               </div>
                               <div className="flex items-center gap-4 text-sm mt-2">
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1" style={{ color: COLORS.smallText }}>
                                   <Calendar className="w-3 h-3" />
                                   {new Date(res.dateDebut).toLocaleDateString('fr-FR')} - {new Date(res.dateFin).toLocaleDateString('fr-FR')}
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1" style={{ color: COLORS.smallText }}>
                                   <Euro className="w-3 h-3" />
                                   {res.nuits || 1} nuits • {res.prixTotal || 0} €
                                 </div>
@@ -958,12 +1058,12 @@ const ClientReservationsDashboard = () => {
                             
                             <div className="text-sm">
                               <div className="flex justify-between">
-                                <span>Payé:</span>
-                                <span className="font-semibold">{res.montantPaye || 0} €</span>
+                                <span style={{ color: COLORS.smallText }}>Payé:</span>
+                                <span className="font-semibold" style={{ color: COLORS.logo }}>{res.montantPaye || 0} €</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>Restant:</span>
-                                <span className="font-semibold text-orange-600">{res.montantRestant || 0} €</span>
+                                <span style={{ color: COLORS.smallText }}>Restant:</span>
+                                <span className="font-semibold" style={{ color: COLORS.logo }}>{res.montantRestant || 0} €</span>
                               </div>
                             </div>
                             
@@ -972,6 +1072,10 @@ const ClientReservationsDashboard = () => {
                                 size="sm" 
                                 variant="outline" 
                                 className="flex-1"
+                                style={{ 
+                                  borderColor: COLORS.separator,
+                                  color: COLORS.smallText
+                                }}
                                 onClick={() => showReservationDetail(res)}
                               >
                                 <Eye className="w-4 h-4 mr-2" />
@@ -981,6 +1085,11 @@ const ClientReservationsDashboard = () => {
                                 <Button 
                                   size="sm" 
                                   className="flex-1" 
+                                  style={{ 
+                                    backgroundColor: COLORS.logo,
+                                    borderColor: COLORS.logo,
+                                    color: COLORS.lightBg
+                                  }}
                                   onClick={() => {
                                     setSimulatingPayment(res.id);
                                     setPaymentAmount(res.montantRestant?.toString() || "0");
@@ -995,18 +1104,21 @@ const ClientReservationsDashboard = () => {
                         
                         {/* Section paiements */}
                         {res.paiements?.length > 0 && (
-                          <div className="mt-4 pt-4 border-t">
-                            <h5 className="font-medium mb-2">Historique des paiements</h5>
+                          <div className="mt-4 pt-4 border-t" style={{ borderColor: COLORS.separator }}>
+                            <h5 className="font-medium mb-2" style={{ color: COLORS.secondaryText }}>Historique des paiements</h5>
                             <div className="space-y-2">
                               {res.paiements.map((p: any) => (
-                                <div key={p.id} className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded">
+                                <div key={p.id} className="flex items-center justify-between text-sm p-2 rounded" style={{ 
+                                  backgroundColor: `${COLORS.primaryDark}08`,
+                                  color: COLORS.smallText
+                                }}>
                                   <div className="flex items-center gap-2">
                                     <CreditCard className="w-3 h-3" />
                                     <span className="font-medium">{p.methode || 'inconnue'}</span>
-                                    <span className="text-gray-500">{p.reference || ''}</span>
+                                    <span>{p.reference || ''}</span>
                                   </div>
                                   <div className="flex items-center gap-4">
-                                    <span className="font-semibold">{p.montant || 0} €</span>
+                                    <span className="font-semibold" style={{ color: COLORS.logo }}>{p.montant || 0} €</span>
                                     <Badge variant={p.statut === 'paye' ? 'default' : 'secondary'}>
                                       {p.statut || 'inconnu'}
                                     </Badge>
@@ -1019,8 +1131,8 @@ const ClientReservationsDashboard = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Home className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <div className="text-center py-8" style={{ color: COLORS.smallText }}>
+                      <Home className="w-12 h-12 mx-auto mb-4" style={{ color: COLORS.separator }} />
                       <p>Aucune réservation trouvée</p>
                     </div>
                   )}
@@ -1031,33 +1143,40 @@ const ClientReservationsDashboard = () => {
 
           {/* Tab Paiements */}
           <TabsContent value="paiements">
-            <Card>
+            <Card style={{ 
+              backgroundColor: COLORS.lightBg,
+              border: `1px solid ${COLORS.separator}`
+            }}>
               <CardHeader>
-                <CardTitle>Gestion des paiements</CardTitle>
-                <CardDescription>Payez vos réservations en attente</CardDescription>
+                <CardTitle style={{ color: COLORS.secondaryText }}>Gestion des paiements</CardTitle>
+                <CardDescription style={{ color: COLORS.smallText }}>Payez vos réservations en attente</CardDescription>
               </CardHeader>
               <CardContent>
                 {paiements?.enAttente && paiements.enAttente.length > 0 ? (
                   <div className="space-y-4">
                     {paiements.enAttente.map((p: any) => (
-                      <Card key={p.id}>
+                      <Card key={p.id} style={{ 
+                        backgroundColor: COLORS.lightBg,
+                        border: `1px solid ${COLORS.separator}`
+                      }}>
                         <CardContent className="p-4">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                               <div className="flex items-center gap-2 mb-2">
-                                <CreditCard className="w-4 h-4" />
-                                <span className="font-semibold">Paiement #{p.reference}</span>
+                                <CreditCard className="w-4 h-4" style={{ color: COLORS.logo }} />
+                                <span className="font-semibold" style={{ color: COLORS.secondaryText }}>Paiement #{p.reference}</span>
                               </div>
-                              <div className="text-sm text-gray-600">
+                              <div className="text-sm" style={{ color: COLORS.smallText }}>
                                 Date d'échéance: {new Date(p.dateEcheance).toLocaleDateString('fr-FR')}
                               </div>
-                              <div className="text-sm text-gray-600">
+                              <div className="text-sm" style={{ color: COLORS.smallText }}>
                                 Méthode: {p.methode}
                               </div>
                               {p.reservationId && (
                                 <Button 
                                   variant="link" 
                                   size="sm" 
+                                  style={{ color: COLORS.logo }}
                                   onClick={() => {
                                     const reservation = reservations.find((r: any) => r.id === p.reservationId);
                                     if (reservation) showReservationDetail(reservation);
@@ -1069,7 +1188,7 @@ const ClientReservationsDashboard = () => {
                             </div>
                             
                             <div className="text-right">
-                              <div className="text-2xl font-bold text-orange-600 mb-2">
+                              <div className="text-2xl font-bold mb-2" style={{ color: COLORS.logo }}>
                                 {p.montant} €
                               </div>
                               <div className="space-y-2">
@@ -1079,11 +1198,19 @@ const ClientReservationsDashboard = () => {
                                   onChange={(e) => setPaymentAmount(e.target.value)}
                                   placeholder="Montant à payer"
                                   className="w-full px-3 py-2 border rounded"
+                                  style={{ 
+                                    borderColor: COLORS.separator,
+                                    color: COLORS.smallText
+                                  }}
                                 />
                                 <select
                                   value={paymentMethod}
                                   onChange={(e) => setPaymentMethod(e.target.value)}
                                   className="w-full px-3 py-2 border rounded"
+                                  style={{ 
+                                    borderColor: COLORS.separator,
+                                    color: COLORS.smallText
+                                  }}
                                 >
                                   <option value="carte">Carte bancaire</option>
                                   <option value="virement">Virement</option>
@@ -1094,6 +1221,11 @@ const ClientReservationsDashboard = () => {
                                   onClick={() => handlePayment(p.id, true)}
                                   disabled={simulatingPayment === p.id}
                                   className="w-full"
+                                  style={{ 
+                                    backgroundColor: COLORS.logo,
+                                    borderColor: COLORS.logo,
+                                    color: COLORS.lightBg
+                                  }}
                                 >
                                   {simulatingPayment === p.id ? 'Traitement...' : 'Simuler le paiement'}
                                 </Button>
@@ -1104,17 +1236,20 @@ const ClientReservationsDashboard = () => {
                       </Card>
                     ))}
                     
-                    <Card className="bg-gray-50">
+                    <Card style={{ 
+                      backgroundColor: `${COLORS.primaryDark}08`,
+                      border: `1px solid ${COLORS.separator}`
+                    }}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h4 className="font-semibold">Total des paiements en attente</h4>
-                            <p className="text-sm text-gray-600">
+                            <h4 className="font-semibold" style={{ color: COLORS.secondaryText }}>Total des paiements en attente</h4>
+                            <p className="text-sm" style={{ color: COLORS.smallText }}>
                               {paiements.enAttente.length} paiement(s) à régler
                             </p>
                           </div>
                           <div className="text-right">
-                            <div className="text-3xl font-bold text-red-600">
+                            <div className="text-3xl font-bold" style={{ color: COLORS.logo }}>
                               {paiements.totalEnAttente} €
                             </div>
                             <Button 
@@ -1122,6 +1257,10 @@ const ClientReservationsDashboard = () => {
                               variant="outline"
                               className="mt-2"
                               disabled={generatingReport}
+                              style={{ 
+                                borderColor: COLORS.separator,
+                                color: COLORS.smallText
+                              }}
                             >
                               {generatingReport ? (
                                 <>
@@ -1142,9 +1281,9 @@ const ClientReservationsDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Aucun paiement en attente</h3>
-                    <p className="text-gray-600">Tous vos paiements sont à jour</p>
+                    <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.logo }} />
+                    <h3 className="text-xl font-semibold mb-2" style={{ color: COLORS.secondaryText }}>Aucun paiement en attente</h3>
+                    <p className="text-gray-600" style={{ color: COLORS.smallText }}>Tous vos paiements sont à jour</p>
                   </div>
                 )}
               </CardContent>
@@ -1154,10 +1293,13 @@ const ClientReservationsDashboard = () => {
           {/* Tab Statistiques */}
           <TabsContent value="statistiques">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2" style={{ 
+                backgroundColor: COLORS.lightBg,
+                border: `1px solid ${COLORS.separator}`
+              }}>
                 <CardHeader>
-                  <CardTitle>Top destinations</CardTitle>
-                  <CardDescription>Vos villes les plus visitées</CardDescription>
+                  <CardTitle style={{ color: COLORS.secondaryText }}>Top destinations</CardTitle>
+                  <CardDescription style={{ color: COLORS.smallText }}>Vos villes les plus visitées</CardDescription>
                 </CardHeader>
                 <CardContent className="h-80">
                   {statistiques?.topDestinations?.length > 0 ? (
@@ -1168,25 +1310,28 @@ const ClientReservationsDashboard = () => {
                         <YAxis />
                         <Tooltip formatter={(value) => [`${value} €`, 'Dépense']} />
                         <Legend />
-                        <Bar dataKey="montant" fill="#8884d8" name="Dépense totale" />
+                        <Bar dataKey="montant" fill={COLORS.logo} name="Dépense totale" />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
+                    <div className="h-full flex items-center justify-center" style={{ color: COLORS.smallText }}>
                       <p>Aucune donnée disponible</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card style={{ 
+                backgroundColor: COLORS.lightBg,
+                border: `1px solid ${COLORS.separator}`
+              }}>
                 <CardHeader>
-                  <CardTitle>Métriques clés</CardTitle>
+                  <CardTitle style={{ color: COLORS.secondaryText }}>Métriques clés</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Prix moyen par nuit</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm mb-1" style={{ color: COLORS.smallText }}>Prix moyen par nuit</div>
+                    <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                       {reservations.length > 0 
                         ? Math.round(resume.montantTotalDepense / reservations.reduce((sum: number, r: any) => sum + (r.nuits || 1), 0))
                         : 0} €
@@ -1194,8 +1339,8 @@ const ClientReservationsDashboard = () => {
                   </div>
                   
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Durée moyenne</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm mb-1" style={{ color: COLORS.smallText }}>Durée moyenne</div>
+                    <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                       {reservations.length > 0 
                         ? Math.round(reservations.reduce((sum: number, r: any) => sum + (r.nuits || 1), 0) / reservations.length)
                         : 0} nuits
@@ -1203,8 +1348,8 @@ const ClientReservationsDashboard = () => {
                   </div>
                   
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Taux de confirmation</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm mb-1" style={{ color: COLORS.smallText }}>Taux de confirmation</div>
+                    <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                       {resume.totalReservations > 0
                         ? Math.round(((statistiques?.repartitionStatut?.confirmee || 0) / resume.totalReservations) * 100)
                         : 0}%
@@ -1212,8 +1357,8 @@ const ClientReservationsDashboard = () => {
                   </div>
                   
                   <div>
-                    <div className="text-sm text-gray-500 mb-1">Taux d'annulation</div>
-                    <div className="text-2xl font-bold text-red-600">
+                    <div className="text-sm mb-1" style={{ color: COLORS.smallText }}>Taux d'annulation</div>
+                    <div className="text-2xl font-bold" style={{ color: COLORS.logo }}>
                       {resume.totalReservations > 0
                         ? Math.round(((statistiques?.repartitionStatut?.annulee || 0) / resume.totalReservations) * 100)
                         : 0}%
@@ -1226,9 +1371,12 @@ const ClientReservationsDashboard = () => {
         </Tabs>
 
         {/* Section conseils */}
-        <Card className="mt-6">
+        <Card className="mt-6" style={{ 
+          backgroundColor: COLORS.lightBg,
+          border: `1px solid ${COLORS.separator}`
+        }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2" style={{ color: COLORS.secondaryText }}>
               <Info className="w-5 h-5" />
               Conseils pour optimiser vos locations
             </CardTitle>
@@ -1237,43 +1385,50 @@ const ClientReservationsDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Euro className="w-3 h-3 text-blue-600" />
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                    <Euro className="w-3 h-3" style={{ color: COLORS.logo }} />
                   </div>
-                  <h4 className="font-semibold">Économisez sur les paiements</h4>
+                  <h4 className="font-semibold" style={{ color: COLORS.secondaryText }}>Économisez sur les paiements</h4>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm" style={{ color: COLORS.smallText }}>
                   Payer en avance peut vous faire bénéficier de réductions. Certains propriétaires offrent jusqu'à 10% de réduction pour les paiements anticipés.
                 </p>
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <Calendar className="w-3 h-3 text-green-600" />
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                    <Calendar className="w-3 h-3" style={{ color: COLORS.logo }} />
                   </div>
-                  <h4 className="font-semibold">Réservez hors saison</h4>
+                  <h4 className="font-semibold" style={{ color: COLORS.secondaryText }}>Réservez hors saison</h4>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm" style={{ color: COLORS.smallText }}>
                   Les prix peuvent être jusqu'à 30% moins chers en basse saison. Planifiez vos vacances en dehors des périodes de pointe.
                 </p>
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                    <TrendingUp className="w-3 h-3 text-purple-600" />
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                    <TrendingUp className="w-3 h-3" style={{ color: COLORS.logo }} />
                   </div>
-                  <h4 className="font-semibold">Suivez vos dépenses</h4>
+                  <h4 className="font-semibold" style={{ color: COLORS.secondaryText }}>Suivez vos dépenses</h4>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm" style={{ color: COLORS.smallText }}>
                   Utilisez notre tableau de bord pour analyser vos dépenses et identifier des opportunités d'économies.
                 </p>
               </div>
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              style={{ 
+                borderColor: COLORS.separator,
+                color: COLORS.smallText
+              }}
+            >
               Voir plus de conseils
             </Button>
           </CardFooter>
@@ -1283,29 +1438,40 @@ const ClientReservationsDashboard = () => {
       {/* Modal de simulation de paiement */}
       {simulatingPayment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
+          <Card className="w-full max-w-md" style={{ 
+            backgroundColor: COLORS.lightBg,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader>
-              <CardTitle>Simulation de paiement</CardTitle>
-              <CardDescription>Vérifiez les détails avant de confirmer</CardDescription>
+              <CardTitle style={{ color: COLORS.secondaryText }}>Simulation de paiement</CardTitle>
+              <CardDescription style={{ color: COLORS.smallText }}>Vérifiez les détails avant de confirmer</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Montant à payer</label>
+                <label className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>Montant à payer</label>
                 <input
                   type="number"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   className="w-full px-3 py-2 border rounded"
                   placeholder="Entrez le montant"
+                  style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.smallText
+                  }}
                 />
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">Méthode de paiement</label>
+                <label className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>Méthode de paiement</label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="w-full px-3 py-2 border rounded"
+                  style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.smallText
+                  }}
                 >
                   <option value="carte">Carte bancaire (+1.5% frais)</option>
                   <option value="virement">Virement bancaire (sans frais)</option>
@@ -1314,26 +1480,32 @@ const ClientReservationsDashboard = () => {
                 </select>
               </div>
               
-              <div className="p-4 bg-gray-50 rounded">
-                <h4 className="font-semibold mb-2">Récapitulatif</h4>
+              <div className="p-4 rounded" style={{ 
+                backgroundColor: `${COLORS.primaryDark}08`,
+                border: `1px solid ${COLORS.separator}`
+              }}>
+                <h4 className="font-semibold mb-2" style={{ color: COLORS.secondaryText }}>Récapitulatif</h4>
                 <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between" style={{ color: COLORS.smallText }}>
                     <span>Montant:</span>
                     <span>{paymentAmount || 0} €</span>
                   </div>
                   {paymentMethod === 'carte' && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between" style={{ color: COLORS.smallText }}>
                       <span>Frais carte (1.5%):</span>
                       <span>{(parseFloat(paymentAmount || '0') * 0.015).toFixed(2)} €</span>
                     </div>
                   )}
                   {paymentMethod === 'paypal' && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between" style={{ color: COLORS.smallText }}>
                       <span>Frais PayPal (2.9%):</span>
                       <span>{(parseFloat(paymentAmount || '0') * 0.029).toFixed(2)} €</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold border-t pt-2 mt-2">
+                  <div className="flex justify-between font-bold border-t pt-2 mt-2" style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.secondaryText
+                  }}>
                     <span>Total:</span>
                     <span>
                       {paymentMethod === 'carte' 
@@ -1350,12 +1522,21 @@ const ClientReservationsDashboard = () => {
               <Button 
                 variant="outline" 
                 className="flex-1"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 onClick={() => setSimulatingPayment(null)}
               >
                 Annuler
               </Button>
               <Button 
                 className="flex-1"
+                style={{ 
+                  backgroundColor: COLORS.logo,
+                  borderColor: COLORS.logo,
+                  color: COLORS.lightBg
+                }}
                 onClick={() => handlePayment(simulatingPayment, false)}
                 disabled={!paymentAmount}
               >
@@ -1369,16 +1550,20 @@ const ClientReservationsDashboard = () => {
       {/* Modal de détails de réservation */}
       {showReservationDetails && selectedReservation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto" style={{ 
+            backgroundColor: COLORS.lightBg,
+            border: `1px solid ${COLORS.separator}`
+          }}>
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle>Détails de la réservation</CardTitle>
-                  <CardDescription>Référence: {selectedReservation.reference || selectedReservation.id}</CardDescription>
+                  <CardTitle style={{ color: COLORS.secondaryText }}>Détails de la réservation</CardTitle>
+                  <CardDescription style={{ color: COLORS.smallText }}>Référence: {selectedReservation.reference || selectedReservation.id}</CardDescription>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
+                  style={{ color: COLORS.smallText }}
                   onClick={() => setShowReservationDetails(false)}
                 >
                   ✕
@@ -1389,18 +1574,18 @@ const ClientReservationsDashboard = () => {
               {/* Informations générales */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Informations générales</h4>
+                  <h4 className="font-semibold mb-2" style={{ color: COLORS.secondaryText }}>Informations générales</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Titre:</span>
-                      <span className="font-medium">{selectedReservation.titre}</span>
+                      <span style={{ color: COLORS.smallText }}>Titre:</span>
+                      <span className="font-medium" style={{ color: COLORS.secondaryText }}>{selectedReservation.titre}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Ville:</span>
-                      <span className="font-medium">{selectedReservation.ville}</span>
+                      <span style={{ color: COLORS.smallText }}>Ville:</span>
+                      <span className="font-medium" style={{ color: COLORS.secondaryText }}>{selectedReservation.ville}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Statut:</span>
+                      <span style={{ color: COLORS.smallText }}>Statut:</span>
                       <Badge className={
                         selectedReservation.statut === 'confirmee' ? 'bg-green-100 text-green-800' :
                         selectedReservation.statut === 'en_attente' ? 'bg-yellow-100 text-yellow-800' :
@@ -1412,30 +1597,30 @@ const ClientReservationsDashboard = () => {
                       </Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Nombre de nuits:</span>
-                      <span className="font-medium">{selectedReservation.nuits || 1}</span>
+                      <span style={{ color: COLORS.smallText }}>Nombre de nuits:</span>
+                      <span className="font-medium" style={{ color: COLORS.secondaryText }}>{selectedReservation.nuits || 1}</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2">Dates</h4>
+                  <h4 className="font-semibold mb-2" style={{ color: COLORS.secondaryText }}>Dates</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Date de début:</span>
-                      <span className="font-medium">
+                      <span style={{ color: COLORS.smallText }}>Date de début:</span>
+                      <span className="font-medium" style={{ color: COLORS.secondaryText }}>
                         {new Date(selectedReservation.dateDebut).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Date de fin:</span>
-                      <span className="font-medium">
+                      <span style={{ color: COLORS.smallText }}>Date de fin:</span>
+                      <span className="font-medium" style={{ color: COLORS.secondaryText }}>
                         {new Date(selectedReservation.dateFin).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Durée totale:</span>
-                      <span className="font-medium">{selectedReservation.nuits || 1} nuits</span>
+                      <span style={{ color: COLORS.smallText }}>Durée totale:</span>
+                      <span className="font-medium" style={{ color: COLORS.secondaryText }}>{selectedReservation.nuits || 1} nuits</span>
                     </div>
                   </div>
                 </div>
@@ -1443,24 +1628,27 @@ const ClientReservationsDashboard = () => {
 
               {/* Informations financières */}
               <div>
-                <h4 className="font-semibold mb-3">Informations financières</h4>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <h4 className="font-semibold mb-3" style={{ color: COLORS.secondaryText }}>Informations financières</h4>
+                <div className="p-4 rounded-lg space-y-3" style={{ 
+                  backgroundColor: `${COLORS.primaryDark}08`,
+                  border: `1px solid ${COLORS.separator}`
+                }}>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Prix total:</span>
-                    <span className="text-xl font-bold">{selectedReservation.prixTotal || 0} €</span>
+                    <span style={{ color: COLORS.smallText }}>Prix total:</span>
+                    <span className="text-xl font-bold" style={{ color: COLORS.logo }}>{selectedReservation.prixTotal || 0} €</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Montant payé:</span>
-                    <span className="font-semibold text-green-600">{selectedReservation.montantPaye || 0} €</span>
+                    <span style={{ color: COLORS.smallText }}>Montant payé:</span>
+                    <span className="font-semibold" style={{ color: COLORS.logo }}>{selectedReservation.montantPaye || 0} €</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Restant à payer:</span>
-                    <span className="font-semibold text-orange-600">{selectedReservation.montantRestant || 0} €</span>
+                    <span style={{ color: COLORS.smallText }}>Restant à payer:</span>
+                    <span className="font-semibold" style={{ color: COLORS.logo }}>{selectedReservation.montantRestant || 0} €</span>
                   </div>
-                  <div className="pt-3 border-t">
+                  <div className="pt-3 border-t" style={{ borderColor: COLORS.separator }}>
                     <div className="flex justify-between font-semibold">
-                      <span>Pourcentage payé:</span>
-                      <span>
+                      <span style={{ color: COLORS.smallText }}>Pourcentage payé:</span>
+                      <span style={{ color: COLORS.logo }}>
                         {selectedReservation.prixTotal > 0 
                           ? Math.round(((selectedReservation.montantPaye || 0) / selectedReservation.prixTotal) * 100)
                           : 0}%
@@ -1473,23 +1661,26 @@ const ClientReservationsDashboard = () => {
               {/* Paiements */}
               {selectedReservation.paiements && selectedReservation.paiements.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3">Historique des paiements</h4>
+                  <h4 className="font-semibold mb-3" style={{ color: COLORS.secondaryText }}>Historique des paiements</h4>
                   <div className="space-y-2">
                     {selectedReservation.paiements.map((p: any, index: number) => (
-                      <div key={p.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div key={p.id} className="flex items-center justify-between p-3 border rounded-lg" style={{ 
+                        borderColor: COLORS.separator,
+                        backgroundColor: COLORS.lightBg
+                      }}>
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-semibold text-blue-600">{index + 1}</span>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${COLORS.primaryDark}15` }}>
+                            <span className="text-sm font-semibold" style={{ color: COLORS.logo }}>{index + 1}</span>
                           </div>
                           <div>
-                            <div className="font-medium">Paiement #{p.reference}</div>
-                            <div className="text-sm text-gray-500">
+                            <div className="font-medium" style={{ color: COLORS.secondaryText }}>Paiement #{p.reference}</div>
+                            <div className="text-sm" style={{ color: COLORS.smallText }}>
                               {new Date(p.datePaiement || new Date()).toLocaleDateString('fr-FR')} • {p.methode || 'inconnue'}
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold">{p.montant || 0} €</div>
+                          <div className="font-bold" style={{ color: COLORS.logo }}>{p.montant || 0} €</div>
                           <Badge variant={p.statut === 'paye' ? 'default' : 'secondary'} className="text-xs">
                             {p.statut || 'inconnu'}
                           </Badge>
@@ -1503,7 +1694,7 @@ const ClientReservationsDashboard = () => {
               {/* Image de la propriété */}
               {selectedReservation.image && (
                 <div>
-                  <h4 className="font-semibold mb-2">Propriété</h4>
+                  <h4 className="font-semibold mb-2" style={{ color: COLORS.secondaryText }}>Propriété</h4>
                   <div className="rounded-lg overflow-hidden">
                     <img 
                       src={selectedReservation.image} 
@@ -1517,12 +1708,21 @@ const ClientReservationsDashboard = () => {
             <CardFooter className="flex gap-3 justify-end">
               <Button
                 variant="outline"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 onClick={() => setShowReservationDetails(false)}
               >
                 Fermer
               </Button>
               {(selectedReservation.montantRestant || 0) > 0 && (
                 <Button
+                  style={{ 
+                    backgroundColor: COLORS.logo,
+                    borderColor: COLORS.logo,
+                    color: COLORS.lightBg
+                  }}
                   onClick={() => {
                     setShowReservationDetails(false);
                     setSimulatingPayment(selectedReservation.id);
