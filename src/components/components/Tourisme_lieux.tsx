@@ -460,7 +460,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
         className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: colors.lightBg }}
       >
-        <div className="text-center">
+        <div className="text-center flex justify-center items-center flex-col">
           <div
             className="animate-spin rounded-full h-16 w-16 border-b-4 mb-4"
             style={{ borderBottomColor: colors.logo }}
@@ -479,7 +479,7 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8">
         <div
-          className="relative py-20 bg-cover bg-center bg-no-repeat"
+          className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage:
               'url("https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80")',
@@ -487,13 +487,14 @@ const LieuxTouristiques: React.FC<LieuxTouristiquesProps> = () => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white">
-            <TourismNavigation />
-            <h1 className="text-5xl font-bold mb-3">
+            
+            <h1 className="text-xl lg:text-4xl font-bold mb-3">
               Lieux Touristiques & Culturels
             </h1>
-            <p className="text-xl max-w-2xl mx-auto opacity-90">
+            <p className="text-sm max-w-2xl mb-5 mx-auto opacity-90">
               Découvrez les trésors du patrimoine
             </p>
+            <TourismNavigation />
           </div>
         </div>
       </div>

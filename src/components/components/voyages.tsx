@@ -438,7 +438,7 @@ const VoyagesAeriens: React.FC = () => {
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8">
         <div
-          className="relative py-20 bg-cover bg-center bg-no-repeat"
+          className="relative pb-8 pt-20 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage:
               'url("https://i.pinimg.com/1200x/79/94/5c/79945cc369cdb035eadcc41efc866a4c.jpg")',
@@ -446,11 +446,12 @@ const VoyagesAeriens: React.FC = () => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white">
-            <TourismNavigation />
-            <h1 className="text-5xl font-bold mb-4">Explorer le Monde</h1>
-            <p className="text-xl max-w-2xl mx-auto">
+            
+            <h1 className="text-xl lg:text-4xl font-bold mb-4">Explorer le Monde</h1>
+            <p className="text-sm mb-5 max-w-2xl mx-auto">
               Découvrez des destinations incroyables avec nos vols exclusifs
             </p>
+            <TourismNavigation />
           </div>
         </div>
       </div>

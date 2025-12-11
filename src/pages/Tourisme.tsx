@@ -773,7 +773,7 @@ export const TourismSection = () => {
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8">
         <div
-          className="relative py-20 bg-cover bg-center bg-no-repeat"
+          className="relative pt-20 pb-8 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage:
               'url("https://i.pinimg.com/1200x/19/f3/34/19f334c7d66cf3393f146a9bcfe911f4.jpg")',
@@ -781,14 +781,16 @@ export const TourismSection = () => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white">
-            <TourismNavigation />
-            <h2 className="md:text-5xl text-3xl font-bold mb-6 tracking-wider">
+            
+            <h2 className="md:text-4xl text-3xl font-bold mb-2 tracking-wider">
               Hébergements Touristiques
             </h2>
-            <p className="text-xl max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm max-w-2xl mx-auto mb-5 leading-relaxed">
               Découvrez nos hébergements partenaires et réservez votre séjour en toute simplicité
             </p>
+            <TourismNavigation />
           </div>
+          
         </div>
       </div>
       {/* Fin Hero */}

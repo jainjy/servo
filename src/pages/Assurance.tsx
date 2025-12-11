@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { financementAPI } from "@/lib/api";
+import ModalAssurance from "@/components/components/ModalAssurance";
 import {
   Shield,
   Home,
@@ -45,6 +46,8 @@ interface FormData {
   telephone: string;
   message: string;
 }
+
+
 
 // Données de fallback en cas d'erreur API
 const servicesAssuranceFallback: AssuranceService[] = [
@@ -160,6 +163,221 @@ export default function Assurance() {
   const [servicesAssurance, setServicesAssurance] = useState<AssuranceService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedCategorie, setSelectedCategorie] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const categoriesAssurance = [
+    {
+      icon: Home,
+      title: "Assurances Habitation",
+      description: "Protégez votre logement et vos biens avec une couverture adaptée à votre mode de vie",
+      features: ["Incendie", "Dégâts des eaux", "Vol", "Responsabilité civile", "Catastrophes naturelles", "Bris de glace"],
+      color: "bg-[#6B8E23]/10",
+      textColor: "text-[#556B2F]",
+      borderColor: "border-[#6B8E23]/20",
+      imageUrl: "https://i.pinimg.com/736x/08/39/28/083928363559c12f69700ee25cab4117.jpg",
+      details: {
+        avantages: [
+          "Souscription 100% en ligne disponible",
+          "Modification des garanties à tout moment sans frais",
+          "Assistance dépannage 24h/24 et 7j/7",
+          "Expert dédié disponible par téléphone",
+          "Déclaration de sinistre via application mobile"
+        ],
+        infosPratiques: [
+          "Franchise standard : 150€ pour le vol, 230€ pour les dégâts des eaux",
+          "Inventaire recommandé pour les biens de valeur",
+          "Délai de carence : 48h pour la garantie vol",
+          "Déclaration de sinistre sous 5 jours ouvrés maximum",
+          "Évaluation des biens par un expert en cas de sinistre important"
+        ],
+        délaiTraitement: "Traitement moyen des sinistres : 10 à 15 jours ouvrés",
+        niveauCouverture: "3 formules : Économique, Confort, Premium avec des plafonds variables",
+        exclusions: [
+          "Dégâts causés par le vieillissement ou usure normale",
+          "Dommages résultant d'un défaut d'entretien évident",
+          "Bijoux et œuvres d'art sans expertise préalable",
+          "Dommages causés intentionnellement par l'assuré",
+          "Catastrophes nucléaires ou actes de guerre"
+        ],
+        documentsRequis: [
+          "Attestation de propriété ou bail",
+          "Surface habitable du logement",
+          "Valeur estimée des biens à assurer",
+          "Description des éléments de valeur"
+        ],
+        conseils: [
+          "Faites régulièrement l'inventaire de vos biens",
+          "Conservez les factures d'achat importantes",
+          "Vérifiez les plafonds de garantie avant souscription",
+          "Mettez à jour votre contrat en cas d'acquisition de biens de valeur"
+        ]
+      }
+    },
+    {
+      icon: Shield,
+      title: "Assurances Professionnelles",
+      description: "Protégez votre activité, vos employés et vos responsabilités légales",
+      features: ["Décennale", "RC Pro", "GFA", "Dommage ouvrage", "Protection juridique", "Perte d'exploitation"],
+      color: "bg-[#6B8E23]/10",
+      textColor: "text-logo",
+      borderColor: "border-[#6B8E23]/20",
+      imageUrl: "https://i.pinimg.com/736x/7e/d6/5a/7ed65a934c44e7486ba52a5c813b45b8.jpg",
+      details: {
+        avantages: [
+          "Tarifs dégressifs selon le nombre d'employés",
+          "Couverture internationale optionnelle",
+          "Assistance juridique professionnelle incluse",
+          "Extension aux sous-traitants possible",
+          "Personnalisation selon le secteur d'activité"
+        ],
+        infosPratiques: [
+          "Obligatoire pour les professions réglementées (artisans, professions libérales...)",
+          "Montant de garantie adapté au chiffre d'affaires",
+          "Déclaration d'activité à jour obligatoire",
+          "Renouvellement automatique avec tacite reconduction",
+          "Majoration possible en cas de sinistres répétés"
+        ],
+        délaiTraitement: "Traitement des déclarations sous 48h en semaine",
+        niveauCouverture: "Formule sur mesure selon métier et taille d'entreprise",
+        exclusions: [
+          "Faute intentionnelle ou dolosive du dirigeant",
+          "Dommages couverts par d'autres assurances obligatoires",
+          "Activités non déclarées ou illicites",
+          "Conséquences directes de la faillite",
+          "Dommages survenus avant la date d'effet du contrat"
+        ],
+        documentsRequis: [
+          "KBis de moins de 3 mois",
+          "Chiffre d'affaires des 3 dernières années",
+          "Description détaillée de l'activité",
+          "Liste des employés et sous-traitants",
+          "Contrats de travaux pour la décennale"
+        ],
+        conseils: [
+          "Vérifiez les obligations légales de votre profession",
+          "Assurez-vous que les plafonds correspondent à vos projets",
+          "Consultez un expert pour les activités à risques",
+          "Mettez à jour votre contrat lors de l'embauche de personnel",
+          "Archivez tous les documents relatifs à votre activité"
+        ]
+      }
+    },
+    {
+      icon: Car,
+      title: "Assurances Automobile",
+      description: "Sécurité et protection pour vos déplacements et votre véhicule",
+      features: ["Tous risques", "Au tiers", "Assistance 0km", "Bris de glace", "Vol", "Incendie"],
+      color: "bg-[#556B2F]/10",
+      textColor: "text-[#556B2F]",
+      borderColor: "border-[#556B2F]/20",
+      imageUrl: "https://i.pinimg.com/736x/70/73/55/70735556b223ba73299590b987d840bc.jpg",
+      details: {
+        avantages: [
+          "Premier sinistre sans franchise pour les nouveaux clients",
+          "Véhicule de remplacement inclus selon formule",
+          "Assistance dépannage et remorquage illimité",
+          "Tiers payant sur les réparations agréées",
+          "Réduction fidélité jusqu'à 50% après 3 ans"
+        ],
+        infosPratiques: [
+          "Délai de rétractation : 14 jours calendaires",
+          "Franchise variable selon l'âge du conducteur et du véhicule",
+          "Majoration possible en fonction du bonus/malus",
+          "Déclaration de sinistre sous 48h après l'accident",
+          "Constat amiable électronique disponible"
+        ],
+        délaiTraitement: "Indemnisation sous 7 jours après expertise",
+        niveauCouverture: "4 formules : Responsabilité civile, Intermédiaire, Confort, Tous risques",
+        exclusions: [
+          "Conducteur non déclaré au contrat",
+          "Usage professionnel non autorisé",
+          "Défaut d'entretien mécanique avéré",
+          "Conduite en état d'ivresse ou sous stupéfiants",
+          "Course ou compétition non déclarée"
+        ],
+        documentsRequis: [
+          "Carte grise du véhicule",
+          "Permis de conduire du conducteur principal",
+          "Historique bonus/malus si anciennement assuré",
+          "Kilométrage annuel estimé",
+          "Lieu de garage habituel"
+        ],
+        conseils: [
+          "Adaptez la formule à l'âge et la valeur de votre véhicule",
+          "Déclarez tous les conducteurs habituels",
+          "Souscrivez une assistance 0km pour les longs trajets",
+          "Vérifiez les franchises avant chaque départ en vacances",
+          "Conservez les factures d'entretien régulier"
+        ]
+      }
+    },
+    {
+      icon: Heart,
+      title: "Assurances Santé & Vie",
+      description: "Prévoyance et protection pour votre santé et votre avenir",
+      features: ["Complémentaire santé", "Prévoyance", "Dépendance", "Obsèques", "Invalidité", "Capital décès"],
+      color: "bg-[#6B8E23]/10",
+      textColor: "text-[#6B8E23]",
+      borderColor: "border-[#6B8E23]/20",
+      imageUrl: "https://i.pinimg.com/1200x/c4/b9/85/c4b985f1a8e0ef855f514a827bc9d8d0.jpg",
+      details: {
+        avantages: [
+          "Tiers payant intégral chez les professionnels conventionnés",
+          "Forfaits prévention (ostéopathie, diététique, psychologie)",
+          "Hospitalisation en chambre particulière",
+          "Délais de carence réduits pour les nouveaux nés",
+          "Option médecines douces et alternatives"
+        ],
+        infosPratiques: [
+          "Délai de carence : 3 mois pour certaines garanties",
+          "Questionnaire médical obligatoire au-delà de certains montants",
+          "Possibilité d'augmenter les garanties sans nouvel examen médical",
+          "Capital garanti et participations aux bénéfices",
+          "Avance sur frais d'hospitalisation possible"
+        ],
+        délaiTraitement: "Remboursement sous 48h pour la télétransmission",
+        niveauCouverture: "Forfaits personnalisables : Individuel, Couple, Famille, Senior",
+        exclusions: [
+          "Maladies préexistantes non déclarées",
+          "Soins esthétiques non thérapeutiques",
+          "Actes non remboursés par la Sécurité Sociale",
+          "Suites de conflits ou d'actes de guerre",
+          "Conséquences d'actes intentionnels"
+        ],
+        documentsRequis: [
+          "Carte Vitale et attestation de droits",
+          "Questionnaire médical pour les hauts capitaux",
+          "État civil complet des bénéficiaires",
+          "Renseignements sur les antécédents médicaux familiaux",
+          "Justificatifs de profession et revenus"
+        ],
+        conseils: [
+          "Adaptez votre contrat à votre situation familiale",
+          "Pensez à la dépendance dès 50 ans",
+          "Vérifiez les délais de carence avant souscription",
+          "Mettez à jour vos bénéficiaires régulièrement",
+          "Consultez le tableau des garanties avant tout soin coûteux"
+        ]
+      }
+    }
+  ];
+
+  const handleOpenModal = (categorie) => {
+    const categorieWithImage = {
+      ...categorie,
+      // Garder l'imageUrl existante au lieu de la générer
+    };
+    setSelectedCategorie(categorieWithImage);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCategorie(null);
+  };
+
 
   // Charger les données depuis l'API
   useEffect(() => {
@@ -311,7 +529,7 @@ export default function Assurance() {
       </section>
 
       {/* Section Catégories d'Assurance */}
-      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="categories-assurance">
+      <section className="py-8 lg:py-4 bg-[#FAFAFA]" id="categories-assurance">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -322,50 +540,13 @@ export default function Assurance() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
               Nos <span className="text-[#556B2F]">Catégories d'Assurance</span>
             </h2>
-            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm text-slate-600 max-w-2xl mx-auto">
               Des solutions de protection adaptées à chaque aspect de votre vie
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {[
-              {
-                icon: Home,
-                title: "Assurances Habitation",
-                description: "Protégez votre logement et vos biens",
-                features: ["Incendie", "Dégâts des eaux", "Vol", "Responsabilité civile"],
-                color: "bg-[#6B8E23]/10",
-                textColor: "text-[#556B2F]",
-                borderColor: "border-[#6B8E23]/20"
-              },
-              {
-                icon: Shield,
-                title: "Assurances Professionnelles",
-                description: "Protégez votre activité professionnelle",
-                features: ["Décennale", "RC Pro", "GFA", "Dommage ouvrage"],
-                color: "bg-[#8B4513]/10",
-                textColor: "text-[#8B4513]",
-                borderColor: "border-[#8B4513]/20"
-              },
-              {
-                icon: Car,
-                title: "Assurances Automobile",
-                description: "Protégez votre véhicule et votre mobilité",
-                features: ["Tous risques", "Au tiers", "Assistance", "Bris de glace"],
-                color: "bg-[#556B2F]/10",
-                textColor: "text-[#556B2F]",
-                borderColor: "border-[#556B2F]/20"
-              },
-              {
-                icon: Heart,
-                title: "Assurances Santé & Vie",
-                description: "Protégez votre santé et celle de vos proches",
-                features: ["Complémentaire santé", "Prévoyance", "Dépendance", "Obsèques"],
-                color: "bg-[#6B8E23]/10",
-                textColor: "text-[#6B8E23]",
-                borderColor: "border-[#6B8E23]/20"
-              }
-            ].map((categorie, index) => (
+            {categoriesAssurance.map((categorie, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -374,7 +555,8 @@ export default function Assurance() {
                 whileHover={{ y: -5 }}
               >
                 <Card
-                  className="p-6 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 bg-white group"
+                  className="p-6 h-full cursor-pointer border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 bg-white group"
+                  onClick={() => handleOpenModal(categorie)}
                 >
                   <div className={`w-12 h-12 rounded-xl ${categorie.color} flex items-center justify-center mb-4 group-hover:${categorie.textColor.replace('text-', 'bg-')} transition-colors duration-300`}>
                     {isImageUrl(categorie.icon) ? (
@@ -388,7 +570,7 @@ export default function Assurance() {
                   <ul className="space-y-2">
                     {categorie.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center text-sm text-slate-600">
-                        <CheckCircle className="h-4 w-4 text-[#6B8E23] mr-2 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-secondary-text mr-2 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
@@ -401,11 +583,12 @@ export default function Assurance() {
               </motion.div>
             ))}
           </div>
+          <ModalAssurance isOpen={isModalOpen} onClose={handleCloseModal} data={selectedCategorie} />
         </div>
       </section>
 
       {/* Section Services d'Assurance */}
-      <section className="py-8 lg:py-20 bg-white" id="services-assurance">
+      <section className="py-8 lg:py-4 bg-white" id="services-assurance">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -416,7 +599,7 @@ export default function Assurance() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
               Nos <span className="text-[#556B2F]">Services d'Assurance</span>
             </h2>
-            <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm text-slate-600 max-w-2xl mx-auto">
               Des solutions complètes pour protéger tous les aspects de votre vie
             </p>
           </motion.div>
@@ -470,7 +653,7 @@ export default function Assurance() {
       </section>
 
       {/* Section Avantages */}
-      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="avantages-assurance">
+      <section className="py-8 lg:py-4 bg-[#FAFAFA]" id="avantages-assurance">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -530,7 +713,7 @@ export default function Assurance() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-10 py-8 lg:py-20" id="devis-assurance">
+      <section className="px-10 py-2 lg:py-4" id="devis-assurance">
         <div className="container mx-auto py-10 rounded-lg  bg-white shadow-xl px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

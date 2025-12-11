@@ -1025,13 +1025,13 @@ const Header = () => {
           image:
             "https://i.pinimg.com/1200x/fb/9a/69/fb9a69b6c23d01e5aab93dabb5533de7.jpg",
         },
-        {
-          title: "Rchizcte",
-          description: "Fiche présentation et projets réalisés",
-          href: "#",
-          image:
-            "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
-        },
+        // {
+        //   title: "Rchizcte",
+        //   description: "Fiche présentation et projets réalisés",
+        //   href: "#",
+        //   image:
+        //     "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
+        // },
         {
           title: "Constructeurs",
           description: "Fiche présentation et projets réalisés",

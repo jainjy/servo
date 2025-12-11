@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { motion, Variants } from "framer-motion";
-import { 
-  MessageCircle, Shield, Target, Users, TrendingUp, CheckCircle, 
+import { motion } from "framer-motion";
+import {
+  MessageCircle, Shield, Target, Users, TrendingUp, CheckCircle,
   FileText, Award, Lightbulb, BarChart, Handshake, Zap,
   ArrowRight, Search, Filter, Clock, Star, MapPin, Phone, Mail,
   Calendar, ChevronRight, Users2, Building2, Scale, Brain, Rocket,
@@ -22,7 +22,7 @@ const colors = {
   lightBg: "#FFFFF0",        // White
   separator: "#D3D3D3",      // Light gray
   secondaryText: "#8B4513",  // Saddle brown
-  
+
   // Couleurs supplémentaires
   primaryLight: "#8FBC8F",
   secondaryLight: "#A0522D",
@@ -139,7 +139,7 @@ const ConseilPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("tous");
   const [showMoreProcess, setShowMoreProcess] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     nom: "",
     email: "",
@@ -441,7 +441,7 @@ const ConseilPage = () => {
   const filteredTypes = conseilTypes.filter(type =>
     (activeCategory === "tous" || type.category === activeCategory) &&
     (type.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     type.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      type.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Catégories avec compteurs
@@ -506,105 +506,65 @@ const ConseilPage = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       {/* Hero Section */}
-      <section className="relative py-8 pt-24 lg:py-24 overflow-hidden">
+      <section className="relative py-20 bg-slate-900 text-white overflow-hidden">
+        {/* Background */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center opacity-40"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg')`,
+            backgroundImage:
+              "url('https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg')",
           }}
         />
+        {/* Badge */}
+        <div className="absolute bottom-0 left-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full 
+      bg-white/10 backdrop-blur-md border border-white/20 mb-6">
+          <span className="text-xs font-medium">Expertise en Audit & Stratégie</span>
+        </div>
+        {/* Content wrapper */}
+        <div className="relative z-10 container mx-auto px-4 max-w-4xl text-center">
 
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-              style={{ 
-                backgroundColor: `${colors.primaryDark}20`,
-                border: `1px solid ${colors.primaryDark}40`
-              }}>
-              <Lightbulb className="h-4 w-4" style={{ color: colors.primaryDark }} />
-              <span className="text-sm font-medium" style={{ color: colors.primaryDark }}>
-                Expertise en Audit & Stratégie
-              </span>
-            </div>
 
-            <h1 className="text-3xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-              Conseil <span style={{ color: colors.primaryDark }}>Expert</span>
-            </h1>
-            <p className="text-lg lg:text-xl text-slate-200 mb-10 leading-relaxed">
-              Des experts en audit stratégique et résolution de conflits pour 
-              accompagner votre entreprise vers l'excellence et la performance.
-            </p>
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            Conseil <span className="text-secondary-text">Expert</span>
+          </h1>
 
-            <div className="flex flex-wrap gap-4 justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  className="rounded-xl px-8 py-5 text-lg font-semibold border-2 transition-all duration-300"
-                  style={{
-                    backgroundColor: colors.primaryDark,
-                    color: colors.lightBg,
-                    borderColor: colors.primaryDark
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.primaryLight;
-                    e.currentTarget.style.borderColor = colors.primaryLight;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.primaryDark;
-                    e.currentTarget.style.borderColor = colors.primaryDark;
-                  }}
-                  onClick={() => document.getElementById('types-conseil')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <Lightbulb className="h-5 w-5 mr-3" />
-                  Découvrir nos conseils
-                </Button>
-              </motion.div>
+          {/* Description */}
+          <p className="text-slate-300 text-sm mb-10">
+            Des experts en audit stratégique et résolution de conflits
+            pour accompagner votre entreprise vers l'excellence.
+          </p>
 
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  className="bg-white text-slate-900 rounded-xl px-8 py-5 text-lg font-semibold border-2 border-white hover:bg-slate-100 transition-all duration-300"
-                  onClick={() => setShowContactModal(true)}
-                >
-                  <Calendar className="h-5 w-5 mr-3" />
-                  Demander un conseil
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Statistiques avec animation */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6"
-          >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8 + index * 0.1 }}
-                className="text-center"
+          {/* Stats with glassmorphism */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            {[
+              { value: "150+", label: "Audits réalisés" },
+              { value: "98%", label: "Clients satisfaits" },
+              { value: "12 ans", label: "d’expertise" },
+              { value: "300+", label: "Conseils délivrés" },
+            ].map((s, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/10"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" 
-                  style={{ 
-                    backgroundColor: `${stat.color}15`,
-                    border: `2px solid ${stat.color}30`
-                  }}>
-                  <stat.icon className="h-8 w-8" style={{ color: stat.color }} />
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-white mb-2">{stat.value}</div>
-                <div className="text-sm text-slate-300">{stat.label}</div>
-              </motion.div>
+                <div className="text-xl font-bold">{s.value}</div>
+                <div className="text-xs text-slate-300">{s.label}</div>
+              </div>
             ))}
-          </motion.div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <button className="px-6 py-2.5 rounded-xl bg-logo hover:bg-logo/80 font-semibold text-sm">
+              Découvrir nos conseils
+            </button>
+            <button className="px-6 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-semibold text-sm">
+              Demander un conseil
+            </button>
+          </div>
         </div>
       </section>
+
 
       {/* Section Notre Processus améliorée */}
       <motion.section
@@ -638,7 +598,7 @@ const ConseilPage = () => {
                 <div className="flex items-start gap-4">
                   <div className="relative">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center"
-                      style={{ 
+                      style={{
                         backgroundColor: `${etape.color}15`,
                         border: `2px solid ${etape.color}`
                       }}>
@@ -649,7 +609,7 @@ const ConseilPage = () => {
                       {etape.step}
                     </div>
                   </div>
-                  
+
                   <div className="flex-1">
                     <h3 className="text-lg font-bold mb-2" style={{ color: colors.textPrimary }}>
                       {etape.title}
@@ -714,7 +674,7 @@ const ConseilPage = () => {
 
       {/* Section Types de Conseil améliorée */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4 py-1"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -818,11 +778,10 @@ const ConseilPage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <motion.div variants={cardHoverVariants} className="h-full">
-                  <Card className={`p-6 h-full rounded-2xl cursor-pointer transition-all duration-500 group relative overflow-hidden ${
-                    selectedType === type.id ? 'ring-2 ring-offset-2' : ''
-                  }`}
+                  <Card className={`p-6 h-full rounded-2xl cursor-pointer transition-all duration-500 group relative overflow-hidden ${selectedType === type.id ? 'ring-2 ring-offset-2' : ''
+                    }`}
                     style={{
                       borderColor: selectedType === type.id ? type.color : colors.separator,
                       backgroundColor: colors.cardBg,
@@ -832,33 +791,31 @@ const ConseilPage = () => {
                   >
                     {/* Effet de fond au hover */}
                     <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-300"
-                      style={{ 
+                      style={{
                         backgroundImage: `linear-gradient(135deg, ${type.color}20 0%, transparent 50%)`
                       }}
                     />
 
                     <div className="relative z-10">
-                      <div className={`w-14 h-14 mb-4 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                        selectedType === type.id ? 'scale-110' : ''
-                      }`}
+                      <div className={`w-14 h-14 mb-4 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedType === type.id ? 'scale-110' : ''
+                        }`}
                         style={{
-                          backgroundColor: selectedType === type.id 
-                            ? type.color 
+                          backgroundColor: selectedType === type.id
+                            ? type.color
                             : `${type.color}15`,
-                          boxShadow: selectedType === type.id 
+                          boxShadow: selectedType === type.id
                             ? `0 8px 20px ${type.color}40`
                             : '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                       >
-                        <type.icon 
-                          className={`h-6 w-6 transition-all duration-300 ${
-                            selectedType === type.id ? 'scale-110' : ''
-                          }`} 
-                          style={{ 
-                            color: selectedType === type.id 
+                        <type.icon
+                          className={`h-6 w-6 transition-all duration-300 ${selectedType === type.id ? 'scale-110' : ''
+                            }`}
+                          style={{
+                            color: selectedType === type.id
                               ? colors.lightBg
                               : type.color
-                          }} 
+                          }}
                         />
                       </div>
 
@@ -938,8 +895,8 @@ const ConseilPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" 
-              style={{ 
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
+              style={{
                 backgroundColor: `${colors.separator}30`,
                 border: `2px dashed ${colors.separator}`
               }}>
@@ -974,7 +931,7 @@ const ConseilPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            style={{ 
+            style={{
               backgroundColor: `${colors.primaryDark}08`,
               border: `1px solid ${colors.separator}`
             }}
@@ -1017,27 +974,26 @@ const ConseilPage = () => {
             >
               <Card className="p-6 rounded-2xl text-center h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
                 style={{ backgroundColor: colors.cardBg }}>
-                
+
                 {/* Badge disponibilité avec animation */}
                 <motion.div
-                  className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 ${
-                    conseiller.disponibilite === 'disponible' ? 'bg-green-100 text-green-800 border border-green-200' :
-                    conseiller.disponibilite === 'limitee' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                    'bg-red-100 text-red-800 border border-red-200'
-                  }`}
-                  animate={conseiller.disponibilite === 'disponible' ? { 
+                  className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 ${conseiller.disponibilite === 'disponible' ? 'bg-green-100 text-green-800 border border-green-200' :
+                      conseiller.disponibilite === 'limitee' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                        'bg-red-100 text-red-800 border border-red-200'
+                    }`}
+                  animate={conseiller.disponibilite === 'disponible' ? {
                     scale: [1, 1.05, 1],
                     boxShadow: ['0 0 0 rgba(34, 197, 94, 0)', '0 0 0 3px rgba(34, 197, 94, 0.3)', '0 0 0 rgba(34, 197, 94, 0)']
                   } : {}}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   {conseiller.disponibilite === 'disponible' ? 'Disponible' :
-                   conseiller.disponibilite === 'limitee' ? 'Limité' : 'Complet'}
+                    conseiller.disponibilite === 'limitee' ? 'Limité' : 'Complet'}
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-xl font-bold relative overflow-hidden group-hover:scale-105 transition-transform duration-300"
-                  style={{ 
+                  style={{
                     backgroundColor: conseiller.avatarColor,
                     boxShadow: `0 8px 25px ${conseiller.avatarColor}40`
                   }}
@@ -1066,7 +1022,7 @@ const ConseilPage = () => {
                       <Star
                         key={i}
                         className="h-3 w-3"
-                        style={{ 
+                        style={{
                           color: i < Math.floor(conseiller.rating) ? colors.warning : colors.separator,
                           fill: i < Math.floor(conseiller.rating) ? colors.warning : 'transparent'
                         }}
@@ -1107,7 +1063,7 @@ const ConseilPage = () => {
                       <motion.span
                         key={index}
                         className="px-2 py-1 rounded-full text-xs cursor-default"
-                        style={{ 
+                        style={{
                           backgroundColor: `${conseiller.avatarColor}15`,
                           color: conseiller.avatarColor,
                           border: `1px solid ${conseiller.avatarColor}30`
@@ -1121,7 +1077,7 @@ const ConseilPage = () => {
                     {conseiller.certifications.length > 2 && (
                       <motion.span
                         className="px-2 py-1 rounded-full text-xs cursor-default"
-                        style={{ 
+                        style={{
                           backgroundColor: colors.separator,
                           color: colors.textSecondary
                         }}
@@ -1157,13 +1113,13 @@ const ConseilPage = () => {
 
       {/* Section Avantages */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <Card className="rounded-3xl overflow-hidden border-0 relative" 
-          style={{ 
+        <Card className="rounded-3xl overflow-hidden border-0 relative"
+          style={{
             background: `linear-gradient(135deg, ${colors.primaryDark} 0%, ${colors.logo} 100%)`,
             color: colors.lightBg
           }}>
@@ -1236,7 +1192,7 @@ const ConseilPage = () => {
 
       {/* Section Témoignages */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -1266,7 +1222,7 @@ const ConseilPage = () => {
                 <div className="flex items-start gap-4 mb-6">
                   <motion.div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg relative overflow-hidden"
-                    style={{ 
+                    style={{
                       backgroundColor: temoignage.avatarColor,
                       boxShadow: `0 4px 15px ${temoignage.avatarColor}40`
                     }}
@@ -1292,7 +1248,7 @@ const ConseilPage = () => {
                     >
                       <Star
                         className="h-4 w-4"
-                        style={{ 
+                        style={{
                           color: colors.accentGold,
                           fill: colors.accentGold
                         }}
@@ -1305,7 +1261,7 @@ const ConseilPage = () => {
                   "{temoignage.texte}"
                 </p>
 
-                <motion.div 
+                <motion.div
                   className="mt-4 pt-4 border-t group-hover/temoignage:border-gray-300 transition-colors duration-300"
                   style={{ borderColor: colors.separator }}
                   initial={{ opacity: 0 }}
@@ -1316,7 +1272,7 @@ const ConseilPage = () => {
                     <div className="text-xs" style={{ color: colors.textSecondary }}>
                       {temoignage.date}
                     </div>
-                    <motion.div 
+                    <motion.div
                       className="px-3 py-1 rounded-full text-xs font-bold"
                       style={{ backgroundColor: colors.success, color: colors.lightBg }}
                       whileHover={{ scale: 1.05 }}
@@ -1344,7 +1300,7 @@ const ConseilPage = () => {
             { value: "10j", label: "Délai moyen", color: colors.secondaryText },
           ].map((stat, index) => (
             <div key={index} className="text-center p-4 rounded-xl"
-              style={{ 
+              style={{
                 backgroundColor: `${stat.color}08`,
                 border: `1px solid ${stat.color}20`
               }}>
@@ -1361,7 +1317,7 @@ const ConseilPage = () => {
 
       {/* CTA Final amélioré */}
       <section className="py-16 relative overflow-hidden"
-        style={{ 
+        style={{
           backgroundColor: colors.lightBg,
           backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(107, 142, 35, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.05) 0%, transparent 50%)'
         }}>
@@ -1373,7 +1329,7 @@ const ConseilPage = () => {
             viewport={{ once: true }}
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-              style={{ 
+              style={{
                 backgroundColor: `${colors.primaryDark}15`,
                 border: `1px solid ${colors.primaryDark}30`
               }}>
@@ -1387,13 +1343,13 @@ const ConseilPage = () => {
               Prêt à <span style={{ color: colors.secondaryText }}>optimiser votre entreprise</span> ?
             </h2>
             <p className="text-lg mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: colors.textSecondary }}>
-              Nos experts en conseil sont à votre disposition pour analyser votre 
+              Nos experts en conseil sont à votre disposition pour analyser votre
               situation et vous proposer des solutions sur mesure qui génèrent des résultats concrets.
             </p>
-            
+
             <div className="flex flex-wrap gap-4 justify-center">
-              <motion.div 
-                whileHover={{ scale: 1.05 }} 
+              <motion.div
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -1424,8 +1380,8 @@ const ConseilPage = () => {
                 </Button>
               </motion.div>
 
-              <motion.div 
-                whileHover={{ scale: 1.05 }} 
+              <motion.div
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -1481,7 +1437,7 @@ const ConseilPage = () => {
                 }
               ].map((info, index) => (
                 <div key={index} className="flex items-start gap-3 p-4 rounded-xl"
-                  style={{ 
+                  style={{
                     backgroundColor: `${colors.primaryDark}05`,
                     border: `1px solid ${colors.separator}`
                   }}>
@@ -1518,7 +1474,7 @@ const ConseilPage = () => {
               setSelectedConseiller(null);
             }}
           />
-          
+
           {/* Modal */}
           <motion.div
             variants={modalVariants}
@@ -1674,10 +1630,10 @@ const ConseilPage = () => {
                 </label>
                 <Select
                   value={formData.conseilType}
-                  onValueChange={(value) => setFormData({...formData, conseilType: value})}
+                  onValueChange={(value) => setFormData({ ...formData, conseilType: value })}
                 >
                   <SelectTrigger className="w-full rounded-xl transition-all duration-300"
-                    style={{ 
+                    style={{
                       borderColor: colors.separator,
                       backgroundColor: colors.cardBg
                     }}>
@@ -1729,10 +1685,10 @@ const ConseilPage = () => {
                 </label>
                 <Select
                   value={formData.budget}
-                  onValueChange={(value) => setFormData({...formData, budget: value})}
+                  onValueChange={(value) => setFormData({ ...formData, budget: value })}
                 >
                   <SelectTrigger className="w-full rounded-xl"
-                    style={{ 
+                    style={{
                       borderColor: colors.separator,
                       backgroundColor: colors.cardBg
                     }}>

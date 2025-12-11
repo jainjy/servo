@@ -490,11 +490,11 @@ const LogementsSHLMR = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
-                        className="py-20"
+                        className="py-2"
                         style={{ backgroundColor: COLORS["light-bg"] }}
                     >
                         <div className="container mx-auto px-4">
-                            <h2 className="text-4xl font-bold text-center mb-16"
+                            <h2 className="lg:text-2xl text-lg font-bold text-center mb-16"
                                 style={{ color: COLORS["secondary-text"] }}>
                                 Les avantages du logement SHLMR
                             </h2>
@@ -577,7 +577,7 @@ const LogementsSHLMR = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
-                        className="py-20"
+                        className="py-2"
                         style={{ backgroundColor: `${COLORS.logo}05` }}
                     >
                         <div className="container mx-auto px-4">
@@ -688,7 +688,7 @@ const LogementsSHLMR = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
-                        className="py-20"
+                        className="py-2"
                         style={{ backgroundColor: COLORS["light-bg"] }}
                     >
                         <div className="container mx-auto px-4">

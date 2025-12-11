@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  Users, Target, TrendingUp, CheckCircle, Clock, Shield, 
-  FileText, MessageCircle, Calendar, Star, ArrowRight, 
-  ChevronRight, Heart, Zap, BookOpen, Award, ThumbsUp, 
-  Users2, Briefcase, Handshake, Coins, Scale, Search, 
+import {
+  Users, Target, TrendingUp, CheckCircle, Clock, Shield,
+  FileText, MessageCircle, Calendar, Star, ArrowRight,
+  ChevronRight, Heart, Zap, BookOpen, Award, ThumbsUp,
+  Users2, Briefcase, Handshake, Coins, Scale, Search,
   X, Send, MapPin, Phone, Mail, Brain, Rocket, GraduationCap,
   BarChart, PieChart, Lightbulb, Globe, Target as TargetIcon,
   Building2, Wallet, Sparkles, Globe2, ShieldCheck, Trophy,
@@ -380,8 +380,8 @@ const AccompagnementPage: React.FC = () => {
   );
 
   // Afficher seulement 3 accompagnements au début
-  const displayedAccompagnements = showAllAccompagnements 
-    ? filteredTypes 
+  const displayedAccompagnements = showAllAccompagnements
+    ? filteredTypes
     : filteredTypes.slice(0, 3);
 
   const handleTypeSelect = (type: AccompagnementType) => {
@@ -491,86 +491,113 @@ const AccompagnementPage: React.FC = () => {
     <div className="min-h-screen" style={{ backgroundColor: colors.lightBg }}>
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative py-8 pt-24 lg:py-24 overflow-hidden">
+      {/* Hero Section — Minimal + Glassmorphism */}
+      <section className="relative py-24 overflow-hidden">
+        {/* Background */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
           style={{
-            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=2000&q=80')`,
           }}
         />
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" />
+        {/* Badge glass */}
+        <div className="absolute bottom-0 left-4 inline-block px-4 py-1.5 mb-6 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+          <span className="text-xs text-slate-200 tracking-wide">
+            Accompagnement Premium
+          </span>
+        </div>
 
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
+            className="text-center max-w-3xl mx-auto"
           >
-            <h1 className="text-3xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
-              Accompagnement <span style={{ color: colors.primaryDark }}>Personnalisé</span>
+
+
+            {/* Title */}
+            <h1 className="text-xl lg:text-3xl font-bold text-white mb-4">
+              Accompagnement{" "}
+              <span style={{ color: colors.primaryDark }}>Personnalisé</span>
             </h1>
-            <p className="text-lg lg:text-xl text-slate-200 mb-10 leading-relaxed">
-              Des experts dédiés pour vous accompagner à chaque étape de votre 
+
+            {/* Subtitle */}
+            <p className="text-slate-200 text-sm leading-relaxed mb-10">
+              Des experts dédiés pour vous accompagner à chaque étape de votre
               projet entrepreneurial. De l'idée à la croissance, nous sommes à vos côtés.
             </p>
 
+            {/* CTA Buttons Glass */}
             <div className="flex flex-wrap gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
-                  className="rounded-xl px-8 py-5 text-lg font-semibold border-2 transition-all duration-300"
-                  style={{
-                    backgroundColor: colors.primaryDark,
-                    color: colors.lightBg,
-                    borderColor: colors.primaryDark
-                  }}
+                  className="rounded-xl px-7 py-4 text-base font-semibold border-2 
+                       backdrop-blur-md bg-white/10 border-white/20 text-white"
+                  style={{ backgroundColor: colors.primaryDark }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = colors.primaryLight;
-                    e.currentTarget.style.borderColor = colors.primaryLight;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = colors.primaryDark;
-                    e.currentTarget.style.borderColor = colors.primaryDark;
                   }}
-                  onClick={() => document.getElementById('types-accompagnement')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() =>
+                    document.getElementById("types-accompagnement")?.scrollIntoView({
+                      behavior: "smooth",
+                    })
+                  }
                 >
-                  <Rocket className="h-5 w-5 mr-3" />
+                  <Rocket className="h-5 w-5 mr-2" />
                   Découvrir nos accompagnements
                 </Button>
               </motion.div>
 
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button
-                  className="bg-white text-slate-900 rounded-xl px-8 py-5 text-lg font-semibold border-2 border-white hover:bg-slate-100 transition-all duration-300"
+                  className="rounded-xl px-7 py-4 text-base font-semibold 
+                       bg-white text-slate-900 border-2 border-white 
+                       hover:bg-slate-100 transition-all"
                   onClick={() => setShowContactModal(true)}
                 >
-                  <Calendar className="h-5 w-5 mr-3" />
+                  <Calendar className="h-5 w-5 mr-2" />
                   Prendre rendez-vous
                 </Button>
               </motion.div>
             </div>
           </motion.div>
 
-          {/* Statistiques simplifiées */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6"
-          >
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" 
-                  style={{ backgroundColor: `${stat.color}15` }}>
-                  <stat.icon className="h-8 w-8" style={{ color: stat.color }} />
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-white mb-2">{stat.value}</div>
-                <div className="text-sm text-slate-200">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
+
         </div>
       </section>
+
+      {/* Stats — Glassmorphism */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6"
+      >
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className="p-4 rounded-xl text-center bg-white shadow-lg"
+          >
+            <div
+              className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4"
+              style={{ backgroundColor: `${stat.color}20` }}
+            >
+              <stat.icon className="h-7 w-7" style={{ color: stat.color }} />
+            </div>
+
+            <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
+            <div className="text-sm text-slate-700">{stat.label}</div>
+          </div>
+        ))}
+      </motion.div>
+
 
       {/* Section Notre Méthode - Timeline horizontale avec ligne connectant les cercles */}
       <motion.section
@@ -594,8 +621,8 @@ const AccompagnementPage: React.FC = () => {
         {/* Timeline horizontale */}
         <div className="relative max-w-6xl mx-auto">
           {/* Ligne horizontale connectant les cercles */}
-          <div className="absolute left-0 right-0 top-8 h-0.5 hidden lg:block" 
-            style={{ 
+          <div className="absolute left-0 right-0 top-8 h-0.5 hidden lg:block"
+            style={{
               backgroundColor: colors.separator,
               zIndex: 0
             }}
@@ -615,13 +642,13 @@ const AccompagnementPage: React.FC = () => {
                   {/* Cercle avec numéro */}
                   <div className="relative mb-4">
                     <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto relative z-10"
-                      style={{ 
+                      style={{
                         backgroundColor: `${etape.color}15`,
                         border: `2px solid ${etape.color}`,
                       }}
                     >
                       <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                        style={{ 
+                        style={{
                           backgroundColor: etape.color,
                           color: colors.lightBg
                         }}
@@ -629,7 +656,7 @@ const AccompagnementPage: React.FC = () => {
                         <span className="text-lg font-bold">{etape.step}</span>
                       </div>
                     </div>
-                    
+
                     {/* Lignes de connexion pour mobile */}
                     {index < etapesAccompagnement.length - 1 && (
                       <>
@@ -672,8 +699,8 @@ const AccompagnementPage: React.FC = () => {
         animate="visible"
         variants={containerVariants}
       >
-        <Card className="rounded-3xl overflow-hidden border-0" 
-          style={{ 
+        <Card className="rounded-3xl overflow-hidden border-0"
+          style={{
             background: colors.gradient1,
             color: colors.lightBg
           }}>
@@ -698,7 +725,7 @@ const AccompagnementPage: React.FC = () => {
                   whileHover={{ y: -5 }}
                 >
                   <Card className="p-6 rounded-2xl h-full border-0 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                    <div className="w-14 h-14 rounded-xl mb-6 flex items-center justify-center mx-auto" 
+                    <div className="w-14 h-14 rounded-xl mb-6 flex items-center justify-center mx-auto"
                       style={{ backgroundColor: `${avantage.color}30` }}>
                       <avantage.icon className="h-7 w-7" style={{ color: avantage.color }} />
                     </div>
@@ -764,9 +791,8 @@ const AccompagnementPage: React.FC = () => {
               onClick={() => handleTypeSelect(type)}
             >
               <motion.div variants={cardHoverVariants} className="h-full">
-                <Card className={`p-8 h-full rounded-2xl cursor-pointer transition-all duration-500 group ${
-                  selectedType === type.id ? 'ring-2 ring-offset-2' : ''
-                }`}
+                <Card className={`p-8 h-full rounded-2xl cursor-pointer transition-all duration-500 group ${selectedType === type.id ? 'ring-2 ring-offset-2' : ''
+                  }`}
                   style={{
                     borderColor: selectedType === type.id ? type.color : colors.separator,
                     backgroundColor: colors.cardBg,
@@ -774,22 +800,21 @@ const AccompagnementPage: React.FC = () => {
                     boxShadow: selectedType === type.id ? `0 10px 30px ${type.color}30` : '0 4px 20px rgba(0,0,0,0.08)'
                   }}
                 >
-                  <div className={`w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center transition-colors duration-300 ${
-                    selectedType === type.id ? '' : 'group-hover:' + type.color + '15'
-                  }`}
+                  <div className={`w-16 h-16 mb-6 rounded-xl mx-auto flex items-center justify-center transition-colors duration-300 ${selectedType === type.id ? '' : 'group-hover:' + type.color + '15'
+                    }`}
                     style={{
-                      backgroundColor: selectedType === type.id 
-                        ? type.color 
+                      backgroundColor: selectedType === type.id
+                        ? type.color
                         : `${type.color}15`
                     }}
                   >
-                    <type.icon 
-                      className="h-8 w-8 transition-colors duration-300" 
-                      style={{ 
-                        color: selectedType === type.id 
+                    <type.icon
+                      className="h-8 w-8 transition-colors duration-300"
+                      style={{
+                        color: selectedType === type.id
                           ? colors.lightBg
                           : type.color
-                      }} 
+                      }}
                     />
                   </div>
 
@@ -902,7 +927,7 @@ const AccompagnementPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" 
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center"
               style={{ backgroundColor: `${colors.separator}30` }}>
               <Search className="h-12 w-12" style={{ color: colors.textSecondary }} />
             </div>
@@ -918,7 +943,7 @@ const AccompagnementPage: React.FC = () => {
 
       {/* Section Nos Experts - Cartes avec bordures et ombres seulement */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -944,23 +969,22 @@ const AccompagnementPage: React.FC = () => {
                 whileHover={{ y: -8 }}
               >
                 <Card className="p-6 rounded-2xl text-center h-full transition-all duration-300 overflow-hidden group bg-white"
-                  style={{ 
+                  style={{
                     border: `2px solid ${colors.separator}`,
                     boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   }}>
-                  
+
                   {/* Badge disponibilité */}
-                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 shadow-md ${
-                    conseiller.disponibilite === 'disponible' ? 'bg-green-100 text-green-800 border border-green-200' :
+                  <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold z-10 shadow-md ${conseiller.disponibilite === 'disponible' ? 'bg-green-100 text-green-800 border border-green-200' :
                     conseiller.disponibilite === 'limitee' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                    'bg-red-100 text-red-800 border border-red-200'
-                  }`}>
+                      'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
                     {conseiller.disponibilite === 'disponible' ? 'Disponible' :
-                     conseiller.disponibilite === 'limitee' ? 'Limité' : 'Complet'}
+                      conseiller.disponibilite === 'limitee' ? 'Limité' : 'Complet'}
                   </div>
 
                   <div className="w-24 h-24 rounded-full mx-auto mb-6 mt-2 flex items-center justify-center text-white text-2xl font-bold relative group-hover:scale-105 transition-transform duration-300 border-4 border-white shadow-lg"
-                    style={{ 
+                    style={{
                       backgroundColor: conseiller.avatarColor,
                       boxShadow: `0 8px 25px ${conseiller.avatarColor}40`
                     }}>
@@ -972,7 +996,7 @@ const AccompagnementPage: React.FC = () => {
                   </h3>
 
                   <div className="inline-block px-3 py-1 rounded-full mb-3 text-sm font-semibold"
-                    style={{ 
+                    style={{
                       backgroundColor: `${colors.primaryDark}10`,
                       color: colors.primaryDark,
                       border: `1px solid ${colors.primaryDark}20`
@@ -990,7 +1014,7 @@ const AccompagnementPage: React.FC = () => {
                         <Star
                           key={i}
                           className="h-4 w-4"
-                          style={{ 
+                          style={{
                             color: i < Math.floor(conseiller.rating) ? colors.warning : colors.separator,
                             fill: i < Math.floor(conseiller.rating) ? colors.warning : 'transparent'
                           }}
@@ -1044,13 +1068,13 @@ const AccompagnementPage: React.FC = () => {
 
       {/* Section Témoignages - Carte Grand Format */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        <Card className="rounded-3xl overflow-hidden border-0" 
-          style={{ 
+        <Card className="rounded-3xl overflow-hidden border-0"
+          style={{
             background: colors.gradient2,
             color: colors.lightBg
           }}>
@@ -1077,7 +1101,7 @@ const AccompagnementPage: React.FC = () => {
                   <Card className="p-6 rounded-2xl h-full border-0 bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
                     <div className="flex items-start gap-4 mb-6">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
-                        style={{ 
+                        style={{
                           backgroundColor: temoignage.avatarColor,
                           boxShadow: `0 4px 15px ${temoignage.avatarColor}40`
                         }}>
@@ -1094,7 +1118,7 @@ const AccompagnementPage: React.FC = () => {
                         <Star
                           key={i}
                           className="h-4 w-4"
-                          style={{ 
+                          style={{
                             color: colors.accentGold,
                             fill: colors.accentGold
                           }}
@@ -1139,8 +1163,8 @@ const AccompagnementPage: React.FC = () => {
             <p className="text-lg mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: colors.textSecondary }}>
               Nos experts vous accompagnent personnellement pour concrétiser vos ambitions entrepreneuriales
             </p>
-            
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+
+            <motion.div>
               <Button
                 className="rounded-xl px-10 py-5 text-lg font-semibold border-2 transition-all duration-300"
                 style={{
@@ -1280,7 +1304,7 @@ const AccompagnementPage: React.FC = () => {
                 </label>
                 <Select
                   value={formData.accompagnementType}
-                  onValueChange={(value) => setFormData({...formData, accompagnementType: value})}
+                  onValueChange={(value) => setFormData({ ...formData, accompagnementType: value })}
                 >
                   <SelectTrigger className="w-full rounded-xl" style={{ borderColor: colors.separator }}>
                     <SelectValue placeholder="Sélectionnez un type" />
@@ -1353,7 +1377,7 @@ const AccompagnementPage: React.FC = () => {
                       borderColor: colors.lightBg,
                       borderTopColor: 'transparent'
                     }}
-                />
+                  />
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
