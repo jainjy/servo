@@ -1,4 +1,3 @@
-// src/pages/admin/metiers.tsx (updated)
 import { useState, useEffect, useCallback } from "react";
 import MetierForm from "../../components/admin/MetierForm";
 import metierService from "../../services/metierService";
@@ -44,7 +43,7 @@ const AdminMetiers = () => {
   // Filtrer et trier les métiers
   useEffect(() => {
     let result = [...metiers];
-    // Filtre de recherche
+
     if (searchTerm) {
       result = result.filter(
         (metier) =>
@@ -52,7 +51,7 @@ const AdminMetiers = () => {
           metier.id.toString().includes(searchTerm)
       );
     }
-    // Tri
+
     result.sort((a, b) => {
       let aValue, bValue;
       switch (sortBy) {
@@ -68,7 +67,7 @@ const AdminMetiers = () => {
           aValue = a.users.length;
           bValue = b.users.length;
           break;
-        default: // libelle
+        default:
           aValue = a.libelle.toLowerCase();
           bValue = b.libelle.toLowerCase();
       }
@@ -76,6 +75,7 @@ const AdminMetiers = () => {
       if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
+
     setFilteredMetiers(result);
   }, [metiers, searchTerm, sortBy, sortOrder]);
 
@@ -165,6 +165,7 @@ const AdminMetiers = () => {
 
   const handleBulkAction = async () => {
     if (!bulkAction || selectedMetiers.size === 0) return;
+
     if (bulkAction === "delete") {
       const hasDependencies = filteredMetiers.some(
         (metier) =>
@@ -178,6 +179,7 @@ const AdminMetiers = () => {
         );
         return;
       }
+
       if (
         window.confirm(
           `Êtes-vous sûr de vouloir supprimer ${selectedMetiers.size} métier(s) ?`
@@ -195,7 +197,7 @@ const AdminMetiers = () => {
           showMessage(
             `${selectedMetiers.size} métier(s) supprimé(s) avec succès !`
           );
-        } catch (err) {
+        } catch {
           showMessage("Erreur lors de la suppression en masse", "error");
         }
       }
@@ -236,15 +238,15 @@ const AdminMetiers = () => {
     withUsers: metiers.filter((m) => m.users.length > 0).length,
   };
 
-  // Composant Loading Spinner intégré
+  // Loading Spinner
   const LoadingSpinner = ({ message = "Chargement..." }) => (
-    <div className="flex flex-col items-center justify-center min-h-64 py-12">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-      <p className="text-gray-600 text-lg">{message}</p>
+    <div className="flex flex-col items-center justify-center min-h-64 py-12 bg-[#FFFFFF]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#556B2F] mb-4" />
+      <p className="text-[#8B4513] text-lg">{message}</p>
     </div>
   );
 
-  // Composant Modal de confirmation intégré
+  // Modal de confirmation
   const ConfirmModal = ({
     isOpen,
     onClose,
@@ -256,24 +258,24 @@ const AdminMetiers = () => {
   }) => {
     if (!isOpen) return null;
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+        <div className="bg-[#FFFFFF] rounded-xl shadow-2xl max-w-md w-full border border-[#D3D3D3]">
+          <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3] bg-[#556B2F]/5">
+            <h3 className="text-lg font-semibold text-[#556B2F]">{title}</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
+              className="text-[#8B4513] hover:text-[#556B2F] text-2xl"
             >
               ×
             </button>
           </div>
           <div className="p-6">
-            <p className="text-gray-700">{message}</p>
+            <p className="text-[#8B4513]">{message}</p>
           </div>
-          <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+          <div className="flex justify-end gap-3 p-6 border-t border-[#D3D3D3] bg-[#556B2F]/5">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-[#8B4513] border border-[#D3D3D3] rounded-lg hover:bg-[#FFFFFF] transition-colors"
             >
               {cancelText}
             </button>
@@ -289,7 +291,7 @@ const AdminMetiers = () => {
     );
   };
 
-  // Composant Card pour l'affichage mobile
+  // Card mobile
   const MetierCard = ({
     metier,
     isSelected,
@@ -297,11 +299,12 @@ const AdminMetiers = () => {
     onEdit,
     onDelete,
   }) => {
-    const canDelete = metier.services.length === 0 && metier.users.length === 0;
+    const canDelete =
+      metier.services.length === 0 && metier.users.length === 0;
     return (
       <div
-        className={`bg-white rounded-lg border border-gray-200 p-4 mb-3 transition-all duration-200 ${
-          isSelected ? "ring-2 ring-blue-500 bg-blue-50" : "hover:shadow-md"
+        className={`bg-[#FFFFFF] rounded-xl border border-[#D3D3D3] p-4 mb-3 transition-all duration-200 ${
+          isSelected ? "ring-2 ring-[#556B2F] bg-[#556B2F]/5" : "hover:shadow-md"
         }`}
       >
         <div className="flex items-start justify-between mb-3">
@@ -310,10 +313,10 @@ const AdminMetiers = () => {
               type="checkbox"
               checked={isSelected}
               onChange={() => onToggleSelect(metier.id)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
+              className="rounded border-[#D3D3D3] text-[#556B2F] focus:ring-[#556B2F]"
             />
-            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-blue-600 font-semibold text-sm">
+            <div className="flex-shrink-0 w-10 h-10 bg-[#556B2F]/10 rounded-lg flex items-center justify-center">
+              <span className="text-[#556B2F] font-semibold text-sm">
                 #{metier.id}
               </span>
             </div>
@@ -321,7 +324,7 @@ const AdminMetiers = () => {
           <div className="flex gap-1">
             <button
               onClick={() => onEdit(metier)}
-              className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-colors"
+              className="bg-[#556B2F]/10 hover:bg-[#556B2F]/20 text-[#556B2F] p-2 rounded-lg transition-colors"
               title="Modifier"
             >
               <svg
@@ -370,13 +373,13 @@ const AdminMetiers = () => {
         </div>
         <div className="space-y-3">
           <div>
-            <h3 className="font-semibold text-gray-900 text-base mb-1">
+            <h3 className="font-semibold text-[#556B2F] text-base mb-1">
               {metier.libelle}
             </h3>
           </div>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-gray-500">Services:</span>
+              <span className="text-[#8B4513]">Services:</span>
               <span
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                   metier.services.length > 0
@@ -388,7 +391,7 @@ const AdminMetiers = () => {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500">Utilisateurs:</span>
+              <span className="text-[#8B4513]">Utilisateurs:</span>
               <span
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                   metier.users.length > 0
@@ -400,9 +403,8 @@ const AdminMetiers = () => {
               </span>
             </div>
           </div>
-          {/* Indicateur de dépendances */}
           {(metier.services.length > 0 || metier.users.length > 0) && (
-            <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+            <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 px-3 py-2 rounded-lg">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -435,22 +437,22 @@ const AdminMetiers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#FFFFFF] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* En-tête avec statistiques */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-[#FFFFFF] rounded-xl shadow-sm border border-[#D3D3D3] p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-[#556B2F] mb-2">
                 Administration des Métiers
               </h1>
-              <p className="text-gray-600">
+              <p className="text-[#8B4513]">
                 Gérez la liste des métiers disponibles dans l'application
               </p>
             </div>
             <button
               onClick={handleAddNewClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#556B2F] hover:bg-[#6B8E23] text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={showFormModal}
             >
               <svg
@@ -471,11 +473,11 @@ const AdminMetiers = () => {
           </div>
           {/* Cartes de statistiques */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-[#556B2F]/5 border border-[#556B2F]/30 rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
+                <div className="bg-[#556B2F]/15 p-2 rounded-lg">
                   <svg
-                    className="w-6 h-6 text-blue-600"
+                    className="w-6 h-6 text-[#556B2F]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -489,10 +491,10 @@ const AdminMetiers = () => {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-blue-900">
+                  <p className="text-sm font-medium text-[#556B2F]">
                     Total des métiers
                   </p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-[#556B2F]">
                     {stats.total}
                   </p>
                 </div>
@@ -502,7 +504,7 @@ const AdminMetiers = () => {
               <div className="flex items-center gap-3">
                 <div className="bg-green-100 p-2 rounded-lg">
                   <svg
-                    className="w-6 h-6 text-green-600"
+                    className="w-6 h-6 text-green-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -519,7 +521,7 @@ const AdminMetiers = () => {
                   <p className="text-sm font-medium text-green-900">
                     Avec services
                   </p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-green-700">
                     {stats.withServices}
                   </p>
                 </div>
@@ -529,7 +531,7 @@ const AdminMetiers = () => {
               <div className="flex items-center gap-3">
                 <div className="bg-purple-100 p-2 rounded-lg">
                   <svg
-                    className="w-6 h-6 text-purple-600"
+                    className="w-6 h-6 text-purple-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -546,7 +548,7 @@ const AdminMetiers = () => {
                   <p className="text-sm font-medium text-purple-900">
                     Avec utilisateurs
                   </p>
-                  <p className="text-2xl font-bold text-purple-600">
+                  <p className="text-2xl font-bold text-purple-700">
                     {stats.withUsers}
                   </p>
                 </div>
@@ -554,6 +556,7 @@ const AdminMetiers = () => {
             </div>
           </div>
         </div>
+
         {/* Messages d'alerte */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex justify-between items-center">
@@ -581,6 +584,7 @@ const AdminMetiers = () => {
             </button>
           </div>
         )}
+
         {success && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex justify-between items-center">
             <div className="flex items-center gap-2">
@@ -607,15 +611,16 @@ const AdminMetiers = () => {
             </button>
           </div>
         )}
+
         {/* Barre de recherche et filtres */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+        <div className="bg-[#FFFFFF] rounded-xl shadow-sm border border-[#D3D3D3] p-4 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
               {/* Barre de recherche */}
               <div className="relative flex-1 max-w-md">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5 text-[#8B4513]/60"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -633,7 +638,7 @@ const AdminMetiers = () => {
                   placeholder="Rechercher un métier..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-[#556B2F] focus:border-[#556B2F] text-[#8B4513]"
                 />
               </div>
 
@@ -642,7 +647,7 @@ const AdminMetiers = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="border border-[#D3D3D3] rounded-lg px-3 py-2 focus:ring-[#556B2F] focus:border-[#556B2F] text-[#8B4513] bg-[#FFFFFF]"
                 >
                   <option value="libelle">Trier par nom</option>
                   <option value="id">Trier par ID</option>
@@ -654,7 +659,7 @@ const AdminMetiers = () => {
                   onClick={() =>
                     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                   }
-                  className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-3 py-2 border border-[#D3D3D3] rounded-lg hover:bg-[#556B2F]/5 transition-colors text-[#8B4513]"
                   title={
                     sortOrder === "asc" ? "Tri décroissant" : "Tri croissant"
                   }
@@ -677,16 +682,17 @@ const AdminMetiers = () => {
                 </button>
               </div>
             </div>
+
             {/* Actions groupées */}
             {selectedMetiers.size > 0 && (
-              <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-                <span className="text-sm text-blue-800 font-medium">
+              <div className="flex items-center gap-3 bg-[#556B2F]/5 px-4 py-2 rounded-lg border border-[#556B2F]/40">
+                <span className="text-sm text-[#556B2F] font-medium">
                   {selectedMetiers.size} sélectionné(s)
                 </span>
                 <select
                   value={bulkAction}
                   onChange={(e) => setBulkAction(e.target.value)}
-                  className="border border-blue-300 rounded px-2 py-1 text-sm bg-white"
+                  className="border border-[#D3D3D3] rounded px-2 py-1 text-sm bg-[#FFFFFF] text-[#8B4513]"
                 >
                   <option value="">Actions groupées</option>
                   <option value="delete">Supprimer</option>
@@ -701,21 +707,22 @@ const AdminMetiers = () => {
             )}
           </div>
         </div>
+
         {/* Liste des métiers */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-[#FFFFFF] rounded-xl shadow-sm border border-[#D3D3D3] overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#D3D3D3] bg-[#556B2F]/5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-[#556B2F]">
                 Liste des métiers
               </h2>
               <div className="flex items-center gap-4">
-                <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-[#556B2F]/10 text-[#556B2F] px-3 py-1 rounded-full text-sm font-medium">
                   {filteredMetiers.length} métier(s)
                 </span>
                 {metiers.length > 0 && (
                   <button
                     onClick={loadMetiers}
-                    className="p-2 rounded-lg hover:bg-gray-50 transition-colors border border-gray-300"
+                    className="p-2 rounded-lg hover:bg-[#556B2F]/10 transition-colors border border-[#D3D3D3] text-[#556B2F]"
                     title="Actualiser"
                   >
                     <svg
@@ -736,13 +743,14 @@ const AdminMetiers = () => {
               </div>
             </div>
           </div>
+
           {filteredMetiers.length === 0 ? (
-            <div className="text-center py-12 px-6">
+            <div className="text-center py-12 px-6 bg-[#FFFFFF]">
               <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-[#556B2F] mb-2">
                 {searchTerm ? "Aucun résultat trouvé" : "Aucun métier trouvé"}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-[#8B4513] mb-6">
                 {searchTerm
                   ? "Aucun métier ne correspond à votre recherche"
                   : "Commencez par ajouter votre premier métier"}
@@ -750,7 +758,7 @@ const AdminMetiers = () => {
               {!searchTerm && (
                 <button
                   onClick={handleAddNewClick}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
                   Ajouter un métier
                 </button>
@@ -758,10 +766,10 @@ const AdminMetiers = () => {
             </div>
           ) : (
             <>
-              {/* Version Desktop - Tableau */}
+              {/* Desktop - Tableau */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-[#556B2F]/10">
                     <tr>
                       <th className="w-12 px-6 py-4">
                         <input
@@ -771,29 +779,31 @@ const AdminMetiers = () => {
                             filteredMetiers.length > 0
                           }
                           onChange={toggleSelectAll}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-[#D3D3D3] text-[#556B2F] focus:ring-[#556B2F]"
                         />
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-medium text-[#8B4513] uppercase tracking-wider">
                         Métier
                       </th>
-                      <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-center text-xs font-medium text-[#8B4513] uppercase tracking-wider">
                         Services
                       </th>
-                      <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-center text-xs font-medium text-[#8B4513] uppercase tracking-wider">
                         Utilisateurs
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-medium text-[#8B4513] uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-[#D3D3D3]">
                     {filteredMetiers.map((metier) => (
                       <tr
                         key={metier.id}
-                        className={`hover:bg-gray-50 transition-colors ${
-                          selectedMetiers.has(metier.id) ? "bg-blue-50" : ""
+                        className={`hover:bg-[#556B2F]/5 transition-colors ${
+                          selectedMetiers.has(metier.id)
+                            ? "bg-[#556B2F]/10"
+                            : ""
                         }`}
                       >
                         <td className="px-6 py-4">
@@ -801,18 +811,18 @@ const AdminMetiers = () => {
                             type="checkbox"
                             checked={selectedMetiers.has(metier.id)}
                             onChange={() => toggleSelectMetier(metier.id)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-[#D3D3D3] text-[#556B2F] focus:ring-[#556B2F]"
                           />
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <span className="text-blue-600 font-semibold text-sm">
+                            <div className="flex-shrink-0 w-10 h-10 bg-[#556B2F]/10 rounded-lg flex items-center justify-center">
+                              <span className="text-[#556B2F] font-semibold text-sm">
                                 #{metier.id}
                               </span>
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-[#556B2F]">
                                 {metier.libelle}
                               </div>
                             </div>
@@ -844,7 +854,7 @@ const AdminMetiers = () => {
                           <div className="flex justify-end items-center gap-2">
                             <button
                               onClick={() => handleEditClick(metier)}
-                              className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-colors"
+                              className="bg-[#556B2F]/10 hover:bg-[#556B2F]/20 text-[#556B2F] p-2 rounded-lg transition-colors"
                               title="Modifier"
                             >
                               <svg
@@ -901,7 +911,8 @@ const AdminMetiers = () => {
                   </tbody>
                 </table>
               </div>
-              {/* Version Mobile - Cartes */}
+
+              {/* Mobile - Cartes */}
               <div className="lg:hidden p-4 space-y-3">
                 {filteredMetiers.map((metier) => (
                   <MetierCard
@@ -917,6 +928,7 @@ const AdminMetiers = () => {
             </>
           )}
         </div>
+
         {/* Modal de formulaire */}
         <MetierForm
           metier={editingMetier}
@@ -925,6 +937,7 @@ const AdminMetiers = () => {
           loading={formLoading}
           isOpen={showFormModal}
         />
+
         {/* Modal de confirmation de suppression */}
         <ConfirmModal
           isOpen={deleteModal.isOpen}

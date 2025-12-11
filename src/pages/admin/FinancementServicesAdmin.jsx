@@ -144,23 +144,35 @@ const FinancementServicesAdmin = () => {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Financement - Administration</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#556B2F] to-[#6B8E23] bg-clip-text text-transparent">
+          Financement - Administration
+        </h1>
+        <p className="">
           Gestion complète des services financiers et partenaires
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="services">Services Financiers</TabsTrigger>
-          <TabsTrigger value="partenaires">Partenaires</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 border-[#D3D3D3]">
+          <TabsTrigger 
+            value="services" 
+            className="data-[state=active]:bg-[#556B2F]  text-[#8B4513]"
+          >
+            Services Financiers
+          </TabsTrigger>
+          <TabsTrigger 
+            value="partenaires" 
+            className="data-[state=active]:bg-[#556B2F]  text-[#8B4513]"
+          >
+            Partenaires
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="services" className="space-y-6">
           {/* Filtres pour les services */}
-          <Card>
+          <Card className="border-[#D3D3D3]">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-[#8B4513]">
                 <Filter className="w-5 h-5" />
                 Filtres
               </CardTitle>
@@ -168,9 +180,9 @@ const FinancementServicesAdmin = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="search">Recherche</Label>
+                  <Label htmlFor="search" className="text-[#8B4513]">Recherche</Label>
                   <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#8B4513]" />
                     <Input
                       id="search"
                       placeholder="Nom du service..."
@@ -178,35 +190,36 @@ const FinancementServicesAdmin = () => {
                       onChange={(e) =>
                         handleFilterChange("search", e.target.value)
                       }
-                      className="pl-8"
+                      className="pl-8 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513] placeholder:text-[#8B4513]/60"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="partenaire">Partenaire</Label>
+                  <Label htmlFor="partenaire" className="text-[#8B4513]">Partenaire</Label>
                   <Select
                     value={filters.partenaireId}
                     onValueChange={(value) =>
                       handleFilterChange("partenaireId", value)
                     }
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tous les partenaires" />
+                    <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+                      <SelectValue placeholder="Tous les partenaires" className="text-[#8B4513]" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les partenaires</SelectItem>
+                    <SelectContent className="border-[#D3D3D3]">
+                      <SelectItem value="all" className="text-[#8B4513]">Tous les partenaires</SelectItem>
                       {partenaires && partenaires.length > 0 ? (
                         partenaires.map((partenaire) => (
                           <SelectItem
                             key={partenaire.id}
                             value={partenaire.id.toString()}
+                            className="text-[#8B4513]"
                           >
                             {partenaire.nom}
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="no-data" disabled>
+                        <SelectItem value="no-data" disabled className="text-[#8B4513]">
                           Aucun partenaire
                         </SelectItem>
                       )}
@@ -215,18 +228,18 @@ const FinancementServicesAdmin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="type">Type de service</Label>
+                  <Label htmlFor="type" className="text-[#8B4513]">Type de service</Label>
                   <Select
                     value={filters.type}
                     onValueChange={(value) => handleFilterChange("type", value)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tous les types" />
+                    <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+                      <SelectValue placeholder="Tous les types" className="text-[#8B4513]" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les types</SelectItem>
+                    <SelectContent className="border-[#D3D3D3]">
+                      <SelectItem value="all" className="text-[#8B4513]">Tous les types</SelectItem>
                       {serviceTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
+                        <SelectItem key={type} value={type} className="text-[#8B4513]">
                           {getTypeLabel(type)}
                         </SelectItem>
                       ))}
@@ -235,20 +248,20 @@ const FinancementServicesAdmin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Statut</Label>
+                  <Label htmlFor="status" className="text-[#8B4513]">Statut</Label>
                   <Select
                     value={filters.isActive}
                     onValueChange={(value) =>
                       handleFilterChange("isActive", value)
                     }
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tous les statuts" />
+                    <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+                      <SelectValue placeholder="Tous les statuts" className="text-[#8B4513]" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les statuts</SelectItem>
-                      <SelectItem value="true">Actif</SelectItem>
-                      <SelectItem value="false">Inactif</SelectItem>
+                    <SelectContent className="border-[#D3D3D3]">
+                      <SelectItem value="all" className="text-[#8B4513]">Tous les statuts</SelectItem>
+                      <SelectItem value="true" className="text-[#8B4513]">Actif</SelectItem>
+                      <SelectItem value="false" className="text-[#8B4513]">Inactif</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -258,16 +271,16 @@ const FinancementServicesAdmin = () => {
 
           {/* Grille des services en cartes */}
           <div className="space-y-4">
-            <Card>
+            <Card className="border-[#D3D3D3]">
               <CardHeader>
-                <CardTitle>Services Financiers</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-[#8B4513]">Services Financiers</CardTitle>
+                <CardDescription className="">
                   {paginationInfo?.totalItems || 0} service(s) au total
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {services.length === 0 && !isLoadingServices ? (
-                  <div className="text-center py-12 text-muted-foreground">
+                  <div className="text-center py-12 text-[#8B4513]">
                     Aucun service financier trouvé
                   </div>
                 ) : (
@@ -287,7 +300,7 @@ const FinancementServicesAdmin = () => {
                     {/* Pagination */}
                     {paginationInfo && paginationInfo.totalPages > 1 && (
                       <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm ">
                           Page {paginationInfo.currentPage} sur{" "}
                           {paginationInfo.totalPages}
                         </div>
@@ -302,6 +315,7 @@ const FinancementServicesAdmin = () => {
                                 page: prev.page - 1,
                               }))
                             }
+                            className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
                           >
                             Précédent
                           </Button>
@@ -317,6 +331,7 @@ const FinancementServicesAdmin = () => {
                                 page: prev.page + 1,
                               }))
                             }
+                            className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
                           >
                             Suivant
                           </Button>
@@ -344,18 +359,21 @@ const FinancementServicesAdmin = () => {
 // Composant carte pour un service
 const ServiceCard = ({ service, onToggleStatus, isLoading, getTypeLabel }) => {
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow border-[#D3D3D3]">
       <CardHeader>
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1">
-            <CardTitle className="text-lg line-clamp-2">
+            <CardTitle className="text-lg line-clamp-2 ">
               {service.nom}
             </CardTitle>
-            <CardDescription className="mt-1">
+            <CardDescription className="mt-1 text-[#8B4513]/80">
               {service.partenaire.nom}
             </CardDescription>
           </div>
-          <Badge variant={service.isActive ? "default" : "secondary"}>
+          <Badge 
+            variant={service.isActive ? "default" : "secondary"} 
+            className={service.isActive ? "bg-[#556B2F] hover:bg-[#6B8E23]" : ""}
+          >
             {service.isActive ? "Actif" : "Inactif"}
           </Badge>
         </div>
@@ -363,20 +381,22 @@ const ServiceCard = ({ service, onToggleStatus, isLoading, getTypeLabel }) => {
       <CardContent className="flex-1 space-y-4">
         <div className="space-y-3">
           <div>
-            <p className="text-xs text-muted-foreground mb-1">Type</p>
-            <Badge variant="outline">{getTypeLabel(service.type)}</Badge>
+            <p className="text-xs text-[#8B4513] mb-1">Type</p>
+            <Badge variant="outline" className="border-[#D3D3D3] text-[#8B4513]">
+              {getTypeLabel(service.type)}
+            </Badge>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Catégorie</p>
-              <Badge variant="secondary" className="text-xs">
+              <p className="text-xs text-[#8B4513] mb-1">Catégorie</p>
+              <Badge variant="secondary" className="text-xs bg-[#6B8E23]/10 text-[#8B4513]">
                 {service.categorie}
               </Badge>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Taux</p>
-              <p className="font-semibold">
+              <p className="text-xs text-[#8B4513] mb-1">Taux</p>
+              <p className="font-semibold text-[#8B4513]">
                 {service.taux ? `${service.taux}%` : "-"}
               </p>
             </div>
@@ -384,10 +404,10 @@ const ServiceCard = ({ service, onToggleStatus, isLoading, getTypeLabel }) => {
 
           {service.partenaire.user && (
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Propriétaire</p>
+              <p className="text-xs text-[#8B4513] mb-1">Propriétaire</p>
               <div className="text-sm">
-                <p className="font-medium">{service.partenaire.user.companyName}</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="font-medium text-[#8B4513]">{service.partenaire.user.companyName}</p>
+                <p className="text-[#8B4513]/80 text-xs">
                   {service.partenaire.user.firstName}{" "}
                   {service.partenaire.user.lastName}
                 </p>
@@ -395,33 +415,34 @@ const ServiceCard = ({ service, onToggleStatus, isLoading, getTypeLabel }) => {
             </div>
           )}
 
-          <div className="pt-2 border-t">
+          <div className="pt-2 border-t border-[#D3D3D3]">
             <Badge
               variant={
                 service.FinancementDemande?.length > 0
                   ? "default"
                   : "outline"
               }
-              className="text-xs"
+              className={`text-xs ${service.FinancementDemande?.length > 0 ? 'bg-[#556B2F] hover:bg-[#6B8E23]' : 'border-[#D3D3D3] '}`}
             >
               {service.FinancementDemande?.length || 0} demande(s)
             </Badge>
           </div>
         </div>
       </CardContent>
-      <div className="border-t p-4">
+      <div className="border-t border-[#D3D3D3] p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Switch
               checked={service.isActive}
               onCheckedChange={() => onToggleStatus(service)}
               disabled={isLoading}
+              className="data-[state=checked]:bg-[#556B2F]"
             />
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-[#8B4513]">
               {service.isActive ? "Actif" : "Inactif"}
             </span>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]">
             <Eye className="w-4 h-4" />
           </Button>
         </div>
@@ -476,12 +497,12 @@ const GestionPartenaires = ({ partenaires, professionals }) => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-[#D3D3D3]">
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle>Gestion des Partenaires</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[#8B4513]">Gestion des Partenaires</CardTitle>
+              <CardDescription className="">
                 Créez et gérez les partenaires de financement
               </CardDescription>
             </div>
@@ -490,15 +511,15 @@ const GestionPartenaires = ({ partenaires, professionals }) => {
               onOpenChange={setIsCreateDialogOpen}
             >
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-[#556B2F] hover:bg-[#6B8E23] text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau Partenaire
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-[#D3D3D3]">
                 <DialogHeader>
-                  <DialogTitle>Créer un partenaire</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-[#8B4513]">Créer un partenaire</DialogTitle>
+                  <DialogDescription className="text-[#8B4513]/80">
                     Ajoutez un nouveau partenaire de financement
                   </DialogDescription>
                 </DialogHeader>
@@ -525,7 +546,7 @@ const GestionPartenaires = ({ partenaires, professionals }) => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-[#8B4513]">
               Aucun partenaire trouvé
             </div>
           )}
@@ -538,25 +559,25 @@ const GestionPartenaires = ({ partenaires, professionals }) => {
 // Composant carte pour un partenaire
 const PartenaireCard = ({ partenaire, onDelete, isLoading }) => {
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow border-[#D3D3D3]">
       <CardHeader>
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1">
-            <CardTitle className="text-lg line-clamp-2">
+            <CardTitle className="text-lg line-clamp-2 text-[#8B4513]">
               {partenaire.nom}
             </CardTitle>
           </div>
-          <Badge variant="outline">{partenaire.type}</Badge>
+          <Badge variant="outline" className="border-[#D3D3D3] text-[#8B4513]">{partenaire.type}</Badge>
         </div>
       </CardHeader>
       <CardContent className="flex-1 space-y-4">
         <div className="space-y-3">
           {partenaire.user && (
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Propriétaire</p>
+              <p className="text-xs text-[#8B4513] mb-1">Propriétaire</p>
               <div className="text-sm">
-                <p className="font-medium">{partenaire.user.companyName}</p>
-                <p className="text-muted-foreground text-xs">
+                <p className="font-medium text-[#8B4513]">{partenaire.user.companyName}</p>
+                <p className="text-[#8B4513]/80 text-xs">
                   {partenaire.user.firstName} {partenaire.user.lastName}
                 </p>
               </div>
@@ -565,8 +586,8 @@ const PartenaireCard = ({ partenaire, onDelete, isLoading }) => {
 
           {!partenaire.user && (
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Propriétaire</p>
-              <Badge variant="outline" className="text-xs">
+              <p className="text-xs text-[#8B4513] mb-1">Propriétaire</p>
+              <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#8B4513]">
                 Non assigné
               </Badge>
             </div>
@@ -574,29 +595,29 @@ const PartenaireCard = ({ partenaire, onDelete, isLoading }) => {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Services</p>
-              <Badge variant="secondary" className="text-xs">
+              <p className="text-xs text-[#8B4513] mb-1">Services</p>
+              <Badge variant="secondary" className="text-xs bg-[#6B8E23]/10 text-[#8B4513]">
                 {partenaire.ServiceFinancier?.length || 0}
               </Badge>
             </div>
           </div>
 
-          <div className="pt-2 border-t space-y-2">
-            <p className="text-xs text-muted-foreground mb-1">Contact</p>
+          <div className="pt-2 border-t border-[#D3D3D3] space-y-2">
+            <p className="text-xs text-[#8B4513] mb-1">Contact</p>
             <div className="text-sm space-y-1">
               {partenaire.email && (
-                <p className="break-all text-xs">{partenaire.email}</p>
+                <p className="break-all text-xs text-[#8B4513]">{partenaire.email}</p>
               )}
               {partenaire.phone && (
-                <p className="text-xs">{partenaire.phone}</p>
+                <p className="text-xs text-[#8B4513]">{partenaire.phone}</p>
               )}
             </div>
           </div>
         </div>
       </CardContent>
-      <div className="border-t p-4">
+      <div className="border-t border-[#D3D3D3] p-4">
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button variant="outline" size="sm" className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]">
             <Edit className="w-4 h-4 mr-1" />
             <span className="hidden sm:inline">Modifier</span>
           </Button>
@@ -605,7 +626,7 @@ const PartenaireCard = ({ partenaire, onDelete, isLoading }) => {
             size="sm"
             onClick={() => onDelete(partenaire)}
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 border-[#D3D3D3] text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
           >
             <Trash2 className="w-4 h-4 mr-1" />
             <span className="hidden sm:inline">Supprimer</span>
@@ -676,7 +697,7 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="nom">Nom du partenaire *</Label>
+          <Label htmlFor="nom" className="text-[#8B4513]">Nom du partenaire *</Label>
           <Input
             id="nom"
             value={formData.nom}
@@ -684,11 +705,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
               setFormData((prev) => ({ ...prev, nom: e.target.value }))
             }
             required
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="type">Type *</Label>
+          <Label htmlFor="type" className="text-[#8B4513]">Type *</Label>
           <Select
             value={formData.type}
             onValueChange={(value) =>
@@ -696,12 +718,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             }
             required
           >
-            <SelectTrigger>
-              <SelectValue />
+            <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+              <SelectValue className="text-[#8B4513]" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="border-[#D3D3D3]">
               {typesPartenaire.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
+                <SelectItem key={type.value} value={type.value} className="text-[#8B4513]">
                   {type.label}
                 </SelectItem>
               ))}
@@ -710,26 +732,26 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="userId">Assigner à un professionnel</Label>
+          <Label htmlFor="userId" className="text-[#8B4513]">Assigner à un professionnel</Label>
           <Select
             value={formData.userId}
             onValueChange={(value) =>
               setFormData((prev) => ({ ...prev, userId: value }))
             }
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un professionnel" />
+            <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+              <SelectValue placeholder="Sélectionner un professionnel" className="text-[#8B4513]" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Non assigné</SelectItem>
+            <SelectContent className="border-[#D3D3D3]">
+              <SelectItem value="" className="text-[#8B4513]">Non assigné</SelectItem>
               {professionals && professionals.length > 0 ? (
                 professionals.map((pro) => (
-                  <SelectItem key={pro.id} value={pro.id}>
+                  <SelectItem key={pro.id} value={pro.id} className="text-[#8B4513]">
                     {pro.companyName} - {pro.firstName} {pro.lastName}
                   </SelectItem>
                 ))
               ) : (
-                <SelectItem value="no-pro" disabled>
+                <SelectItem value="no-pro" disabled className="text-[#8B4513]">
                   Aucun professionnel disponible
                 </SelectItem>
               )}
@@ -738,7 +760,7 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="icon">Icône</Label>
+          <Label htmlFor="icon" className="text-[#8B4513]">Icône</Label>
           <Input
             id="icon"
             value={formData.icon}
@@ -746,12 +768,13 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
               setFormData((prev) => ({ ...prev, icon: e.target.value }))
             }
             placeholder="URL de l'icône"
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-[#8B4513]">Description</Label>
         <Textarea
           id="description"
           value={formData.description}
@@ -759,11 +782,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
           rows={3}
+          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Avantages</Label>
+        <Label className="text-[#8B4513]">Avantages</Label>
         <div className="flex gap-2">
           <Input
             value={newAvantage}
@@ -772,8 +796,9 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onKeyPress={(e) =>
               e.key === "Enter" && (e.preventDefault(), handleAddAvantage())
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
-          <Button type="button" onClick={handleAddAvantage}>
+          <Button type="button" onClick={handleAddAvantage} className="bg-[#556B2F] hover:bg-[#6B8E23] text-white">
             Ajouter
           </Button>
         </div>
@@ -782,13 +807,13 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             <Badge
               key={index}
               variant="secondary"
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-[#6B8E23]/10 text-[#8B4513]"
             >
               {avantage}
               <button
                 type="button"
                 onClick={() => handleRemoveAvantage(index)}
-                className="text-xs text-muted-foreground hover:text-foreground"
+                className="text-xs text-[#8B4513]/80 hover:text-[#8B4513]"
               >
                 ×
               </button>
@@ -799,7 +824,7 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="website">Site web</Label>
+          <Label htmlFor="website" className="text-[#8B4513]">Site web</Label>
           <Input
             id="website"
             type="url"
@@ -807,11 +832,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, website: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-[#8B4513]">Email</Label>
           <Input
             id="email"
             type="email"
@@ -819,35 +845,38 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, email: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Téléphone</Label>
+          <Label htmlFor="phone" className="text-[#8B4513]">Téléphone</Label>
           <Input
             id="phone"
             value={formData.phone}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, phone: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address">Adresse</Label>
+          <Label htmlFor="address" className="text-[#8B4513]">Adresse</Label>
           <Input
             id="address"
             value={formData.address}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, address: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="tauxMin">Taux minimum (%)</Label>
+          <Label htmlFor="tauxMin" className="text-[#8B4513]">Taux minimum (%)</Label>
           <Input
             id="tauxMin"
             type="number"
@@ -857,11 +886,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, tauxMin: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="tauxMax">Taux maximum (%)</Label>
+          <Label htmlFor="tauxMax" className="text-[#8B4513]">Taux maximum (%)</Label>
           <Input
             id="tauxMax"
             type="number"
@@ -871,11 +901,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, tauxMax: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dureeMin">Durée min (mois)</Label>
+          <Label htmlFor="dureeMin" className="text-[#8B4513]">Durée min (mois)</Label>
           <Input
             id="dureeMin"
             type="number"
@@ -884,11 +915,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, dureeMin: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dureeMax">Durée max (mois)</Label>
+          <Label htmlFor="dureeMax" className="text-[#8B4513]">Durée max (mois)</Label>
           <Input
             id="dureeMax"
             type="number"
@@ -897,11 +929,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, dureeMax: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="montantMin">Montant min (€)</Label>
+          <Label htmlFor="montantMin" className="text-[#8B4513]">Montant min (€)</Label>
           <Input
             id="montantMin"
             type="number"
@@ -911,11 +944,12 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, montantMin: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="montantMax">Montant max (€)</Label>
+          <Label htmlFor="montantMax" className="text-[#8B4513]">Montant max (€)</Label>
           <Input
             id="montantMax"
             type="number"
@@ -925,12 +959,13 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, montantMax: e.target.value }))
             }
+            className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="conditions">Conditions particulières</Label>
+        <Label htmlFor="conditions" className="text-[#8B4513]">Conditions particulières</Label>
         <Textarea
           id="conditions"
           value={formData.conditions}
@@ -938,14 +973,24 @@ const PartenaireForm = ({ professionals, onSubmit, isLoading, onCancel }) => {
             setFormData((prev) => ({ ...prev, conditions: e.target.value }))
           }
           rows={2}
+          className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513]"
         />
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
+        >
           Annuler
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
+        >
           {isLoading ? "Création..." : "Créer le partenaire"}
         </Button>
       </div>

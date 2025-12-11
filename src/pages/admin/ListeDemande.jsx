@@ -11,7 +11,6 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  MoreVertical,
   ArrowUpDown,
   Users,
   FileText,
@@ -21,188 +20,213 @@ import {
   User,
   Bell,
   Star,
-  Loader,
+  Filter,
+  Download,
+  MoreHorizontal,
+  ChevronRight,
+  BarChart3,
+  Target,
+  Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { adminDemandesService } from "@/services/adminDemandesService";
+
+// Variables CSS pour les couleurs
+const colorTheme = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFFF",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+};
 
 // Composant de carte de demande pour l'admin
 const DemandeCardAdmin = ({ demande, onViewDetails, onValidate, onAssign }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case "En attente":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return {
+          bg: "bg-yellow-50",
+          text: "text-yellow-800",
+          border: "border-yellow-200",
+          icon: "bg-yellow-100 text-yellow-700",
+        };
       case "En cours":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return {
+          bg: "bg-blue-50",
+          text: "text-blue-800",
+          border: "border-blue-200",
+          icon: "bg-blue-100 text-blue-700",
+        };
       case "Validée":
-        return "bg-green-100 text-green-800 border-green-200";
+        return {
+          bg: "bg-emerald-50",
+          text: "text-emerald-800",
+          border: "border-emerald-200",
+          icon: "bg-emerald-100 text-emerald-700",
+        };
       case "Terminée":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return {
+          bg: "bg-gray-50",
+          text: "text-gray-800",
+          border: "border-gray-200",
+          icon: "bg-gray-100 text-gray-700",
+        };
       case "Refusée":
-        return "bg-red-100 text-red-800 border-red-200";
+        return {
+          bg: "bg-red-50",
+          text: "text-red-800",
+          border: "border-red-200",
+          icon: "bg-red-100 text-red-700",
+        };
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return {
+          bg: "bg-gray-50",
+          text: "text-gray-800",
+          border: "border-gray-200",
+          icon: "bg-gray-100 text-gray-700",
+        };
     }
   };
 
   const getUrgencyColor = (urgency) => {
     switch (urgency) {
       case "Urgent":
-        return "text-red-500";
+        return "text-red-600 bg-red-50 border-red-200";
       case "Moyen":
-        return "text-orange-500";
+        return "text-orange-600 bg-orange-50 border-orange-200";
       case "Faible":
-        return "text-green-500";
+        return "text-emerald-600 bg-emerald-50 border-emerald-200";
       default:
-        return "text-gray-500";
-    }
-  };
-
-  const getUrgencyIcon = (urgency) => {
-    switch (urgency) {
-      case "Urgent":
-        return <AlertCircle className="w-4 h-4" />;
-      case "Moyen":
-        return <Clock className="w-4 h-4" />;
-      case "Faible":
-        return <CheckCircle className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
+        return "text-gray-600 bg-gray-50 border-gray-200";
     }
   };
 
   const getMetierIcon = (metier) => {
+    const iconProps = "w-5 h-5";
     switch (metier) {
       case "Plombier":
-        return <Wrench className="w-5 h-5" />;
+        return <Wrench className={iconProps} />;
       case "Électricien":
-        return <Zap className="w-5 h-5" />;
+        return <Zap className={iconProps} />;
       case "Menuisier":
-        return <Home className="w-5 h-5" />;
+        return <Home className={iconProps} />;
       case "Peintre":
-        return <Palette className="w-5 h-5" />;
+        return <Palette className={iconProps} />;
       default:
-        return <Wrench className="w-5 h-5" />;
+        return <Wrench className={iconProps} />;
     }
   };
 
+  const statusColors = getStatusColor(demande.statut);
+  const urgencyColors = getUrgencyColor(demande.urgence);
+
   return (
-    <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group relative">
-  {/* Badge Nouveau */}
-  {demande.nouvelle && (
-    <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2">
-      <div className="bg-green-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-md sm:shadow-lg">
-        <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
-        <span className="hidden xs:inline">NOUVEAU</span>
-        <span className="xs:hidden">NEW</span>
-      </div>
-    </div>
-  )}
+    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+      {/* Effet de bordure élégant */}
+      <div 
+        className="absolute left-0 top-0 bottom-0 w-1"
+        style={{ backgroundColor: colorTheme.primaryDark }}
+      ></div>
 
-  {/* Badge Urgent */}
-  {demande.urgent && (
-    <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2">
-      <div className="bg-red-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-0.5 sm:gap-1 shadow-md sm:shadow-lg animate-pulse">
-        <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-        <span className="hidden xs:inline">URGENT</span>
-        <span className="xs:hidden">URG</span>
-      </div>
-    </div>
-  )}
-
-  {/* Header compact pour mobile */}
-  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3 sm:mb-4">
-    <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-      {/* Icône réduite */}
-      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white relative flex-shrink-0">
-        {getMetierIcon(demande.metierLabel)}
-        {demande.nouvelle && (
-          <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full border border-white"></div>
-        )}
-      </div>
-      
-      {/* Contenu texte compact */}
-      <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-gray-900 text-xs lg:text-lg group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
-          {demande.titre}
-        </h3>
-        <div className="flex flex-col xs:flex-row xs:items-center gap-1 sm:gap-2 mt-1">
-          <span className="bg-gray-100 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs border border-gray-200 w-fit truncate">
-            {demande.metierLabel}
+      {/* Header de la carte */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start gap-3 flex-1">
+          <div className={`p-2.5 rounded-lg ${statusColors.icon} transition-transform group-hover:scale-110`}>
+            {getMetierIcon(demande.metierLabel)}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-gray-900 group-hover:text-[#6B8E23] transition-colors duration-200 truncate">
+                {demande.titre}
+              </h3>
+              {demande.nouvelle && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-medium">
+                  <Sparkles className="w-3 h-3" />
+                  Nouveau
+                </span>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${urgencyColors}`}>
+                {demande.urgence === "Urgent" && <AlertCircle className="w-3 h-3" />}
+                {demande.urgence}
+              </span>
+              
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                <MapPin className="w-3 h-3" />
+                {demande.lieu}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-end gap-2">
+          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${statusColors.bg} ${statusColors.text} ${statusColors.border} border`}>
+            {demande.statut}
           </span>
-          <span className="flex items-center gap-1 text-gray-500 text-xs sm:text-sm">
-            <MapPin className="w-3 h-3 flex-shrink-0" />
-            <span className="truncate">{demande.lieu}</span>
+          <span className="text-xs text-gray-500">
+            {new Date(demande.date).toLocaleDateString('fr-FR', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            })}
           </span>
         </div>
       </div>
-    </div>
-    
-    {/* Status et urgence empilés sur mobile */}
-    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-1 sm:gap-2 self-stretch">
-      <span
-        className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-medium border ${getStatusColor(
-          demande.statut
-        )}`}
-      >
-        {demande.statut}
-      </span>
-      <span
-        className={`text-xs sm:text-sm font-medium flex items-center gap-1 ${getUrgencyColor(
-          demande.urgence
-        )}`}
-      >
-        {getUrgencyIcon(demande.urgence)}
-        {demande.urgence}
-      </span>
-    </div>
-  </div>
 
-  {/* Description réduite */}
-  <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
-    {demande.description}
-  </p>
+      {/* Description */}
+      <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+        {demande.description}
+      </p>
 
-  {/* Footer compact */}
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-100">
-    {/* Métadonnées empilées sur mobile */}
-    <div className="flex flex-wrap items-center gap-3 text-gray-500 text-xs sm:text-sm w-full sm:w-auto justify-between sm:justify-start">
-      <span className="flex items-center gap-1">
-        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-        <span className="hidden xs:inline">{demande.date}</span>
-        <span className="xs:hidden text-[10px]">
-          {new Date(demande.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-        </span>
-      </span>
-      <span className="flex items-center gap-1">
-        <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-        <span className="truncate max-w-20 sm:max-w-none">{demande.client}</span>
-      </span>
-      {demande.budget && (
-        <span className="flex items-center gap-1">
-          <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-          <span className="text-[10px] sm:text-sm">{demande.budget}</span>
-        </span>
-      )}
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-4 text-sm text-gray-500">
+          <span className="flex items-center gap-1.5">
+            <User className="w-4 h-4" />
+            <span className="font-medium" style={{ color: colorTheme.secondaryText }}>
+              {demande.client}
+            </span>
+          </span>
+          
+          <span className="flex items-center gap-1.5">
+            <div className="p-1 rounded bg-gray-100">
+              {getMetierIcon(demande.metierLabel)}
+            </div>
+            <span>{demande.metierLabel}</span>
+          </span>
+          
+          {demande.budget && (
+            <span className="flex items-center gap-1.5 font-medium" style={{ color: colorTheme.secondaryText }}>
+              <DollarSign className="w-4 h-4" />
+              {demande.budget}
+            </span>
+          )}
+        </div>
+        
+        <Link
+          to={`/admin/messages/${demande.id}`}
+          state={{ demande }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 group/btn"
+          style={{
+            backgroundColor: colorTheme.logo,
+            color: 'white'
+          }}
+        >
+          <Eye className="w-4 h-4" />
+          <span>Voir détails</span>
+          <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+        </Link>
+      </div>
     </div>
-    
-    {/* Bouton unique sur mobile */}
-    <div className="flex gap-2 w-full sm:w-auto justify-end">
-      <Link
-        to={`/admin/messages/${demande.id}`}
-        state={{ demande }}
-        className="w-full sm:w-auto bg-gray-800 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group/btn text-sm sm:text-base"
-      >
-        <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-        <span>Détails</span>
-      </Link>
-    </div>
-  </div>
-</div>
   );
 };
 
-// Composant de statistiques pour l'admin
+// Composant de statistiques amélioré
 const StatsCardAdmin = ({
   number,
   label,
@@ -213,66 +237,93 @@ const StatsCardAdmin = ({
   loading,
 }) => {
   const colorClasses = {
-    blue: "from-blue-500 to-blue-600",
-    green: "from-green-500 to-green-600",
-    orange: "from-orange-500 to-orange-600",
-    purple: "from-purple-500 to-purple-600",
-    red: "from-red-500 to-red-600",
+    green: { 
+      bg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+      text: "text-emerald-600"
+    },
+    orange: { 
+      bg: "bg-gradient-to-br from-amber-500 to-amber-600",
+      text: "text-amber-600"
+    },
+    red: { 
+      bg: "bg-gradient-to-br from-red-500 to-red-600",
+      text: "text-red-600"
+    },
+    blue: { 
+      bg: "bg-gradient-to-br from-blue-500 to-blue-600",
+      text: "text-blue-600"
+    },
   };
 
   const IconComponent = icon;
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+      <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2 mb-3"></div>
+          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
         </div>
       </div>
     );
   }
 
+  const colors = colorClasses[color] || colorClasses.green;
+
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-all duration-300 group shadow-sm relative">
+    <div className="bg-white rounded-xl p-5 border border-gray-100 hover:shadow-lg transition-all duration-300 group">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className={`text-2xl font-bold mb-1 ${colors.text}`}>
+            {number}
+          </div>
+          <div className="text-gray-600 text-sm">{label}</div>
+          
+          {trend && (
+            <div className={`inline-flex items-center gap-1 mt-2 px-2 py-1 rounded-full text-xs ${trend > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+              <TrendingUp className={`w-3 h-3 ${trend > 0 ? '' : 'rotate-180'}`} />
+              {Math.abs(trend)}%
+            </div>
+          )}
+        </div>
+        
+        <div className={`p-3 rounded-xl ${colors.bg} text-white transition-transform group-hover:scale-110`}>
+          <IconComponent className="w-5 h-5" />
+        </div>
+      </div>
+      
       {badge && (
-        <div className="absolute -top-2 -right-2">
-          <div
-            className={`${badge.color} text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg`}
-          >
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${badge.color}`}>
             {badge.icon && <badge.icon className="w-3 h-3" />}
             {badge.text}
           </div>
         </div>
       )}
-
-      <div className="flex items-center justify-between">
-        <div>
-          <div
-            className={`text-3xl font-bold bg-gradient-to-r ${colorClasses[color]} bg-clip-text text-transparent`}
-          >
-            {number}
-          </div>
-          <div className="text-gray-600 text-sm mt-1">{label}</div>
-          {trend && (
-            <div
-              className={`text-xs mt-1 flex items-center gap-1 ${trend > 0 ? "text-green-600" : "text-red-600"
-                }`}
-            >
-              <TrendingUp
-                className={`w-3 h-3 ${trend > 0 ? "" : "rotate-180"}`}
-              />
-              {Math.abs(trend)}% vs mois dernier
-            </div>
-          )}
-        </div>
-        <div
-          className={`p-3 rounded-lg bg-gradient-to-r ${colorClasses[color]} text-white group-hover:scale-110 transition-transform duration-300`}
-        >
-          <IconComponent className="w-6 h-6" />
-        </div>
-      </div>
     </div>
+  );
+};
+
+// Composant de filtre élégant
+const FilterButton = ({ label, count, active, onClick, icon }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 border ${
+        active
+          ? `text-white border-[#6B8E23] shadow-sm`
+          : "text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+      }`}
+      style={active ? { backgroundColor: colorTheme.logo } : {}}
+    >
+      {icon && <icon className="w-4 h-4" />}
+      <span>{label}</span>
+      <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+        active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+      }`}>
+        {count}
+      </span>
+    </button>
   );
 };
 
@@ -286,7 +337,6 @@ const AdminDemandesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Charger les données
   const loadDemandes = async () => {
     try {
       setLoading(true);
@@ -315,11 +365,9 @@ const AdminDemandesPage = () => {
     loadDemandes();
   }, [activeFilter, searchQuery]);
 
-  // Gérer la validation d'une demande
   const handleValidateDemande = async (demandeId) => {
     try {
       await adminDemandesService.validateDemande(demandeId);
-      // Recharger les données
       await loadDemandes();
     } catch (err) {
       console.error("Erreur lors de la validation:", err);
@@ -327,14 +375,16 @@ const AdminDemandesPage = () => {
     }
   };
 
-  // Gérer l'assignation d'un artisan
-  const handleAssignArtisan = async (demandeId) => {
-    // Implémentez la logique d'assignation ici
-    console.log("Assigner artisan pour la demande:", demandeId);
-    // Vous pouvez ouvrir un modal pour sélectionner l'artisan
+  const handleAssignArtisan = async (demandeId, artisanId) => {
+    try {
+      await adminDemandesService.assignArtisan(demandeId, artisanId);
+      await loadDemandes();
+    } catch (err) {
+      console.error("Erreur lors de l'assignation:", err);
+      setError("Erreur lors de l'assignation");
+    }
   };
 
-  // Calcul des statistiques en temps réel basées sur les données filtrées
   const filteredDemandes = useMemo(() => {
     return demandes.filter((demande) => {
       const matchesFilter =
@@ -347,7 +397,6 @@ const AdminDemandesPage = () => {
     });
   }, [demandes, activeFilter, searchQuery]);
 
-  // Calcul des compteurs pour les filtres
   const filterCounts = useMemo(() => {
     const counts = {
       Toutes: demandes.length,
@@ -360,19 +409,18 @@ const AdminDemandesPage = () => {
     return counts;
   }, [demandes]);
 
-  // Statistiques en temps réel basées sur les données filtrées
   const realTimeStats = useMemo(
     () => [
       {
         number: stats.total?.toString() || "0",
         label: "Total demandes",
-        color: "purple",
+        color: "blue",
         icon: FileText,
         badge:
           stats.nouvelles > 0
             ? {
-              color: "bg-green-500",
-              text: `${stats.nouvelles} nouv.`,
+              color: "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white",
+              text: `${stats.nouvelles} nouvelles`,
               icon: Bell,
             }
             : null,
@@ -383,6 +431,7 @@ const AdminDemandesPage = () => {
         label: "En attente",
         color: "orange",
         icon: Clock,
+        trend: 12,
         loading,
       },
       {
@@ -393,8 +442,8 @@ const AdminDemandesPage = () => {
         badge:
           stats.urgentes > 0
             ? {
-              color: "bg-red-500",
-              text: `${stats.urgentes} urg.`,
+              color: "bg-gradient-to-r from-red-500 to-red-600 text-white",
+              text: `${stats.urgentes} urgentes`,
               icon: AlertCircle,
             }
             : null,
@@ -402,9 +451,10 @@ const AdminDemandesPage = () => {
       },
       {
         number: stats.validees?.toString() || "0",
-        label: "en cours",
+        label: "En cours",
         color: "green",
         icon: CheckCircle,
+        trend: 8,
         loading,
       },
     ],
@@ -430,207 +480,274 @@ const AdminDemandesPage = () => {
   const filters = [
     {
       key: "Toutes",
-      label: "Toutes les demandes",
+      label: "Toutes",
       count: filterCounts["Toutes"],
+      icon: FileText,
     },
     {
       key: "En attente",
       label: "En attente",
       count: filterCounts["En attente"],
+      icon: Clock,
     },
-    { key: "En cours", label: "En cours", count: filterCounts["En cours"] },
-    { key: "Validée", label: "Validées", count: filterCounts["Validée"] },
-    { key: "Terminée", label: "Terminées", count: filterCounts["Terminée"] },
-    { key: "Refusée", label: "Refusées", count: filterCounts["Refusée"] },
+    { 
+      key: "En cours", 
+      label: "En cours", 
+      count: filterCounts["En cours"],
+      icon: Target,
+    },
+    { 
+      key: "Validée", 
+      label: "Validées", 
+      count: filterCounts["Validée"],
+      icon: CheckCircle,
+    },
+    { 
+      key: "Terminée", 
+      label: "Terminées", 
+      count: filterCounts["Terminée"],
+      icon: ShieldCheck,
+    },
+    { 
+      key: "Refusée", 
+      label: "Refusées", 
+      count: filterCounts["Refusée"],
+      icon: AlertCircle,
+    },
   ];
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="bg-white rounded-xl p-8 text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Erreur</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={loadDemandes}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-          >
-            Réessayer
-          </button>
+      <div className="min-h-screen" style={{ backgroundColor: colorTheme.lightBg }}>
+        <div className="p-6 flex items-center justify-center h-screen">
+          <div className="bg-white rounded-xl p-8 text-center max-w-md shadow-lg">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4" style={{ color: colorTheme.logo }} />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Erreur</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={loadDemandes}
+              className="px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: colorTheme.logo,
+                color: 'white'
+              }}
+            >
+              Réessayer
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Admin */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Gestion des demandes
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Administration de toutes les demandes clients
-          </p>
-        </div>
-      </div>
-
-      {/* Statistiques en temps réel */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        {realTimeStats.map((stat, index) => (
-          <StatsCardAdmin
-            key={index}
-            number={stat.number}
-            label={stat.label}
-            color={stat.color}
-            icon={stat.icon}
-            trend={stat.trend}
-            badge={stat.badge}
-            loading={stat.loading}
-          />
-        ))}
-      </div>
-
-      {/* Barre de recherche et filtres */}
-      <div className="bg-white rounded-xl border lg:p-6 p-2 border-gray-200 mb-8 shadow-sm">
-        <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
-          {/* Barre de recherche */}
-          <div className="flex-1 w-full lg:w-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Rechercher une demande, un client, une ville..."
-                className="w-full lg:w-96 pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+    <div className="min-h-screen" style={{ backgroundColor: colorTheme.lightBg }}>
+      <div className="p-6 max-w-7xl mx-auto">
+        {/* Header élégant */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div 
+                  className="p-2 rounded-lg"
+                  style={{ backgroundColor: colorTheme.logo + '20' }}
+                >
+                  <BarChart3 
+                    className="w-5 h-5" 
+                    style={{ color: colorTheme.logo }}
+                  />
+                </div>
+                <h1 
+                  className="text-2xl font-bold"
+                  style={{ color: colorTheme.secondaryText }}
+                >
+                  Tableau de bord des demandes
+                </h1>
+              </div>
+              <p className="text-gray-600">
+                Gérez et suivez toutes les demandes de services
+              </p>
             </div>
-          </div>
-
-          {/* Tri */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-600">
-              <ArrowUpDown className="w-4 h-4" />
-              <span className="text-sm">Trier par:</span>
-            </div>
-            <select
-              className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="date">Date</option>
-              <option value="urgence">Urgence</option>
-              <option value="statut">Statut</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Filtres rapides avec compteurs en temps réel */}
-        <div className=" lg:flex grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6">
-          {filters.map((filter, index) => (
-            <button
-              key={filter.key}
-              onClick={() => setActiveFilter(filter.key)}
-              className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border ${activeFilter === filter.key
-                  ? "bg-blue-100 text-blue-700 border-blue-300 shadow-md"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-gray-700 hover:bg-gray-50"
-                } ${index === 0 ? "col-span-2" : ""
-                }`}
-            >
-              {filter.label}
-              <span
-                className={`text-xs px-2 py-1 rounded-full ${activeFilter === filter.key
-                    ? "bg-blue-200 text-blue-800"
-                    : "bg-gray-100 text-gray-600"
-                  }`}
-              >
-                {filter.count}
-              </span>
+            
+            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium border border-gray-200 hover:border-gray-300 transition-colors duration-200">
+              <Download className="w-4 h-4" />
+              <span>Exporter</span>
             </button>
+          </div>
+          
+          <div 
+            className="h-1 w-20 rounded-full mt-2"
+            style={{ backgroundColor: colorTheme.primaryDark }}
+          ></div>
+        </div>
+
+        {/* Statistiques */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {realTimeStats.map((stat, index) => (
+            <StatsCardAdmin
+              key={index}
+              number={stat.number}
+              label={stat.label}
+              color={stat.color}
+              icon={stat.icon}
+              trend={stat.trend}
+              badge={stat.badge}
+              loading={stat.loading}
+            />
           ))}
         </div>
-      </div>
 
-      {/* En-tête de liste */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {activeFilter === "Toutes"
-            ? "Toutes les demandes"
-            : `Demandes ${activeFilter.toLowerCase()}`}
-          <span className="text-gray-600 text-sm font-normal ml-2">
-            ({filteredDemandes.length} demande
-            {filteredDemandes.length > 1 ? "s" : ""})
-          </span>
-        </h2>
-        <div className="text-gray-500 lg:flex hidden text-sm  items-center gap-1">
-          <span>
-            Tri:{" "}
-            {sortBy === "date"
-              ? "Plus récent"
-              : sortBy === "urgence"
-                ? "Urgence"
-                : "Statut"}
-          </span>
-        </div>
-      </div>
-
-      {/* Liste des demandes */}
-      <div className="space-y-4">
-        {loading ? (
-          // Squelette de chargement
-          Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gray-200"></div>
-                  <div>
-                    <div className="h-4 bg-gray-200 rounded w-48 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-32"></div>
-                  </div>
-                </div>
-                
+        {/* Section de contrôle principale */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5 mb-8 shadow-sm">
+          <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center mb-6">
+            <div className="flex-1 w-full">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par titre, client, ville..."
+                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                  style={{ 
+                    focusRingColor: colorTheme.logo,
+                    borderColor: colorTheme.separator
+                  }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
             </div>
-          ))
-        ) : sortedDemandes.length > 0 ? (
-          sortedDemandes.map((demande) => (
-            <DemandeCardAdmin
-              key={demande.id}
-              demande={demande}
-              onValidate={handleValidateDemande}
-              onAssign={handleAssignArtisan}
-            />
-          ))
-        ) : (
-          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-            <div className="text-gray-300 mb-4">
-              <Search className="w-20 h-20 mx-auto" />
+
+            <div className="flex items-center gap-4 w-full lg:w-auto">
+              <div className="flex items-center gap-2 text-gray-600">
+                <ArrowUpDown className="w-4 h-4" />
+                <span className="text-sm">Trier par:</span>
+              </div>
+              <select
+                className="flex-1 lg:flex-none bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                style={{ 
+                  focusRingColor: colorTheme.logo,
+                  borderColor: colorTheme.separator
+                }}
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="date">Date récente</option>
+                <option value="urgence">Niveau d'urgence</option>
+                <option value="statut">Statut</option>
+              </select>
             </div>
-            <h4 className="text-gray-700 text-lg font-medium mb-2">
-              Aucune demande trouvée
-            </h4>
-            <p className="text-gray-500 text-sm mb-6">
-              Aucune demande ne correspond à vos critères de recherche
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setActiveFilter("Toutes");
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 mx-auto"
-            >
-              <Search className="w-4 h-4" />
-              Réinitialiser les filtres
-            </button>
           </div>
-        )}
+
+          {/* Filtres rapides */}
+          <div className="flex flex-wrap gap-2">
+            {filters.map((filter) => (
+              <FilterButton
+                key={filter.key}
+                label={filter.label}
+                count={filter.count}
+                active={activeFilter === filter.key}
+                onClick={() => setActiveFilter(filter.key)}
+                icon={filter.icon}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* En-tête de liste */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {activeFilter === "Toutes"
+                ? "Toutes les demandes"
+                : `Demandes ${activeFilter.toLowerCase()}`}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {filteredDemandes.length} demande{filteredDemandes.length > 1 ? "s" : ""} trouvée
+              {filteredDemandes.length > 0 ? "s" : ""}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+            <Filter className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-600">
+              Tri:{" "}
+              <span className="font-medium" style={{ color: colorTheme.secondaryText }}>
+                {sortBy === "date"
+                  ? "Date récente"
+                  : sortBy === "urgence"
+                    ? "Urgence"
+                    : "Statut"}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* Liste des demandes */}
+        <div className="space-y-4">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-gray-200"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-48"></div>
+                      <div className="h-3 bg-gray-200 rounded w-32"></div>
+                    </div>
+                  </div>
+                  <div className="h-6 bg-gray-200 rounded w-24"></div>
+                </div>
+                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            ))
+          ) : sortedDemandes.length > 0 ? (
+            sortedDemandes.map((demande) => (
+              <DemandeCardAdmin
+                key={demande.id}
+                demande={demande}
+                onValidate={handleValidateDemande}
+                onAssign={handleAssignArtisan}
+              />
+            ))
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+              <div 
+                className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: colorTheme.logo + '10' }}
+              >
+                <Search 
+                  className="w-10 h-10"
+                  style={{ color: colorTheme.logo }}
+                />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Aucune demande trouvée
+              </h3>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                Aucune demande ne correspond à vos critères de recherche.
+                Essayez d'ajuster vos filtres ou votre recherche.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveFilter("Toutes");
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{
+                  backgroundColor: colorTheme.logo,
+                  color: 'white'
+                }}
+              >
+                <Filter className="w-4 h-4" />
+                Réinitialiser les filtres
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

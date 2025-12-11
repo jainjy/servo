@@ -498,7 +498,7 @@ const AdvertisementManager = () => {
       footer: <Clock className="w-3 h-3 mr-1" />
     }
     return (
-      <Badge variant="outline" className="flex items-center">
+      <Badge variant="outline" className="flex items-center border-[#D3D3D3] text-[#8B4513]">
         {icons[position]}
         {labels[position] || position}
       </Badge>
@@ -522,7 +522,7 @@ const AdvertisementManager = () => {
       video: <Video className="w-3 h-3 mr-1" />
     }
     return (
-      <Badge variant={variants[type]} className="flex items-center">
+      <Badge variant={variants[type]} className="flex items-center bg-[#556B2F] hover:bg-[#6B8E23]">
         {icons[type]}
         {labels[type]}
       </Badge>
@@ -562,10 +562,10 @@ const AdvertisementManager = () => {
       {/* En-tête amélioré */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#556B2F] to-[#6B8E23] bg-clip-text text-transparent">
             Gestion des Publicités
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className=" mt-2">
             Créez et gérez les campagnes publicitaires de votre site
           </p>
         </div>
@@ -574,42 +574,42 @@ const AdvertisementManager = () => {
             variant="outline" 
             onClick={loadAdvertisements}
             disabled={loading}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Actualiser
           </Button>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+              <Button className="flex items-center gap-2 bg-[#556B2F] hover:bg-[#6B8E23] text-white">
                 <Plus className="w-4 h-4" />
                 Nouvelle Publicité
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-[#D3D3D3]">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
+                <DialogTitle className="flex items-center gap-2 text-[#8B4513]">
                   <Plus className="w-5 h-5" />
                   Créer une nouvelle publicité
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-[#8B4513]/80">
                   Remplissez les informations pour créer une nouvelle campagne publicitaire
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-6">
                 {/* Informations de base */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                     <Target className="w-4 h-4" />
                     Informations de base
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="title" className="flex items-center gap-2">
+                      <Label htmlFor="title" className="flex items-center gap-2 text-[#8B4513]">
                         Titre *
                         {formData.title && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#8B4513]">
                             {formData.title.length}/50
                           </Badge>
                         )}
@@ -621,18 +621,19 @@ const AdvertisementManager = () => {
                         placeholder="Nom de votre campagne"
                         maxLength={50}
                         required
+                        className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="position">Position *</Label>
+                      <Label htmlFor="position" className="text-[#8B4513]">Position *</Label>
                       <Select 
                         value={formData.position} 
                         onValueChange={(value) => handleInputChange('position', value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border-[#D3D3D3]">
                           <SelectItem value="header">En-tête</SelectItem>
                           <SelectItem value="sidebar">Barre latérale</SelectItem>
                           <SelectItem value="homepage">Page d'accueil</SelectItem>
@@ -643,18 +644,19 @@ const AdvertisementManager = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description" className="text-[#8B4513]">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       rows={2}
                       placeholder="Description de la publicité..."
+                      className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="targetUrl" className="flex items-center gap-2">
+                    <Label htmlFor="targetUrl" className="flex items-center gap-2 text-[#8B4513]">
                       URL de destination
                       <ExternalLink className="w-3 h-3" />
                     </Label>
@@ -664,28 +666,29 @@ const AdvertisementManager = () => {
                       value={formData.targetUrl}
                       onChange={(e) => handleInputChange('targetUrl', e.target.value)}
                       placeholder="https://example.com/offre-speciale"
+                      className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                     />
                   </div>
                 </div>
 
                 {/* Configuration */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                     <BarChart3 className="w-4 h-4" />
                     Configuration
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="type">Type de publicité</Label>
+                      <Label htmlFor="type" className="text-[#8B4513]">Type de publicité</Label>
                       <Select 
                         value={formData.type} 
                         onValueChange={(value) => handleInputChange('type', value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border-[#D3D3D3]">
                           <SelectItem value="banner">Bannière</SelectItem>
                           <SelectItem value="popup">Popup</SelectItem>
                           <SelectItem value="video">Vidéo</SelectItem>
@@ -693,15 +696,15 @@ const AdvertisementManager = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="status">Statut</Label>
+                      <Label htmlFor="status" className="text-[#8B4513]">Statut</Label>
                       <Select 
                         value={formData.status} 
                         onValueChange={(value) => handleInputChange('status', value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border-[#D3D3D3]">
                           <SelectItem value="active">Actif</SelectItem>
                           <SelectItem value="inactive">Inactif</SelectItem>
                           <SelectItem value="scheduled">Planifié</SelectItem>
@@ -709,7 +712,7 @@ const AdvertisementManager = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="priority">Priorité (1-10)</Label>
+                      <Label htmlFor="priority" className="text-[#8B4513]">Priorité (1-10)</Label>
                       <Input
                         id="priority"
                         type="number"
@@ -717,6 +720,7 @@ const AdvertisementManager = () => {
                         max="10"
                         value={formData.priority}
                         onChange={(e) => handleInputChange('priority', parseInt(e.target.value) || 1)}
+                        className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                       />
                     </div>
                   </div>
@@ -724,43 +728,45 @@ const AdvertisementManager = () => {
 
                 {/* Planning */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                     <Calendar className="w-4 h-4" />
                     Planning
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="startDate">Date de début</Label>
+                      <Label htmlFor="startDate" className="text-[#8B4513]">Date de début</Label>
                       <Input
                         id="startDate"
                         type="date"
                         value={formData.startDate}
                         onChange={(e) => handleInputChange('startDate', e.target.value)}
                         min={new Date().toISOString().split('T')[0]}
+                        className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="endDate">Date de fin</Label>
+                      <Label htmlFor="endDate" className="text-[#8B4513]">Date de fin</Label>
                       <Input
                         id="endDate"
                         type="date"
                         value={formData.endDate}
                         onChange={(e) => handleInputChange('endDate', e.target.value)}
                         min={getMinEndDate()}
+                        className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                       />
                     </div>
                   </div>
                   
                   {dateError && (
-                    <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
                       <AlertCircle className="w-4 h-4" />
                       {dateError}
                     </div>
                   )}
                   
                   {(formData.startDate || formData.endDate) && !dateError && (
-                    <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                    <div className="text-sm text-[#8B4513] bg-[#6B8E23]/10 p-3 rounded-lg border border-[#D3D3D3]">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         <span>
@@ -778,7 +784,7 @@ const AdvertisementManager = () => {
 
                 {/* Média */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                     {formData.type === 'video' ? (
                       <Video className="w-4 h-4" />
                     ) : (
@@ -788,10 +794,10 @@ const AdvertisementManager = () => {
                   </h3>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="media">
+                    <Label htmlFor="media" className="text-[#8B4513]">
                       {formData.type === 'video' ? 'Vidéo *' : 'Image *'}
                     </Label>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-6 text-center hover:border-[#556B2F] transition-colors">
                       <Input
                         id="media"
                         type="file"
@@ -803,21 +809,21 @@ const AdvertisementManager = () => {
                         <div className="flex flex-col items-center gap-2">
                           {formData.type === 'video' ? (
                             <>
-                              <Video className="w-8 h-8 text-muted-foreground" />
-                              <span className="text-sm text-muted-foreground">
+                              <Video className="w-8 h-8 text-[#8B4513]" />
+                              <span className="text-sm text-[#8B4513]">
                                 Cliquez pour uploader une vidéo
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-[#8B4513]/70">
                                 MP4, WebM, OGG jusqu'à 50MB
                               </span>
                             </>
                           ) : (
                             <>
-                              <Upload className="w-8 h-8 text-muted-foreground" />
-                              <span className="text-sm text-muted-foreground">
+                              <Upload className="w-8 h-8 text-[#8B4513]" />
+                              <span className="text-sm text-[#8B4513]">
                                 Cliquez pour uploader une image
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-[#8B4513]/70">
                                 PNG, JPG, WEBP jusqu'à 5MB
                               </span>
                             </>
@@ -829,19 +835,19 @@ const AdvertisementManager = () => {
                     {/* Aperçu */}
                     {imagePreview && formData.type !== 'video' && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium mb-2">Aperçu :</p>
+                        <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu :</p>
                         <img 
                           src={imagePreview} 
                           alt="Aperçu" 
-                          className="max-h-40 rounded-lg object-cover border"
+                          className="max-h-40 rounded-lg object-cover border border-[#D3D3D3]"
                         />
                       </div>
                     )}
                     
                     {videoPreview && formData.type === 'video' && (
                       <div className="mt-4">
-                        <p className="text-sm font-medium mb-2">Aperçu :</p>
-                        <div className="relative max-h-40 rounded-lg border overflow-hidden">
+                        <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu :</p>
+                        <div className="relative max-h-40 rounded-lg border border-[#D3D3D3] overflow-hidden">
                           <video 
                             src={videoPreview} 
                             className="w-full h-full object-cover"
@@ -864,13 +870,14 @@ const AdvertisementManager = () => {
                       setIsCreateDialogOpen(false)
                       resetForm()
                     }}
+                    className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
                   >
                     Annuler
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={loading || !!dateError}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                   >
                     {loading ? (
                       <>
@@ -893,71 +900,71 @@ const AdvertisementManager = () => {
 
       {/* Cartes de statut */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-blue-500">
+        <Card className="border-l-4 border-l-[#556B2F] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{advertisements.length}</p>
+                <p className="text-sm font-medium text-[#8B4513]">Total</p>
+                <p className="text-2xl font-bold text-[#8B4513]">{advertisements.length}</p>
               </div>
-              <BarChart3 className="w-8 h-8 text-blue-500" />
+              <BarChart3 className="w-8 h-8 text-[#556B2F]" />
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-l-4 border-l-green-500">
+        <Card className="border-l-4 border-l-[#6B8E23] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Actives</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm font-medium text-[#8B4513]">Actives</p>
+                <p className="text-2xl font-bold text-[#8B4513]">
                   {advertisements.filter(ad => getCurrentStatus(ad) === 'active').length}
                 </p>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-500" />
+              <TrendingUp className="w-8 h-8 text-[#6B8E23]" />
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-l-4 border-l-orange-500">
+        <Card className="border-l-4 border-l-[#8B4513] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Planifiées</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm font-medium text-[#8B4513]">Planifiées</p>
+                <p className="text-2xl font-bold text-[#8B4513]">
                   {advertisements.filter(ad => getCurrentStatus(ad) === 'scheduled').length}
                 </p>
               </div>
-              <Clock className="w-8 h-8 text-orange-500" />
+              <Clock className="w-8 h-8 text-[#8B4513]" />
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-l-4 border-l-red-500">
+        <Card className="border-l-4 border-l-[#A52A2A] border-[#D3D3D3]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Expirées</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm font-medium text-[#8B4513]">Expirées</p>
+                <p className="text-2xl font-bold text-[#8B4513]">
                   {advertisements.filter(ad => getCurrentStatus(ad) === 'expired').length}
                 </p>
               </div>
-              <AlertCircle className="w-8 h-8 text-red-500" />
+              <AlertCircle className="w-8 h-8 text-[#A52A2A]" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filtres améliorés */}
-      <Card>
+      <Card className="border-[#D3D3D3]">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8B4513] w-4 h-4" />
                 <Input
                   placeholder="Rechercher par titre, description..."
-                  className="pl-10"
+                  className="pl-10 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F] text-[#8B4513] placeholder:text-[#8B4513]/60"
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                 />
@@ -968,31 +975,31 @@ const AdvertisementManager = () => {
                 value={filters.status} 
                 onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
               >
-                <SelectTrigger className="w-40">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Statut" />
+                <SelectTrigger className="w-40 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+                  <Filter className="w-4 h-4 mr-2 text-[#8B4513]" />
+                  <SelectValue placeholder="Statut" className="text-[#8B4513]" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="active">Actives</SelectItem>
-                  <SelectItem value="inactive">Inactives</SelectItem>
-                  <SelectItem value="scheduled">Planifiées</SelectItem>
-                  <SelectItem value="expired">Expirées</SelectItem>
+                <SelectContent className="border-[#D3D3D3]">
+                  <SelectItem value="all" className="text-[#8B4513]">Tous les statuts</SelectItem>
+                  <SelectItem value="active" className="text-[#8B4513]">Actives</SelectItem>
+                  <SelectItem value="inactive" className="text-[#8B4513]">Inactives</SelectItem>
+                  <SelectItem value="scheduled" className="text-[#8B4513]">Planifiées</SelectItem>
+                  <SelectItem value="expired" className="text-[#8B4513]">Expirées</SelectItem>
                 </SelectContent>
               </Select>
               <Select 
                 value={filters.position} 
                 onValueChange={(value) => setFilters(prev => ({ ...prev, position: value }))}
               >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Position" />
+                <SelectTrigger className="w-48 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
+                  <SelectValue placeholder="Position" className="text-[#8B4513]" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes positions</SelectItem>
-                  <SelectItem value="header">En-tête</SelectItem>
-                  <SelectItem value="sidebar">Barre latérale</SelectItem>
-                  <SelectItem value="homepage">Page d'accueil</SelectItem>
-                  <SelectItem value="footer">Pied de page</SelectItem>
+                <SelectContent className="border-[#D3D3D3]">
+                  <SelectItem value="all" className="text-[#8B4513]">Toutes positions</SelectItem>
+                  <SelectItem value="header" className="text-[#8B4513]">En-tête</SelectItem>
+                  <SelectItem value="sidebar" className="text-[#8B4513]">Barre latérale</SelectItem>
+                  <SelectItem value="homepage" className="text-[#8B4513]">Page d'accueil</SelectItem>
+                  <SelectItem value="footer" className="text-[#8B4513]">Pied de page</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1001,27 +1008,27 @@ const AdvertisementManager = () => {
       </Card>
 
       {/* Tableau des publicités amélioré */}
-      <Card>
+      <Card className="border-[#D3D3D3]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-[#8B4513]">
             <BarChart3 className="w-5 h-5" />
             Campagnes Publicitaires
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="">
             {filteredAdvertisements.length} publicité{filteredAdvertisements.length > 1 ? 's' : ''} trouvée{filteredAdvertisements.length > 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-12">
-              <RefreshCw className="w-12 h-12 animate-spin text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Chargement des publicités...</p>
+              <RefreshCw className="w-12 h-12 animate-spin text-[#8B4513]/60 mx-auto mb-4" />
+              <p className="text-[#8B4513]">Chargement des publicités...</p>
             </div>
           ) : filteredAdvertisements.length === 0 ? (
             <div className="text-center py-12">
-              <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucune publicité trouvée</h3>
-              <p className="text-muted-foreground mb-6">
+              <ImageIcon className="w-16 h-16 text-[#8B4513]/60 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2 text-[#8B4513]">Aucune publicité trouvée</h3>
+              <p className="text-[#8B4513] mb-6">
                 {filters.status !== 'all' || filters.position !== 'all' || filters.search
                   ? "Aucune publicité ne correspond à vos critères de recherche"
                   : "Commencez par créer votre première campagne publicitaire"
@@ -1031,38 +1038,42 @@ const AdvertisementManager = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => setFilters({ status: 'all', position: 'all', search: '' })}
+                  className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
                 >
                   Réinitialiser les filtres
                 </Button>
               ) : (
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Button 
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Créer une publicité
                 </Button>
               )}
             </div>
           ) : (
-            <div className="rounded-lg border">
+            <div className="rounded-lg border border-[#D3D3D3]">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Publicité</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Performance</TableHead>
-                    <TableHead>Planning</TableHead>
-                    <TableHead className="w-[120px]">Actions</TableHead>
+                  <TableRow className="border-b-[#D3D3D3] hover:bg-transparent">
+                    <TableHead className="font-semibold">Publicité</TableHead>
+                    <TableHead className="font-semibold">Position</TableHead>
+                    <TableHead className="font-semibold">Type</TableHead>
+                    <TableHead className="font-semibold">Statut</TableHead>
+                    <TableHead className="font-semibold">Performance</TableHead>
+                    <TableHead className="font-semibold">Planning</TableHead>
+                    <TableHead className="font-semibold w-[120px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAdvertisements.map((ad) => (
-                    <TableRow key={ad.id} className="hover:bg-muted/50">
+                    <TableRow key={ad.id} className="border-b-[#D3D3D3] hover:bg-[#6B8E23]/5">
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {ad.type === 'video' ? (
-                            <div className="relative w-12 h-12 rounded-lg border overflow-hidden bg-muted flex items-center justify-center">
-                              <Video className="w-6 h-6 text-muted-foreground" />
+                            <div className="relative w-12 h-12 rounded-lg border border-[#D3D3D3] overflow-hidden bg-[#6B8E23]/10 flex items-center justify-center">
+                              <Video className="w-6 h-6 " />
                               <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                                 <Play className="w-4 h-4 text-white" />
                               </div>
@@ -1071,20 +1082,20 @@ const AdvertisementManager = () => {
                             <img 
                               src={ad.imageUrl} 
                               alt={ad.title}
-                              className="w-12 h-12 rounded-lg object-cover border"
+                              className="w-12 h-12 rounded-lg object-cover border border-[#D3D3D3]"
                             />
                           )}
                           <div className="min-w-0 flex-1">
-                            <div className="font-semibold truncate flex items-center gap-2">
+                            <div className="font-semibold truncate flex items-center gap-2 ">
                               {ad.title}
                             </div>
                             {ad.description && (
-                              <div className="text-sm text-muted-foreground truncate">
+                              <div className="text-sm text-[#8B4513]/70 truncate">
                                 {ad.description}
                               </div>
                             )}
                             {ad.targetUrl && (
-                              <div className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                              <div className="text-xs text-[#556B2F] flex items-center gap-1 mt-1">
                                 <Link className="w-3 h-3" />
                                 <span className="truncate">{formatUrl(ad.targetUrl)}</span>
                               </div>
@@ -1098,15 +1109,15 @@ const AdvertisementManager = () => {
                       <TableCell>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm">
-                            <TrendingUp className="w-3 h-3 text-green-600" />
-                            <span className="font-medium">{ad.clicks || 0} clics</span>
+                            <TrendingUp className="w-3 h-3 text-[#6B8E23]" />
+                            <span className="font-medium ">{ad.clicks || 0} clics</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 text-sm ">
                             <Eye className="w-3 h-3" />
                             <span>{ad.impressions || 0} impressions</span>
                           </div>
                           {ad.impressions > 0 && (
-                            <div className="text-xs text-blue-600">
+                            <div className="text-xs text-[#556B2F]">
                               CTR: {((ad.clicks / ad.impressions) * 100).toFixed(1)}%
                             </div>
                           )}
@@ -1115,19 +1126,19 @@ const AdvertisementManager = () => {
                       <TableCell>
                         <div className="space-y-1 text-sm">
                           {ad.startDate && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-3 h-3 text-muted-foreground" />
+                            <div className="flex items-center gap-2 ">
+                              <Calendar className="w-3 h-3" />
                               <span>Début: {new Date(ad.startDate).toLocaleDateString('fr-FR')}</span>
                             </div>
                           )}
                           {ad.endDate && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-3 h-3 text-muted-foreground" />
+                            <div className="flex items-center gap-2 ">
+                              <Calendar className="w-3 h-3" />
                               <span>Fin: {new Date(ad.endDate).toLocaleDateString('fr-FR')}</span>
                             </div>
                           )}
                           {!ad.startDate && !ad.endDate && (
-                            <span className="text-muted-foreground">Aucune date</span>
+                            <span className="text-[#8B4513]/60">Aucune date</span>
                           )}
                         </div>
                       </TableCell>
@@ -1138,6 +1149,7 @@ const AdvertisementManager = () => {
                             size="icon"
                             onClick={() => openEditDialog(ad)}
                             title="Modifier"
+                            className="text-[#8B4513] hover:text-[#6B8E23] hover:bg-[#6B8E23]/10"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -1163,30 +1175,30 @@ const AdvertisementManager = () => {
 
       {/* Modal d'édition */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-[#D3D3D3]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-[#8B4513]">
               <Edit className="w-5 h-5" />
               Modifier la publicité
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#8B4513]/80">
               Modifiez les informations de la campagne publicitaire
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-6">
             {/* Informations de base */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                 <Target className="w-4 h-4" />
                 Informations de base
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-title" className="flex items-center gap-2">
+                  <Label htmlFor="edit-title" className="flex items-center gap-2 text-[#8B4513]">
                     Titre *
                     {formData.title && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#8B4513]">
                         {formData.title.length}/50
                       </Badge>
                     )}
@@ -1198,18 +1210,19 @@ const AdvertisementManager = () => {
                     placeholder="Nom de votre campagne"
                     maxLength={50}
                     required
+                    className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-position">Position *</Label>
+                  <Label htmlFor="edit-position" className="text-[#8B4513]">Position *</Label>
                   <Select 
                     value={formData.position} 
                     onValueChange={(value) => handleInputChange('position', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-[#D3D3D3]">
                       <SelectItem value="header">En-tête</SelectItem>
                       <SelectItem value="sidebar">Barre latérale</SelectItem>
                       <SelectItem value="homepage">Page d'accueil</SelectItem>
@@ -1220,18 +1233,19 @@ const AdvertisementManager = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-description">Description</Label>
+                <Label htmlFor="edit-description" className="text-[#8B4513]">Description</Label>
                 <Textarea
                   id="edit-description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={2}
                   placeholder="Description de la publicité..."
+                  className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-targetUrl" className="flex items-center gap-2">
+                <Label htmlFor="edit-targetUrl" className="flex items-center gap-2 text-[#8B4513]">
                   URL de destination
                   <ExternalLink className="w-3 h-3" />
                 </Label>
@@ -1241,28 +1255,29 @@ const AdvertisementManager = () => {
                   value={formData.targetUrl}
                   onChange={(e) => handleInputChange('targetUrl', e.target.value)}
                   placeholder="https://example.com/offre-speciale"
+                  className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                 />
               </div>
             </div>
 
             {/* Configuration */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                 <BarChart3 className="w-4 h-4" />
                 Configuration
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-type">Type de publicité</Label>
+                  <Label htmlFor="edit-type" className="text-[#8B4513]">Type de publicité</Label>
                   <Select 
                     value={formData.type} 
                     onValueChange={(value) => handleInputChange('type', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-[#D3D3D3]">
                       <SelectItem value="banner">Bannière</SelectItem>
                       <SelectItem value="popup">Popup</SelectItem>
                       <SelectItem value="video">Vidéo</SelectItem>
@@ -1270,15 +1285,15 @@ const AdvertisementManager = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-status">Statut</Label>
+                  <Label htmlFor="edit-status" className="text-[#8B4513]">Statut</Label>
                   <Select 
                     value={formData.status} 
                     onValueChange={(value) => handleInputChange('status', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-[#D3D3D3]">
                       <SelectItem value="active">Actif</SelectItem>
                       <SelectItem value="inactive">Inactif</SelectItem>
                       <SelectItem value="scheduled">Planifié</SelectItem>
@@ -1286,7 +1301,7 @@ const AdvertisementManager = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-priority">Priorité (1-10)</Label>
+                  <Label htmlFor="edit-priority" className="text-[#8B4513]">Priorité (1-10)</Label>
                   <Input
                     id="edit-priority"
                     type="number"
@@ -1294,6 +1309,7 @@ const AdvertisementManager = () => {
                     max="10"
                     value={formData.priority}
                     onChange={(e) => handleInputChange('priority', parseInt(e.target.value) || 1)}
+                    className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                   />
                 </div>
               </div>
@@ -1301,43 +1317,45 @@ const AdvertisementManager = () => {
 
             {/* Planning */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                 <Calendar className="w-4 h-4" />
                 Planning
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-startDate">Date de début</Label>
+                  <Label htmlFor="edit-startDate" className="text-[#8B4513]">Date de début</Label>
                   <Input
                     id="edit-startDate"
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => handleInputChange('startDate', e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
+                    className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-endDate">Date de fin</Label>
+                  <Label htmlFor="edit-endDate" className="text-[#8B4513]">Date de fin</Label>
                   <Input
                     id="edit-endDate"
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => handleInputChange('endDate', e.target.value)}
                     min={getMinEndDate()}
+                    className="border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
                   />
                 </div>
               </div>
               
               {dateError && (
-                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
                   <AlertCircle className="w-4 h-4" />
                   {dateError}
                 </div>
               )}
               
               {(formData.startDate || formData.endDate) && !dateError && (
-                <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                <div className="text-sm text-[#8B4513] bg-[#6B8E23]/10 p-3 rounded-lg border border-[#D3D3D3]">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     <span>
@@ -1355,7 +1373,7 @@ const AdvertisementManager = () => {
 
             {/* Média */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-[#8B4513]">
                 {formData.type === 'video' ? (
                   <Video className="w-4 h-4" />
                 ) : (
@@ -1365,10 +1383,10 @@ const AdvertisementManager = () => {
               </h3>
               
               <div className="space-y-2">
-                <Label htmlFor="edit-media">
+                <Label htmlFor="edit-media" className="text-[#8B4513]">
                   {formData.type === 'video' ? 'Vidéo' : 'Image'}
                 </Label>
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                <div className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-6 text-center hover:border-[#556B2F] transition-colors">
                   <Input
                     id="edit-media"
                     type="file"
@@ -1380,21 +1398,21 @@ const AdvertisementManager = () => {
                     <div className="flex flex-col items-center gap-2">
                       {formData.type === 'video' ? (
                         <>
-                          <Video className="w-8 h-8 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
+                          <Video className="w-8 h-8 text-[#8B4513]" />
+                          <span className="text-sm text-[#8B4513]">
                             Cliquez pour changer la vidéo
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-[#8B4513]/70">
                             MP4, WebM, OGG jusqu'à 50MB
                           </span>
                         </>
                       ) : (
                         <>
-                          <Upload className="w-8 h-8 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
+                          <Upload className="w-8 h-8 text-[#8B4513]" />
+                          <span className="text-sm text-[#8B4513]">
                             Cliquez pour changer l'image
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-[#8B4513]/70">
                             PNG, JPG, WEBP jusqu'à 5MB
                           </span>
                         </>
@@ -1406,9 +1424,9 @@ const AdvertisementManager = () => {
                 {/* Aperçu actuel */}
                 {(imagePreview || videoPreview) && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium mb-2">Aperçu actuel :</p>
+                    <p className="text-sm font-medium mb-2 text-[#8B4513]">Aperçu actuel :</p>
                     {formData.type === 'video' && videoPreview ? (
-                      <div className="relative max-h-40 rounded-lg border overflow-hidden">
+                      <div className="relative max-h-40 rounded-lg border border-[#D3D3D3] overflow-hidden">
                         <video 
                           src={videoPreview} 
                           className="w-full h-full object-cover"
@@ -1422,7 +1440,7 @@ const AdvertisementManager = () => {
                       <img 
                         src={imagePreview} 
                         alt="Aperçu" 
-                        className="max-h-40 rounded-lg object-cover border"
+                        className="max-h-40 rounded-lg object-cover border border-[#D3D3D3]"
                       />
                     ) : null}
                   </div>
@@ -1439,13 +1457,14 @@ const AdvertisementManager = () => {
                   setSelectedAd(null)
                   resetForm()
                 }}
+                className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#6B8E23]"
               >
                 Annuler
               </Button>
               <Button 
                 type="submit" 
                 disabled={loading || !!dateError}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
               >
                 {loading ? (
                   <>
