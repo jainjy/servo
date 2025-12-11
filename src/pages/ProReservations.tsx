@@ -26,9 +26,19 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  PlayCircle
+  PlayCircle,
+  FileText
 } from "lucide-react";
 import { ReservationCoursService, ReservationCours, ReservationCoursStats } from "@/services/reservationCoursService";
+
+// Définition du thème
+const theme = {
+  logo: "#556B2F",           // logo / accent - Olive green
+  primaryDark: "#6B8E23",    // Sruvol / fonds légers - Yellow-green
+  lightBg: "#FFFFFF",        // fond de page / bloc texte - White
+  separator: "#D3D3D3",     // séparateurs / bordures, UI - Light gray
+  secondaryText: "#8B4513",  // touche premium / titres secondaires - Saddle brown
+};
 
 const ProReservations: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -181,30 +191,43 @@ const ProReservations: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Accès non autorisé</h2>
-          <p>Veuillez vous connecter pour accéder à cette page.</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: `${theme.separator}20` }}>
+        <Card className="p-8 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
+          <h2 className="text-2xl font-bold mb-4" style={{ color: theme.logo }}>Accès non autorisé</h2>
+          <p style={{ color: theme.secondaryText }}>Veuillez vous connecter pour accéder à cette page.</p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-2 lg:p-0">
+    <div className="min-h-screen py-2 lg:p-0" style={{ backgroundColor: `${theme.separator}20` }}>
       <div className="container mx-auto px-4">
         {/* En-tête */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-lg lg:text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-lg lg:text-3xl font-bold mb-2" style={{ color: theme.logo }}>
                 Gestion des réservations de cours
               </h1>
-              <p className="text-gray-600">
+              <p style={{ color: theme.secondaryText }}>
                 Gérez les réservations de vos cours et suivez vos performances
               </p>
             </div>
-            <Button onClick={exportReservations} className="flex items-center gap-2">
+            <Button 
+              onClick={exportReservations} 
+              className="flex items-center gap-2"
+              style={{ 
+                backgroundColor: theme.primaryDark,
+                color: "white"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#556B2F";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = theme.primaryDark;
+              }}
+            >
               <Download className="w-4 h-4" />
               Exporter CSV
             </Button>
@@ -214,52 +237,52 @@ const ProReservations: React.FC = () => {
         {/* Statistiques */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
               <div className="flex items-center justify-center mb-2">
-                <BarChart3 className="w-8 h-8 text-blue-600" />
+                <BarChart3 className="w-8 h-8" style={{ color: theme.primaryDark }} />
               </div>
-              <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-              <div className="text-gray-600 text-sm">Total réservations</div>
+              <div className="text-2xl font-bold" style={{ color: theme.logo }}>{stats.total}</div>
+              <div className="text-sm" style={{ color: theme.secondaryText }}>Total réservations</div>
             </Card>
             
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
               <div className="flex items-center justify-center mb-2">
-                <AlertCircle className="w-8 h-8 text-yellow-600" />
+                <AlertCircle className="w-8 h-8" style={{ color: '#CA8A04' }} />
               </div>
-              <div className="text-2xl font-bold text-yellow-600">{stats.en_attente}</div>
-              <div className="text-gray-600 text-sm">En attente</div>
+              <div className="text-2xl font-bold" style={{ color: '#CA8A04' }}>{stats.en_attente}</div>
+              <div className="text-sm" style={{ color: theme.secondaryText }}>En attente</div>
             </Card>
             
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
               <div className="flex items-center justify-center mb-2">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+                <CheckCircle className="w-8 h-8" style={{ color: '#16A34A' }} />
               </div>
-              <div className="text-2xl font-bold text-green-600">{stats.confirmee}</div>
-              <div className="text-gray-600 text-sm">Confirmées</div>
+              <div className="text-2xl font-bold" style={{ color: '#16A34A' }}>{stats.confirmee}</div>
+              <div className="text-sm" style={{ color: theme.secondaryText }}>Confirmées</div>
             </Card>
             
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
               <div className="flex items-center justify-center mb-2">
-                <XCircle className="w-8 h-8 text-red-600" />
+                <XCircle className="w-8 h-8" style={{ color: '#DC2626' }} />
               </div>
-              <div className="text-2xl font-bold text-red-600">{stats.annulee}</div>
-              <div className="text-gray-600 text-sm">Annulées</div>
+              <div className="text-2xl font-bold" style={{ color: '#DC2626' }}>{stats.annulee}</div>
+              <div className="text-sm" style={{ color: theme.secondaryText }}>Annulées</div>
             </Card>
             
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
               <div className="flex items-center justify-center mb-2">
-                <PlayCircle className="w-8 h-8 text-blue-600" />
+                <PlayCircle className="w-8 h-8" style={{ color: '#2563EB' }} />
               </div>
-              <div className="text-2xl font-bold text-blue-600">{stats.terminee}</div>
-              <div className="text-gray-600 text-sm">Terminées</div>
+              <div className="text-2xl font-bold" style={{ color: '#2563EB' }}>{stats.terminee}</div>
+              <div className="text-sm" style={{ color: theme.secondaryText }}>Terminées</div>
             </Card>
             
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
               <div className="flex items-center justify-center mb-2">
-                <TrendingUp className="w-8 h-8 text-purple-600" />
+                <TrendingUp className="w-8 h-8" style={{ color: '#7C3AED' }} />
               </div>
-              <div className="text-2xl font-bold text-purple-600">{stats.totalRevenue}€</div>
-              <div className="text-gray-600 text-sm">Chiffre d'affaires</div>
+              <div className="text-2xl font-bold" style={{ color: '#7C3AED' }}>{stats.totalRevenue}€</div>
+              <div className="text-sm" style={{ color: theme.secondaryText }}>Chiffre d'affaires</div>
             </Card>
           </div>
         )}
@@ -269,13 +292,18 @@ const ProReservations: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Barre de recherche */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: theme.secondaryText }} />
               <input
                 type="text"
                 placeholder="Rechercher par client, cours ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-blue-500"
+                style={{ 
+                  borderColor: theme.separator,
+                  backgroundColor: theme.lightBg,
+                  color: theme.logo 
+                }}
               />
             </div>
           </div>
@@ -286,6 +314,13 @@ const ProReservations: React.FC = () => {
               variant={filter === 'all' ? 'default' : 'outline'}
               className="cursor-pointer flex items-center"
               onClick={() => setFilter('all')}
+              style={filter === 'all' ? { 
+                backgroundColor: theme.primaryDark,
+                color: "white"
+              } : {
+                borderColor: theme.separator,
+                color: theme.secondaryText
+              }}
             >
               <Filter className="w-3 h-3 mr-1" />
               Toutes
@@ -294,6 +329,13 @@ const ProReservations: React.FC = () => {
               variant={filter === 'en_attente' ? 'default' : 'outline'}
               className="cursor-pointer flex items-center"
               onClick={() => setFilter('en_attente')}
+              style={filter === 'en_attente' ? { 
+                backgroundColor: '#CA8A04',
+                color: "white"
+              } : {
+                borderColor: theme.separator,
+                color: theme.secondaryText
+              }}
             >
               <AlertCircle className="w-3 h-3 mr-1" />
               En attente
@@ -302,6 +344,13 @@ const ProReservations: React.FC = () => {
               variant={filter === 'confirmee' ? 'default' : 'outline'}
               className="cursor-pointer flex items-center"
               onClick={() => setFilter('confirmee')}
+              style={filter === 'confirmee' ? { 
+                backgroundColor: '#16A34A',
+                color: "white"
+              } : {
+                borderColor: theme.separator,
+                color: theme.secondaryText
+              }}
             >
               <CheckCircle className="w-3 h-3 mr-1" />
               Confirmées
@@ -310,6 +359,13 @@ const ProReservations: React.FC = () => {
               variant={filter === 'annulee' ? 'default' : 'outline'}
               className="cursor-pointer flex items-center"
               onClick={() => setFilter('annulee')}
+              style={filter === 'annulee' ? { 
+                backgroundColor: '#DC2626',
+                color: "white"
+              } : {
+                borderColor: theme.separator,
+                color: theme.secondaryText
+              }}
             >
               <XCircle className="w-3 h-3 mr-1" />
               Annulées
@@ -318,6 +374,13 @@ const ProReservations: React.FC = () => {
               variant={filter === 'terminee' ? 'default' : 'outline'}
               className="cursor-pointer flex items-center"
               onClick={() => setFilter('terminee')}
+              style={filter === 'terminee' ? { 
+                backgroundColor: '#2563EB',
+                color: "white"
+              } : {
+                borderColor: theme.separator,
+                color: theme.secondaryText
+              }}
             >
               <PlayCircle className="w-3 h-3 mr-1" />
               Terminées
@@ -328,13 +391,13 @@ const ProReservations: React.FC = () => {
         {/* Liste des réservations */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: theme.primaryDark }}></div>
           </div>
         ) : filteredReservations.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune réservation</h3>
-            <p className="text-gray-600">
+          <Card className="p-12 text-center" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
+            <Calendar className="w-16 h-16 mx-auto mb-4" style={{ color: theme.separator }} />
+            <h3 className="text-xl font-semibold mb-2" style={{ color: theme.logo }}>Aucune réservation</h3>
+            <p style={{ color: theme.secondaryText }}>
               {filter === 'all' 
                 ? "Vous n'avez aucune réservation pour le moment." 
                 : `Aucune réservation avec le statut "${filter}".`
@@ -343,31 +406,38 @@ const ProReservations: React.FC = () => {
           </Card>
         ) : (
           <div className="space-y-4">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm" style={{ color: theme.secondaryText }}>
               {filteredReservations.length} réservation(s) trouvée(s)
             </div>
             
             {filteredReservations.map((reservation) => (
-              <Card key={reservation.id} className="p-6 hover:shadow-lg transition-shadow">
+              <Card 
+                key={reservation.id} 
+                className="p-6 hover:shadow-lg transition-shadow"
+                style={{ 
+                  backgroundColor: theme.lightBg,
+                  borderColor: theme.separator 
+                }}
+              >
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   {/* Informations réservation */}
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>
                           {reservation.courseTitle}
                         </h3>
                         <div className="flex items-center gap-4 mt-2 flex-wrap">
                           {getStatusBadge(reservation.status)}
-                          <span className="text-sm text-gray-600 flex items-center">
+                          <span className="text-sm flex items-center" style={{ color: theme.secondaryText }}>
                             <Calendar className="w-4 h-4 mr-1" />
                             {ReservationCoursService.formatDate(reservation.date)}
                           </span>
-                          <span className="text-sm text-gray-600 flex items-center">
+                          <span className="text-sm flex items-center" style={{ color: theme.secondaryText }}>
                             <Clock className="w-4 h-4 mr-1" />
                             {reservation.courseDuration} min
                           </span>
-                          <span className="text-sm font-semibold text-green-600 flex items-center">
+                          <span className="text-sm font-semibold flex items-center" style={{ color: '#16A34A' }}>
                             <Euro className="w-4 h-4 mr-1" />
                             {reservation.totalPrice}€
                           </span>
@@ -378,29 +448,43 @@ const ProReservations: React.FC = () => {
                     {/* Informations client */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                        <h4 className="font-medium mb-2 flex items-center" style={{ color: theme.logo }}>
                           <User className="w-4 h-4 mr-2" />
                           Client
                         </h4>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{reservation.userName}</span>
+                            <span className="font-medium" style={{ color: theme.logo }}>{reservation.userName}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-gray-500" />
+                            <Mail className="w-4 h-4" style={{ color: theme.secondaryText }} />
                             <a 
                               href={`mailto:${reservation.userEmail}`} 
-                              className="text-blue-600 hover:underline"
+                              className="hover:underline"
+                              style={{ color: theme.primaryDark }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.color = "#556B2F";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.color = theme.primaryDark;
+                              }}
                             >
                               {reservation.userEmail}
                             </a>
                           </div>
                           {reservation.user.phone && (
                             <div className="flex items-center gap-2">
-                              <Phone className="w-4 h-4 text-gray-500" />
+                              <Phone className="w-4 h-4" style={{ color: theme.secondaryText }} />
                               <a 
                                 href={`tel:${reservation.user.phone}`} 
-                                className="text-blue-600 hover:underline"
+                                className="hover:underline"
+                                style={{ color: theme.primaryDark }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.color = "#556B2F";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = theme.primaryDark;
+                                }}
                               >
                                 {reservation.user.phone}
                               </a>
@@ -410,28 +494,28 @@ const ProReservations: React.FC = () => {
                       </div>
 
                       <div>
-                        <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                        <h4 className="font-medium mb-2 flex items-center" style={{ color: theme.logo }}>
                           <BookOpen className="w-4 h-4 mr-2" />
                           Détails
                         </h4>
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-gray-500" />
+                          <div className="flex items-center gap-2" style={{ color: theme.secondaryText }}>
+                            <Users className="w-4 h-4" />
                             <strong>Participants:</strong> {reservation.participants} personne(s)
                           </div>
-                          <div>
+                          <div style={{ color: theme.secondaryText }}>
                             <strong>Réservé le:</strong> {new Date(reservation.createdAt).toLocaleDateString('fr-FR')}
                           </div>
-                          <div>
+                          <div style={{ color: theme.secondaryText }}>
                             <strong>Catégorie:</strong> {reservation.courseCategory}
                           </div>
                           {reservation.notes && (
-                            <div>
+                            <div style={{ color: theme.secondaryText }}>
                               <strong>Notes:</strong> {reservation.notes}
                             </div>
                           )}
                           {reservation.raisonAnnulation && (
-                            <div className="text-red-600">
+                            <div style={{ color: '#DC2626' }}>
                               <strong>Raison annulation:</strong> {reservation.raisonAnnulation}
                             </div>
                           )}
@@ -447,7 +531,16 @@ const ProReservations: React.FC = () => {
                         <Button
                           onClick={() => updateReservationStatus(reservation.id, 'confirmee')}
                           disabled={updating === reservation.id}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="text-white"
+                          style={{ 
+                            backgroundColor: '#16A34A',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#15803D';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#16A34A';
+                          }}
                         >
                           {updating === reservation.id ? (
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -467,7 +560,16 @@ const ProReservations: React.FC = () => {
                           }}
                           disabled={updating === reservation.id}
                           variant="outline"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
+                          style={{ 
+                            color: '#DC2626',
+                            borderColor: '#DC2626'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#FEE2E2';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
                         >
                           <X className="w-4 h-4 mr-2" />
                           Refuser
@@ -480,7 +582,16 @@ const ProReservations: React.FC = () => {
                         <Button
                           onClick={() => updateReservationStatus(reservation.id, 'terminee')}
                           disabled={updating === reservation.id}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="text-white"
+                          style={{ 
+                            backgroundColor: '#2563EB',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#1D4ED8';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#2563EB';
+                          }}
                         >
                           {updating === reservation.id ? (
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -500,7 +611,16 @@ const ProReservations: React.FC = () => {
                           }}
                           disabled={updating === reservation.id}
                           variant="outline"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
+                          style={{ 
+                            color: '#DC2626',
+                            borderColor: '#DC2626'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#FEE2E2';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
                         >
                           <X className="w-4 h-4 mr-2" />
                           Annuler
@@ -513,10 +633,19 @@ const ProReservations: React.FC = () => {
                         onClick={() => deleteReservation(reservation.id)}
                         disabled={updating === reservation.id}
                         variant="outline"
-                        className="text-red-600 border-red-600 hover:bg-red-50"
+                        style={{ 
+                          color: '#DC2626',
+                          borderColor: '#DC2626'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FEE2E2';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
                       >
                         {updating === reservation.id ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#DC2626' }}></div>
                         ) : (
                           <>
                             <Trash2 className="w-4 h-4 mr-2" />
@@ -531,6 +660,16 @@ const ProReservations: React.FC = () => {
                       onClick={() => setSelectedReservation(reservation)}
                       variant="outline"
                       className="flex items-center gap-2"
+                      style={{ 
+                        borderColor: theme.separator,
+                        color: theme.secondaryText
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
                       <Eye className="w-4 h-4" />
                       Détails
@@ -545,16 +684,26 @@ const ProReservations: React.FC = () => {
         {/* Modal de détails */}
         {selectedReservation && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ backgroundColor: theme.lightBg }}>
               <div className="p-6">
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Détails de la réservation</h3>
-                    <p className="text-gray-600 mt-2">{selectedReservation.courseTitle}</p>
+                    <h3 className="text-2xl font-bold mb-2" style={{ color: theme.logo }}>Détails de la réservation</h3>
+                    <p style={{ color: theme.secondaryText }}>{selectedReservation.courseTitle}</p>
                   </div>
                   <button
                     onClick={() => setSelectedReservation(null)}
-                    className="h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center"
+                    className="h-10 w-10 rounded-full flex items-center justify-center"
+                    style={{ 
+                      backgroundColor: `${theme.separator}20`,
+                      color: theme.secondaryText
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = `${theme.separator}40`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                    }}
                   >
                     ×
                   </button>
@@ -563,46 +712,46 @@ const ProReservations: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Informations cours */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <h4 className="font-semibold mb-3 flex items-center" style={{ color: theme.logo }}>
                       <BookOpen className="w-4 h-4 mr-2" />
                       Cours
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <div><strong>Titre:</strong> {selectedReservation.courseTitle}</div>
-                      <div><strong>Catégorie:</strong> {selectedReservation.courseCategory}</div>
-                      <div><strong>Durée:</strong> {selectedReservation.courseDuration} minutes</div>
-                      <div><strong>Prix:</strong> {selectedReservation.totalPrice}€</div>
-                      <div><strong>Participants:</strong> {selectedReservation.participants}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Titre:</strong> {selectedReservation.courseTitle}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Catégorie:</strong> {selectedReservation.courseCategory}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Durée:</strong> {selectedReservation.courseDuration} minutes</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Prix:</strong> {selectedReservation.totalPrice}€</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Participants:</strong> {selectedReservation.participants}</div>
                     </div>
                   </div>
 
                   {/* Informations client */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <h4 className="font-semibold mb-3 flex items-center" style={{ color: theme.logo }}>
                       <User className="w-4 h-4 mr-2" />
                       Client
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <div><strong>Nom:</strong> {selectedReservation.userName}</div>
-                      <div><strong>Email:</strong> {selectedReservation.userEmail}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Nom:</strong> {selectedReservation.userName}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Email:</strong> {selectedReservation.userEmail}</div>
                       {selectedReservation.user.phone && (
-                        <div><strong>Téléphone:</strong> {selectedReservation.user.phone}</div>
+                        <div style={{ color: theme.secondaryText }}><strong>Téléphone:</strong> {selectedReservation.user.phone}</div>
                       )}
-                      <div><strong>Date réservation:</strong> {new Date(selectedReservation.createdAt).toLocaleDateString('fr-FR')}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Date réservation:</strong> {new Date(selectedReservation.createdAt).toLocaleDateString('fr-FR')}</div>
                     </div>
                   </div>
 
                   {/* Statut et dates */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <h4 className="font-semibold mb-3 flex items-center" style={{ color: theme.logo }}>
                       <Calendar className="w-4 h-4 mr-2" />
                       Planning
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <div><strong>Date du cours:</strong> {ReservationCoursService.formatDate(selectedReservation.date)}</div>
-                      <div><strong>Statut:</strong> {ReservationCoursService.getStatusLabel(selectedReservation.status)}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Date du cours:</strong> {ReservationCoursService.formatDate(selectedReservation.date)}</div>
+                      <div style={{ color: theme.secondaryText }}><strong>Statut:</strong> {ReservationCoursService.getStatusLabel(selectedReservation.status)}</div>
                       {selectedReservation.dateAnnulation && (
-                        <div><strong>Annulé le:</strong> {new Date(selectedReservation.dateAnnulation).toLocaleDateString('fr-FR')}</div>
+                        <div style={{ color: theme.secondaryText }}><strong>Annulé le:</strong> {new Date(selectedReservation.dateAnnulation).toLocaleDateString('fr-FR')}</div>
                       )}
                     </div>
                   </div>
@@ -610,19 +759,19 @@ const ProReservations: React.FC = () => {
                   {/* Notes */}
                   {(selectedReservation.notes || selectedReservation.raisonAnnulation) && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <h4 className="font-semibold mb-3 flex items-center" style={{ color: theme.logo }}>
                         <FileText className="w-4 h-4 mr-2" />
                         Informations
                       </h4>
                       <div className="space-y-2 text-sm">
                         {selectedReservation.notes && (
-                          <div>
+                          <div style={{ color: theme.secondaryText }}>
                             <strong>Notes:</strong> 
-                            <p className="mt-1 text-gray-600">{selectedReservation.notes}</p>
+                            <p className="mt-1">{selectedReservation.notes}</p>
                           </div>
                         )}
                         {selectedReservation.raisonAnnulation && (
-                          <div className="text-red-600">
+                          <div style={{ color: '#DC2626' }}>
                             <strong>Raison annulation:</strong> 
                             <p className="mt-1">{selectedReservation.raisonAnnulation}</p>
                           </div>
@@ -632,10 +781,20 @@ const ProReservations: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+                <div className="flex justify-end gap-3 mt-6 pt-6 border-t" style={{ borderColor: theme.separator }}>
                   <Button
                     onClick={() => setSelectedReservation(null)}
                     variant="outline"
+                    style={{ 
+                      borderColor: theme.separator,
+                      color: theme.secondaryText
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
                     Fermer
                   </Button>
