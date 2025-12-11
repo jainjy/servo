@@ -39,6 +39,15 @@ import { toast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { demandeImmobilierAPI } from "@/lib/api";
 
+// Définition du thème
+const theme = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFFF",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+};
+
 const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: any) => {
   const [showActions, setShowActions] = useState(false);
   const [showStatusSelector, setShowStatusSelector] = useState(false);
@@ -71,33 +80,33 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
     switch ((status || "").toLowerCase()) {
       case "en attente":
       case "en cours":
-        return <Clock className="w-4 h-4" />;
+        return <Clock className="w-4 h-4" style={{ color: theme.secondaryText }} />;
       case "validée":
       case "validee":
       case "valide":
-        return <CheckCircle className="w-4 h-4" />;
+        return <CheckCircle className="w-4 h-4" style={{ color: '#16A34A' }} />;
       case "refusée":
       case "refusee":
       case "refus":
-        return <XCircle className="w-4 h-4" />;
+        return <XCircle className="w-4 h-4" style={{ color: '#DC2626' }} />;
       case "archivée":
       case "archivee":
       case "archive":
-        return <Archive className="w-4 h-4" />;
+        return <Archive className="w-4 h-4" style={{ color: theme.secondaryText }} />;
       case "terminée":
       case "terminee":
-        return <CheckSquare className="w-4 h-4" />;
+        return <CheckSquare className="w-4 h-4" style={{ color: '#2563EB' }} />;
       default:
-        return <Info className="w-4 h-4" />;
+        return <Info className="w-4 h-4" style={{ color: theme.secondaryText }} />;
     }
   };
 
   const statusOptions = [
-    { value: "en attente", label: "En attente", icon: <Clock className="w-4 h-4" />, color: "bg-yellow-100 text-yellow-800" },
-    { value: "validée", label: "Validée", icon: <CheckCircle className="w-4 h-4" />, color: "bg-green-100 text-green-800" },
-    { value: "refusée", label: "Refusée", icon: <XCircle className="w-4 h-4" />, color: "bg-red-100 text-red-800" },
-    { value: "archivée", label: "Archivée", icon: <Archive className="w-4 h-4" />, color: "bg-gray-100 text-gray-800" },
-    { value: "terminée", label: "Terminée", icon: <CheckSquare className="w-4 h-4" />, color: "bg-blue-100 text-blue-800" },
+    { value: "en attente", label: "En attente", icon: <Clock className="w-4 h-4" style={{ color: theme.secondaryText }} />, color: "bg-yellow-100 text-yellow-800" },
+    { value: "validée", label: "Validée", icon: <CheckCircle className="w-4 h-4" style={{ color: '#16A34A' }} />, color: "bg-green-100 text-green-800" },
+    { value: "refusée", label: "Refusée", icon: <XCircle className="w-4 h-4" style={{ color: '#DC2626' }} />, color: "bg-red-100 text-red-800" },
+    { value: "archivée", label: "Archivée", icon: <Archive className="w-4 h-4" style={{ color: theme.secondaryText }} />, color: "bg-gray-100 text-gray-800" },
+    { value: "terminée", label: "Terminée", icon: <CheckSquare className="w-4 h-4" style={{ color: '#2563EB' }} />, color: "bg-blue-100 text-blue-800" },
   ];
 
   const handleStatusSelect = (status: string) => {
@@ -106,13 +115,16 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
   };
 
   const renderDesktopView = () => (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
+    <div className="rounded-2xl border p-6 hover:shadow-lg transition-all duration-500 group relative overflow-hidden" style={{ 
+      backgroundColor: theme.lightBg,
+      borderColor: theme.separator 
+    }}>
       <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-6">
         {/* Section gauche - Image et informations de base */}
         <div className="flex-1 flex flex-col md:flex-row gap-6">
           {/* Image */}
           {demande.property?.images?.length > 0 ? (
-            <div className="relative overflow-hidden rounded-xl min-w-[150px] h-32 md:h-36">
+            <div className="relative overflow-hidden rounded-xl min-w-[150px] h-32 md:h-36" style={{ border: `1px solid ${theme.separator}` }}>
               <img
                 src={demande.property.images[0]}
                 alt={demande.property?.title || "Propriété"}
@@ -120,18 +132,24 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
               />
             </div>
           ) : (
-            <div className="min-w-[150px] h-32 md:h-36 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
-              <Home className="w-8 h-8" />
+            <div className="min-w-[150px] h-32 md:h-36 rounded-xl flex items-center justify-center shadow-lg" style={{ 
+              backgroundColor: `${theme.primaryDark}20`,
+              border: `1px solid ${theme.separator}`
+            }}>
+              <Home className="w-8 h-8" style={{ color: theme.primaryDark }} />
             </div>
           )}
 
           <div className="flex-1 space-y-3">
             <div>
-              <h3 className="font-bold text-gray-900 text-lg md:text-xl group-hover:text-blue-700 transition-colors duration-300 leading-tight">
+              <h3 className="font-bold text-lg md:text-xl group-hover:text-blue-700 transition-colors duration-300 leading-tight" style={{ color: theme.logo }}>
                 {demande.property?.title || "Demande de visite"}
               </h3>
-              <p className="text-gray-600 text-sm flex items-center gap-2 mt-2">
-                <span className="flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+              <p className="text-sm flex items-center gap-2 mt-2">
+                <span className="flex items-center gap-2 px-3 py-1 rounded-full" style={{ 
+                  backgroundColor: `${theme.separator}20`,
+                  color: theme.secondaryText 
+                }}>
                   <MapPin className="w-4 h-4" />
                   {formatAddress(demande)}
                 </span>
@@ -141,15 +159,15 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
             {/* Informations client pour artisan */}
             {isArtisan && demande.createdBy && (
               <div className="flex flex-wrap gap-4 mt-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm" style={{ color: theme.secondaryText }}>
                   <User className="w-4 h-4" />
                   <span>Client: {demande.createdBy.firstName} {demande.createdBy.lastName}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm" style={{ color: theme.secondaryText }}>
                   <Mail className="w-4 h-4" />
                   <span>{demande.contactEmail}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm" style={{ color: theme.secondaryText }}>
                   <Phone className="w-4 h-4" />
                   <span>{demande.contactTel}</span>
                 </div>
@@ -169,29 +187,35 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
               >
                 <div className="flex items-center gap-2">
                   {getStatusIcon(demande.statut)}
-                  <span className="capitalize">{demande.statut}</span>
+                  <span className="capitalize" style={{ color: getStatusTextColor(demande.statut) }}>
+                    {demande.statut}
+                  </span>
                 </div>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4" style={{ color: theme.secondaryText }} />
               </button>
 
               {showStatusSelector && (
-                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-2xl border border-gray-200 z-50 py-2">
+                <div className="absolute top-full mt-2 w-full rounded-lg shadow-2xl border py-2 z-50" style={{ 
+                  backgroundColor: theme.lightBg,
+                  borderColor: theme.separator 
+                }}>
                   {statusOptions.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => handleStatusSelect(option.value)}
                       className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors hover:bg-gray-50 ${option.value === demande.statut ? option.color : "text-gray-700"}`}
+                      style={{ color: theme.secondaryText }}
                     >
                       {option.icon}
                       {option.label}
-                      {option.value === demande.statut && <Check className="w-4 h-4 ml-auto" />}
+                      {option.value === demande.statut && <Check className="w-4 h-4 ml-auto" style={{ color: theme.primaryDark }} />}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="text-sm text-gray-500 flex items-center gap-2">
+            <div className="text-sm flex items-center gap-2" style={{ color: theme.secondaryText }}>
               <Calendar className="w-4 h-4" />
               <span>
                 {new Date(demande.createdAt || demande.date).toLocaleDateString("fr-FR")}
@@ -199,7 +223,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
             </div>
 
             {demande.dateSouhaitee && (
-              <div className="text-sm text-gray-500 flex items-center gap-2">
+              <div className="text-sm flex items-center gap-2" style={{ color: theme.secondaryText }}>
                 <Clock className="w-4 h-4" />
                 <span>
                   Visite: {new Date(demande.dateSouhaitee).toLocaleDateString("fr-FR")} à {demande.heureSouhaitee || "--:--"}
@@ -211,11 +235,20 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
       </div>
 
       {/* Boutons d'action */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-6 border-t border-gray-100">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-6 border-t" style={{ borderColor: theme.separator }}>
         <div className="flex flex-wrap gap-3">
           <Link
             to={`/immobilier/${demande.propertyId || demande.property?.id}`}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
+            className="text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
+            style={{ 
+              backgroundColor: theme.primaryDark,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.logo;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = theme.primaryDark;
+            }}
           >
             <Eye className="w-4 h-4" />
             Voir le bien
@@ -223,7 +256,17 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
 
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
+            className="px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
+            style={{ 
+              backgroundColor: `${theme.separator}20`,
+              color: theme.secondaryText
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = `${theme.separator}40`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+            }}
           >
             <FileText className="w-4 h-4" />
             {showDetails ? "Masquer détails" : "Voir détails"}
@@ -235,19 +278,39 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
             <div className="relative">
               <button
                 onClick={() => setShowActions(!showActions)}
-                className="p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all duration-300 hover:scale-105"
+                className="p-2.5 rounded-lg transition-all duration-300 hover:scale-105"
+                style={{ 
+                  backgroundColor: `${theme.separator}20`,
+                  color: theme.secondaryText
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${theme.separator}40`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                }}
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
 
               {showActions && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 py-2">
+                <div className="absolute right-0 top-full mt-2 w-48 rounded-lg shadow-2xl border py-2 z-50" style={{ 
+                  backgroundColor: theme.lightBg,
+                  borderColor: theme.separator 
+                }}>
                   <button
                     onClick={() => {
                       onRemove(demande.id);
                       setShowActions(false);
                     }}
-                    className="w-full px-4 py-3 text-left flex items-center gap-3 text-red-600 hover:bg-red-50 transition-colors"
+                    className="w-full px-4 py-3 text-left flex items-center gap-3 transition-colors"
+                    style={{ color: '#DC2626' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FEE2E2';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
                     <Trash2 className="w-4 h-4" />
                     Supprimer définitivement
@@ -261,41 +324,44 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
 
       {/* Détails supplémentaires */}
       {showDetails && (
-        <div className="mt-6 pt-6 border-t border-gray-100">
+        <div className="mt-6 pt-6 border-t" style={{ borderColor: theme.separator }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
-                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+              <h4 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: theme.logo }}>
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: theme.primaryDark }}></div>
                 Informations du client
               </h4>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">
-                    <span className="font-medium text-gray-800">
+                  <User className="w-4 h-4" style={{ color: theme.secondaryText }} />
+                  <span style={{ color: theme.secondaryText }}>
+                    <span className="font-medium" style={{ color: theme.logo }}>
                       {demande.contactPrenom} {demande.contactNom}
                     </span>
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">{demande.contactEmail}</span>
+                  <Mail className="w-4 h-4" style={{ color: theme.secondaryText }} />
+                  <span style={{ color: theme.secondaryText }}>{demande.contactEmail}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">{demande.contactTel}</span>
+                  <Phone className="w-4 h-4" style={{ color: theme.secondaryText }} />
+                  <span style={{ color: theme.secondaryText }}>{demande.contactTel}</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
-                <div className="w-1 h-4 bg-green-500 rounded-full"></div>
+              <h4 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: theme.logo }}>
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: theme.logo }}></div>
                 Message du client
               </h4>
-              <div className="text-gray-600 leading-relaxed text-sm bg-gray-50 p-4 rounded-lg">
+              <div className="leading-relaxed text-sm p-4 rounded-lg" style={{ 
+                backgroundColor: `${theme.separator}10`,
+                color: theme.secondaryText 
+              }}>
                 <div className="flex items-start gap-3">
-                  <MessageCircle className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+                  <MessageCircle className="w-4 h-4 mt-1 flex-shrink-0" style={{ color: theme.secondaryText }} />
                   <span>{formatMessage(demande.description)}</span>
                 </div>
               </div>
@@ -318,14 +384,17 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
   );
 
   const renderMobileView = () => (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 hover:border-blue-200 hover:shadow-lg transition-all duration-500">
+    <div className="rounded-xl border p-4 hover:shadow-lg transition-all duration-500" style={{ 
+      backgroundColor: theme.lightBg,
+      borderColor: theme.separator 
+    }}>
       {/* En-tête mobile */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="font-bold text-gray-900 text-base mb-2">
+          <h3 className="font-bold text-base mb-2" style={{ color: theme.logo }}>
             {demande.property?.title || "Demande de visite"}
           </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+          <div className="flex items-center gap-2 text-sm mb-3" style={{ color: theme.secondaryText }}>
             <MapPin className="w-4 h-4" />
             <span className="truncate">{formatAddress(demande)}</span>
           </div>
@@ -334,7 +403,8 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
         {/* Bouton pour voir détails */}
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="p-2 text-gray-500"
+          className="p-2"
+          style={{ color: theme.secondaryText }}
         >
           {showDetails ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         </button>
@@ -350,18 +420,22 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
           >
             <div className="flex items-center gap-2">
               {getStatusIcon(demande.statut)}
-              <span className="text-sm capitalize">{demande.statut}</span>
+              <span className="text-sm capitalize" style={{ color: getStatusTextColor(demande.statut) }}>{demande.statut}</span>
             </div>
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-4 h-4" style={{ color: theme.secondaryText }} />
           </button>
 
           {showStatusSelector && (
-            <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+            <div className="absolute top-full mt-1 w-full rounded-lg shadow-lg border py-1 z-50" style={{ 
+              backgroundColor: theme.lightBg,
+              borderColor: theme.separator 
+            }}>
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleStatusSelect(option.value)}
                   className={`w-full px-3 py-2 text-left flex items-center gap-2 text-sm ${option.value === demande.statut ? option.color : "text-gray-700"}`}
+                  style={{ color: theme.secondaryText }}
                 >
                   {option.icon}
                   {option.label}
@@ -372,7 +446,7 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
         </div>
 
         {/* Date et heure */}
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm" style={{ color: theme.secondaryText }}>
           <Calendar className="w-4 h-4" />
           <span>{new Date(demande.createdAt || demande.date).toLocaleDateString("fr-FR")}</span>
         </div>
@@ -382,7 +456,16 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
       <div className="flex gap-2 mb-4">
         <Link
           to={`/immobilier/${demande.propertyId || demande.property?.id}`}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+          className="flex-1 text-white px-3 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
+          style={{ 
+            backgroundColor: theme.primaryDark,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.logo;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = theme.primaryDark;
+          }}
         >
           <Eye className="w-4 h-4" />
           Voir
@@ -391,7 +474,17 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
         {isArtisan && (
           <button
             onClick={() => onRemove(demande.id)}
-            className="px-3 py-2 rounded-lg font-medium text-sm flex items-center gap-2 border border-red-200 text-red-600 hover:bg-red-50"
+            className="px-3 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
+            style={{ 
+              border: `1px solid ${theme.separator}`,
+              color: '#DC2626'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#FEE2E2';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -400,22 +493,22 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
 
       {/* Détails dépliables */}
       {showDetails && (
-        <div className="pt-4 border-t border-gray-100 space-y-4">
+        <div className="pt-4 border-t space-y-4" style={{ borderColor: theme.separator }}>
           <div>
-            <h4 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-3">
+            <h4 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: theme.logo }}>
               Client
             </h4>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-2" style={{ color: theme.secondaryText }}>
+                <User className="w-4 h-4" />
                 <span>{demande.contactPrenom} {demande.contactNom}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-2" style={{ color: theme.secondaryText }}>
+                <Phone className="w-4 h-4" />
                 <span>{demande.contactTel}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-2" style={{ color: theme.secondaryText }}>
+                <Mail className="w-4 h-4" />
                 <span className="truncate">{demande.contactEmail}</span>
               </div>
             </div>
@@ -423,10 +516,10 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
 
           {demande.description && (
             <div>
-              <h4 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: theme.logo }}>
                 Message
               </h4>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm leading-relaxed" style={{ color: theme.secondaryText }}>
                 {formatMessage(demande.description)}
               </p>
             </div>
@@ -434,16 +527,16 @@ const DemandeCard = ({ demande, onStatusChange, onRemove, isArtisan = false }: a
 
           {demande.dateSouhaitee && (
             <div>
-              <h4 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: theme.logo }}>
                 Visite prévue
               </h4>
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center gap-2 text-sm" style={{ color: theme.secondaryText }}>
+                <Calendar className="w-4 h-4" />
                 <span>{new Date(demande.dateSouhaitee).toLocaleDateString("fr-FR")}</span>
                 {demande.heureSouhaitee && (
                   <>
                     <span>•</span>
-                    <Clock className="w-4 h-4 text-gray-400" />
+                    <Clock className="w-4 h-4" />
                     <span>{demande.heureSouhaitee}</span>
                   </>
                 )}
@@ -494,6 +587,31 @@ const getStatusColor = (status: string) => {
       return "bg-blue-50 text-blue-700 border-blue-200";
     default:
       return "bg-gray-50 text-gray-700 border-gray-200";
+  }
+};
+
+const getStatusTextColor = (status: string) => {
+  switch ((status || "").toLowerCase()) {
+    case "en attente":
+    case "en cours":
+      return '#CA8A04'; // Jaune
+    case "validée":
+    case "validee":
+    case "valide":
+      return '#16A34A'; // Vert
+    case "refusée":
+    case "refusee":
+    case "refus":
+      return '#DC2626'; // Rouge
+    case "archivée":
+    case "archivee":
+    case "archive":
+      return theme.secondaryText; // Marron du thème
+    case "terminée":
+    case "terminee":
+      return '#2563EB'; // Bleu
+    default:
+      return theme.secondaryText;
   }
 };
 
@@ -778,8 +896,8 @@ const ListeDemandesImmobilier = () => {
 
   if (!isAuthenticated)
     return (
-      <div className="min-h-screen mt-12 bg-gray-50 p-4 md:p-6 flex items-center justify-center">
-        <p className="text-gray-600">
+      <div className="min-h-screen mt-12 p-4 md:p-6 flex items-center justify-center" style={{ backgroundColor: `${theme.separator}20` }}>
+        <p style={{ color: theme.secondaryText }}>
           Veuillez vous connecter pour voir les demandes.
         </p>
       </div>
@@ -789,28 +907,28 @@ const ListeDemandesImmobilier = () => {
     return <LoadingSpinner text="Chargement des demandes immobilières" />;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: `${theme.separator}20` }}>
       <div className="max-w-7xl mx-auto">
         {/* En-tête responsive */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
               {isArtisan ? (
-                <Building2 className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                <Building2 className="w-6 h-6 md:w-8 md:h-8" style={{ color: theme.primaryDark }} />
               ) : (
-                <User className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+                <User className="w-6 h-6 md:w-8 md:h-8" style={{ color: theme.primaryDark }} />
               )}
-              <h1 className="text-xl md:text-3xl font-bold text-gray-900">
+              <h1 className="text-xl md:text-3xl font-bold" style={{ color: theme.logo }}>
                 {isArtisan ? "Réservations" : "Mes demandes"}
               </h1>
             </div>
-            <p className="text-gray-600 text-sm md:text-base">
+            <p style={{ color: theme.secondaryText }} className="text-sm md:text-base">
               {isArtisan 
                 ? "Gérez les réservations de vos propriétés" 
                 : "Gérez vos demandes de visite"}
             </p>
-            <p className="text-xs md:text-sm text-gray-500 mt-1">
-              <span className="font-semibold text-gray-700">
+            <p className="text-xs md:text-sm mt-1" style={{ color: theme.secondaryText }}>
+              <span className="font-semibold" style={{ color: theme.logo }}>
                 {demandes.length} demande(s)
               </span>
             </p>
@@ -821,7 +939,20 @@ const ListeDemandesImmobilier = () => {
             <button
               onClick={handleExport}
               disabled={filteredDemandes.length === 0}
-              className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 md:flex-none text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ 
+                backgroundColor: theme.primaryDark,
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.backgroundColor = theme.logo;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.backgroundColor = theme.primaryDark;
+                }
+              }}
             >
               <Download className="w-4 h-4" />
               <span className="hidden md:inline">Exporter</span>
@@ -829,7 +960,16 @@ const ListeDemandesImmobilier = () => {
             </button>
             <button
               onClick={loadDemandes}
-              className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              className="flex-1 md:flex-none text-white px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              style={{ 
+                backgroundColor: theme.secondaryText,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#6B240B';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = theme.secondaryText;
+              }}
             >
               <RefreshCw className="w-4 h-4" />
               <span className="hidden md:inline">Actualiser</span>
@@ -847,35 +987,48 @@ const ListeDemandesImmobilier = () => {
             { label: "Refusées", value: stats.refusees, color: "bg-red-50" },
             { label: "Archivées", value: stats.archivees, color: "bg-gray-50" },
           ].map((stat, index) => (
-            <div key={index} className={`${stat.color} rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 text-center shadow-sm`}>
-              <div className="text-lg md:text-2xl font-bold text-gray-900">{stat.value}</div>
-              <div className="text-xs md:text-sm text-gray-600">{stat.label}</div>
+            <div key={index} className={`${stat.color} rounded-lg md:rounded-xl p-3 md:p-4 border text-center shadow-sm`} style={{ 
+              borderColor: theme.separator 
+            }}>
+              <div className="text-lg md:text-2xl font-bold" style={{ color: theme.logo }}>{stat.value}</div>
+              <div className="text-xs md:text-sm" style={{ color: theme.secondaryText }}>{stat.label}</div>
             </div>
           ))}
         </div>
 
         {/* Barre de recherche responsive */}
-        <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-200 mb-4 md:mb-6 shadow-sm">
+        <div className="rounded-lg md:rounded-xl p-3 md:p-4 border mb-4 md:mb-6 shadow-sm" style={{ 
+          backgroundColor: theme.lightBg,
+          borderColor: theme.separator 
+        }}>
           <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
             <div className="flex-1 w-full relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: theme.secondaryText }} />
               <input
                 type="text"
                 placeholder={isArtisan ? "Rechercher client, bien..." : "Rechercher bien, date..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:border-blue-500 text-sm md:text-base"
+                style={{ 
+                  borderColor: theme.separator,
+                  backgroundColor: theme.lightBg,
+                  color: theme.logo 
+                }}
               />
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <Filter className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-600">Filtrer:</span>
+              <Filter className="w-4 h-4" style={{ color: theme.secondaryText }} />
+              <span className="text-sm" style={{ color: theme.secondaryText }}>Filtrer:</span>
             </div>
           </div>
         </div>
 
         {/* Tabs de filtrage responsive */}
-        <div className="flex items-center space-x-1 bg-white rounded-lg md:rounded-xl p-1 md:p-2 border border-gray-200 mb-4 md:mb-8 shadow-sm overflow-x-auto">
+        <div className="flex items-center space-x-1 rounded-lg md:rounded-xl p-1 md:p-2 border mb-4 md:mb-8 shadow-sm overflow-x-auto" style={{ 
+          backgroundColor: theme.lightBg,
+          borderColor: theme.separator 
+        }}>
           {[
             { id: "all", label: "Toutes", count: stats.total },
             { id: "en_attente", label: "En attente", count: stats.enAttente },
@@ -888,16 +1041,31 @@ const ListeDemandesImmobilier = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 md:px-6 py-2 md:py-3 text-xs md:text-sm font-medium rounded-md md:rounded-lg transition-all duration-200 flex items-center gap-1 md:gap-2 whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "text-white shadow-md"
+                  : "hover:bg-gray-100"
               }`}
+              style={activeTab === tab.id ? { 
+                backgroundColor: theme.primaryDark 
+              } : { 
+                color: theme.secondaryText 
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== tab.id) {
+                  e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== tab.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
               {tab.label}
               <span className={`px-1.5 md:px-2 py-0.5 md:py-1 text-xs rounded-full ${
                 activeTab === tab.id
                   ? "bg-white/20 text-white"
-                  : "bg-gray-200 text-gray-600"
-              }`}>
+                  : "bg-gray-200"
+              }`} style={activeTab !== tab.id ? { color: theme.secondaryText } : {}}>
                 {tab.count}
               </span>
             </button>
@@ -917,19 +1085,24 @@ const ListeDemandesImmobilier = () => {
               />
             ))
           ) : (
-            <div className="bg-white rounded-lg md:rounded-2xl border border-gray-200 p-6 md:p-12 text-center shadow-sm">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="rounded-lg md:rounded-2xl border p-6 md:p-12 text-center shadow-sm" style={{ 
+              backgroundColor: theme.lightBg,
+              borderColor: theme.separator 
+            }}>
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ 
+                backgroundColor: `${theme.separator}20`
+              }}>
                 {isArtisan ? (
-                  <Building className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
+                  <Building className="w-6 h-6 md:w-8 md:h-8" style={{ color: theme.secondaryText }} />
                 ) : (
-                  <Calendar className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
+                  <Calendar className="w-6 h-6 md:w-8 md:h-8" style={{ color: theme.secondaryText }} />
                 )}
               </div>
-              <h4 className="text-gray-700 text-base md:text-lg font-medium mb-2">
+              <h4 className="text-base md:text-lg font-medium mb-2" style={{ color: theme.logo }}>
                 Aucune demande{" "}
                 {activeTab !== "all" ? "dans cette catégorie" : isArtisan ? "pour vos biens" : "de visite"}
               </h4>
-              <p className="text-gray-500 text-sm md:text-base mb-4 md:mb-6">
+              <p className="mb-4 md:mb-6 text-sm md:text-base" style={{ color: theme.secondaryText }}>
                 {isArtisan 
                   ? "Aucun client n'a encore réservé de visite pour vos propriétés."
                   : "Vous n'avez pas encore demandé de visite pour un bien immobilier."}
@@ -937,7 +1110,16 @@ const ListeDemandesImmobilier = () => {
               {!isArtisan && (
                 <Link
                   to="/immobilier"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center gap-2"
+                  className="text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base inline-flex items-center gap-2"
+                  style={{ 
+                    backgroundColor: theme.primaryDark,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.logo;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.primaryDark;
+                  }}
                 >
                   <Home className="w-4 h-4" />
                   Voir les biens

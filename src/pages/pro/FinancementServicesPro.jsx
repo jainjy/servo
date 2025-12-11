@@ -168,9 +168,9 @@ const FinancementServicesPro = () => {
 
   const getStatusBadge = (service) => {
     if (!service.isActive) {
-      return <Badge variant="destructive">Inactif</Badge>;
+      return <Badge style={{ backgroundColor: "#6B8E23" }}>Inactif</Badge>;
     }
-    return <Badge variant="default">Actif</Badge>;
+    return <Badge style={{ backgroundColor: "#6B8E23" }}>Actif</Badge>;
   };
 
   if (isLoadingServices || isLoadingPartenaires) {
@@ -180,24 +180,26 @@ const FinancementServicesPro = () => {
   }
 
   return (
-    <div className="p-1 lg:p-0 space-y-6">
+    <div className="p-1 lg:p-0 space-y-6" style={{ backgroundColor: "#FFFFFF0" }}>
       <div className="grid gap-4 lg:flex justify-between items-center">
         <div>
-          <h1 className="text-lg lg:text-3xl font-bold">Services Financiers</h1>
+          <h1 className="text-lg lg:text-3xl font-bold" style={{ color: "#8B4513" }}>
+            Services Financiers
+          </h1>
           <p className="text-muted-foreground">
             Gérez vos services financiers et produits de crédit
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button style={{ backgroundColor: "#556B2F", borderColor: "#556B2F" }}>
               <Plus className="w-4 h-4 mr-2" />
               Nouveau Service
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ borderColor: "#D3D3D3" }}>
             <DialogHeader>
-              <DialogTitle>Créer un service financier</DialogTitle>
+              <DialogTitle style={{ color: "#8B4513" }}>Créer un service financier</DialogTitle>
               <DialogDescription>
                 Ajoutez un nouveau service financier à votre catalogue
               </DialogDescription>
@@ -213,7 +215,7 @@ const FinancementServicesPro = () => {
       </div>
 
       {/* Filtres */}
-      <Card>
+      <Card style={{ borderColor: "#D3D3D3" }}>
         <CardContent className="p-4">
           <div className="flex gap-4 flex-col md:flex-row">
             <div className="flex-1">
@@ -226,16 +228,17 @@ const FinancementServicesPro = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
+                  style={{ borderColor: "#D3D3D3" }}
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="type">Type de service</Label>
               <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-[200px]" style={{ borderColor: "#D3D3D3" }}>
                   <SelectValue placeholder="Tous les types" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent style={{ borderColor: "#D3D3D3" }}>
                   <SelectItem value="all">Tous les types</SelectItem>
                   {serviceTypes.map((type) => (
                     <SelectItem key={type} value={type}>
@@ -250,9 +253,9 @@ const FinancementServicesPro = () => {
       </Card>
 
       {/* Grille des services */}
-      <Card>
+      <Card style={{ borderColor: "#D3D3D3" }}>
         <CardHeader>
-          <CardTitle>Mes Services Financiers</CardTitle>
+          <CardTitle style={{ color: "#8B4513" }}>Mes Services Financiers</CardTitle>
           <CardDescription>
             {filteredServices.length} service(s) trouvé(s)
           </CardDescription>
@@ -261,11 +264,13 @@ const FinancementServicesPro = () => {
           {filteredServices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredServices.map((service) => (
-                <Card key={service.id} className="flex flex-col">
+                <Card key={service.id} className="flex flex-col" style={{ borderColor: "#D3D3D3" }}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{service.nom}</CardTitle>
+                        <CardTitle className="text-lg" style={{ color: "#8B4513" }}>
+                          {service.nom}
+                        </CardTitle>
                         <CardDescription className="mt-1">
                           {service.partenaire?.nom || "-"}
                         </CardDescription>
@@ -282,7 +287,9 @@ const FinancementServicesPro = () => {
                       <div>
                         <span className="text-muted-foreground">Catégorie:</span>
                         <p className="mt-1">
-                          <Badge variant="outline">{service.categorie}</Badge>
+                          <Badge variant="outline" style={{ borderColor: "#D3D3D3" }}>
+                            {service.categorie}
+                          </Badge>
                         </p>
                       </div>
                       {service.taux && (
@@ -309,7 +316,7 @@ const FinancementServicesPro = () => {
                       )}
                     </div>
                   </CardContent>
-                  <div className="border-t p-3 flex gap-2">
+                  <div className="border-t p-3 flex gap-2" style={{ borderColor: "#D3D3D3" }}>
                     <Button
                       variant="outline"
                       size="sm"
@@ -318,6 +325,7 @@ const FinancementServicesPro = () => {
                         setSelectedService(service);
                         setIsEditDialogOpen(true);
                       }}
+                      style={{ borderColor: "#D3D3D3" }}
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier
@@ -328,6 +336,7 @@ const FinancementServicesPro = () => {
                       className="flex-1"
                       onClick={() => handleDelete(service)}
                       disabled={deleteMutation.isLoading}
+                      style={{ borderColor: "#D3D3D3" }}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Supprimer
@@ -346,9 +355,9 @@ const FinancementServicesPro = () => {
 
       {/* Dialog d'édition */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ borderColor: "#D3D3D3" }}>
           <DialogHeader>
-            <DialogTitle>Modifier le service financier</DialogTitle>
+            <DialogTitle style={{ color: "#8B4513" }}>Modifier le service financier</DialogTitle>
             <DialogDescription>
               Modifiez les informations de votre service financier
             </DialogDescription>
@@ -483,7 +492,7 @@ const ServiceForm = ({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="nom">Nom du service *</Label>
+          <Label htmlFor="nom" style={{ color: "#8B4513" }}>Nom du service *</Label>
           <Input
             id="nom"
             value={formData.nom}
@@ -491,11 +500,12 @@ const ServiceForm = ({
               setFormData((prev) => ({ ...prev, nom: e.target.value }))
             }
             required
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="partenaireId">Partenaire *</Label>
+          <Label htmlFor="partenaireId" style={{ color: "#8B4513" }}>Partenaire *</Label>
           <Select
             value={formData.partenaireId}
             onValueChange={(value) =>
@@ -503,10 +513,10 @@ const ServiceForm = ({
             }
             required
           >
-            <SelectTrigger>
+            <SelectTrigger style={{ borderColor: "#D3D3D3" }}>
               <SelectValue placeholder="Sélectionner un partenaire" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ borderColor: "#D3D3D3" }}>
               {partenaires && partenaires.length > 0 ? (
                 partenaires.map((partenaire) => (
                   <SelectItem
@@ -526,7 +536,7 @@ const ServiceForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="type">Type de service *</Label>
+          <Label htmlFor="type" style={{ color: "#8B4513" }}>Type de service *</Label>
           <Select
             value={formData.type}
             onValueChange={(value) =>
@@ -534,10 +544,10 @@ const ServiceForm = ({
             }
             required
           >
-            <SelectTrigger>
+            <SelectTrigger style={{ borderColor: "#D3D3D3" }}>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ borderColor: "#D3D3D3" }}>
               {serviceTypes.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
@@ -548,7 +558,7 @@ const ServiceForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="categorie">Catégorie *</Label>
+          <Label htmlFor="categorie" style={{ color: "#8B4513" }}>Catégorie *</Label>
           <Select
             value={formData.categorie}
             onValueChange={(value) =>
@@ -556,10 +566,10 @@ const ServiceForm = ({
             }
             required
           >
-            <SelectTrigger>
+            <SelectTrigger style={{ borderColor: "#D3D3D3" }}>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ borderColor: "#D3D3D3" }}>
               {categories.map((cat) => (
                 <SelectItem key={cat.value} value={cat.value}>
                   {cat.label}
@@ -571,7 +581,7 @@ const ServiceForm = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" style={{ color: "#8B4513" }}>Description</Label>
         <Textarea
           id="description"
           value={formData.description}
@@ -579,12 +589,13 @@ const ServiceForm = ({
             setFormData((prev) => ({ ...prev, description: e.target.value }))
           }
           rows={3}
+          style={{ borderColor: "#D3D3D3" }}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="taux">Taux d'intérêt (%)</Label>
+          <Label htmlFor="taux" style={{ color: "#8B4513" }}>Taux d'intérêt (%)</Label>
           <Input
             id="taux"
             type="number"
@@ -594,11 +605,12 @@ const ServiceForm = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, taux: e.target.value }))
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="fraisDossier">Frais de dossier (€)</Label>
+          <Label htmlFor="fraisDossier" style={{ color: "#8B4513" }}>Frais de dossier (€)</Label>
           <Input
             id="fraisDossier"
             type="number"
@@ -608,11 +620,12 @@ const ServiceForm = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, fraisDossier: e.target.value }))
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dureeMin">Durée min (mois)</Label>
+          <Label htmlFor="dureeMin" style={{ color: "#8B4513" }}>Durée min (mois)</Label>
           <Input
             id="dureeMin"
             type="number"
@@ -621,11 +634,12 @@ const ServiceForm = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, dureeMin: e.target.value }))
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dureeMax">Durée max (mois)</Label>
+          <Label htmlFor="dureeMax" style={{ color: "#8B4513" }}>Durée max (mois)</Label>
           <Input
             id="dureeMax"
             type="number"
@@ -634,11 +648,12 @@ const ServiceForm = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, dureeMax: e.target.value }))
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="montantMin">Montant min (€)</Label>
+          <Label htmlFor="montantMin" style={{ color: "#8B4513" }}>Montant min (€)</Label>
           <Input
             id="montantMin"
             type="number"
@@ -648,11 +663,12 @@ const ServiceForm = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, montantMin: e.target.value }))
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="montantMax">Montant max (€)</Label>
+          <Label htmlFor="montantMax" style={{ color: "#8B4513" }}>Montant max (€)</Label>
           <Input
             id="montantMax"
             type="number"
@@ -662,12 +678,13 @@ const ServiceForm = ({
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, montantMax: e.target.value }))
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="delaiTraitement">Délai de traitement</Label>
+        <Label htmlFor="delaiTraitement" style={{ color: "#8B4513" }}>Délai de traitement</Label>
         <Input
           id="delaiTraitement"
           value={formData.delaiTraitement}
@@ -678,11 +695,12 @@ const ServiceForm = ({
             }))
           }
           placeholder="ex: 48h, 1 semaine"
+          style={{ borderColor: "#D3D3D3" }}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="conditions">Conditions particulières</Label>
+        <Label htmlFor="conditions" style={{ color: "#8B4513" }}>Conditions particulières</Label>
         <Textarea
           id="conditions"
           value={formData.conditions}
@@ -690,6 +708,7 @@ const ServiceForm = ({
             setFormData((prev) => ({ ...prev, conditions: e.target.value }))
           }
           rows={2}
+          style={{ borderColor: "#D3D3D3" }}
         />
       </div>
 
@@ -701,11 +720,11 @@ const ServiceForm = ({
             setFormData((prev) => ({ ...prev, assuranceObligatoire: checked }))
           }
         />
-        <Label htmlFor="assuranceObligatoire">Assurance obligatoire</Label>
+        <Label htmlFor="assuranceObligatoire" style={{ color: "#8B4513" }}>Assurance obligatoire</Label>
       </div>
 
       <div className="space-y-2">
-        <Label>Avantages</Label>
+        <Label style={{ color: "#8B4513" }}>Avantages</Label>
         <div className="flex gap-2">
           <Input
             value={newAvantage}
@@ -714,8 +733,9 @@ const ServiceForm = ({
             onKeyPress={(e) =>
               e.key === "Enter" && (e.preventDefault(), handleAddAvantage())
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
-          <Button type="button" onClick={handleAddAvantage}>
+          <Button type="button" onClick={handleAddAvantage} style={{ backgroundColor: "#6B8E23", borderColor: "#6B8E23" }}>
             Ajouter
           </Button>
         </div>
@@ -725,6 +745,7 @@ const ServiceForm = ({
               key={index}
               variant="secondary"
               className="flex items-center gap-1"
+              style={{ backgroundColor: "#6B8E23" }}
             >
               {avantage}
               <button
@@ -740,7 +761,7 @@ const ServiceForm = ({
       </div>
 
       <div className="space-y-2">
-        <Label>Documents requis</Label>
+        <Label style={{ color: "#8B4513" }}>Documents requis</Label>
         <div className="flex gap-2">
           <Input
             value={newDocument}
@@ -749,8 +770,9 @@ const ServiceForm = ({
             onKeyPress={(e) =>
               e.key === "Enter" && (e.preventDefault(), handleAddDocument())
             }
+            style={{ borderColor: "#D3D3D3" }}
           />
-          <Button type="button" onClick={handleAddDocument}>
+          <Button type="button" onClick={handleAddDocument} style={{ backgroundColor: "#6B8E23", borderColor: "#6B8E23" }}>
             Ajouter
           </Button>
         </div>
@@ -760,6 +782,7 @@ const ServiceForm = ({
               key={index}
               variant="outline"
               className="flex items-center gap-1"
+              style={{ borderColor: "#D3D3D3" }}
             >
               {doc}
               <button
@@ -775,7 +798,7 @@ const ServiceForm = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ordreAffichage">Ordre d'affichage</Label>
+        <Label htmlFor="ordreAffichage" style={{ color: "#8B4513" }}>Ordre d'affichage</Label>
         <Input
           id="ordreAffichage"
           type="number"
@@ -787,14 +810,15 @@ const ServiceForm = ({
               ordreAffichage: parseInt(e.target.value) || 0,
             }))
           }
+          style={{ borderColor: "#D3D3D3" }}
         />
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} style={{ borderColor: "#D3D3D3" }}>
           Annuler
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} style={{ backgroundColor: "#556B2F", borderColor: "#556B2F" }}>
           {isLoading ? "Enregistrement..." : service ? "Modifier" : "Créer"}
         </Button>
       </div>
