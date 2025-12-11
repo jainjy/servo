@@ -59,6 +59,27 @@ interface User {
   userType?: string | null;
 }
 
+// Palette de couleurs du thème
+const colors = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFF0",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+  primaryLight: "#8FBC8F",
+  secondaryLight: "#A0522D",
+  cardBg: "#FFFFFF",
+  textPrimary: "#2C3E50",
+  textSecondary: "#5D6D7E",
+  success: "#27AE60",
+  warning: "#F39C12",
+  error: "#E74C3C",
+  accentGold: "#D4AF37",
+  gradient1: "linear-gradient(135deg, #556B2F 0%, #6B8E23 100%)",
+  gradient2: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+  gradient3: "linear-gradient(135deg, #6B8E23 0%, #27AE60 100%)",
+};
+
 export function UsersTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -169,10 +190,10 @@ export function UsersTable() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <Users className="h-6 w-6 text-primary" />
+                <Users className="h-6 w-6" style={{ color: colors.primaryDark }} />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: colors.primaryDark }}>
                   Gestion des Utilisateurs
                 </h1>
                 <p className="text-sm text-muted-foreground">
@@ -191,6 +212,16 @@ export function UsersTable() {
                   size="sm"
                   onClick={() => setViewMode("grid")}
                   className="h-8 px-3"
+                  style={
+                    viewMode === "grid"
+                      ? {
+                          backgroundColor: colors.primaryDark,
+                          color: colors.lightBg,
+                        }
+                      : {
+                          color: colors.primaryDark,
+                        }
+                  }
                 >
                   Grid
                 </Button>
@@ -199,12 +230,36 @@ export function UsersTable() {
                   size="sm"
                   onClick={() => setViewMode("list")}
                   className="h-8 px-3"
+                  style={
+                    viewMode === "list"
+                      ? {
+                          backgroundColor: colors.primaryDark,
+                          color: colors.lightBg,
+                        }
+                      : {
+                          color: colors.primaryDark,
+                        }
+                  }
                 >
                   List
                 </Button>
               </div>
 
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                style={{
+                  borderColor: colors.primaryDark,
+                  color: colors.primaryDark,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
                 <Download className="h-4 w-4" />
                 Exporter
               </Button>
@@ -229,6 +284,16 @@ export function UsersTable() {
                 <Button
                   variant="outline"
                   className="border-border bg-transparent whitespace-nowrap gap-2 flex-1 sm:flex-none"
+                  style={{
+                    borderColor: colors.primaryDark,
+                    color: colors.primaryDark,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                 >
                   <Filter className="h-4 w-4" />
                   Filtres
@@ -238,6 +303,16 @@ export function UsersTable() {
                 <Button
                   variant="outline"
                   className="border-border bg-transparent whitespace-nowrap gap-2 flex-1 sm:flex-none"
+                  style={{
+                    borderColor: colors.primaryDark,
+                    color: colors.primaryDark,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                 >
                   <UserCheck className="h-4 w-4" />
                   Rôle
@@ -251,7 +326,10 @@ export function UsersTable() {
               <div className="flex items-center gap-2">
                 <Badge
                   variant="secondary"
-                  className="bg-green-100 text-green-800"
+                  style={{
+                    backgroundColor: `${colors.primaryDark}20`,
+                    color: colors.primaryDark,
+                  }}
                 >
                   {users.filter((u) => u.status === "active").length} Actifs
                 </Badge>
@@ -259,7 +337,10 @@ export function UsersTable() {
               <div className="flex items-center gap-2">
                 <Badge
                   variant="secondary"
-                  className="bg-gray-100 text-gray-800"
+                  style={{
+                    backgroundColor: `${colors.textSecondary}15`,
+                    color: colors.textSecondary,
+                  }}
                 >
                   {users.filter((u) => u.status === "inactive").length} Inactifs
                 </Badge>
@@ -267,7 +348,10 @@ export function UsersTable() {
               <div className="flex items-center gap-2">
                 <Badge
                   variant="secondary"
-                  className="bg-blue-100 text-blue-800"
+                  style={{
+                    backgroundColor: `${colors.primaryDark}15`,
+                    color: colors.primaryDark,
+                  }}
                 >
                   {users.filter((u) => u.role === "professional").length} Pros
                 </Badge>
@@ -295,6 +379,16 @@ export function UsersTable() {
                 variant="outline"
                 className="mt-4"
                 onClick={() => setSearchQuery("")}
+                style={{
+                  borderColor: colors.primaryDark,
+                  color: colors.primaryDark,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 Effacer la recherche
               </Button>
@@ -314,18 +408,14 @@ export function UsersTable() {
                     <div className="flex-1 min-w-0">
                       <div className="flex gap-2 flex-wrap">
                         <Badge
-                          className={`${
-                            statusColors[
-                              user.status as keyof typeof statusColors
-                            ]
-                          } text-xs sm:text-sm`}
+                          className="text-xs sm:text-sm"
+                          style={statusColors[user.status as keyof typeof statusColors]}
                         >
                           {user.status === "active" ? "✓ Actif" : "○ Inactif"}
                         </Badge>
                         <Badge
-                          className={`${
-                            roleColors[user.role as keyof typeof roleColors]
-                          } text-xs sm:text-sm`}
+                          className="text-xs sm:text-sm"
+                          style={roleColors[user.role as keyof typeof roleColors]}
                         >
                           {user.role === "professional"
                             ? "👑 Pro"
@@ -380,7 +470,13 @@ export function UsersTable() {
                           }}
                         />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-bold text-sm sm:text-base">
+                        <AvatarFallback 
+                          className="font-bold text-sm sm:text-base"
+                          style={{
+                            background: `linear-gradient(135deg, ${colors.primaryDark}20, ${colors.primaryDark}10)`,
+                            color: colors.primaryDark,
+                          }}
+                        >
                           {getInitials(user)}
                         </AvatarFallback>
                       )}
@@ -435,7 +531,12 @@ export function UsersTable() {
                         <Badge
                           key={metier.id}
                           variant="outline"
-                          className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                          className="text-xs"
+                          style={{
+                            backgroundColor: `${colors.primaryDark}15`,
+                            color: colors.primaryDark,
+                            borderColor: `${colors.primaryDark}25`,
+                          }}
                         >
                           {metier.libelle}
                         </Badge>
@@ -456,7 +557,7 @@ export function UsersTable() {
                       className="flex flex-col items-center p-2 rounded-lg bg-background/50 hover:bg-background/80 transition-colors cursor-help"
                       title="Nombre de produits"
                     >
-                      <Package className="h-4 w-4 text-blue-600 mb-1" />
+                      <Package className="h-4 w-4 mb-1" style={{ color: colors.primaryDark }} />
                       <span className="text-sm font-semibold text-foreground">
                         {user.productsCount}
                       </span>
@@ -468,7 +569,7 @@ export function UsersTable() {
                       className="flex flex-col items-center p-2 rounded-lg bg-background/50 hover:bg-background/80 transition-colors cursor-help"
                       title="Nombre de biens"
                     >
-                      <Home className="h-4 w-4 text-green-600 mb-1" />
+                      <Home className="h-4 w-4 mb-1" style={{ color: colors.primaryDark }} />
                       <span className="text-sm font-semibold text-foreground">
                         {user.propertiesCount}
                       </span>
@@ -480,7 +581,7 @@ export function UsersTable() {
                       className="flex flex-col items-center p-2 rounded-lg bg-background/50 hover:bg-background/80 transition-colors cursor-help"
                       title="Nombre d'articles"
                     >
-                      <FileText className="h-4 w-4 text-purple-600 mb-1" />
+                      <FileText className="h-4 w-4 mb-1" style={{ color: colors.primaryDark }} />
                       <span className="text-sm font-semibold text-foreground">
                         {user.articlesCount}
                       </span>
@@ -497,7 +598,18 @@ export function UsersTable() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(user)}
-                    className="border-border hover:bg-accent w-full text-xs sm:text-sm gap-1"
+                    className="border-border w-full text-xs sm:text-sm gap-1 transition-colors duration-300"
+                    style={{
+                      borderColor: colors.primaryDark,
+                      color: colors.primaryDark,
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
                     <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>Modifier</span>
@@ -506,11 +618,19 @@ export function UsersTable() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
-                        variant={
-                          user.status === "inactive" ? "default" : "destructive"
-                        }
                         size="sm"
                         className="w-full text-xs sm:text-sm gap-1"
+                        style={
+                          user.status === "inactive"
+                            ? {
+                                backgroundColor: colors.success,
+                                color: colors.lightBg,
+                              }
+                            : {
+                                backgroundColor: colors.warning,
+                                color: colors.lightBg,
+                              }
+                        }
                       >
                         {user.status === "inactive" ? (
                           <>
@@ -528,12 +648,12 @@ export function UsersTable() {
                     <DropdownMenuContent align="end">
                       {user.status === "inactive" ? (
                         <DropdownMenuItem onClick={() => handleActivate(user)}>
-                          <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                          <CheckCircle className="h-4 w-4 mr-2" style={{ color: colors.success }} />
                           Activer l'utilisateur
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem onClick={() => handleSuspend(user)}>
-                          <Ban className="h-4 w-4 mr-2 text-orange-600" />
+                          <Ban className="h-4 w-4 mr-2" style={{ color: colors.warning }} />
                           Suspendre l'utilisateur
                         </DropdownMenuItem>
                       )}
@@ -557,12 +677,12 @@ export function UsersTable() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
-                    <th className="text-left p-4 font-medium">Utilisateur</th>
-                    <th className="text-left p-4 font-medium">Contact</th>
-                    <th className="text-left p-4 font-medium">Statistiques</th>
-                    <th className="text-left p-4 font-medium">Statut</th>
-                    <th className="text-left p-4 font-medium">Inscription</th>
-                    <th className="text-right p-4 font-medium">Actions</th>
+                    <th className="text-left p-4 font-medium" style={{ color: colors.primaryDark }}>Utilisateur</th>
+                    <th className="text-left p-4 font-medium" style={{ color: colors.primaryDark }}>Contact</th>
+                    <th className="text-left p-4 font-medium" style={{ color: colors.primaryDark }}>Statistiques</th>
+                    <th className="text-left p-4 font-medium" style={{ color: colors.primaryDark }}>Statut</th>
+                    <th className="text-left p-4 font-medium" style={{ color: colors.primaryDark }}>Inscription</th>
+                    <th className="text-right p-4 font-medium" style={{ color: colors.primaryDark }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -577,13 +697,18 @@ export function UsersTable() {
                             {user.avatar ? (
                               <img src={user.avatar} alt={getInitials(user)} />
                             ) : (
-                              <AvatarFallback>
+                              <AvatarFallback 
+                                style={{
+                                  background: `linear-gradient(135deg, ${colors.primaryDark}20, ${colors.primaryDark}10)`,
+                                  color: colors.primaryDark,
+                                }}
+                              >
                                 {getInitials(user)}
                               </AvatarFallback>
                             )}
                           </Avatar>
                           <div>
-                            <div className="font-medium">
+                            <div className="font-medium" style={{ color: colors.textPrimary }}>
                               {user.firstName} {user.lastName}
                             </div>
                             <div className="text-sm text-muted-foreground">
@@ -645,19 +770,13 @@ export function UsersTable() {
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1">
                           <Badge
-                            className={
-                              statusColors[
-                                user.status as keyof typeof statusColors
-                              ]
-                            }
+                            style={statusColors[user.status as keyof typeof statusColors]}
                           >
                             {user.status === "active" ? "Actif" : "Inactif"}
                           </Badge>
                           <Badge
                             variant="outline"
-                            className={
-                              roleColors[user.role as keyof typeof roleColors]
-                            }
+                            style={roleColors[user.role as keyof typeof roleColors]}
                           >
                             {user.role}
                           </Badge>
@@ -674,6 +793,16 @@ export function UsersTable() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(user)}
+                            style={{
+                              borderColor: colors.primaryDark,
+                              color: colors.primaryDark,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -681,15 +810,21 @@ export function UsersTable() {
                             <Button
                               size="sm"
                               onClick={() => handleActivate(user)}
-                              className="bg-green-600 hover:bg-green-700"
+                              style={{
+                                backgroundColor: colors.success,
+                                color: colors.lightBg,
+                              }}
                             >
                               <CheckCircle className="h-4 w-4" />
                             </Button>
                           ) : (
                             <Button
-                              variant="destructive"
                               size="sm"
                               onClick={() => handleSuspend(user)}
+                              style={{
+                                backgroundColor: colors.warning,
+                                color: colors.lightBg,
+                              }}
                             >
                               <Ban className="h-4 w-4" />
                             </Button>
@@ -715,13 +850,35 @@ export function UsersTable() {
   );
 }
 
+// Mise à jour des couleurs des badges pour utiliser le vert du thème
 const roleColors = {
-  user: "bg-blue-100 text-blue-800 border-blue-200",
-  professional: "bg-green-100 text-green-800 border-green-200",
-  admin: "bg-red-100 text-red-800 border-red-200",
+  user: {
+    backgroundColor: `${colors.primaryDark}15`,
+    color: colors.primaryDark,
+    borderColor: `${colors.primaryDark}25`,
+  },
+  professional: {
+    backgroundColor: `${colors.primaryDark}20`,
+    color: colors.primaryDark,
+    borderColor: `${colors.primaryDark}30`,
+  },
+  admin: {
+    backgroundColor: `${colors.error}20`,
+    color: colors.error,
+    borderColor: `${colors.error}30`,
+  },
 };
 
+// Mise à jour des couleurs des badges de statut pour utiliser le vert du thème
 const statusColors = {
-  active: "bg-green-100 text-green-800 border-green-200",
-  inactive: "bg-gray-100 text-gray-800 border-gray-200",
+  active: {
+    backgroundColor: `${colors.primaryDark}20`,
+    color: colors.primaryDark,
+    borderColor: `${colors.primaryDark}30`,
+  },
+  inactive: {
+    backgroundColor: `${colors.textSecondary}15`,
+    color: colors.textSecondary,
+    borderColor: `${colors.textSecondary}25`,
+  },
 };
