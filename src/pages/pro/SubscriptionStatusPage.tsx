@@ -41,11 +41,20 @@ const SubscriptionStatusPage = () => {
   const [plansLoading, setPlansLoading] = useState(true);
   const [daysRemaining, setDaysRemaining] = useState(0);
   const [showExpiredModal, setShowExpiredModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview"); // AJOUT: Onglet actif
-  const [paymentHistory, setPaymentHistory] = useState([]); // AJOUT: Historique des paiements
-  const [paymentsLoading, setPaymentsLoading] = useState(false); // AJOUT: Chargement des paiements
-  const [showAmounts, setShowAmounts] = useState(true); // AJOUT: Afficher/masquer les montants
-  const [showOtherPlans, setShowOtherPlans] = useState(false); // AJOUT: Afficher/masquer les autres plans
+  const [activeTab, setActiveTab] = useState("overview");
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [showAmounts, setShowAmounts] = useState(true);
+  const [showOtherPlans, setShowOtherPlans] = useState(false);
+
+  // Constantes de couleur basées sur votre palette
+  const COLORS = {
+    logo: "#556B2F",           /* Olive green - logo/accent */
+    primary: "#6B8E23",        /* Yellow-green - primary-dark */
+    lightBg: "#FFFFFF",        /* White - light-bg */
+    separator: "#D3D3D3",      /* Light gray - separator */
+    secondaryText: "#8B4513",  /* Saddle brown - secondary-text */
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +69,6 @@ const SubscriptionStatusPage = () => {
     fetchData();
   }, []);
 
-  // AJOUT: Récupérer l'historique des paiements
   useEffect(() => {
     if (activeTab === "payments") {
       fetchPaymentHistory();
@@ -68,23 +76,20 @@ const SubscriptionStatusPage = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    // Vérifier si l'abonnement est expiré au chargement
     if (subscription?.status == 'expired') {
       setShowExpiredModal(true);
     }
   }, [subscription]);
 
-  // AJOUT: Fonction pour récupérer l'historique des paiements
   const fetchPaymentHistory = async () => {
     try {
       setPaymentsLoading(true);
       const response = await api.get("/transactions/history");
-      // Gérer la structure de réponse correctement
       const transactions = response.data.data || response.data || [];
       setPaymentHistory(Array.isArray(transactions) ? transactions : []);
     } catch (error) {
       console.error("Erreur lors du chargement de l'historique:", error);
-      setPaymentHistory([]); // Initialiser à un tableau vide en cas d'erreur
+      setPaymentHistory([]);
       toast.error("Impossible de charger l'historique des paiements");
     } finally {
       setPaymentsLoading(false);
@@ -97,7 +102,6 @@ const SubscriptionStatusPage = () => {
       setSubscription(response.data);
       console.log("data:",response.data,"plan:", response.data.plan,"planId:", response.data.planId);
 
-      // Calcul des jours restants
       if (response.data?.endDate) {
         const endDate = new Date(response.data.endDate);
         const today = new Date();
@@ -241,41 +245,41 @@ const SubscriptionStatusPage = () => {
     return Star;
   };
 
+  // Mise à jour de la fonction pour utiliser la nouvelle palette
   const getColorClasses = (color) => {
     const colors = {
       blue: {
         bg: "bg-blue-50",
         text: "text-blue-600",
         border: "border-blue-200",
-        button: "bg-blue-600 hover:bg-blue-700",
-        gradient: "from-blue-500 to-blue-600",
+        button: `bg-[${COLORS.primary}] hover:bg-[${COLORS.logo}]`,
+        iconBg: "bg-blue-100",
       },
       emerald: {
         bg: "bg-emerald-50",
         text: "text-emerald-600",
         border: "border-emerald-200",
-        button: "bg-emerald-600 hover:bg-emerald-700",
-        gradient: "from-emerald-500 to-emerald-600",
+        button: `bg-[${COLORS.primary}] hover:bg-[${COLORS.logo}]`,
+        iconBg: "bg-emerald-100",
       },
       purple: {
         bg: "bg-purple-50",
         text: "text-purple-600",
         border: "border-purple-200",
-        button: "bg-purple-600 hover:bg-purple-700",
-        gradient: "from-purple-500 to-purple-600",
+        button: `bg-[${COLORS.primary}] hover:bg-[${COLORS.logo}]`,
+        iconBg: "bg-purple-100",
       },
       pink: {
         bg: "bg-pink-50",
         text: "text-pink-600",
         border: "border-pink-200",
-        button: "bg-pink-600 hover:bg-pink-700",
-        gradient: "from-pink-500 to-pink-600",
+        button: `bg-[${COLORS.primary}] hover:bg-[${COLORS.logo}]`,
+        iconBg: "bg-pink-100",
       },
     };
     return colors[color] || colors.blue;
   };
 
-  // AJOUT: Fonction pour obtenir le badge du statut du paiement
   const getPaymentStatusBadge = (status) => {
     const statusConfig = {
       completed: { variant: "default", label: "Payé", color: "bg-green-100 text-green-800" },
@@ -288,7 +292,6 @@ const SubscriptionStatusPage = () => {
     return <Badge className={config.color}>{config.label}</Badge>;
   };
 
-  // AJOUT: Fonction pour formater la devise
   const formatCurrency = (amount, currency = "EUR") => {
     if (!showAmounts) return "••••••";
     return new Intl.NumberFormat("fr-FR", {
@@ -297,10 +300,8 @@ const SubscriptionStatusPage = () => {
     }).format(amount);
   };
 
-  // AJOUT: Fonction pour télécharger la facture (placeholder)
   const handleDownloadInvoice = async (transaction) => {
     try {
-      // Transformer les données de transaction au format attendu par ReceiptPDF
       const formattedTransaction = {
         id: transaction.id,
         date: new Date(transaction.createdAt).toLocaleDateString("fr-FR", {
@@ -350,10 +351,10 @@ const SubscriptionStatusPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: COLORS.lightBg }}>
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-lg font-medium text-gray-600">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: COLORS.primary }} />
+          <p className="text-lg font-medium" style={{ color: COLORS.secondaryText }}>
             Chargement de votre abonnement...
           </p>
         </div>
@@ -368,27 +369,28 @@ const SubscriptionStatusPage = () => {
   const isExpired = subscription?.status == 'expired';
 
   return (
-    <div className="min-h-screen py-0 ">
+    <div className="min-h-screen py-0" style={{ backgroundColor: COLORS.lightBg }}>
       <div className="max-w-6xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="text-lg lg:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-lg lg:text-3xl md:text-4xl font-bold mb-2" style={{ color: COLORS.secondaryText }}>
             Votre Abonnement
           </h1>
-          <p className="text-md lg:text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-md lg:text-lg max-w-2xl mx-auto" style={{ color: COLORS.logo }}>
             Gérez et suivez l'état de votre abonnement en temps réel
           </p>
         </div>
 
-        {/* AJOUT: Onglets de navigation */}
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
+        {/* Onglets de navigation */}
+        <div className="flex gap-2 mb-6" style={{ borderBottom: `1px solid ${COLORS.separator}` }}>
           <button
             onClick={() => setActiveTab("overview")}
             className={`px-4 py-3 font-medium border-b-2 transition-colors ${
               activeTab === "overview"
-                ? "border-primary text-primary"
+                ? `text-[${COLORS.primary}] border-[${COLORS.primary}]`
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
+            style={{ borderBottomColor: activeTab === "overview" ? COLORS.primary : 'transparent' }}
           >
             Vue d'ensemble
           </button>
@@ -396,23 +398,24 @@ const SubscriptionStatusPage = () => {
             onClick={() => setActiveTab("payments")}
             className={`px-4 py-3 font-medium border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === "payments"
-                ? "border-primary text-primary"
+                ? `text-[${COLORS.primary}] border-[${COLORS.primary}]`
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
+            style={{ borderBottomColor: activeTab === "payments" ? COLORS.primary : 'transparent' }}
           >
             <CreditCard className="h-4 w-4" />
             Historique des paiements
           </button>
         </div>
 
-        {/* AJOUT: Contenu de l'onglet "Paiements" */}
+        {/* Contenu de l'onglet "Paiements" */}
         {activeTab === "payments" && (
           <div>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl mb-6">
+            <Card className="border-0 shadow-xl mb-6" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-xl">Historique des paiements</CardTitle>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <CardTitle className="text-xl" style={{ color: COLORS.secondaryText }}>Historique des paiements</CardTitle>
+                  <p className="text-sm mt-1" style={{ color: COLORS.logo }}>
                     Consultez tous vos paiements d'abonnement
                   </p>
                 </div>
@@ -422,47 +425,51 @@ const SubscriptionStatusPage = () => {
                   title={showAmounts ? "Masquer les montants" : "Afficher les montants"}
                 >
                   {showAmounts ? (
-                    <Eye className="h-5 w-5 text-gray-600" />
+                    <Eye className="h-5 w-5" style={{ color: COLORS.secondaryText }} />
                   ) : (
-                    <EyeOff className="h-5 w-5 text-gray-600" />
+                    <EyeOff className="h-5 w-5" style={{ color: COLORS.secondaryText }} />
                   )}
                 </button>
               </CardHeader>
               <CardContent>
                 {paymentsLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-                    <span className="ml-2 text-gray-600">Chargement...</span>
+                    <RefreshCw className="h-6 w-6 animate-spin" style={{ color: COLORS.primary }} />
+                    <span className="ml-2" style={{ color: COLORS.secondaryText }}>Chargement...</span>
                   </div>
                 ) : paymentHistory.length === 0 ? (
                   <div className="text-center py-8">
-                    <CreditCard className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">Aucun paiement enregistré</p>
+                    <CreditCard className="h-12 w-12 mx-auto mb-3" style={{ color: COLORS.separator }} />
+                    <p style={{ color: COLORS.secondaryText }}>Aucun paiement enregistré</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Description</th>
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Montant</th>
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Statut</th>
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                        <tr style={{ borderBottom: `1px solid ${COLORS.separator}` }}>
+                          <th className="text-left py-3 px-4 font-semibold" style={{ color: COLORS.secondaryText }}>Date</th>
+                          <th className="text-left py-3 px-4 font-semibold" style={{ color: COLORS.secondaryText }}>Description</th>
+                          <th className="text-left py-3 px-4 font-semibold" style={{ color: COLORS.secondaryText }}>Montant</th>
+                          <th className="text-left py-3 px-4 font-semibold" style={{ color: COLORS.secondaryText }}>Statut</th>
+                          <th className="text-left py-3 px-4 font-semibold" style={{ color: COLORS.secondaryText }}>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {paymentHistory.map((transaction) => (
-                          <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <tr 
+                            key={transaction.id} 
+                            className="hover:bg-gray-50 transition-colors"
+                            style={{ borderBottom: `1px solid ${COLORS.separator}` }}
+                          >
                             <td className="py-3 px-4">
-                              <span className="text-sm text-gray-900">
+                              <span className="text-sm">
                                 {new Date(transaction.createdAt).toLocaleDateString("fr-FR", {
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
                                 })}
                               </span>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs" style={{ color: COLORS.logo }}>
                                 {new Date(transaction.createdAt).toLocaleTimeString("fr-FR", {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -471,16 +478,16 @@ const SubscriptionStatusPage = () => {
                             </td>
                             <td className="py-3 px-4">
                               <div>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>
                                   {transaction.description}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs" style={{ color: COLORS.logo }}>
                                   {transaction.providerId}
                                 </p>
                               </div>
                             </td>
                             <td className="py-3 px-4">
-                              <span className="text-sm font-semibold text-gray-900">
+                              <span className="text-sm font-semibold" style={{ color: COLORS.primary }}>
                                 {formatCurrency(transaction.amount, transaction.currency)}
                               </span>
                             </td>
@@ -494,7 +501,7 @@ const SubscriptionStatusPage = () => {
                                   className="p-1 hover:bg-gray-200 rounded transition-colors"
                                   title="Télécharger la facture"
                                 >
-                                  <Download className="h-4 w-4 text-gray-600" />
+                                  <Download className="h-4 w-4" style={{ color: COLORS.secondaryText }} />
                                 </button>
                               </div>
                             </td>
@@ -510,10 +517,10 @@ const SubscriptionStatusPage = () => {
             {/* Résumé des statistiques de paiement */}
             {paymentHistory.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                   <CardContent className="pt-6">
-                    <p className="text-sm text-gray-600 mb-2">Total payé</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm mb-2" style={{ color: COLORS.logo }}>Total payé</p>
+                    <p className="text-2xl font-bold" style={{ color: COLORS.primary }}>
                       {formatCurrency(
                         paymentHistory
                           .filter((t) => t.status === "completed")
@@ -522,18 +529,18 @@ const SubscriptionStatusPage = () => {
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                   <CardContent className="pt-6">
-                    <p className="text-sm text-gray-600 mb-2">Nombre de paiements</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm mb-2" style={{ color: COLORS.logo }}>Nombre de paiements</p>
+                    <p className="text-2xl font-bold" style={{ color: COLORS.primary }}>
                       {paymentHistory.filter((t) => t.status === "completed").length}
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                   <CardContent className="pt-6">
-                    <p className="text-sm text-gray-600 mb-2">Dernier paiement</p>
-                    <p className="text-lg font-bold text-gray-900">
+                    <p className="text-sm mb-2" style={{ color: COLORS.logo }}>Dernier paiement</p>
+                    <p className="text-lg font-bold" style={{ color: COLORS.primary }}>
                       {paymentHistory.length > 0
                         ? new Date(paymentHistory[0].createdAt).toLocaleDateString("fr-FR")
                         : "-"}
@@ -545,25 +552,26 @@ const SubscriptionStatusPage = () => {
           </div>
         )}
 
-        {/* Contenu de l'onglet "Vue d'ensemble" (existant) */}
+        {/* Contenu de l'onglet "Vue d'ensemble" */}
         {activeTab === "overview" && (
           <>
             {/* Bannière d'alerte pour abonnement expiré */}
             {isExpired && (
-              <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="mb-6 rounded-lg p-4" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                  <AlertTriangle className="h-6 w-6" style={{ color: '#DC2626' }} />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-red-800">
+                    <h3 className="font-semibold" style={{ color: '#991B1B' }}>
                       Abonnement Expiré
                     </h3>
-                    <p className="text-red-700 text-sm">
+                    <p className="text-sm" style={{ color: '#B91C1C' }}>
                       Votre abonnement a expiré. Renouvelez-le pour continuer à profiter de tous les avantages.
                     </p>
                   </div>
                   <Button 
                     onClick={handleRenew}
-                    className="bg-red-600 hover:bg-red-700"
+                    style={{ backgroundColor: COLORS.primary }}
+                    className="hover:bg-[#556B2F]"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Renouveler
@@ -575,14 +583,22 @@ const SubscriptionStatusPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Carte principale d'abonnement */}
               <div className="lg:col-span-2">
-                <Card className={`bg-white/80 backdrop-blur-sm border-0 shadow-xl ${
-                  isExpired ? 'border-red-200 ring-1 ring-red-100' : ''
-                }`}>
+                <Card 
+                  className={`border-0 shadow-xl ${
+                    isExpired ? 'border-red-200 ring-1 ring-red-100' : ''
+                  }`}
+                  style={{ 
+                    backgroundColor: COLORS.lightBg,
+                    borderColor: isExpired ? '#FECACA' : COLORS.separator
+                  }}
+                >
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2 text-md lg:text-2xl">
-                        <PlanIcon className="h-6 w-6 text-primary" />
-                        {subscription?.plan?.name || "Essai Gratuit"}
+                        <PlanIcon className="h-6 w-6" style={{ color: COLORS.primary }} />
+                        <span style={{ color: COLORS.secondaryText }}>
+                          {subscription?.plan?.name || "Essai Gratuit"}
+                        </span>
                       </CardTitle>
                       {getStatusBadge(subscription?.status)}
                     </div>
@@ -593,16 +609,17 @@ const SubscriptionStatusPage = () => {
                       subscription.plan.price == 0) && (
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
-                          <span className="font-medium">Jours restants</span>
-                          <span className="text-primary font-bold">
+                          <span className="font-medium" style={{ color: COLORS.secondaryText }}>Jours restants</span>
+                          <span className="font-bold" style={{ color: COLORS.primary }}>
                             {daysRemaining} jours
                           </span>
                         </div>
                         <Progress
                           value={((30 - daysRemaining) / 30) * 100}
                           className="h-2"
+                          style={{ backgroundColor: COLORS.separator }}
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs" style={{ color: COLORS.logo }}>
                           Votre période d'essai se termine dans {daysRemaining}{" "}
                           jours
                         </p>
@@ -611,11 +628,11 @@ const SubscriptionStatusPage = () => {
 
                     {/* Détails de l'abonnement */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <Calendar className="h-5 w-5 text-blue-600" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: '#EFF6FF' }}>
+                        <Calendar className="h-5 w-5" style={{ color: '#2563EB' }} />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Début</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>Début</p>
+                          <p className="text-sm" style={{ color: COLORS.logo }}>
                             {subscription
                               ? new Date(subscription.startDate).toLocaleDateString(
                                   "fr-FR"
@@ -625,11 +642,11 @@ const SubscriptionStatusPage = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
-                        <Calendar className="h-5 w-5 text-orange-600" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: '#FFEDD5' }}>
+                        <Calendar className="h-5 w-5" style={{ color: '#EA580C' }} />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Fin</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>Fin</p>
+                          <p className="text-sm" style={{ color: COLORS.logo }}>
                             {subscription
                               ? new Date(subscription.endDate).toLocaleDateString(
                                   "fr-FR"
@@ -639,23 +656,23 @@ const SubscriptionStatusPage = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <CreditCard className="h-5 w-5 text-green-600" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F0FDF4' }}>
+                        <CreditCard className="h-5 w-5" style={{ color: '#16A34A' }} />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>
                             Auto-renouvellement
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm" style={{ color: COLORS.logo }}>
                             {subscription?.autoRenew ? "Activé" : "Désactivé"}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                        <Zap className="h-5 w-5 text-purple-600" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: '#FAF5FF' }}>
+                        <Zap className="h-5 w-5" style={{ color: '#9333EA' }} />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Prix</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm font-medium" style={{ color: COLORS.secondaryText }}>Prix</p>
+                          <p className="text-sm" style={{ color: COLORS.logo }}>
                             {subscription?.plan?.price
                               ? `${subscription.plan.price}€/${subscription.plan.interval}`
                               : "Gratuit"}
@@ -666,8 +683,8 @@ const SubscriptionStatusPage = () => {
 
                     {/* Avantages du plan actuel */}
                     {currentPlan && (
-                      <div className="border-t pt-4">
-                        <h4 className="font-semibold text-gray-900 mb-3">
+                      <div className="border-t pt-4" style={{ borderColor: COLORS.separator }}>
+                        <h4 className="font-semibold mb-3" style={{ color: COLORS.secondaryText }}>
                           Avantages inclus :
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -678,8 +695,8 @@ const SubscriptionStatusPage = () => {
                                 key={index}
                                 className="flex items-center gap-2 text-sm"
                               >
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                <span className="text-gray-700">{feature}</span>
+                                <CheckCircle className="h-4 w-4" style={{ color: COLORS.primary }} />
+                                <span style={{ color: COLORS.logo }}>{feature}</span>
                               </div>
                             ))}
                         </div>
@@ -692,7 +709,8 @@ const SubscriptionStatusPage = () => {
                         <>
                           <Button
                             onClick={handleRenew}
-                            className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg"
+                            className="flex-1 shadow-lg"
+                            style={{ backgroundColor: COLORS.primary }}
                           >
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Renouveler mon abonnement
@@ -703,7 +721,8 @@ const SubscriptionStatusPage = () => {
                         <>
                           <Button
                             onClick={() => handleUpgrade()}
-                            className="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+                            className="flex-1 shadow-lg"
+                            style={{ backgroundColor: COLORS.primary }}
                           >
                             <Crown className="h-4 w-4 mr-2" />
                             {subscription?.plan?.price
@@ -717,6 +736,7 @@ const SubscriptionStatusPage = () => {
                               variant="outline"
                               onClick={handleRenew}
                               className="flex-1"
+                              style={{ borderColor: COLORS.separator, color: COLORS.secondaryText }}
                             >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Renouveler maintenant
@@ -732,51 +752,55 @@ const SubscriptionStatusPage = () => {
               {/* Sidebar avec statistiques */}
               <div className="space-y-6">
                 {/* Carte de statistiques d'utilisation */}
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-yellow-500" />
-                      Votre utilisation
+                      <Zap className="h-5 w-5" style={{ color: '#CA8A04' }} />
+                      <span style={{ color: COLORS.secondaryText }}>Votre utilisation</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Profil complété</span>
-                        <span>85%</span>
+                        <span style={{ color: COLORS.secondaryText }}>Profil complété</span>
+                        <span style={{ color: COLORS.primary }}>85%</span>
                       </div>
-                      <Progress value={85} className="h-2" />
+                      <Progress value={85} className="h-2" style={{ backgroundColor: COLORS.separator }} />
                     </div>
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Annonces actives</span>
-                        <span>3 / 10</span>
+                        <span style={{ color: COLORS.secondaryText }}>Annonces actives</span>
+                        <span style={{ color: COLORS.primary }}>3 / 10</span>
                       </div>
-                      <Progress value={30} className="h-2" />
+                      <Progress value={30} className="h-2" style={{ backgroundColor: COLORS.separator }} />
                     </div>
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Clients ce mois</span>
-                        <span>12 / 50</span>
+                        <span style={{ color: COLORS.secondaryText }}>Clients ce mois</span>
+                        <span style={{ color: COLORS.primary }}>12 / 50</span>
                       </div>
-                      <Progress value={24} className="h-2" />
+                      <Progress value={24} className="h-2" style={{ backgroundColor: COLORS.separator }} />
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Carte d'information */}
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                   <CardHeader>
-                    <CardTitle className="text-lg">Support</CardTitle>
+                    <CardTitle className="text-lg" style={{ color: COLORS.secondaryText }}>Support</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <p className="text-gray-600">
+                    <p style={{ color: COLORS.logo }}>
                       Besoin d'aide avec votre abonnement ?
                     </p>
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      style={{ borderColor: COLORS.separator, color: COLORS.secondaryText }}
+                    >
                       Contacter le support
                     </Button>
-                    <p className="text-xs text-gray-500 text-center">
+                    <p className="text-xs text-center" style={{ color: COLORS.logo }}>
                       Réponse sous 24h
                     </p>
                   </CardContent>
@@ -787,7 +811,6 @@ const SubscriptionStatusPage = () => {
             {/* Section des autres plans*/}
             {!plansLoading && subscriptionPlans.length > 0 && (
               <div className="mt-8">
-                {/* Bouton pour afficher/masquer les plans */}
                 {!showOtherPlans ? (
                   <div className="text-center">
                     <Button
@@ -795,6 +818,7 @@ const SubscriptionStatusPage = () => {
                       variant="outline"
                       size="lg"
                       className="gap-2"
+                      style={{ borderColor: COLORS.separator, color: COLORS.secondaryText }}
                     >
                       Voir les autres plans
                       <ArrowRight className="h-4 w-4" />
@@ -803,20 +827,21 @@ const SubscriptionStatusPage = () => {
                 ) : (
                   <>
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold text-gray-900">Autres Plans</h2>
+                      <h2 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>Autres Plans</h2>
                       <Button
                         onClick={() => setShowOtherPlans(false)}
                         variant="ghost"
                         size="sm"
+                        style={{ color: COLORS.secondaryText }}
                       >
                         Masquer
                       </Button>
                     </div>
 
-                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                    <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                       <CardHeader>
-                        <CardTitle className="text-xl">Découvrez nos offres</CardTitle>
-                        <p className="text-gray-600">
+                        <CardTitle className="text-xl" style={{ color: COLORS.secondaryText }}>Découvrez nos offres</CardTitle>
+                        <p style={{ color: COLORS.logo }}>
                           Choisissez le plan adapté à vos besoins
                         </p>
                       </CardHeader>
@@ -831,42 +856,49 @@ const SubscriptionStatusPage = () => {
                                 key={plan.id}
                                 className={`border rounded-lg p-4 relative transition-all duration-300 hover:shadow-lg ${
                                   isCurrentPlan
-                                    ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                                    ? "ring-2 bg-opacity-5"
                                     : plan.popular
                                     ? "border-yellow-400 ring-2 ring-yellow-200 bg-yellow-50/50"
                                     : "border-gray-200 hover:border-gray-300"
                                 }`}
+                                style={{ 
+                                  backgroundColor: isCurrentPlan ? `${COLORS.primary}0D` : COLORS.lightBg,
+                                  borderColor: isCurrentPlan ? COLORS.primary : plan.popular ? '#FACC15' : COLORS.separator,
+                                  boxShadow: isCurrentPlan ? `0 0 0 2px ${COLORS.primary}33` : 'none'
+                                }}
                               >
                                 {plan.popular && !isCurrentPlan && (
-                                  <Badge className="mb-2 bg-yellow-500 text-white absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                  <Badge className="mb-2 absolute -top-2 left-1/2 transform -translate-x-1/2" 
+                                    style={{ backgroundColor: '#CA8A04', color: 'white' }}>
                                     Populaire
                                   </Badge>
                                 )}
 
                                 {isCurrentPlan && (
-                                  <Badge className="mb-2 bg-primary text-white absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                  <Badge className="mb-2 absolute -top-2 left-1/2 transform -translate-x-1/2" 
+                                    style={{ backgroundColor: COLORS.primary, color: 'white' }}>
                                     Actuel
                                   </Badge>
                                 )}
 
                                 <div className="flex items-center gap-3 mb-3">
-                                  <div className={`p-2 rounded-lg ${color.bg}`}>
-                                    <div className={color.text}>{plan.icon}</div>
+                                  <div className="p-2 rounded-lg" style={{ backgroundColor: color.iconBg || '#F3F4F6' }}>
+                                    <div style={{ color: plan.color || COLORS.primary }}>{plan.icon}</div>
                                   </div>
                                   <div>
-                                    <h3 className="font-bold text-lg text-gray-900">
+                                    <h3 className="font-bold text-lg" style={{ color: COLORS.secondaryText }}>
                                       {plan.title}
                                     </h3>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm" style={{ color: COLORS.logo }}>
                                       {plan.description}
                                     </p>
                                   </div>
                                 </div>
 
                                 <div className="mb-4">
-                                  <p className="text-2xl font-bold text-gray-900">
+                                  <p className="text-2xl font-bold" style={{ color: COLORS.primary }}>
                                     {plan.price}€
-                                    <span className="text-sm font-normal text-gray-600">
+                                    <span className="text-sm font-normal" style={{ color: COLORS.logo }}>
                                       /{plan.period || "mois"}
                                     </span>
                                   </p>
@@ -875,14 +907,13 @@ const SubscriptionStatusPage = () => {
                                 <ul className="space-y-2 text-sm mb-4">
                                   {plan.features?.slice(0, 4).map((feature, idx) => (
                                     <li key={idx} className="flex items-center gap-2">
-                                      <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                      <span className="text-gray-700">{feature}</span>
+                                      <CheckCircle className="h-4 w-4 flex-shrink-0" style={{ color: COLORS.primary }} />
+                                      <span style={{ color: COLORS.logo }}>{feature}</span>
                                     </li>
                                   ))}
                                   {plan.features?.length > 4 && (
-                                    <li className="text-xs text-gray-500">
-                                      + {plan.features.length - 4} avantages
-                                      supplémentaires
+                                    <li className="text-xs" style={{ color: COLORS.secondaryText }}>
+                                      + {plan.features.length - 4} avantages supplémentaires
                                     </li>
                                   )}
                                 </ul>
@@ -897,9 +928,17 @@ const SubscriptionStatusPage = () => {
                                   }
                                   className={`w-full ${
                                     plan.popular && !isCurrentPlan
-                                      ? "bg-yellow-500 hover:bg-yellow-600"
+                                      ? "hover:bg-yellow-600"
                                       : ""
                                   }`}
+                                  style={{ 
+                                    backgroundColor: isCurrentPlan ? 'transparent' : 
+                                    plan.popular ? '#CA8A04' : 'transparent',
+                                    borderColor: isCurrentPlan ? COLORS.primary : 
+                                    plan.popular ? '#CA8A04' : COLORS.separator,
+                                    color: isCurrentPlan ? COLORS.primary : 
+                                    plan.popular ? 'white' : COLORS.secondaryText
+                                  }}
                                   onClick={() => handleUpgrade(plan.id)}
                                   disabled={isCurrentPlan && !isExpired}
                                 >
@@ -924,10 +963,10 @@ const SubscriptionStatusPage = () => {
             {/* Loading state for plans */}
             {plansLoading && (
               <div className="mt-8">
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <Card className="border-0 shadow-xl" style={{ backgroundColor: COLORS.lightBg, borderColor: COLORS.separator }}>
                   <CardContent className="p-8 text-center">
-                    <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                    <p className="text-gray-600">Chargement des plans...</p>
+                    <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: COLORS.primary }} />
+                    <p style={{ color: COLORS.logo }}>Chargement des plans...</p>
                   </CardContent>
                 </Card>
               </div>

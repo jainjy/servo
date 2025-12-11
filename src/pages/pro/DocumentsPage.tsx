@@ -43,6 +43,16 @@ import {
   CATEGORIES_IMMOBILIER,
 } from "@/services/documentService";
 
+// Nouvelle palette de couleurs
+const COLORS = {
+  LOGO: "#556B2F",           /* Olive green - accent */
+  PRIMARY_DARK: "#6B8E23",   /* Yellow-green - primary */
+  LIGHT_BG: "#FFFFFF",       /* White - fond clair */
+  SEPARATOR: "#D3D3D3",      /* Light gray - séparateurs */
+  SECONDARY_TEXT: "#8B4513", /* Saddle brown - textes secondaires */
+  TEXT_BLACK: "#000000",     /* Black - petits textes */
+};
+
 // Composant Modal
 const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
   if (!isOpen) return null;
@@ -59,14 +69,15 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
       <div
         className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-scaleIn ${sizeClasses[size]}`}
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold" style={{ color: "#0A0A0A" }}>
+        <div className="flex justify-between items-center p-6 border-b" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
+          <h2 className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
             {title}
           </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300 transform hover:rotate-90"
-            style={{ color: "#5A6470" }}
+            style={{ color: COLORS.SECONDARY_TEXT }}
           >
             <X size={24} />
           </button>
@@ -172,7 +183,9 @@ const ModalUploadDocument = ({
     >
       <form onSubmit={handleUpload} className="space-y-6">
         <div>
-          <Label className="block mb-2">Nom du document *</Label>
+          <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+            Nom du document *
+          </Label>
           <Input
             required
             value={formData.nom}
@@ -182,11 +195,17 @@ const ModalUploadDocument = ({
                 ? "Ex: Bail Location Appartement T2 République"
                 : "Ex: Assurance RC Pro 2024"
             }
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.TEXT_BLACK 
+            }}
           />
         </div>
 
         <div>
-          <Label className="block mb-2">Description (optionnel)</Label>
+          <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+            Description (optionnel)
+          </Label>
           <Textarea
             value={formData.description}
             onChange={(e) =>
@@ -194,18 +213,28 @@ const ModalUploadDocument = ({
             }
             placeholder="Description du document..."
             rows={3}
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.TEXT_BLACK 
+            }}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label className="block mb-2">Type de document</Label>
+            <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+              Type de document
+            </Label>
             <select
               className="w-full p-3 border rounded-lg"
               value={formData.type}
               onChange={(e) =>
                 setFormData({ ...formData, type: e.target.value })
               }
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             >
               {Object.entries(TYPES_DOCUMENTS).map(([key, type]) => (
                 <option key={key} value={key}>
@@ -217,13 +246,19 @@ const ModalUploadDocument = ({
 
           {formData.type === "IMMOBILIER" && (
             <div>
-              <Label className="block mb-2">Catégorie immobilière</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Catégorie immobilière
+              </Label>
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.categorie}
                 onChange={(e) =>
                   setFormData({ ...formData, categorie: e.target.value })
                 }
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.TEXT_BLACK 
+                }}
               >
                 {Object.entries(CATEGORIES_IMMOBILIER).map(
                   ([key, categorie]) => (
@@ -237,7 +272,9 @@ const ModalUploadDocument = ({
           )}
 
           <div>
-            <Label className="block mb-2">Date d'expiration (optionnel)</Label>
+            <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+              Date d'expiration (optionnel)
+            </Label>
             <Input
               type="date"
               min={new Date().toISOString().split("T")[0]}
@@ -245,13 +282,17 @@ const ModalUploadDocument = ({
               onChange={(e) =>
                 setFormData({ ...formData, dateExpiration: e.target.value })
               }
+              style={{ borderColor: COLORS.SEPARATOR }}
             />
           </div>
         </div>
 
         <div>
-          <Label className="block mb-2">Fichier *</Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+          <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+            Fichier *
+          </Label>
+          <div className="border-2 border-dashed rounded-lg p-6 text-center"
+               style={{ borderColor: COLORS.SEPARATOR }}>
             <Input
               type="file"
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
@@ -260,21 +301,29 @@ const ModalUploadDocument = ({
               id="file-upload"
             />
             <label htmlFor="file-upload" className="cursor-pointer block">
-              <Upload className="mx-auto mb-3 text-gray-400" size={48} />
+              <Upload className="mx-auto mb-3" size={48} 
+                     style={{ color: COLORS.SECONDARY_TEXT }} />
               <div
                 className="text-lg font-semibold"
-                style={{ color: "#0A0A0A" }}
+                style={{ color: COLORS.PRIMARY_DARK }}
               >
                 Choisir un fichier
               </div>
-              <div className="text-sm mt-1" style={{ color: "#5A6470" }}>
+              <div className="text-sm mt-1" style={{ color: COLORS.TEXT_BLACK }}>
                 PDF, DOC, DOCX, JPG, PNG (max. 10MB)
               </div>
             </label>
             {formData.fichier && (
-              <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                <CheckCircle className="inline text-green-600 mr-2" size={16} />
-                <span className="font-medium">{formData.fichier.name}</span>
+              <div className="mt-3 p-3 rounded-lg"
+                   style={{ 
+                     backgroundColor: `${COLORS.PRIMARY_DARK}10`,
+                     borderColor: COLORS.PRIMARY_DARK 
+                   }}>
+                <CheckCircle className="inline mr-2" size={16} 
+                            style={{ color: COLORS.PRIMARY_DARK }} />
+                <span className="font-medium" style={{ color: COLORS.PRIMARY_DARK }}>
+                  {formData.fichier.name}
+                </span>
               </div>
             )}
           </div>
@@ -282,22 +331,34 @@ const ModalUploadDocument = ({
 
         {isUploading && (
           <div className="space-y-2">
-            <Label>Upload en cours...</Label>
+            <Label style={{ color: COLORS.PRIMARY_DARK }}>Upload en cours...</Label>
             <Progress value={uploadProgress} className="w-full" />
-            <div className="text-right text-sm" style={{ color: "#5A6470" }}>
+            <div className="text-right text-sm" style={{ color: COLORS.TEXT_BLACK }}>
               {uploadProgress}%
             </div>
           </div>
         )}
 
-        <div className="flex justify-between pt-6 border-t">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex justify-between pt-6 border-t" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onClose}
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.SECONDARY_TEXT 
+            }}
+          >
             Annuler
           </Button>
           <Button
             type="submit"
             disabled={!formData.fichier || !formData.nom || isUploading}
-            style={{ backgroundColor: "#0052FF", color: "white" }}
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK,
+              color: COLORS.LIGHT_BG 
+            }}
           >
             <Upload className="mr-2" size={16} />
             Uploader le document
@@ -374,27 +435,43 @@ const ModalEditeurContrat = ({ isOpen, onClose, contrat, onSave }) => {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <Label className="block mb-2">Nom du contrat *</Label>
+            <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+              Nom du contrat *
+            </Label>
             <Input
               value={nom}
               onChange={(e) => setNom(e.target.value)}
               placeholder="Ex: Mandat Exclusif de Vente"
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
           </div>
           <div>
-            <Label className="block mb-2">Description</Label>
+            <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+              Description
+            </Label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description du contrat..."
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
           </div>
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-2">
-            <Label>Contenu du contrat *</Label>
-            <Badge variant="outline">
+            <Label style={{ color: COLORS.PRIMARY_DARK }}>Contenu du contrat *</Label>
+            <Badge variant="outline"
+                   style={{ 
+                     borderColor: COLORS.SEPARATOR,
+                     color: COLORS.SECONDARY_TEXT 
+                   }}>
               {variables.length} variable(s) détectée(s)
             </Badge>
           </div>
@@ -405,18 +482,28 @@ const ModalEditeurContrat = ({ isOpen, onClose, contrat, onSave }) => {
             placeholder="Saisissez le contenu de votre contrat...
 Utilisez [NOM_VARIABLE] pour les parties variables..."
             className="font-mono text-sm"
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.TEXT_BLACK 
+            }}
           />
-          <div className="mt-2 text-sm" style={{ color: "#5A6470" }}>
+          <div className="mt-2 text-sm" style={{ color: COLORS.TEXT_BLACK }}>
             Astuce : Entourez les variables avec des crochets [EXEMPLE]
           </div>
         </div>
 
         {variables.length > 0 && (
           <div>
-            <Label className="block mb-2">Variables détectées</Label>
+            <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+              Variables détectées
+            </Label>
             <div className="flex flex-wrap gap-2">
               {variables.map((variable, index) => (
-                <Badge key={index} variant="secondary">
+                <Badge key={index} variant="secondary"
+                       style={{ 
+                         backgroundColor: `${COLORS.SEPARATOR}30`,
+                         color: COLORS.SECONDARY_TEXT 
+                       }}>
                   [{variable}]
                 </Badge>
               ))}
@@ -424,14 +511,26 @@ Utilisez [NOM_VARIABLE] pour les parties variables..."
           </div>
         )}
 
-        <div className="flex justify-between pt-6 border-t">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex justify-between pt-6 border-t" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onClose}
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.SECONDARY_TEXT 
+            }}
+          >
             Annuler
           </Button>
           <Button
             onClick={handleSave}
             disabled={!nom || !contenu}
-            style={{ backgroundColor: "#0052FF", color: "white" }}
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK,
+              color: COLORS.LIGHT_BG 
+            }}
           >
             <Save className="mr-2" size={16} />
             Sauvegarder le contrat
@@ -476,7 +575,6 @@ const DocumentsPage = () => {
     chargerDonnees();
   }, []);
 
-  // Dans le composant DocumentsPage, modifiez chargerDonnees()
   const chargerDonnees = async () => {
     try {
       setLoading(true);
@@ -502,14 +600,12 @@ const DocumentsPage = () => {
         }
       );
 
-      // Filtrer les documents immobiliers
       const docsImmobiliers = (documentsData || []).filter(
         (doc) => doc.type === "IMMOBILIER"
       );
       setDocumentsImmobiliersList(docsImmobiliers);
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
-      // Initialiser avec des tableaux vides en cas d'erreur
       setDocuments([]);
       setContrats([]);
       setArchives([]);
@@ -600,15 +696,8 @@ const DocumentsPage = () => {
 
   const telechargerDocument = async (document) => {
     try {
-      // Pour Supabase, on peut soit:
-      // 1. Ouvrir directement l'URL dans un nouvel onglet
       window.open(document.url, "_blank");
 
-      // Ou 2. Télécharger via une requête API si besoin d'authentification
-      // const response = await documentService.downloadDocument(document.id);
-      // const downloadUrl = response.downloadUrl;
-
-      // Créer un lien de téléchargement
       const link = document.createElement("a");
       link.href = document.url;
       link.download = document.nom + "." + document.format.toLowerCase();
@@ -618,7 +707,6 @@ const DocumentsPage = () => {
       document.body.removeChild(link);
     } catch (error) {
       console.error("Erreur lors du téléchargement:", error);
-      // Fallback: ouvrir l'URL directement
       window.open(document.url, "_blank");
     }
   };
@@ -661,30 +749,35 @@ const DocumentsPage = () => {
 
   if (loading) {
     return (
-      
-      <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
-          <img src="/loading.gif" alt="" className='w-24 h-24'/>
-            <p className="mt-4 text-xl font-semibold text-gray-700">
-              Chargement des documents...
-            </p>
-        </div>
+      <div className="text-center flex flex-col items-center justify-center py-20 backdrop-blur-sm rounded-2xl shadow-xl"
+           style={{ backgroundColor: COLORS.LIGHT_BG }}>
+        <img src="/loading.gif" alt="" className='w-24 h-24'/>
+        <p className="mt-4 text-xl font-semibold" style={{ color: COLORS.SECONDARY_TEXT }}>
+          Chargement des documents...
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: COLORS.LIGHT_BG }}>
       <div className="container mx-auto px-4 py-2 lg:py-6">
         {/* En-tête */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div className="flex items-center gap-4 mb-4 lg:mb-0">
-            <div className="p-3 rounded-xl bg-blue-100 text-blue-600">
+            <div className="p-3 rounded-xl" 
+                 style={{ 
+                   backgroundColor: `${COLORS.PRIMARY_DARK}20`,
+                   color: COLORS.PRIMARY_DARK 
+                 }}>
               <FileText size={32} />
             </div>
             <div>
-              <h1 className="text-lg lg:text-4xl font-bold" style={{ color: "#0A0A0A" }}>
+              <h1 className="text-lg lg:text-4xl font-bold" 
+                  style={{ color: COLORS.PRIMARY_DARK }}>
                 Documents & Légal
               </h1>
-              <p className="text-sm lg:text-lg" style={{ color: "#5A6470" }}>
+              <p className="text-sm lg:text-lg" style={{ color: COLORS.TEXT_BLACK }}>
                 Gérez vos documents professionnels et contrats types
               </p>
             </div>
@@ -694,13 +787,19 @@ const DocumentsPage = () => {
             <Button
               variant="outline"
               onClick={() => setShowModalUploadImmobilier(true)}
-              className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+              style={{ 
+                borderColor: COLORS.LOGO,
+                color: COLORS.LOGO 
+              }}
             >
               <Home className="mr-2" size={16} />
               Document Immobilier
             </Button>
             <Button
-              style={{ backgroundColor: "#0052FF", color: "white" }}
+              style={{ 
+                backgroundColor: COLORS.PRIMARY_DARK, 
+                color: COLORS.LIGHT_BG 
+              }}
               onClick={() => setShowModalUpload(true)}
             >
               <Upload className="mr-2" size={16} />
@@ -711,66 +810,66 @@ const DocumentsPage = () => {
 
         {/* Statistiques */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-blue-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
                   {stats.total}
                 </div>
-                <div style={{ color: "#5A6470" }}>Documents</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Documents</div>
               </div>
-              <FileText className="text-blue-600" size={24} />
+              <FileText size={24} style={{ color: COLORS.PRIMARY_DARK }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-yellow-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: "#D97706" }}>
                   {stats.expirant}
                 </div>
-                <div style={{ color: "#5A6470" }}>Expirant bientôt</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Expirant bientôt</div>
               </div>
-              <Clock className="text-yellow-600" size={24} />
+              <Clock size={24} style={{ color: "#D97706" }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-red-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: "#DC2626" }}>
                   {stats.expire}
                 </div>
-                <div style={{ color: "#5A6470" }}>Expirés</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Expirés</div>
               </div>
-              <AlertTriangle className="text-red-600" size={24} />
+              <AlertTriangle size={24} style={{ color: "#DC2626" }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-green-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.LOGO }}>
                   {stats.contrats}
                 </div>
-                <div style={{ color: "#5A6470" }}>Contrats types</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Contrats types</div>
               </div>
-              <FileCheck className="text-green-600" size={24} />
+              <FileCheck size={24} style={{ color: COLORS.LOGO }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-indigo-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.SECONDARY_TEXT }}>
                   {stats.immobilier}
                 </div>
-                <div style={{ color: "#5A6470" }}>Documents immobiliers</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Documents immobiliers</div>
               </div>
-              <Home className="text-indigo-600" size={24} />
+              <Home size={24} style={{ color: COLORS.SECONDARY_TEXT }} />
             </div>
           </Card>
         </div>
 
         {/* Navigation par onglets */}
-        <Card className="mb-8">
-          <div className="border-b">
+        <Card className="mb-8" style={{ borderColor: COLORS.SEPARATOR }}>
+          <div className="border-b" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex flex-wrap -mb-px">
               {[
                 { id: "documents", label: "Documents", icon: FileText },
@@ -789,9 +888,13 @@ const DocumentsPage = () => {
                     key={onglet.id}
                     className={`flex items-center gap-2 p-4 border-b-2 font-medium text-sm ${
                       ongletActif === onglet.id
-                        ? "border-blue-500 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
+                        ? `text-blue-600`
+                        : "text-gray-500 hover:text-gray-700"
                     }`}
+                    style={{
+                      borderBottomColor: ongletActif === onglet.id ? COLORS.PRIMARY_DARK : 'transparent',
+                      color: ongletActif === onglet.id ? COLORS.PRIMARY_DARK : COLORS.SECONDARY_TEXT
+                    }}
                     onClick={() => setOngletActif(onglet.id)}
                   >
                     <Icon size={16} />
@@ -809,12 +912,13 @@ const DocumentsPage = () => {
           {ongletActif === "documents" && (
             <>
               {/* Barre de filtres */}
-              <Card className="p-6">
+              <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
                 <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                   <div className="flex-1 relative">
                     <Search
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
                       size={20}
+                      style={{ color: COLORS.SECONDARY_TEXT }}
                     />
                     <Input
                       placeholder="Rechercher un document..."
@@ -823,6 +927,10 @@ const DocumentsPage = () => {
                       onChange={(e) =>
                         setFiltres({ ...filtres, recherche: e.target.value })
                       }
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        color: COLORS.TEXT_BLACK 
+                      }}
                     />
                   </div>
 
@@ -832,6 +940,10 @@ const DocumentsPage = () => {
                     onChange={(e) =>
                       setFiltres({ ...filtres, type: e.target.value })
                     }
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.TEXT_BLACK 
+                    }}
                   >
                     <option value="">Tous les types</option>
                     {Object.entries(TYPES_DOCUMENTS).map(([key, type]) => (
@@ -847,6 +959,10 @@ const DocumentsPage = () => {
                     onChange={(e) =>
                       setFiltres({ ...filtres, statut: e.target.value })
                     }
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.TEXT_BLACK 
+                    }}
                   >
                     <option value="">Tous les statuts</option>
                     {Object.entries(STATUT_DOCUMENT).map(([key, statut]) => (
@@ -867,6 +983,10 @@ const DocumentsPage = () => {
                     <Card
                       key={document.id}
                       className="p-6 hover:shadow-lg transition-all duration-300"
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        backgroundColor: COLORS.LIGHT_BG 
+                      }}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -906,20 +1026,21 @@ const DocumentsPage = () => {
 
                       <h3
                         className="font-semibold mb-2 line-clamp-2"
-                        style={{ color: "#0A0A0A" }}
+                        style={{ color: COLORS.PRIMARY_DARK }}
                       >
                         {document.nom}
                       </h3>
 
                       {document.description && (
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-sm mb-3 line-clamp-2" 
+                           style={{ color: COLORS.TEXT_BLACK }}>
                           {document.description}
                         </p>
                       )}
 
                       <div
                         className="space-y-2 text-sm"
-                        style={{ color: "#5A6470" }}
+                        style={{ color: COLORS.TEXT_BLACK }}
                       >
                         <div className="flex justify-between">
                           <span>Uploadé le:</span>
@@ -962,6 +1083,10 @@ const DocumentsPage = () => {
                               key={index}
                               variant="outline"
                               className="text-xs"
+                              style={{ 
+                                borderColor: COLORS.SEPARATOR,
+                                color: COLORS.SECONDARY_TEXT 
+                              }}
                             >
                               {tag}
                             </Badge>
@@ -973,15 +1098,17 @@ const DocumentsPage = () => {
               </div>
 
               {documentsFiltres.length === 0 && (
-                <Card className="p-12 text-center">
-                  <FileText className="mx-auto mb-4 text-gray-400" size={48} />
+                <Card className="p-12 text-center" 
+                      style={{ borderColor: COLORS.SEPARATOR }}>
+                  <FileText className="mx-auto mb-4" size={48} 
+                           style={{ color: COLORS.SEPARATOR }} />
                   <h3
                     className="text-xl font-semibold mb-2"
-                    style={{ color: "#0A0A0A" }}
+                    style={{ color: COLORS.PRIMARY_DARK }}
                   >
                     Aucun document trouvé
                   </h3>
-                  <p style={{ color: "#5A6470" }}>
+                  <p style={{ color: COLORS.TEXT_BLACK }}>
                     {filtres.recherche || filtres.type || filtres.statut
                       ? "Essayez de modifier vos critères de recherche"
                       : "Commencez par uploader votre premier document"}
@@ -998,18 +1125,21 @@ const DocumentsPage = () => {
                 <div>
                   <h2
                     className="text-2xl font-bold"
-                    style={{ color: "#0A0A0A" }}
+                    style={{ color: COLORS.PRIMARY_DARK }}
                   >
                     Documents Immobiliers
                   </h2>
-                  <p style={{ color: "#5A6470" }}>
+                  <p style={{ color: COLORS.TEXT_BLACK }}>
                     Gérez vos revenus fonciers, baux de location, quittances de
                     loyer et autres documents immobiliers
                   </p>
                 </div>
                 <Button
                   onClick={() => setShowModalUploadImmobilier(true)}
-                  style={{ backgroundColor: "#0052FF", color: "white" }}
+                  style={{ 
+                    backgroundColor: COLORS.PRIMARY_DARK,
+                    color: COLORS.LIGHT_BG 
+                  }}
                 >
                   <Upload className="mr-2" size={16} />
                   Uploader un document
@@ -1017,12 +1147,13 @@ const DocumentsPage = () => {
               </div>
 
               {/* Barre de filtres immobiliers */}
-              <Card className="p-6">
+              <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
                 <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                   <div className="flex-1 relative">
                     <Search
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
                       size={20}
+                      style={{ color: COLORS.SECONDARY_TEXT }}
                     />
                     <Input
                       placeholder="Rechercher un document immobilier..."
@@ -1034,6 +1165,10 @@ const DocumentsPage = () => {
                           recherche: e.target.value,
                         })
                       }
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        color: COLORS.TEXT_BLACK 
+                      }}
                     />
                   </div>
 
@@ -1046,6 +1181,10 @@ const DocumentsPage = () => {
                         categorie: e.target.value,
                       })
                     }
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.TEXT_BLACK 
+                    }}
                   >
                     <option value="">Toutes les catégories</option>
                     {Object.entries(CATEGORIES_IMMOBILIER).map(
@@ -1068,14 +1207,18 @@ const DocumentsPage = () => {
                     ).length;
                     const Icon = categorie.icon;
                     return (
-                      <Card key={key} className="p-4 text-center">
+                      <Card key={key} className="p-4 text-center"
+                            style={{ borderColor: COLORS.SEPARATOR }}>
                         <div
-                          className={`p-2 rounded-lg ${categorie.color} w-12 h-12 mx-auto mb-2 flex items-center justify-center`}
+                          className={`p-2 rounded-lg w-12 h-12 mx-auto mb-2 flex items-center justify-center`}
+                          style={{ backgroundColor: `${COLORS.PRIMARY_DARK}20` }}
                         >
-                          <Icon size={20} />
+                          <Icon size={20} style={{ color: COLORS.PRIMARY_DARK }} />
                         </div>
-                        <div className="text-lg font-bold">{count}</div>
-                        <div className="text-xs" style={{ color: "#5A6470" }}>
+                        <div className="text-lg font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
+                          {count}
+                        </div>
+                        <div className="text-xs" style={{ color: COLORS.TEXT_BLACK }}>
                           {categorie.label}
                         </div>
                       </Card>
@@ -1094,14 +1237,22 @@ const DocumentsPage = () => {
                     <Card
                       key={document.id}
                       className="p-6 hover:shadow-lg transition-all duration-300"
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        backgroundColor: COLORS.LIGHT_BG 
+                      }}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${categorie?.color}`}>
-                            <CategorieIcon size={20} />
+                          <div className="p-2 rounded-lg" 
+                               style={{ backgroundColor: `${COLORS.PRIMARY_DARK}20` }}>
+                            <CategorieIcon size={20} style={{ color: COLORS.PRIMARY_DARK }} />
                           </div>
                           <div>
-                            <Badge className={categorie?.color}>
+                            <Badge style={{ 
+                              backgroundColor: `${COLORS.PRIMARY_DARK}20`,
+                              color: COLORS.PRIMARY_DARK 
+                            }}>
                               {categorie?.label}
                             </Badge>
                           </div>
@@ -1129,20 +1280,21 @@ const DocumentsPage = () => {
 
                       <h3
                         className="font-semibold mb-2 line-clamp-2"
-                        style={{ color: "#0A0A0A" }}
+                        style={{ color: COLORS.PRIMARY_DARK }}
                       >
                         {document.nom}
                       </h3>
 
                       {document.description && (
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2"
+                           style={{ color: COLORS.TEXT_BLACK }}>
                           {document.description}
                         </p>
                       )}
 
                       <div
                         className="space-y-2 text-sm"
-                        style={{ color: "#5A6470" }}
+                        style={{ color: COLORS.TEXT_BLACK }}
                       >
                         <div className="flex justify-between">
                           <span>Uploadé le:</span>
@@ -1185,6 +1337,10 @@ const DocumentsPage = () => {
                               key={index}
                               variant="outline"
                               className="text-xs"
+                              style={{ 
+                                borderColor: COLORS.SEPARATOR,
+                                color: COLORS.SECONDARY_TEXT 
+                              }}
                             >
                               {tag}
                             </Badge>
@@ -1196,15 +1352,17 @@ const DocumentsPage = () => {
               </div>
 
               {documentsImmobiliersFiltres.length === 0 && (
-                <Card className="p-12 text-center">
-                  <Home className="mx-auto mb-4 text-gray-400" size={48} />
+                <Card className="p-12 text-center" 
+                      style={{ borderColor: COLORS.SEPARATOR }}>
+                  <Home className="mx-auto mb-4" size={48} 
+                        style={{ color: COLORS.SEPARATOR }} />
                   <h3
                     className="text-xl font-semibold mb-2"
-                    style={{ color: "#0A0A0A" }}
+                    style={{ color: COLORS.PRIMARY_DARK }}
                   >
                     Aucun document immobilier trouvé
                   </h3>
-                  <p style={{ color: "#5A6470" }}>
+                  <p style={{ color: COLORS.TEXT_BLACK }}>
                     {filtresImmobilier.recherche || filtresImmobilier.categorie
                       ? "Essayez de modifier vos critères de recherche"
                       : "Commencez par uploader votre premier document immobilier"}
@@ -1218,7 +1376,7 @@ const DocumentsPage = () => {
           {ongletActif === "contrats" && (
             <>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold" style={{ color: "#0A0A0A" }}>
+                <h2 className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
                   Contrats Types Modifiables
                 </h2>
                 <Button
@@ -1226,7 +1384,10 @@ const DocumentsPage = () => {
                     setContratSelectionne(null);
                     setShowModalEditeur(true);
                   }}
-                  style={{ backgroundColor: "#0052FF", color: "white" }}
+                  style={{ 
+                    backgroundColor: COLORS.PRIMARY_DARK,
+                    color: COLORS.LIGHT_BG 
+                  }}
                 >
                   <Plus className="mr-2" size={16} />
                   Nouveau contrat
@@ -1238,9 +1399,17 @@ const DocumentsPage = () => {
                   <Card
                     key={contrat.id}
                     className="p-6 hover:shadow-lg transition-all duration-300"
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      backgroundColor: COLORS.LIGHT_BG 
+                    }}
                   >
                     <div className="flex items-start justify-between mb-4">
-                      <Badge variant="outline">
+                      <Badge variant="outline"
+                             style={{ 
+                               borderColor: COLORS.SEPARATOR,
+                               color: COLORS.SECONDARY_TEXT 
+                             }}>
                         {contrat.variables.length} variables
                       </Badge>
                       <div className="flex gap-1">
@@ -1274,21 +1443,21 @@ const DocumentsPage = () => {
 
                     <h3
                       className="font-semibold mb-2"
-                      style={{ color: "#0A0A0A" }}
+                      style={{ color: COLORS.PRIMARY_DARK }}
                     >
                       {contrat.nom}
                     </h3>
 
                     <p
                       className="text-sm mb-4 line-clamp-2"
-                      style={{ color: "#5A6470" }}
+                      style={{ color: COLORS.TEXT_BLACK }}
                     >
                       {contrat.description}
                     </p>
 
                     <div
                       className="space-y-2 text-sm"
-                      style={{ color: "#5A6470" }}
+                      style={{ color: COLORS.TEXT_BLACK }}
                     >
                       <div className="flex justify-between">
                         <span>Utilisé:</span>
@@ -1306,7 +1475,11 @@ const DocumentsPage = () => {
                       </div>
                     </div>
 
-                    <Button className="w-full mt-4" variant="outline">
+                    <Button className="w-full mt-4" variant="outline"
+                            style={{ 
+                              borderColor: COLORS.SEPARATOR,
+                              color: COLORS.SECONDARY_TEXT 
+                            }}>
                       <Download className="mr-2" size={16} />
                       Télécharger le modèle
                     </Button>
@@ -1321,7 +1494,7 @@ const DocumentsPage = () => {
             <>
               <h2
                 className="text-2xl font-bold mb-6"
-                style={{ color: "#0A0A0A" }}
+                style={{ color: COLORS.PRIMARY_DARK }}
               >
                 Archives des Documents Signés
               </h2>
@@ -1331,6 +1504,10 @@ const DocumentsPage = () => {
                   <Card
                     key={archive.id}
                     className="p-6 hover:shadow-lg transition-all duration-300"
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      backgroundColor: COLORS.LIGHT_BG 
+                    }}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -1348,10 +1525,18 @@ const DocumentsPage = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm"
+                                style={{ 
+                                  borderColor: COLORS.SEPARATOR,
+                                  color: COLORS.SECONDARY_TEXT 
+                                }}>
                           <Eye size={16} />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm"
+                                style={{ 
+                                  borderColor: COLORS.SEPARATOR,
+                                  color: COLORS.SECONDARY_TEXT 
+                                }}>
                           <Download size={16} />
                         </Button>
                       </div>
@@ -1359,14 +1544,14 @@ const DocumentsPage = () => {
 
                     <h3
                       className="font-semibold mb-3"
-                      style={{ color: "#0A0A0A" }}
+                      style={{ color: COLORS.PRIMARY_DARK }}
                     >
                       {archive.nom}
                     </h3>
 
                     <div
                       className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
-                      style={{ color: "#5A6470" }}
+                      style={{ color: COLORS.TEXT_BLACK }}
                     >
                       <div>
                         <div className="font-medium mb-1">Parties:</div>

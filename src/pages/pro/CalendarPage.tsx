@@ -46,6 +46,16 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
+// Nouvelle palette de couleurs
+const COLORS = {
+  LOGO: "#556B2F",           /* Olive green - accent */
+  PRIMARY_DARK: "#6B8E23",   /* Yellow-green - primary */
+  LIGHT_BG: "#FFFFFF",       /* White - fond clair */
+  SEPARATOR: "#D3D3D3",      /* Light gray - séparateurs */
+  SECONDARY_TEXT: "#8B4513", /* Saddle brown - textes secondaires */
+  TEXT_BLACK: "#000000",     /* Black - petits textes */
+};
+
 const formatDateLocal = (d) => {
   const date = d instanceof Date ? d : new Date(d);
   const yyyy = date.getFullYear();
@@ -56,19 +66,35 @@ const formatDateLocal = (d) => {
 
 // Types de rendez-vous
 const STATUT_RENDEZ_VOUS = {
-  CONFIRME: { label: "Confirmé", color: "bg-green-100 text-green-800" },
-  EN_ATTENTE: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  ANNULE: { label: "Annulé", color: "bg-red-100 text-red-800" },
-  TERMINE: { label: "Terminé", color: "bg-blue-100 text-blue-800" },
+  CONFIRME: { 
+    label: "Confirmé", 
+    color: "bg-green-100 text-green-800" 
+  },
+  EN_ATTENTE: { 
+    label: "En attente", 
+    color: "bg-yellow-100 text-yellow-800" 
+  },
+  ANNULE: { 
+    label: "Annulé", 
+    color: "bg-red-100 text-red-800" 
+  },
+  TERMINE: { 
+    label: "Terminé", 
+    color: "bg-blue-100 text-blue-800" 
+  },
 };
 
 const TYPES_RENDEZ_VOUS = {
   VISITE: {
     label: "Visite",
-    color: "bg-purple-100 text-purple-800",
+    color: `bg-[${COLORS.LOGO}20] text-[${COLORS.LOGO}]`,
     icon: MapPin,
   },
-  VIDEO: { label: "Visio", color: "bg-blue-100 text-blue-800", icon: Video },
+  VIDEO: { 
+    label: "Visio", 
+    color: "bg-blue-100 text-blue-800", 
+    icon: Video 
+  },
   TELEPHONE: {
     label: "Téléphone",
     color: "bg-green-100 text-green-800",
@@ -79,7 +105,11 @@ const TYPES_RENDEZ_VOUS = {
     color: "bg-orange-100 text-orange-800",
     icon: Users,
   },
-  AUDIT: { label: "Audit", color: "bg-red-100 text-red-800", icon: Users },
+  AUDIT: { 
+    label: "Audit", 
+    color: "bg-red-100 text-red-800", 
+    icon: Users 
+  },
   TOURISME: {
     label: "Tourisme",
     color: "bg-indigo-100 text-indigo-800",
@@ -178,7 +208,6 @@ const transformerDonneesAPI = (apiData) => {
       return true;
     })
     .map((event, index) => {
-      // Formater la date correctement
       let dateFormatee;
       let heureDebut = "09:00";
       let heureFin = "10:00";
@@ -186,18 +215,15 @@ const transformerDonneesAPI = (apiData) => {
       try {
         const startDate = new Date(event.start);
         dateFormatee = formatDateLocal(startDate);
-        // Extraire l'heure du start
         if (event.start.includes("T")) {
           const timePart = event.start.split("T")[1];
-          heureDebut = timePart.substring(0, 5); // HH:MM
+          heureDebut = timePart.substring(0, 5);
         }
 
-        // Calculer l'heure de fin
         if (event.end && event.end.includes("T")) {
           const endTimePart = event.end.split("T")[1];
           heureFin = endTimePart.substring(0, 5);
         } else {
-          // Si pas d'heure de fin, calculer +1h
           const [heures, minutes] = heureDebut.split(":");
           const heureFinNum = parseInt(heures) + 1;
           heureFin = `${heureFinNum.toString().padStart(2, "0")}:${minutes}`;
@@ -207,16 +233,15 @@ const transformerDonneesAPI = (apiData) => {
         dateFormatee = formatDateLocal(new Date());
       }
 
-      // Déterminer le type basé sur le type de l'API
       let type = "DEMANDE";
       let statut = "CONFIRME";
-      let couleur = event.backgroundColor || "#8B5CF6";
+      let couleur = event.backgroundColor || COLORS.LOGO;
       let icone = Users;
 
       switch (event.type) {
         case "appointment":
           type = "VISITE";
-          couleur = "#3B82F6";
+          couleur = COLORS.PRIMARY_DARK;
           icone = MapPin;
           break;
         case "tourisme":
@@ -226,7 +251,7 @@ const transformerDonneesAPI = (apiData) => {
           break;
         case "demande":
           type = "DEMANDE";
-          couleur = "#8B5CF6";
+          couleur = COLORS.LOGO;
           icone = Users;
           break;
         case "demande_artisan":
@@ -239,7 +264,6 @@ const transformerDonneesAPI = (apiData) => {
           icone = Clock;
       }
 
-      // Créer un titre significatif
       let titre = event.title || "Rendez-vous sans titre";
       if (titre.length > 50) {
         titre = titre.substring(0, 50) + "...";
@@ -268,7 +292,7 @@ const transformerDonneesAPI = (apiData) => {
         notes: event.description || event.notes || "",
         couleur: couleur,
         icone: icone,
-        sourceData: event, // Garder les données originales
+        sourceData: event,
       };
 
       console.log("Rendez-vous transformé:", rendezVous);
@@ -292,14 +316,15 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
       <div
         className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-scaleIn ${sizeClasses[size]}`}
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold" style={{ color: "#0A0A0A" }}>
+        <div className="flex justify-between items-center p-6 border-b" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
+          <h2 className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
             {title}
           </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300 transform hover:rotate-90"
-            style={{ color: "#5A6470" }}
+            style={{ color: COLORS.SECONDARY_TEXT }}
           >
             <X size={24} />
           </button>
@@ -384,7 +409,7 @@ const ModalDetailsRendezVous = ({
               <TypeIcon size={24} style={{ color: rendezVous.couleur }} />
             </div>
             <div>
-              <h3 className="text-xl font-bold" style={{ color: "#0A0A0A" }}>
+              <h3 className="text-xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
                 {rendezVous.titre}
               </h3>
               <Badge className={`mt-1 ${StatutBadge.color}`}>
@@ -395,27 +420,39 @@ const ModalDetailsRendezVous = ({
         </div>
 
         {/* Informations date et heure */}
-        <Card className="p-4">
+        <Card className="p-4" style={{ borderColor: COLORS.SEPARATOR }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Calendar size={20} className="text-blue-600" />
+              <div className="p-2 rounded-lg" 
+                   style={{ 
+                     backgroundColor: `${COLORS.LOGO}20`,
+                     color: COLORS.LOGO 
+                   }}>
+                <Calendar size={20} />
               </div>
               <div>
-                <div className="text-sm text-gray-500">Date</div>
-                <div className="font-semibold" style={{ color: "#0A0A0A" }}>
+                <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
+                  Date
+                </div>
+                <div className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
                   {formaterDate(rendezVous.date)}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Clock size={20} className="text-green-600" />
+              <div className="p-2 rounded-lg" 
+                   style={{ 
+                     backgroundColor: `${COLORS.PRIMARY_DARK}20`,
+                     color: COLORS.PRIMARY_DARK 
+                   }}>
+                <Clock size={20} />
               </div>
               <div>
-                <div className="text-sm text-gray-500">Horaire</div>
-                <div className="font-semibold" style={{ color: "#0A0A0A" }}>
+                <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
+                  Horaire
+                </div>
+                <div className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
                   {rendezVous.heureDebut} - {rendezVous.heureFin}
                 </div>
               </div>
@@ -424,8 +461,9 @@ const ModalDetailsRendezVous = ({
         </Card>
 
         {/* Informations client */}
-        <Card className="p-4">
-          <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4" style={{ borderColor: COLORS.SEPARATOR }}>
+          <h4 className="text-lg font-semibold mb-4 flex items-center gap-2" 
+              style={{ color: COLORS.PRIMARY_DARK }}>
             <User size={20} />
             Informations client
           </h4>
@@ -439,10 +477,12 @@ const ModalDetailsRendezVous = ({
                 </AvatarFallback>
               </Avatar>
               <div>
-                <div className="font-semibold" style={{ color: "#0A0A0A" }}>
+                <div className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
                   {rendezVous.client.nom || "Non spécifié"}
                 </div>
-                <div className="text-sm text-gray-500">Client</div>
+                <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
+                  Client
+                </div>
               </div>
             </div>
 
@@ -453,6 +493,10 @@ const ModalDetailsRendezVous = ({
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-2"
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.SECONDARY_TEXT 
+                    }}
                   >
                     <PhoneCall size={16} />
                     {rendezVous.client.telephone}
@@ -463,6 +507,10 @@ const ModalDetailsRendezVous = ({
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-2"
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.SECONDARY_TEXT 
+                    }}
                   >
                     <MailIcon size={16} />
                     {rendezVous.client.email}
@@ -475,21 +523,26 @@ const ModalDetailsRendezVous = ({
 
         {/* Informations bien */}
         {rendezVous.bien && rendezVous.bien.adresse && (
-          <Card className="p-4">
-            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Card className="p-4" style={{ borderColor: COLORS.SEPARATOR }}>
+            <h4 className="text-lg font-semibold mb-4 flex items-center gap-2"
+                style={{ color: COLORS.PRIMARY_DARK }}>
               <Home size={20} />
               Informations bien
             </h4>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Navigation size={20} className="text-purple-600" />
+              <div className="p-2 rounded-lg" 
+                   style={{ 
+                     backgroundColor: `${COLORS.LOGO}20`,
+                     color: COLORS.LOGO 
+                   }}>
+                <Navigation size={20} />
               </div>
               <div>
-                <div className="font-semibold" style={{ color: "#0A0A0A" }}>
+                <div className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
                   {rendezVous.bien.adresse}
                 </div>
                 {rendezVous.bien.ville && (
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
                     {rendezVous.bien.ville}
                   </div>
                 )}
@@ -499,20 +552,21 @@ const ModalDetailsRendezVous = ({
         )}
 
         {/* Informations supplémentaires */}
-        <Card className="p-4">
-          <h4 className="text-lg font-semibold mb-3">
+        <Card className="p-4" style={{ borderColor: COLORS.SEPARATOR }}>
+          <h4 className="text-lg font-semibold mb-3" 
+              style={{ color: COLORS.PRIMARY_DARK }}>
             Informations supplémentaires
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <div className="text-gray-500">Type de rendez-vous</div>
-              <div className="font-semibold" style={{ color: "#0A0A0A" }}>
+              <div style={{ color: COLORS.SECONDARY_TEXT }}>Type de rendez-vous</div>
+              <div className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
                 {TYPES_RENDEZ_VOUS[rendezVous.type]?.label || rendezVous.type}
               </div>
             </div>
             <div>
-              <div className="text-gray-500">Agent assigné</div>
-              <div className="font-semibold" style={{ color: "#0A0A0A" }}>
+              <div style={{ color: COLORS.SECONDARY_TEXT }}>Agent assigné</div>
+              <div className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
                 {rendezVous.agent}
               </div>
             </div>
@@ -520,13 +574,16 @@ const ModalDetailsRendezVous = ({
         </Card>
 
         {/* Actions */}
-
-        <div className=" grid place-items-center  ">
+        <div className="grid place-items-center">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="mx-auto  w-50 hover:bg-red-400 hover:text-white"
+            className="mx-auto w-50"
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.SECONDARY_TEXT 
+            }}
           >
             Fermer
           </Button>
@@ -556,7 +613,7 @@ const ModalRendezVous = ({
     statut: "EN_ATTENTE",
     agent: "Utilisateur",
     notes: "",
-    couleur: "#8B5CF6",
+    couleur: COLORS.LOGO,
     serviceId: 1,
   });
 
@@ -577,7 +634,7 @@ const ModalRendezVous = ({
         statut: "EN_ATTENTE",
         agent: "Utilisateur",
         notes: "",
-        couleur: "#8B5CF6",
+        couleur: COLORS.LOGO,
         serviceId: 1,
       });
     }
@@ -586,7 +643,6 @@ const ModalRendezVous = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation des champs requis
     if (!formData.heureDebut) {
       toast.error("L'heure de début est requise");
       return;
@@ -600,11 +656,10 @@ const ModalRendezVous = ({
     setEnregistrement(true);
 
     try {
-      // Préparer les données pour l'API
       const appointmentData = {
         titre: formData.titre,
         date: formData.date,
-        heureDebut: formData.heureDebut, // Assurez-vous que ce champ est envoyé
+        heureDebut: formData.heureDebut,
         heureFin: formData.heureFin,
         type: formData.type,
         statut: formData.statut,
@@ -615,7 +670,7 @@ const ModalRendezVous = ({
         serviceId: formData.serviceId || 1,
       };
 
-      console.log("Données envoyées:", appointmentData); // Pour debug
+      console.log("Données envoyées:", appointmentData);
 
       if (rendezVous?.id && !rendezVous.id.startsWith("event_")) {
         await api.put(`/planning/${rendezVous.id}`, appointmentData);
@@ -637,13 +692,10 @@ const ModalRendezVous = ({
       onClose();
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
-
-      // Message d'erreur plus détaillé
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.error ||
         "Erreur lors de la sauvegarde du rendez-vous";
-
       toast.error(errorMessage);
     } finally {
       setEnregistrement(false);
@@ -652,7 +704,6 @@ const ModalRendezVous = ({
 
   const handleDelete = async () => {
     if (!rendezVous?.id || rendezVous.id.startsWith("event_")) {
-      // Ne pas supprimer les événements générés automatiquement
       onDelete(rendezVous.id);
       onClose();
       return;
@@ -682,8 +733,8 @@ const ModalRendezVous = ({
   };
 
   const couleursDisponibles = [
-    "#8B5CF6",
-    "#3B82F6",
+    COLORS.LOGO,
+    COLORS.PRIMARY_DARK,
     "#10B981",
     "#F59E0B",
     "#EF4444",
@@ -709,7 +760,9 @@ const ModalRendezVous = ({
           {/* Informations de base */}
           <div className="space-y-4">
             <div>
-              <Label className="block mb-2">Titre du rendez-vous *</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Titre du rendez-vous *
+              </Label>
               <Input
                 required
                 value={formData.titre}
@@ -718,11 +771,17 @@ const ModalRendezVous = ({
                 }
                 placeholder="Ex: Visite appartement..."
                 disabled={enregistrement}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.TEXT_BLACK 
+                }}
               />
             </div>
 
             <div>
-              <Label className="block mb-2">Date *</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Date *
+              </Label>
               <Input
                 type="date"
                 required
@@ -732,12 +791,15 @@ const ModalRendezVous = ({
                   setFormData({ ...formData, date: e.target.value })
                 }
                 disabled={enregistrement}
+                style={{ borderColor: COLORS.SEPARATOR }}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="block mb-2">Heure début *</Label>
+                <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                  Heure début *
+                </Label>
                 <Input
                   type="time"
                   required
@@ -746,10 +808,13 @@ const ModalRendezVous = ({
                     setFormData({ ...formData, heureDebut: e.target.value })
                   }
                   disabled={enregistrement}
+                  style={{ borderColor: COLORS.SEPARATOR }}
                 />
               </div>
               <div>
-                <Label className="block mb-2">Heure fin *</Label>
+                <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                  Heure fin *
+                </Label>
                 <Input
                   type="time"
                   required
@@ -758,12 +823,15 @@ const ModalRendezVous = ({
                     setFormData({ ...formData, heureFin: e.target.value })
                   }
                   disabled={enregistrement}
+                  style={{ borderColor: COLORS.SEPARATOR }}
                 />
               </div>
             </div>
 
             <div>
-              <Label className="block mb-2">Service associé</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Service associé
+              </Label>
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.serviceId}
@@ -774,6 +842,10 @@ const ModalRendezVous = ({
                   })
                 }
                 disabled={enregistrement}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.TEXT_BLACK 
+                }}
               >
                 {servicesOptions.map((service) => (
                   <option key={service.id} value={service.id}>
@@ -787,7 +859,9 @@ const ModalRendezVous = ({
           {/* Type et statut */}
           <div className="space-y-4">
             <div>
-              <Label className="block mb-2">Type de rendez-vous</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Type de rendez-vous
+              </Label>
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.type}
@@ -795,6 +869,10 @@ const ModalRendezVous = ({
                   setFormData({ ...formData, type: e.target.value })
                 }
                 disabled={enregistrement}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.TEXT_BLACK 
+                }}
               >
                 {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
                   <option key={key} value={key}>
@@ -805,7 +883,9 @@ const ModalRendezVous = ({
             </div>
 
             <div>
-              <Label className="block mb-2">Statut</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Statut
+              </Label>
               <select
                 className="w-full p-3 border rounded-lg"
                 value={formData.statut}
@@ -813,6 +893,10 @@ const ModalRendezVous = ({
                   setFormData({ ...formData, statut: e.target.value })
                 }
                 disabled={enregistrement}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.TEXT_BLACK 
+                }}
               >
                 {Object.entries(STATUT_RENDEZ_VOUS).map(([key, statut]) => (
                   <option key={key} value={key}>
@@ -823,7 +907,9 @@ const ModalRendezVous = ({
             </div>
 
             <div>
-              <Label className="block mb-2">Agent</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Agent
+              </Label>
               <Input
                 value={formData.agent}
                 onChange={(e) =>
@@ -831,11 +917,17 @@ const ModalRendezVous = ({
                 }
                 placeholder="Nom de l'agent"
                 disabled={enregistrement}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.TEXT_BLACK 
+                }}
               />
             </div>
 
             <div>
-              <Label className="block mb-2">Couleur</Label>
+              <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                Couleur
+              </Label>
               <div className="flex gap-2">
                 {couleursDisponibles.map((couleur) => (
                   <button
@@ -859,8 +951,9 @@ const ModalRendezVous = ({
         </div>
 
         {/* Informations client */}
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="border-t pt-6" style={{ borderColor: COLORS.SEPARATOR }}>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"
+              style={{ color: COLORS.PRIMARY_DARK }}>
             <User size={20} />
             Informations client
           </h3>
@@ -876,6 +969,10 @@ const ModalRendezVous = ({
                 })
               }
               disabled={enregistrement}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
             <Input
               type="email"
@@ -888,6 +985,10 @@ const ModalRendezVous = ({
                 })
               }
               disabled={enregistrement}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
             <Input
               type="tel"
@@ -900,13 +1001,18 @@ const ModalRendezVous = ({
                 })
               }
               disabled={enregistrement}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
           </div>
         </div>
 
         {/* Informations bien */}
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <div className="border-t pt-6" style={{ borderColor: COLORS.SEPARATOR }}>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"
+              style={{ color: COLORS.PRIMARY_DARK }}>
             <Home size={20} />
             Informations bien
           </h3>
@@ -921,6 +1027,10 @@ const ModalRendezVous = ({
                 })
               }
               disabled={enregistrement}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
             <Input
               placeholder="Ville"
@@ -932,13 +1042,19 @@ const ModalRendezVous = ({
                 })
               }
               disabled={enregistrement}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
           </div>
         </div>
 
         {/* Notes */}
         <div>
-          <Label className="block mb-2">Notes</Label>
+          <Label className="block mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+            Notes
+          </Label>
           <Textarea
             rows={4}
             placeholder="Notes supplémentaires..."
@@ -947,11 +1063,15 @@ const ModalRendezVous = ({
               setFormData({ ...formData, notes: e.target.value })
             }
             disabled={enregistrement}
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.TEXT_BLACK 
+            }}
           />
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between pt-6 border-t">
+        <div className="flex justify-between pt-6 border-t" style={{ borderColor: COLORS.SEPARATOR }}>
           {rendezVous && (
             <Button
               type="button"
@@ -974,13 +1094,20 @@ const ModalRendezVous = ({
               variant="outline"
               onClick={onClose}
               disabled={enregistrement}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.SECONDARY_TEXT 
+              }}
             >
               Annuler
             </Button>
             <Button
               type="submit"
-              style={{ backgroundColor: "#0052FF", color: "white" }}
               disabled={enregistrement}
+              style={{ 
+                backgroundColor: COLORS.PRIMARY_DARK,
+                color: COLORS.LIGHT_BG 
+              }}
             >
               {enregistrement ? (
                 <RefreshCw className="mr-2 animate-spin" size={16} />
@@ -1062,8 +1189,10 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
     >
       <div className="space-y-6">
         {/* Ajout nouveau créneau */}
-        <Card className="p-4">
-          <h3 className="font-semibold mb-4">Ajouter un créneau récurrent</h3>
+        <Card className="p-4" style={{ borderColor: COLORS.SEPARATOR }}>
+          <h3 className="font-semibold mb-4" style={{ color: COLORS.PRIMARY_DARK }}>
+            Ajouter un créneau récurrent
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <select
               className="p-2 border rounded"
@@ -1071,6 +1200,10 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
               onChange={(e) =>
                 setNouveauCreneau({ ...nouveauCreneau, jour: e.target.value })
               }
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             >
               {joursSemaine.map((jour) => (
                 <option key={jour.value} value={jour.value}>
@@ -1085,6 +1218,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
               onChange={(e) =>
                 setNouveauCreneau({ ...nouveauCreneau, debut: e.target.value })
               }
+              style={{ borderColor: COLORS.SEPARATOR }}
             />
 
             <Input
@@ -1093,6 +1227,7 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
               onChange={(e) =>
                 setNouveauCreneau({ ...nouveauCreneau, fin: e.target.value })
               }
+              style={{ borderColor: COLORS.SEPARATOR }}
             />
 
             <select
@@ -1101,6 +1236,10 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
               onChange={(e) =>
                 setNouveauCreneau({ ...nouveauCreneau, type: e.target.value })
               }
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             >
               {Object.entries(TYPES_RENDEZ_VOUS).map(([key, type]) => (
                 <option key={key} value={key}>
@@ -1109,7 +1248,14 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
               ))}
             </select>
 
-            <Button onClick={ajouterCreneau} className="whitespace-nowrap">
+            <Button 
+              onClick={ajouterCreneau} 
+              className="whitespace-nowrap"
+              style={{ 
+                backgroundColor: COLORS.PRIMARY_DARK,
+                color: COLORS.LIGHT_BG 
+              }}
+            >
               <Plus size={16} className="mr-1" />
               Ajouter
             </Button>
@@ -1118,11 +1264,14 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
 
         {/* Liste des créneaux */}
         <div className="space-y-3">
-          <h3 className="font-semibold">Créneaux configurés</h3>
+          <h3 className="font-semibold" style={{ color: COLORS.PRIMARY_DARK }}>
+            Créneaux configurés
+          </h3>
           {creneauxLocaux.map((creneau) => (
             <div
               key={creneau.id}
               className="flex items-center justify-between p-3 border rounded-lg"
+              style={{ borderColor: COLORS.SEPARATOR }}
             >
               <div className="flex items-center gap-4 flex-1">
                 <Switch
@@ -1131,11 +1280,19 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
                 />
 
                 <div className="flex-1 grid grid-cols-4 gap-4">
-                  <span className="capitalize font-medium">{creneau.jour}</span>
-                  <span>
+                  <span className="capitalize font-medium" style={{ color: COLORS.PRIMARY_DARK }}>
+                    {creneau.jour}
+                  </span>
+                  <span style={{ color: COLORS.TEXT_BLACK }}>
                     {creneau.debut} - {creneau.fin}
                   </span>
-                  <Badge variant="outline">
+                  <Badge 
+                    variant="outline"
+                    style={{ 
+                      borderColor: COLORS.SEPARATOR,
+                      color: COLORS.SECONDARY_TEXT 
+                    }}
+                  >
                     {TYPES_RENDEZ_VOUS[creneau.type]?.label || creneau.type}
                   </Badge>
                   <Badge
@@ -1163,13 +1320,23 @@ const ModalCreneaux = ({ isOpen, onClose, creneaux, onSaveCreneaux }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between pt-6 border-t">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex justify-between pt-6 border-t" style={{ borderColor: COLORS.SEPARATOR }}>
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.SECONDARY_TEXT 
+            }}
+          >
             Annuler
           </Button>
           <Button
             onClick={sauvegarder}
-            style={{ backgroundColor: "#0052FF", color: "white" }}
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK,
+              color: COLORS.LIGHT_BG 
+            }}
           >
             <Save className="mr-2" size={16} />
             Sauvegarder
@@ -1394,44 +1561,80 @@ const CalendarPage = () => {
 
   if (erreur) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" 
+           style={{ backgroundColor: COLORS.LIGHT_BG }}>
         <div className="text-center">
-          <XCircle className="text-red-500 mx-auto mb-4" size={32} />
-          <p className="text-red-500 mb-4">{erreur}</p>
-          <Button onClick={chargerRendezVous}>Réessayer</Button>
+          <XCircle className="mx-auto mb-4" size={32} style={{ color: "#DC2626" }} />
+          <p className="mb-4" style={{ color: "#DC2626" }}>{erreur}</p>
+          <Button 
+            onClick={chargerRendezVous}
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK,
+              color: COLORS.LIGHT_BG 
+            }}
+          >
+            Réessayer
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: COLORS.LIGHT_BG }}>
       <div className="container mx-auto px-4 lg:py-6 py-2">
         {/* En-tête */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div className="flex items-center gap-4 mb-4 lg:mb-0">
-            <div className="p-3 rounded-xl bg-blue-100 text-blue-600">
+            <div className="p-3 rounded-xl" 
+                 style={{ 
+                   backgroundColor: `${COLORS.PRIMARY_DARK}20`,
+                   color: COLORS.PRIMARY_DARK 
+                 }}>
               <CalendarIcon size={32} />
             </div>
             <div>
-              <h1 className="text-lg lg:text-4xl font-bold" style={{ color: "#0A0A0A" }}>
+              <h1 className="text-lg lg:text-4xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
                 Calendrier & Réservations
               </h1>
-              <p className="text-lg" style={{ color: "#5A6470" }}>
+              <p className="text-lg" style={{ color: COLORS.TEXT_BLACK }}>
                 {rendezVous.length} rendez-vous chargés
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={aujourdhui}>
+            <Button 
+              variant="outline" 
+              onClick={aujourdhui}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.SECONDARY_TEXT 
+              }}
+            >
               Aujourd'hui
             </Button>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={precedenteSemaine}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={precedenteSemaine}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.SECONDARY_TEXT 
+                }}
+              >
                 <ChevronLeft size={16} />
               </Button>
-              <Button variant="outline" size="icon" onClick={semaineSuivante}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={semaineSuivante}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.SECONDARY_TEXT 
+                }}
+              >
                 <ChevronRight size={16} />
               </Button>
             </div>
@@ -1439,12 +1642,19 @@ const CalendarPage = () => {
               className="p-2 border rounded-lg"
               value={vue}
               onChange={(e) => setVue(e.target.value)}
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             >
               <option value="semaine">Vue Semaine</option>
               <option value="mois">Vue Mois</option>
             </select>
             <Button
-              style={{ backgroundColor: "#0052FF", color: "white" }}
+              style={{ 
+                backgroundColor: COLORS.PRIMARY_DARK, 
+                color: COLORS.LIGHT_BG 
+              }}
               onClick={nouveauRendezVous}
               className="left-5"
             >
@@ -1453,53 +1663,54 @@ const CalendarPage = () => {
             </Button>
           </div>
         </div>
+        
         {/* Statistiques rapides */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-blue-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
                   {rendezVous.filter((rdv) => rdv.statut === "CONFIRME").length}
                 </div>
-                <div style={{ color: "#5A6470" }}>Confirmés</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Confirmés</div>
               </div>
-              <CheckCircle className="text-blue-600" size={24} />
+              <CheckCircle size={24} style={{ color: COLORS.PRIMARY_DARK }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-yellow-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: "#D97706" }}>
                   {
                     rendezVous.filter((rdv) => rdv.statut === "EN_ATTENTE")
                       .length
                   }
                 </div>
-                <div style={{ color: "#5A6470" }}>En attente</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>En attente</div>
               </div>
-              <Clock4 className="text-yellow-600" size={24} />
+              <Clock4 size={24} style={{ color: "#D97706" }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-green-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.LOGO }}>
                   {rendezVous.filter((rdv) => rdv.type === "VISITE").length}
                 </div>
-                <div style={{ color: "#5A6470" }}>Visites cette semaine</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Visites cette semaine</div>
               </div>
-              <MapPin className="text-green-600" size={24} />
+              <MapPin size={24} style={{ color: COLORS.LOGO }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-purple-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.SECONDARY_TEXT }}>
                   {creneauxRecurrents.filter((c) => c.actif).length}
                 </div>
-                <div style={{ color: "#5A6470" }}>Créneaux actifs</div>
+                <div style={{ color: COLORS.TEXT_BLACK }}>Créneaux actifs</div>
               </div>
-              <Settings className="text-purple-600" size={24} />
+              <Settings size={24} style={{ color: COLORS.SECONDARY_TEXT }} />
             </div>
           </Card>
         </div>
@@ -1509,7 +1720,7 @@ const CalendarPage = () => {
           <div className="xl:col-span-3">
             {/* Calendrier Semaine */}
             {vue === "semaine" && (
-              <Card className="p-6">
+              <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
                 {/* En-tête des jours */}
                 <div className="grid grid-cols-8 gap-1 mb-4">
                   <div className="p-3"></div>
@@ -1521,13 +1732,17 @@ const CalendarPage = () => {
                         key={index}
                         className={`p-3 text-center rounded-lg ${
                           estAujourdhui
-                            ? "bg-blue-100 border border-blue-200"
-                            : "bg-gray-50"
+                            ? "border"
+                            : ""
                         }`}
+                        style={{ 
+                          backgroundColor: estAujourdhui ? `${COLORS.PRIMARY_DARK}20` : `${COLORS.SEPARATOR}30`,
+                          borderColor: estAujourdhui ? COLORS.PRIMARY_DARK : COLORS.SEPARATOR
+                        }}
                       >
                         <div
                           className="font-semibold capitalize"
-                          style={{ color: "#0A0A0A" }}
+                          style={{ color: COLORS.PRIMARY_DARK }}
                         >
                           {date.toLocaleDateString("fr-FR", {
                             weekday: "short",
@@ -1550,9 +1765,11 @@ const CalendarPage = () => {
                   {heuresJournee.map((heure) => (
                     <div
                       key={heure}
-                      className="flex border-t border-gray-200 min-h-16"
+                      className="flex border-t min-h-16"
+                      style={{ borderColor: COLORS.SEPARATOR }}
                     >
-                      <div className="w-20 py-2 pr-4 text-right text-sm text-gray-500">
+                      <div className="w-20 py-2 pr-4 text-right text-sm" 
+                           style={{ color: COLORS.SECONDARY_TEXT }}>
                         {formaterHeure(heure)}
                       </div>
 
@@ -1561,7 +1778,8 @@ const CalendarPage = () => {
                         return (
                           <div
                             key={jourIndex}
-                            className="flex-1 min-h-16 border-l border-gray-200 relative"
+                            className="flex-1 min-h-16 border-l relative"
+                            style={{ borderColor: COLORS.SEPARATOR }}
                           >
                             {rdvs.map((rdv, rdvIndex) => {
                               const TypeIcon =
@@ -1611,11 +1829,11 @@ const CalendarPage = () => {
 
             {/* Vue Mois */}
             {vue === "mois" && (
-              <Card className="p-6">
+              <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
                 <div className="text-center mb-6">
                   <h3
                     className="text-xl font-bold"
-                    style={{ color: "#0A0A0A" }}
+                    style={{ color: COLORS.PRIMARY_DARK }}
                   >
                     {dateCourante.toLocaleDateString("fr-FR", {
                       month: "long",
@@ -1630,7 +1848,7 @@ const CalendarPage = () => {
                       <div
                         key={jour}
                         className="p-2 text-center font-semibold text-sm"
-                        style={{ color: "#5A6470" }}
+                        style={{ color: COLORS.SECONDARY_TEXT }}
                       >
                         {jour}
                       </div>
@@ -1638,20 +1856,17 @@ const CalendarPage = () => {
                   )}
 
                   {Array.from({ length: 42 }, (_, i) => {
-                    // Premier jour du mois courant
                     const premierJourMois = new Date(
                       dateCourante.getFullYear(),
                       dateCourante.getMonth(),
                       1
                     );
-                    // Dernier jour du mois précédent
                     const dernierJourMoisPrecedent = new Date(
                       dateCourante.getFullYear(),
                       dateCourante.getMonth(),
                       0
                     );
 
-                    // Calculer le premier jour à afficher (lundi de la semaine contenant le 1er du mois)
                     const premierJourAffiche = new Date(premierJourMois);
                     const decalageLundi =
                       premierJourMois.getDay() === 0
@@ -1661,7 +1876,6 @@ const CalendarPage = () => {
                       premierJourMois.getDate() + decalageLundi
                     );
 
-                    // Date pour cette cellule
                     const dateCellule = new Date(premierJourAffiche);
                     dateCellule.setDate(premierJourAffiche.getDate() + i);
 
@@ -1684,6 +1898,7 @@ const CalendarPage = () => {
                               : "bg-white"
                             : "bg-gray-50 text-gray-400"
                         }`}
+                        style={{ borderColor: COLORS.SEPARATOR }}
                       >
                         <div
                           className={`text-sm font-semibold mb-1 ${
@@ -1719,7 +1934,7 @@ const CalendarPage = () => {
                           })}
 
                           {rdvsDuJour.length > 2 && (
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs" style={{ color: COLORS.SECONDARY_TEXT }}>
                               +{rdvsDuJour.length - 2} autres
                             </div>
                           )}
@@ -1735,10 +1950,10 @@ const CalendarPage = () => {
           {/* Colonne latérale */}
           <div className="space-y-6">
             {/* Rendez-vous du jour */}
-            <Card className="p-6">
+            <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
               <h3
                 className="text-xl font-bold mb-4 flex items-center gap-2"
-                style={{ color: "#0A0A0A" }}
+                style={{ color: COLORS.PRIMARY_DARK }}
               >
                 <Star size={20} />
                 Aujourd'hui
@@ -1754,15 +1969,19 @@ const CalendarPage = () => {
                     return (
                       <div
                         key={rdv.id}
-                        className="p-3 border rounded-lg cursor-pointer hover:border-blue-300 transition-colors"
+                        className="p-3 border rounded-lg cursor-pointer transition-colors"
+                        style={{ 
+                          borderColor: COLORS.SEPARATOR,
+                          backgroundColor: COLORS.LIGHT_BG
+                        }}
                         onClick={() => ouvrirDetailsRendezVous(rdv)}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <TypeIcon size={16} className="text-blue-600" />
+                            <TypeIcon size={16} style={{ color: COLORS.PRIMARY_DARK }} />
                             <span
                               className="font-semibold text-sm"
-                              style={{ color: "#0A0A0A" }}
+                              style={{ color: COLORS.PRIMARY_DARK }}
                             >
                               {rdv.heureDebut}
                             </span>
@@ -1776,12 +1995,12 @@ const CalendarPage = () => {
 
                         <div
                           className="text-sm font-medium mb-1"
-                          style={{ color: "#0A0A0A" }}
+                          style={{ color: COLORS.PRIMARY_DARK }}
                         >
                           {rdv.titre}
                         </div>
 
-                        <div className="text-xs" style={{ color: "#5A6470" }}>
+                        <div className="text-xs" style={{ color: COLORS.TEXT_BLACK }}>
                           {rdv.client.nom}
                         </div>
                       </div>
@@ -1791,7 +2010,7 @@ const CalendarPage = () => {
                 {rendezVousFiltres.filter(
                   (rdv) => rdv.date === formatDateLocal(new Date())
                 ).length === 0 && (
-                  <div className="text-center py-4 text-gray-500">
+                  <div className="text-center py-4" style={{ color: COLORS.SECONDARY_TEXT }}>
                     Aucun rendez-vous aujourd'hui
                   </div>
                 )}
@@ -1799,9 +2018,9 @@ const CalendarPage = () => {
             </Card>
 
             {/* Créneaux récurrents */}
-            <Card className="p-6">
+            <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold" style={{ color: "#0A0A0A" }}>
+                <h3 className="text-xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
                   Créneaux récurrents
                 </h3>
                 <Badge variant="secondary">
@@ -1814,19 +2033,27 @@ const CalendarPage = () => {
                   <div
                     key={creneau.id}
                     className="flex items-center justify-between p-2 border rounded"
+                    style={{ borderColor: COLORS.SEPARATOR }}
                   >
                     <div>
                       <div
                         className="font-medium text-sm capitalize"
-                        style={{ color: "#0A0A0A" }}
+                        style={{ color: COLORS.PRIMARY_DARK }}
                       >
                         {creneau.jour}
                       </div>
-                      <div className="text-xs" style={{ color: "#5A6470" }}>
+                      <div className="text-xs" style={{ color: COLORS.TEXT_BLACK }}>
                         {creneau.debut} - {creneau.fin}
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs"
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        color: COLORS.SECONDARY_TEXT 
+                      }}
+                    >
                       {TYPES_RENDEZ_VOUS[creneau.type]?.label || creneau.type}
                     </Badge>
                   </div>
@@ -1837,6 +2064,10 @@ const CalendarPage = () => {
                 variant="outline"
                 className="w-full mt-3"
                 onClick={() => setShowModalCreneaux(true)}
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  color: COLORS.SECONDARY_TEXT 
+                }}
               >
                 Gérer les créneaux
               </Button>
