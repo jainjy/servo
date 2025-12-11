@@ -85,12 +85,12 @@ const navigation = [
     href: "/pro/demandes-devis",
     icon: FileText,
   },
-  {
-    name: "Cours à Domicile",
-    href: "/pro/cours-domicile",
-    icon: BookOpen,
-  },
-  { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
+  // {
+  //   name: "Cours à Domicile",
+  //   href: "/pro/cours-domicile",
+  //   icon: BookOpen,
+  // },
+  // { name: "Reservations Cours", href: "/pro/reservations-cours", icon: Plus },
   // 🔥 NOUVEL ITEM : Gestion des Médias
   {
     name: "Gestion des Médias",
