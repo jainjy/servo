@@ -28,6 +28,27 @@ import { MediaService } from "../../lib/api";
 import MediaUpload from "./MediaUpload";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
+// Palette de couleurs identique à AccompagnementPage.tsx
+const colors = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFF0",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+  primaryLight: "#8FBC8F",
+  secondaryLight: "#A0522D",
+  cardBg: "#FFFFFF",
+  textPrimary: "#2C3E50",
+  textSecondary: "#5D6D7E",
+  success: "#27AE60",
+  warning: "#F39C12",
+  error: "#E74C3C",
+  accentGold: "#D4AF37",
+  gradient1: "linear-gradient(135deg, #556B2F 0%, #6B8E23 100%)",
+  gradient2: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+  gradient3: "linear-gradient(135deg, #6B8E23 0%, #27AE60 100%)",
+};
+
 // Types adaptés à votre structure de données
 interface MediaBase {
   id: string;
@@ -80,11 +101,12 @@ const Modal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className={`bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`}>
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: colors.separator }}>
+          <h2 className="text-xl font-bold" style={{ color: colors.textPrimary }}>{title}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            style={{ color: colors.textSecondary }}
           >
             <X size={20} />
           </button>
@@ -138,57 +160,57 @@ const MediaDetailModal: React.FC<{
           {/* Détails */}
           <div className="lg:w-2/3 space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{media.title}</h3>
-              <p className="text-gray-600 mt-1">{media.description || 'Aucune description'}</p>
+              <h3 className="text-lg font-semibold" style={{ color: colors.textPrimary }}>{media.title}</h3>
+              <p className="mt-1" style={{ color: colors.textSecondary }}>{media.description || 'Aucune description'}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Catégorie</label>
-                <p className="text-gray-900">{media.category || 'Non catégorisé'}</p>
+                <label className="text-sm font-medium" style={{ color: colors.textSecondary }}>Catégorie</label>
+                <p style={{ color: colors.textPrimary }}>{media.category || 'Non catégorisé'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Statut</label>
+                <label className="text-sm font-medium" style={{ color: colors.textSecondary }}>Statut</label>
                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${media.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
                   {media.isActive ? 'Actif' : 'Inactif'}
                 </span>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Vues</label>
-                <p className="text-gray-900">
+                <label className="text-sm font-medium" style={{ color: colors.textSecondary }}>Vues</label>
+                <p style={{ color: colors.textPrimary }}>
                   {media.views?.toLocaleString() || 0}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Date de création</label>
-                <p className="text-gray-900">
+                <label className="text-sm font-medium" style={{ color: colors.textSecondary }}>Date de création</label>
+                <p style={{ color: colors.textPrimary }}>
                   {new Date(media.createdAt).toLocaleDateString('fr-FR')}
                 </p>
               </div>
             </div>
 
             {/* Informations techniques */}
-            <div className="border-t pt-4">
-              <h4 className="font-medium text-gray-900 mb-3">Informations techniques</h4>
+            <div className="border-t pt-4" style={{ borderColor: colors.separator }}>
+              <h4 className="font-medium mb-3" style={{ color: colors.textPrimary }}>Informations techniques</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <label className="text-gray-500">Durée</label>
-                  <p className="text-gray-900">{formatDuration(media.duration)}</p>
+                  <label style={{ color: colors.textSecondary }}>Durée</label>
+                  <p style={{ color: colors.textPrimary }}>{formatDuration(media.duration)}</p>
                 </div>
                 <div>
-                  <label className="text-gray-500">Taille du fichier</label>
-                  <p className="text-gray-900">
+                  <label style={{ color: colors.textSecondary }}>Taille du fichier</label>
+                  <p style={{ color: colors.textPrimary }}>
                     {formatFileSize(media.fileSize)}
                   </p>
                 </div>
                 <div>
-                  <label className="text-gray-500">Type MIME</label>
-                  <p className="text-gray-900">{media.mimeType || 'N/A'}</p>
+                  <label style={{ color: colors.textSecondary }}>Type MIME</label>
+                  <p style={{ color: colors.textPrimary }}>{media.mimeType || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="text-gray-500">Premium</label>
-                  <p className="text-gray-900">
+                  <label style={{ color: colors.textSecondary }}>Premium</label>
+                  <p style={{ color: colors.textPrimary }}>
                     {media.isPremium ? 'Oui' : 'Non'}
                   </p>
                 </div>
@@ -201,7 +223,14 @@ const MediaDetailModal: React.FC<{
                 href={media.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors"
+                style={{ backgroundColor: colors.primaryDark }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryLight;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryDark;
+                }}
               >
                 <Play size={16} />
                 Regarder le podcast
@@ -292,16 +321,16 @@ const EditMediaModal: React.FC<{
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
         {/* Afficher l'erreur si elle existe */}
         {saveError && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border rounded-lg p-4" style={{ borderColor: colors.error, backgroundColor: `${colors.error}15` }}>
             <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-              <span className="text-red-800 text-sm">{saveError}</span>
+              <AlertCircle className="h-5 w-5 mr-2" style={{ color: colors.error }} />
+              <span className="text-sm" style={{ color: colors.error }}>{saveError}</span>
             </div>
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1" style={{ color: colors.textPrimary }}>
             Titre *
           </label>
           <input
@@ -309,32 +338,35 @@ const EditMediaModal: React.FC<{
             required
             value={formData.title}
             onChange={(e) => handleChange('title', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            style={{ borderColor: colors.separator }}
             disabled={loading}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1" style={{ color: colors.textPrimary }}>
             Description
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            style={{ borderColor: colors.separator }}
             disabled={loading}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium mb-1" style={{ color: colors.textPrimary }}>
             Catégorie
           </label>
           <select
             value={formData.category}
             onChange={(e) => handleChange('category', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            style={{ borderColor: colors.separator }}
             disabled={loading}
           >
             <option value="">Sélectionner une catégorie</option>
@@ -353,10 +385,11 @@ const EditMediaModal: React.FC<{
               id="isActive"
               checked={formData.isActive}
               onChange={(e) => handleChange('isActive', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 focus:ring-blue-500 border-gray-300 rounded"
+              style={{ color: colors.primaryDark }}
               disabled={loading}
             />
-            <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="isActive" className="ml-2 text-sm" style={{ color: colors.textSecondary }}>
               Podcast vidéo actif
             </label>
           </div>
@@ -367,10 +400,11 @@ const EditMediaModal: React.FC<{
               id="isPremium"
               checked={formData.isPremium}
               onChange={(e) => handleChange('isPremium', e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 focus:ring-blue-500 border-gray-300 rounded"
+              style={{ color: colors.primaryDark }}
               disabled={loading}
             />
-            <label htmlFor="isPremium" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="isPremium" className="ml-2 text-sm" style={{ color: colors.textSecondary }}>
               Contenu premium
             </label>
           </div>
@@ -381,14 +415,26 @@ const EditMediaModal: React.FC<{
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+            style={{ 
+              color: colors.textSecondary,
+              backgroundColor: colors.lightBg,
+              border: `1px solid ${colors.separator}`
+            }}
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+            style={{ backgroundColor: colors.primaryDark }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primaryLight;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primaryDark;
+            }}
           >
             {loading ? (
               <>
@@ -410,14 +456,24 @@ const ErrorMessage: React.FC<{ message: string; onRetry?: () => void }> = ({
   message,
   onRetry
 }) => (
-  <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+  <div className="border rounded-xl p-4 mb-6" style={{ 
+    backgroundColor: `${colors.error}15`,
+    borderColor: colors.error 
+  }}>
     <div className="flex items-center">
-      <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-      <span className="text-red-800 font-medium">{message}</span>
+      <AlertCircle className="h-5 w-5 mr-2" style={{ color: colors.error }} />
+      <span className="font-medium" style={{ color: colors.error }}>{message}</span>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="ml-auto bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+          className="ml-auto text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+          style={{ backgroundColor: colors.error }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = colors.warning;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = colors.error;
+          }}
         >
           <RefreshCw size={16} />
           Réessayer
@@ -441,7 +497,8 @@ const ActionDropdown: React.FC<{
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        style={{ color: colors.textSecondary }}
       >
         <MoreVertical size={18} />
       </button>
@@ -452,13 +509,14 @@ const ActionDropdown: React.FC<{
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border py-1 z-20" style={{ borderColor: colors.separator }}>
             <button
               onClick={() => {
                 onView(media);
                 setIsOpen(false);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-gray-50"
+              style={{ color: colors.textPrimary }}
             >
               <Eye size={16} />
               Voir détails
@@ -469,7 +527,8 @@ const ActionDropdown: React.FC<{
                 onEdit(media);
                 setIsOpen(false);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-blue-50"
+              style={{ color: colors.primaryDark }}
             >
               <Edit size={16} />
               Modifier
@@ -479,7 +538,8 @@ const ActionDropdown: React.FC<{
                 onDelete(media.id);
                 setIsOpen(false);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-red-50"
+              style={{ color: colors.error }}
             >
               <Trash2 size={16} />
               Supprimer
@@ -697,49 +757,49 @@ const AdminMedia: React.FC = () => {
 
   const renderStats = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+      <div className="bg-white rounded-2xl p-6 shadow-lg border" style={{ borderColor: colors.separator }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Total Podcasts Vidéo</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalVideos}</p>
+            <p className="text-sm font-medium" style={{ color: colors.textSecondary }}>Total Podcasts Vidéo</p>
+            <p className="text-2xl font-bold" style={{ color: colors.textPrimary }}>{stats.totalVideos}</p>
           </div>
-          <Video className="h-8 w-8 text-blue-600" />
+          <Video className="h-8 w-8" style={{ color: colors.primaryDark }} />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+      <div className="bg-white rounded-2xl p-6 shadow-lg border" style={{ borderColor: colors.separator }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Vues Total</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
+            <p className="text-sm font-medium" style={{ color: colors.textSecondary }}>Vues Total</p>
+            <p className="text-2xl font-bold" style={{ color: colors.textPrimary }}>{stats.totalViews.toLocaleString()}</p>
           </div>
-          <Users className="h-8 w-8 text-blue-600" />
+          <Users className="h-8 w-8" style={{ color: colors.primaryDark }} />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+      <div className="bg-white rounded-2xl p-6 shadow-lg border" style={{ borderColor: colors.separator }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Catégories</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalCategories}</p>
+            <p className="text-sm font-medium" style={{ color: colors.textSecondary }}>Catégories</p>
+            <p className="text-2xl font-bold" style={{ color: colors.textPrimary }}>{stats.totalCategories}</p>
           </div>
-          <BarChart3 className="h-8 w-8 text-blue-600" />
+          <BarChart3 className="h-8 w-8" style={{ color: colors.primaryDark }} />
         </div>
       </div>
     </div>
   );
 
   const renderControls = () => (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8">
+    <div className="bg-white rounded-2xl shadow-lg border mb-8" style={{ borderColor: colors.separator }}>
       <div className="p-6">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-2xl">
-              <Video className="w-8 h-8 text-blue-600" />
+            <div className="p-3 rounded-2xl" style={{ backgroundColor: `${colors.primaryDark}15` }}>
+              <Video className="w-8 h-8" style={{ color: colors.primaryDark }} />
             </div>
             <div>
-              <h2 className="text-md lg:text-2xl font-bold text-gray-900">Gestion des Podcasts Vidéo</h2>
-              <p className="text-gray-600">Administrez votre bibliothèque de podcasts vidéo</p>
+              <h2 className="text-md lg:text-2xl font-bold" style={{ color: colors.textPrimary }}>Gestion des Podcasts Vidéo</h2>
+              <p style={{ color: colors.textSecondary }}>Administrez votre bibliothèque de podcasts vidéo</p>
             </div>
           </div>
 
@@ -747,14 +807,28 @@ const AdminMedia: React.FC = () => {
             <button
               onClick={refreshData}
               disabled={refreshing}
-              className="bg-gray-600 text-white px-4 py-3 rounded-xl hover:bg-gray-700 transition-all duration-300 font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50"
+              className="text-white px-4 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50"
+              style={{ backgroundColor: colors.textPrimary }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = colors.textSecondary;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = colors.textPrimary;
+              }}
             >
               <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
               Actualiser
             </button>
             <button
               onClick={handleUploadClick}
-              className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl"
+              className="text-white px-6 py-3 rounded-xl transition-all duration-300 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: colors.primaryDark }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = colors.primaryLight;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = colors.primaryDark;
+              }}
             >
               <Plus size={20} />
               Ajouter un Podcast Vidéo
@@ -765,13 +839,14 @@ const AdminMedia: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: colors.textSecondary }} />
               <input
                 type="text"
                 placeholder="Rechercher un podcast vidéo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                style={{ borderColor: colors.separator }}
               />
             </div>
           </div>
@@ -780,7 +855,8 @@ const AdminMedia: React.FC = () => {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              style={{ borderColor: colors.separator }}
             >
               <option value="">Toutes les catégories</option>
               {categories.map((category, index) => (
@@ -796,19 +872,26 @@ const AdminMedia: React.FC = () => {
   );
 
   const renderMediaCards = () => (
-    <div className=" rounded-2xl  ">
+    <div className="rounded-2xl">
       {filteredVideos.length === 0 ? (
         <div className="text-center py-12">
-          <Video className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <p className="text-lg font-medium text-gray-900 mb-2">
+          <Video className="mx-auto h-16 w-16 mb-4" style={{ color: colors.separator }} />
+          <p className="text-lg font-medium mb-2" style={{ color: colors.textPrimary }}>
             Aucun podcast vidéo trouvé
           </p>
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4" style={{ color: colors.textSecondary }}>
             {searchTerm || filterCategory ? 'Essayez de modifier vos critères de recherche' : 'Commencez par ajouter votre premier podcast vidéo'}
           </p>
           <button
             onClick={handleUploadClick}
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2"
+            className="text-white px-6 py-3 rounded-xl transition-colors font-medium inline-flex items-center gap-2"
+            style={{ backgroundColor: colors.primaryDark }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primaryLight;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = colors.primaryDark;
+            }}
           >
             <Plus size={20} />
             Ajouter le premier podcast vidéo
@@ -819,7 +902,8 @@ const AdminMedia: React.FC = () => {
           {filteredVideos.map((media) => (
             <div
               key={media.id}
-              className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+              className="bg-white rounded-xl shadow-lg border hover:shadow-xl transition-all duration-300 group"
+              style={{ borderColor: colors.separator }}
             >
               {/* Image et overlay */}
               <div className="relative aspect-video overflow-hidden rounded-t-xl">
@@ -860,16 +944,16 @@ const AdminMedia: React.FC = () => {
 
               {/* Contenu */}
               <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors" style={{ color: colors.textPrimary }}>
                   {media.title}
                 </h3>
 
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                <p className="text-sm mb-3 line-clamp-2" style={{ color: colors.textSecondary }}>
                   {media.description || 'Aucune description'}
                 </p>
 
                 {/* Métriques */}
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <div className="flex items-center justify-between text-sm mb-4" style={{ color: colors.textSecondary }}>
                   <div className="flex items-center gap-1">
                     <Headphones size={14} />
                     <span>{media.views?.toLocaleString() || 0} vues</span>
@@ -883,7 +967,7 @@ const AdminMedia: React.FC = () => {
                 </div>
 
                 {/* Date */}
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <div className="flex items-center justify-between text-xs mb-4" style={{ color: colors.textSecondary }}>
                   <div className="flex items-center gap-1">
                     <Calendar size={12} />
                     <span>
@@ -893,10 +977,11 @@ const AdminMedia: React.FC = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: colors.separator }}>
                   <button
                     onClick={() => handleViewDetails(media)}
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="flex items-center gap-1 text-sm font-medium"
+                    style={{ color: colors.primaryDark }}
                   >
                     <Play size={14} />
                     Voir
@@ -924,7 +1009,7 @@ const AdminMedia: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 ">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: colors.lightBg }}>
       <div className="max-w-7xl mx-auto">
 
         {/* En-tête */}
@@ -933,13 +1018,25 @@ const AdminMedia: React.FC = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate(-1)}
-                className="bg-slate-900 text-white p-3 rounded-xl hover:bg-slate-800 transition-all duration-200 font-medium shadow-lg border border-slate-700 hover:border-slate-600 group"
+                className="text-white p-3 rounded-xl transition-all duration-200 font-medium shadow-lg border group"
+                style={{ 
+                  backgroundColor: colors.textPrimary,
+                  borderColor: colors.textPrimary 
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.textSecondary;
+                  e.currentTarget.style.borderColor = colors.textSecondary;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.textPrimary;
+                  e.currentTarget.style.borderColor = colors.textPrimary;
+                }}
               >
                 <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
               </button>
               <div>
-                <h1 className="text-lg lg:text-3xl font-bold text-slate-900">Administration Podcasts Vidéo</h1>
-                <p className="text-gray-600 mt-2">Gérez votre bibliothèque de podcasts vidéo</p>
+                <h1 className="text-lg lg:text-3xl font-bold" style={{ color: colors.textPrimary }}>Administration Podcasts Vidéo</h1>
+                <p style={{ color: colors.textSecondary }} className="mt-2">Gérez votre bibliothèque de podcasts vidéo</p>
               </div>
             </div>
           </div>
