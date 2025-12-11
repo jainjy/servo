@@ -15,6 +15,15 @@ import { reviewService } from "@/services/reviewService";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
+// Définition du thème
+const theme = {
+  logo: "#556B2F",           
+  primaryDark: "#6B8E23",   
+  lightBg: "#FFFFFF",       
+  separator: "#D3D3D3",     
+  secondaryText: "#8B4513", 
+};
+
 // Types pour les avis
 interface Review {
   id: string;
@@ -133,10 +142,10 @@ const ReviewsPage: FC = () => {
 
   if (!reviewsData) {
     return (
-      <div className="container mx-auto p-6">
-        <Card>
+      <div className="container mx-auto p-6" style={{ backgroundColor: theme.lightBg }}>
+        <Card style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
           <CardContent className="pt-6">
-            <p className="text-center text-gray-500">
+            <p className="text-center" style={{ color: theme.secondaryText }}>
               Impossible de charger les avis
             </p>
           </CardContent>
@@ -148,50 +157,64 @@ const ReviewsPage: FC = () => {
   const { reviews, statistics, badges } = reviewsData;
 
   return (
-    <div className="container mx-auto p-2 lg:p-0 space-y-6">
-      <h1 className="text-lg lg:text-3xl font-bold mb-6">Avis & Réputation</h1>
+    <div className="container mx-auto p-2 lg:p-0 space-y-6" style={{ backgroundColor: theme.lightBg }}>
+      <h1 className="text-lg lg:text-3xl font-bold mb-6" style={{ color: theme.logo }}>
+        Avis & Réputation
+      </h1>
 
       {/* Résumé des statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card>
+        <Card style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
           <CardHeader>
-            <CardTitle className="text-md lg:text-xl">Note moyenne</CardTitle>
+            <CardTitle className="text-md lg:text-xl" style={{ color: theme.logo }}>
+              Note moyenne
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-2">
-              <span className="text-4xl font-bold">
+              <span className="text-4xl font-bold" style={{ color: theme.logo }}>
                 {statistics.averageRating}
               </span>
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <StarIcon
                     key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(statistics.averageRating)
-                        ? "text-yellow-400 fill-current"
-                        : "text-gray-300"
-                    }`}
+                    className="w-5 h-5"
+                    style={{
+                      color: i < Math.floor(statistics.averageRating) ? "#FBBF24" : theme.separator,
+                      fill: i < Math.floor(statistics.averageRating) ? "#FBBF24" : "transparent"
+                    }}
                   />
                 ))}
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm mt-2" style={{ color: theme.secondaryText }}>
               Basé sur {statistics.totalReviews} avis
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
           <CardHeader>
-            <CardTitle className="text-md lg:text-xl">Distribution des notes</CardTitle>
+            <CardTitle className="text-md lg:text-xl" style={{ color: theme.logo }}>
+              Distribution des notes
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {statistics.ratingDistribution.map((dist) => (
                 <div key={dist.stars} className="flex items-center gap-2">
-                  <span className="w-8 text-sm">{dist.stars}★</span>
-                  <Progress value={dist.percentage} className="h-2 flex-1" />
-                  <span className="text-sm text-gray-500 w-12 text-right">
+                  <span className="w-8 text-sm" style={{ color: theme.secondaryText }}>
+                    {dist.stars}★
+                  </span>
+                  <Progress 
+                    value={dist.percentage} 
+                    className="h-2 flex-1 custom-progress-filled"
+                    style={{ 
+                      backgroundColor: `${theme.separator}40`,
+                    }}
+                  />
+                  <span className="text-sm w-12 text-right" style={{ color: theme.secondaryText }}>
                     {dist.count}
                   </span>
                 </div>
@@ -200,14 +223,24 @@ const ReviewsPage: FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
           <CardHeader>
-            <CardTitle className="text-md lg:text-xl">Certifications</CardTitle>
+            <CardTitle className="text-md lg:text-xl" style={{ color: theme.logo }}>
+              Certifications
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {badges.map((badge, index) => (
-                <Badge key={index} variant="secondary">
+                <Badge 
+                  key={index} 
+                  variant="secondary"
+                  style={{ 
+                    backgroundColor: `${theme.primaryDark}10`,
+                    color: theme.primaryDark,
+                    borderColor: theme.separator
+                  }}
+                >
                   {badge}
                 </Badge>
               ))}
@@ -217,16 +250,16 @@ const ReviewsPage: FC = () => {
       </div>
 
       {/* Liste des avis */}
-      <Card>
+      <Card style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
         <CardHeader>
-          <CardTitle>Avis Clients</CardTitle>
-          <CardDescription>
+          <CardTitle style={{ color: theme.logo }}>Avis Clients</CardTitle>
+          <CardDescription style={{ color: theme.secondaryText }}>
             Gérez et répondez aux avis de vos clients
           </CardDescription>
         </CardHeader>
         <CardContent>
           {reviews.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
+            <p className="text-center py-8" style={{ color: theme.secondaryText }}>
               Aucun avis pour le moment
             </p>
           ) : (
@@ -234,13 +267,16 @@ const ReviewsPage: FC = () => {
               {reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="border-b border-gray-200 pb-6 last:border-0"
+                  className="border-b pb-6 last:border-0"
+                  style={{ borderColor: theme.separator }}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="font-semibold">{getClientName(review)}</h3>
+                      <h3 className="font-semibold" style={{ color: theme.logo }}>
+                        {getClientName(review)}
+                      </h3>
                       {review.service && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm" style={{ color: theme.secondaryText }}>
                           Service: {review.service.libelle}
                         </p>
                       )}
@@ -248,33 +284,39 @@ const ReviewsPage: FC = () => {
                         {[...Array(5)].map((_, i) => (
                           <StarIcon
                             key={i}
-                            className={`w-4 h-4 ${
-                              i < review.rating
-                                ? "text-yellow-400 fill-current"
-                                : "text-gray-300"
-                            }`}
+                            className="w-4 h-4"
+                            style={{
+                              color: i < review.rating ? "#FBBF24" : theme.separator,
+                              fill: i < review.rating ? "#FBBF24" : "transparent"
+                            }}
                           />
                         ))}
                       </div>
                     </div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm" style={{ color: theme.secondaryText }}>
                       {formatDate(review.createdAt)}
                     </span>
                   </div>
 
-                  <p className="text-gray-700 mb-3">{review.comment}</p>
+                  <p className="mb-3" style={{ color: theme.secondaryText }}>{review.comment}</p>
 
                   {review.metadata?.professionalResponse && (
-                    <div className="bg-blue-50 p-3 rounded-md mt-2 border border-blue-200">
-                      <p className="text-sm font-semibold text-blue-800 flex items-center gap-1">
+                    <div 
+                      className="p-3 rounded-md mt-2 border"
+                      style={{ 
+                        backgroundColor: `${theme.primaryDark}10`,
+                        borderColor: theme.separator
+                      }}
+                    >
+                      <p className="text-sm font-semibold flex items-center gap-1" style={{ color: theme.primaryDark }}>
                         <MessageCircle className="w-4 h-4" />
                         Votre réponse:
                       </p>
-                      <p className="text-sm text-blue-700 mt-1">
+                      <p className="text-sm mt-1" style={{ color: theme.secondaryText }}>
                         {review.metadata.professionalResponse}
                       </p>
                       {review.metadata.responseDate && (
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="text-xs mt-1" style={{ color: theme.secondaryText }}>
                           Le {formatDate(review.metadata.responseDate)}
                         </p>
                       )}
@@ -290,12 +332,27 @@ const ReviewsPage: FC = () => {
                             value={responseText}
                             onChange={(e) => setResponseText(e.target.value)}
                             rows={3}
+                            style={{
+                              borderColor: theme.separator,
+                              backgroundColor: theme.lightBg,
+                              color: theme.secondaryText
+                            }}
                           />
                           <div className="flex gap-2">
                             <Button
                               onClick={() => handleRespond(review.id)}
                               disabled={submitting || !responseText.trim()}
                               size="sm"
+                              style={{ 
+                                backgroundColor: theme.primaryDark,
+                                color: "white"
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#556B2F";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = theme.primaryDark;
+                              }}
                             >
                               {submitting && (
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -310,6 +367,16 @@ const ReviewsPage: FC = () => {
                               }}
                               size="sm"
                               disabled={submitting}
+                              style={{ 
+                                borderColor: theme.separator,
+                                color: theme.secondaryText
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "transparent";
+                              }}
                             >
                               Annuler
                             </Button>
@@ -321,6 +388,16 @@ const ReviewsPage: FC = () => {
                           size="sm"
                           onClick={() => setRespondingTo(review.id)}
                           className="flex items-center gap-1"
+                          style={{ 
+                            borderColor: theme.separator,
+                            color: theme.secondaryText
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                          }}
                         >
                           <MessageCircle className="w-4 h-4" />
                           Répondre à cet avis
