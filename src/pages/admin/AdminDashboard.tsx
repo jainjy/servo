@@ -258,14 +258,14 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-[#8B4513]">Dashboard</h1>
           <p className="text-muted-foreground">Vue d'ensemble de la plateforme SERVO</p>
         </div>
         
         <Button 
           onClick={handleOpenEmailCard}
           disabled={isLoading}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+          className="flex items-center gap-2 bg-[#6B8E23] hover:bg-[#6B8E23]/90 text-white"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -281,17 +281,17 @@ export default function AdminDashboard() {
      {/* Carte pour saisir l'email */}
       {isEmailCardOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md mx-4 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-lg border border-[#D3D3D3]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
+                <Mail className="h-5 w-5 text-[#6B8E23]" />
                 Envoyer le rapport par email
               </h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleCloseEmailCard}
-                className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="h-8 w-8 p-0 hover:bg-gray-100"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -307,11 +307,11 @@ export default function AdminDashboard() {
                   
                   {/* Bouton d'activation/désactivation */}
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground">Automatique</span>
+                    <span className="text-sm font-medium text-[#8B4513]">Automatique</span>
                     <button
                       type="button"
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        isAutoSend ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                        isAutoSend ? 'bg-[#6B8E23]' : 'bg-gray-300'
                       }`}
                       onClick={handleAutoSendToggle}
                     >
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
                       placeholder="exemple@servo.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full"
+                      className="w-full border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23]"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           handleGenerateReport()
@@ -344,14 +344,14 @@ export default function AdminDashboard() {
                   
                   {/* Dropdown simple pour emails récents */}
                   <Select onValueChange={handleEmailSelect} value={selectedEmail}>
-                    <SelectTrigger className="w-12 px-3">
-                      <ChevronDown className="h-4 w-4" />
+                    <SelectTrigger className="w-12 px-3 border-[#D3D3D3]">
+                      <ChevronDown className="h-4 w-4 text-[#6B8E23]" />
                     </SelectTrigger>
-                    <SelectContent className="w-64">
+                    <SelectContent className="w-64 border border-[#D3D3D3]">
                       {loadingEmails ? (
                         <SelectItem value="loading" disabled>
                           <div className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin text-[#6B8E23]" />
                             <span>Chargement...</span>
                           </div>
                         </SelectItem>
@@ -359,7 +359,7 @@ export default function AdminDashboard() {
                         storedEmails.map((emailItem) => (
                           <SelectItem key={emailItem.id || emailItem.email} value={emailItem.email}>
                             <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-green-600" />
+                              <Mail className="h-4 w-4 text-[#556B2F]" />
                               <span className="truncate">{emailItem.email}</span>
                             </div>
                           </SelectItem>
@@ -378,19 +378,19 @@ export default function AdminDashboard() {
 
                 {/* Sélection de fréquence - affichée seulement quand automatique est activé */}
                 {isAutoSend && (
-                  <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <div className="space-y-3 pt-2 border-t border-[#D3D3D3]">
                     <div className="space-y-2">
-                      <Label htmlFor="frequency" className="text-sm font-medium text-foreground">
+                      <Label htmlFor="frequency" className="text-sm font-medium text-[#8B4513]">
                         Fréquence d'envoi automatique
                       </Label>
                       <Select 
                         value={autoSendFrequency} 
                         onValueChange={setAutoSendFrequency}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full border-[#D3D3D3]">
                           <SelectValue placeholder="Choisir la fréquence" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border border-[#D3D3D3]">
                           <SelectItem value="custom">Personnalisée</SelectItem>
                           <SelectItem value="daily">Quotidiennement</SelectItem>
                           <SelectItem value="weekly">Hebdomadairement</SelectItem>
@@ -401,9 +401,9 @@ export default function AdminDashboard() {
 
                     {/* Configuration de fréquence personnalisée */}
                     {autoSendFrequency === "custom" && (
-                      <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg">
                         <div className="space-y-2">
-                          <Label htmlFor="customValue" className="text-sm font-medium text-foreground">
+                          <Label htmlFor="customValue" className="text-sm font-medium text-[#8B4513]">
                             Valeur
                           </Label>
                           <Input
@@ -413,21 +413,21 @@ export default function AdminDashboard() {
                             max="365"
                             value={customValue}
                             onChange={(e) => setCustomValue(parseInt(e.target.value) || 1)}
-                            className="w-full"
+                            className="w-full border-[#D3D3D3]"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="customUnit" className="text-sm font-medium text-foreground">
+                          <Label htmlFor="customUnit" className="text-sm font-medium text-[#8B4513]">
                             Unité
                           </Label>
                           <Select 
                             value={customUnit} 
                             onValueChange={setCustomUnit}
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full border-[#D3D3D3]">
                               <SelectValue placeholder="Unité" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="border border-[#D3D3D3]">
                               <SelectItem value="hours">Heures</SelectItem>
                               <SelectItem value="days">Jours</SelectItem>
                               <SelectItem value="weeks">Semaines</SelectItem>
@@ -439,9 +439,9 @@ export default function AdminDashboard() {
 
                     {/* Aperçu de la fréquence sélectionnée */}
                     {isAutoSend && (
-                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm text-blue-700 dark:text-blue-300">
-                          <strong>Fréquence configurée :</strong><br />
+                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                        <p className="text-sm text-green-700">
+                          <strong className="text-[#8B4513]">Fréquence configurée :</strong><br />
                           {autoSendFrequency === "custom" 
                             ? getCustomFrequencyText(customValue, customUnit)
                             : getFrequencyText(autoSendFrequency)
@@ -458,13 +458,14 @@ export default function AdminDashboard() {
                   variant="outline"
                   onClick={handleCloseEmailCard}
                   disabled={isLoading}
+                  className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10"
                 >
                   Annuler
                 </Button>
                 <Button
                   onClick={handleGenerateReport}
                   disabled={isLoading || !email.trim()}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                  className="flex items-center gap-2 bg-[#6B8E23] hover:bg-[#6B8E23]/90 text-white"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -481,10 +482,10 @@ export default function AdminDashboard() {
 
       {/* Modal de confirmation */}
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent>
+        <DialogContent className="border border-[#D3D3D3]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-green-600" />
+            <DialogTitle className="flex items-center gap-2 text-[#8B4513]">
+              <Mail className="h-5 w-5 text-[#6B8E23]" />
               {isAutoSend ? "Envoi automatique activé" : "Rapport envoyé"}
               <p className="text-sm font-normal text-muted-foreground mt-1">
                 {isAutoSend 
@@ -493,12 +494,15 @@ export default function AdminDashboard() {
                 }
               </p>
             </DialogTitle>
-            <DialogDescription className="pt-4">
+            <DialogDescription className="pt-4 text-gray-600">
               {modalMessage}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end pt-4">
-            <Button onClick={handleCloseModal}>
+            <Button 
+              onClick={handleCloseModal}
+              className="bg-[#6B8E23] hover:bg-[#6B8E23]/90 text-white"
+            >
               Fermer
             </Button>
           </div>
