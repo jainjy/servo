@@ -3,6 +3,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, FileAudio, FileVideo, Image } from 'lucide-react';
 import api from '../../lib/api';
 
+// Définition du thème
+const theme = {
+  logo: "#556B2F",           // logo / accent - Olive green
+  primaryDark: "#6B8E23",    // Sruvol / fonds légers - Yellow-green
+  lightBg: "#FFFFFF",        // fond de page / bloc texte - White
+  separator: "#D3D3D3",     // séparateurs / bordures, UI - Light gray
+  secondaryText: "#8B4513",  // touche premium / titres secondaires - Saddle brown
+};
+
 interface MediaUploadProps {
   type: 'podcast' | 'video';
   onUploadSuccess: (media: any) => void;
@@ -218,14 +227,14 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: theme.lightBg }}>
         {/* En-tête */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: theme.separator }}>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold" style={{ color: theme.logo }}>
               Ajouter un {type === 'podcast' ? 'Podcast' : 'Vidéo'}
             </h2>
-            <p className="text-gray-600 mt-1">
+            <p className="mt-1" style={{ color: theme.secondaryText }}>
               Téléchargez votre média et remplissez les informations
             </p>
           </div>
@@ -233,6 +242,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             disabled={uploading}
+            style={{ color: theme.secondaryText }}
           >
             <X size={24} />
           </button>
@@ -241,9 +251,12 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
         {/* Formulaire */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm font-medium">{error}</p>
-              <p className="text-red-700 text-xs mt-1">
+            <div className="border rounded-lg p-4" style={{ 
+              backgroundColor: `${theme.separator}20`,
+              borderColor: theme.separator 
+            }}>
+              <p className="text-sm font-medium" style={{ color: theme.secondaryText }}>{error}</p>
+              <p className="text-xs mt-1" style={{ color: theme.secondaryText }}>
                 Vérifiez les informations et réessayez.
               </p>
             </div>
@@ -251,21 +264,32 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 
           {/* Fichier média principal */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium mb-3" style={{ color: theme.secondaryText }}>
               Fichier {type === 'podcast' ? 'Audio' : 'Vidéo'} *
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors">
+            <div className="border-2 border-dashed rounded-xl p-6 text-center transition-colors" 
+              style={{ 
+                borderColor: theme.separator,
+                backgroundColor: `${theme.separator}10`
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = theme.primaryDark;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = theme.separator;
+              }}
+            >
               {files.media ? (
-                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between rounded-lg p-4" style={{ backgroundColor: `${theme.separator}20` }}>
                   <div className="flex items-center space-x-3">
                     {type === 'podcast' ? (
-                      <FileAudio className="h-8 w-8 text-blue-600" />
+                      <FileAudio className="h-8 w-8" style={{ color: theme.primaryDark }} />
                     ) : (
-                      <FileVideo className="h-8 w-8 text-red-600" />
+                      <FileVideo className="h-8 w-8" style={{ color: theme.primaryDark }} />
                     )}
                     <div className="text-left">
-                      <p className="font-medium text-gray-900">{files.media.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium" style={{ color: theme.logo }}>{files.media.name}</p>
+                      <p className="text-sm" style={{ color: theme.secondaryText }}>
                         {(files.media.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
                     </div>
@@ -273,8 +297,15 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                   <button
                     type="button"
                     onClick={() => removeFile('media')}
-                    className="text-red-600 hover:text-red-700 p-1"
+                    className="p-1"
                     disabled={uploading}
+                    style={{ color: '#DC2626' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#B91C1C';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#DC2626';
+                    }}
                   >
                     <X size={20} />
                   </button>
@@ -296,15 +327,15 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                     disabled={uploading}
                   >
                     {type === 'podcast' ? (
-                      <FileAudio className="h-12 w-12 text-blue-600" />
+                      <FileAudio className="h-12 w-12" style={{ color: theme.primaryDark }} />
                     ) : (
-                      <FileVideo className="h-12 w-12 text-red-600" />
+                      <FileVideo className="h-12 w-12" style={{ color: theme.primaryDark }} />
                     )}
                     <div>
-                      <p className="text-lg font-medium text-gray-900">
+                      <p className="text-lg font-medium" style={{ color: theme.logo }}>
                         Cliquez pour sélectionner un fichier
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm mt-1" style={{ color: theme.secondaryText }}>
                         {getSupportedFormats()} • Max {getFileSizeLimit()}
                       </p>
                     </div>
@@ -316,17 +347,28 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 
           {/* Miniature */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium mb-3" style={{ color: theme.secondaryText }}>
               Image de couverture
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors">
+            <div className="border-2 border-dashed rounded-xl p-6 text-center transition-colors"
+              style={{ 
+                borderColor: theme.separator,
+                backgroundColor: `${theme.separator}10`
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = theme.primaryDark;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = theme.separator;
+              }}
+            >
               {files.thumbnail ? (
-                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between rounded-lg p-4" style={{ backgroundColor: `${theme.separator}20` }}>
                   <div className="flex items-center space-x-3">
-                    <Image className="h-8 w-8 text-green-600" />
+                    <Image className="h-8 w-8" style={{ color: theme.primaryDark }} />
                     <div className="text-left">
-                      <p className="font-medium text-gray-900">{files.thumbnail.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium" style={{ color: theme.logo }}>{files.thumbnail.name}</p>
+                      <p className="text-sm" style={{ color: theme.secondaryText }}>
                         {(files.thumbnail.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
                     </div>
@@ -334,8 +376,15 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                   <button
                     type="button"
                     onClick={() => removeFile('thumbnail')}
-                    className="text-red-600 hover:text-red-700 p-1"
+                    className="p-1"
                     disabled={uploading}
+                    style={{ color: '#DC2626' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#B91C1C';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#DC2626';
+                    }}
                   >
                     <X size={20} />
                   </button>
@@ -356,12 +405,12 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                     className="flex flex-col items-center space-y-3 w-full"
                     disabled={uploading}
                   >
-                    <Image className="h-12 w-12 text-green-600" />
+                    <Image className="h-12 w-12" style={{ color: theme.primaryDark }} />
                     <div>
-                      <p className="text-lg font-medium text-gray-900">
+                      <p className="text-lg font-medium" style={{ color: theme.logo }}>
                         Ajouter une image de couverture
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm mt-1" style={{ color: theme.secondaryText }}>
                         JPEG, PNG, WebP, GIF • Max 10MB
                       </p>
                     </div>
@@ -374,7 +423,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
           {/* Informations du média */}
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium mb-2" style={{ color: theme.secondaryText }}>
                 Titre *
               </label>
               <input
@@ -383,7 +432,12 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
+                style={{ 
+                  borderColor: theme.separator,
+                  backgroundColor: theme.lightBg,
+                  color: theme.logo 
+                }}
                 placeholder={`Titre du ${type === 'podcast' ? 'podcast' : 'vidéo'}`}
                 disabled={uploading}
                 required
@@ -391,7 +445,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="description" className="block text-sm font-medium mb-2" style={{ color: theme.secondaryText }}>
                 Description
               </label>
               <textarea
@@ -400,7 +454,12 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
+                style={{ 
+                  borderColor: theme.separator,
+                  backgroundColor: theme.lightBg,
+                  color: theme.logo 
+                }}
                 placeholder={`Description du ${type === 'podcast' ? 'podcast' : 'vidéo'}...`}
                 disabled={uploading}
               />
@@ -408,7 +467,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="category" className="block text-sm font-medium mb-2" style={{ color: theme.secondaryText }}>
                   Catégorie
                 </label>
                 <div className="relative">
@@ -418,7 +477,12 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
+                    style={{ 
+                      borderColor: theme.separator,
+                      backgroundColor: theme.lightBg,
+                      color: theme.logo 
+                    }}
                     placeholder="Ex: Technologie, Musique, Éducation..."
                     disabled={uploading}
                     list="categories-list"
@@ -430,13 +494,13 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                     ))}
                   </datalist>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs mt-1" style={{ color: theme.secondaryText }}>
                   Tapez une catégorie ou sélectionnez-en une existante
                 </p>
               </div>
 
               <div>
-                <label htmlFor="isActive" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="isActive" className="block text-sm font-medium mb-2" style={{ color: theme.secondaryText }}>
                   Statut
                 </label>
                 <select
@@ -444,11 +508,16 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                   name="isActive"
                   value={formData.isActive}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:border-blue-500 transition-all duration-200"
+                  style={{ 
+                    borderColor: theme.separator,
+                    backgroundColor: theme.lightBg,
+                    color: theme.logo 
+                  }}
                   disabled={uploading}
                 >
-                  <option value="true">Actif</option>
-                  <option value="false">Inactif</option>
+                  <option value="true" style={{ color: theme.logo }}>Actif</option>
+                  <option value="false" style={{ color: theme.logo }}>Inactif</option>
                 </select>
               </div>
             </div>
@@ -456,37 +525,64 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 
           {/* Barre de progression */}
           {uploading && (
-            <div className="bg-gray-50 rounded-xl p-4">
+            <div className="rounded-xl p-4" style={{ backgroundColor: `${theme.separator}20` }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Upload en cours...</span>
-                <span className="text-sm text-gray-500">{progress}%</span>
+                <span className="text-sm font-medium" style={{ color: theme.logo }}>Upload en cours...</span>
+                <span className="text-sm" style={{ color: theme.secondaryText }}>{progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full rounded-full h-2" style={{ backgroundColor: `${theme.separator}40` }}>
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${progress}%`,
+                    backgroundColor: theme.primaryDark
+                  }}
                 ></div>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs mt-2" style={{ color: theme.secondaryText }}>
                 Ne fermez pas cette fenêtre pendant l'upload...
               </p>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-6 border-t" style={{ borderColor: theme.separator }}>
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+              className="px-6 py-3 border rounded-xl transition-colors font-medium"
+              style={{ 
+                borderColor: theme.separator,
+                color: theme.secondaryText,
+                backgroundColor: 'transparent'
+              }}
               disabled={uploading}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = `${theme.separator}20`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={uploading || !formData.title.trim() || !files.media}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-3 text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              style={{ 
+                backgroundColor: uploading ? `${theme.primaryDark}80` : theme.primaryDark
+              }}
+              onMouseEnter={(e) => {
+                if (!uploading && formData.title.trim() && files.media) {
+                  e.currentTarget.style.backgroundColor = "#556B2F";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!uploading && formData.title.trim() && files.media) {
+                  e.currentTarget.style.backgroundColor = theme.primaryDark;
+                }
+              }}
             >
               {uploading ? (
                 <>

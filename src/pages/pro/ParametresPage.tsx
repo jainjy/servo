@@ -1,4 +1,4 @@
-"import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -138,30 +138,28 @@ const ParametresPage = () => {
 
   if (!parametres) {
     return (
-      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="mx-auto text-[#556B2F] mb-4" size={48} />
-          <h2 className="text-xl font-bold text-[#8B4513] mb-2">
+          <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
             Impossible de charger les paramètres
           </h2>
           <p className="text-gray-600 mb-4">
             Une erreur est survenue lors du chargement de vos paramètres.
           </p>
-          <Button className="bg-[#6B8E23] hover:bg-[#556B2F] text-white">
-            Réessayer
-          </Button>
+          <Button onClick={chargerParametres}>Réessayer</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF]">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         {/* En-tête */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-xl bg-[#6B8E23]/10 text-[#6B8E23]">
+            <div className="p-3 rounded-xl bg-[#6B8E23]/10 text-[#556B2F]">
               <SettingsIcon size={32} />
             </div>
             <div>
@@ -194,7 +192,7 @@ const ParametresPage = () => {
           {/* Colonne principale */}
           <div className="lg:col-span-2 space-y-8">
             {/* Section Horaires d'ouverture */}
-            <Card className="p-6">
+            <Card className="p-6 border-[#D3D3D3]">
               <div className="flex items-center gap-3 mb-6">
                 <Clock className="text-[#556B2F]" size={24} />
                 <h2 className="text-2xl font-bold text-[#8B4513]">
@@ -212,7 +210,7 @@ const ParametresPage = () => {
                   return (
                     <div
                       key={jour.key}
-                      className="flex items-center justify-between p-4 border border-[#D3D3D3] rounded-lg"
+                      className="flex items-center justify-between p-4 border border-[#D3D3D3] rounded-lg hover:bg-[#6B8E23]/5 transition-colors"
                     >
                       <div className="flex items-center gap-4">
                         <Switch
@@ -220,8 +218,9 @@ const ParametresPage = () => {
                           onCheckedChange={(ouvert) =>
                             mettreAJourHoraire(jour.dbKey, "ouvert", ouvert)
                           }
+                          className="data-[state=checked]:bg-[#556B2F]"
                         />
-                        <Label className="font-medium w-24 text-[#8B4513]">
+                        <Label className="font-medium w-24 text-gray-900">
                           {jour.label}
                         </Label>
                       </div>
@@ -240,7 +239,7 @@ const ParametresPage = () => {
                                   e.target.value
                                 )
                               }
-                              className="w-24 md:w-32 border-[#D3D3D3]"
+                              className="w-24 md:w-32 border-[#D3D3D3] focus:border-[#556B2F]"
                             />
                           </div>
                           <div className="flex items-center gap-2">
@@ -255,7 +254,7 @@ const ParametresPage = () => {
                                   e.target.value
                                 )
                               }
-                              className="w-24 md:w-32 border-[#D3D3D3]"
+                              className="w-24 md:w-32 border-[#D3D3D3] focus:border-[#556B2F]"
                             />
                           </div>
                         </div>
@@ -267,7 +266,7 @@ const ParametresPage = () => {
             </Card>
 
             {/* Section Jours fermés */}
-            <Card className="p-6">
+            <Card className="p-6 border-[#D3D3D3]">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <Calendar className="text-[#556B2F]" size={24} />
@@ -278,7 +277,7 @@ const ParametresPage = () => {
                 <Button 
                   onClick={ajouterJourFerme} 
                   variant="outline"
-                  className="border-[#6B8E23] text-[#6B8E23] hover:bg-[#6B8E23]/10"
+                  className="border-[#556B2F] text-[#556B2F] hover:bg-[#6B8E23]/10"
                 >
                   + Ajouter
                 </Button>
@@ -288,7 +287,7 @@ const ParametresPage = () => {
                 {(parametres.joursFermes || []).map((jour, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 border border-[#D3D3D3] rounded-lg"
+                    className="flex items-center justify-between p-3 border border-[#D3D3D3] rounded-lg hover:bg-[#6B8E23]/5 transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <Input
@@ -298,7 +297,7 @@ const ParametresPage = () => {
                         onChange={(e) =>
                           mettreAJourJourFerme(index, "date", e.target.value)
                         }
-                        className="w-40 border-[#D3D3D3]"
+                        className="w-40 border-[#D3D3D3] focus:border-[#556B2F]"
                       />
                       <Input
                         placeholder="Libellé (ex: Férié, Congés...)"
@@ -306,7 +305,7 @@ const ParametresPage = () => {
                         onChange={(e) =>
                           mettreAJourJourFerme(index, "label", e.target.value)
                         }
-                        className="flex-1 border-[#D3D3D3]"
+                        className="flex-1 border-[#D3D3D3] focus:border-[#556B2F]"
                       />
                     </div>
                     <Button
@@ -328,7 +327,7 @@ const ParametresPage = () => {
             </Card>
 
             {/* Section Délais de réponse */}
-            <Card className="p-6">
+            <Card className="p-6 border-[#D3D3D3]">
               <div className="flex items-center gap-3 mb-6">
                 <Mail className="text-[#556B2F]" size={24} />
                 <h2 className="text-2xl font-bold text-[#8B4513]">
@@ -353,7 +352,7 @@ const ParametresPage = () => {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="text-lg border-[#D3D3D3]"
+                    className="text-lg border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -373,7 +372,7 @@ const ParametresPage = () => {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="text-lg border-[#D3D3D3]"
+                    className="text-lg border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -393,7 +392,7 @@ const ParametresPage = () => {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="text-lg border-[#D3D3D3]"
+                    className="text-lg border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
               </div>
@@ -403,7 +402,7 @@ const ParametresPage = () => {
           {/* Colonne latérale */}
           <div className="space-y-8">
             {/* Section Politique d'annulation */}
-            <Card className="p-6">
+            <Card className="p-6 border-[#D3D3D3]">
               <div className="flex items-center gap-3 mb-6">
                 <AlertCircle className="text-[#556B2F]" size={24} />
                 <h2 className="text-2xl font-bold text-[#8B4513]">
@@ -427,7 +426,7 @@ const ParametresPage = () => {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -446,7 +445,7 @@ const ParametresPage = () => {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -461,14 +460,14 @@ const ParametresPage = () => {
                     }
                     rows={4}
                     placeholder="Décrivez votre politique d'annulation..."
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
               </div>
             </Card>
 
             {/* Section Seuil de réservation */}
-            <Card className="p-6">
+            <Card className="p-6 border-[#D3D3D3]">
               <div className="flex items-center gap-3 mb-6">
                 <Euro className="text-[#556B2F]" size={24} />
                 <h2 className="text-2xl font-bold text-[#8B4513]">
@@ -492,7 +491,7 @@ const ParametresPage = () => {
                         parseInt(e.target.value) || 0
                       )
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -510,7 +509,7 @@ const ParametresPage = () => {
                         parseFloat(e.target.value) || 0
                       )
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -525,14 +524,14 @@ const ParametresPage = () => {
                     }
                     rows={3}
                     placeholder="Décrivez vos conditions de paiement..."
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
               </div>
             </Card>
 
             {/* Section Informations générales */}
-            <Card className="p-6">
+            <Card className="p-6 border-[#D3D3D3]">
               <div className="flex items-center gap-3 mb-6">
                 <Building className="text-[#556B2F]" size={24} />
                 <h2 className="text-2xl font-bold text-[#8B4513]">
@@ -550,7 +549,7 @@ const ParametresPage = () => {
                     onChange={(e) =>
                       mettreAJourChamp("nomEntreprise", e.target.value)
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -564,7 +563,7 @@ const ParametresPage = () => {
                     onChange={(e) =>
                       mettreAJourChamp("emailContact", e.target.value)
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -577,7 +576,7 @@ const ParametresPage = () => {
                     onChange={(e) =>
                       mettreAJourChamp("telephone", e.target.value)
                     }
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
 
@@ -591,19 +590,19 @@ const ParametresPage = () => {
                       mettreAJourChamp("adresse", e.target.value)
                     }
                     rows={2}
-                    className="border-[#D3D3D3]"
+                    className="border-[#D3D3D3] focus:border-[#556B2F]"
                   />
                 </div>
               </div>
             </Card>
 
             {/* Bouton de sauvegarde */}
-            <Card className="p-6 bg-[#6B8E23]/10 border-[#6B8E23]/20">
+            <Card className="p-6 bg-[#6B8E23]/10 border-[#556B2F]">
               <div className="text-center">
                 <Button
                   onClick={sauvegarderParametres}
                   disabled={sauvegardeEnCours}
-                  className="w-full py-3 text-lg font-semibold transition-all duration-300 transform hover:scale-105 bg-[#6B8E23] hover:bg-[#556B2F] text-white"
+                  className="w-full py-3 text-lg font-semibold transition-all duration-300 transform hover:scale-105 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                 >
                   {sauvegardeEnCours ? (
                     <>
