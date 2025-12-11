@@ -8,6 +8,16 @@ import { CreateCustomServiceModal } from "@/components/pro/CreateCustomServiceMo
 import { ProfessionalServicesTable } from "@/components/pro/professional-services-table";
 import { ProfessionalServicesStats } from "@/components/pro/professional-services-stats";
 
+// Nouvelle palette de couleurs
+const COLORS = {
+  LOGO: "#556B2F",           /* Olive green - accent */
+  PRIMARY_DARK: "#6B8E23",   /* Yellow-green - primary */
+  LIGHT_BG: "#FFFFFF",       /* White - fond clair */
+  SEPARATOR: "#D3D3D3",      /* Light gray - séparateurs */
+  SECONDARY_TEXT: "#8B4513", /* Saddle brown - textes secondaires */
+  TEXT_BLACK: "#000000",     /* Black - petits textes */
+};
+
 export default function ProfessionalServicesPage() {
   const [isAvailableModalOpen, setIsAvailableModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -29,10 +39,11 @@ export default function ProfessionalServicesPage() {
     <div className="space-y-6">
       <div className="flex items-center flex-col md:flex-row justify-between">
         <div>
-          <h1 className="text-lg lg:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-lg lg:text-3xl font-bold tracking-tight" 
+              style={{ color: COLORS.PRIMARY_DARK }}>
             Mes Services
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-black" style={{ color: COLORS.TEXT_BLACK }}>
             Gérez les services que vous proposez
           </p>
         </div>
@@ -40,14 +51,22 @@ export default function ProfessionalServicesPage() {
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             variant="outline"
-            className="border-border hover:bg-accent"
+            className="hover:bg-accent"
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.SECONDARY_TEXT 
+            }}
           >
             <Package className="mr-2 h-4 w-4" />
             Créer un service
           </Button>
           <Button
             onClick={() => setIsAvailableModalOpen(true)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK,
+              color: COLORS.LIGHT_BG 
+            }}
+            className="hover:opacity-90"
           >
             <Plus className="mr-2 h-4 w-4" />
             Relier un service
@@ -57,16 +76,24 @@ export default function ProfessionalServicesPage() {
 
       <ProfessionalServicesStats key={`stats-${statsRefreshKey}`} />
 
-      <Card className="bg-card border-border p-6">
+      <Card className="p-6" style={{ 
+        backgroundColor: COLORS.LIGHT_BG,
+        borderColor: COLORS.SEPARATOR 
+      }}>
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+          <div className="flex space-x-1 p-1 rounded-lg"
+               style={{ backgroundColor: `${COLORS.SEPARATOR}30` }}>
             <Button
               variant={activeTab === "associated" ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("associated")}
-              className={
-                activeTab === "associated text-black" ? "bg-background shadow-sm" : ""
-              }
+              className={activeTab === "associated" ? "shadow-sm" : ""}
+              style={activeTab === "associated" ? { 
+                backgroundColor: COLORS.LIGHT_BG,
+                color: COLORS.TEXT_BLACK 
+              } : {
+                color: COLORS.SECONDARY_TEXT
+              }}
             >
               Mes Services
             </Button>
@@ -74,22 +101,32 @@ export default function ProfessionalServicesPage() {
               variant={activeTab === "available" ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("available")}
-              className={
-                activeTab === "available text-black" ? "bg-background shadow-sm" : ""
-              }
+              className={activeTab === "available" ? "shadow-sm" : ""}
+              style={activeTab === "available" ? { 
+                backgroundColor: COLORS.LIGHT_BG,
+                color: COLORS.TEXT_BLACK 
+              } : {
+                color: COLORS.SECONDARY_TEXT
+              }}
             >
               Services Disponibles
             </Button>
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" 
+                   style={{ color: COLORS.SECONDARY_TEXT }} />
             <Input
               type="search"
               placeholder="Rechercher un service..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 bg-background border-input"
+              className="pl-10"
+              style={{ 
+                backgroundColor: COLORS.LIGHT_BG,
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.TEXT_BLACK 
+              }}
             />
           </div>
         </div>

@@ -173,15 +173,15 @@ interface Filters {
 // Composants helper
 const Section = ({ title, children, className = '' }: { title: string; children: React.ReactNode; className?: string }) => (
   <div className={className}>
-    <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
+    <h4 className="text-lg font-semibold text-[#8B4513] mb-4">{title}</h4>
     {children}
   </div>
 );
 
 const InfoRow = ({ label, value, mono = false, badge = false }: { label: string; value: React.ReactNode; mono?: boolean; badge?: boolean }) => (
   <div className="flex justify-between items-center py-2">
-    <span className="text-sm font-medium text-gray-600">{label}</span>
-    <span className={`text-sm text-gray-900 ${mono ? 'font-mono' : ''} ${badge ? 'px-2 py-1 bg-gray-100 rounded-full' : ''}`}>
+    <span className="text-sm font-medium text-[#8B4513]/70">{label}</span>
+    <span className={`text-sm text-[#8B4513] ${mono ? 'font-mono' : ''} ${badge ? 'px-2 py-1 bg-[#6B8E23]/10 rounded-full' : ''}`}>
       {value}
     </span>
   </div>
@@ -192,19 +192,19 @@ const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case 'confirmed':
       case 'paid':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-[#6B8E23]/20 text-[#556B2F] border border-[#6B8E23]/30';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-amber-100 text-amber-800 border border-amber-200';
       case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-100 text-red-800 border border-red-200';
       case 'completed':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-blue-100 text-blue-800 border border-blue-200';
       case 'failed':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-100 text-red-800 border border-red-200';
       case 'refunded':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-purple-100 text-purple-800 border border-purple-200';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-[#D3D3D3] text-[#8B4513] border border-[#D3D3D3]';
     }
   };
 
@@ -212,18 +212,18 @@ const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case 'confirmed':
       case 'paid':
-        return <CheckCircle className="w-3 h-3 mr-1" />;
+        return <CheckCircle className="w-3 h-3 mr-1 text-[#556B2F]" />;
       case 'pending':
-        return <Clock className="w-3 h-3 mr-1" />;
+        return <Clock className="w-3 h-3 mr-1 text-amber-600" />;
       case 'cancelled':
       case 'failed':
-        return <XCircle className="w-3 h-3 mr-1" />;
+        return <XCircle className="w-3 h-3 mr-1 text-red-600" />;
       case 'completed':
-        return <CheckCircle className="w-3 h-3 mr-1" />;
+        return <CheckCircle className="w-3 h-3 mr-1 text-blue-600" />;
       case 'refunded':
-        return <DollarSign className="w-3 h-3 mr-1" />;
+        return <DollarSign className="w-3 h-3 mr-1 text-purple-600" />;
       default:
-        return <AlertCircle className="w-3 h-3 mr-1" />;
+        return <AlertCircle className="w-3 h-3 mr-1 text-[#8B4513]/70" />;
     }
   };
 
@@ -237,7 +237,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getColors()}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getColors()}`}>
       {getStatusIcon(status)}
       <span className="ml-1 capitalize">{getStatusLabel(status)}</span>
     </span>
@@ -270,9 +270,9 @@ const BookingCard = ({
     switch (status) {
       case "confirmed":
       case "paid":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-[#6B8E23]" />;
       case "pending":
-        return <Clock className="w-4 h-4 text-yellow-500" />;
+        return <Clock className="w-4 h-4 text-amber-500" />;
       case "cancelled":
       case "failed":
         return <XCircle className="w-4 h-4 text-red-500" />;
@@ -281,7 +281,7 @@ const BookingCard = ({
       case "refunded":
         return <DollarSign className="w-4 h-4 text-purple-500" />;
       default:
-        return <AlertCircle className="w-4 h-4 text-gray-500" />;
+        return <AlertCircle className="w-4 h-4 text-[#8B4513]/70" />;
     }
   };
 
@@ -289,18 +289,18 @@ const BookingCard = ({
     switch (status) {
       case "confirmed":
       case "paid":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-[#6B8E23]/20 text-[#556B2F] border border-[#6B8E23]/30";
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-100 text-amber-800 border border-amber-200";
       case "cancelled":
       case "failed":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-100 text-red-800 border border-red-200";
       case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-100 text-blue-800 border border-blue-200";
       case "refunded":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-purple-100 text-purple-800 border border-purple-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-[#D3D3D3] text-[#8B4513] border border-[#D3D3D3]";
     }
   };
 
@@ -363,13 +363,13 @@ const BookingCard = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+    <div className="bg-white rounded-2xl shadow-lg border border-[#D3D3D3] overflow-hidden hover:shadow-xl transition-all duration-300">
       {/* En-tête de la carte */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="p-6 border-b border-[#D3D3D3]">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <div className="text-sm font-mono font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">
+              <div className="text-sm font-mono font-bold text-[#8B4513] bg-[#6B8E23]/10 px-3 py-1 rounded-lg">
                 {isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber}
               </div>
               {isFlight && (
@@ -379,7 +379,7 @@ const BookingCard = ({
                 </span>
               )}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-[#8B4513]/60">
               Créé le {new Date(booking.createdAt).toLocaleDateString()}
             </div>
           </div>
@@ -388,21 +388,21 @@ const BookingCard = ({
           <div className="relative">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-[#6B8E23]/10 rounded-lg transition-colors"
             >
-              <MoreVertical className="w-5 h-5 text-gray-600" />
+              <MoreVertical className="w-5 h-5 text-[#8B4513]" />
             </button>
 
             {showActions && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-10">
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-[#D3D3D3] py-2 z-10">
                 <button
                   onClick={() => {
                     onViewDetails();
                     setShowActions(false);
                   }}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex items-center w-full px-4 py-2 text-sm text-[#8B4513] hover:bg-[#6B8E23]/10"
                 >
-                  <Eye className="w-4 h-4 mr-3" />
+                  <Eye className="w-4 h-4 mr-3 text-[#556B2F]" />
                   Voir les détails
                 </button>
 
@@ -412,7 +412,7 @@ const BookingCard = ({
                       onGenerateQRCode(booking);
                       setShowActions(false);
                     }}
-                    className="flex items-center w-full px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                    className="flex items-center w-full px-4 py-2 text-sm text-[#6B8E23] hover:bg-[#6B8E23]/10"
                   >
                     <QrCode className="w-4 h-4 mr-3" />
                     Générer QR Code
@@ -425,7 +425,7 @@ const BookingCard = ({
                       onUpdateStatus(booking.id, "confirmed");
                       setShowActions(false);
                     }}
-                    className="flex items-center w-full px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                    className="flex items-center w-full px-4 py-2 text-sm text-[#6B8E23] hover:bg-[#6B8E23]/10"
                   >
                     <CheckCircle className="w-4 h-4 mr-3" />
                     Confirmer
@@ -438,7 +438,7 @@ const BookingCard = ({
                       onUpdateStatus(booking.id, "cancelled");
                       setShowActions(false);
                     }}
-                    className="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
                     <XCircle className="w-4 h-4 mr-3" />
                     Annuler
@@ -452,7 +452,7 @@ const BookingCard = ({
                       onUpdateStatus(booking.id, "paid");
                       setShowActions(false);
                     }}
-                    className="flex items-center w-full px-4 py-2 text-sm text-blue-700 hover:bg-blue-50"
+                    className="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50"
                   >
                     <DollarSign className="w-4 h-4 mr-3" />
                     Marquer payé
@@ -482,31 +482,31 @@ const BookingCard = ({
           <img
             src={getBookingImage()}
             alt={getBookingTitle()}
-            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+            className="w-20 h-20 rounded-xl object-cover flex-shrink-0 border border-[#D3D3D3]"
             onError={(e) => {
               e.currentTarget.src = 'https://i.pinimg.com/736x/a8/15/50/a81550a6d4c9ffd633e56200a25f8f9b.jpg';
             }}
           />
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
+            <h3 className="text-lg font-semibold text-[#8B4513] line-clamp-2 mb-2">
               {getBookingTitle()}
             </h3>
 
-            <div className="flex items-center text-sm text-gray-600 mb-1">
+            <div className="flex items-center text-sm text-[#8B4513]/70 mb-1">
               {isTouristicPlace && getCategoryIcon(touristicPlaceBooking.place?.category)}
               {isFlight && <Plane className="w-4 h-4 mr-1" />}
               <MapPin className="w-4 h-4 mr-1" />
               {getBookingLocation()}
             </div>
 
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-[#8B4513]/70">
               <UserIcon className="w-4 h-4 mr-1" />
               <span className="mr-2">{getUserInfo()}</span>
               {getUserEmail() && (
                 <a
                   href={`mailto:${getUserEmail()}`}
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                  className="text-[#6B8E23] hover:text-[#556B2F] transition-colors"
                   title="Envoyer un email"
                 >
                   <Mail className="w-4 h-4" />
@@ -518,17 +518,17 @@ const BookingCard = ({
 
         {/* Informations détaillées */}
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center bg-gray-50 rounded-lg p-3">
-            <Calendar className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-            <div className="text-sm font-medium text-gray-900">{getBookingDate()}</div>
-            <div className="text-xs text-gray-600">{getBookingTime()}</div>
+          <div className="text-center bg-[#6B8E23]/5 rounded-lg p-3 border border-[#D3D3D3]">
+            <Calendar className="w-5 h-5 text-[#6B8E23] mx-auto mb-1" />
+            <div className="text-sm font-medium text-[#8B4513]">{getBookingDate()}</div>
+            <div className="text-xs text-[#8B4513]/60">{getBookingTime()}</div>
           </div>
 
-          <div className="text-center bg-gray-50 rounded-lg p-3">
-            <Users className="w-5 h-5 text-green-600 mx-auto mb-1" />
-            <div className="text-sm font-medium text-gray-900">{getBookingDetails()}</div>
+          <div className="text-center bg-[#6B8E23]/5 rounded-lg p-3 border border-[#D3D3D3]">
+            <Users className="w-5 h-5 text-[#6B8E23] mx-auto mb-1" />
+            <div className="text-sm font-medium text-[#8B4513]">{getBookingDetails()}</div>
             {isAccommodation && (
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-[#8B4513]/60">
                 {accommodationBooking.adults}A, {accommodationBooking.children}E
                 {accommodationBooking.infants > 0 && `, ${accommodationBooking.infants}B`}
               </div>
@@ -537,19 +537,19 @@ const BookingCard = ({
         </div>
 
         {/* Montant */}
-        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+        <div className="flex justify-between items-center pt-4 border-t border-[#D3D3D3]">
           <div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-2xl font-bold text-[#8B4513]">
               {booking.totalAmount}€
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-[#8B4513]/60">
               {booking.serviceFee ? `Dont ${booking.serviceFee}€ de frais` : 'Frais inclus'}
             </div>
           </div>
 
           <button
             onClick={onViewDetails}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] transition-colors font-medium"
           >
             Voir détails
           </button>
@@ -580,25 +580,11 @@ const BookingDetailModal = ({
   const touristicPlaceBooking = booking as TouristicPlaceBooking;
   const flightReservation = booking as FlightReservation;
 
-  const isUpcoming = () => {
-    if (isAccommodation) {
-      return new Date(accommodationBooking.checkIn) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-        new Date(accommodationBooking.checkIn) >= new Date();
-    } else if (isTouristicPlace) {
-      return new Date(touristicPlaceBooking.visitDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-        new Date(touristicPlaceBooking.visitDate) >= new Date();
-    } else if (isFlight) {
-      return new Date(flightReservation.flight?.departDateHeure) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-        new Date(flightReservation.flight?.departDateHeure) >= new Date();
-    }
-    return false;
-  };
-
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/90 to-black/95 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-hidden py-8">
-      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-2xl shadow-gray-900/20 max-w-6xl w-full max-h-[95vh] overflow-y-auto border border-gray-200">
+    <div className="fixed inset-0 bg-[#8B4513]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-hidden py-8">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-y-auto border border-[#D3D3D3]">
         {/* En-tête élégant */}
-        <div className="sticky top-0 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-t-2xl p-4 sm:p-6 lg:p-8 z-10">
+        <div className="sticky top-0 bg-gradient-to-r from-[#8B4513] to-[#556B2F] text-white rounded-t-2xl p-4 sm:p-6 lg:p-8 z-10">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
             <div className="flex-1">
               <div className="flex items-start sm:items-center gap-3 mb-2 sm:mb-3">
@@ -620,12 +606,12 @@ const BookingDetailModal = ({
                       {isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber}
                     </span>
                     <div className="hidden sm:flex items-center gap-3">
-                      <span className="text-gray-300 text-sm">•</span>
-                      <span className="text-gray-300 text-sm">
+                      <span className="text-white/80 text-sm">•</span>
+                      <span className="text-white/80 text-sm">
                         {isAccommodation ? 'Hébergement' : isTouristicPlace ? 'Lieu Touristiques' : 'Vol'}
                       </span>
                     </div>
-                    <div className="sm:hidden text-gray-300 text-xs">
+                    <div className="sm:hidden text-white/80 text-xs">
                       {isAccommodation ? 'Hébergement' : isTouristicPlace ? 'Lieu Touristiques' : 'Vol'}
                     </div>
                   </div>
@@ -647,33 +633,33 @@ const BookingDetailModal = ({
             {/* Colonne gauche */}
             <div className="lg:col-span-2 space-y-8">
               {/* Carte : Informations principales */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg p-6">
+              <div className="bg-white rounded-2xl border border-[#D3D3D3] shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                    <FileText className="w-5 h-5 text-[#6B8E23]" />
                   </div>
-                  <h4 className="text-md lg:text-xl font-bold text-gray-900">Informations Générales</h4>
+                  <h4 className="text-md lg:text-xl font-bold text-[#8B4513]">Informations Générales</h4>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-500 mb-1">Numéro de confirmation</span>
-                      <span className="font-mono text-md lg:text-lg font-bold text-gray-900 bg-gray-100 px-1 py-2 rounded-lg">
+                      <span className="text-sm font-medium text-[#8B4513]/70 mb-1">Numéro de confirmation</span>
+                      <span className="font-mono text-md lg:text-lg font-bold text-[#8B4513] bg-[#6B8E23]/10 px-1 py-2 rounded-lg">
                         {isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber}
                       </span>
                     </div>
 
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-500 mb-1">Statut</span>
+                      <span className="text-sm font-medium text-[#8B4513]/70 mb-1">Statut</span>
                       <StatusBadge status={booking.status} />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-500 mb-1">Date de création</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-sm font-medium text-[#8B4513]/70 mb-1">Date de création</span>
+                      <span className="font-medium text-[#8B4513]">
                         {new Date(booking.createdAt).toLocaleString('fr-FR', {
                           day: 'numeric',
                           month: 'long',
@@ -685,8 +671,8 @@ const BookingDetailModal = ({
                     </div>
 
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-500 mb-1">Méthode de paiement</span>
-                      <span className="font-medium text-gray-900 flex items-center gap-2">
+                      <span className="text-sm font-medium text-[#8B4513]/70 mb-1">Méthode de paiement</span>
+                      <span className="font-medium text-[#8B4513] flex items-center gap-2">
                         <CreditCard className="w-4 h-4" />
                         {booking.paymentMethod || 'Non spécifiée'}
                       </span>
@@ -696,12 +682,12 @@ const BookingDetailModal = ({
               </div>
 
               {/* Carte : Détails du séjour/vol */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg p-6">
+              <div className="bg-white rounded-2xl border border-[#D3D3D3] shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Calendar className="w-5 h-5 text-green-600" />
+                  <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                    <Calendar className="w-5 h-5 text-[#6B8E23]" />
                   </div>
-                  <h4 className="text-md lg:text-xl font-bold text-gray-900">
+                  <h4 className="text-md lg:text-xl font-bold text-[#8B4513]">
                     {isAccommodation ? "Dates du séjour" :
                       isTouristicPlace ? "Détails de la visite" :
                         "Détails du vol"}
@@ -712,9 +698,9 @@ const BookingDetailModal = ({
                   {isAccommodation ? (
                     <>
                       <div className="space-y-3">
-                        <div className="bg-green-50 p-4 rounded-xl">
-                          <span className="text-sm font-medium text-green-700 mb-1">Arrivée</span>
-                          <div className="text-lg font-bold text-green-900">
+                        <div className="bg-[#6B8E23]/10 p-4 rounded-xl border border-[#D3D3D3]">
+                          <span className="text-sm font-medium text-[#556B2F] mb-1">Arrivée</span>
+                          <div className="text-lg font-bold text-[#8B4513]">
                             {new Date(accommodationBooking.checkIn).toLocaleDateString('fr-FR', {
                               weekday: 'long',
                               day: 'numeric',
@@ -722,7 +708,7 @@ const BookingDetailModal = ({
                             })}
                           </div>
                         </div>
-                        <div className="bg-blue-50 p-4 rounded-xl">
+                        <div className="bg-blue-50 p-4 rounded-xl border border-[#D3D3D3]">
                           <span className="text-sm font-medium text-blue-700 mb-1">Départ</span>
                           <div className="text-lg font-bold text-blue-900">
                             {new Date(accommodationBooking.checkOut).toLocaleDateString('fr-FR', {
@@ -734,7 +720,7 @@ const BookingDetailModal = ({
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl">
+                        <div className="bg-purple-50 p-4 rounded-xl border border-[#D3D3D3]">
                           <span className="text-sm font-medium text-purple-700 mb-1">Durée du séjour</span>
                           <div className="text-2xl font-bold text-purple-900">
                             {calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} nuit(s)
@@ -745,9 +731,9 @@ const BookingDetailModal = ({
                   ) : isTouristicPlace ? (
                     <>
                       <div className="space-y-3">
-                        <div className="bg-purple-50 p-4 rounded-xl">
-                          <span className="text-sm font-medium text-purple-700 mb-1">Date de visite</span>
-                          <div className="text-lg font-bold text-purple-900">
+                        <div className="bg-[#6B8E23]/10 p-4 rounded-xl border border-[#D3D3D3]">
+                          <span className="text-sm font-medium text-[#556B2F] mb-1">Date de visite</span>
+                          <div className="text-lg font-bold text-[#8B4513]">
                             {new Date(touristicPlaceBooking.visitDate).toLocaleDateString('fr-FR', {
                               weekday: 'long',
                               day: 'numeric',
@@ -757,7 +743,7 @@ const BookingDetailModal = ({
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="bg-amber-50 p-4 rounded-xl">
+                        <div className="bg-amber-50 p-4 rounded-xl border border-[#D3D3D3]">
                           <span className="text-sm font-medium text-amber-700 mb-1">Heure de visite</span>
                           <div className="text-lg font-bold text-amber-900">
                             {touristicPlaceBooking.visitTime}
@@ -768,7 +754,7 @@ const BookingDetailModal = ({
                   ) : (
                     <>
                       <div className="space-y-3">
-                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl">
+                        <div className="bg-blue-50 p-4 rounded-xl border border-[#D3D3D3]">
                           <span className="text-sm font-medium text-blue-700 mb-1">Départ</span>
                           <div className="text-lg font-bold text-blue-900">
                             {new Date(flightReservation.flight?.departDateHeure).toLocaleDateString('fr-FR', {
@@ -780,13 +766,13 @@ const BookingDetailModal = ({
                           <div className="text-sm text-blue-600">
                             {new Date(flightReservation.flight?.departDateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <div className="text-sm font-medium text-gray-700 mt-2">
+                          <div className="text-sm font-medium text-[#8B4513] mt-2">
                             {flightReservation.flight?.departVille}
                           </div>
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl">
+                        <div className="bg-green-50 p-4 rounded-xl border border-[#D3D3D3]">
                           <span className="text-sm font-medium text-green-700 mb-1">Arrivée</span>
                           <div className="text-lg font-bold text-green-900">
                             {new Date(flightReservation.flight?.arriveeDateHeure).toLocaleDateString('fr-FR', {
@@ -798,7 +784,7 @@ const BookingDetailModal = ({
                           <div className="text-sm text-green-600">
                             {new Date(flightReservation.flight?.arriveeDateHeure).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <div className="text-sm font-medium text-gray-700 mt-2">
+                          <div className="text-sm font-medium text-[#8B4513] mt-2">
                             {flightReservation.flight?.arriveeVille}
                           </div>
                         </div>
@@ -809,26 +795,26 @@ const BookingDetailModal = ({
               </div>
 
               {/* Carte : Détails financiers */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg p-6">
+              <div className="bg-white rounded-2xl border border-[#D3D3D3] shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <Banknote className="w-5 h-5 text-amber-600" />
+                  <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                    <Banknote className="w-5 h-5 text-[#6B8E23]" />
                   </div>
-                  <h4 className="text-md lg:text-xl font-bold text-gray-900">Détails Financiers</h4>
+                  <h4 className="text-md lg:text-xl font-bold text-[#8B4513]">Détails Financiers</h4>
                 </div>
 
-                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+                <div className="bg-[#6B8E23]/5 rounded-xl p-6 border border-[#D3D3D3]">
                   <div className="space-y-4">
                     {isAccommodation ? (
                       <>
                         <div className="flex justify-between items-center py-2">
                           <div>
-                            <span className="text-gray-600">Séjour ({calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} nuits)</span>
-                            <div className="text-sm text-gray-500">
+                            <span className="text-[#8B4513]/70">Séjour ({calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)} nuits)</span>
+                            <div className="text-sm text-[#8B4513]/50">
                               {((booking.totalAmount - booking.serviceFee) / calculateNights(accommodationBooking.checkIn, accommodationBooking.checkOut)).toFixed(2)}€ par nuit
                             </div>
                           </div>
-                          <span className="font-semibold text-gray-900">
+                          <span className="font-semibold text-[#8B4513]">
                             {(booking.totalAmount - booking.serviceFee).toFixed(2)}€
                           </span>
                         </div>
@@ -836,45 +822,45 @@ const BookingDetailModal = ({
                     ) : isTouristicPlace ? (
                       <div className="flex justify-between items-center py-2">
                         <div>
-                          <span className="text-gray-600">Billets ({touristicPlaceBooking.numberOfTickets}x)</span>
-                          <div className="text-sm text-gray-500">
+                          <span className="text-[#8B4513]/70">Billets ({touristicPlaceBooking.numberOfTickets}x)</span>
+                          <div className="text-sm text-[#8B4513]/50">
                             {touristicPlaceBooking.place?.price || 0}€ par billet
                           </div>
                         </div>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-[#8B4513]">
                           {(booking.totalAmount - booking.serviceFee).toFixed(2)}€
                         </span>
                       </div>
                     ) : (
                       <div className="flex justify-between items-center py-2">
                         <div>
-                          <span className="text-gray-600">Vol ({flightReservation.nbrPersonne}x passagers)</span>
-                          <div className="text-sm text-gray-500">
+                          <span className="text-[#8B4513]/70">Vol ({flightReservation.nbrPersonne}x passagers)</span>
+                          <div className="text-sm text-[#8B4513]/50">
                             {flightReservation.flight?.prix}€ par personne
                           </div>
                         </div>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-[#8B4513]">
                           {(flightReservation.flight?.prix * flightReservation.nbrPersonne).toFixed(2)}€
                         </span>
                       </div>
                     )}
 
                     {booking.serviceFee > 0 && (
-                      <div className="flex justify-between items-center py-2 border-t border-gray-200 pt-4">
+                      <div className="flex justify-between items-center py-2 border-t border-[#D3D3D3] pt-4">
                         <div>
-                          <span className="text-gray-600">Frais de service</span>
-                          <div className="text-sm text-gray-500">Inclus dans le total</div>
+                          <span className="text-[#8B4513]/70">Frais de service</span>
+                          <div className="text-sm text-[#8B4513]/50">Inclus dans le total</div>
                         </div>
-                        <span className="font-semibold text-gray-900">{booking.serviceFee}€</span>
+                        <span className="font-semibold text-[#8B4513]">{booking.serviceFee}€</span>
                       </div>
                     )}
 
-                    <div className="flex justify-between items-center pt-6 border-t border-gray-300">
+                    <div className="flex justify-between items-center pt-6 border-t border-[#8B4513]/30">
                       <div>
-                        <span className="text-lg font-bold text-gray-900">Montant total</span>
-                        <div className="text-sm text-gray-500">TVA incluse</div>
+                        <span className="text-lg font-bold text-[#8B4513]">Montant total</span>
+                        <div className="text-sm text-[#8B4513]/50">TVA incluse</div>
                       </div>
-                      <span className="text-2xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      <span className="text-2xl font-bold text-[#8B4513]">
                         {booking.totalAmount}€
                       </span>
                     </div>
@@ -886,36 +872,36 @@ const BookingDetailModal = ({
             {/* Colonne droite */}
             <div className="space-y-8">
               {/* Carte : Client */}
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl border border-blue-100 shadow-lg p-6">
+              <div className="bg-white rounded-2xl border border-[#D3D3D3] shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <User className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                    <User className="w-5 h-5 text-[#6B8E23]" />
                   </div>
-                  <h4 className="text-md lg:text-xl font-bold text-gray-900">Informations Client</h4>
+                  <h4 className="text-md lg:text-xl font-bold text-[#8B4513]">Informations Client</h4>
                 </div>
 
                 {booking.user || booking.userReservation ? (
                   <div className="space-y-6">
-                    <div className="bg-white rounded-xl p-4 border border-gray-200">
+                    <div className="bg-white rounded-xl p-4 border border-[#D3D3D3]">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-blue-100 rounded-full">
-                          <User className="w-4 h-4 text-blue-600" />
+                        <div className="p-2 bg-[#6B8E23]/10 rounded-full">
+                          <User className="w-4 h-4 text-[#6B8E23]" />
                         </div>
                         <div className="flex-1">
-                          <h5 className="font-bold text-gray-900">
+                          <h5 className="font-bold text-[#8B4513]">
                             {booking.user ?
                               `${booking.user.firstName} ${booking.user.lastName}` :
                               `${booking.userReservation.firstName} ${booking.userReservation.lastName}`
                             }
                           </h5>
-                          <p className="text-sm text-gray-500">Voyageur principal</p>
+                          <p className="text-sm text-[#8B4513]/50">Voyageur principal</p>
                         </div>
                       </div>
 
                       <div className="space-y-3">
                         <a
                           href={`mailto:${booking.user?.email || booking.userReservation?.email}`}
-                          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors group"
+                          className="flex items-center gap-2 text-[#6B8E23] hover:text-[#556B2F] transition-colors group"
                         >
                           <Mail className="w-4 h-4" />
                           <span className="text-sm">{booking.user?.email || booking.userReservation?.email}</span>
@@ -924,7 +910,7 @@ const BookingDetailModal = ({
                         {(booking.user?.phone || booking.userReservation?.phone) && (
                           <a
                             href={`tel:${booking.user?.phone || booking.userReservation?.phone}`}
-                            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors"
+                            className="flex items-center gap-2 text-[#8B4513] hover:text-[#6B8E23] transition-colors"
                           >
                             <Phone className="w-4 h-4" />
                             <span className="text-sm">{booking.user?.phone || booking.userReservation?.phone}</span>
@@ -936,7 +922,7 @@ const BookingDetailModal = ({
                     <div className="flex gap-3">
                       <a
                         href={`mailto:${booking.user?.email || booking.userReservation?.email}?subject=Réservation ${isFlight ? `FLIGHT-${flightReservation.id.slice(-6)}` : booking.confirmationNumber}`}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#6B8E23] text-white rounded-xl hover:bg-[#556B2F] transition-all font-medium"
                       >
                         <Mail className="w-4 h-4" />
                         Contacter
@@ -944,7 +930,7 @@ const BookingDetailModal = ({
                       {(booking.status === 'confirmed' || booking.status === 'paid') && (
                         <button
                           onClick={() => onSendReminder(booking.id)}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all font-medium"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#8B4513] text-white rounded-xl hover:bg-[#556B2F] transition-all font-medium"
                         >
                           <MessageCircle className="w-4 h-4" />
                           Rappel
@@ -954,20 +940,20 @@ const BookingDetailModal = ({
                   </div>
                 ) : (
                   <div className="text-center py-6">
-                    <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 font-medium">Aucune information client</p>
-                    <p className="text-gray-400 text-sm mt-1">Réservation sans compte</p>
+                    <User className="w-12 h-12 text-[#D3D3D3] mx-auto mb-3" />
+                    <p className="text-[#8B4513]/50 font-medium">Aucune information client</p>
+                    <p className="text-[#8B4513]/30 text-sm mt-1">Réservation sans compte</p>
                   </div>
                 )}
               </div>
 
               {/* Carte : Détails voyageurs */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg p-6">
+              <div className="bg-white rounded-2xl border border-[#D3D3D3] shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Users className="w-5 h-5 text-purple-600" />
+                  <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                    <Users className="w-5 h-5 text-[#6B8E23]" />
                   </div>
-                  <h4 className="text-md lg:text-xl font-bold text-gray-900">
+                  <h4 className="text-md lg:text-xl font-bold text-[#8B4513]">
                     {isAccommodation ? "Voyageurs" :
                       isTouristicPlace ? "Billets" :
                         "Passagers"}
@@ -977,47 +963,47 @@ const BookingDetailModal = ({
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                   {isAccommodation ? (
                     <>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{accommodationBooking.guests}</div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total</div>
+                      <div className="bg-white p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-2xl font-bold text-[#8B4513] mb-1">{accommodationBooking.guests}</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Total</div>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{accommodationBooking.adults}</div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Adultes</div>
+                      <div className="bg-white p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-2xl font-bold text-[#8B4513] mb-1">{accommodationBooking.adults}</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Adultes</div>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{accommodationBooking.children}</div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Enfants</div>
+                      <div className="bg-white p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-2xl font-bold text-[#8B4513] mb-1">{accommodationBooking.children}</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Enfants</div>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{accommodationBooking.infants}</div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Bébés</div>
+                      <div className="bg-white p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-2xl font-bold text-[#8B4513] mb-1">{accommodationBooking.infants}</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Bébés</div>
                       </div>
                     </>
                   ) : isTouristicPlace ? (
                     <>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{touristicPlaceBooking.numberOfTickets}</div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Billets</div>
+                      <div className="bg-white p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-2xl font-bold text-[#8B4513] mb-1">{touristicPlaceBooking.numberOfTickets}</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Billets</div>
                       </div>
-                      <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-xl border border-purple-100 text-center">
-                        <div className="text-lg font-bold text-purple-900 mb-1 capitalize">
+                      <div className="bg-[#6B8E23]/5 p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-lg font-bold text-[#8B4513] mb-1 capitalize">
                           {getTicketTypeLabel(touristicPlaceBooking.ticketType)}
                         </div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Type</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Type</div>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{flightReservation.nbrPersonne}</div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Passagers</div>
+                      <div className="bg-white p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-2xl font-bold text-[#8B4513] mb-1">{flightReservation.nbrPersonne}</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Passagers</div>
                       </div>
-                      <div className="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl border border-blue-100 text-center">
-                        <div className="text-lg font-bold text-blue-900 mb-1">
+                      <div className="bg-[#6B8E23]/5 p-4 rounded-xl border border-[#D3D3D3] text-center">
+                        <div className="text-lg font-bold text-[#8B4513] mb-1">
                           {flightReservation.place}
                         </div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Place</div>
+                        <div className="text-xs font-medium text-[#8B4513]/50 uppercase tracking-wider">Place</div>
                       </div>
                     </>
                   )}
@@ -1025,14 +1011,14 @@ const BookingDetailModal = ({
               </div>
 
               {/* Carte : Actions rapides */}
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6">
+              <div className="bg-gradient-to-r from-[#8B4513] to-[#556B2F] rounded-2xl p-6">
                 <h4 className="text-lg font-bold text-white mb-6">Actions Rapides</h4>
 
                 <div className="space-y-3">
                   {isTouristicPlace && (booking.status === 'confirmed' || booking.status === 'paid') && onGenerateQRCode && (
                     <button
                       onClick={() => onGenerateQRCode(booking)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all font-medium"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all font-medium"
                     >
                       <QrCode className="w-4 h-4" />
                       Générer QR Code
@@ -1042,7 +1028,7 @@ const BookingDetailModal = ({
                   {booking.status === 'pending' && (
                     <button
                       onClick={() => onStatusUpdate(booking.id, 'confirmed')}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all font-medium"
+                      className="w-full px-4 py-3 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all font-medium"
                     >
                       Confirmer la réservation
                     </button>
@@ -1051,7 +1037,7 @@ const BookingDetailModal = ({
                   {booking.status !== 'cancelled' && booking.status !== 'completed' && (
                     <button
                       onClick={() => onStatusUpdate(booking.id, 'cancelled')}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl hover:from-red-700 hover:to-pink-700 transition-all font-medium"
+                      className="w-full px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-medium"
                     >
                       Annuler la réservation
                     </button>
@@ -1060,15 +1046,15 @@ const BookingDetailModal = ({
                   {booking.status !== 'paid' && booking.status !== 'cancelled' && booking.status !== 'failed' && (
                     <button
                       onClick={() => onStatusUpdate(booking.id, 'paid')}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all font-medium"
+                      className="w-full px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium"
                     >
                       Marquer comme payé
                     </button>
                   )}
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-gray-700">
-                  <div className="text-sm text-gray-300">
+                <div className="mt-6 pt-6 border-t border-white/20">
+                  <div className="text-sm text-white/80">
                     <div className="mb-1">Dernière modification</div>
                     <div className="font-medium">
                       {new Date(booking.updatedAt).toLocaleDateString('fr-FR', {
@@ -1086,15 +1072,15 @@ const BookingDetailModal = ({
 
           {/* Demandes spéciales */}
           {booking.specialRequests && (
-            <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border border-blue-200 p-6">
+            <div className="mt-8 bg-[#6B8E23]/5 rounded-2xl border border-[#D3D3D3] p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
+                <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+                  <MessageCircle className="w-5 h-5 text-[#6B8E23]" />
                 </div>
-                <h4 className="text-lg font-bold text-gray-900">Demandes Spéciales</h4>
+                <h4 className="text-lg font-bold text-[#8B4513]">Demandes Spéciales</h4>
               </div>
               <div className="bg-white/80 rounded-xl p-4">
-                <p className="text-gray-700 italic">"{booking.specialRequests}"</p>
+                <p className="text-[#8B4513] italic">"{booking.specialRequests}"</p>
               </div>
             </div>
           )}
@@ -1690,31 +1676,31 @@ export const ProBookings = () => {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'monument':
-        return <Landmark className="w-4 h-4 text-purple-600" />;
+        return <Landmark className="w-4 h-4 text-[#6B8E23]" />;
       case 'museum':
-        return <Building className="w-4 h-4 text-blue-600" />;
+        return <Building className="w-4 h-4 text-[#6B8E23]" />;
       case 'park':
-        return <GalleryVerticalEnd className="w-4 h-4 text-green-600" />;
+        return <GalleryVerticalEnd className="w-4 h-4 text-[#6B8E23]" />;
       case 'religious':
-        return <Church className="w-4 h-4 text-indigo-600" />;
+        return <Church className="w-4 h-4 text-[#6B8E23]" />;
       case 'historical':
-        return <Castle className="w-4 h-4 text-cyan-600" />;
+        return <Castle className="w-4 h-4 text-[#6B8E23]" />;
       case 'cultural':
-        return <BookOpen className="w-4 h-4 text-lime-600" />;
+        return <BookOpen className="w-4 h-4 text-[#6B8E23]" />;
       default:
-        return <GalleryVerticalEnd className="w-4 h-4 text-gray-600" />;
+        return <GalleryVerticalEnd className="w-4 h-4 text-[#8B4513]" />;
     }
   };
 
   const getAirlineColor = (airline: string) => {
     const colors: { [key: string]: string } = {
       'Air France': 'bg-blue-100 text-blue-800 border-blue-200',
-      'Air Senegal': 'bg-green-100 text-green-800 border-green-200',
+      'Air Senegal': 'bg-[#6B8E23]/20 text-[#556B2F] border-[#6B8E23]/30',
       'Emirates': 'bg-red-100 text-red-800 border-red-200',
       'Qatar Airways': 'bg-purple-100 text-purple-800 border-purple-200',
       'Turkish Airlines': 'bg-orange-100 text-orange-800 border-orange-200',
     };
-    return colors[airline] || 'bg-gray-100 text-gray-800 border-gray-200';
+    return colors[airline] || 'bg-[#D3D3D3] text-[#8B4513] border-[#D3D3D3]';
   };
 
   const calculateNights = (checkIn: string, checkOut: string) => {
@@ -1749,18 +1735,18 @@ export const ProBookings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
+      <div className="min-h-screen bg-[#6B8E23]/5 pt-20">
         <div className="container mx-auto px-4">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+            <div className="h-8 bg-[#D3D3D3] rounded w-1/4 mb-8"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+                <div key={i} className="h-32 bg-[#D3D3D3] rounded-xl"></div>
               ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded-2xl"></div>
+                <div key={i} className="h-64 bg-[#D3D3D3] rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -1770,22 +1756,25 @@ export const ProBookings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-0">
+    <div className="min-h-screen bg-[#6B8E23]/5 pt-0">
       <div className="container mx-auto px-4">
         {/* En-tête avec bouton rafraîchir */}
         <div className="grid gap-4 lg:flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-lg lg:text-3xl font-bold text-gray-900 mb-2">
-              Gestion des Réservations
-            </h1>
-            <p className="text-gray-600">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-6 w-1.5 bg-[#556B2F] rounded-full"></div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-[#8B4513]">
+                Gestion des Réservations
+              </h1>
+            </div>
+            <p className="text-[#8B4513]/70">
               Gérez et suivez toutes vos réservations d'hébergements, de lieux touristiques et de vols
             </p>
           </div>
           <button
             onClick={refreshBookings}
             disabled={refreshing}
-            className="flex w-1/2 lg:w-auto items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex w-1/2 lg:w-auto items-center px-4 py-2 bg-[#6B8E23] text-white rounded-xl hover:bg-[#556B2F] transition-colors disabled:opacity-50"
           >
             <RefreshCw
               className={`w-5 h-5 mr-2 ${refreshing ? "animate-spin" : ""}`}
@@ -1799,39 +1788,39 @@ export const ProBookings = () => {
           <button
             onClick={() => setActiveTab('accommodation')}
             className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${activeTab === 'accommodation'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-[#6B8E23] text-white'
+              : 'bg-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#556B2F]'
               }`}
           >
             <Home className="w-5 h-5 mr-2" />
             Hébergements
-            <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+            <span className="ml-2 bg-white/20 text-white px-2 py-1 rounded-full text-sm">
               {accommodationBookings.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('touristic_place')}
             className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${activeTab === 'touristic_place'
-              ? 'bg-green-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-[#6B8E23] text-white'
+              : 'bg-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#556B2F]'
               }`}
           >
             <Camera className="w-5 h-5 mr-2" />
             Lieux Touristiques
-            <span className="ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
+            <span className="ml-2 bg-white/20 text-white px-2 py-1 rounded-full text-sm">
               {touristicPlaceBookings.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('flight')}
             className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${activeTab === 'flight'
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-[#6B8E23] text-white'
+              : 'bg-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23]/10 hover:text-[#556B2F]'
               }`}
           >
             <Plane className="w-5 h-5 mr-2" />
             Vols
-            <span className="ml-2 bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm">
+            <span className="ml-2 bg-white/20 text-white px-2 py-1 rounded-full text-sm">
               {flightReservations.length}
             </span>
           </button>
@@ -1839,19 +1828,19 @@ export const ProBookings = () => {
 
         {/* Message si aucun service créé */}
         {activeTab === 'touristic_place' && userPlaces.length === 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8">
             <div className="flex items-center">
-              <AlertCircle className="w-8 h-8 text-yellow-600 mr-4" />
+              <AlertCircle className="w-8 h-8 text-amber-600 mr-4" />
               <div>
-                <h3 className="text-lg font-semibold text-yellow-800">
+                <h3 className="text-lg font-semibold text-amber-800">
                   Aucun lieu touristique créé
                 </h3>
-                <p className="text-yellow-700 mt-1">
+                <p className="text-amber-700 mt-1">
                   Vous devez créer des lieux touristiques pour recevoir des réservations.
                 </p>
                 <button
                   onClick={() => window.location.href = '/admin/tourisme'}
-                  className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                  className="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
                 >
                   Créer un lieu touristique
                 </button>
@@ -1861,19 +1850,19 @@ export const ProBookings = () => {
         )}
 
         {activeTab === 'flight' && userFlights.length === 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-8">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8">
             <div className="flex items-center">
-              <AlertCircle className="w-8 h-8 text-yellow-600 mr-4" />
+              <AlertCircle className="w-8 h-8 text-amber-600 mr-4" />
               <div>
-                <h3 className="text-lg font-semibold text-yellow-800">
+                <h3 className="text-lg font-semibold text-amber-800">
                   Aucun vol créé
                 </h3>
-                <p className="text-yellow-700 mt-1">
+                <p className="text-amber-700 mt-1">
                   Vous devez créer des vols pour recevoir des réservations.
                 </p>
                 <button
                   onClick={() => window.location.href = '/admin/flights'}
-                  className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                  className="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
                 >
                   Créer un vol
                 </button>
@@ -1885,16 +1874,16 @@ export const ProBookings = () => {
         {/* Statistiques améliorées */}
         {getCurrentBookingsCount() > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-[#D3D3D3]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-[#8B4513]/70">
                     Total Réservations
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-bold text-[#8B4513]">
                     {getCurrentStats().total}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#8B4513]/50 mt-1">
                     {activeTab === 'touristic_place'
                       ? `${getCurrentStats().totalTickets} billets vendus`
                       : activeTab === 'flight'
@@ -1903,60 +1892,60 @@ export const ProBookings = () => {
                     }
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
+                <div className="p-3 bg-[#6B8E23]/10 rounded-xl">
                   {activeTab === 'flight' ? (
-                    <Plane className="w-6 h-6 text-blue-600" />
+                    <Plane className="w-6 h-6 text-[#6B8E23]" />
                   ) : (
-                    <Calendar className="w-6 h-6 text-blue-600" />
+                    <Calendar className="w-6 h-6 text-[#6B8E23]" />
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-[#D3D3D3]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">En Attente</p>
-                  <p className="text-3xl font-bold text-yellow-600">
+                  <p className="text-sm font-medium text-[#8B4513]/70">En Attente</p>
+                  <p className="text-3xl font-bold text-amber-600">
                     {getCurrentStats().pending}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#8B4513]/50 mt-1">
                     {((getCurrentStats().pending / getCurrentStats().total) * 100 || 0).toFixed(1)}% du total
                   </p>
                 </div>
-                <div className="p-3 bg-yellow-100 rounded-xl">
-                  <Clock className="w-6 h-6 text-yellow-600" />
+                <div className="p-3 bg-amber-100 rounded-xl">
+                  <Clock className="w-6 h-6 text-amber-600" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-[#D3D3D3]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-[#8B4513]/70">
                     Revenu Total
                   </p>
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-3xl font-bold text-[#6B8E23]">
                     {getCurrentStats().revenue.toFixed(2)}€
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#8B4513]/50 mt-1">
                     Moyenne: {getCurrentStats().averageBooking.toFixed(2)}€
                   </p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <DollarSign className="w-6 h-6 text-green-600" />
+                <div className="p-3 bg-[#6B8E23]/10 rounded-xl">
+                  <DollarSign className="w-6 h-6 text-[#6B8E23]" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-[#D3D3D3]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-[#8B4513]/70">
                     {activeTab === 'touristic_place' ? "Taux d'Occupation" :
                       activeTab === 'flight' ? "Taux de Remplissage" : "Taux Conversion"}
                   </p>
-                  <p className="text-3xl font-bold text-purple-600">
+                  <p className="text-3xl font-bold text-[#556B2F]">
                     {activeTab === 'touristic_place'
                       ? `${getCurrentStats().occupancyRate?.toFixed(1)}%`
                       : activeTab === 'flight'
@@ -1964,34 +1953,34 @@ export const ProBookings = () => {
                         : `${(((getCurrentStats().confirmed + getCurrentStats().completed) / getCurrentStats().total) * 100 || 0).toFixed(1)}%`
                     }
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#8B4513]/50 mt-1">
                     {activeTab === 'touristic_place' ? "Capacité utilisée" :
                       activeTab === 'flight' ? "Vols confirmés" : `${getCurrentStats().cancelled} annulations`}
                   </p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="p-3 bg-[#6B8E23]/10 rounded-xl">
+                  <Users className="w-6 h-6 text-[#6B8E23]" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-[#D3D3D3]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-[#8B4513]/70">
                     Prochaines 7j
                   </p>
-                  <p className="text-3xl font-bold text-orange-600">
+                  <p className="text-3xl font-bold text-[#8B4513]">
                     {getUpcomingBookings()}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#8B4513]/50 mt-1">
                     {activeTab === 'accommodation' ? "Arrivées à venir" :
                       activeTab === 'touristic_place' ? "Visites à venir" :
                         "Départs à venir"}
                   </p>
                 </div>
-                <div className="p-3 bg-orange-100 rounded-xl">
-                  <Calendar className="w-6 h-6 text-orange-600" />
+                <div className="p-3 bg-[#6B8E23]/10 rounded-xl">
+                  <Calendar className="w-6 h-6 text-[#6B8E23]" />
                 </div>
               </div>
             </div>
@@ -1999,15 +1988,15 @@ export const ProBookings = () => {
         )}
 
         {/* Barre de recherche et filtres améliorée */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-[#D3D3D3]">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="flex-1 w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8B4513]/40 w-5 h-5" />
                 <input
                   type="text"
                   placeholder={`Rechercher par numéro, client, ${getTabLabel()}, ville...`}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-[#D3D3D3] rounded-xl focus:ring-2 focus:ring-[#6B8E23] focus:border-[#6B8E23] text-[#8B4513]"
                   value={filters.search}
                   onChange={(e) =>
                     setFilters({ ...filters, search: e.target.value })
@@ -2018,7 +2007,7 @@ export const ProBookings = () => {
 
             <div className="flex flex-wrap gap-3">
               <select
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="px-4 py-3 border-2 border-[#D3D3D3] rounded-xl focus:ring-2 focus:ring-[#6B8E23] focus:border-[#6B8E23] text-sm text-[#8B4513]"
                 value={filters.status}
                 onChange={(e) =>
                   setFilters({ ...filters, status: e.target.value })
@@ -2035,7 +2024,7 @@ export const ProBookings = () => {
               </select>
 
               <select
-                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="px-4 py-3 border-2 border-[#D3D3D3] rounded-xl focus:ring-2 focus:ring-[#6B8E23] focus:border-[#6B8E23] text-sm text-[#8B4513]"
                 value={filters.dateRange}
                 onChange={(e) =>
                   setFilters({ ...filters, dateRange: e.target.value })
@@ -2050,7 +2039,7 @@ export const ProBookings = () => {
 
               <button
                 onClick={exportToCSV}
-                className="flex items-center px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors text-sm"
+                className="flex items-center px-4 py-3 bg-[#6B8E23] text-white rounded-xl hover:bg-[#556B2F] transition-colors text-sm"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Exporter CSV
@@ -2059,13 +2048,13 @@ export const ProBookings = () => {
           </div>
 
           {/* Résultats filtres */}
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
+          <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#D3D3D3]">
+            <div className="text-sm text-[#8B4513]/70">
               {filteredBookings.length} réservation(s) trouvée(s)
               {activeTab === 'touristic_place' && userPlaces.length > 0 && ` sur ${userPlaces.length} lieu(x)`}
               {activeTab === 'flight' && userFlights.length > 0 && ` sur ${userFlights.length} vol(s)`}
             </div>
-            <div className="text-sm text-gray-500 flex items-center">
+            <div className="text-sm text-[#8B4513]/50 flex items-center">
               <RefreshCw className="w-4 h-4 mr-1" />
               Dernière mise à jour: {new Date().toLocaleTimeString()}
             </div>
@@ -2094,12 +2083,12 @@ export const ProBookings = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <Filter className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg mb-2">
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-[#D3D3D3]">
+            <Filter className="w-16 h-16 text-[#D3D3D3] mx-auto mb-4" />
+            <p className="text-[#8B4513]/50 text-lg mb-2">
               Aucune réservation trouvée
             </p>
-            <p className="text-gray-400">
+            <p className="text-[#8B4513]/30">
               {activeTab === 'touristic_place' && userPlaces.length === 0
                 ? "Vous devez créer des lieux touristiques pour recevoir des réservations"
                 : activeTab === 'flight' && userFlights.length === 0

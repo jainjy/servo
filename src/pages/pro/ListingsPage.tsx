@@ -45,6 +45,15 @@ import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import { ListingModal } from "@/components/admin/listings/listing-modal";
 
+// Nouvelle palette de couleurs
+const COLORS = {
+  LOGO: "#556B2F",           /* Olive green - accent */
+  PRIMARY_DARK: "#6B8E23",   /* Yellow-green - primary */
+  LIGHT_BG: "#FFFFFF",       /* White - fond clair */
+  SEPARATOR: "#D3D3D3",      /* Light gray - séparateurs */
+  SECONDARY_TEXT: "#8B4513", /* Saddle brown - textes secondaires */
+};
+
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
   pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
@@ -105,14 +114,15 @@ const Modal = ({ isOpen, onClose, children, title, size = "md" }) => {
       <div
         className={`bg-white rounded-2xl shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-scaleIn ${sizeClasses[size]}`}
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold" style={{ color: "#0A0A0A" }}>
+        <div className="flex justify-between items-center p-6 border-b" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
+          <h2 className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
             {title}
           </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300 transform hover:rotate-90"
-            style={{ color: "#5A6470" }}
+            style={{ color: COLORS.SECONDARY_TEXT }}
           >
             <X size={24} />
           </button>
@@ -137,46 +147,46 @@ const ModalStatistiques = ({ isOpen, onClose, annonce }) => {
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <Card className="p-4 text-center">
-            <Eye className="mx-auto mb-2 text-blue-600" size={24} />
-            <div className="text-2xl font-bold" style={{ color: "#0A0A0A" }}>
+            <Eye className="mx-auto mb-2" size={24} style={{ color: COLORS.LOGO }} />
+            <div className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
               {annonce.views || 0}
             </div>
-            <div className="text-sm" style={{ color: "#5A6470" }}>
+            <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
               Vues
             </div>
           </Card>
           <Card className="p-4 text-center">
-            <Heart className="mx-auto mb-2 text-red-600" size={24} />
-            <div className="text-2xl font-bold" style={{ color: "#0A0A0A" }}>
+            <Heart className="mx-auto mb-2" size={24} style={{ color: "#DC2626" }} />
+            <div className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
               {annonce.favorites?.length || 0}
             </div>
-            <div className="text-sm" style={{ color: "#5A6470" }}>
+            <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
               Favoris
             </div>
           </Card>
         </div>
 
         <div>
-          <h3 className="font-semibold mb-4" style={{ color: "#0A0A0A" }}>
+          <h3 className="font-semibold mb-4" style={{ color: COLORS.PRIMARY_DARK }}>
             Informations de publication
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span style={{ color: "#5A6470" }}>Statut:</span>
+              <span style={{ color: COLORS.SECONDARY_TEXT }}>Statut:</span>
               <Badge className={STATUT_ANNONCE[annonce.status]?.color}>
                 {STATUT_ANNONCE[annonce.status]?.label}
               </Badge>
             </div>
             <div className="flex justify-between">
-              <span style={{ color: "#5A6470" }}>Créée le:</span>
-              <span style={{ color: "#0A0A0A" }}>
+              <span style={{ color: COLORS.SECONDARY_TEXT }}>Créée le:</span>
+              <span style={{ color: COLORS.PRIMARY_DARK }}>
                 {new Date(annonce.createdAt).toLocaleDateString("fr-FR")}
               </span>
             </div>
             {annonce.publishedAt && (
               <div className="flex justify-between">
-                <span style={{ color: "#5A6470" }}>Publiée le:</span>
-                <span style={{ color: "#0A0A0A" }}>
+                <span style={{ color: COLORS.SECONDARY_TEXT }}>Publiée le:</span>
+                <span style={{ color: COLORS.PRIMARY_DARK }}>
                   {new Date(annonce.publishedAt).toLocaleDateString("fr-FR")}
                 </span>
               </div>
@@ -243,12 +253,19 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Marquer comme loué" size="md">
       <div className="space-y-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="rounded-lg p-4"
+             style={{ 
+               backgroundColor: `${COLORS.LOGO}10`,
+               borderColor: COLORS.LOGO,
+               borderWidth: '1px'
+             }}>
           <div className="flex items-center gap-3">
-            <Home className="text-blue-600" size={20} />
+            <Home size={20} style={{ color: COLORS.LOGO }} />
             <div>
-              <h4 className="font-semibold text-blue-800">{annonce.title}</h4>
-              <p className="text-sm text-blue-600">
+              <h4 className="font-semibold" style={{ color: COLORS.LOGO }}>
+                {annonce.title}
+              </h4>
+              <p className="text-sm" style={{ color: COLORS.PRIMARY_DARK }}>
                 {annonce.address}, {annonce.city}
               </p>
             </div>
@@ -257,18 +274,25 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
 
         {isLocationSaisonniere ? (
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-green-700">
+            <div className="rounded-lg p-4"
+                 style={{ 
+                   backgroundColor: `${COLORS.PRIMARY_DARK}10`,
+                   borderColor: COLORS.PRIMARY_DARK,
+                   borderWidth: '1px'
+                 }}>
+              <div className="flex items-center gap-2" style={{ color: COLORS.PRIMARY_DARK }}>
                 <CheckCircle size={18} />
                 <span className="font-medium">Location saisonnière détectée</span>
               </div>
-              <p className="text-sm text-green-600 mt-1">
+              <p className="text-sm mt-1" style={{ color: COLORS.SECONDARY_TEXT }}>
                 Une réservation de location saisonnière sera automatiquement créée.
               </p>
             </div>
 
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-medium mb-3">Sélectionner le client</h4>
+            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.SEPARATOR }}>
+              <h4 className="font-medium mb-3" style={{ color: COLORS.PRIMARY_DARK }}>
+                Sélectionner le client
+              </h4>
               
               {demandes.length > 0 ? (
                 <div className="space-y-2">
@@ -278,8 +302,13 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
                       className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                         selectedClientId === demande.clientId
                           ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:bg-gray-50'
+                          : 'hover:bg-gray-50'
                       }`}
+                      style={{ 
+                        borderColor: selectedClientId === demande.clientId 
+                          ? COLORS.LOGO 
+                          : COLORS.SEPARATOR 
+                      }}
                       onClick={() => {
                         setSelectedClientId(demande.clientId);
                         setClientInfo(demande);
@@ -294,10 +323,11 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
                           <User size={16} />
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium">
+                          <div className="font-medium" style={{ color: COLORS.PRIMARY_DARK }}>
                             {demande.contactPrenom} {demande.contactNom}
                           </div>
-                          <div className="text-sm text-gray-600 flex items-center gap-2">
+                          <div className="text-sm flex items-center gap-2" 
+                               style={{ color: COLORS.SECONDARY_TEXT }}>
                             <Mail size={12} />
                             {demande.contactEmail}
                           </div>
@@ -310,7 +340,7 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
                               {demande.statut}
                             </Badge>
                             {demande.dateSouhaitee && (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs" style={{ color: COLORS.SECONDARY_TEXT }}>
                                 Visite: {new Date(demande.dateSouhaitee).toLocaleDateString('fr-FR')}
                               </span>
                             )}
@@ -321,10 +351,12 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg">
-                  <AlertCircle className="mx-auto text-gray-400 mb-2" size={24} />
-                  <p className="text-gray-600">Aucune demande de visite trouvée</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                <div className="text-center py-4 border border-dashed rounded-lg"
+                     style={{ borderColor: COLORS.SEPARATOR }}>
+                  <AlertCircle className="mx-auto mb-2" size={24} 
+                              style={{ color: COLORS.SEPARATOR }} />
+                  <p style={{ color: COLORS.SECONDARY_TEXT }}>Aucune demande de visite trouvée</p>
+                  <p className="text-sm mt-1" style={{ color: COLORS.SECONDARY_TEXT }}>
                     Le client doit d'abord faire une demande de visite et vous devez la valider.
                   </p>
                 </div>
@@ -332,24 +364,32 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
             </div>
 
             {clientInfo && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium mb-2">Détails de la réservation</h4>
+              <div className="rounded-lg p-4"
+                   style={{ 
+                     backgroundColor: `${COLORS.SEPARATOR}20`,
+                     borderColor: COLORS.SEPARATOR 
+                   }}>
+                <h4 className="font-medium mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
+                  Détails de la réservation
+                </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-gray-500">Client:</div>
-                    <div className="font-medium">{clientInfo.contactPrenom} {clientInfo.contactNom}</div>
+                    <div style={{ color: COLORS.SECONDARY_TEXT }}>Client:</div>
+                    <div className="font-medium" style={{ color: COLORS.PRIMARY_DARK }}>
+                      {clientInfo.contactPrenom} {clientInfo.contactNom}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Email:</div>
-                    <div>{clientInfo.contactEmail}</div>
+                    <div style={{ color: COLORS.SECONDARY_TEXT }}>Email:</div>
+                    <div style={{ color: COLORS.PRIMARY_DARK }}>{clientInfo.contactEmail}</div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Durée:</div>
-                    <div>7 nuits (par défaut)</div>
+                    <div style={{ color: COLORS.SECONDARY_TEXT }}>Durée:</div>
+                    <div style={{ color: COLORS.PRIMARY_DARK }}>7 nuits (par défaut)</div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Prix total:</div>
-                    <div className="font-medium text-green-600">
+                    <div style={{ color: COLORS.SECONDARY_TEXT }}>Prix total:</div>
+                    <div className="font-medium" style={{ color: COLORS.LOGO }}>
                       {((annonce.price || 0) * 7).toLocaleString()} €
                     </div>
                   </div>
@@ -358,29 +398,42 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
             )}
           </div>
         ) : (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-yellow-700">
+          <div className="rounded-lg p-4"
+               style={{ 
+                 backgroundColor: `${COLORS.SECONDARY_TEXT}10`,
+                 borderColor: COLORS.SECONDARY_TEXT,
+                 borderWidth: '1px'
+               }}>
+            <div className="flex items-center gap-2" style={{ color: COLORS.SECONDARY_TEXT }}>
               <AlertCircle size={18} />
               <span className="font-medium">Attention</span>
             </div>
-            <p className="text-sm text-yellow-600 mt-1">
+            <p className="text-sm mt-1" style={{ color: COLORS.SECONDARY_TEXT }}>
               Ce bien n'est pas en location saisonnière. Le marquage comme "loué" ne créera pas de réservation automatique.
             </p>
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-3 pt-4 border-t" 
+             style={{ borderColor: COLORS.SEPARATOR }}>
           <Button
             variant="outline"
             onClick={onClose}
             disabled={loading}
+            style={{ 
+              borderColor: COLORS.SEPARATOR,
+              color: COLORS.SECONDARY_TEXT 
+            }}
           >
             Annuler
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={loading || (isLocationSaisonniere && !selectedClientId)}
-            className="bg-blue-600 hover:bg-blue-700"
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK,
+              color: COLORS.LIGHT_BG 
+            }}
           >
             {loading ? (
               <>
@@ -443,7 +496,6 @@ const ListingsPage = () => {
       setLoading(true);
       const response = await api.get(`/properties/user/${userId}?status=all`);
       setAnnonces(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {
@@ -682,36 +734,45 @@ const ListingsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" 
+           style={{ backgroundColor: COLORS.LIGHT_BG }}>
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Chargement des annonces...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" 
+                  style={{ color: COLORS.LOGO }} />
+          <p style={{ color: COLORS.SECONDARY_TEXT }}>Chargement des annonces...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: COLORS.LIGHT_BG }}>
       <div className="container mx-auto px-4 py-8">
         {/* En-tête */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div className="flex items-center gap-4 mb-4 lg:mb-0">
-            <div className="p-3 rounded-xl bg-blue-100 text-blue-600">
+            <div className="p-3 rounded-xl" 
+                 style={{ 
+                   backgroundColor: `${COLORS.PRIMARY_DARK}20`,
+                   color: COLORS.PRIMARY_DARK 
+                 }}>
               <Home size={32} />
             </div>
             <div>
-              <h1 className="text-4xl font-bold" style={{ color: "#0A0A0A" }}>
+              <h1 className="text-4xl font-bold" style={{ color: COLORS.PRIMARY_DARK }}>
                 Gestion des Annonces
               </h1>
-              <p className="text-lg" style={{ color: "#5A6470" }}>
+              <p className="text-lg" style={{ color: COLORS.SECONDARY_TEXT }}>
                 Gérez vos biens immobiliers et suivez leurs performances
               </p>
             </div>
           </div>
 
           <Button
-            style={{ backgroundColor: "#0052FF", color: "white" }}
+            style={{ 
+              backgroundColor: COLORS.PRIMARY_DARK, 
+              color: COLORS.LIGHT_BG 
+            }}
             onClick={() => {
               setAnnonceSelectionnee(null);
               setShowModalCreation(true);
@@ -724,63 +785,68 @@ const ListingsPage = () => {
 
         {/* Statistiques globales */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-blue-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.PRIMARY_DARK }}>
                   {statsGlobales.total}
                 </div>
-                <div style={{ color: "#5A6470" }}>Total annonces</div>
+                <div style={{ color: COLORS.SECONDARY_TEXT }}>Total annonces</div>
               </div>
-              <Home className="text-blue-600" size={24} />
+              <Home size={24} style={{ color: COLORS.LOGO }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-green-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: "#059669" }}>
                   {statsGlobales.published}
                 </div>
-                <div style={{ color: "#5A6470" }}>Publiées</div>
+                <div style={{ color: COLORS.SECONDARY_TEXT }}>Publiées</div>
               </div>
-              <CheckCircle className="text-green-600" size={24} />
+              <CheckCircle size={24} style={{ color: "#059669" }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-yellow-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: "#D97706" }}>
                   {statsGlobales.pending}
                 </div>
-                <div style={{ color: "#5A6470" }}>En attente</div>
+                <div style={{ color: COLORS.SECONDARY_TEXT }}>En attente</div>
               </div>
-              <Clock className="text-yellow-600" size={24} />
+              <Clock size={24} style={{ color: "#D97706" }} />
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6" style={{ borderColor: COLORS.SEPARATOR }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-gray-600 mb-2">
+                <div className="text-2xl font-bold mb-2" style={{ color: COLORS.SECONDARY_TEXT }}>
                   {statsGlobales.archived}
                 </div>
-                <div style={{ color: "#5A6470" }}>Archivées</div>
+                <div style={{ color: COLORS.SECONDARY_TEXT }}>Archivées</div>
               </div>
-              <Archive className="text-gray-600" size={24} />
+              <Archive size={24} style={{ color: COLORS.SECONDARY_TEXT }} />
             </div>
           </Card>
         </div>
 
         {/* Barre de filtres */}
-        <Card className="p-6 mb-8">
+        <Card className="p-6 mb-8" style={{ borderColor: COLORS.SEPARATOR }}>
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="flex-1 relative">
               <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2"
                 size={20}
+                style={{ color: COLORS.SECONDARY_TEXT }}
               />
               <Input
                 placeholder="Rechercher une annonce..."
                 className="pl-10"
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  backgroundColor: COLORS.LIGHT_BG 
+                }}
                 value={filtres.recherche}
                 onChange={(e) =>
                   setFiltres({ ...filtres, recherche: e.target.value })
@@ -790,6 +856,11 @@ const ListingsPage = () => {
 
             <select
               className="p-2 border rounded-lg"
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.SECONDARY_TEXT,
+                backgroundColor: COLORS.LIGHT_BG 
+              }}
               value={filtres.statut}
               onChange={(e) =>
                 setFiltres({ ...filtres, statut: e.target.value })
@@ -805,6 +876,11 @@ const ListingsPage = () => {
 
             <select
               className="p-2 border rounded-lg"
+              style={{ 
+                borderColor: COLORS.SEPARATOR,
+                color: COLORS.SECONDARY_TEXT,
+                backgroundColor: COLORS.LIGHT_BG 
+              }}
               value={filtres.type}
               onChange={(e) => setFiltres({ ...filtres, type: e.target.value })}
             >
@@ -827,6 +903,10 @@ const ListingsPage = () => {
               <Card
                 key={annonce.id}
                 className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
+                style={{ 
+                  borderColor: COLORS.SEPARATOR,
+                  backgroundColor: COLORS.LIGHT_BG 
+                }}
               >
                 {/* Image et badge statut */}
                 <div className="relative flex-shrink-0">
@@ -837,8 +917,9 @@ const ListingsPage = () => {
                       className="w-full h-32 sm:h-40 lg:h-48 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-32 sm:h-40 lg:h-48 bg-gray-200 flex items-center justify-center">
-                      <Home className="text-gray-400" size={40} />
+                    <div className="w-full h-32 sm:h-40 lg:h-48 flex items-center justify-center"
+                         style={{ backgroundColor: `${COLORS.SEPARATOR}50` }}>
+                      <Home size={40} style={{ color: COLORS.SECONDARY_TEXT }} />
                     </div>
                   )}
                   <div className="absolute top-2 left-2">
@@ -854,7 +935,11 @@ const ListingsPage = () => {
                     {disponibilite.vente && (
                       <Badge
                         variant="secondary"
-                        className="bg-green-100 text-green-800 text-xs"
+                        className="text-xs"
+                        style={{ 
+                          backgroundColor: `${COLORS.LOGO}20`,
+                          color: COLORS.LOGO 
+                        }}
                       >
                         Vente
                       </Badge>
@@ -862,7 +947,11 @@ const ListingsPage = () => {
                     {disponibilite.location && (
                       <Badge
                         variant="secondary"
-                        className="bg-blue-100 text-blue-800 text-xs"
+                        className="text-xs"
+                        style={{ 
+                          backgroundColor: `${COLORS.PRIMARY_DARK}20`,
+                          color: COLORS.PRIMARY_DARK 
+                        }}
                       >
                         Location
                       </Badge>
@@ -870,7 +959,11 @@ const ListingsPage = () => {
                     {annonce.rentType === "saisonniere" && (
                       <Badge
                         variant="secondary"
-                        className="bg-purple-100 text-purple-800 text-xs"
+                        className="text-xs"
+                        style={{ 
+                          backgroundColor: "#7C3AED20",
+                          color: "#7C3AED" 
+                        }}
                       >
                         Saisonnière
                       </Badge>
@@ -878,7 +971,11 @@ const ListingsPage = () => {
                     {annonce.isPSLA && (
                       <Badge
                         variant="secondary"
-                        className="bg-orange-100 text-orange-800 text-xs"
+                        className="text-xs"
+                        style={{ 
+                          backgroundColor: "#EA580C20",
+                          color: "#EA580C" 
+                        }}
                       >
                         PSLA
                       </Badge>
@@ -886,7 +983,11 @@ const ListingsPage = () => {
                     {annonce.isSHLMR && (
                       <Badge
                         variant="secondary"
-                        className="bg-indigo-100 text-indigo-800 text-xs"
+                        className="text-xs"
+                        style={{ 
+                          backgroundColor: "#4F46E520",
+                          color: "#4F46E5" 
+                        }}
                       >
                         SHLMR
                       </Badge>
@@ -899,11 +1000,12 @@ const ListingsPage = () => {
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
                     <h3
                       className="font-bold text-base sm:text-lg line-clamp-2 flex-1"
-                      style={{ color: "#0A0A0A" }}
+                      style={{ color: COLORS.PRIMARY_DARK }}
                     >
                       {annonce.title}
                     </h3>
-                    <div className="text-lg sm:text-xl font-bold text-blue-600 whitespace-nowrap">
+                    <div className="text-lg sm:text-xl font-bold whitespace-nowrap"
+                         style={{ color: COLORS.LOGO }}>
                       {annonce.price?.toLocaleString()} €
                       {disponibilite.location && !disponibilite.vente && (
                         <span className="text-xs">/mois</span>
@@ -913,7 +1015,7 @@ const ListingsPage = () => {
 
                   <div
                     className="flex items-center gap-1 mb-2 text-xs sm:text-sm"
-                    style={{ color: "#5A6470" }}
+                    style={{ color: COLORS.SECONDARY_TEXT }}
                   >
                     <MapPin size={12} />
                     <span className="line-clamp-1">
@@ -923,7 +1025,7 @@ const ListingsPage = () => {
 
                   <div
                     className="flex flex-wrap items-center gap-3 mb-3 text-xs sm:text-sm"
-                    style={{ color: "#5A6470" }}
+                    style={{ color: COLORS.SECONDARY_TEXT }}
                   >
                     <div className="flex items-center gap-1">
                       <Ruler size={12} />
@@ -940,25 +1042,26 @@ const ListingsPage = () => {
                   </div>
 
                   {/* Statistiques rapides */}
-                  <div className="flex justify-between mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg gap-2">
+                  <div className="flex justify-between mb-4 p-2 sm:p-3 rounded-lg gap-2"
+                       style={{ backgroundColor: `${COLORS.SEPARATOR}20` }}>
                     <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
-                        style={{ color: "#0A0A0A" }}
+                        style={{ color: COLORS.PRIMARY_DARK }}
                       >
                         {annonce.views || 0}
                       </div>
-                      <div className="text-xs" style={{ color: "#5A6470" }}>
+                      <div className="text-xs" style={{ color: COLORS.SECONDARY_TEXT }}>
                         Vues
                       </div>
                     </div>
                     <div className="text-center flex-1">
                       <div
                         className="font-bold text-sm"
-                        style={{ color: "#0A0A0A" }}>
+                        style={{ color: COLORS.PRIMARY_DARK }}>
                         {annonce.favorites?.length || 0}
                       </div>
-                      <div className="text-xs" style={{ color: "#5A6470" }}>
+                      <div className="text-xs" style={{ color: COLORS.SECONDARY_TEXT }}>
                         Favoris
                       </div>
                     </div>
@@ -973,7 +1076,11 @@ const ListingsPage = () => {
                         setAnnonceSelectionnee(annonce);
                         setShowModalStatistiques(true);
                       }}
-                      className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                      className="flex-1 p-2 h-8 sm:h-9"
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        color: COLORS.SECONDARY_TEXT 
+                      }}
                       title="Statistiques"
                     >
                       <TrendingUp size={14} />
@@ -986,7 +1093,11 @@ const ListingsPage = () => {
                         setAnnonceSelectionnee(annonce);
                         setShowModalCreation(true);
                       }}
-                      className="flex-1 border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                      className="flex-1 p-2 h-8 sm:h-9"
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        color: COLORS.SECONDARY_TEXT 
+                      }}
                       title="Éditer"
                     >
                       <Edit size={14} />
@@ -1002,20 +1113,32 @@ const ListingsPage = () => {
                             openMenu === annonce.id ? null : annonce.id
                           )
                         }
-                        className="border-gray-300 hover:bg-gray-50 p-2 h-8 sm:h-9"
+                        className="p-2 h-8 sm:h-9"
+                        style={{ 
+                          borderColor: COLORS.SEPARATOR,
+                          color: COLORS.SECONDARY_TEXT 
+                        }}
                         title="Plus d'actions"
                       >
                         <MoreVertical size={14} />
                       </Button>
 
                       {openMenu === annonce.id && (
-                        <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <div className="absolute right-0 bottom-full mb-2 w-48 border rounded-lg shadow-lg z-50"
+                             style={{ 
+                               backgroundColor: COLORS.LIGHT_BG,
+                               borderColor: COLORS.SEPARATOR 
+                             }}>
                           <button
                             onClick={() => {
                               supprimerAnnonce(annonce.id);
                               setOpenMenu(null);
                             }}
-                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 border-b border-gray-100 text-red-600"
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 border-b"
+                            style={{ 
+                              borderColor: COLORS.SEPARATOR,
+                              color: "#DC2626" 
+                            }}
                           >
                             <Trash2 size={14} />
                             Supprimer
@@ -1029,7 +1152,11 @@ const ListingsPage = () => {
                                   changerStatut(annonce.id, "pending");
                                   setOpenMenu(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b"
+                                style={{ 
+                                  borderColor: COLORS.SEPARATOR,
+                                  color: COLORS.SECONDARY_TEXT 
+                                }}
                               >
                                 <Archive size={14} />
                                 Dépublier
@@ -1042,7 +1169,11 @@ const ListingsPage = () => {
                                     changerStatut(annonce.id, "sold");
                                     setOpenMenu(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b border-gray-100"
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2 border-b"
+                                  style={{ 
+                                    borderColor: COLORS.SEPARATOR,
+                                    color: COLORS.SECONDARY_TEXT 
+                                  }}
                                 >
                                   <CheckCircle size={14} />
                                   Marquer comme vendu
@@ -1057,7 +1188,11 @@ const ListingsPage = () => {
                                     setShowModalConfirmationLoue(true);
                                     setOpenMenu(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-600 border-b border-gray-100"
+                                  className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 border-b"
+                                  style={{ 
+                                    borderColor: COLORS.SEPARATOR,
+                                    color: COLORS.LOGO 
+                                  }}
                                 >
                                   <CheckCircle size={14} />
                                   Marquer comme loué
@@ -1075,7 +1210,8 @@ const ListingsPage = () => {
                                 );
                                 setOpenMenu(null);
                               }}
-                              className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 flex items-center gap-2 text-green-600"
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 flex items-center gap-2"
+                              style={{ color: COLORS.PRIMARY_DARK }}
                             >
                               <CheckCircle size={14} />
                               Publier
@@ -1092,15 +1228,17 @@ const ListingsPage = () => {
         </div>
 
         {annoncesFiltrees.length === 0 && (
-          <Card className="p-8 sm:p-12 text-center">
-            <Home className="mx-auto mb-4 text-gray-400" size={48} />
+          <Card className="p-8 sm:p-12 text-center" 
+                style={{ borderColor: COLORS.SEPARATOR }}>
+            <Home className="mx-auto mb-4" size={48} 
+                  style={{ color: COLORS.SEPARATOR }} />
             <h3
               className="text-lg sm:text-xl font-semibold mb-2"
-              style={{ color: "#0A0A0A" }}
+              style={{ color: COLORS.PRIMARY_DARK }}
             >
               Aucune annonce trouvée
             </h3>
-            <p style={{ color: "#5A6470" }}>
+            <p style={{ color: COLORS.SECONDARY_TEXT }}>
               {filtres.recherche || filtres.statut || filtres.type
                 ? "Essayez de modifier vos critères de recherche"
                 : "Commencez par créer votre première annonce"}
