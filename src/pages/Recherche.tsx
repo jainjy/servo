@@ -1294,254 +1294,254 @@ const handleShowMapModal = () => {
       </main>
 
      {/* // =============== MODAL DE LA CARTE (EN BAS À DROITE) =============== */}
-        {showMapModal && (
-  <div className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
-    // Mobile: prend tout l'écran
-    bottom-0 right-0 w-full h-3/4
-    // Tablet: taille moyenne
-    md:bottom-4 md:right-4 md:w-[calc(100vw-2rem)] md:h-3/5 md:max-w-[700px] md:max-h-[600px]
-    // Desktop: taille fixe
-    lg:bottom-8 lg:right-8 lg:w-[600px] lg:h-[500px]"
-  >
-    {/* Header de la carte */}
-    <div className="bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2">
-      <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-        <MapPin className="h-4 w-4 md:h-5 md:w-5 text-blue-600 flex-shrink-0" />
-        <span className="font-semibold text-sm md:text-base truncate">
-          Carte de la Réunion
-        </span>
-        <div className="hidden md:flex items-center gap-2 ml-3">
-          <span className="text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
-            {filteredMapPoints.length} points
-          </span>
-          {userLocation && hasPositionBeenFetched && (
-            <span className="text-xs md:text-sm bg-green-100 text-green-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
-              Position active
-            </span>
+      {showMapModal && (
+        <div className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
+          // Mobile: prend tout l'écran
+          bottom-0 right-0 w-full h-3/4
+          // Tablet: taille moyenne
+          md:bottom-4 md:right-4 md:w-[calc(100vw-2rem)] md:h-3/5 md:max-w-[700px] md:max-h-[600px]
+          // Desktop: taille fixe
+          lg:bottom-8 lg:right-8 lg:w-[600px] lg:h-[500px]"
+        >
+          {/* Header de la carte */}
+          <div className="bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+              <MapPin className="h-4 w-4 md:h-5 md:w-5 text-blue-600 flex-shrink-0" />
+              <span className="font-semibold text-sm md:text-base truncate">
+                Carte de la Réunion
+              </span>
+              <div className="hidden md:flex items-center gap-2 ml-3">
+                <span className="text-xs md:text-sm bg-blue-100 text-blue-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
+                  {filteredMapPoints.length} points
+                </span>
+                {userLocation && hasPositionBeenFetched && (
+                  <span className="text-xs md:text-sm bg-green-100 text-green-800 px-2 py-1 md:px-3 md:py-1.5 rounded">
+                    Position active
+                  </span>
+                )}
+              </div>
+            </div>
+            
+            {/* Badges mobiles */}
+            <div className="flex md:hidden gap-2">
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                {filteredMapPoints.length}
+              </span>
+              {userLocation && hasPositionBeenFetched && (
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                  Position
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1 md:gap-2">
+              {/* Bouton pour obtenir la position (une seule fois) */}
+            {/* Bouton pour obtenir la position (une seule fois) */}
+          {!userLocation ? (
+            <button
+              onClick={handleGetUserLocation}
+              disabled={geoLoading}
+              className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
+              title={geoLoading ? "Récupération..." : "Obtenir ma position"}
+            >
+              {geoLoading ? (
+                <Loader className="h-4 w-4 md:h-5 md:w-5 text-purple-600 animate-spin" />
+              ) : (
+                <MapPin className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
+              )}
+            </button>
+          ) : (
+        /* Bouton pour actualiser la position */
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => {
+              // Recentrer sur la position
+              window.dispatchEvent(new CustomEvent('centerMap', { 
+                detail: { 
+                  location: userLocation,
+                  zoom: 14,
+                  smooth: true
+                } 
+              }));
+            }}
+            className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Me recentrer"
+          >
+            <PositionIcon className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
+          </button>
+          <button
+            onClick={handleRefreshLocation}
+            className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Actualiser ma position"
+          >
+            <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+          </button>
+        </div>
+      )}
+              <button
+                onClick={handleCenterToReunion}
+                className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Centrer sur la Réunion"
+              >
+                <TreePalm className="h-4 w-4 md:h-5 md:w-5 text-orange-600" />
+              </button>
+
+              <button
+                onClick={() => setShowMapModal(false)}
+                className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Fermer la carte"
+              >
+                <X className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+
+          {/* Contenu de la carte */}
+          <div className="h-[calc(100%-120px)] md:h-[calc(100%-130px)] bg-gray-100 relative">
+            {mapLoading ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <Loader className="h-8 w-8 md:h-10 md:w-10 animate-spin mx-auto text-blue-600" />
+                  <p className="mt-2 md:mt-3 text-sm md:text-base text-gray-600">
+                    Chargement de la carte...
+                  </p>
+                </div>
+              </div>
+            ) : mapError ? (
+              <div className="h-full flex items-center justify-center p-4 md:p-6">
+                <div className="text-center">
+                  <p className="text-sm md:text-base text-red-600">{mapError}</p>
+                  <button
+                    onClick={loadMapData}
+                    className="mt-2 md:mt-3 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Réessayer
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Log de debug */}
+                <div className="hidden">
+                  {(() => {
+                    console.log("📍 Props envoyées à GenericMap:", {
+                      pointsCount: filteredMapPoints.length,
+                      points: filteredMapPoints.slice(0, 2),
+                      userLocation,
+                      center: [-21.1351, 55.2471],
+                      zoom: 10
+                    });
+                    return null;
+                  })()}
+                </div>
+                
+                <GenericMap
+                  points={filteredMapPoints}
+                  userLocation={userLocation}
+                  center={[-21.1351, 55.2471]}
+                  zoom={10}
+                  onPointClick={handleMapPointClick} // Ajout du handler pour les clics
+                />
+                
+                {/* Overlay de debug */}
+                <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
+                  {filteredMapPoints.length} points
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Footer avec statistiques */}
+          <div className="bg-white p-2 md:p-3 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div className="flex flex-wrap gap-3 md:gap-4">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <Users className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
+                <span className="text-xs md:text-sm text-gray-700">
+                  {mapPoints.filter(p => p.type === "user").length} partenaires
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <Home className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+                <span className="text-xs md:text-sm text-gray-700">
+                  {mapPoints.filter(p => p.type === "property").length} propriétés
+                </span>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => navigate('/map')}
+              className="text-xs md:text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors self-end sm:self-auto"
+            >
+              Voir carte complète →
+            </button>
+          </div>
+        </div>
+      )}
+
+        {/* Bouton pour réafficher la carte si cachée */}
+          {!showMapModal && (
+            <button
+              onClick={handleShowMapModal}
+              className="fixed z-40 p-3 bg-logo hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors
+                // Mobile: plus petit
+                bottom-4 right-4
+                // Desktop: taille normale
+                md:bottom-8 md:right-8"
+              title="Afficher la carte"
+            >
+              <MapPin className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
           )}
-        </div>
-      </div>
-      
-      {/* Badges mobiles */}
-      <div className="flex md:hidden gap-2">
-        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-          {filteredMapPoints.length}
-        </span>
-        {userLocation && hasPositionBeenFetched && (
-          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-            Position
-          </span>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-1 md:gap-2">
-        {/* Bouton pour obtenir la position (une seule fois) */}
-       {/* Bouton pour obtenir la position (une seule fois) */}
-{!userLocation ? (
-  <button
-    onClick={handleGetUserLocation}
-    disabled={geoLoading}
-    className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg disabled:opacity-50 transition-colors"
-    title={geoLoading ? "Récupération..." : "Obtenir ma position"}
-  >
-    {geoLoading ? (
-      <Loader className="h-4 w-4 md:h-5 md:w-5 text-purple-600 animate-spin" />
-    ) : (
-      <MapPin className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
-    )}
-  </button>
-) : (
-  /* Bouton pour actualiser la position */
-  <div className="flex items-center gap-1">
-    <button
-      onClick={() => {
-        // Recentrer sur la position
-        window.dispatchEvent(new CustomEvent('centerMap', { 
-          detail: { 
-            location: userLocation,
-            zoom: 14,
-            smooth: true
-          } 
-        }));
-      }}
-      className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-      title="Me recentrer"
-    >
-      <PositionIcon className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
-    </button>
-    <button
-      onClick={handleRefreshLocation}
-      className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-      title="Actualiser ma position"
-    >
-      <RefreshCw className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-    </button>
-  </div>
-)}
-        <button
-          onClick={handleCenterToReunion}
-          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          title="Centrer sur la Réunion"
-        >
-          <TreePalm className="h-4 w-4 md:h-5 md:w-5 text-orange-600" />
-        </button>
 
-        <button
-          onClick={() => setShowMapModal(false)}
-          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          title="Fermer la carte"
-        >
-          <X className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
-        </button>
-      </div>
-    </div>
-
-    {/* Contenu de la carte */}
-    <div className="h-[calc(100%-120px)] md:h-[calc(100%-130px)] bg-gray-100 relative">
-      {mapLoading ? (
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center">
-            <Loader className="h-8 w-8 md:h-10 md:w-10 animate-spin mx-auto text-blue-600" />
-            <p className="mt-2 md:mt-3 text-sm md:text-base text-gray-600">
-              Chargement de la carte...
-            </p>
-          </div>
-        </div>
-      ) : mapError ? (
-        <div className="h-full flex items-center justify-center p-4 md:p-6">
-          <div className="text-center">
-            <p className="text-sm md:text-base text-red-600">{mapError}</p>
-            <button
-              onClick={loadMapData}
-              className="mt-2 md:mt-3 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Réessayer
-            </button>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Log de debug */}
-          <div className="hidden">
-            {(() => {
-              console.log("📍 Props envoyées à GenericMap:", {
-                pointsCount: filteredMapPoints.length,
-                points: filteredMapPoints.slice(0, 2),
-                userLocation,
-                center: [-21.1351, 55.2471],
-                zoom: 10
-              });
-              return null;
-            })()}
-          </div>
-          
-          <GenericMap
-            points={filteredMapPoints}
-            userLocation={userLocation}
-            center={[-21.1351, 55.2471]}
-            zoom={10}
-            onPointClick={handleMapPointClick} // Ajout du handler pour les clics
+        {/* Modal des détails du point (comme dans MapPage) */}
+          <PointDetailsModal
+            point={selectedMapPoint}
+            onClose={handleClosePointModal}
+            onViewDetails={handleViewDetails}
           />
-          
-          {/* Overlay de debug */}
-          <div className="absolute top-2 left-2 md:top-3 md:left-3 bg-black/70 text-white text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5 rounded pointer-events-none">
-            {filteredMapPoints.length} points
-          </div>
-        </>
-      )}
-    </div>
 
-    {/* Footer avec statistiques */}
-    <div className="bg-white p-2 md:p-3 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-      <div className="flex flex-wrap gap-3 md:gap-4">
-        <div className="flex items-center gap-1.5 md:gap-2">
-          <Users className="h-3 w-3 md:h-4 md:w-4 text-blue-500" />
-          <span className="text-xs md:text-sm text-gray-700">
-            {mapPoints.filter(p => p.type === "user").length} partenaires
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-1.5 md:gap-2">
-          <Home className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
-          <span className="text-xs md:text-sm text-gray-700">
-            {mapPoints.filter(p => p.type === "property").length} propriétés
-          </span>
-        </div>
-      </div>
-      
-      <button
-        onClick={() => navigate('/map')}
-        className="text-xs md:text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors self-end sm:self-auto"
-      >
-        Voir carte complète →
-      </button>
-    </div>
-  </div>
-)}
+          {/* Modal des résultats 5km (comme dans MapPage) */}
+          {showNearbyModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+              <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                {/* Header */}
+              
 
-    {/* Bouton pour réafficher la carte si cachée */}
-    {!showMapModal && (
-      <button
-        onClick={handleShowMapModal}
-        className="fixed z-40 p-3 bg-logo hover:bg-primary-dark text-white rounded-full shadow-lg transition-colors
-          // Mobile: plus petit
-          bottom-4 right-4
-          // Desktop: taille normale
-          md:bottom-8 md:right-8"
-        title="Afficher la carte"
-      >
-        <MapPin className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
-    )}
+              
 
-    {/* Modal des détails du point (comme dans MapPage) */}
-    <PointDetailsModal
-      point={selectedMapPoint}
-      onClose={handleClosePointModal}
-      onViewDetails={handleViewDetails}
-    />
+                {/* Footer */}
+                <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+                  <p className="text-xs text-gray-500">
+                    Cliquez sur un résultat pour voir les détails
+                  </p>
+                  <button
+                    onClick={() => setShowNearbyModal(false)}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
-    {/* Modal des résultats 5km (comme dans MapPage) */}
-    {showNearbyModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-        <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-          {/* Header */}
-         
+          {/* MODALES */}
+          {devisModal.isOpen && (
+            <DevisModal
+              isOpen={devisModal.isOpen}
+              onClose={closeDevisModal}
+              prestation={devisModal.prestation}
+            />
+          )}
 
-         
-
-          {/* Footer */}
-          <div className="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
-            <p className="text-xs text-gray-500">
-              Cliquez sur un résultat pour voir les détails
-            </p>
-            <button
-              onClick={() => setShowNearbyModal(false)}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-
-      {/* MODALES */}
-      {devisModal.isOpen && (
-        <DevisModal
-          isOpen={devisModal.isOpen}
-          onClose={closeDevisModal}
-          prestation={devisModal.prestation}
-        />
-      )}
-
-      {visiteModal.isOpen && (
-        <ModalDemandeVisite
-          open={visiteModal.isOpen}
-          onClose={closeVisiteModal}
-          property={visiteModal.property}
-        />
-      )}
+          {visiteModal.isOpen && (
+            <ModalDemandeVisite
+              open={visiteModal.isOpen}
+              onClose={closeVisiteModal}
+              property={visiteModal.property}
+            />
+          )}
     </div>
   );
 };
