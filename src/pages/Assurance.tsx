@@ -529,7 +529,7 @@ export default function Assurance() {
       </section>
 
       {/* Section Catégories d'Assurance */}
-      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="categories-assurance">
+      <section className="py-8 lg:py-4 bg-[#FAFAFA]" id="categories-assurance">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -540,7 +540,7 @@ export default function Assurance() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
               Nos <span className="text-[#556B2F]">Catégories d'Assurance</span>
             </h2>
-            <p className="text-sm lg:text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm text-slate-600 max-w-2xl mx-auto">
               Des solutions de protection adaptées à chaque aspect de votre vie
             </p>
           </motion.div>
@@ -555,7 +555,7 @@ export default function Assurance() {
                 whileHover={{ y: -5 }}
               >
                 <Card
-                  className="p-6 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 bg-white group"
+                  className="p-6 h-full cursor-pointer border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 bg-white group"
                   onClick={() => handleOpenModal(categorie)}
                 >
                   <div className={`w-12 h-12 rounded-xl ${categorie.color} flex items-center justify-center mb-4 group-hover:${categorie.textColor.replace('text-', 'bg-')} transition-colors duration-300`}>
@@ -588,7 +588,7 @@ export default function Assurance() {
       </section>
 
       {/* Section Services d'Assurance */}
-      <section className="py-8 lg:py-20 bg-white" id="services-assurance">
+      <section className="py-8 lg:py-4 bg-white" id="services-assurance">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -599,7 +599,7 @@ export default function Assurance() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-4 text-[#8B4513]">
               Nos <span className="text-[#556B2F]">Services d'Assurance</span>
             </h2>
-            <p className="text-sm lg:text-sm text-slate-600 max-w-2xl mx-auto">
+            <p className="text-sm text-slate-600 max-w-2xl mx-auto">
               Des solutions complètes pour protéger tous les aspects de votre vie
             </p>
           </motion.div>
@@ -653,7 +653,7 @@ export default function Assurance() {
       </section>
 
       {/* Section Avantages */}
-      <section className="py-8 lg:py-20 bg-[#FAFAFA]" id="avantages-assurance">
+      <section className="py-8 lg:py-4 bg-[#FAFAFA]" id="avantages-assurance">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -713,7 +713,7 @@ export default function Assurance() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-10 py-8 lg:py-20" id="devis-assurance">
+      <section className="px-10 py-2 lg:py-4" id="devis-assurance">
         <div className="container mx-auto py-10 rounded-lg  bg-white shadow-xl px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

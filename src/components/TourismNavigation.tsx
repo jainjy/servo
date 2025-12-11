@@ -26,20 +26,17 @@ const TourismNavigation: React.FC = () => {
             <button
               key={btn.id}
               onClick={() => navigate(btn.path)}
-              style={{
-                borderColor: "#D3D3D3", // Light gray
-                color: "#8B4513", // Saddle brown
-              }}
+              
               className={`
                 px-6 py-2 
                 rounded-full 
-                border 
-                bg-white/50
-                text-sm font-medium
+                 
+                bg-logo
+                text-sm font-medium text-white
                 transition
-                hover:border-[#556B2F]     /* olive */
-                hover:text-[#556B2F]
-                hover:bg-[#6B8E23]/10      /* yellow-green (light bg) */
+                hover:border-[#556B2F]/50    
+                hover:text-white
+                hover:bg-logo/50   
               `}
             >
               {btn.title}

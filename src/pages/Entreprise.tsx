@@ -427,10 +427,10 @@ const Entreprise = () => {
             className="text-center max-w-4xl mx-auto"
           >
             {/* TITRE MODIFIÉ - "Professionnelles" en vert #6B8E23 */}
-            <h1 className="text-xl lg:text-5xl md:text-6xl font-bold mb-6 text-white">
+            <h1 className="text-xl lg:text-4xl md:text-6xl font-bold mb-6 text-white">
               Solutions <span style={{ color: colors.primaryDark }}>Professionnelles</span>
             </h1>
-            <p className="text-sm lg:text-xl text-slate-200 mb-10 leading-relaxed">
+            <p className="text-sm text-slate-200 mb-10 leading-relaxed">
               Des services sur mesure pour répondre aux besoins spécifiques de
               votre entreprise. Accompagnement personnalisé de A à Z.
             </p>
@@ -466,7 +466,7 @@ const Entreprise = () => {
               {/* BOUTON NON MODIFIÉ */}
               <motion.div>
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-blue-500 hover:border-blue-400 transition-all duration-300"
+                  className="bg-logo hover:bg-logo/80 text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-logo hover:border-logo/80 transition-all duration-300"
                   onClick={handleOpenMap}
                 >
                   <MapPin className="h-5 w-5 mr-3" />

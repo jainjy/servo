@@ -263,37 +263,37 @@ const ServicesPartnersPage = () => {
       // Configuration par type
       const getTypeConfig = (type: string) => {
         const configs = {
-          service: { 
-            color: '#556B2F', 
+          service: {
+            color: '#556B2F',
             lightColor: '#556B2F/10',
-            icon: Wrench, 
+            icon: Wrench,
             label: 'Service',
             bgFrom: 'from-[#556B2F]/10',
             bgTo: 'to-[#6B8E23]/10',
             borderColor: 'border-[#556B2F]/20'
           },
-          property: { 
-            color: '#8B4513', 
+          property: {
+            color: '#8B4513',
             lightColor: '#8B4513/10',
-            icon: Home, 
+            icon: Home,
             label: 'Bien Immobilier',
             bgFrom: 'from-[#8B4513]/10',
             bgTo: 'to-[#8B4513]/20',
             borderColor: 'border-[#8B4513]/20'
           },
-          product: { 
-            color: '#6B8E23', 
+          product: {
+            color: '#6B8E23',
             lightColor: '#6B8E23/10',
-            icon: Car, 
+            icon: Car,
             label: 'Produit',
             bgFrom: 'from-[#6B8E23]/10',
             bgTo: 'to-[#6B8E23]/20',
             borderColor: 'border-[#6B8E23]/20'
           },
-          aliment: { 
-            color: '#556B2F', 
+          aliment: {
+            color: '#556B2F',
             lightColor: '#556B2F/10',
-            icon: Utensils, 
+            icon: Utensils,
             label: 'Aliment',
             bgFrom: 'from-[#556B2F]/10',
             bgTo: 'to-[#556B2F]/20',
@@ -311,8 +311,8 @@ const ServicesPartnersPage = () => {
       const images = (item as any).images || [];
 
       return (
-        <div 
-          key={item.id || `${item.type}-${index}`} 
+        <div
+          key={item.id || `${item.type}-${index}`}
           className={`bg-[#FFFFF0] rounded-xl shadow-lg border ${config.borderColor} overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105`}
         >
           {/* Image */}
@@ -532,15 +532,15 @@ const ServicesPartnersPage = () => {
     return (
       <div className="text-center py-12">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-gray-900">
+          <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-secondary-text">
             {view === "default" ? "Tous nos services" :
-             view === "partenaires" ? "Nos Partenaires" :
-             view === "services" ? "Demandes de Prestations" : "Aides"}
+              view === "partenaires" ? "Nos Partenaires" :
+                view === "services" ? "Demandes de Prestations" : "Aides"}
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-sm text-gray-100">
             {view === "default" ? "Découvrez l'ensemble de nos prestations et propriétés disponibles" :
-             view === "partenaires" ? "Trouvez les meilleurs experts pour votre projet" :
-             view === "services" ? "Soumettez vos demandes de services" : "Obtenez de l'aide et des conseils"}
+              view === "partenaires" ? "Trouvez les meilleurs experts pour votre projet" :
+                view === "services" ? "Soumettez vos demandes de services" : "Obtenez de l'aide et des conseils"}
           </p>
         </div>
       </div>
@@ -548,20 +548,30 @@ const ServicesPartnersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFF0] text-gray-900 antialiased mt-15">
+    <div className="min-h-screen text-gray-900 antialiased mt-15">
       <header
-        className="relative pt-12 px-8 pb-8 border-b border-[#D3D3D3] bg-gradient-to-b from-[#FFFFF0] to-[#FFFFF0]/50"
+        className="relative pt-12 px-8 pb-8 overflow-hidden border-b border-[#D3D3D3]"
       >
+        {/* Image de fond */}
+        <div
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(https://i.pinimg.com/736x/9c/7a/3a/9c7a3a5a0b27ce38ef9f99260836aa28.jpg)', // Remplacez par le chemin de votre image
+          }}
+        >
+          {/* Overlay noir */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-black/60"></div>
+        </div>
+
         <div className="max-w-[1200px] mx-auto flex flex-col gap-6 relative z-10">
           <div className="flex flex-col gap-2">{renderHeaderTitles()}</div>
 
           <div className="flex flex-wrap gap-4 justify-center">
             <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "default" 
-                  ? "border-[#556B2F] bg-[#556B2F] text-white shadow-lg" 
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${view === "default"
+                  ? "border-[#556B2F] bg-[#556B2F] text-white shadow-lg"
                   : "border-[#556B2F] bg-[#FFFFF0] text-[#556B2F] hover:bg-[#556B2F]/10 shadow-md"
-              } text-sm font-semibold transform hover:scale-105`}
+                } text-sm font-semibold transform hover:scale-105`}
               onClick={() => navigate('/services-partners?section=')}
             >
               TOUS NOS SERVICES
@@ -569,29 +579,26 @@ const ServicesPartnersPage = () => {
             </button>
 
             <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "partenaires" 
-                  ? "border-[#8B4513] bg-[#8B4513] text-white shadow-lg" 
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${view === "partenaires"
+                  ? "border-[#8B4513] bg-[#8B4513] text-white shadow-lg"
                   : "border-[#8B4513] bg-[#FFFFF0] text-[#8B4513] hover:bg-[#8B4513]/10 shadow-md"
-              } text-sm font-semibold transform hover:scale-105`}
+                } text-sm font-semibold transform hover:scale-105`}
               onClick={() => navigate('/services-partners?section=partenaires')}
             >
               PRÉSENTATION PARTENAIRES
               <ChevronDown className="w-4 h-4" />
             </button>
-            
+
             <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${
-                view === "services" 
-                  ? "border-[#6B8E23] bg-[#6B8E23] text-white shadow-lg" 
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${view === "services"
+                  ? "border-[#6B8E23] bg-[#6B8E23] text-white shadow-lg"
                   : "border-[#6B8E23] bg-[#FFFFF0] text-[#6B8E23] hover:bg-[#6B8E23]/10 shadow-md"
-              } text-sm font-semibold transform hover:scale-105`}
+                } text-sm font-semibold transform hover:scale-105`}
               onClick={() => navigate('/services-partners?section=prestations')}
             >
               DEMANDES DE PRESTATIONS
               <ChevronDown className="w-4 h-4" />
             </button>
-            
           </div>
         </div>
       </header>
