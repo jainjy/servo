@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { 
   MessageCircle, Shield, Target, Users, TrendingUp, CheckCircle, 
   FileText, Award, Lightbulb, BarChart, Handshake, Zap,
@@ -33,6 +33,61 @@ const colors = {
   warning: "#F39C12",
   error: "#E74C3C",
   accentGold: "#D4AF37",
+};
+
+// Animations
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100
+    }
+  }
+};
+
+const cardHoverVariants: Variants = {
+  initial: { y: 0, scale: 1 },
+  hover: {
+    y: -8,
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      stiffness: 300
+    }
+  }
+};
+
+const modalVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 25
+    }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    transition: {
+      duration: 0.2
+    }
+  }
 };
 
 // Types de conseil
@@ -446,61 +501,6 @@ const ConseilPage = () => {
       });
       setSelectedConseiller(null);
     }, 2000);
-  };
-
-  // Animations
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  };
-
-  const cardHoverVariants = {
-    initial: { y: 0, scale: 1 },
-    hover: {
-      y: -8,
-      scale: 1.02,
-      transition: {
-        type: "spring",
-        stiffness: 300
-      }
-    }
-  };
-
-  const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 25
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.8,
-      transition: {
-        duration: 0.2
-      }
-    }
   };
 
   return (
