@@ -1220,27 +1220,27 @@ export default function UnifiedReservationPage() {
               {serviceBookings.length}
             </Badge>
           </TabsTrigger>
-          {/* <TabsTrigger value="tourisme" className="flex items-center gap-2">
+          <TabsTrigger value="tourisme" className="flex items-center gap-2">
             <Building className="w-4 h-4" />
             Hébergements
             <Badge variant="secondary" className="ml-2">
               {tourismBookings.length}
             </Badge>
-          </TabsTrigger> */}
-          {/* <TabsTrigger value="lieux-touristiques" className="flex items-center gap-2">
+          </TabsTrigger>
+          <TabsTrigger value="lieux-touristiques" className="flex items-center gap-2">
             <Ticket className="w-4 h-4" />
             Billets
             <Badge variant="secondary" className="ml-2">
               {touristicPlaceBookings.length}
             </Badge>
-          </TabsTrigger> */}
-          {/* <TabsTrigger value="vols" className="flex items-center gap-2">
+          </TabsTrigger>
+          <TabsTrigger value="vols" className="flex items-center gap-2">
             <Plane className="w-4 h-4" />
             Vols
             <Badge variant="secondary" className="ml-2">
               {flightReservations.length}
             </Badge>
-          </TabsTrigger> */}
+          </TabsTrigger>
         </TabsList>
 
         {/* Onglet Hébergements */}
