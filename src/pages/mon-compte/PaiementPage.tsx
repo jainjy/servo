@@ -85,16 +85,29 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+// --- Couleurs du thème ---
+const theme = {
+  logo: "#556B2F", // Olive green
+  primaryDark: "#6B8E23", // Yellow-green
+  lightBg: "#F8F8F0", // Blanc cassé
+  separator: "#D3D3D3", // Light gray
+  secondaryText: "#8B4513", // Saddle brown
+  accent: "#BDB76B", // Dark khaki (accent doux)
+  success: "#228B22", // Forest green (succès)
+  info: "#C0C0A0", // Olive silver (info douce)
+  error: "#CD5C5C", // Indian red (alerte douce)
+  warning: "#FFD700", // Gold (attention)
+};
+
 // --- Sub-components ---
 function StatusBadge({ status }: { status: Transaction["status"] }) {
-  const variant =
-    status === "payee"
-      ? "default"
-      : status === "en_attente"
-      ? "secondary"
-      : status === "rembourse"
-      ? "outline"
-      : "destructive";
+  // Couleurs personnalisées pour chaque statut
+  const colorMap: Record<Transaction["status"], string> = {
+    payee: theme.success,
+    en_attente: theme.accent,
+    rembourse: theme.info,
+    echoue: theme.error,
+  };
   const label =
     status === "payee"
       ? "Payée"
@@ -104,7 +117,17 @@ function StatusBadge({ status }: { status: Transaction["status"] }) {
       ? "Remboursée"
       : "Échouée";
 
-  return <Badge variant={variant as any}>{label}</Badge>;
+  return (
+    <Badge
+      style={{
+        backgroundColor: colorMap[status],
+        color: status === "echoue" ? "#fff" : theme.logo,
+        border: "none",
+      }}
+    >
+      {label}
+    </Badge>
+  );
 }
 
 function AddCardDialog({ onAdd }: { onAdd: (method: PaymentMethod) => void }) {
@@ -405,41 +428,57 @@ export default function PaiementPage() {
 
   return (
     <>
-      <div className="container mx-auto max-w-6xl py-8 mt-12">
+      <div
+        className="container mx-auto max-w-6xl py-8 mt-12"
+        style={{ background: theme.lightBg }}
+      >
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Paiement</h1>
-          <p className="text-muted-foreground">
+          <h1
+            className="text-2xl font-bold"
+            style={{ color: theme.logo }}
+          >
+            Paiement
+          </h1>
+          <p className="text-muted-foreground" style={{ color: theme.secondaryText }}>
             Gérez vos paiements, factures et méthodes de paiement.
           </p>
         </div>
 
         <Tabs defaultValue="historique" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="historique">Historique</TabsTrigger>
-            <TabsTrigger value="factures">Factures</TabsTrigger>
-            <TabsTrigger value="methods">Moyens de paiement</TabsTrigger>
+          <TabsList
+            className="mb-4"
+            style={{ background: theme.primaryDark, borderColor: theme.separator }}
+          >
+            <TabsTrigger value="historique" style={{ color: theme.logo }}>
+              Historique
+            </TabsTrigger>
+            <TabsTrigger value="factures" style={{ color: theme.logo }}>
+              Factures
+            </TabsTrigger>
+            <TabsTrigger value="methods" style={{ color: theme.logo }}>
+              Moyens de paiement
+            </TabsTrigger>
           </TabsList>
 
           {/* Transactions */}
           <TabsContent value="historique" className="space-y-4">
-            <Card>
+            <Card style={{ borderColor: theme.separator }}>
               <CardHeader>
-                <CardTitle>Historique des transactions</CardTitle>
-                <CardDescription>
+                <CardTitle style={{ color: theme.logo }}>
+                  Historique des transactions
+                </CardTitle>
+                <CardDescription style={{ color: theme.secondaryText }}>
                   Vos derniers paiements et remboursements
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4 pb-4">
                   <div className="w-48">
-                    <Select
-                      value={selectedPeriod}
-                      onValueChange={handlePeriodChange}
-                    >
-                      <SelectTrigger>
+                    <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+                      <SelectTrigger style={{ background: theme.accent, color: theme.logo }}>
                         <SelectValue placeholder="Période" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent style={{ background: theme.lightBg }}>
                         <SelectItem value="1m">Dernier mois</SelectItem>
                         <SelectItem value="3m">3 derniers mois</SelectItem>
                         <SelectItem value="12m">12 derniers mois</SelectItem>
@@ -448,16 +487,19 @@ export default function PaiementPage() {
                     </Select>
                   </div>
                 </div>
-
-                <div className="rounded-md border">
+                <div className="rounded-md border" style={{ borderColor: theme.separator }}>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Montant</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead className="w-[1%]">Action</TableHead>
+                        <TableHead style={{ color: theme.secondaryText }}>Date</TableHead>
+                        <TableHead style={{ color: theme.secondaryText }}>Description</TableHead>
+                        <TableHead className="text-right" style={{ color: theme.secondaryText }}>
+                          Montant
+                        </TableHead>
+                        <TableHead style={{ color: theme.secondaryText }}>Statut</TableHead>
+                        <TableHead className="w-[1%]" style={{ color: theme.secondaryText }}>
+                          Action
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -513,22 +555,26 @@ export default function PaiementPage() {
 
           {/* Invoices */}
           <TabsContent value="factures" className="space-y-4">
-            <Card>
+            <Card style={{ borderColor: theme.separator }}>
               <CardHeader>
-                <CardTitle>Factures</CardTitle>
-                <CardDescription>
+                <CardTitle style={{ color: theme.logo }}>Factures</CardTitle>
+                <CardDescription style={{ color: theme.secondaryText }}>
                   Téléchargez vos factures au format PDF
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
+                <div className="rounded-md border" style={{ borderColor: theme.separator }}>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Numéro</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                        <TableHead className="w-[1%]">Action</TableHead>
+                        <TableHead style={{ color: theme.secondaryText }}>Numéro</TableHead>
+                        <TableHead style={{ color: theme.secondaryText }}>Date</TableHead>
+                        <TableHead className="text-right" style={{ color: theme.secondaryText }}>
+                          Total
+                        </TableHead>
+                        <TableHead className="w-[1%]" style={{ color: theme.secondaryText }}>
+                          Action
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -584,11 +630,11 @@ export default function PaiementPage() {
           {/* Payment methods */}
           <TabsContent value="methods" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <Card>
+              <Card style={{ borderColor: theme.separator }}>
                 <CardHeader className="flex-row items-center justify-between space-y-0">
                   <div>
-                    <CardTitle>Méthodes enregistrées</CardTitle>
-                    <CardDescription>
+                    <CardTitle style={{ color: theme.logo }}>Méthodes enregistrées</CardTitle>
+                    <CardDescription style={{ color: theme.secondaryText }}>
                       Cartes bancaires associées à votre compte
                     </CardDescription>
                   </div>
@@ -608,17 +654,21 @@ export default function PaiementPage() {
                       <div
                         key={m.id}
                         className="flex items-center justify-between rounded-md border p-3"
+                        style={{ borderColor: theme.separator, background: m.isDefault ? theme.accent : theme.lightBg }}
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">
+                            <p className="font-medium" style={{ color: theme.logo }}>
                               {m.brand} •••• {m.last4}
                             </p>
-                            {m.isDefault && <Badge>Par défaut</Badge>}
+                            {m.isDefault && (
+                              <Badge style={{ background: theme.primaryDark, color: "#fff" }}>
+                                Par défaut
+                              </Badge>
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            Exp. {String(m.expMonth).padStart(2, "0")}/
-                            {m.expYear} • {m.holder}
+                          <p className="text-sm text-muted-foreground" style={{ color: theme.secondaryText }}>
+                            Exp. {String(m.expMonth).padStart(2, "0")}/{m.expYear} • {m.holder}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -645,16 +695,18 @@ export default function PaiementPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card style={{ borderColor: theme.separator }}>
                 <CardHeader>
-                  <CardTitle>Adresse de facturation</CardTitle>
-                  <CardDescription>Utilisée sur les factures</CardDescription>
+                  <CardTitle style={{ color: theme.logo }}>Adresse de facturation</CardTitle>
+                  <CardDescription style={{ color: theme.secondaryText }}>
+                    Utilisée sur les factures
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {billingAddress ? (
                     <>
-                      <div className="rounded-md border p-3">
-                        <p>{billingAddress.name}</p>
+                      <div className="rounded-md border p-3" style={{ borderColor: theme.separator }}>
+                        <p style={{ color: theme.logo }}>{billingAddress.name}</p>
                         <p>{billingAddress.address}</p>
                         {billingAddress.addressComplement && (
                           <p>{billingAddress.addressComplement}</p>
