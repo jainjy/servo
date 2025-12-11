@@ -42,6 +42,16 @@ import AjoutVolModal from "../../components/components/AjoutVol";
 import AjoutActivitesModal from "@/components/components/AjoutActivites";
 import { api } from "@/lib/axios";
 
+// Constantes de couleur basées sur votre palette
+const COLORS = {
+  logo: "#556B2F",           /* Olive green - logo/accent */
+  primary: "#6B8E23",        /* Yellow-green - primary-dark */
+  lightBg: "#FFFFFF",        /* White - light-bg */
+  separator: "#D3D3D3",      /* Light gray - separator */
+  secondaryText: "#8B4513",  /* Saddle brown - secondary-text */
+  smallText: "#000000",      /* Black for small text */
+};
+
 // Amenities disponibles avec icônes
 const availableAmenities = [
   { id: "wifi", label: "Wi-Fi", icon: Wifi },
@@ -314,9 +324,9 @@ const AdminModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b" style={{ borderColor: COLORS.separator }}>
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>
               {editingListing
                 ? `Modifier ${formData.isTouristicPlace
                   ? "le lieu touristique"
@@ -338,11 +348,15 @@ const AdminModal = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {!editingListing && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Type de contenu *
               </label>
               <select
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={
                   formData.isTouristicPlace ? "touristic_place" : formData.type
                 }
@@ -364,11 +378,15 @@ const AdminModal = ({
           {formData.isTouristicPlace && (
             <>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                   Catégorie *
                 </label>
                 <select
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                  style={{ 
+                    borderColor: COLORS.separator,
+                    color: COLORS.smallText
+                  }}
                   value={formData.category || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -389,12 +407,16 @@ const AdminModal = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Horaires d'ouverture
                   </label>
                   <input
                     type="text"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     placeholder="Ex: 9h-18h, fermé le lundi"
                     value={formData.openingHours || ""}
                     onChange={(e) =>
@@ -406,12 +428,16 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Tarif d'entrée
                   </label>
                   <input
                     type="text"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     placeholder="Ex: Gratuit, 10€, Enfants: 5€"
                     value={formData.entranceFee || ""}
                     onChange={(e) =>
@@ -426,12 +452,16 @@ const AdminModal = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Site web
                   </label>
                   <input
                     type="url"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.website || ""}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -442,12 +472,16 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Contact
                   </label>
                   <input
                     type="text"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     placeholder="Ex: +33 1 23 45 67 89"
                     value={formData.contactInfo || ""}
                     onChange={(e) =>
@@ -466,11 +500,15 @@ const AdminModal = ({
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Type d'hébergement *
                   </label>
                   <select
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.type}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, type: e.target.value }))
@@ -484,7 +522,7 @@ const AdminModal = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Prix (€) *
                   </label>
                   <input
@@ -492,7 +530,11 @@ const AdminModal = ({
                     required
                     min="0"
                     step="0.01"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.price}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -506,13 +548,17 @@ const AdminModal = ({
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Chambres
                   </label>
                   <input
                     type="number"
                     min="1"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.bedrooms || ""}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -525,13 +571,17 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Salles de bain
                   </label>
                   <input
                     type="number"
                     min="1"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.bathrooms || ""}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -544,14 +594,18 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Voyageurs max *
                   </label>
                   <input
                     type="number"
                     required
                     min="1"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.maxGuests}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -576,16 +630,20 @@ const AdminModal = ({
                       }))
                     }
                   />
-                  <span className="ml-2 text-sm text-gray-700">
+                  <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>
                     Réservation instantanée
                   </span>
                 </label>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                     Politique d'annulation
                   </label>
                   <select
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                    style={{ 
+                      borderColor: COLORS.separator,
+                      color: COLORS.smallText
+                    }}
                     value={formData.cancellationPolicy}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -604,10 +662,10 @@ const AdminModal = ({
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-4">
+            <label className="block text-sm font-semibold mb-4" style={{ color: COLORS.secondaryText }}>
               Images {uploading && "(Upload en cours...)"}
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-4">
+            <div className="border-2 border-dashed rounded-xl p-6 text-center mb-4" style={{ borderColor: COLORS.separator }}>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -621,7 +679,8 @@ const AdminModal = ({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center mx-auto transition-all duration-300 disabled:opacity-50"
+                className="text-white px-6 py-3 rounded-lg font-medium flex items-center mx-auto transition-all duration-300 disabled:opacity-50"
+                style={{ backgroundColor: COLORS.primary }}
               >
                 {uploading ? (
                   <>
@@ -635,7 +694,7 @@ const AdminModal = ({
                   </>
                 )}
               </button>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm mt-2" style={{ color: COLORS.logo }}>
                 Formats supportés: JPG, PNG, WebP. Maximum 10 images, 5MB par
                 image.
                 {uploadedFiles.length > 0 &&
@@ -668,13 +727,17 @@ const AdminModal = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Titre *
               </label>
               <input
                 type="text"
                 required
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.title}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, title: e.target.value }))
@@ -682,13 +745,17 @@ const AdminModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Ville *
               </label>
               <input
                 type="text"
                 required
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.city}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, city: e.target.value }))
@@ -698,12 +765,16 @@ const AdminModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
               Description
             </label>
             <textarea
               rows={3}
-              className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 border-2 rounded-xl focus:ring-2"
+              style={{ 
+                borderColor: COLORS.separator,
+                color: COLORS.smallText
+              }}
               value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -716,7 +787,7 @@ const AdminModal = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Note
               </label>
               <input
@@ -724,7 +795,11 @@ const AdminModal = ({
                 min="0"
                 max="5"
                 step="0.1"
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.rating}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -735,13 +810,17 @@ const AdminModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Nombre d'avis
               </label>
               <input
                 type="number"
                 min="0"
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.reviewCount}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -754,7 +833,7 @@ const AdminModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
               Équipements
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -781,7 +860,7 @@ const AdminModal = ({
                       }
                     }}
                   />
-                  <span className="ml-2 text-sm text-gray-700">
+                  <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>
                     {amenity.label}
                   </span>
                 </label>
@@ -802,7 +881,7 @@ const AdminModal = ({
                   }))
                 }
               />
-              <span className="ml-2 text-sm text-gray-700">Disponible</span>
+              <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>Disponible</span>
             </label>
             <label className="flex items-center">
               <input
@@ -816,7 +895,7 @@ const AdminModal = ({
                   }))
                 }
               />
-              <span className="ml-2 text-sm text-gray-700">
+              <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>
                 Mettre en vedette
               </span>
             </label>
@@ -826,13 +905,15 @@ const AdminModal = ({
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              className="flex-1 py-4 px-6 border-2 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              style={{ borderColor: COLORS.separator }}
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
+              className="flex-1 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
+              style={{ backgroundColor: COLORS.primary }}
             >
               {editingListing ? "Modifier" : "Créer"}
             </button>
@@ -852,9 +933,9 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b" style={{ borderColor: COLORS.separator }}>
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>
               {selectedListing.title}
             </h3>
             <button
@@ -864,7 +945,7 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
               <X className="w-6 h-6" />
             </button>
           </div>
-          <p className="text-gray-600 flex items-center mt-2">
+          <p className="flex items-center mt-2" style={{ color: COLORS.logo }}>
             <MapPin className="w-4 h-4 mr-1" />
             {selectedListing.city}
           </p>
@@ -880,7 +961,7 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
               />
             </div>
           ) : (
-            <div className="relative h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl overflow-hidden">
+            <div className="relative h-64 rounded-xl overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
               <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
                 Aucune image disponible
               </div>
@@ -888,46 +969,46 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
           )}
 
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+            <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
               Description
             </h4>
-            <p className="text-gray-600">{selectedListing.description}</p>
+            <p style={{ color: COLORS.smallText }}>{selectedListing.description}</p>
           </div>
 
           {isTouristicPlace ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedListing.openingHours && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Clock className="w-6 h-6 text-blue-600 mb-2" />
-                  <div className="text-sm text-gray-600">Horaires</div>
-                  <div className="font-semibold">
+                  <Clock className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Horaires</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>
                     {selectedListing.openingHours}
                   </div>
                 </div>
               )}
               {selectedListing.entranceFee && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Star className="w-6 h-6 text-green-600 mb-2" />
-                  <div className="text-sm text-gray-600">Tarif d'entrée</div>
-                  <div className="font-semibold">
+                  <Star className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Tarif d'entrée</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>
                     {selectedListing.entranceFee}
                   </div>
                 </div>
               )}
               {selectedListing.website && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Globe className="w-6 h-6 text-purple-600 mb-2" />
-                  <div className="text-sm text-gray-600">Site web</div>
-                  <div className="font-semibold truncate">
+                  <Globe className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Site web</div>
+                  <div className="font-semibold truncate" style={{ color: COLORS.smallText }}>
                     {selectedListing.website}
                   </div>
                 </div>
               )}
               {selectedListing.contactInfo && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Users className="w-6 h-6 text-orange-600 mb-2" />
-                  <div className="text-sm text-gray-600">Contact</div>
-                  <div className="font-semibold">
+                  <Users className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Contact</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>
                     {selectedListing.contactInfo}
                   </div>
                 </div>
@@ -936,36 +1017,36 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <Bed className="w-6 h-6 text-blue-600 mb-2" />
-                <div className="text-sm text-gray-600">Chambres</div>
-                <div className="font-semibold">
+                <Bed className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                <div className="text-sm" style={{ color: COLORS.logo }}>Chambres</div>
+                <div className="font-semibold" style={{ color: COLORS.smallText }}>
                   {selectedListing.bedrooms || 1}
                 </div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <Users className="w-6 h-6 text-green-600 mb-2" />
-                <div className="text-sm text-gray-600">Voyageurs max</div>
-                <div className="font-semibold">{selectedListing.maxGuests}</div>
+                <Users className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                <div className="text-sm" style={{ color: COLORS.logo }}>Voyageurs max</div>
+                <div className="font-semibold" style={{ color: COLORS.smallText }}>{selectedListing.maxGuests}</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <Bath className="w-6 h-6 text-purple-600 mb-2" />
-                <div className="text-sm text-gray-600">Salles de bain</div>
-                <div className="font-semibold">
+                <Bath className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                <div className="text-sm" style={{ color: COLORS.logo }}>Salles de bain</div>
+                <div className="font-semibold" style={{ color: COLORS.smallText }}>
                   {selectedListing.bathrooms || 1}
                 </div>
               </div>
               {selectedListing.area && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Square className="w-6 h-6 text-orange-600 mb-2" />
-                  <div className="text-sm text-gray-600">Surface</div>
-                  <div className="font-semibold">{selectedListing.area}m²</div>
+                  <Square className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Surface</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>{selectedListing.area}m²</div>
                 </div>
               )}
             </div>
           )}
 
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+            <h4 className="text-lg font-semibold mb-4" style={{ color: COLORS.secondaryText }}>
               Équipements
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -979,8 +1060,8 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
                     key={amenityId}
                     className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg"
                   >
-                    <IconComponent className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm text-gray-700">
+                    <IconComponent className="w-5 h-5" style={{ color: COLORS.primary }} />
+                    <span className="text-sm" style={{ color: COLORS.smallText }}>
                       {amenity?.label || amenityId}
                     </span>
                   </div>
@@ -990,20 +1071,20 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
           </div>
 
           {!isTouristicPlace && (
-            <div className="bg-blue-50 p-4 rounded-xl">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+            <div className="p-4 rounded-xl" style={{ backgroundColor: `${COLORS.primary}15` }}>
+              <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Informations de réservation
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-600">Prix par nuit</span>
-                    <span className="font-semibold">
+                    <span style={{ color: COLORS.logo }}>Prix par nuit</span>
+                    <span className="font-semibold" style={{ color: COLORS.smallText }}>
                       {selectedListing.price}€
                     </span>
                   </div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-600">
+                    <span style={{ color: COLORS.logo }}>
                       Réservation instantanée
                     </span>
                     <span
@@ -1018,21 +1099,21 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-600">
+                    <span style={{ color: COLORS.logo }}>
                       Politique d'annulation
                     </span>
-                    <span className="font-semibold capitalize">
+                    <span className="font-semibold capitalize" style={{ color: COLORS.smallText }}>
                       {selectedListing.cancellationPolicy}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Note</span>
+                    <span style={{ color: COLORS.logo }}>Note</span>
                     <div className="flex items-center">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                      <span className="font-semibold">
+                      <span className="font-semibold" style={{ color: COLORS.smallText }}>
                         {selectedListing.rating}
                       </span>
-                      <span className="text-gray-500 ml-1">
+                      <span className="ml-1" style={{ color: COLORS.logo }}>
                         ({selectedListing.reviewCount} avis)
                       </span>
                     </div>
@@ -1045,7 +1126,8 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
           <div className="flex space-x-4 pt-4">
             <button
               onClick={onClose}
-              className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              className="flex-1 py-3 px-6 border-2 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              style={{ borderColor: COLORS.separator }}
             >
               Fermer
             </button>
@@ -1055,7 +1137,8 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
                   onClose();
                   onBook(selectedListing);
                 }}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
+                className="flex-1 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
+                style={{ backgroundColor: COLORS.primary }}
               >
                 Réserver maintenant
               </button>
@@ -1089,9 +1172,9 @@ const AirlineModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b" style={{ borderColor: COLORS.separator }}>
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>
               Nouvelle compagnie aérienne
             </h3>
             <button
@@ -1106,13 +1189,17 @@ const AirlineModal = ({ isOpen, onClose }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Nom *
               </label>
               <input
                 type="text"
                 required
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.name}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -1120,13 +1207,17 @@ const AirlineModal = ({ isOpen, onClose }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Code *
               </label>
               <input
                 type="text"
                 required
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.code}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, code: e.target.value }))
@@ -1137,12 +1228,16 @@ const AirlineModal = ({ isOpen, onClose }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Pays
               </label>
               <input
                 type="text"
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.country}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, country: e.target.value }))
@@ -1150,12 +1245,16 @@ const AirlineModal = ({ isOpen, onClose }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                 Site web
               </label>
               <input
                 type="url"
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border-2 rounded-xl focus:ring-2"
+                style={{ 
+                  borderColor: COLORS.separator,
+                  color: COLORS.smallText
+                }}
                 value={formData.website}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, website: e.target.value }))
@@ -1168,13 +1267,15 @@ const AirlineModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              className="flex-1 py-4 px-6 border-2 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+              style={{ borderColor: COLORS.separator }}
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
+              className="flex-1 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
+              style={{ backgroundColor: COLORS.primary }}
             >
               Créer
             </button>
@@ -1716,7 +1817,7 @@ export default function TourismPage() {
 
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 overflow-hidden">
+        <div className="relative h-48 overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
           {listing.images && listing.images.length > 0 ? (
             <img
               src={listing.images[0]}
@@ -1794,10 +1895,10 @@ export default function TourismPage() {
 
         <div className="p-5">
           <div className="mb-3">
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
+            <h3 className="font-bold text-lg line-clamp-1" style={{ color: COLORS.secondaryText }}>
               {listing.title}
             </h3>
-            <p className="text-gray-600 flex items-center text-sm mt-1">
+            <p className="flex items-center text-sm mt-1" style={{ color: COLORS.logo }}>
               <MapPin className="w-4 h-4 mr-1" />
               {listing.city}
             </p>
@@ -1806,10 +1907,10 @@ export default function TourismPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold" style={{ color: COLORS.smallText }}>
                 {listing.rating}
               </span>
-              <span className="text-gray-500 ml-1">
+              <span className="ml-1" style={{ color: COLORS.logo }}>
                 ({listing.reviewCount} avis)
               </span>
             </div>
@@ -1839,21 +1940,21 @@ export default function TourismPage() {
             <div className="mb-4 space-y-2">
               {listing.entranceFee && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Tarif d'entrée:</span>
-                  <span className="font-semibold text-green-600">
+                  <span style={{ color: COLORS.logo }}>Tarif d'entrée:</span>
+                  <span className="font-semibold" style={{ color: COLORS.primary }}>
                     {listing.entranceFee}
                   </span>
                 </div>
               )}
               {listing.openingHours && (
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm" style={{ color: COLORS.logo }}>
                   <Clock className="w-4 h-4 mr-1" />
                   <span>{listing.openingHours}</span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+            <div className="flex items-center justify-between text-sm mb-4" style={{ color: COLORS.logo }}>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-1" />
@@ -1893,8 +1994,8 @@ export default function TourismPage() {
                     key={amenityId}
                     className="flex items-center p-1 bg-gray-100 rounded-lg"
                   >
-                    <IconComponent className="w-3 h-3 text-blue-600 mr-1" />
-                    <span className="text-xs text-gray-700">
+                    <IconComponent className="w-3 h-3 mr-1" style={{ color: COLORS.primary }} />
+                    <span className="text-xs" style={{ color: COLORS.smallText }}>
                       {amenity?.label}
                     </span>
                   </div>
@@ -1902,7 +2003,7 @@ export default function TourismPage() {
               })}
               {listing.amenities.length > 4 && (
                 <div className="flex items-center p-1 bg-gray-100 rounded-lg">
-                  <span className="text-xs text-gray-700">
+                  <span className="text-xs" style={{ color: COLORS.smallText }}>
                     +{listing.amenities.length - 4}
                   </span>
                 </div>
@@ -1947,7 +2048,7 @@ export default function TourismPage() {
   const FlightCard = ({ flight }) => {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 overflow-hidden">
+        <div className="relative h-48 overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
           {flight.image ? (
             <img
               src={flight.image}
@@ -1984,10 +2085,10 @@ export default function TourismPage() {
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="font-bold text-lg text-gray-900">
+              <h3 className="font-bold text-lg" style={{ color: COLORS.secondaryText }}>
                 {flight.departVille} → {flight.arriveeVille}
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-sm" style={{ color: COLORS.logo }}>
                 {flight.compagnie} • {flight.numeroVol}
               </p>
             </div>
@@ -1995,25 +2096,25 @@ export default function TourismPage() {
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <div className="text-sm text-gray-600">Départ</div>
-              <div className="font-semibold text-sm">
+              <div className="text-sm" style={{ color: COLORS.logo }}>Départ</div>
+              <div className="font-semibold text-sm" style={{ color: COLORS.smallText }}>
                 {new Date(flight.departDateHeure).toLocaleString("fr-FR")}
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-600">Arrivée</div>
-              <div className="font-semibold text-sm">
+              <div className="text-sm" style={{ color: COLORS.logo }}>Arrivée</div>
+              <div className="font-semibold text-sm" style={{ color: COLORS.smallText }}>
                 {new Date(flight.arriveeDateHeure).toLocaleString("fr-FR")}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-4 pb-4 border-b">
-            <div className="flex items-center">
+          <div className="flex items-center justify-between text-sm mb-4 pb-4 border-b" style={{ borderColor: COLORS.separator }}>
+            <div className="flex items-center" style={{ color: COLORS.logo }}>
               <Clock className="w-4 h-4 mr-1" />
               <span>Durée: {flight.duree}</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center" style={{ color: COLORS.logo }}>
               <MapPin className="w-4 h-4 mr-1" />
               <span>
                 {flight.escales} escale{flight.escales > 1 ? "s" : ""}
@@ -2023,7 +2124,7 @@ export default function TourismPage() {
 
           {flight.services && flight.services.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs text-gray-600 mb-2">Services inclus:</p>
+              <p className="text-xs mb-2" style={{ color: COLORS.logo }}>Services inclus:</p>
               <div className="flex flex-wrap gap-1">
                 {flight.services.map((service) => (
                   <span
@@ -2062,7 +2163,7 @@ export default function TourismPage() {
   const ActivityCard = ({ activity }) => {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
-        <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 overflow-hidden">
+        <div className="relative h-48 overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
           {activity.image ? (
             <img
               src={activity.image}
@@ -2098,12 +2199,12 @@ export default function TourismPage() {
 
         <div className="p-5">
           <div className="mb-3">
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-1">
+            <h3 className="font-bold text-lg line-clamp-1" style={{ color: COLORS.secondaryText }}>
               {activity.name || activity.title}
             </h3>
             
             {activity.location && (
-              <p className="text-gray-600 flex items-center text-sm mt-1">
+              <p className="flex items-center text-sm mt-1" style={{ color: COLORS.logo }}>
                 <MapPin className="w-4 h-4 mr-1" />
                 {activity.location}
               </p>
@@ -2111,13 +2212,13 @@ export default function TourismPage() {
           </div>
 
           {activity.description && (
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            <p className="text-sm mb-4 line-clamp-2" style={{ color: COLORS.smallText }}>
               {activity.description}
             </p>
           )}
 
           <div className="mb-4">
-            <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center justify-between text-sm" style={{ color: COLORS.logo }}>
               {activity.duration && (
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
@@ -2173,9 +2274,9 @@ export default function TourismPage() {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-6 border-b" style={{ borderColor: COLORS.separator }}>
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-gray-900">
+              <h3 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>
                 {activity.name || activity.title}
               </h3>
               <button
@@ -2186,7 +2287,7 @@ export default function TourismPage() {
               </button>
             </div>
             {activity.location && (
-              <p className="text-gray-600 flex items-center mt-2">
+              <p className="flex items-center mt-2" style={{ color: COLORS.logo }}>
                 <MapPin className="w-4 h-4 mr-1" />
                 {activity.location}
               </p>
@@ -2203,7 +2304,7 @@ export default function TourismPage() {
                 />
               </div>
             ) : (
-              <div className="relative h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl overflow-hidden">
+              <div className="relative h-64 rounded-xl overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
                 <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
                   <div className="text-center">
                     <div className="text-6xl mb-2">🎯</div>
@@ -2215,25 +2316,25 @@ export default function TourismPage() {
 
             {activity.description && (
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                   Description
                 </h4>
-                <p className="text-gray-600">{activity.description}</p>
+                <p style={{ color: COLORS.smallText }}>{activity.description}</p>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activity.category && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600">Catégorie</div>
-                  <div className="font-semibold">{activity.category}</div>
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Catégorie</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>{activity.category}</div>
                 </div>
               )}
               
               {activity.price > 0 && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600">Prix</div>
-                  <div className="font-semibold text-green-600">
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Prix</div>
+                  <div className="font-semibold" style={{ color: COLORS.primary }}>
                     {activity.price}€ / personne
                   </div>
                 </div>
@@ -2241,17 +2342,17 @@ export default function TourismPage() {
               
               {activity.duration && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Clock className="w-6 h-6 text-blue-600 mb-2" />
-                  <div className="text-sm text-gray-600">Durée</div>
-                  <div className="font-semibold">{activity.duration}</div>
+                  <Clock className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Durée</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>{activity.duration}</div>
                 </div>
               )}
               
               {activity.capacity && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <Users className="w-6 h-6 text-purple-600 mb-2" />
-                  <div className="text-sm text-gray-600">Capacité</div>
-                  <div className="font-semibold">
+                  <Users className="w-6 h-6 mb-2" style={{ color: COLORS.primary }} />
+                  <div className="text-sm" style={{ color: COLORS.logo }}>Capacité</div>
+                  <div className="font-semibold" style={{ color: COLORS.smallText }}>
                     {activity.capacity} personnes max
                   </div>
                 </div>
@@ -2260,7 +2361,7 @@ export default function TourismPage() {
 
             {activity.included && activity.included.length > 0 && (
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                   Inclus dans l'activité
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -2279,17 +2380,18 @@ export default function TourismPage() {
 
             {activity.requirements && (
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                <h4 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                   Prérequis
                 </h4>
-                <p className="text-gray-600">{activity.requirements}</p>
+                <p style={{ color: COLORS.smallText }}>{activity.requirements}</p>
               </div>
             )}
 
             <div className="flex space-x-4 pt-4">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+                className="flex-1 py-3 px-6 border-2 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300"
+                style={{ borderColor: COLORS.separator }}
               >
                 Fermer
               </button>
@@ -2300,7 +2402,8 @@ export default function TourismPage() {
                       onClose();
                       handleEditActivity(activity);
                     }}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
+                    className="flex-1 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
+                    style={{ backgroundColor: COLORS.primary }}
                   >
                     Modifier
                   </button>
@@ -2334,10 +2437,10 @@ export default function TourismPage() {
       <div className="space-y-6">
         <div className="lg:flex grid gap-4 justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-bold" style={{ color: COLORS.secondaryText }}>
               {currentContentType?.label || "Gestion du Tourisme"}
             </h1>
-            <p className="text-gray-600">
+            <p style={{ color: COLORS.logo }}>
               {currentContentType?.description ||
                 "Administrez vos services touristiques"}
             </p>
@@ -2347,19 +2450,20 @@ export default function TourismPage() {
             <div className="relative">
               <button
                 onClick={() => setShowContentTypeDropdown(!showContentTypeDropdown)}
-                className="bg-white border-2 border-gray-200 hover:border-blue-500 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
+                className="bg-white border-2 text-gray-700 px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 min-w-64 justify-between"
+                style={{ borderColor: COLORS.separator }}
               >
                 <div className="flex items-center">
                   {currentContentType?.icon && (
                     <currentContentType.icon className="w-5 h-5 mr-3" />
                   )}
-                  <span>{currentContentType?.label || "Sélectionner"}</span>
+                  <span style={{ color: COLORS.smallText }}>{currentContentType?.label || "Sélectionner"}</span>
                 </div>
                 <ChevronDown className="w-4 h-4 ml-2" />
               </button>
 
               {showContentTypeDropdown && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border z-50" style={{ borderColor: COLORS.separator }}>
                   <div className="p-2">
                     {contentTypeOptions.map((option) => {
                       const IconComponent = option.icon;
@@ -2370,12 +2474,16 @@ export default function TourismPage() {
                             setContentType(option.id);
                             setShowContentTypeDropdown(false);
                           }}
-                          className="w-full flex items-center px-4 py-4 text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                          className="w-full flex items-center px-4 py-4 text-left rounded-lg transition-all duration-300 border-b last:border-b-0"
+                          style={{ 
+                            color: COLORS.smallText,
+                            borderColor: COLORS.separator
+                          }}
                         >
-                          <IconComponent className="w-6 h-6 mr-4 text-blue-500" />
+                          <IconComponent className="w-6 h-6 mr-4" style={{ color: COLORS.primary }} />
                           <div className="flex-1">
                             <div className="font-semibold">{option.label}</div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm" style={{ color: COLORS.logo }}>
                               {option.description}
                             </div>
                           </div>
@@ -2403,7 +2511,8 @@ export default function TourismPage() {
                     setShowActivitiesModal(true);
                   }
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+                className="text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300"
+                style={{ backgroundColor: COLORS.primary }}
               >
                 <PlusCircle className="w-5 h-5 mr-2" />
                 {contentType === "accommodations" && "Ajouter un hébergement"}
@@ -2417,14 +2526,14 @@ export default function TourismPage() {
 
         {stats && contentType !== "flights" && contentType !== "activities" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Building className="w-8 h-8 text-blue-600 mr-4" />
+                <Building className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {stats.totalListings || 0}
                   </div>
-                  <div className="text-gray-600">
+                  <div style={{ color: COLORS.logo }}>
                     {contentType === "accommodations"
                       ? "Hébergements"
                       : contentType === "touristic_places"
@@ -2435,38 +2544,38 @@ export default function TourismPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Star className="w-8 h-8 text-yellow-500 mr-4" />
+                <Star className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {stats.averageRating?.toFixed(2) || "0.00"}
                   </div>
-                  <div className="text-gray-600">Note moyenne</div>
+                  <div style={{ color: COLORS.logo }}>Note moyenne</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
+                <TrendingUp className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {stats.availableListings || 0}
                   </div>
-                  <div className="text-gray-600">Disponibles</div>
+                  <div style={{ color: COLORS.logo }}>Disponibles</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Users className="w-8 h-8 text-purple-600 mr-4" />
+                <Users className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {stats.totalBookings || 0}
                   </div>
-                  <div className="text-gray-600">Réservations</div>
+                  <div style={{ color: COLORS.logo }}>Réservations</div>
                 </div>
               </div>
             </div>
@@ -2475,21 +2584,21 @@ export default function TourismPage() {
 
         {contentType === "flights" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Plane className="w-8 h-8 text-blue-600 mr-4" />
+                <Plane className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">{flights.length}</div>
-                  <div className="text-gray-600">Vols actifs</div>
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>{flights.length}</div>
+                  <div style={{ color: COLORS.logo }}>Vols actifs</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
+                <TrendingUp className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {flights.length > 0
                       ? flights.reduce(
                         (total, flight) =>
@@ -2498,16 +2607,16 @@ export default function TourismPage() {
                       )
                       : 0}
                   </div>
-                  <div className="text-gray-600">Places disponibles</div>
+                  <div style={{ color: COLORS.logo }}>Places disponibles</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Star className="w-8 h-8 text-yellow-500 mr-4" />
+                <Star className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {flights.length > 0
                       ? Math.min(...flights.map((f) => f.prix || Infinity)) ===
                         Infinity
@@ -2516,16 +2625,16 @@ export default function TourismPage() {
                       : 0}
                     €
                   </div>
-                  <div className="text-gray-600">Prix minimum</div>
+                  <div style={{ color: COLORS.logo }}>Prix minimum</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Users className="w-8 h-8 text-purple-600 mr-4" />
+                <Users className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {flights.length > 0
                       ? flights.reduce(
                         (total, flight) => total + (flight.nbrPersonne || 0),
@@ -2533,7 +2642,7 @@ export default function TourismPage() {
                       )
                       : 0}
                   </div>
-                  <div className="text-gray-600">Réservations</div>
+                  <div style={{ color: COLORS.logo }}>Réservations</div>
                 </div>
               </div>
             </div>
@@ -2542,21 +2651,21 @@ export default function TourismPage() {
 
         {contentType === "activities" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Mountain className="w-8 h-8 text-blue-600 mr-4" />
+                <Mountain className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">{activities.length}</div>
-                  <div className="text-gray-600">Activités</div>
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>{activities.length}</div>
+                  <div style={{ color: COLORS.logo }}>Activités</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 text-green-600 mr-4" />
+                <TrendingUp className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {activities.length > 0
                       ? (activities.reduce(
                         (total, activity) => total + (activity.price || 0),
@@ -2565,16 +2674,16 @@ export default function TourismPage() {
                       : "0.00"}
                     €
                   </div>
-                  <div className="text-gray-600">Prix moyen</div>
+                  <div style={{ color: COLORS.logo }}>Prix moyen</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Star className="w-8 h-8 text-yellow-500 mr-4" />
+                <Star className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {activities.length > 0
                       ? Math.min(...activities.map((a) => a.price || Infinity)) ===
                         Infinity
@@ -2583,21 +2692,21 @@ export default function TourismPage() {
                       : 0}
                     €
                   </div>
-                  <div className="text-gray-600">Prix minimum</div>
+                  <div style={{ color: COLORS.logo }}>Prix minimum</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border" style={{ borderColor: COLORS.separator }}>
               <div className="flex items-center">
-                <Users className="w-8 h-8 text-purple-600 mr-4" />
+                <Users className="w-8 h-8 mr-4" style={{ color: COLORS.primary }} />
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ color: COLORS.smallText }}>
                     {activities.length > 0
                       ? activities.filter((a) => a.available !== false).length
                       : 0}
                   </div>
-                  <div className="text-gray-600">Disponibles</div>
+                  <div style={{ color: COLORS.logo }}>Disponibles</div>
                 </div>
               </div>
             </div>
@@ -2607,7 +2716,7 @@ export default function TourismPage() {
         {loading || flightsLoading || activitiesLoading ? (
           <div className="text-center flex flex-col items-center justify-center py-20 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl">
             <img src="/loading.gif" alt="" className='w-24 h-24' />
-            <p className="mt-4 text-xl font-semibold text-gray-700">
+            <p className="mt-4 text-xl font-semibold" style={{ color: COLORS.smallText }}>
               Chargement...
             </p>
           </div>
@@ -2625,16 +2734,16 @@ export default function TourismPage() {
                   {filteredListings.length === 0 && (
                     <div className="text-center py-12">
                       {contentType === "accommodations" ? (
-                        <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <Building className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
                       ) : (
-                        <Landmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <Landmark className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
                       )}
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                         {contentType === "accommodations"
                           ? "Aucun hébergement trouvé"
                           : "Aucun lieu touristique trouvé"}
                       </h3>
-                      <p className="text-gray-600 mb-4">
+                      <p className="mb-4" style={{ color: COLORS.logo }}>
                         {listings.length === 0
                           ? `Commencez par ajouter votre premier ${contentType === "accommodations"
                             ? "hébergement"
@@ -2648,7 +2757,8 @@ export default function TourismPage() {
                             setEditingListing(null);
                             setShowAdminModal(true);
                           }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                          className="text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                          style={{ backgroundColor: COLORS.primary }}
                         >
                           <PlusCircle className="w-5 h-5 mr-2" />
                           {contentType === "accommodations"
@@ -2671,11 +2781,11 @@ export default function TourismPage() {
 
                 {flights.length === 0 && (
                   <div className="text-center py-12">
-                    <Plane className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <Plane className="w-16 h-16 mx-auto mb-4" style={{ color: COLORS.separator }} />
+                    <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
                       Aucun vol trouvé
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="mb-4" style={{ color: COLORS.logo }}>
                       {user?.role === "professional"
                         ? "Commencez par ajouter votre premier vol."
                         : "Aucun vol disponible pour le moment."}
@@ -2683,7 +2793,8 @@ export default function TourismPage() {
                     {user?.role === "professional" && (
                       <button
                         onClick={() => setShowFlightModal(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                        className="text-white px-6 py-3 rounded-xl font-bold flex items-center transition-all duration-300 mx-auto"
+                        style={{ backgroundColor: COLORS.primary }}
                       >
                         <PlusCircle className="w-5 h-5 mr-2" />
                         Ajouter un vol
@@ -2697,20 +2808,20 @@ export default function TourismPage() {
         {contentType === "activities" && (
   <div className="space-y-8">
     {/* En-tête avec statistiques */}
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+    <div className="rounded-2xl p-6 border" style={{ backgroundColor: `${COLORS.primary}10`, borderColor: COLORS.separator }}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestion des Activités</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>Gestion des Activités</h2>
+          <p className="mt-1" style={{ color: COLORS.logo }}>
             Gérez vos activités touristiques et catégories
           </p>
         </div>
         
         {user?.role === "professional" && (
           <div className="flex items-center space-x-3">
-            <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-white rounded-xl border border-gray-200">
+            <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-white rounded-xl border" style={{ borderColor: COLORS.separator }}>
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm text-gray-700">
+              <span className="text-sm" style={{ color: COLORS.smallText }}>
                 {activities.filter(a => a.isActive !== false).length} actives
               </span>
             </div>
@@ -2719,7 +2830,8 @@ export default function TourismPage() {
                 setEditingActivity(null);
                 setShowActivitiesModal(true);
               }}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-300 shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: COLORS.primary }}
             >
               <PlusCircle className="w-5 h-5" />
               <span>Nouvelle activité</span>
@@ -2733,7 +2845,7 @@ export default function TourismPage() {
     {activitiesLoading ? (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div key={i} className="bg-white rounded-2xl shadow-sm border overflow-hidden" style={{ borderColor: COLORS.separator }}>
             <div className="h-48 bg-gray-200"></div>
             <div className="p-6 space-y-4">
               <div className="h-6 bg-gray-200 rounded"></div>
@@ -2750,13 +2862,13 @@ export default function TourismPage() {
       <>
         {/* Filtres rapides */}
         <div className="flex flex-wrap gap-3">
-          <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors">
+          <button className="px-4 py-2 rounded-lg font-medium transition-colors" style={{ backgroundColor: `${COLORS.primary}20`, color: COLORS.primary }}>
             Toutes ({activities.length})
           </button>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <button className="px-4 py-2 rounded-lg font-medium transition-colors" style={{ backgroundColor: `${COLORS.separator}50`, color: COLORS.smallText }}>
             Actives ({activities.filter(a => a.isActive !== false).length})
           </button>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+          <button className="px-4 py-2 rounded-lg font-medium transition-colors" style={{ backgroundColor: `${COLORS.separator}50`, color: COLORS.smallText }}>
             Inactives ({activities.filter(a => a.isActive === false).length})
           </button>
         </div>
@@ -2766,7 +2878,8 @@ export default function TourismPage() {
           {activities.map((activity) => (
             <div 
               key={activity.id} 
-              className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+              className="group bg-white rounded-2xl shadow-lg border overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+              style={{ borderColor: COLORS.separator }}
             >
               {/* En-tête avec image et badge de statut */}
               <div className="relative h-56 overflow-hidden">
@@ -2777,7 +2890,7 @@ export default function TourismPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}, ${COLORS.primary})` }}>
                     <div className="text-center text-white">
                       <div className="text-5xl mb-2">🎯</div>
                       <div className="font-medium">Activité</div>
@@ -2810,7 +2923,7 @@ export default function TourismPage() {
                   <div className="absolute top-4 right-4">
                     <div 
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
-                      style={{ backgroundColor: activity.color || '#3B82F6' }}
+                      style={{ backgroundColor: activity.color || COLORS.primary }}
                     >
                       <span className="font-bold">{activity.icon.charAt(0)}</span>
                     </div>
@@ -2823,7 +2936,7 @@ export default function TourismPage() {
                 {/* Titre et catégorie */}
                 <div className="mb-4">
                   <div className="flex items-start justify-between">
-                    <h3 className="font-bold text-xl text-gray-900 line-clamp-1">
+                    <h3 className="font-bold text-xl line-clamp-1" style={{ color: COLORS.secondaryText }}>
                       {activity.name || activity.title}
                     </h3>
                     <div className="flex space-x-2">
@@ -2831,14 +2944,16 @@ export default function TourismPage() {
                         <>
                           <button
                             onClick={() => handleEditActivity(activity)}
-                            className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ backgroundColor: `${COLORS.primary}15`, color: COLORS.primary }}
                             title="Modifier"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteActivity(activity.id)}
-                            className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ backgroundColor: `${COLORS.primary}15`, color: COLORS.primary }}
                             title="Supprimer"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -2850,7 +2965,7 @@ export default function TourismPage() {
                   
                   {activity.category && (
                     <div className="mt-2">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: `${COLORS.primary}20`, color: COLORS.primary }}>
                         {activity.category}
                       </span>
                     </div>
@@ -2859,7 +2974,7 @@ export default function TourismPage() {
 
                 {/* Description */}
                 {activity.description && (
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  <p className="text-sm mb-4 line-clamp-2" style={{ color: COLORS.smallText }}>
                     {activity.description}
                   </p>
                 )}
@@ -2867,22 +2982,22 @@ export default function TourismPage() {
                 {/* Métadonnées */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {activity.location && (
-                    <div className="flex items-center text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                    <div className="flex items-center" style={{ color: COLORS.logo }}>
+                      <MapPin className="w-4 h-4 mr-2" />
                       <span className="text-sm truncate">{activity.location}</span>
                     </div>
                   )}
                   
                   {activity.duration && (
-                    <div className="flex items-center text-gray-600">
-                      <Clock className="w-4 h-4 mr-2 text-gray-400" />
+                    <div className="flex items-center" style={{ color: COLORS.logo }}>
+                      <Clock className="w-4 h-4 mr-2" />
                       <span className="text-sm">{activity.duration}</span>
                     </div>
                   )}
                   
                   {activity.capacity && (
-                    <div className="flex items-center text-gray-600">
-                      <Users className="w-4 h-4 mr-2 text-gray-400" />
+                    <div className="flex items-center" style={{ color: COLORS.logo }}>
+                      <Users className="w-4 h-4 mr-2" />
                       <span className="text-sm">{activity.capacity} pers.</span>
                     </div>
                   )}
@@ -2891,7 +3006,7 @@ export default function TourismPage() {
                 {/* Inclus dans l'activité */}
                 {activity.included && activity.included.length > 0 && (
                   <div className="mb-6">
-                    <p className="text-xs text-gray-500 mb-2">Inclus :</p>
+                    <p className="text-xs mb-2" style={{ color: COLORS.logo }}>Inclus :</p>
                     <div className="flex flex-wrap gap-1">
                       {activity.included.slice(0, 3).map((item, index) => (
                         <span
@@ -2915,7 +3030,8 @@ export default function TourismPage() {
                 <div className="flex space-x-3">
                   <button
                     onClick={() => handleViewActivityDetails(activity)}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600"
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600"
+                    style={{ color: COLORS.smallText }}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     Détails
@@ -2933,16 +3049,16 @@ export default function TourismPage() {
         </div>
 
         {/* Pagination ou compteur */}
-        <div className="flex items-center justify-between pt-8 border-t border-gray-200">
-          <div className="text-gray-600">
-            Affichage de <span className="font-semibold text-gray-900">{activities.length}</span> activité{activities.length > 1 ? 's' : ''}
+        <div className="flex items-center justify-between pt-8 border-t" style={{ borderColor: COLORS.separator }}>
+          <div style={{ color: COLORS.logo }}>
+            Affichage de <span className="font-semibold" style={{ color: COLORS.smallText }}>{activities.length}</span> activité{activities.length > 1 ? 's' : ''}
           </div>
           <div className="flex items-center space-x-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50" style={{ borderColor: COLORS.separator, color: COLORS.smallText }}>
               ← Précédent
             </button>
-            <span className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">1</span>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            <span className="px-4 py-2 rounded-lg font-medium text-white" style={{ backgroundColor: COLORS.primary }}>1</span>
+            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors" style={{ borderColor: COLORS.separator, color: COLORS.smallText }}>
               Suivant →
             </button>
           </div>
@@ -2950,14 +3066,14 @@ export default function TourismPage() {
       </>
     ) : (
       /* État vide amélioré */
-      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center">
-        <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+      <div className="rounded-2xl border-2 border-dashed p-12 text-center" style={{ backgroundColor: `${COLORS.separator}20`, borderColor: COLORS.separator }}>
+        <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(to bottom right, ${COLORS.logo}20, ${COLORS.primary}20)` }}>
           <div className="text-4xl">🎯</div>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+        <h3 className="text-2xl font-bold mb-3" style={{ color: COLORS.secondaryText }}>
           Aucune activité disponible
         </h3>
-        <p className="text-gray-600 max-w-md mx-auto mb-8">
+        <p className="max-w-md mx-auto mb-8" style={{ color: COLORS.logo }}>
           {user?.role === "professional"
             ? "Commencez par créer votre première activité pour enrichir votre catalogue touristique."
             : "Revenez plus tard pour découvrir nos activités passionnantes."}
@@ -2969,14 +3085,16 @@ export default function TourismPage() {
                 setEditingActivity(null);
                 setShowActivitiesModal(true);
               }}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: COLORS.primary }}
             >
               <PlusCircle className="w-6 h-6" />
               <span>Créer une activité</span>
             </button>
             <button
               onClick={() => loadActivities()}
-              className="px-8 py-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-semibold transition-all duration-300"
+              className="px-8 py-4 border-2 rounded-xl font-semibold transition-all duration-300"
+              style={{ borderColor: COLORS.separator, color: COLORS.smallText }}
             >
               <RefreshCw className="w-5 h-5 inline mr-2" />
               Rafraîchir
@@ -2994,7 +3112,7 @@ export default function TourismPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: COLORS.lightBg }}>
       <div className="container mx-auto px-4 lg:p-0 py-4">
         <AdminInterface />
       </div>

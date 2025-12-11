@@ -9,6 +9,15 @@ import { useState } from "react"
 import api from "@/lib/api"
 import { useAuth } from "@/hooks/useAuth"
 
+// Définition du thème
+const theme = {
+  logo: "#556B2F",           
+  primaryDark: "#6B8E23",   
+  lightBg: "#FFFFFF",       
+  separator: "#D3D3D3",     
+  secondaryText: "#8B4513", 
+};
+
 // Types pour nos données basés sur AdminBookings
 interface TourismeBooking {
   id: string;
@@ -204,25 +213,26 @@ export function RecentBookings() {
 
   if (isLoading) {
     return (
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Réservations récentes</h3>
-            <p className="text-sm text-muted-foreground">Chargement...</p>
+            <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Réservations récentes</h3>
+            <p className="text-sm" style={{ color: theme.secondaryText }}>Chargement...</p>
           </div>
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" disabled style={{ borderColor: theme.separator }}>
             Voir tous
           </Button>
         </div>
         <div className="space-y-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg border border-border bg-background p-4 animate-pulse">
+            <div key={i} className="flex items-center justify-between rounded-lg border p-4 animate-pulse" 
+              style={{ borderColor: theme.separator, backgroundColor: theme.lightBg }}>
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                <div className="h-10 w-10 rounded-full" style={{ backgroundColor: theme.separator }}></div>
                 <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="h-3 bg-gray-200 rounded w-32"></div>
-                  <div className="h-3 bg-gray-200 rounded w-40"></div>
+                  <div className="h-4 rounded w-24" style={{ backgroundColor: theme.separator }}></div>
+                  <div className="h-3 rounded w-32" style={{ backgroundColor: theme.separator }}></div>
+                  <div className="h-3 rounded w-40" style={{ backgroundColor: theme.separator }}></div>
                 </div>
               </div>
             </div>
@@ -234,10 +244,10 @@ export function RecentBookings() {
 
   if (error) {
     return (
-      <Card className="p-6 bg-card border-border">
-        <div className="text-center text-red-600">
+      <Card className="p-6" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
+        <div className="text-center" style={{ color: "#ef4444" }}>
           <p>Erreur lors du chargement des réservations</p>
-          <Button variant="outline" onClick={() => refetch()} className="mt-2">
+          <Button variant="outline" onClick={() => refetch()} className="mt-2" style={{ borderColor: theme.separator }}>
             Réessayer
           </Button>
         </div>
@@ -246,14 +256,14 @@ export function RecentBookings() {
   }
 
   return (
-    <Card className="p-6 bg-card border-border">
+    <Card className="p-6" style={{ backgroundColor: theme.lightBg, borderColor: theme.separator }}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Réservations récentes</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Réservations récentes</h3>
+          <p className="text-sm" style={{ color: theme.secondaryText }}>
             {totalThisWeek} réservations • 
-            <span className="text-green-600 ml-1">{confirmedCount} confirmées</span> • 
-            <span className="text-yellow-600 ml-1">{pendingCount} en attente</span>
+            <span style={{ color: "#16a34a", marginLeft: '4px' }}>{confirmedCount} confirmées</span> • 
+            <span style={{ color: "#ca8a04", marginLeft: '4px' }}>{pendingCount} en attente</span>
           </p>
         </div>
         <div className=" flex  items-center gap-2">
@@ -262,10 +272,11 @@ export function RecentBookings() {
             size="icon"
             onClick={handleRefresh}
             disabled={actionLoading === 'refresh'}
+            style={{ borderColor: theme.separator }}
           >
             <RefreshCw className={`h-4 w-4 ${actionLoading === 'refresh' ? 'animate-spin' : ''}`} />
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" style={{ borderColor: theme.separator }}>
             Voir tous
           </Button>
         </div>
@@ -283,16 +294,30 @@ export function RecentBookings() {
             const displayDate = formatDate(booking.createdAt)
             
             return (
-              <div key={booking.id} className="flex items-center justify-between rounded-lg border border-border bg-background p-4 hover:bg-accent/50 transition-colors">
+              <div key={booking.id} className="flex items-center justify-between rounded-lg border p-4 transition-colors" 
+                style={{ 
+                  borderColor: theme.separator,
+                  backgroundColor: theme.lightBg
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${theme.primaryDark}10`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.lightBg;
+                }}
+              >
                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <Avatar className="h-10 w-10 border border-border flex-shrink-0">
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  <Avatar className="h-10 w-10 border flex-shrink-0" style={{ borderColor: theme.separator }}>
+                    <AvatarFallback className="font-semibold" style={{ 
+                      backgroundColor: `${theme.primaryDark}10`,
+                      color: theme.primaryDark
+                    }}>
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-foreground truncate">
+                      <span className="font-medium truncate" style={{ color: theme.logo }}>
                         {booking.user ? `${booking.user.firstName} ${booking.user.lastName}` : 'Client non connecté'}
                       </span>
                       <Badge 
@@ -303,10 +328,10 @@ export function RecentBookings() {
                         {statusConfig[booking.status]?.label || booking.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-sm truncate" style={{ color: theme.secondaryText }}>
                       {booking.listing.title} • {nights} nuit(s)
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                    <div className="flex items-center gap-4 text-xs flex-wrap" style={{ color: theme.secondaryText }}>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {displayDate}
@@ -314,10 +339,10 @@ export function RecentBookings() {
                       <span>•</span>
                       <span>{booking.listing.city}</span>
                       <span>•</span>
-                      <span className="font-medium text-foreground">{booking.totalAmount}€</span>
+                      <span className="font-medium" style={{ color: theme.logo }}>{booking.totalAmount}€</span>
                     </div>
                     {booking.paymentStatus !== 'paid' && (
-                      <div className="text-xs text-yellow-600 font-medium mt-1">
+                      <div className="text-xs font-medium mt-1" style={{ color: "#ca8a04" }}>
                         Paiement: {booking.paymentStatus}
                       </div>
                     )}
@@ -327,9 +352,19 @@ export function RecentBookings() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 hover:bg-blue-100"
+                    className="h-8 w-8"
                     onClick={() => handleSendMessage(booking.id)}
                     disabled={actionLoading === `message-${booking.id}`}
+                    style={{ 
+                      color: theme.secondaryText,
+                      backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#3b82f610";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
                     <MessageSquare className="h-4 w-4" />
                   </Button>
@@ -337,8 +372,18 @@ export function RecentBookings() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 hover:bg-gray-100"
+                    className="h-8 w-8"
                     onClick={() => console.log('Voir détails', booking.id)}
+                    style={{ 
+                      color: theme.secondaryText,
+                      backgroundColor: 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = `${theme.separator}80`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
@@ -346,9 +391,18 @@ export function RecentBookings() {
                   {booking.status === 'pending' && (
                     <Button 
                       size="sm" 
-                      className="bg-green-600 hover:bg-green-700 text-white"
                       onClick={() => handleConfirmBooking(booking.id)}
                       disabled={actionLoading === `confirm-${booking.id}`}
+                      style={{ 
+                        backgroundColor: "#16a34a",
+                        color: "white"
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#15803d";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#16a34a";
+                      }}
                     >
                       {actionLoading === `confirm-${booking.id}` ? "..." : "Confirmer"}
                     </Button>
@@ -360,6 +414,16 @@ export function RecentBookings() {
                       size="sm"
                       onClick={() => handleCancelBooking(booking.id)}
                       disabled={actionLoading === `cancel-${booking.id}`}
+                      style={{ 
+                        borderColor: theme.separator,
+                        color: theme.secondaryText
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = `${theme.separator}40`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
                       {actionLoading === `cancel-${booking.id}` ? "..." : "Annuler"}
                     </Button>
@@ -369,9 +433,9 @@ export function RecentBookings() {
             )
           })
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8" style={{ color: theme.secondaryText }}>
             <p>Aucune réservation récente</p>
-            <Button variant="outline" onClick={() => refetch()} className="mt-2">
+            <Button variant="outline" onClick={() => refetch()} className="mt-2" style={{ borderColor: theme.separator }}>
               Rafraîchir
             </Button>
           </div>

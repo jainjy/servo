@@ -55,6 +55,20 @@ import {
 } from "lucide-react";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 
+// --- Couleurs du thème ---
+const theme = {
+  logo: "#556B2F", // Olive green
+  primaryDark: "#6B8E23", // Yellow-green
+  lightBg: "#F8F8F0", // Blanc cassé
+  separator: "#D3D3D3", // Light gray
+  secondaryText: "#8B4513", // Saddle brown
+  accent: "#BDB76B", // Dark khaki
+  success: "#228B22", // Forest green
+  info: "#C0C0A0", // Olive silver
+  error: "#CD5C5C", // Indian red
+  warning: "#FFD700", // Gold
+};
+
 // Types pour les réservations tourisme
 interface TourismBooking {
   id: string;
@@ -202,14 +216,12 @@ function formatCurrency(amount: number) {
 }
 
 function TourismStatusBadge({ status }: { status: TourismBooking["status"] }) {
-  const variant =
-    status === "confirmee"
-      ? "default"
-      : status === "en_attente"
-      ? "secondary"
-      : status === "terminee"
-      ? "outline"
-      : "destructive";
+  const colorMap: Record<TourismBooking["status"], string> = {
+    confirmee: theme.success,
+    en_attente: theme.accent,
+    terminee: theme.info,
+    annulee: theme.error,
+  };
   const label =
     status === "confirmee"
       ? "Confirmée"
@@ -219,18 +231,26 @@ function TourismStatusBadge({ status }: { status: TourismBooking["status"] }) {
       ? "Terminée"
       : "Annulée";
 
-  return <Badge variant={variant as any}>{label}</Badge>;
+  return (
+    <Badge
+      style={{
+        backgroundColor: colorMap[status],
+        color: status === "annulee" ? "#fff" : theme.logo,
+        border: "none",
+      }}
+    >
+      {label}
+    </Badge>
+  );
 }
 
 function ServiceStatusBadge({ status }: { status: ServiceBooking["status"] }) {
-  const variant =
-    status === "confirmed"
-      ? "default"
-      : status === "pending"
-      ? "secondary"
-      : status === "completed"
-      ? "outline"
-      : "destructive";
+  const colorMap: Record<ServiceBooking["status"], string> = {
+    confirmed: theme.success,
+    pending: theme.accent,
+    completed: theme.info,
+    cancelled: theme.error,
+  };
   const label =
     status === "confirmed"
       ? "Confirmée"
@@ -240,18 +260,26 @@ function ServiceStatusBadge({ status }: { status: ServiceBooking["status"] }) {
       ? "Terminée"
       : "Annulée";
 
-  return <Badge variant={variant as any}>{label}</Badge>;
+  return (
+    <Badge
+      style={{
+        backgroundColor: colorMap[status],
+        color: status === "cancelled" ? "#fff" : theme.logo,
+        border: "none",
+      }}
+    >
+      {label}
+    </Badge>
+  );
 }
 
 function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["status"] }) {
-  const variant =
-    status === "confirmed"
-      ? "default"
-      : status === "pending"
-      ? "secondary"
-      : status === "completed"
-      ? "outline"
-      : "destructive";
+  const colorMap: Record<TouristicPlaceBooking["status"], string> = {
+    confirmed: theme.success,
+    pending: theme.accent,
+    completed: theme.info,
+    cancelled: theme.error,
+  };
   const label =
     status === "confirmed"
       ? "Confirmée"
@@ -261,18 +289,29 @@ function TouristicPlaceStatusBadge({ status }: { status: TouristicPlaceBooking["
       ? "Terminée"
       : "Annulée";
 
-  return <Badge variant={variant as any}>{label}</Badge>;
+  return (
+    <Badge
+      style={{
+        backgroundColor: colorMap[status],
+        color: status === "cancelled" ? "#fff" : theme.logo,
+        border: "none",
+      }}
+    >
+      {label}
+    </Badge>
+  );
 }
 
 function FlightStatusBadge({ status }: { status: FlightReservation["status"] }) {
-  const variant =
-    status === "confirmed" || status === "paid" || status === "completed"
-      ? "default"
-      : status === "pending"
-      ? "secondary"
-      : status === "refunded"
-      ? "outline"
-      : "destructive";
+  const colorMap: Record<FlightReservation["status"], string> = {
+    confirmed: theme.success,
+    paid: theme.success,
+    completed: theme.info,
+    pending: theme.accent,
+    refunded: theme.warning,
+    cancelled: theme.error,
+    failed: theme.error,
+  };
   const label =
     status === "confirmed"
       ? "Confirmée"
@@ -286,7 +325,17 @@ function FlightStatusBadge({ status }: { status: FlightReservation["status"] }) 
       ? "Remboursée"
       : "Annulée";
 
-  return <Badge variant={variant as any}>{label}</Badge>;
+  return (
+    <Badge
+      style={{
+        backgroundColor: colorMap[status] || theme.info,
+        color: ["cancelled", "failed"].includes(status) ? "#fff" : theme.logo,
+        border: "none",
+      }}
+    >
+      {label}
+    </Badge>
+  );
 }
 
 function generateBookingCode(id: string): string {
@@ -575,7 +624,10 @@ function BookingCard({
   const [showActions, setShowActions] = useState(false);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+    <Card
+      className="overflow-hidden hover:shadow-lg transition-all duration-300"
+      style={{ borderColor: theme.separator, background: theme.lightBg }}
+    >
       {/* Layout pour mobile : image en haut */}
       <div className="block md:hidden">
         {/* Image en haut pour mobile */}
@@ -596,16 +648,27 @@ function BookingCard({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 {getStatusBadge(booking.status)}
-                <Badge variant="outline" className="text-xs">
+                <Badge
+                  variant="outline"
+                  className="text-xs"
+                  style={{
+                    borderColor: theme.logo,
+                    color: theme.logo,
+                    background: theme.accent,
+                  }}
+                >
                   {type === "tourisme" ? "🏠 Hébergement" : 
                    type === "service" ? "💆 Service" : 
                    type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
                 </Badge>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              <h3
+                className="text-lg font-semibold mb-1"
+                style={{ color: theme.logo }}
+              >
                 {getBookingTitle()}
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm mb-2" style={{ color: theme.secondaryText }}>
                 {getBookingSubtitle()}
               </p>
             </div>
@@ -653,11 +716,11 @@ function BookingCard({
           {/* Informations détaillées pour mobile */}
           <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-gray-400" />
+              <Calendar className="w-4 h-4" style={{ color: theme.primaryDark }} />
               <span className="text-xs">{getBookingDate()}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-400" />
+              <Users className="w-4 h-4" style={{ color: theme.primaryDark }} />
               <span className="text-xs">{getBookingDetails()}</span>
             </div>
           </div>
@@ -665,10 +728,10 @@ function BookingCard({
           {/* Montant et actions pour mobile */}
           <div className="flex flex-col gap-3 pt-3 border-t border-gray-100">
             <div className="text-center">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold" style={{ color: theme.logo }}>
                 {formatCurrency(getBookingAmount())}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs" style={{ color: theme.secondaryText }}>
                 {type === "touristic_place" && booking.confirmationNumber && (
                   <span>Ref: {booking.confirmationNumber}</span>
                 )}
@@ -712,16 +775,27 @@ function BookingCard({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 {getStatusBadge(booking.status)}
-                <Badge variant="outline" className="text-xs">
+                <Badge
+                  variant="outline"
+                  className="text-xs"
+                  style={{
+                    borderColor: theme.logo,
+                    color: theme.logo,
+                    background: theme.accent,
+                  }}
+                >
                   {type === "tourisme" ? "🏠 Hébergement" : 
                    type === "service" ? "💆 Service" : 
                    type === "touristic_place" ? "🎫 Billet" : "✈️ Vol"}
                 </Badge>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              <h3
+                className="text-lg font-semibold mb-1"
+                style={{ color: theme.logo }}
+              >
                 {getBookingTitle()}
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm mb-2" style={{ color: theme.secondaryText }}>
                 {getBookingSubtitle()}
               </p>
             </div>
@@ -769,11 +843,11 @@ function BookingCard({
           {/* Informations détaillées pour desktop */}
           <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-gray-400" />
+              <Calendar className="w-4 h-4" style={{ color: theme.primaryDark }} />
               <span>{getBookingDate()}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-400" />
+              <Users className="w-4 h-4" style={{ color: theme.primaryDark }} />
               <span>{getBookingDetails()}</span>
             </div>
           </div>
@@ -781,10 +855,10 @@ function BookingCard({
           {/* Montant et actions pour desktop */}
           <div className="flex justify-between items-center pt-3 border-t border-gray-100">
             <div className="text-right">
-              <div className="text-xl font-bold text-gray-900">
+              <div className="text-xl font-bold" style={{ color: theme.logo }}>
                 {formatCurrency(getBookingAmount())}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm" style={{ color: theme.secondaryText }}>
                 {type === "touristic_place" && booking.confirmationNumber && (
                   <span>Ref: {booking.confirmationNumber}</span>
                 )}
@@ -1200,67 +1274,93 @@ export default function UnifiedReservationPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl py-8 mt-12">
+    <div
+      className="container mx-auto max-w-6xl py-8 mt-12"
+      style={{ background: theme.lightBg }}
+    >
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold mb-2" style={{ color: theme.logo }}>
           Mes Réservations
         </h1>
-        <p className="text-gray-600">
+        <p style={{ color: theme.secondaryText }}>
           {user?.firstName ? `Bonjour ${user.firstName}, ` : ""}
           Consultez et gérez toutes vos réservations.
         </p>
       </div>
 
       <Tabs defaultValue="services" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 p-2 h-auto gap-2">
-          <TabsTrigger value="services" className="flex items-center gap-2">
+        <TabsList
+          className="grid w-full grid-cols-1 md:grid-cols-4 p-2 h-auto gap-2"
+          style={{
+            background: theme.primaryDark,
+            borderColor: theme.separator,
+          }}
+        >
+          <TabsTrigger
+            value="services"
+            className="flex items-center gap-2 text-white"
+          >
             <Scissors className="w-4 h-4" />
             Services
             <Badge variant="secondary" className="ml-2">
               {serviceBookings.length}
             </Badge>
           </TabsTrigger>
-          {/* <TabsTrigger value="tourisme" className="flex items-center gap-2">
+          <TabsTrigger
+            value="tourisme"
+            className="flex items-center gap-2 text-white"
+          >
             <Building className="w-4 h-4" />
             Hébergements
             <Badge variant="secondary" className="ml-2">
               {tourismBookings.length}
             </Badge>
-          </TabsTrigger> */}
-          {/* <TabsTrigger value="lieux-touristiques" className="flex items-center gap-2">
+          </TabsTrigger>
+          <TabsTrigger
+            value="lieux-touristiques"
+            className="flex items-center gap-2 text-white"
+          >
             <Ticket className="w-4 h-4" />
             Billets
             <Badge variant="secondary" className="ml-2">
               {touristicPlaceBookings.length}
             </Badge>
-          </TabsTrigger> */}
-          {/* <TabsTrigger value="vols" className="flex items-center gap-2">
+          </TabsTrigger>
+          <TabsTrigger
+            value="vols"
+            className="flex items-center gap-2 text-white"
+          >
             <Plane className="w-4 h-4" />
             Vols
             <Badge variant="secondary" className="ml-2">
               {flightReservations.length}
             </Badge>
-          </TabsTrigger> */}
+          </TabsTrigger>
         </TabsList>
 
         {/* Onglet Hébergements */}
         <TabsContent value="tourisme">
-          <Card>
+          <Card style={{ borderColor: theme.separator }}>
             <CardHeader>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>Mes réservations d'hébergements</CardTitle>
-                  <CardDescription>
+                  <CardTitle style={{ color: theme.logo }}>
+                    Mes réservations d'hébergements
+                  </CardTitle>
+                  <CardDescription style={{ color: theme.secondaryText }}>
                     {tourismBookings.length} réservation
                     {tourismBookings.length > 1 ? "s" : ""} trouvée
                     {tourismBookings.length > 1 ? "s" : ""}
                   </CardDescription>
                 </div>
                 <Select value={tourismFilter} onValueChange={setTourismFilter}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger
+                    className="w-48"
+                    style={{ background: theme.accent, color: theme.logo }}
+                  >
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ background: theme.lightBg }}>
                     <SelectItem value="all">Toutes</SelectItem>
                     <SelectItem value="en_attente">En attente</SelectItem>
                     <SelectItem value="confirmee">Confirmées</SelectItem>
@@ -1282,7 +1382,7 @@ export default function UnifiedReservationPage() {
                   <p className="text-gray-600 mb-4">
                     Vous n'avez pas encore de réservation d'hébergement.
                   </p>
-                  <Button asChild>
+                  <Button asChild className="text-white bg-[#556B2F]">
                     <Link to="/tourisme">Découvrir les hébergements</Link>
                   </Button>
                 </div>
@@ -1318,20 +1418,25 @@ export default function UnifiedReservationPage() {
 
         {/* Onglet Services */}
         <TabsContent value="services">
-          <Card>
+          <Card style={{ borderColor: theme.separator }}>
             <CardHeader>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>Mes réservations de services</CardTitle>
-                  <CardDescription>
+                  <CardTitle style={{ color: theme.logo }}>
+                    Mes réservations de services
+                  </CardTitle>
+                  <CardDescription style={{ color: theme.secondaryText }}>
                     Historique et réservations à venir
                   </CardDescription>
                 </div>
                 <Select value={serviceFilter} onValueChange={setServiceFilter}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger
+                    className="w-48"
+                    style={{ background: theme.accent, color: theme.logo }}
+                  >
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ background: theme.lightBg }}>
                     <SelectItem value="all">Toutes</SelectItem>
                     <SelectItem value="pending">En attente</SelectItem>
                     <SelectItem value="confirmed">Confirmées</SelectItem>
@@ -1353,8 +1458,8 @@ export default function UnifiedReservationPage() {
                   <p className="text-gray-600 mb-4">
                     Vous n'avez pas encore de réservation de service.
                   </p>
-                  <Button asChild>
-                    <Link to="/app/services">Découvrir les services</Link>
+                  <Button asChild className="text-white bg-[#556B2F]">
+                    <Link to="/services-partners">Découvrir les services</Link>
                   </Button>
                 </div>
               ) : (
@@ -1389,12 +1494,14 @@ export default function UnifiedReservationPage() {
 
         {/* Onglet Lieux Touristiques */}
         <TabsContent value="lieux-touristiques">
-          <Card>
+          <Card style={{ borderColor: theme.separator }}>
             <CardHeader>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>Mes billets de lieux touristiques</CardTitle>
-                  <CardDescription>
+                  <CardTitle style={{ color: theme.logo }}>
+                    Mes billets de lieux touristiques
+                  </CardTitle>
+                  <CardDescription style={{ color: theme.secondaryText }}>
                     {touristicPlaceBookings.length} billet
                     {touristicPlaceBookings.length > 1 ? "s" : ""} trouvé
                     {touristicPlaceBookings.length > 1 ? "s" : ""}
@@ -1404,10 +1511,13 @@ export default function UnifiedReservationPage() {
                   value={touristicPlaceFilter}
                   onValueChange={setTouristicPlaceFilter}
                 >
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger
+                    className="w-48"
+                    style={{ background: theme.accent, color: theme.logo }}
+                  >
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ background: theme.lightBg }}>
                     <SelectItem value="all">Toutes</SelectItem>
                     <SelectItem value="pending">En attente</SelectItem>
                     <SelectItem value="confirmed">Confirmées</SelectItem>
@@ -1431,7 +1541,7 @@ export default function UnifiedReservationPage() {
                   <p className="text-gray-600 mb-4">
                     Vous n'avez pas encore de billet pour un lieu touristique.
                   </p>
-                  <Button asChild>
+                  <Button asChild className="text-white bg-[#556B2F]">
                     <Link to="/tourisme?type=touristic">
                       Découvrir les lieux
                     </Link>
@@ -1469,22 +1579,27 @@ export default function UnifiedReservationPage() {
 
         {/* Onglet Vols */}
         <TabsContent value="vols">
-          <Card>
+          <Card style={{ borderColor: theme.separator }}>
             <CardHeader>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>Mes réservations de vols</CardTitle>
-                  <CardDescription>
+                  <CardTitle style={{ color: theme.logo }}>
+                    Mes réservations de vols
+                  </CardTitle>
+                  <CardDescription style={{ color: theme.secondaryText }}>
                     {flightReservations.length} réservation
                     {flightReservations.length > 1 ? "s" : ""} trouvée
                     {flightReservations.length > 1 ? "s" : ""}
                   </CardDescription>
                 </div>
                 <Select value={flightFilter} onValueChange={setFlightFilter}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger
+                    className="w-48"
+                    style={{ background: theme.accent, color: theme.logo }}
+                  >
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{ background: theme.lightBg }}>
                     <SelectItem value="all">Toutes</SelectItem>
                     <SelectItem value="pending">En attente</SelectItem>
                     <SelectItem value="confirmed">Confirmées</SelectItem>
@@ -1507,8 +1622,8 @@ export default function UnifiedReservationPage() {
                   <p className="text-gray-600 mb-4">
                     Vous n'avez pas encore de réservation de vol.
                   </p>
-                  <Button asChild>
-                    <Link to="/vols">Découvrir les vols</Link>
+                  <Button asChild className="text-white bg-[#556B2F]">
+                    <Link to="/voyages">Découvrir les vols</Link>
                   </Button>
                 </div>
               ) : (

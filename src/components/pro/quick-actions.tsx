@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 // Imports d'icônes Lucide
 import { Plus, Calendar, MessageSquare, FileText, Settings, Users } from "lucide-react";
 
+const theme = {
+  logo: "#556B2F",           
+  primaryDark: "#6B8E23",   
+  lightBg: "#FFFFFF",       
+  separator: "#D3D3D3",     
+  secondaryText: "#8B4513", 
+};
+
 // Données d'actions rapides (Inchangées)
 const quickActions = [
     {
@@ -46,10 +54,16 @@ const quickActions = [
 
 export function QuickActions() {
     return (
-        <Card className="p-6 bg-card border-border">
+        <Card 
+            className="p-6" 
+            style={{ 
+                backgroundColor: theme.lightBg,
+                borderColor: theme.separator 
+            }}
+        >
             <div className="mb-4">
-                <h3 className="text-lg font-semibold text-foreground">Actions rapides</h3>
-                <p className="text-sm text-muted-foreground">Accédez rapidement aux fonctionnalités principales</p>
+                <h3 className="text-lg font-semibold" style={{ color: theme.logo }}>Actions rapides</h3>
+                <p className="text-sm" style={{ color: theme.secondaryText }}>Accédez rapidement aux fonctionnalités principales</p>
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -58,14 +72,26 @@ export function QuickActions() {
                     <Link key={action.name} to={action.href}>
                         <Button 
                             variant="outline" 
-                            className="w-full h-auto p-4 justify-start hover:border-primary hover:bg-primary/5 transition-colors"
+                            className="w-full h-auto p-4 justify-start transition-colors"
+                            style={{
+                                borderColor: theme.separator, 
+                                backgroundColor: theme.lightBg,
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = theme.primaryDark;
+                                e.currentTarget.style.backgroundColor = `${theme.primaryDark}10`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = theme.separator;
+                                e.currentTarget.style.backgroundColor = theme.lightBg;
+                            }}
                         >
                             <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${action.bgColor} mr-3`}>
                                 <action.icon className={`h-5 w-5 ${action.color}`} />
                             </div>
                             <div className="text-left">
-                                <div className="font-medium text-foreground">{action.name}</div>
-                                <div className="text-xs text-muted-foreground">{action.description}</div>
+                                <div className="font-medium" style={{ color: theme.logo }}>{action.name}</div>
+                                <div className="text-xs" style={{ color: theme.secondaryText }}>{action.description}</div>
                             </div>
                         </Button>
                     </Link>

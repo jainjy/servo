@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   MapPin,
   Ruler,
@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import PropertyMap from "@/components/PropertyMap";
-import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
+import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
 
 interface Property {
   id: string;
@@ -96,7 +96,14 @@ interface PropertyDetailPageProps {
 
 const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   const navigate = useNavigate();
-  
+  useEffect(() => {
+    // Défilement fluide vers le haut
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth", // Pour un défilement fluide
+    });
+  }, []);
   // Enregistrer ScrollTrigger une seule fois
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -146,16 +153,26 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   };
 
   const getStatusBadge = () => {
-    const statusMap: { [key: string]: { label: string; variant: "default" | "secondary" | "destructive" | "outline" } } = {
+    const statusMap: {
+      [key: string]: {
+        label: string;
+        variant: "default" | "secondary" | "destructive" | "outline";
+      };
+    } = {
       published: { label: "Disponible", variant: "default" },
       draft: { label: "Brouillon", variant: "outline" },
       pending: { label: "En attente", variant: "secondary" },
       archived: { label: "Archivé", variant: "outline" },
       sold: { label: "Vendu", variant: "destructive" },
-      rented: { label: "Loué", variant: "destructive" }
+      rented: { label: "Loué", variant: "destructive" },
     };
 
-    return statusMap[property.status] || { label: property.status, variant: "outline" };
+    return (
+      statusMap[property.status] || {
+        label: property.status,
+        variant: "outline",
+      }
+    );
   };
 
   const getTypeLabel = (type: string) => {
@@ -164,7 +181,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
       apartment: "Appartement",
       villa: "Villa",
       land: "Terrain",
-      studio: "Studio"
+      studio: "Studio",
     };
 
     return typeMap[property.type] || property.type;
@@ -177,7 +194,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
       parking: <Car className="h-4 w-4" />,
       terrace: <Square className="h-4 w-4" />,
       balcony: <Square className="h-4 w-4" />,
-      elevator: <UploadIcon className="h-4 w-4" />
+      elevator: <UploadIcon className="h-4 w-4" />,
     };
 
     return iconMap[amenity] || <Home className="h-4 w-4" />;
@@ -207,8 +224,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   const downloadAllImages = async (images: string[], propertyTitle: string) => {
     try {
       const folderName = propertyTitle
-        .replace(/[^a-zA-Z0-9\s]/g, '')
-        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, "_")
         .toLowerCase();
 
       for (let i = 0; i < images.length; i++) {
@@ -218,13 +235,13 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
 
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
         link.click();
 
         URL.revokeObjectURL(link.href);
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       console.log("✅ Toutes les images ont été téléchargées !");
@@ -234,7 +251,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
   };
 
   const statusBadge = getStatusBadge();
-  const isAvailable = (property.isActive);
+  const isAvailable = property.isActive;
   const mm = gsap.matchMedia();
 
   useEffect(() => {
@@ -246,7 +263,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         pin: true,
         scrub: 1,
       });
-    })
+    });
   }, []);
 
   return (
@@ -311,10 +328,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                          ? ""
-                          : "border-transparent"
-                          }`}
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImage === index ? "" : "border-transparent"
+                        }`}
                       >
                         <img
                           src={image}
@@ -339,7 +355,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 {property.images && property.images.length > 0 && (
                   <div className="col-span-2 mt-[-160px]">
                     <Button
-                      onClick={() => downloadAllImages(property.images, property.title)}
+                      onClick={() =>
+                        downloadAllImages(property.images, property.title)
+                      }
                       variant="outline"
                       size="sm"
                       className="w-full border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
@@ -354,7 +372,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
           </div>
 
           {/* Sidebar - Agent & Actions */}
-          <div id="agents" className="space-y-6 relative lg:absolute right-2 lg:w-80">
+          <div
+            id="agents"
+            className="space-y-6 relative lg:absolute right-2 lg:w-80"
+          >
             {/* Carte Agent */}
             <Card className="border border-[#D3D3D3]">
               <CardContent className="p-6">
@@ -380,8 +401,8 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
                 <div className="space-y-3">
                   {property.owner.phone && (
-                    <Button 
-                      className="w-full bg-[#6B8E23] hover:bg-[#556B2F]" 
+                    <Button
+                      className="w-full bg-[#6B8E23] hover:bg-[#556B2F]"
                       onClick={handleContact}
                     >
                       <Phone className="h-4 w-4 mr-2" />
@@ -414,15 +435,16 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       </p>
                     )}
                     {property.listingType === "sale" && (
-                      <p className="text-sm text-gray-600">
-                        Honoraires inclus
-                      </p>
+                      <p className="text-sm text-gray-600">Honoraires inclus</p>
                     )}
                   </div>
 
                   <Button
-                    className={`w-full ${!isAvailable ? "bg-gray-400 cursor-not-allowed" : "bg-[#556B2F] hover:bg-[#6B8E23]"
-                      }`}
+                    className={`w-full ${
+                      !isAvailable
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-[#556B2F] hover:bg-[#6B8E23]"
+                    }`}
                     size="lg"
                     onClick={handleScheduleVisit}
                     disabled={!isAvailable}
@@ -474,10 +496,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <Ruler className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#8B4513]">{property.surface} m²</div>
-                      <div className="text-sm text-gray-600">
-                        Surface
+                      <div className="font-semibold text-[#8B4513]">
+                        {property.surface} m²
                       </div>
+                      <div className="text-sm text-gray-600">Surface</div>
                     </div>
                   </div>
                 )}
@@ -487,10 +509,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <Bed className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#8B4513]">{property.bedrooms}</div>
-                      <div className="text-sm text-gray-600">
-                        Chambres
+                      <div className="font-semibold text-[#8B4513]">
+                        {property.bedrooms}
                       </div>
+                      <div className="text-sm text-gray-600">Chambres</div>
                     </div>
                   </div>
                 )}
@@ -500,7 +522,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <Bath className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#8B4513]">{property.bathrooms}</div>
+                      <div className="font-semibold text-[#8B4513]">
+                        {property.bathrooms}
+                      </div>
                       <div className="text-sm text-gray-600">
                         Salles de bain
                       </div>
@@ -513,10 +537,10 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <Home className="h-5 w-5 text-[#6B8E23]" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#8B4513]">{property.rooms}</div>
-                      <div className="text-sm text-gray-600">
-                        Pièces
+                      <div className="font-semibold text-[#8B4513]">
+                        {property.rooms}
                       </div>
+                      <div className="text-sm text-gray-600">Pièces</div>
                     </div>
                   </div>
                 )}
@@ -526,20 +550,20 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
             {/* Tabs */}
             <Tabs defaultValue="description" className="w-full">
               <TabsList className="grid w-full grid-cols-3 border-b border-[#D3D3D3]">
-                <TabsTrigger 
-                  value="description" 
+                <TabsTrigger
+                  value="description"
                   className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white text-[#8B4513]"
                 >
                   Description
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="features" 
+                <TabsTrigger
+                  value="features"
                   className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white text-[#8B4513]"
                 >
                   Équipements
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="location" 
+                <TabsTrigger
+                  value="location"
                   className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white text-[#8B4513]"
                 >
                   Localisation
@@ -548,7 +572,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
               <TabsContent value="description" className="space-y-6 pt-6">
                 <div>
-                  <h3 className="text-xl font-semibold mb-4 text-[#8B4513]">Description</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-[#8B4513]">
+                    Description
+                  </h3>
                   <p className="text-lg leading-relaxed text-gray-700">
                     {property.description || "Aucune description disponible."}
                   </p>
@@ -557,34 +583,46 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card className="border border-[#D3D3D3]">
                     <CardContent className="p-6">
-                      <h4 className="font-semibold mb-4 text-[#8B4513]">Caractéristiques</h4>
+                      <h4 className="font-semibold mb-4 text-[#8B4513]">
+                        Caractéristiques
+                      </h4>
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Type</span>
-                          <span className="font-medium text-[#556B2F]">{getTypeLabel(property.type)}</span>
+                          <span className="font-medium text-[#556B2F]">
+                            {getTypeLabel(property.type)}
+                          </span>
                         </div>
                         {property.surface && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">Surface</span>
-                            <span className="font-medium text-[#556B2F]">{property.surface} m²</span>
+                            <span className="font-medium text-[#556B2F]">
+                              {property.surface} m²
+                            </span>
                           </div>
                         )}
                         {property.yearBuilt && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">Année</span>
-                            <span className="font-medium text-[#556B2F]">{property.yearBuilt}</span>
+                            <span className="font-medium text-[#556B2F]">
+                              {property.yearBuilt}
+                            </span>
                           </div>
                         )}
                         {property.energyClass && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">DPE</span>
-                            <span className="font-medium text-[#556B2F]">{property.energyClass}</span>
+                            <span className="font-medium text-[#556B2F]">
+                              {property.energyClass}
+                            </span>
                           </div>
                         )}
                         {property.floor && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">Étage</span>
-                            <span className="font-medium text-[#556B2F]">{property.floor}</span>
+                            <span className="font-medium text-[#556B2F]">
+                              {property.floor}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -593,7 +631,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
 
                   <Card className="border border-[#D3D3D3]">
                     <CardContent className="p-6">
-                      <h4 className="font-semibold mb-4 text-[#8B4513]">Informations</h4>
+                      <h4 className="font-semibold mb-4 text-[#8B4513]">
+                        Informations
+                      </h4>
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Statut</span>
@@ -604,20 +644,26 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                         <div className="flex justify-between">
                           <span className="text-gray-600">Type d'annonce</span>
                           <span className="font-medium text-[#556B2F]">
-                            {property.listingType === "rent" ? "Location" : "Vente"}
+                            {property.listingType === "rent"
+                              ? "Location"
+                              : "Vente"}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Publié le</span>
                           <span className="font-medium text-[#556B2F]">
-                            {new Date(property.createdAt).toLocaleDateString('fr-FR')}
+                            {new Date(property.createdAt).toLocaleDateString(
+                              "fr-FR"
+                            )}
                           </span>
                         </div>
                         {property.expiresAt && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">Expire le</span>
                             <span className="font-medium text-[#556B2F]">
-                              {new Date(property.expiresAt).toLocaleDateString('fr-FR')}
+                              {new Date(property.expiresAt).toLocaleDateString(
+                                "fr-FR"
+                              )}
                             </span>
                           </div>
                         )}
@@ -637,7 +683,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
                       <div className="text-[#6B8E23]">
                         {getAmenityIcon(feature.toLowerCase())}
                       </div>
-                      <span className="font-medium text-[#8B4513]">{feature}</span>
+                      <span className="font-medium text-[#8B4513]">
+                        {feature}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -646,7 +694,9 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
               <TabsContent value="location" className="pt-6">
                 <Card className="border border-[#D3D3D3]">
                   <CardContent className="p-6">
-                    <h4 className="font-semibold mb-4 text-[#8B4513]">Localisation</h4>
+                    <h4 className="font-semibold mb-4 text-[#8B4513]">
+                      Localisation
+                    </h4>
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-gray-600">
                         <MapPin className="h-4 w-4 text-[#556B2F]" />
