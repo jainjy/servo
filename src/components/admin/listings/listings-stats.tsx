@@ -3,6 +3,29 @@ import { Card } from "@/components/ui/card"
 import { Building2, CheckCircle, Clock, Archive, Eye, TrendingUp } from "lucide-react"
 import api from "@/lib/api"
 
+// Palette de couleurs du thème
+const colors = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFF0",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+  primaryLight: "#8FBC8F",
+  secondaryLight: "#A0522D",
+  cardBg: "#FFFFFF",
+  textPrimary: "#2C3E50",
+  textSecondary: "#5D6D7E",
+  success: "#27AE60",
+  warning: "#F39C12",
+  error: "#E74C3C",
+  accentGold: "#D4AF37",
+  gradient1: "linear-gradient(135deg, #556B2F 0%, #6B8E23 100%)",
+  gradient2: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+  gradient3: "linear-gradient(135deg, #6B8E23 0%, #27AE60 100%)",
+  oliveHover: "#5D801F",
+  oliveLight: "#8FBC8F20",
+};
+
 export function ListingsStats() {
   const [stats, setStats] = useState({
     total: 0,
@@ -40,49 +63,61 @@ export function ListingsStats() {
       name: "Total annonces",
       value: stats.total.toLocaleString(),
       icon: Building2,
-      color: "text-[#556B2F]",
-      bgColor: "bg-[#556B2F]/10",
-      borderColor: "border-l-[#556B2F]"
+      iconColor: colors.primaryDark,
+      bgColor: `${colors.primaryDark}20`,
+      valueColor: colors.textPrimary,
+      labelColor: colors.textSecondary,
+      borderColor: `${colors.primaryDark}30`,
     },
     {
       name: "Publiées",
       value: stats.published.toLocaleString(),
       icon: CheckCircle,
-      color: "text-[#6B8E23]",
-      bgColor: "bg-[#6B8E23]/10",
-      borderColor: "border-l-[#6B8E23]"
+      iconColor: colors.success,
+      bgColor: `${colors.success}20`,
+      valueColor: colors.textPrimary,
+      labelColor: colors.textSecondary,
+      borderColor: `${colors.success}30`,
     },
     {
       name: "En attente",
       value: stats.pending.toLocaleString(),
       icon: Clock,
-      color: "text-[#8B4513]",
-      bgColor: "bg-[#8B4513]/10",
-      borderColor: "border-l-[#8B4513]"
+      iconColor: colors.warning,
+      bgColor: `${colors.warning}20`,
+      valueColor: colors.textPrimary,
+      labelColor: colors.textSecondary,
+      borderColor: `${colors.warning}30`,
     },
     {
       name: "Archivées",
       value: stats.archived.toLocaleString(),
       icon: Archive,
-      color: "text-gray-600",
-      bgColor: "bg-[#D3D3D3]/20",
-      borderColor: "border-l-[#D3D3D3]"
+      iconColor: colors.textSecondary,
+      bgColor: `${colors.textSecondary}15`,
+      valueColor: colors.textPrimary,
+      labelColor: colors.textSecondary,
+      borderColor: `${colors.textSecondary}25`,
     },
     {
       name: "Vues totales",
       value: stats.totalViews.toLocaleString(),
       icon: Eye,
-      color: "text-[#556B2F]",
-      bgColor: "bg-[#556B2F]/10",
-      borderColor: "border-l-[#556B2F]"
+      iconColor: colors.primaryDark,
+      bgColor: `${colors.primaryDark}20`,
+      valueColor: colors.textPrimary,
+      labelColor: colors.textSecondary,
+      borderColor: `${colors.primaryDark}30`,
     },
     {
       name: "Moyenne vues",
       value: stats.avgViews.toLocaleString(),
       icon: TrendingUp,
-      color: "text-[#6B8E23]",
-      bgColor: "bg-[#6B8E23]/10",
-      borderColor: "border-l-[#6B8E23]"
+      iconColor: colors.accentGold,
+      bgColor: `${colors.accentGold}20`,
+      valueColor: colors.textPrimary,
+      labelColor: colors.textSecondary,
+      borderColor: `${colors.accentGold}30`,
     },
   ]
 
@@ -91,26 +126,35 @@ export function ListingsStats() {
       {statsCards.map((stat) => (
         <Card 
           key={stat.name} 
-          className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-[#6B8E23] group"
+          className="p-6 hover:shadow-lg transition-shadow hover:scale-105 transition-transform duration-200"
           style={{ 
-            backgroundColor: '#FFFFFF0',
-            borderColor: '#D3D3D3'
+            borderColor: stat.borderColor,
+            backgroundColor: colors.cardBg,
           }}
         >
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-2xl font-bold mb-2" style={{ color: '#556B2F' }}>
+              <div 
+                className="text-2xl font-bold mb-2"
+                style={{ color: stat.valueColor }}
+              >
                 {stat.value}
               </div>
-              <div className="text-sm" style={{ color: '#8B4513' }}>
+              <div 
+                className="text-sm"
+                style={{ color: stat.labelColor }}
+              >
                 {stat.name}
               </div>
             </div>
             <div 
-              className={`p-3 rounded-full ${stat.bgColor} group-hover:${stat.bgColor.replace('/10', '/20')} transition-colors`}
-              style={{ border: '1px solid #D3D3D3' }}
+              className="p-3 rounded-full"
+              style={{ backgroundColor: stat.bgColor }}
             >
-              <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              <stat.icon 
+                className="h-6 w-6" 
+                style={{ color: stat.iconColor }} 
+              />
             </div>
           </div>
         </Card>
