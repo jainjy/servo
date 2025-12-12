@@ -56,6 +56,20 @@ interface BlogArticle {
 const categories = ["Toutes", "Immobilier", "Travaux", "Financement", "Produits", "Rénovation"];
 const statuts = ["Tous", "publié", "brouillon", "programmé", "archivé"];
 
+// Couleurs personnalisées
+const COLORS = {
+  logo: "#556B2F",           // Olive green
+  primaryDark: "#6B8E23",    // Yellow-green
+  lightBg: "#FFFFFF",        // White
+  separator: "#D3D3D3",      // Light gray
+  secondaryText: "#8B4513",  // Saddle brown
+  // Couleurs complémentaires
+  success: "#7CB342",        // Green
+  warning: "#FBC02D",        // Amber
+  info: "#5C7CBA",           // Blue-gray
+  danger: "#D32F2F",         // Red
+};
+
 const GestionBlog = () => {
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,13 +101,16 @@ const GestionBlog = () => {
     try {
       setLoading(true);
       const response = await api.get('/articles');
-      setArticles(response.data);
+      // Gérer la structure de la réponse - vérifier si c'est un objet avec une propriété data
+      const articlesData = Array.isArray(response.data) ? response.data : response.data?.articles || response.data?.data || [];
+      setArticles(articlesData);
     } catch (error: any) {
       console.error('Erreur lors du chargement des articles:', error);
       toast.error(
         `Erreur lors du chargement des articles: ${error.response?.data?.error || error.message
         }`
       );
+      setArticles([]); // Initialiser avec un tableau vide en cas d'erreur
     } finally {
       setLoading(false);
     }
@@ -255,29 +272,34 @@ const GestionBlog = () => {
 
   const getStatutColor = (statut: string) => {
     switch (statut) {
-      case "publié": return "bg-green-100 text-green-800";
-      case "brouillon": return "bg-yellow-100 text-yellow-800";
-      case "programmé": return "bg-blue-100 text-blue-800";
-      case "archivé": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "publié": 
+        return "text-white" + ` bg-[${COLORS.success}]`;
+      case "brouillon": 
+        return "text-white bg-[" + COLORS.warning + "]";
+      case "programmé": 
+        return "text-white bg-[" + COLORS.info + "]";
+      case "archivé": 
+        return "text-gray-700 bg-[" + COLORS.separator + "]";
+      default: 
+        return "text-gray-700 bg-[" + COLORS.separator + "]";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAF5] to-[#FFFFFF] flex items-center justify-center">
         <div className="text-center">
           <img src="/loading.gif" alt="" className='w-24 h-24' />
-          <p className="mt-4 text-muted-foreground">Chargement des articles...</p>
+          <p className="mt-4 text-[#8B4513]">Chargement des articles...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#FAFAF5] to-[#FFFFFF]">
       {/* Header de la page */}
-      <section className="relative bg-gradient-to-r from-primary to-primary/90 text-white py-16">
+      <section className="relative bg-gradient-to-r from-[#556B2F] to-[#6B8E23] text-white py-16">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -291,7 +313,7 @@ const GestionBlog = () => {
             </div>
             <Button
               onClick={handleCreateArticle}
-              className="bg-white text-primary hover:bg-white/90 px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+              className="bg-white text-[#556B2F] hover:bg-[#FAFAF5] px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 border-2 border-[#556B2F]"
             >
               <Plus className="h-5 w-5 mr-2" />
               Nouvel Article
@@ -306,20 +328,20 @@ const GestionBlog = () => {
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
             {/* Barre de recherche */}
             <div className="relative flex-1 w-full lg:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8B4513] h-4 w-4" />
               <Input
                 type="text"
                 placeholder="Rechercher un article..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full rounded-lg border-border focus:ring-2 focus:ring-primary/20"
+                className="pl-10 pr-4 py-2 w-full rounded-lg border-[#D3D3D3] focus:ring-2 focus:ring-[#6B8E23]/20 focus:border-[#6B8E23]"
               />
             </div>
 
             {/* Filtres */}
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] border-[#D3D3D3] text-[#8B4513]">
                   <SelectValue placeholder="Catégorie" />
                 </SelectTrigger>
                 <SelectContent>
@@ -332,7 +354,7 @@ const GestionBlog = () => {
               </Select>
 
               <Select value={selectedStatut} onValueChange={setSelectedStatut}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] border-[#D3D3D3] text-[#8B4513]">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -352,12 +374,12 @@ const GestionBlog = () => {
       <section className="container mx-auto px-4 py-8">
         <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
           {/* En-tête du tableau */}
-          <div className="bg-muted/50 px-6 py-4 border-b">
+          <div className="bg-[#F5F5F0] px-6 py-4 border-b-2 border-[#D3D3D3]">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold text-[#556B2F]">
                 Articles ({filteredArticles.length})
               </h2>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-[#8B4513]">
                 <Filter className="h-4 w-4" />
                 Filtres appliqués
               </div>
@@ -365,38 +387,46 @@ const GestionBlog = () => {
           </div>
 
           {/* Liste des articles */}
-          <div className="divide-y">
+          <div className="divide-y divide-[#D3D3D3]">
             {filteredArticles.length > 0 ? (
               filteredArticles.map((article) => (
-                <div key={article.id} className="p-6 hover:bg-muted/30 transition-colors duration-200">
+                <div key={article.id} className="p-6 hover:bg-[#FAFAF5] transition-colors duration-200 border-b border-[#D3D3D3]">
                   <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Image miniature */}
                     <div
-                      className="w-20 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg flex-shrink-0 bg-cover bg-center"
+                      className="w-20 h-16 bg-gradient-to-br from-[#6B8E23]/20 to-[#6B8E23]/10 rounded-lg flex-shrink-0 bg-cover bg-center border border-[#D3D3D3]"
                       style={{ backgroundImage: `url(${article.image})` }}
                     />
 
                     {/* Contenu */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                        <h3 className="font-semibold text-lg truncate">
+                        <h3 className="font-semibold text-lg text-[#556B2F] truncate">
                           {article.titre}
                         </h3>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <Badge variant="secondary" className={getStatutColor(article.statut)}>
+                          <Badge 
+                            variant="secondary" 
+                            className={`
+                              ${article.statut === "publié" ? `bg-[${COLORS.success}] text-white` : ""}
+                              ${article.statut === "brouillon" ? `bg-[${COLORS.warning}] text-white` : ""}
+                              ${article.statut === "programmé" ? `bg-[${COLORS.info}] text-white` : ""}
+                              ${article.statut === "archivé" ? "bg-[#D3D3D3] text-[#556B2F]" : ""}
+                            `}
+                          >
                             {article.statut}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-[#8B4513]">
                             {article.vues} vues
                           </span>
                         </div>
                       </div>
 
-                      <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
+                      <p className="text-[#8B4513] text-sm mb-2 line-clamp-2">
                         {article.description}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-[#8B4513]">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
                           {article.date}
@@ -417,12 +447,12 @@ const GestionBlog = () => {
 
                       <div className="flex flex-wrap gap-1 mt-2">
                         {article.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge key={index} variant="outline" className="text-xs border-[#D3D3D3] text-[#556B2F]">
                             {tag}
                           </Badge>
                         ))}
                         {article.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#556B2F]">
                             +{article.tags.length - 3}
                           </Badge>
                         )}
@@ -435,7 +465,7 @@ const GestionBlog = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditArticle(article)}
-                        className="h-9 w-9 p-0"
+                        className="h-9 w-9 p-0 text-[#6B8E23] hover:bg-[#6B8E23]/10"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -443,7 +473,7 @@ const GestionBlog = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteArticle(article)}
-                        className="h-9 w-9 p-0 text-destructive hover:text-destructive"
+                        className="h-9 w-9 p-0 text-[#D32F2F] hover:bg-[#D32F2F]/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -454,15 +484,18 @@ const GestionBlog = () => {
             ) : (
               <div className="p-12 text-center">
                 <div className="max-w-md mx-auto">
-                  <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Aucun article trouvé</h3>
-                  <p className="text-muted-foreground mb-6">
+                  <Search className="h-12 w-12 text-[#D3D3D3] mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-[#556B2F] mb-2">Aucun article trouvé</h3>
+                  <p className="text-[#8B4513] mb-6">
                     {articles.length === 0
                       ? "Commencez par créer votre premier article"
                       : "Aucun article ne correspond à vos critères de recherche."
                     }
                   </p>
-                  <Button onClick={handleCreateArticle}>
+                  <Button 
+                    onClick={handleCreateArticle}
+                    className="bg-[#6B8E23] text-white hover:bg-[#556B2F]"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Créer un article
                   </Button>
@@ -475,12 +508,12 @@ const GestionBlog = () => {
 
       {/* Modal de création/édition d'article */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-[#556B2F]">
               {isEditing ? "Modifier l'article" : "Créer un nouvel article"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#8B4513]">
               Remplissez les informations de votre article de blog
             </DialogDescription>
           </DialogHeader>
@@ -490,37 +523,39 @@ const GestionBlog = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Titre */}
               <div className="space-y-2">
-                <Label htmlFor="titre">Titre de l'article *</Label>
+                <Label htmlFor="titre" className="text-[#556B2F] font-semibold">Titre de l'article *</Label>
                 <Input
                   id="titre"
                   value={formData.titre}
                   onChange={(e) => setFormData({ ...formData, titre: e.target.value })}
                   placeholder="Entrez le titre de l'article"
+                  className="border-[#D3D3D3] focus:ring-[#6B8E23] focus:border-[#6B8E23]"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description" className="text-[#556B2F] font-semibold">Description *</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Entrez une description courte de l'article"
                   rows={3}
+                  className="border-[#D3D3D3] focus:ring-[#6B8E23] focus:border-[#6B8E23]"
                 />
               </div>
 
               {/* Contenu */}
               <div className="space-y-2">
-                <Label htmlFor="contenu">Contenu de l'article *</Label>
+                <Label htmlFor="contenu" className="text-[#556B2F] font-semibold">Contenu de l'article *</Label>
                 <Textarea
                   id="contenu"
                   value={formData.contenu}
                   onChange={(e) => setFormData({ ...formData, contenu: e.target.value })}
                   placeholder="Rédigez le contenu de votre article (HTML autorisé)"
                   rows={12}
-                  className="font-mono text-sm"
+                  className="font-mono text-sm border-[#D3D3D3] focus:ring-[#6B8E23] focus:border-[#6B8E23]"
                 />
               </div>
             </div>
@@ -529,9 +564,9 @@ const GestionBlog = () => {
             <div className="space-y-6">
               {/* Image */}
               <div className="space-y-4">
-                <Label>Image de l'article</Label>
+                <Label className="text-[#556B2F] font-semibold">Image de l'article</Label>
                 <div
-                  className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                  className="border-2 border-dashed border-[#D3D3D3] rounded-lg p-4 text-center cursor-pointer hover:border-[#6B8E23] transition-colors bg-[#FAFAF5]"
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onClick={() => document.getElementById('file-input')?.click()}
@@ -541,16 +576,16 @@ const GestionBlog = () => {
                       <img
                         src={formData.image}
                         alt="Preview"
-                        className="w-full h-32 object-cover rounded-md mx-auto"
+                        className="w-full h-32 object-cover rounded-md mx-auto border border-[#D3D3D3]"
                       />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#8B4513]">
                         Cliquez pour changer l'image
                       </p>
                     </div>
                   ) : (
                     <>
-                      <Image className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <Image className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
+                      <p className="text-sm text-[#8B4513] mb-2">
                         Glissez-déposez une image ou cliquez pour uploader
                       </p>
                     </>
@@ -563,6 +598,7 @@ const GestionBlog = () => {
                       e.stopPropagation();
                       document.getElementById('file-input')?.click();
                     }}
+                    className="border-[#D3D3D3] text-[#556B2F] hover:bg-white hover:border-[#6B8E23]"
                   >
                     {uploading ? (
                       <>Chargement...</>
@@ -585,12 +621,12 @@ const GestionBlog = () => {
 
               {/* Catégorie */}
               <div className="space-y-2">
-                <Label htmlFor="categorie">Catégorie *</Label>
+                <Label htmlFor="categorie" className="text-[#556B2F] font-semibold">Catégorie *</Label>
                 <Select
                   value={formData.categorie}
                   onValueChange={(value) => setFormData({ ...formData, categorie: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-[#D3D3D3] text-[#8B4513]">
                     <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
                   <SelectContent>
@@ -605,26 +641,27 @@ const GestionBlog = () => {
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label htmlFor="tags">Tags</Label>
+                <Label htmlFor="tags" className="text-[#556B2F] font-semibold">Tags</Label>
                 <Input
                   id="tags"
                   value={formData.tags}
                   onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                   placeholder="tag1, tag2, tag3"
+                  className="border-[#D3D3D3] focus:ring-[#6B8E23] focus:border-[#6B8E23]"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[#8B4513]">
                   Séparez les tags par des virgules
                 </p>
               </div>
 
               {/* Statut */}
               <div className="space-y-2">
-                <Label htmlFor="statut">Statut</Label>
+                <Label htmlFor="statut" className="text-[#556B2F] font-semibold">Statut</Label>
                 <Select
                   value={formData.statut}
                   onValueChange={(value: any) => setFormData({ ...formData, statut: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-[#D3D3D3] text-[#8B4513]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -639,24 +676,29 @@ const GestionBlog = () => {
               {/* Date de publication programmée */}
               {formData.statut === "programmé" && (
                 <div className="space-y-2">
-                  <Label htmlFor="datePublication">Date de publication</Label>
+                  <Label htmlFor="datePublication" className="text-[#556B2F] font-semibold">Date de publication</Label>
                   <Input
                     id="datePublication"
                     type="datetime-local"
                     value={formData.datePublication}
                     onChange={(e) => setFormData({ ...formData, datePublication: e.target.value })}
+                    className="border-[#D3D3D3] focus:ring-[#6B8E23] focus:border-[#6B8E23]"
                   />
                 </div>
               )}
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-6">
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-[#D3D3D3]">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-[#D3D3D3] text-[#556B2F]">
               Annuler
             </Button>
             <div className="flex-1"></div>
-            <Button onClick={handleSaveArticle} disabled={uploading}>
+            <Button 
+              onClick={handleSaveArticle} 
+              disabled={uploading}
+              className="bg-[#6B8E23] text-white hover:bg-[#556B2F]"
+            >
               <Save className="h-4 w-4 mr-2" />
               {isEditing ? "Mettre à jour" : "Publier l'article"}
             </Button>
@@ -666,28 +708,35 @@ const GestionBlog = () => {
 
       {/* Modal de confirmation de suppression */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-destructive" />
+            <DialogTitle className="flex items-center gap-2 text-[#D32F2F]">
+              <AlertCircle className="h-5 w-5" />
               Confirmer la suppression
             </DialogTitle>
           </DialogHeader>
 
           <div className="py-4">
-            <p>
+            <p className="text-[#556B2F]">
               Êtes-vous sûr de vouloir supprimer l'article <strong>"{currentArticle?.titre}"</strong> ?
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-[#8B4513] mt-2">
               Cette action est irréversible. Toutes les données associées à cet article seront perdues.
             </p>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="border-[#D3D3D3] text-[#556B2F]"
+            >
               Annuler
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button 
+              onClick={confirmDelete}
+              className="bg-[#D32F2F] text-white hover:bg-[#B71C1C]"
+            >
               <Trash2 className="h-4 w-4 mr-2" />
               Supprimer
             </Button>
