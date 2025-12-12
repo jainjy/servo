@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Users, Home, Loader, TreePalm, X } from "lucide-react";
 import GenericMap from "@/components/GenericMap";
@@ -8,12 +8,9 @@ import PointDetailsModal from "@/components/PointDetailsModal";
 import api from "@/lib/api";
 
 interface CarteBouttonProps {
-  // Props optionnels pour personnalisation
   className?: string;
   size?: "sm" | "md" | "lg";
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
-  
-  // 🚀 NOUVEAU : catégorie venant de Agence / Plombier / Constructeur
   category?: "agences" | "plombiers" | "constructeurs" | "all";
 }
 
@@ -35,12 +32,19 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
   const [geoLoading, setGeoLoading] = useState(false);
   const [selectedMapPoint, setSelectedMapPoint] = useState<MapPoint | null>(null);
 
+  // États pour le drag du modal (desktop seulement)
+  const [isDragging, setIsDragging] = useState(false);
+  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
+  const modalRef = useRef<HTMLDivElement>(null);
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const modalStartPos = useRef({ x: 0, y: 0 });
+
   // Convertir la catégorie en endpoint API
   const getEndpoint = () => {
     if (category === "agences") return "/pro/agences";
     if (category === "plombiers") return "/pro/plombiers";
     if (category === "constructeurs") return "/pro/constructeurs";
-    return "/pro/all"; // Si "all" → tout afficher
+    return "/pro/all";
   };
 
   // Déterminer le titre basé sur la catégorie
@@ -58,6 +62,82 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
         return "Carte de la Réunion";
     }
   };
+
+  // ========== GESTION DU DRAG FLUIDE (Desktop seulement) ==========
+  const handleHeaderMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (window.innerWidth < 1024) return;
+    
+    setIsDragging(true);
+    
+    // Sauvegarder la position actuelle du modal
+    modalStartPos.current = { ...modalPosition };
+    
+    // Calculer le décalage exact entre le curseur et le coin supérieur gauche du modal
+    if (modalRef.current) {
+      const rect = modalRef.current.getBoundingClientRect();
+      dragStartPos.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    } else {
+      // Fallback si le ref n'est pas disponible
+      dragStartPos.current = {
+        x: e.clientX - modalPosition.x,
+        y: e.clientY - modalPosition.y
+      };
+    }
+    
+    e.preventDefault();
+  }, [modalPosition]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Calculer la nouvelle position en fonction du décalage initial
+      if (dragStartPos.current && modalStartPos.current) {
+        const newX = e.clientX - dragStartPos.current.x;
+        const newY = e.clientY - dragStartPos.current.y;
+        
+        // Appliquer la nouvelle position avec une transition fluide
+        setModalPosition({ 
+          x: newX, 
+          y: newY 
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      // Réinitialiser les positions de départ
+      dragStartPos.current = { x: 0, y: 0 };
+      modalStartPos.current = { x: 0, y: 0 };
+    };
+
+    // Utiliser requestAnimationFrame pour un mouvement plus fluide
+    const onMouseMove = (e: MouseEvent) => {
+      requestAnimationFrame(() => handleMouseMove(e));
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  // Réinitialiser la position du modal quand il est rouvert
+  useEffect(() => {
+    if (showMapModal && window.innerWidth >= 1024) {
+      // Centrer le modal initialement
+      const x = window.innerWidth / 2 - 300; // Moitié de la largeur - moitié de la largeur du modal
+      const y = window.innerHeight / 2 - 250; // Moitié de la hauteur - moitié de la hauteur du modal
+      setModalPosition({ x, y });
+    }
+  }, [showMapModal]);
+  // =========================================================
 
   // Déterminer la position du bouton
   const getPositionClasses = () => {
@@ -91,7 +171,6 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
   const filterPointsByCategory = useCallback((points: MapPoint[]): MapPoint[] => {
     if (category === "all") return points;
     
-    // Map des types de points correspondant aux catégories
     const categoryToType: Record<string, string> = {
       "agences": "agency",
       "plombiers": "plumber",
@@ -103,77 +182,70 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
   }, [category]);
 
   // Charger toutes les données de la carte
-const loadMapData = useCallback(async () => {
-  try {
-    setMapLoading(true);
+  const loadMapData = useCallback(async () => {
+    try {
+      setMapLoading(true);
 
-    if (category === "all") {
-      const allPoints = await MapService.getAllMapPoints();
-      setMapPoints(allPoints);
-      setFilteredPoints(filterPointsByCategory(allPoints));
-    } else {
-      const endpoint = getEndpoint();
-      const res = await api.get(endpoint);
+      if (category === "all") {
+        const allPoints = await MapService.getAllMapPoints();
+        setMapPoints(allPoints);
+        setFilteredPoints(filterPointsByCategory(allPoints));
+      } else {
+        const endpoint = getEndpoint();
+        const res = await api.get(endpoint);
 
-      if (!res.data.success) {
-        throw new Error("Erreur lors de la récupération des données");
+        if (!res.data.success) {
+          throw new Error("Erreur lors de la récupération des données");
+        }
+
+        const categoryPoints: MapPoint[] = res.data.data.map((item: any) => {
+          const safeName =
+            [item.firstName, item.lastName].filter(Boolean).join(" ").trim() ||
+            item.commercialName ||
+            item.companyName ||
+            item.firstName ||
+            "Professionnel";
+
+          return {
+            id: item.id,
+            latitude: item.latitude ?? null,
+            longitude: item.longitude ?? null,
+            title: safeName,
+            description: item.description || item.specialty || "",
+            type: item.type || "user",
+            category: category,
+            address: item.address || item.city || "Réunion",
+            phone: item.phone || "",
+            email: item.email || "",
+            website: item.website || ""
+          };
+        });
+
+        setMapPoints(categoryPoints);
+        setFilteredPoints(categoryPoints);
       }
 
-      // ⭐ Correction complète du mapping
-      const categoryPoints: MapPoint[] = res.data.data.map((item: any) => {
-        
-        // ⭐ Nom propre sans undefined
-        const safeName =
-          [item.firstName, item.lastName].filter(Boolean).join(" ").trim() ||
-          item.commercialName ||
-          item.companyName ||
-          item.firstName ||
-          "Professionnel";
-
-        return {
-          id: item.id,
-
-          // ⭐ On ne met pas de valeurs par défaut fixes !
-          latitude: item.latitude ?? null,
-          longitude: item.longitude ?? null,
-
-          title: safeName,
-          description: item.description || item.specialty || "",
-          type: item.type || "user",
-          category: category,
-
-          address: item.address || item.city || "Réunion",
-          phone: item.phone || "",
-          email: item.email || "",
-          website: item.website || ""
-        };
+      console.log("📊 Données carte chargées:", {
+        category,
+        total: mapPoints.length,
+        filtered: filteredPoints.length
       });
 
-      setMapPoints(categoryPoints);
-      setFilteredPoints(categoryPoints);
+      setMapError(null);
+
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
+
+      setMapError(errorMessage);
+      console.error("❌ Erreur chargement carte:", err);
+
+      setMapPoints([]);
+      setFilteredPoints([]);
+    } finally {
+      setMapLoading(false);
     }
-
-    console.log("📊 Données carte chargées:", {
-      category,
-      total: mapPoints.length,
-      filtered: filteredPoints.length
-    });
-
-    setMapError(null);
-
-  } catch (err) {
-    const errorMessage =
-      err instanceof Error ? err.message : "Erreur lors du chargement de la carte";
-
-    setMapError(errorMessage);
-    console.error("❌ Erreur chargement carte:", err);
-
-    setMapPoints([]);
-    setFilteredPoints([]);
-  } finally {
-    setMapLoading(false);
-  }
-}, [category, filterPointsByCategory]);
+  }, [category, filterPointsByCategory]);
 
   // Obtenir la géolocalisation utilisateur
   const handleGetUserLocation = () => {
@@ -193,7 +265,6 @@ const loadMapData = useCallback(async () => {
         setUserLocation([latitude, longitude]);
         setGeoLoading(false);
         
-        // Centrer la carte sur la position utilisateur
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('centerMap', { 
             detail: { 
@@ -258,6 +329,18 @@ const loadMapData = useCallback(async () => {
     }
   }, [showMapModal, loadMapData]);
 
+  // Styles pour le drag fluide
+  const modalStyle = window.innerWidth >= 1024 
+    ? {
+        position: 'fixed' as const,
+        left: `${modalPosition.x}px`,
+        top: `${modalPosition.y}px`,
+        transform: 'none',
+        transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+        cursor: isDragging ? 'grabbing' : 'grab'
+      }
+    : {};
+
   return (
     <>
       {/* Bouton flottant pour ouvrir la carte */}
@@ -284,14 +367,23 @@ const loadMapData = useCallback(async () => {
       {/* Modal de la carte */}
       {showMapModal && (
         <div
-          className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
+          ref={modalRef}
+          className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
             bottom-0 right-0 w-full h-3/4
             md:bottom-4 md:right-4 md:w-[calc(100vw-2rem)] md:h-3/5 md:max-w-[700px] md:max-h-[600px]
-            lg:bottom-8 lg:right-8 lg:w-[600px] lg:h-[500px]
-            animate-in slide-in-from-bottom duration-300"
+            lg:w-full lg:h-full lg:bottom-auto lg:right-auto
+            animate-in slide-in-from-bottom duration-300
+            ${window.innerWidth >= 1024 ? 'cursor-grab' : ''}
+          `}
+          style={modalStyle}
         >
           {/* Header de la carte */}
-          <div className="bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2">
+          <div 
+            className={`bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2 ${
+              window.innerWidth >= 1024 ? 'cursor-grab active:cursor-grabbing select-none' : ''
+            }`}
+            onMouseDown={handleHeaderMouseDown}
+          >
             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
               <MapPin className="h-4 w-4 md:h-5 md:w-5 text-green-600 flex-shrink-0" />
               <span className="font-semibold text-sm md:text-base truncate">
@@ -357,7 +449,7 @@ const loadMapData = useCallback(async () => {
           </div>
 
           {/* Contenu de la carte */}
-          <div className="h-[calc(100%-120px)] md:h-[calc(100%-130px)] bg-gray-100 relative">
+          <div className="h-[calc(100%-120px)] md:h-[calc(100%-130px)] overflow-hidden bg-gray-100 relative">
             {mapLoading ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
@@ -390,7 +482,7 @@ const loadMapData = useCallback(async () => {
             ) : (
               <>
                 <GenericMap
-                  points={filteredPoints} // Afficher les points filtrés par catégorie
+                  points={filteredPoints}
                   userLocation={userLocation}
                   center={[-21.1351, 55.2471]}
                   zoom={10}
@@ -419,7 +511,7 @@ const loadMapData = useCallback(async () => {
             <button
               onClick={() => {
                 setShowMapModal(false);
-                navigate('/map', { state: { category } });
+                navigate('/carte', { state: { category } });
               }}
               className="text-xs md:text-sm text-green-600 hover:text-green-800 hover:underline font-medium transition-colors self-end sm:self-auto"
             >
