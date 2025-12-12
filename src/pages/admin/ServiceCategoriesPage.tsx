@@ -131,16 +131,25 @@ export default function ServiceCategoriesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 
+              className="text-3xl font-bold tracking-tight"
+              style={{ color: '#556B2F' }}
+            >
               Catégories de services
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-gray-800">
               Gérer les catégories de services
             </p>
           </div>
         </div>
-        <Card className="bg-card border-border p-6">
-          <div className="text-center text-muted-foreground">
+        <Card 
+          className="p-6"
+          style={{ 
+            backgroundColor: '#FFFFFF0',
+            borderColor: '#D3D3D3'
+          }}
+        >
+          <div className="text-center text-gray-800">
             Chargement des catégories...
           </div>
         </Card>
@@ -154,16 +163,20 @@ export default function ServiceCategoriesPage() {
         <div className="flex items-center gap-4">
           <Link
             to="/admin/services"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-sm hover:text-[#6B8E23] transition-colors"
+            style={{ color: '#8B4513' }}
           >
             <ArrowLeft className="h-4 w-4" />
             Retour aux services
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 
+              className="text-3xl font-bold tracking-tight"
+              style={{ color: '#556B2F' }}
+            >
               Catégories de services
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-gray-800">
               Gérer les catégories de services
             </p>
           </div>
@@ -173,14 +186,21 @@ export default function ServiceCategoriesPage() {
           <Button
             onClick={() => setIsAssignModalOpen(true)}
             variant="outline"
-            className="border-border hover:bg-accent"
+            style={{ 
+              borderColor: '#D3D3D3',
+              color: '#6B8E23'
+            }}
           >
             <Tag className="mr-2 h-4 w-4" />
             Assigner des catégories
           </Button>
           <Button
             onClick={handleCreate}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            style={{ 
+              backgroundColor: '#6B8E23',
+              color: 'white',
+              borderColor: '#6B8E23'
+            }}
           >
             <Plus className="mr-2 h-4 w-4" />
             Nouvelle catégorie
@@ -190,17 +210,29 @@ export default function ServiceCategoriesPage() {
 
       {/* Section Services sans catégorie */}
       {servicesWithoutCategory.length > 0 && (
-        <Card className="bg-card border-border border-yellow-200">
+        <Card 
+          className="border-l-4 border-l-[#8B4513]"
+          style={{ 
+            backgroundColor: '#FFFFFF0',
+            borderColor: '#D3D3D3'
+          }}
+        >
           <div className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Tag className="h-5 w-5 text-yellow-600" />
+              <div 
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: '#8B4513/10' }}
+              >
+                <Tag className="h-5 w-5" style={{ color: '#8B4513' }} />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">
+                <h3 
+                  className="font-semibold"
+                  style={{ color: '#556B2F' }}
+                >
                   Services sans catégorie
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-800">
                   {servicesWithoutCategory.length} service(s) n'ont pas encore
                   de catégorie assignée
                 </p>
@@ -211,14 +243,25 @@ export default function ServiceCategoriesPage() {
               {servicesWithoutCategory.slice(0, 6).map((service) => (
                 <div
                   key={service.id}
-                  className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200"
+                  className="flex items-center justify-between p-3 rounded-lg border"
+                  style={{ 
+                    backgroundColor: '#8B4513/5',
+                    borderColor: '#8B4513/20'
+                  }}
                 >
-                  <span className="text-sm font-medium text-yellow-800">
+                  <span 
+                    className="text-sm font-medium"
+                    style={{ color: '#8B4513' }}
+                  >
                     {service.libelle}
                   </span>
                   <Badge
                     variant="outline"
-                    className="bg-yellow-100 text-yellow-800 border-yellow-300"
+                    style={{ 
+                      backgroundColor: '#8B4513/10',
+                      color: '#8B4513',
+                      borderColor: '#8B4513/30'
+                    }}
                   >
                     Sans catégorie
                   </Badge>
@@ -226,7 +269,7 @@ export default function ServiceCategoriesPage() {
               ))}
               {servicesWithoutCategory.length > 6 && (
                 <div className="p-3 text-center">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-gray-800">
                     + {servicesWithoutCategory.length - 6} autre(s) service(s)
                   </span>
                 </div>
@@ -238,7 +281,10 @@ export default function ServiceCategoriesPage() {
                 onClick={() => setIsAssignModalOpen(true)}
                 variant="outline"
                 size="sm"
-                className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                style={{ 
+                  borderColor: '#8B4513/30',
+                  color: '#8B4513'
+                }}
               >
                 <Tag className="mr-2 h-4 w-4" />
                 Assigner les catégories
@@ -249,17 +295,29 @@ export default function ServiceCategoriesPage() {
       )}
 
       {/* Recherche et liste des catégories */}
-      <Card className="bg-card border-border">
+      <Card 
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
         <div className="p-6">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search 
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" 
+                style={{ color: '#8B4513' }}
+              />
               <Input
                 type="search"
                 placeholder="Rechercher une catégorie..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background border-input"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#556B2F'
+                }}
+                className="pl-10"
               />
             </div>
           </div>
@@ -267,7 +325,7 @@ export default function ServiceCategoriesPage() {
 
         <div className="p-6">
           {filteredCategories.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="text-center text-gray-800 py-8">
               {searchQuery
                 ? "Aucune catégorie trouvée pour votre recherche"
                 : "Aucune catégorie disponible"}
@@ -277,17 +335,27 @@ export default function ServiceCategoriesPage() {
               {filteredCategories.map((category) => (
                 <Card
                   key={category.id}
-                  className="border-border bg-card p-6 hover:shadow-lg transition-shadow"
+                  className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-[#6B8E23]"
+                  style={{ 
+                    backgroundColor: '#FFFFFF0',
+                    borderColor: '#D3D3D3'
+                  }}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-foreground text-lg mb-2">
+                      <h3 
+                        className="font-semibold text-lg mb-2"
+                        style={{ color: '#556B2F' }}
+                      >
                         {category.name}
                       </h3>
                       <div className="flex items-center gap-2">
                         <Badge
                           variant="secondary"
-                          className="bg-primary/10 text-primary"
+                          style={{ 
+                            backgroundColor: '#6B8E23/10',
+                            color: '#6B8E23'
+                          }}
                         >
                           {category._count?.services || 0} service(s)
                         </Badge>
@@ -295,22 +363,30 @@ export default function ServiceCategoriesPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                  <div className="flex gap-2 mt-4 pt-4 border-t" style={{ borderColor: '#D3D3D3' }}>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(category)}
-                      className="flex-1 border-border hover:bg-accent"
+                      className="flex-1 hover:bg-[#6B8E23]/10"
+                      style={{ 
+                        borderColor: '#D3D3D3',
+                        color: '#6B8E23'
+                      }}
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Modifier
                     </Button>
 
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDelete(category)}
-                      className="flex-1"
+                      className="flex-1 hover:bg-[#8B4513]/10"
+                      style={{ 
+                        borderColor: '#8B4513/30',
+                        color: '#8B4513'
+                      }}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Supprimer
