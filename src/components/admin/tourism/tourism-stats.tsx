@@ -129,11 +129,11 @@ export function TourismStats() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statsCards.map((stat) => (
-        <Card key={stat.label} className="p-6">
+        <Card key={stat.label} className="p-6 bg-white border-[#D3D3D3]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <stat.icon className="h-4 w-4 text-primary" />
+              <div className="p-2 bg-[#556B2F]/10 rounded-lg">
+                <stat.icon className="h-4 w-4 text-[#556B2F]" />
               </div>
             </div>
             <span className={`text-xs font-medium ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}>
@@ -141,7 +141,7 @@ export function TourismStats() {
             </span>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-2xl font-bold text-[#8B4513]">{stat.value}</div>
             <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
           </div>
         </Card>

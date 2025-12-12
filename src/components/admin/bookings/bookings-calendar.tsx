@@ -7,8 +7,6 @@ import api from "@/lib/api"
 interface Booking {
   id: string
   service: string
-
-  
   time: string
   date: string
   status: "confirmed" | "pending" | "cancelled"
@@ -19,9 +17,9 @@ interface Booking {
 }
 
 const statusColors = {
-  confirmed: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
-  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+  confirmed: "bg-[#6B8E23]/10 text-[#556B2F] border border-[#6B8E23]/20",
+  pending: "bg-[#8B4513]/10 text-[#8B4513] border border-[#8B4513]/20",
+  cancelled: "bg-[#D3D3D3]/10 text-[#8B4513]/70 border border-[#D3D3D3]",
 }
 
 const statusTranslations = {
@@ -173,28 +171,33 @@ export function BookingsCalendar() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border-border">
-        <div className="mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Prochaines réservations</h3>
+      <Card className="p-6 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#6B8E23]/10">
+            <Calendar className="h-5 w-5 text-[#6B8E23]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[#8B4513]">Prochaines réservations</h3>
+            <p className="text-sm text-[#8B4513]/60">Affiche les réservations confirmées à venir</p>
+          </div>
         </div>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[1, 2, 3, 4].map((index) => (
-            <div key={index} className="rounded-lg border border-border bg-background p-4 animate-pulse">
+            <div key={index} className="rounded-lg border border-[#D3D3D3]/50 bg-[#FFFFFF] p-4 animate-pulse">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
-                  <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                  <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                  <div className="h-4 w-32 bg-[#D3D3D3]/50 rounded"></div>
+                  <div className="h-3 w-24 bg-[#D3D3D3]/50 rounded"></div>
                 </div>
-                <div className="h-6 w-20 bg-gray-200 rounded"></div>
+                <div className="h-6 w-20 bg-[#D3D3D3]/50 rounded"></div>
               </div>
             </div>
           ))}
         </div>
         
-        <div className="flex items-center justify-center mt-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        <div className="flex items-center justify-center mt-6 text-sm text-[#8B4513]/60">
+          <Loader2 className="h-4 w-4 animate-spin mr-2 text-[#6B8E23]" />
           Chargement des réservations...
         </div>
       </Card>
@@ -202,41 +205,43 @@ export function BookingsCalendar() {
   }
 
   return (
-    <Card className="p-6 bg-card border-border">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Prochaines réservations</h3>
-          {upcomingBookings.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
-              {upcomingBookings.length}
-            </Badge>
-          )}
+    <Card className="p-6 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#6B8E23]/10">
+            <Calendar className="h-5 w-5 text-[#6B8E23]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[#8B4513]">Prochaines réservations</h3>
+            <p className="text-sm text-[#8B4513]/60">Affiche les réservations confirmées à venir</p>
+          </div>
         </div>
         
         <button 
           onClick={fetchUpcomingBookings}
           disabled={loading}
-          className="p-2 hover:bg-accent rounded-md transition-colors"
+          className="p-2 hover:bg-[#6B8E23]/10 rounded-lg transition-colors border border-[#D3D3D3]"
           title="Actualiser"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 text-[#8B4513] ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {error ? (
         <div className="text-center py-8">
-          <div className="text-red-600 mb-3">
-            <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">{error}</p>
+          <div className="text-[#8B4513] mb-3">
+            <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-[#8B4513]/10 mb-3">
+              <Calendar className="h-6 w-6 text-[#8B4513]" />
+            </div>
+            <p className="font-medium">Erreur de chargement</p>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Impossible de charger les réservations
+          <p className="text-sm text-[#8B4513]/70 mb-4">
+            Impossible de charger les réservations à venir
           </p>
           <button 
             onClick={fetchUpcomingBookings}
             disabled={loading}
-            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 text-sm disabled:opacity-50"
+            className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] text-sm disabled:opacity-50 transition-colors"
           >
             {loading ? (
               <>
@@ -249,43 +254,53 @@ export function BookingsCalendar() {
           </button>
         </div>
       ) : upcomingBookings.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p className="font-medium">Aucune réservation à venir</p>
+        <div className="text-center py-8 text-[#8B4513]/70">
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-[#6B8E23]/10 mb-3">
+            <Calendar className="h-6 w-6 text-[#6B8E23]" />
+          </div>
+          <p className="font-medium text-[#8B4513]">Aucune réservation à venir</p>
           <p className="text-sm">Les prochaines réservations apparaîtront ici</p>
           <button 
             onClick={fetchUpcomingBookings}
             disabled={loading}
-            className="mt-3 px-3 py-1 text-xs bg-accent text-accent-foreground rounded hover:bg-accent/80"
+            className="mt-4 px-3 py-1.5 text-sm bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] transition-colors"
           >
             Actualiser
           </button>
         </div>
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {upcomingBookings.map((booking) => (
-              <div key={booking.id} className="rounded-lg border border-border bg-background p-4 hover:bg-accent/50 transition-colors">
+              <div 
+                key={booking.id} 
+                className="rounded-lg border border-[#D3D3D3]/50 bg-[#FFFFFF] p-4 hover:border-[#6B8E23]/30 hover:shadow-sm transition-all duration-300"
+              >
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">{booking.service}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {booking.date} à {booking.time}
-                    </p>
+                  <div className="space-y-1.5">
+                    <p className="font-medium text-[#8B4513]">{booking.service}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-[#6B8E23] bg-[#6B8E23]/5 px-2 py-0.5 rounded">
+                        {booking.date}
+                      </span>
+                      <span className="text-sm text-[#8B4513]/70">à</span>
+                      <span className="text-sm font-medium text-[#8B4513] bg-[#8B4513]/5 px-2 py-0.5 rounded">
+                        {booking.time}
+                      </span>
+                    </div>
                     {booking.clientName && (
-                      <p className="text-xs text-muted-foreground">
-                        Client: {booking.clientName}
+                      <p className="text-xs text-[#8B4513]/60 pt-1">
+                        👤 Client: <span className="font-medium">{booking.clientName}</span>
                       </p>
                     )}
                     {booking.prestataireName && (
-                      <p className="text-xs text-muted-foreground">
-                        Prestataire: {booking.prestataireName}
+                      <p className="text-xs text-[#8B4513]/60">
+                        🏢 Prestataire: <span className="font-medium">{booking.prestataireName}</span>
                       </p>
                     )}
                   </div>
                   <Badge 
-                    variant="secondary" 
-                    className={statusColors[booking.status]}
+                    className={`${statusColors[booking.status]} font-medium text-xs px-2 py-1`}
                   >
                     {statusTranslations[booking.status]}
                   </Badge>
@@ -294,12 +309,12 @@ export function BookingsCalendar() {
             ))}
           </div>
 
-          <div className="mt-4 text-xs text-muted-foreground text-center">
-            {upcomingBookings.length} réservation(s) à venir • 
+          <div className="mt-6 pt-4 border-t border-[#D3D3D3]/50 text-xs text-[#8B4513]/60 text-center">
+            <span className="font-medium text-[#6B8E23]">{upcomingBookings.length}</span> réservation(s) à venir • 
             <button 
               onClick={fetchUpcomingBookings}
               disabled={loading}
-              className="ml-1 underline hover:text-foreground disabled:opacity-50"
+              className="ml-1 underline hover:text-[#8B4513] disabled:opacity-50 transition-colors"
             >
               Actualiser
             </button>

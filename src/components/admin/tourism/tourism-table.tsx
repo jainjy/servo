@@ -118,9 +118,9 @@ export function TourismTable() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
-      active: { label: "Actif", className: "bg-success/20 text-success" },
-      suspended: { label: "Suspendu", className: "bg-destructive/20 text-destructive" },
-      draft: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
+      active: { label: "Actif", className: "bg-green-100 text-green-800" },
+      suspended: { label: "Suspendu", className: "bg-red-100 text-red-800" },
+      draft: { label: "Brouillon", className: "bg-gray-100 text-gray-800" },
     }
     const config = variants[status] || variants.active
     return <Badge className={config.className}>{config.label}</Badge>
@@ -158,18 +158,18 @@ export function TourismTable() {
 
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="p-6 bg-white border-[#D3D3D3]">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Rechercher une expérience..."
                 disabled
-                className="pl-10"
+                className="pl-10 border-[#D3D3D3]"
               />
             </div>
-            <Button variant="outline" size="sm" disabled>
+            <Button variant="outline" size="sm" disabled className="border-[#D3D3D3] text-[#8B4513]">
               <Filter className="h-4 w-4 mr-2" />
               Filtres
             </Button>
@@ -178,21 +178,21 @@ export function TourismTable() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((index) => (
-            <Card key={index} className="p-6 animate-pulse">
+            <Card key={index} className="p-6 bg-white border-[#D3D3D3] animate-pulse">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-48 bg-muted rounded"></div>
-                  <div className="h-3 w-20 bg-muted rounded"></div>
+                  <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                  <div className="h-3 w-20 bg-gray-200 rounded"></div>
                   <div className="flex gap-2">
-                    <div className="h-6 w-20 bg-muted rounded"></div>
-                    <div className="h-6 w-20 bg-muted rounded"></div>
+                    <div className="h-6 w-20 bg-gray-200 rounded"></div>
+                    <div className="h-6 w-20 bg-gray-200 rounded"></div>
                   </div>
                 </div>
               </div>
               <div className="space-y-3 mb-4">
-                <div className="h-3 w-32 bg-muted rounded"></div>
-                <div className="h-3 w-40 bg-muted rounded"></div>
-                <div className="h-3 w-24 bg-muted rounded"></div>
+                <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                <div className="h-3 w-40 bg-gray-200 rounded"></div>
+                <div className="h-3 w-24 bg-gray-200 rounded"></div>
               </div>
             </Card>
           ))}
@@ -203,19 +203,19 @@ export function TourismTable() {
 
   if (error) {
     return (
-      <Card className="p-6">
+      <Card className="p-6 bg-white border-[#D3D3D3]">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Rechercher une expérience..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-[#D3D3D3]"
               />
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-[#D3D3D3] text-[#8B4513]">
               <Filter className="h-4 w-4 mr-2" />
               Filtres
             </Button>
@@ -224,7 +224,10 @@ export function TourismTable() {
 
         <div className="text-center py-12">
           <p className="text-red-600 font-medium mb-4">{error}</p>
-          <Button onClick={fetchExperiences} className="bg-success hover:bg-success/90">
+          <Button 
+            onClick={fetchExperiences} 
+            className="bg-[#556B2F] text-white hover:bg-[#6B8E23]"
+          >
             Réessayer
           </Button>
         </div>
@@ -234,39 +237,41 @@ export function TourismTable() {
 
   return (
     <>
-      <Card className="p-6">
+      <Card className="p-6 bg-white border-[#D3D3D3]">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4 flex-1">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Rechercher une expérience..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]"
               />
             </div>
             <Button 
               variant="outline" 
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
+              className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#556B2F]/10"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filtres
-              {hasActiveFilters && <Badge className="ml-2 bg-primary text-white">✓</Badge>}
+              {hasActiveFilters && <Badge className="ml-2 bg-[#556B2F] text-white">✓</Badge>}
             </Button>
           </div>
         </div>
 
         {showFilters && (
-          <div className="mb-6 p-4 bg-muted/30 rounded-lg space-y-4 border border-border">
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4 border border-[#D3D3D3]">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-foreground">Filtrer par:</h3>
+              <h3 className="font-semibold text-[#8B4513]">Filtrer par:</h3>
               {hasActiveFilters && (
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={clearFilters}
+                  className="border-[#D3D3D3] text-[#8B4513] hover:bg-[#556B2F]/10"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Réinitialiser
@@ -276,12 +281,12 @@ export function TourismTable() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Type</label>
+                <label className="text-sm font-semibold text-[#8B4513]">Type</label>
                 <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="bg-background border-input">
+                  <SelectTrigger className="bg-white border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                     <SelectValue placeholder="Tous les types" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-[#D3D3D3]">
                     <SelectItem value="">Tous les types</SelectItem>
                     {uniqueTypes.map(type => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
@@ -291,12 +296,12 @@ export function TourismTable() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Statut</label>
+                <label className="text-sm font-semibold text-[#8B4513]">Statut</label>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="bg-background border-input">
+                  <SelectTrigger className="bg-white border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                     <SelectValue placeholder="Tous les statuts" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-[#D3D3D3]">
                     <SelectItem value="">Tous les statuts</SelectItem>
                     {uniqueStatuses.map(status => (
                       <SelectItem key={status} value={status}>
@@ -308,12 +313,12 @@ export function TourismTable() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Localisation</label>
+                <label className="text-sm font-semibold text-[#8B4513]">Localisation</label>
                 <Select value={filterLocation} onValueChange={setFilterLocation}>
-                  <SelectTrigger className="bg-background border-input">
+                  <SelectTrigger className="bg-white border-[#D3D3D3] focus:border-[#556B2F] focus:ring-[#556B2F]">
                     <SelectValue placeholder="Tous les lieux" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border-[#D3D3D3]">
                     <SelectItem value="">Tous les lieux</SelectItem>
                     {uniqueLocations.map(location => (
                       <SelectItem key={location} value={location}>{location}</SelectItem>
@@ -326,22 +331,22 @@ export function TourismTable() {
         )}
 
         {filteredExperiences.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="text-center py-12 text-gray-500">
             <p className="font-medium">Aucune expérience trouvée</p>
             <p className="text-sm">Essayez de modifier vos critères de recherche</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredExperiences.map((experience) => (
-              <Card key={experience.id} className="p-6 hover:shadow-lg transition-shadow">
+              <Card key={experience.id} className="p-6 bg-white border-[#D3D3D3] hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+                    <h3 className="font-semibold text-[#8B4513] line-clamp-2 mb-1">
                       {experience.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-2">ID: {experience.id}</p>
+                    <p className="text-sm text-gray-500 mb-2">ID: {experience.id}</p>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#8B4513]">
                         {experience.category}
                       </Badge>
                       {getStatusBadge(experience.status)}
@@ -350,51 +355,51 @@ export function TourismTable() {
                 </div>
 
                 <div className="space-y-3 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <MapPin className="h-4 w-4" />
                     <span>{experience.location}</span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Prestataire:</span>
-                    <span className="text-sm font-medium text-foreground">{experience.provider}</span>
+                    <span className="text-sm text-gray-600">Prestataire:</span>
+                    <span className="text-sm font-medium text-[#8B4513]">{experience.provider}</span>
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Prix:</span>
-                    <span className="text-lg font-bold text-foreground">€{experience.price}</span>
+                    <span className="text-sm text-gray-600">Prix:</span>
+                    <span className="text-lg font-bold text-[#556B2F]">€{experience.price}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">{experience.duration}</span>
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">{experience.duration}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">{experience.capacity} max</span>
+                        <Users className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">{experience.capacity} max</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-border">
+                  <div className="flex justify-between items-center pt-2 border-t border-[#D3D3D3]">
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                      <span className="text-sm font-medium text-foreground">{experience.rating}</span>
+                      <span className="text-sm font-medium text-[#8B4513]">{experience.rating}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-gray-600">
                       {experience.bookings} réservations
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t border-border">
+                <div className="flex gap-2 pt-4 border-t border-[#D3D3D3]">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleView(experience)}
-                    className="flex-1"
+                    className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#556B2F]/10"
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Voir
@@ -405,6 +410,7 @@ export function TourismTable() {
                     size="sm"
                     onClick={() => handleDelete(experience)}
                     disabled={deletingId === experience.id}
+                    className="bg-red-500 hover:bg-red-600 text-white"
                   >
                     {deletingId === experience.id ? (
                       <>
@@ -424,9 +430,9 @@ export function TourismTable() {
       </Card>
 
       <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
-        <DialogContent className="max-w-2xl bg-card border-border">
+        <DialogContent className="max-w-2xl bg-white border-[#D3D3D3]">
           <DialogHeader>
-            <DialogTitle className="text-foreground flex items-center gap-2">
+            <DialogTitle className="text-[#8B4513] flex items-center gap-2">
               <Eye className="h-5 w-5" />
               Détails de l'expérience
             </DialogTitle>
@@ -436,44 +442,46 @@ export function TourismTable() {
             <div className="space-y-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">{selectedExperience.name}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">ID: {selectedExperience.id}</p>
+                  <h2 className="text-xl font-bold text-[#8B4513]">{selectedExperience.name}</h2>
+                  <p className="text-sm text-gray-500 mt-1">ID: {selectedExperience.id}</p>
                   <div className="flex items-center gap-2 mt-3">
-                    <Badge variant="outline">{selectedExperience.category}</Badge>
+                    <Badge variant="outline" className="border-[#D3D3D3] text-[#8B4513]">
+                      {selectedExperience.category}
+                    </Badge>
                     {getStatusBadge(selectedExperience.status)}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-foreground">€{selectedExperience.price}</p>
-                  <p className="text-xs text-muted-foreground">Prix par personne</p>
+                  <p className="text-3xl font-bold text-[#556B2F]">€{selectedExperience.price}</p>
+                  <p className="text-xs text-gray-500">Prix par personne</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground font-semibold">LOCALISATION</p>
-                  <p className="text-foreground font-medium flex items-center gap-2">
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-[#D3D3D3]">
+                  <p className="text-xs text-gray-500 font-semibold">LOCALISATION</p>
+                  <p className="text-[#8B4513] font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     {selectedExperience.location}
                   </p>
                 </div>
 
-                <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground font-semibold">PRESTATAIRE</p>
-                  <p className="text-foreground font-medium">{selectedExperience.provider}</p>
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-[#D3D3D3]">
+                  <p className="text-xs text-gray-500 font-semibold">PRESTATAIRE</p>
+                  <p className="text-[#8B4513] font-medium">{selectedExperience.provider}</p>
                 </div>
 
-                <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground font-semibold">DURÉE</p>
-                  <p className="text-foreground font-medium flex items-center gap-2">
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-[#D3D3D3]">
+                  <p className="text-xs text-gray-500 font-semibold">DURÉE</p>
+                  <p className="text-[#8B4513] font-medium flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     {selectedExperience.duration}
                   </p>
                 </div>
 
-                <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground font-semibold">CAPACITÉ</p>
-                  <p className="text-foreground font-medium flex items-center gap-2">
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-[#D3D3D3]">
+                  <p className="text-xs text-gray-500 font-semibold">CAPACITÉ</p>
+                  <p className="text-[#8B4513] font-medium flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     {selectedExperience.capacity} participants max
                   </p>
@@ -481,25 +489,25 @@ export function TourismTable() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground font-semibold">RÉSERVATIONS</p>
-                  <p className="text-2xl font-bold text-foreground">{selectedExperience.bookings}</p>
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-[#D3D3D3]">
+                  <p className="text-xs text-gray-500 font-semibold">RÉSERVATIONS</p>
+                  <p className="text-2xl font-bold text-[#8B4513]">{selectedExperience.bookings}</p>
                 </div>
 
-                <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-xs text-muted-foreground font-semibold">NOTE MOYENNE</p>
-                  <p className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-[#D3D3D3]">
+                  <p className="text-xs text-gray-500 font-semibold">NOTE MOYENNE</p>
+                  <p className="text-2xl font-bold text-[#8B4513] flex items-center gap-2">
                     <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
                     {selectedExperience.rating}/5
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4 border-t border-border">
+              <div className="flex gap-2 pt-4 border-t border-[#D3D3D3]">
                 <Button
                   variant="outline"
                   onClick={() => setViewModalOpen(false)}
-                  className="flex-1 border-border"
+                  className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#556B2F]/10"
                 >
                   Fermer
                 </Button>
