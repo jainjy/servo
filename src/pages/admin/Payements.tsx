@@ -6,8 +6,8 @@ const PaymentsPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Paiements & Transactions</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold text-[#556B2F]">Paiements & Transactions</h1>
+        <p className="text-[#8B4513] mt-1">
           Gérez les transactions, remboursements et méthodes de paiement
         </p>
       </div>

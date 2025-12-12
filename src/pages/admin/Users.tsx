@@ -10,10 +10,10 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row  items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Utilisateurs</h1>
-          <p className="text-muted-foreground">Gérer tous les utilisateurs de la plateforme</p>
+          <h1 className="text-3xl font-bold tracking-tight text-[#556B2F]">Utilisateurs</h1>
+          <p className="text-[#8B4513]">Gérer tous les utilisateurs de la plateforme</p>
         </div>
-        {/* <Button onClick={() => setIsModalOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        {/* <Button onClick={() => setIsModalOpen(true)} className="bg-[#6B8E23] text-white hover:bg-[#556B2F]">
           <Plus className="mr-2 h-4 w-4" />
           Nouvel utilisateur
         </Button> */}

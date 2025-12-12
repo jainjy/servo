@@ -34,12 +34,11 @@ const ListingsPage = () => {
       <div className="flex flex-col md:flex-row items-center justify-between">
         <div>
           <h1 
-            className="text-3xl font-bold tracking-tight"
-            style={{ color: colors.primaryDark }}
+            className="text-3xl font-bold tracking-tight text-[#6B8E23]"
           >
             Annonces immobilières
           </h1>
-          <p style={{ color: colors.textSecondary }}>
+          <p className="text-[#8B4513]">
             Gérer toutes les annonces de la plateforme
           </p>
         </div>
