@@ -17,13 +17,14 @@ interface Activity {
   userEmail?: string
 }
 
+// Mise à jour des couleurs avec le thème OLIVEST
 const typeColors = {
-  listing: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
-  booking: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-  vendor: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
-  review: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
-  profile: "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300",
-  user: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+  listing: "bg-[#6B8E23]/20 text-[#6B8E23] border border-[#6B8E23]/30",
+  booking: "bg-[#556B2F]/20 text-[#556B2F] border border-[#556B2F]/30",
+  vendor: "bg-[#8B4513]/20 text-[#8B4513] border border-[#8B4513]/30",
+  review: "bg-[#D2691E]/20 text-[#D2691E] border border-[#D2691E]/30",
+  profile: "bg-[#D3D3D3] text-gray-700 border border-[#D3D3D3]/50",
+  user: "bg-[#556B2F]/20 text-[#556B2F] border border-[#556B2F]/30",
 }
 
 export function RecentActivity() {
@@ -329,22 +330,22 @@ export function RecentActivity() {
 
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="p-6 bg-[#FFFFF0] border border-[#D3D3D3] shadow-lg">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold">Activité récente</h3>
-          <p className="text-sm text-muted-foreground">Chargement des activités...</p>
+          <h3 className="text-lg font-semibold text-[#8B4513]">Activité récente</h3>
+          <p className="text-sm text-gray-600">Chargement des activités...</p>
         </div>
         <div className="space-y-4">
           {[1, 2, 3, 4, 5].map((index) => (
-            <div key={index} className="flex items-start gap-4 p-4 border rounded-lg animate-pulse">
-              <div className="w-10 h-10 rounded-full bg-gray-200"></div>
+            <div key={index} className="flex items-start gap-4 p-4 border border-[#D3D3D3] rounded-lg animate-pulse">
+              <div className="w-10 h-10 rounded-full bg-[#D3D3D3]"></div>
               <div className="flex-1 space-y-2">
                 <div className="flex gap-2">
-                  <div className="w-24 h-4 bg-gray-200 rounded"></div>
-                  <div className="w-16 h-5 bg-gray-200 rounded"></div>
+                  <div className="w-24 h-4 bg-[#D3D3D3] rounded"></div>
+                  <div className="w-16 h-5 bg-[#D3D3D3] rounded"></div>
                 </div>
-                <div className="w-48 h-3 bg-gray-200 rounded"></div>
-                <div className="w-20 h-3 bg-gray-200 rounded"></div>
+                <div className="w-48 h-3 bg-[#D3D3D3] rounded"></div>
+                <div className="w-20 h-3 bg-[#D3D3D3] rounded"></div>
               </div>
             </div>
           ))}
@@ -355,16 +356,16 @@ export function RecentActivity() {
 
   if (error && activities.length === 0) {
     return (
-      <Card className="p-6">
+      <Card className="p-6 bg-[#FFFFF0] border border-[#D3D3D3] shadow-lg">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold">Activité récente</h3>
-          <p className="text-sm text-muted-foreground">Erreur de chargement</p>
+          <h3 className="text-lg font-semibold text-[#8B4513]">Activité récente</h3>
+          <p className="text-sm text-gray-600">Erreur de chargement</p>
         </div>
         <div className="text-center py-8 text-red-600">
           <p>{error}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-all duration-300"
           >
             Réessayer
           </button>
@@ -374,28 +375,28 @@ export function RecentActivity() {
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-[#FFFFF0] border border-[#D3D3D3] shadow-lg">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold">Activité récente</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-lg font-semibold text-[#8B4513]">Activité récente</h3>
+        <p className="text-sm text-gray-600">
           {activities.length > 0 
             ? `${activities.length} activités trouvées` 
             : "Aucune activité récente"
           }
         </p>
         {activities.length > 0 && (
-          <div className="mt-1 text-xs text-blue-600">
+          <div className="mt-1 text-xs text-[#6B8E23]">
             Données en temps réel • Actualisé maintenant
           </div>
         )}
       </div>
 
       {activities.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        <div className="text-center py-8 text-gray-600">
           <p>Aucune activité récente à afficher</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+            className="mt-2 text-sm text-[#556B2F] hover:text-[#6B8E23] transition-colors"
           >
             Actualiser
           </button>
@@ -403,9 +404,9 @@ export function RecentActivity() {
       ) : (
         <div className="space-y-4 max-h-[600px] overflow-y-auto">
           {activities.map((activity) => (
-            <div key={`${activity.type}-${activity.id}`} className="flex items-start gap-4 p-4 border rounded-lg">
+            <div key={`${activity.type}-${activity.id}`} className="flex items-start gap-4 p-4 border border-[#D3D3D3] rounded-lg hover:border-[#556B2F]/30 transition-all duration-300">
               <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-blue-100 text-blue-800 font-semibold">
+                <AvatarFallback className="bg-[#556B2F]/10 text-[#556B2F] font-semibold">
                   {activity.user
                     .split(" ")
                     .map((n) => n[0]?.toUpperCase() || 'U')
@@ -415,15 +416,15 @@ export function RecentActivity() {
               </Avatar>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium">{activity.user}</span>
+                  <span className="font-medium text-gray-900">{activity.user}</span>
                   <Badge variant="secondary" className={`text-xs ${typeColors[activity.type]}`}>
                     {getTranslatedType(activity.type)}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {activity.action} <span className="font-medium">{activity.target}</span>
+                <p className="text-sm text-gray-700">
+                  {activity.action} <span className="font-medium text-[#8B4513]">{activity.target}</span>
                 </p>
-                <p className="text-xs text-muted-foreground">{activity.time}</p>
+                <p className="text-xs text-gray-500">{activity.time}</p>
               </div>
             </div>
           ))}

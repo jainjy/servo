@@ -30,7 +30,6 @@ export function StatsCards() {
         setLoading(true)
         setError(null)
         
-        // Appeler les différentes APIs pour récupérer toutes les statistiques
         const [usersStats, tourismeStats, bookingsStats, demandesStats] = await Promise.all([
           api.get('/users/stats').catch(() => ({ data: { total: 0, active: 0 } })),
           api.get('/admin/tourisme/stats').catch(() => ({ 
@@ -68,22 +67,12 @@ export function StatsCards() {
           demandes: demandesStats.data
         })
 
-        // Traitement des données pour les adapter à l'interface
         const processedData: StatsData = {
-          // Utilisateurs actifs (depuis users/stats)
           activeUsers: usersStats.data?.active || usersStats.data?.total || 0,
-          
-          // Annonces publiées (depuis admin/tourisme/stats)
           publishedListings: tourismeStats.data?.data?.totalListings || 0,
-          
-          // Réservations (depuis admin/bookings/stats)
           bookings: bookingsStats.data?.data?.total || 0,
-          
-          // Revenus (depuis admin/bookings/stats)
           revenue: bookingsStats.data?.data?.revenue || 0,
-          
-          // Croissances (calculées ou par défaut)
-          userGrowth: 0.1, // Par défaut en attendant les vraies données
+          userGrowth: 0.1,
           listingGrowth: 0.05,
           bookingGrowth: 0.15,
           revenueGrowth: 0.2
@@ -101,7 +90,6 @@ export function StatsCards() {
     fetchStats()
   }, [])
 
-  // Fonction pour formater les pourcentages de croissance
   const formatGrowth = (growth: number | undefined): string => {
     if (growth === undefined || growth === null) return "+0.0%"
     
@@ -109,10 +97,9 @@ export function StatsCards() {
     return `${sign}${(growth * 100).toFixed(1)}%`
   }
 
-  // Fonction pour déterminer la couleur en fonction de la tendance
   const getTrendColor = (growth: number | undefined): string => {
-    if (growth === undefined || growth === null) return "text-muted-foreground"
-    return growth >= 0 ? "text-green-600" : "text-red-600"
+    if (growth === undefined || growth === null) return "text-[#D3D3D3]"
+    return growth >= 0 ? "text-[#556B2F]" : "text-red-600"
   }
 
   const statsCards = [
@@ -122,7 +109,8 @@ export function StatsCards() {
       change: formatGrowth(stats.userGrowth),
       trend: stats.userGrowth && stats.userGrowth >= 0 ? "up" : "down",
       icon: Users,
-      growth: stats.userGrowth
+      growth: stats.userGrowth,
+      accentColor: "bg-[#556B2F]/10"
     },
     {
       name: "Annonces publiées",
@@ -130,7 +118,8 @@ export function StatsCards() {
       change: formatGrowth(stats.listingGrowth),
       trend: stats.listingGrowth && stats.listingGrowth >= 0 ? "up" : "down",
       icon: Building2,
-      growth: stats.listingGrowth
+      growth: stats.listingGrowth,
+      accentColor: "bg-[#6B8E23]/10"
     },
     {
       name: "Réservations",
@@ -138,7 +127,8 @@ export function StatsCards() {
       change: formatGrowth(stats.bookingGrowth),
       trend: stats.bookingGrowth && stats.bookingGrowth >= 0 ? "up" : "down",
       icon: Calendar,
-      growth: stats.bookingGrowth
+      growth: stats.bookingGrowth,
+      accentColor: "bg-[#8B4513]/10"
     },
     {
       name: "Revenus (€)",
@@ -146,7 +136,8 @@ export function StatsCards() {
       change: formatGrowth(stats.revenueGrowth),
       trend: stats.revenueGrowth && stats.revenueGrowth >= 0 ? "up" : "down",
       icon: TrendingUp,
-      growth: stats.revenueGrowth
+      growth: stats.revenueGrowth,
+      accentColor: "bg-[#556B2F]/10"
     },
   ]
 
@@ -154,16 +145,17 @@ export function StatsCards() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="p-6 bg-card border-border">
-            <div className="animate-pulse">
-              <div className="flex items-center justify-between">
-                <div className="h-12 w-12 rounded-lg bg-gray-300"></div>
-                <div className="h-4 w-16 bg-gray-300 rounded"></div>
-              </div>
-              <div className="mt-4">
-                <div className="h-4 w-24 bg-gray-300 rounded mb-2"></div>
-                <div className="h-6 w-16 bg-gray-300 rounded"></div>
-              </div>
+          <Card 
+            key={index} 
+            className="p-6 bg-[#FFFFF0] border-[#D3D3D3] animate-pulse hover:border-[#556B2F]/30 transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-12 w-12 rounded-lg bg-[#D3D3D3]"></div>
+              <div className="h-4 w-16 bg-[#D3D3D3] rounded"></div>
+            </div>
+            <div className="mt-4">
+              <div className="h-4 w-24 bg-[#D3D3D3] rounded mb-2"></div>
+              <div className="h-6 w-16 bg-[#D3D3D3] rounded"></div>
             </div>
           </Card>
         ))}
@@ -174,12 +166,12 @@ export function StatsCards() {
   if (error) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6 bg-card border-border col-span-4">
+        <Card className="p-6 bg-[#FFFFF0] border-[#D3D3D3] col-span-4 hover:shadow-lg transition-all">
           <div className="text-center text-red-600">
             <p>{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              className="mt-4 px-6 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors shadow-sm hover:shadow"
             >
               Réessayer
             </button>
@@ -192,18 +184,36 @@ export function StatsCards() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statsCards.map((stat) => (
-        <Card key={stat.name} className="p-6 bg-card border-border hover:shadow-md transition-shadow">
+        <Card 
+          key={stat.name} 
+          className="p-6 bg-[#FFFFF0] border-[#D3D3D3] hover:border-[#556B2F]/30 hover:shadow-lg transition-all duration-300 group"
+        >
           <div className="flex items-center justify-between">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <stat.icon className="h-6 w-6 text-primary" />
+            <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.accentColor} group-hover:scale-105 transition-transform`}>
+              <stat.icon className="h-6 w-6 text-[#556B2F]" />
             </div>
             <span className={`text-sm font-medium ${getTrendColor(stat.growth)}`}>
               {stat.change}
             </span>
           </div>
           <div className="mt-4">
-            <p className="text-sm font-medium text-muted-foreground">{stat.name}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{stat.value}</p>
+            <p className="text-sm font-medium text-[#8B4513]">{stat.name}</p>
+            <p className="mt-1 text-2xl font-bold text-[#556B2F]">{stat.value}</p>
+          </div>
+          
+          {/* Barre de progression subtile */}
+          <div className="mt-3 h-1 w-full bg-[#D3D3D3] rounded-full overflow-hidden">
+            <div 
+              className={`h-full ${
+                stat.name === "Utilisateurs actifs" ? "bg-[#556B2F]" :
+                stat.name === "Annonces publiées" ? "bg-[#6B8E23]" :
+                stat.name === "Réservations" ? "bg-[#8B4513]" :
+                "bg-[#556B2F]"
+              } rounded-full transition-all duration-700`}
+              style={{ 
+                width: stat.growth ? `${Math.min(Math.abs(stat.growth) * 100, 100)}%` : "0%" 
+              }}
+            ></div>
           </div>
         </Card>
       ))}

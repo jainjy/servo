@@ -9,7 +9,7 @@ interface ChartData {
   users: number
   bookings: number
   revenue: number
-  sortableDate: Date // Ajout pour le tri
+  sortableDate: Date
 }
 
 interface AnalyticsData {
@@ -33,7 +33,6 @@ export function PerformanceCharts() {
         setLoading(true)
         setError(null)
 
-        // Récupérer les données des réservations pour les 7 derniers jours
         const [bookingsResponse, usersResponse] = await Promise.all([
           api.get('/admin/bookings/analytics?period=week'),
           api.get('/users/stats?period=week')
@@ -42,7 +41,6 @@ export function PerformanceCharts() {
         const bookingsData: AnalyticsData = bookingsResponse.data.data
         console.log("Données analytics reçues:", bookingsData)
 
-        // Transformer les données pour le graphique
         const chartData = transformDataForCharts(bookingsData.monthly)
         setData(chartData)
 
@@ -57,23 +55,20 @@ export function PerformanceCharts() {
     fetchChartData()
   }, [])
 
-  // Fonction pour transformer les données de l'API en format graphique
   const transformDataForCharts = (weeklyData: any[]): ChartData[] => {
     if (!weeklyData || weeklyData.length === 0) {
       return generateDefaultData()
     }
 
-    // Créer un tableau des 7 derniers jours
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date()
-      date.setDate(date.getDate() - (6 - i)) // Du jour -6 à aujourd'hui
+      date.setDate(date.getDate() - (6 - i))
       return date
     })
 
-    // Grouper les données par date
     const dataByDate = weeklyData.reduce((acc: any, item: any) => {
       const itemDate = new Date(item.createdAt)
-      const dateKey = itemDate.toISOString().split('T')[0] // Format YYYY-MM-DD
+      const dateKey = itemDate.toISOString().split('T')[0]
       
       if (!acc[dateKey]) {
         acc[dateKey] = {
@@ -86,13 +81,11 @@ export function PerformanceCharts() {
 
       acc[dateKey].bookings += item._count?.id || 0
       acc[dateKey].revenue += item._sum?.totalAmount || 0
-      // Pour les utilisateurs, vous devrez adapter selon votre API
       acc[dateKey].users += Math.floor(Math.random() * 20) + 10
 
       return acc
     }, {})
 
-    // Combler les jours manquants avec des zéros et formater
     const chartData = last7Days.map(date => {
       const dateKey = date.toISOString().split('T')[0]
       const dayData = dataByDate[dateKey]
@@ -102,18 +95,16 @@ export function PerformanceCharts() {
           day: '2-digit', 
           month: 'short' 
         }),
-        sortableDate: date, // Garder la date pour le tri
+        sortableDate: date,
         users: dayData?.users || 0,
         bookings: dayData?.bookings || 0,
         revenue: dayData?.revenue || 0
       }
     })
 
-    // Trier par date (au cas où)
     return chartData.sort((a, b) => a.sortableDate.getTime() - b.sortableDate.getTime())
   }
 
-  // Générer des données par défaut si l'API ne renvoie rien
   const generateDefaultData = (): ChartData[] => {
     const dates = []
     const today = new Date()
@@ -130,7 +121,6 @@ export function PerformanceCharts() {
       })
     }
 
-    // Trier par date
     dates.sort((a, b) => a.sortableDate.getTime() - b.sortableDate.getTime())
 
     return dates.map(item => ({
@@ -142,7 +132,6 @@ export function PerformanceCharts() {
     }))
   }
 
-  // Fonction pour formater les données sans la propriété sortableDate pour le graphique
   const getChartData = () => {
     return data.map(({ sortableDate, ...rest }) => rest)
   }
@@ -151,15 +140,15 @@ export function PerformanceCharts() {
     return (
       <div className="grid gap-4 md:grid-cols-2">
         {Array.from({ length: 2 }).map((_, index) => (
-          <Card key={index} className="p-6 bg-card border-border">
+          <Card key={index} className="p-6 bg-[#FFFFF0] border-[#D3D3D3] hover:border-[#556B2F]/30 transition-colors">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-lg font-semibold text-[#556B2F]">
                 {index === 0 ? "Utilisateurs actifs" : "Réservations"}
               </h3>
-              <p className="text-sm text-muted-foreground">Évolution sur les 7 derniers jours</p>
+              <p className="text-sm text-[#8B4513]">Évolution sur les 7 derniers jours</p>
             </div>
             <div className="h-[200px] flex items-center justify-center">
-              <div className="animate-pulse text-muted-foreground">Chargement...</div>
+              <div className="animate-pulse text-[#8B4513]">Chargement...</div>
             </div>
           </Card>
         ))}
@@ -170,12 +159,12 @@ export function PerformanceCharts() {
   if (error) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="p-6 bg-card border-border col-span-2">
+        <Card className="p-6 bg-[#FFFFF0] border-[#D3D3D3] col-span-2 hover:shadow-lg transition-all">
           <div className="text-center text-red-600">
             <p>{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              className="mt-4 px-6 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors shadow-sm hover:shadow"
             >
               Réessayer
             </button>
@@ -189,16 +178,17 @@ export function PerformanceCharts() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card className="p-6 bg-card border-border">
+      {/* Graphique Utilisateurs */}
+      <Card className="p-6 bg-[#FFFFF0] border-[#D3D3D3] hover:border-[#556B2F]/30 hover:shadow-lg transition-all duration-300">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Utilisateurs actifs</h3>
-          <p className="text-sm text-muted-foreground">Évolution sur les 7 derniers jours</p>
+          <h3 className="text-lg font-semibold text-[#556B2F]">Utilisateurs actifs</h3>
+          <p className="text-sm text-[#8B4513]">Évolution sur les 7 derniers jours</p>
         </div>
         <ChartContainer
           config={{
             users: {
               label: "Utilisateurs",
-              color: "hsl(var(--chart-1))",
+              color: "#556B2F", // Vert olive profond
             },
           }}
           className="h-[200px] lg:w-full w-64"
@@ -207,43 +197,65 @@ export function PerformanceCharts() {
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#556B2F" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#556B2F" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="#D3D3D3" 
+                strokeOpacity={0.5}
+              />
               <XAxis 
                 dataKey="date" 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#8B4513" 
                 fontSize={12} 
+                strokeWidth={0.5}
               />
               <YAxis 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#8B4513" 
                 fontSize={12} 
+                strokeWidth={0.5}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip 
+                content={<ChartTooltipContent />}
+                contentStyle={{
+                  backgroundColor: '#FFFFF0',
+                  border: '1px solid #D3D3D3',
+                  borderRadius: '6px',
+                  color: '#556B2F'
+                }}
+              />
               <Area
                 type="monotone"
                 dataKey="users"
-                stroke="hsl(var(--chart-1))"
+                stroke="#556B2F"
+                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorUsers)"
+                activeDot={{
+                  r: 4,
+                  fill: "#556B2F",
+                  stroke: "#FFFFF0",
+                  strokeWidth: 2
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </ChartContainer>
       </Card>
 
-      <Card className="p-6 bg-card border-border">
+      {/* Graphique Réservations */}
+      <Card className="p-6 bg-[#FFFFF0] border-[#D3D3D3] hover:border-[#556B2F]/30 hover:shadow-lg transition-all duration-300">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Réservations</h3>
-          <p className="text-sm text-muted-foreground">Évolution sur les 7 derniers jours</p>
+          <h3 className="text-lg font-semibold text-[#556B2F]">Réservations</h3>
+          <p className="text-sm text-[#8B4513]">Évolution sur les 7 derniers jours</p>
         </div>
         <ChartContainer
           config={{
             bookings: {
               label: "Réservations",
-              color: "hsl(var(--chart-2))",
+              color: "#6B8E23", // Vert olive clair
             },
           }}
           className="h-[200px] lg:w-full w-64"
@@ -252,27 +264,48 @@ export function PerformanceCharts() {
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#6B8E23" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#6B8E23" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="#D3D3D3" 
+                strokeOpacity={0.5}
+              />
               <XAxis 
                 dataKey="date" 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#8B4513" 
                 fontSize={12} 
+                strokeWidth={0.5}
               />
               <YAxis 
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="#8B4513" 
                 fontSize={12} 
+                strokeWidth={0.5}
               />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartTooltip 
+                content={<ChartTooltipContent />}
+                contentStyle={{
+                  backgroundColor: '#FFFFF0',
+                  border: '1px solid #D3D3D3',
+                  borderRadius: '6px',
+                  color: '#6B8E23'
+                }}
+              />
               <Area
                 type="monotone"
                 dataKey="bookings"
-                stroke="hsl(var(--chart-2))"
+                stroke="#6B8E23"
+                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorBookings)"
+                activeDot={{
+                  r: 4,
+                  fill: "#6B8E23",
+                  stroke: "#FFFFF0",
+                  strokeWidth: 2
+                }}
               />
             </AreaChart>
           </ResponsiveContainer>
