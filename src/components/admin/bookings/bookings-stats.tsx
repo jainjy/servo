@@ -63,7 +63,7 @@ export function BookingsStats() {
       name: "Total réservations",
       value: stats.total.toLocaleString(),
       icon: Calendar,
-      color: "text-[#6B8E23]", // primary-dark
+      color: "text-blue-500",
       bgColor: "bg-[#6B8E23]/10",
     },
     {
@@ -93,7 +93,7 @@ export function BookingsStats() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="p-6 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm">
+          <Card key={index} className="p-6 bg-white border-[#D3D3D3]">
             <div className="animate-pulse">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-lg bg-[#D3D3D3]/50"></div>
@@ -112,12 +112,12 @@ export function BookingsStats() {
   if (error) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm col-span-4">
-          <div className="text-center text-[#8B4513]">
-            <p className="font-medium">{error}</p>
+        <Card className="p-6 bg-white border-[#D3D3D3] col-span-4">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-3 px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] transition-colors font-medium"
+              className="mt-2 px-4 py-2 bg-[#556B2F] text-white rounded hover:bg-[#6B8E23]"
             >
               Réessayer
             </button>
@@ -130,17 +130,14 @@ export function BookingsStats() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statsCards.map((stat) => (
-        <Card 
-          key={stat.name} 
-          className="p-6 bg-[#FFFFFF] border border-[#D3D3D3] shadow-sm hover:shadow-md transition-all duration-300"
-        >
+        <Card key={stat.name} className="p-6 bg-white border-[#D3D3D3] hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4">
             <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.bgColor}`}>
               <stat.icon className={`h-6 w-6 ${stat.color}`} />
             </div>
             <div>
               <p className="text-sm font-medium text-[#8B4513]">{stat.name}</p>
-              <p className="text-2xl font-bold text-[#8B4513]">{stat.value}</p>
+              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
             </div>
           </div>
         </Card>

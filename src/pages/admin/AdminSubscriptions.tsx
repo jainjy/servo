@@ -180,48 +180,48 @@ const AdminSubscriptions = () => {
   };
 
   const getPlanColor = (planName) => {
-    if (!planName) return "blue";
+    if (!planName) return "primary";
 
     const name = planName.toLowerCase();
-    if (name.includes("pro")) return "purple";
-    if (name.includes("premium")) return "amber";
-    if (name.includes("immobilier")) return "blue";
-    if (name.includes("service")) return "green";
-    if (name.includes("meuble")) return "pink";
+    if (name.includes("pro")) return "accent";
+    if (name.includes("premium")) return "secondary";
+    if (name.includes("immobilier")) return "primary";
+    if (name.includes("service")) return "light-bg";
+    if (name.includes("meuble")) return "separator";
     return "gray";
   };
 
   const getColorClasses = (color) => {
     const colors = {
-      blue: {
-        bg: "bg-blue-50",
-        text: "text-blue-600",
-        border: "border-blue-200",
-        light: "bg-blue-500/10",
+      primary: {
+        bg: "bg-[#6B8E23]/10",
+        text: "text-[#6B8E23]",
+        border: "border-[#6B8E23]/20",
+        light: "bg-[#6B8E23]/20",
       },
-      purple: {
-        bg: "bg-purple-50",
-        text: "text-purple-600",
-        border: "border-purple-200",
-        light: "bg-purple-500/10",
+      accent: {
+        bg: "bg-[#556B2F]/10",
+        text: "text-[#556B2F]",
+        border: "border-[#556B2F]/20",
+        light: "bg-[#556B2F]/20",
       },
-      amber: {
-        bg: "bg-amber-50",
-        text: "text-amber-600",
-        border: "border-amber-200",
-        light: "bg-amber-500/10",
+      secondary: {
+        bg: "bg-[#8B4513]/10",
+        text: "text-[#8B4513]",
+        border: "border-[#8B4513]/20",
+        light: "bg-[#8B4513]/20",
       },
-      green: {
-        bg: "bg-green-50",
-        text: "text-green-600",
-        border: "border-green-200",
-        light: "bg-green-500/10",
+      "light-bg": {
+        bg: "bg-[#FFFFFF0]",
+        text: "text-[#8B4513]",
+        border: "border-[#D3D3D3]",
+        light: "bg-[#FFFFFF0]",
       },
-      pink: {
-        bg: "bg-pink-50",
-        text: "text-pink-600",
-        border: "border-pink-200",
-        light: "bg-pink-500/10",
+      separator: {
+        bg: "bg-[#D3D3D3]",
+        text: "text-[#8B4513]",
+        border: "border-[#D3D3D3]",
+        light: "bg-[#D3D3D3]",
       },
       gray: {
         bg: "bg-gray-50",
@@ -230,7 +230,7 @@ const AdminSubscriptions = () => {
         light: "bg-gray-500/10",
       },
     };
-    return colors[color] || colors.blue;
+    return colors[color] || colors.primary;
   };
 
   const handleStatusChange = async (subscriptionId, newStatus) => {
@@ -326,14 +326,14 @@ const AdminSubscriptions = () => {
       {/* En-tête - Responsive */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#8B4513]">
             Gestion des Abonnements
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Gérez et surveillez les abonnements des professionnels
           </p>
         </div>
-        <Button onClick={exportToCSV} variant="outline" className="gap-2 text-xs sm:text-sm whitespace-nowrap">
+        <Button onClick={exportToCSV} variant="outline" className="gap-2 text-xs sm:text-sm whitespace-nowrap border-[#D3D3D3] text-[#8B4513] hover:bg-[#556B2F] hover:text-white">
           <Download className="h-3 w-3 sm:h-4 sm:w-4" />
           <span className="hidden sm:inline">Exporter CSV</span>
           <span className="sm:hidden">Export</span>
@@ -343,17 +343,17 @@ const AdminSubscriptions = () => {
       {/* Cartes de statistiques - Grid responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
         {/* Total */}
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-md transition-shadow">
+        <Card className="bg-gradient-to-br from-[#6B8E23]/10 to-[#6B8E23]/5 border-[#6B8E23]/20 hover:shadow-md transition-shadow">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                <Users className="h-4 w-4 md:h-6 md:w-6 text-blue-600" />
+              <div className="p-1.5 md:p-2 bg-[#6B8E23]/20 rounded-lg flex-shrink-0">
+                <Users className="h-4 w-4 md:h-6 md:w-6 text-[#6B8E23]" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Total
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-blue-700">
+                <p className="text-xl md:text-2xl font-bold text-[#6B8E23]">
                   {stats.total}
                 </p>
               </div>
@@ -369,7 +369,7 @@ const AdminSubscriptions = () => {
                 <TrendingUp className="h-4 w-4 md:h-6 md:w-6 text-green-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Actifs
                 </p>
                 <p className="text-xl md:text-2xl font-bold text-green-700">
@@ -388,7 +388,7 @@ const AdminSubscriptions = () => {
                 <Calendar className="h-4 w-4 md:h-6 md:w-6 text-red-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Expirés
                 </p>
                 <p className="text-xl md:text-2xl font-bold text-red-700">
@@ -407,7 +407,7 @@ const AdminSubscriptions = () => {
                 <RefreshCw className="h-4 w-4 md:h-6 md:w-6 text-yellow-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   En attente
                 </p>
                 <p className="text-xl md:text-2xl font-bold text-yellow-700">
@@ -419,17 +419,17 @@ const AdminSubscriptions = () => {
         </Card>
 
         {/* Revenu */}
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-md transition-shadow col-span-1 sm:col-span-2 lg:col-span-1">
+        <Card className="bg-gradient-to-br from-[#556B2F]/10 to-[#556B2F]/5 border-[#556B2F]/20 hover:shadow-md transition-shadow col-span-1 sm:col-span-2 lg:col-span-1">
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-purple-100 rounded-lg flex-shrink-0">
-                <CreditCard className="h-4 w-4 md:h-6 md:w-6 text-purple-600" />
+              <div className="p-1.5 md:p-2 bg-[#556B2F]/20 rounded-lg flex-shrink-0">
+                <CreditCard className="h-4 w-4 md:h-6 md:w-6 text-[#556B2F]" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-gray-600">
                   Revenu
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-purple-700">
+                <p className="text-xl md:text-2xl font-bold text-[#556B2F]">
                   {stats.revenue}€
                 </p>
               </div>
@@ -439,21 +439,21 @@ const AdminSubscriptions = () => {
       </div>
 
       {/* Filtres et recherche - Responsive */}
-      <Card>
+      <Card className="border-[#D3D3D3]">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col gap-3 md:gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#8B4513]" />
               <Input
                 placeholder="Rechercher un utilisateur, email ou plan..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 text-sm"
+                className="pl-9 text-sm border-[#D3D3D3] focus:border-[#6B8E23]"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full text-sm">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-full text-sm border-[#D3D3D3]">
+                <Filter className="h-4 w-4 mr-2 text-[#8B4513]" />
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
@@ -471,16 +471,16 @@ const AdminSubscriptions = () => {
       {/* Cartes des abonnements */}
       <div>
         <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h2 className="text-lg md:text-xl font-semibold">
+          <h2 className="text-lg md:text-xl font-semibold text-[#8B4513]">
             Abonnements ({filteredSubscriptions.length})
           </h2>
         </div>
 
         {filteredSubscriptions.length === 0 ? (
-          <Card>
+          <Card className="border-[#D3D3D3]">
             <CardContent className="p-6 md:p-8 text-center">
-              <Users className="h-8 md:h-12 w-8 md:w-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
-              <p className="text-sm md:text-base text-muted-foreground">Aucun abonnement trouvé</p>
+              <Users className="h-8 md:h-12 w-8 md:w-12 text-gray-400 mx-auto mb-3 md:mb-4" />
+              <p className="text-sm md:text-base text-gray-600">Aucun abonnement trouvé</p>
             </CardContent>
           </Card>
         ) : (
@@ -496,7 +496,7 @@ const AdminSubscriptions = () => {
               return (
                 <Card
                   key={subscription.id}
-                  className={`hover:shadow-lg transition-all duration-300 flex flex-col ${
+                  className={`hover:shadow-lg transition-all duration-300 flex flex-col border-[#D3D3D3] ${
                     isExpiringSoon
                       ? "border-yellow-300 ring-1 ring-yellow-200"
                       : ""
@@ -511,11 +511,11 @@ const AdminSubscriptions = () => {
                           />
                         </div>
                         <div className="min-w-0">
-                          <CardTitle className="text-sm md:text-lg truncate">
+                          <CardTitle className="text-sm md:text-lg truncate text-[#8B4513]">
                             {subscription.user?.firstName}{" "}
                             {subscription.user?.lastName}
                           </CardTitle>
-                          <CardDescription className="flex items-center gap-1 mt-1 text-xs md:text-sm truncate">
+                          <CardDescription className="flex items-center gap-1 mt-1 text-xs md:text-sm truncate text-gray-600">
                             <Mail className="h-3 w-3 flex-shrink-0" />
                             <span className="truncate">{subscription.user?.email}</span>
                           </CardDescription>
@@ -531,17 +531,17 @@ const AdminSubscriptions = () => {
                     {/* Plan et prix */}
                     <div className="flex items-start justify-between mb-3 gap-2">
                       <div>
-                        <p className="text-sm md:text-base font-semibold text-gray-900">
+                        <p className="text-sm md:text-base font-semibold text-[#8B4513]">
                           {subscription.plan?.name || "Essai Gratuit"}
                         </p>
-                        <p className="text-xs md:text-sm text-muted-foreground">
+                        <p className="text-xs md:text-sm text-gray-600">
                           {subscription.plan?.interval === "month"
                             ? "Mensuel"
                             : "Annuel"}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-base md:text-lg font-bold text-gray-900">
+                        <p className="text-base md:text-lg font-bold text-[#556B2F]">
                           {subscription.plan?.price
                             ? `${subscription.plan.price}€`
                             : "Gratuit"}
@@ -550,7 +550,7 @@ const AdminSubscriptions = () => {
                           variant={
                             subscription.autoRenew ? "default" : "outline"
                           }
-                          className="text-xs mt-1"
+                          className="text-xs mt-1 bg-[#6B8E23]/10 text-[#6B8E23] border-[#6B8E23]/20"
                         >
                           {subscription.autoRenew
                             ? "Auto"
@@ -562,13 +562,13 @@ const AdminSubscriptions = () => {
                     {/* Période */}
                     <div className="grid grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm mb-3">
                       <div>
-                        <p className="font-medium text-muted-foreground">
+                        <p className="font-medium text-gray-600">
                           Début
                         </p>
                         <p className="text-xs md:text-sm">{formatDate(subscription.startDate)}</p>
                       </div>
                       <div>
-                        <p className="font-medium text-muted-foreground">Fin</p>
+                        <p className="font-medium text-gray-600">Fin</p>
                         <p
                           className={
                             isExpiringSoon
@@ -584,21 +584,21 @@ const AdminSubscriptions = () => {
 
                     {/* Entreprise */}
                     {subscription.user?.companyName && (
-                      <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-xs md:text-sm text-gray-600">
                         <Building className="h-3 w-3 flex-shrink-0" />
                         <span className="truncate">{subscription.user.companyName}</span>
                       </div>
                     )}
                   </CardContent>
 
-                  <CardFooter className="pt-3 border-t">
+                  <CardFooter className="pt-3 border-t border-[#D3D3D3]">
                     <div className="flex gap-2 w-full flex-col sm:flex-row">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 text-xs md:text-sm"
+                            className="flex-1 text-xs md:text-sm border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23] hover:text-white"
                             onClick={() =>
                               setSelectedSubscription(subscription)
                             }
@@ -608,38 +608,38 @@ const AdminSubscriptions = () => {
                             <span className="sm:hidden">Voir</span>
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="w-11/12 md:max-w-md rounded-lg">
+                        <DialogContent className="w-11/12 md:max-w-md rounded-lg border-[#D3D3D3]">
                           <DialogHeader>
-                            <DialogTitle className="text-lg md:text-xl">Détails de l'abonnement</DialogTitle>
+                            <DialogTitle className="text-lg md:text-xl text-[#8B4513]">Détails de l'abonnement</DialogTitle>
                           </DialogHeader>
                           {selectedSubscription && (
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-3 md:gap-4">
                                 <div>
-                                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                                  <p className="text-xs md:text-sm font-medium text-gray-600">
                                     Utilisateur
                                   </p>
-                                  <p className="text-sm md:text-base font-semibold">
+                                  <p className="text-sm md:text-base font-semibold text-[#8B4513]">
                                     {selectedSubscription.user?.firstName}{" "}
                                     {selectedSubscription.user?.lastName}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                                  <p className="text-xs md:text-sm font-medium text-gray-600">
                                     Email
                                   </p>
                                   <p className="text-xs md:text-sm truncate">{selectedSubscription.user?.email}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                                  <p className="text-xs md:text-sm font-medium text-gray-600">
                                     Plan
                                   </p>
-                                  <p className="text-sm md:text-base font-semibold">
+                                  <p className="text-sm md:text-base font-semibold text-[#8B4513]">
                                     {selectedSubscription.plan?.name}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                                  <p className="text-xs md:text-sm font-medium text-gray-600">
                                     Statut
                                   </p>
                                   <div className="mt-1">
@@ -651,7 +651,7 @@ const AdminSubscriptions = () => {
                               </div>
 
                               <div>
-                                <p className="text-xs md:text-sm font-medium mb-2">
+                                <p className="text-xs md:text-sm font-medium mb-2 text-[#8B4513]">
                                   Changer le statut
                                 </p>
                                 <Select
@@ -663,7 +663,7 @@ const AdminSubscriptions = () => {
                                     )
                                   }
                                 >
-                                  <SelectTrigger className="text-xs md:text-sm">
+                                  <SelectTrigger className="text-xs md:text-sm border-[#D3D3D3]">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -687,7 +687,7 @@ const AdminSubscriptions = () => {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-xs md:text-sm"
+                                  className="text-xs md:text-sm border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23] hover:text-white"
                                   onClick={() => {
                                     navigate(
                                       `/professional/${selectedSubscription.user?.id}`
@@ -700,7 +700,7 @@ const AdminSubscriptions = () => {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-xs md:text-sm"
+                                  className="text-xs md:text-sm border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23] hover:text-white"
                                   onClick={() =>
                                     handleEditSubscription(selectedSubscription)
                                   }
@@ -724,30 +724,30 @@ const AdminSubscriptions = () => {
 
       {/* Dialog de modification - Responsive */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="w-11/12 md:max-w-md rounded-lg">
+        <DialogContent className="w-11/12 md:max-w-md rounded-lg border-[#D3D3D3]">
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl">Modifier l'abonnement</DialogTitle>
+            <DialogTitle className="text-lg md:text-xl text-[#8B4513]">Modifier l'abonnement</DialogTitle>
           </DialogHeader>
           {editSubscription && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs md:text-sm font-medium text-gray-600">
                     Utilisateur
                   </p>
-                  <p className="text-sm md:text-base font-semibold">
+                  <p className="text-sm md:text-base font-semibold text-[#8B4513]">
                     {editSubscription.user?.firstName}{" "}
                     {editSubscription.user?.lastName}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs md:text-sm font-medium text-gray-600">
                     Plan
                   </p>
-                  <p className="text-sm md:text-base font-semibold">{editSubscription.plan?.name}</p>
+                  <p className="text-sm md:text-base font-semibold text-[#8B4513]">{editSubscription.plan?.name}</p>
                 </div>
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs md:text-sm font-medium text-gray-600">
                     Statut actuel
                   </p>
                   <div className="mt-1">
@@ -755,7 +755,7 @@ const AdminSubscriptions = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                  <p className="text-xs md:text-sm font-medium text-gray-600">
                     Date de début
                   </p>
                   <p className="text-xs md:text-sm">{formatDate(editSubscription.startDate)}</p>
@@ -763,17 +763,17 @@ const AdminSubscriptions = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endDate" className="text-xs md:text-sm">Date d'expiration</Label>
+                <Label htmlFor="endDate" className="text-xs md:text-sm text-[#8B4513]">Date d'expiration</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal text-xs md:text-sm",
-                        !editEndDate && "text-muted-foreground"
+                        "w-full justify-start text-left font-normal text-xs md:text-sm border-[#D3D3D3]",
+                        !editEndDate && "text-gray-600"
                       )}
                     >
-                      <Calendar className="mr-2 h-3 w-3 md:h-4 md:w-4" />
+                      <Calendar className="mr-2 h-3 w-3 md:h-4 md:w-4 text-[#8B4513]" />
                       {editEndDate ? (
                         format(editEndDate, "PPP", { locale: fr })
                       ) : (
@@ -781,7 +781,7 @@ const AdminSubscriptions = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0 border-[#D3D3D3]">
                     <CalendarComponent
                       mode="single"
                       selected={editEndDate}
@@ -792,7 +792,7 @@ const AdminSubscriptions = () => {
                     />
                   </PopoverContent>
                 </Popover>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-600">
                   Sélectionnez la nouvelle date d'expiration
                 </p>
               </div>
@@ -801,12 +801,16 @@ const AdminSubscriptions = () => {
                 <Button
                   variant="outline"
                   onClick={() => setIsEditDialogOpen(false)}
-                  className="text-xs md:text-sm"
+                  className="text-xs md:text-sm border-[#D3D3D3] text-[#8B4513] hover:bg-red-600 hover:text-white"
                 >
                   <X className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                   Annuler
                 </Button>
-                <Button onClick={handleSaveEdit} disabled={!editEndDate} className="text-xs md:text-sm">
+                <Button 
+                  onClick={handleSaveEdit} 
+                  disabled={!editEndDate} 
+                  className="text-xs md:text-sm bg-[#556B2F] hover:bg-[#6B8E23] text-white"
+                >
                   <Save className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                   Enregistrer
                 </Button>
