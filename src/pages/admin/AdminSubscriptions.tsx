@@ -68,6 +68,27 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
+// Palette de couleurs du thème
+const colors = {
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFF0",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
+  primaryLight: "#8FBC8F",
+  secondaryLight: "#A0522D",
+  cardBg: "#FFFFFF",
+  textPrimary: "#2C3E50",
+  textSecondary: "#5D6D7E",
+  success: "#27AE60",
+  warning: "#F39C12",
+  error: "#E74C3C",
+  accentGold: "#D4AF37",
+  gradient1: "linear-gradient(135deg, #556B2F 0%, #6B8E23 100%)",
+  gradient2: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+  gradient3: "linear-gradient(135deg, #6B8E23 0%, #27AE60 100%)",
+};
+
 const AdminSubscriptions = () => {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -132,25 +153,33 @@ const AdminSubscriptions = () => {
       active: {
         variant: "default",
         label: "Actif",
-        color: "bg-green-100 text-green-800 border-green-200",
+        color: `${colors.primaryDark}20`,
+        textColor: colors.primaryDark,
+        borderColor: `${colors.primaryDark}30`,
         icon: CheckCircle,
       },
       expired: {
         variant: "destructive",
         label: "Expiré",
-        color: "bg-red-100 text-red-800 border-red-200",
+        color: `${colors.error}20`,
+        textColor: colors.error,
+        borderColor: `${colors.error}30`,
         icon: XCircle,
       },
       pending: {
         variant: "secondary",
         label: "En attente",
-        color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        color: `${colors.warning}20`,
+        textColor: colors.warning,
+        borderColor: `${colors.warning}30`,
         icon: Clock,
       },
       inactive: {
         variant: "outline",
         label: "Inactif",
-        color: "bg-gray-100 text-gray-800 border-gray-200",
+        color: `${colors.textSecondary}15`,
+        textColor: colors.textSecondary,
+        borderColor: `${colors.textSecondary}25`,
         icon: AlertTriangle,
       },
     };
@@ -159,7 +188,14 @@ const AdminSubscriptions = () => {
     const IconComponent = config.icon;
 
     return (
-      <Badge className={`${config.color} border gap-1`}>
+      <Badge 
+        className="gap-1 border"
+        style={{
+          backgroundColor: config.color,
+          color: config.textColor,
+          borderColor: config.borderColor,
+        }}
+      >
         <IconComponent className="h-3 w-3" />
         {config.label}
       </Badge>
@@ -192,45 +228,45 @@ const AdminSubscriptions = () => {
   };
 
   const getColorClasses = (color) => {
-    const colors = {
+    const colorsMap = {
       blue: {
-        bg: "bg-blue-50",
-        text: "text-blue-600",
-        border: "border-blue-200",
-        light: "bg-blue-500/10",
+        bg: `${colors.primaryDark}15`,
+        text: colors.primaryDark,
+        border: `${colors.primaryDark}25`,
+        light: `${colors.primaryDark}10`,
       },
       purple: {
-        bg: "bg-purple-50",
-        text: "text-purple-600",
-        border: "border-purple-200",
-        light: "bg-purple-500/10",
+        bg: `${colors.primaryDark}20`,
+        text: colors.primaryDark,
+        border: `${colors.primaryDark}30`,
+        light: `${colors.primaryDark}15`,
       },
       amber: {
-        bg: "bg-amber-50",
-        text: "text-amber-600",
-        border: "border-amber-200",
-        light: "bg-amber-500/10",
+        bg: `${colors.warning}20`,
+        text: colors.warning,
+        border: `${colors.warning}30`,
+        light: `${colors.warning}15`,
       },
       green: {
-        bg: "bg-green-50",
-        text: "text-green-600",
-        border: "border-green-200",
-        light: "bg-green-500/10",
+        bg: `${colors.success}20`,
+        text: colors.success,
+        border: `${colors.success}30`,
+        light: `${colors.success}15`,
       },
       pink: {
-        bg: "bg-pink-50",
-        text: "text-pink-600",
-        border: "border-pink-200",
-        light: "bg-pink-500/10",
+        bg: `${colors.accentGold}15`,
+        text: colors.accentGold,
+        border: `${colors.accentGold}25`,
+        light: `${colors.accentGold}10`,
       },
       gray: {
-        bg: "bg-gray-50",
-        text: "text-gray-600",
-        border: "border-gray-200",
-        light: "bg-gray-500/10",
+        bg: `${colors.textSecondary}15`,
+        text: colors.textSecondary,
+        border: `${colors.textSecondary}25`,
+        light: `${colors.textSecondary}10`,
       },
     };
-    return colors[color] || colors.blue;
+    return colorsMap[color] || colorsMap.blue;
   };
 
   const handleStatusChange = async (subscriptionId, newStatus) => {
@@ -326,14 +362,31 @@ const AdminSubscriptions = () => {
       {/* En-tête - Responsive */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <h1 
+            className="text-2xl sm:text-3xl font-bold tracking-tight"
+            style={{ color: colors.primaryDark }}
+          >
             Gestion des Abonnements
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Gérez et surveillez les abonnements des professionnels
           </p>
         </div>
-        <Button onClick={exportToCSV} variant="outline" className="gap-2 text-xs sm:text-sm whitespace-nowrap">
+        <Button 
+          onClick={exportToCSV} 
+          variant="outline" 
+          className="gap-2 text-xs sm:text-sm whitespace-nowrap"
+          style={{
+            borderColor: colors.primaryDark,
+            color: colors.primaryDark,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
           <Download className="h-3 w-3 sm:h-4 sm:w-4" />
           <span className="hidden sm:inline">Exporter CSV</span>
           <span className="sm:hidden">Export</span>
@@ -343,17 +396,25 @@ const AdminSubscriptions = () => {
       {/* Cartes de statistiques - Grid responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
         {/* Total */}
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-md transition-shadow">
+        <Card className="border-border hover:shadow-md transition-shadow"
+          style={{
+            background: `linear-gradient(135deg, ${colors.primaryDark}15, ${colors.primaryDark}5)`,
+            borderColor: colors.primaryDark,
+          }}
+        >
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                <Users className="h-4 w-4 md:h-6 md:w-6 text-blue-600" />
+              <div 
+                className="p-1.5 md:p-2 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${colors.primaryDark}20` }}
+              >
+                <Users className="h-4 w-4 md:h-6 md:w-6" style={{ color: colors.primaryDark }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Total
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-blue-700">
+                <p className="text-xl md:text-2xl font-bold" style={{ color: colors.primaryDark }}>
                   {stats.total}
                 </p>
               </div>
@@ -362,17 +423,25 @@ const AdminSubscriptions = () => {
         </Card>
 
         {/* Actifs */}
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-md transition-shadow">
+        <Card className="border-border hover:shadow-md transition-shadow"
+          style={{
+            background: `linear-gradient(135deg, ${colors.primaryDark}10, ${colors.success}10)`,
+            borderColor: colors.primaryDark,
+          }}
+        >
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-green-100 rounded-lg flex-shrink-0">
-                <TrendingUp className="h-4 w-4 md:h-6 md:w-6 text-green-600" />
+              <div 
+                className="p-1.5 md:p-2 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${colors.primaryDark}20` }}
+              >
+                <TrendingUp className="h-4 w-4 md:h-6 md:w-6" style={{ color: colors.primaryDark }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Actifs
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-green-700">
+                <p className="text-xl md:text-2xl font-bold" style={{ color: colors.primaryDark }}>
                   {stats.active}
                 </p>
               </div>
@@ -381,17 +450,25 @@ const AdminSubscriptions = () => {
         </Card>
 
         {/* Expirés */}
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 hover:shadow-md transition-shadow">
+        <Card className="border-border hover:shadow-md transition-shadow"
+          style={{
+            background: `linear-gradient(135deg, ${colors.error}10, ${colors.warning}10)`,
+            borderColor: colors.error,
+          }}
+        >
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-red-100 rounded-lg flex-shrink-0">
-                <Calendar className="h-4 w-4 md:h-6 md:w-6 text-red-600" />
+              <div 
+                className="p-1.5 md:p-2 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${colors.error}20` }}
+              >
+                <Calendar className="h-4 w-4 md:h-6 md:w-6" style={{ color: colors.error }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Expirés
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-red-700">
+                <p className="text-xl md:text-2xl font-bold" style={{ color: colors.error }}>
                   {stats.expired}
                 </p>
               </div>
@@ -400,17 +477,25 @@ const AdminSubscriptions = () => {
         </Card>
 
         {/* En attente */}
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-md transition-shadow">
+        <Card className="border-border hover:shadow-md transition-shadow"
+          style={{
+            background: `linear-gradient(135deg, ${colors.warning}10, ${colors.accentGold}10)`,
+            borderColor: colors.warning,
+          }}
+        >
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-yellow-100 rounded-lg flex-shrink-0">
-                <RefreshCw className="h-4 w-4 md:h-6 md:w-6 text-yellow-600" />
+              <div 
+                className="p-1.5 md:p-2 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${colors.warning}20` }}
+              >
+                <RefreshCw className="h-4 w-4 md:h-6 md:w-6" style={{ color: colors.warning }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   En attente
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-yellow-700">
+                <p className="text-xl md:text-2xl font-bold" style={{ color: colors.warning }}>
                   {stats.pending}
                 </p>
               </div>
@@ -419,17 +504,25 @@ const AdminSubscriptions = () => {
         </Card>
 
         {/* Revenu */}
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-md transition-shadow col-span-1 sm:col-span-2 lg:col-span-1">
+        <Card className="border-border hover:shadow-md transition-shadow col-span-1 sm:col-span-2 lg:col-span-1"
+          style={{
+            background: `linear-gradient(135deg, ${colors.primaryDark}15, ${colors.accentGold}10)`,
+            borderColor: colors.accentGold,
+          }}
+        >
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="p-1.5 md:p-2 bg-purple-100 rounded-lg flex-shrink-0">
-                <CreditCard className="h-4 w-4 md:h-6 md:w-6 text-purple-600" />
+              <div 
+                className="p-1.5 md:p-2 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${colors.accentGold}20` }}
+              >
+                <CreditCard className="h-4 w-4 md:h-6 md:w-6" style={{ color: colors.accentGold }} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Revenu
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-purple-700">
+                <p className="text-xl md:text-2xl font-bold" style={{ color: colors.accentGold }}>
                   {stats.revenue}€
                 </p>
               </div>
@@ -439,7 +532,7 @@ const AdminSubscriptions = () => {
       </div>
 
       {/* Filtres et recherche - Responsive */}
-      <Card>
+      <Card className="border-border">
         <CardContent className="p-4 md:p-6">
           <div className="flex flex-col gap-3 md:gap-4">
             <div className="relative">
@@ -452,8 +545,11 @@ const AdminSubscriptions = () => {
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full text-sm">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger 
+                className="w-full text-sm border-border"
+                style={{ borderColor: colors.primaryDark }}
+              >
+                <Filter className="h-4 w-4 mr-2" style={{ color: colors.primaryDark }} />
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
@@ -471,13 +567,16 @@ const AdminSubscriptions = () => {
       {/* Cartes des abonnements */}
       <div>
         <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h2 className="text-lg md:text-xl font-semibold">
+          <h2 
+            className="text-lg md:text-xl font-semibold"
+            style={{ color: colors.primaryDark }}
+          >
             Abonnements ({filteredSubscriptions.length})
           </h2>
         </div>
 
         {filteredSubscriptions.length === 0 ? (
-          <Card>
+          <Card className="border-border">
             <CardContent className="p-6 md:p-8 text-center">
               <Users className="h-8 md:h-12 w-8 md:w-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
               <p className="text-sm md:text-base text-muted-foreground">Aucun abonnement trouvé</p>
@@ -496,22 +595,34 @@ const AdminSubscriptions = () => {
               return (
                 <Card
                   key={subscription.id}
-                  className={`hover:shadow-lg transition-all duration-300 flex flex-col ${
+                  className={`border-border hover:shadow-lg transition-all duration-300 flex flex-col ${
                     isExpiringSoon
-                      ? "border-yellow-300 ring-1 ring-yellow-200"
+                      ? "ring-1"
                       : ""
-                  } ${isExpired ? "border-red-200" : ""}`}
+                  }`}
+                  style={{
+                    borderColor: isExpiringSoon ? colors.warning : colors.separator,
+                    borderWidth: isExpiringSoon ? '2px' : '1px',
+                    boxShadow: isExpiringSoon ? `0 0 0 1px ${colors.warning}20` : 'none',
+                  }}
                 >
                   <CardHeader className="pb-2 md:pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-                        <div className={`p-1.5 md:p-2 rounded-lg ${colorClasses.bg} flex-shrink-0`}>
+                        <div 
+                          className="p-1.5 md:p-2 rounded-lg flex-shrink-0"
+                          style={{ backgroundColor: colorClasses.bg }}
+                        >
                           <PlanIcon
-                            className={`h-4 w-4 md:h-5 md:w-5 ${colorClasses.text}`}
+                            className="h-4 w-4 md:h-5 md:w-5"
+                            style={{ color: colorClasses.text }}
                           />
                         </div>
                         <div className="min-w-0">
-                          <CardTitle className="text-sm md:text-lg truncate">
+                          <CardTitle 
+                            className="text-sm md:text-lg truncate"
+                            style={{ color: colors.textPrimary }}
+                          >
                             {subscription.user?.firstName}{" "}
                             {subscription.user?.lastName}
                           </CardTitle>
@@ -531,7 +642,7 @@ const AdminSubscriptions = () => {
                     {/* Plan et prix */}
                     <div className="flex items-start justify-between mb-3 gap-2">
                       <div>
-                        <p className="text-sm md:text-base font-semibold text-gray-900">
+                        <p className="text-sm md:text-base font-semibold" style={{ color: colors.textPrimary }}>
                           {subscription.plan?.name || "Essai Gratuit"}
                         </p>
                         <p className="text-xs md:text-sm text-muted-foreground">
@@ -541,20 +652,23 @@ const AdminSubscriptions = () => {
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-base md:text-lg font-bold text-gray-900">
+                        <p className="text-base md:text-lg font-bold" style={{ color: colors.textPrimary }}>
                           {subscription.plan?.price
                             ? `${subscription.plan.price}€`
                             : "Gratuit"}
                         </p>
                         <Badge
-                          variant={
-                            subscription.autoRenew ? "default" : "outline"
-                          }
+                          variant={subscription.autoRenew ? "default" : "outline"}
                           className="text-xs mt-1"
+                          style={subscription.autoRenew ? {
+                            backgroundColor: colors.primaryDark,
+                            color: colors.lightBg,
+                          } : {
+                            borderColor: colors.primaryDark,
+                            color: colors.primaryDark,
+                          }}
                         >
-                          {subscription.autoRenew
-                            ? "Auto"
-                            : "Manuel"}
+                          {subscription.autoRenew ? "Auto" : "Manuel"}
                         </Badge>
                       </div>
                     </div>
@@ -565,16 +679,18 @@ const AdminSubscriptions = () => {
                         <p className="font-medium text-muted-foreground">
                           Début
                         </p>
-                        <p className="text-xs md:text-sm">{formatDate(subscription.startDate)}</p>
+                        <p className="text-xs md:text-sm" style={{ color: colors.textSecondary }}>
+                          {formatDate(subscription.startDate)}
+                        </p>
                       </div>
                       <div>
                         <p className="font-medium text-muted-foreground">Fin</p>
                         <p
-                          className={
-                            isExpiringSoon
-                              ? "text-yellow-600 font-semibold text-xs md:text-sm"
-                              : "text-xs md:text-sm"
-                          }
+                          className="text-xs md:text-sm"
+                          style={{
+                            color: isExpiringSoon ? colors.warning : colors.textSecondary,
+                            fontWeight: isExpiringSoon ? '600' : 'normal'
+                          }}
                         >
                           {formatDate(subscription.endDate)}
                           {isExpiringSoon && ` (${daysRemaining}j)`}
@@ -591,7 +707,7 @@ const AdminSubscriptions = () => {
                     )}
                   </CardContent>
 
-                  <CardFooter className="pt-3 border-t">
+                  <CardFooter className="pt-3 border-t" style={{ borderColor: colors.separator }}>
                     <div className="flex gap-2 w-full flex-col sm:flex-row">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -599,18 +715,31 @@ const AdminSubscriptions = () => {
                             variant="outline"
                             size="sm"
                             className="flex-1 text-xs md:text-sm"
-                            onClick={() =>
-                              setSelectedSubscription(subscription)
-                            }
+                            onClick={() => setSelectedSubscription(subscription)}
+                            style={{
+                              borderColor: colors.primaryDark,
+                              color: colors.primaryDark,
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
                           >
                             <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                             <span className="hidden sm:inline">Détails</span>
                             <span className="sm:hidden">Voir</span>
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="w-11/12 md:max-w-md rounded-lg">
+                        <DialogContent className="w-11/12 md:max-w-md rounded-lg border-border">
                           <DialogHeader>
-                            <DialogTitle className="text-lg md:text-xl">Détails de l'abonnement</DialogTitle>
+                            <DialogTitle 
+                              className="text-lg md:text-xl"
+                              style={{ color: colors.primaryDark }}
+                            >
+                              Détails de l'abonnement
+                            </DialogTitle>
                           </DialogHeader>
                           {selectedSubscription && (
                             <div className="space-y-4">
@@ -619,7 +748,7 @@ const AdminSubscriptions = () => {
                                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
                                     Utilisateur
                                   </p>
-                                  <p className="text-sm md:text-base font-semibold">
+                                  <p className="text-sm md:text-base font-semibold" style={{ color: colors.textPrimary }}>
                                     {selectedSubscription.user?.firstName}{" "}
                                     {selectedSubscription.user?.lastName}
                                   </p>
@@ -628,13 +757,15 @@ const AdminSubscriptions = () => {
                                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
                                     Email
                                   </p>
-                                  <p className="text-xs md:text-sm truncate">{selectedSubscription.user?.email}</p>
+                                  <p className="text-xs md:text-sm truncate" style={{ color: colors.textSecondary }}>
+                                    {selectedSubscription.user?.email}
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
                                     Plan
                                   </p>
-                                  <p className="text-sm md:text-base font-semibold">
+                                  <p className="text-sm md:text-base font-semibold" style={{ color: colors.textPrimary }}>
                                     {selectedSubscription.plan?.name}
                                   </p>
                                 </div>
@@ -643,42 +774,29 @@ const AdminSubscriptions = () => {
                                     Statut
                                   </p>
                                   <div className="mt-1">
-                                    {getStatusBadge(
-                                      selectedSubscription.status
-                                    )}
+                                    {getStatusBadge(selectedSubscription.status)}
                                   </div>
                                 </div>
                               </div>
 
                               <div>
-                                <p className="text-xs md:text-sm font-medium mb-2">
+                                <p className="text-xs md:text-sm font-medium mb-2" style={{ color: colors.textPrimary }}>
                                   Changer le statut
                                 </p>
                                 <Select
                                   value={selectedSubscription.status}
                                   onValueChange={(value) =>
-                                    handleStatusChange(
-                                      selectedSubscription.id,
-                                      value
-                                    )
+                                    handleStatusChange(selectedSubscription.id, value)
                                   }
                                 >
-                                  <SelectTrigger className="text-xs md:text-sm">
+                                  <SelectTrigger className="text-xs md:text-sm border-border">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="active">
-                                      Actif
-                                    </SelectItem>
-                                    <SelectItem value="expired">
-                                      Expiré
-                                    </SelectItem>
-                                    <SelectItem value="pending">
-                                      En attente
-                                    </SelectItem>
-                                    <SelectItem value="inactive">
-                                      Inactif
-                                    </SelectItem>
+                                    <SelectItem value="active">Actif</SelectItem>
+                                    <SelectItem value="expired">Expiré</SelectItem>
+                                    <SelectItem value="pending">En attente</SelectItem>
+                                    <SelectItem value="inactive">Inactif</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -689,9 +807,17 @@ const AdminSubscriptions = () => {
                                   size="sm"
                                   className="text-xs md:text-sm"
                                   onClick={() => {
-                                    navigate(
-                                      `/professional/${selectedSubscription.user?.id}`
-                                    );
+                                    navigate(`/professional/${selectedSubscription.user?.id}`);
+                                  }}
+                                  style={{
+                                    borderColor: colors.primaryDark,
+                                    color: colors.primaryDark,
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
                                   }}
                                 >
                                   <User className="h-3 w-3 md:h-4 md:w-4 mr-1" />
@@ -701,9 +827,17 @@ const AdminSubscriptions = () => {
                                   variant="outline"
                                   size="sm"
                                   className="text-xs md:text-sm"
-                                  onClick={() =>
-                                    handleEditSubscription(selectedSubscription)
-                                  }
+                                  onClick={() => handleEditSubscription(selectedSubscription)}
+                                  style={{
+                                    borderColor: colors.primaryDark,
+                                    color: colors.primaryDark,
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                  }}
                                 >
                                   <Edit className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                                   Modifier
@@ -724,9 +858,14 @@ const AdminSubscriptions = () => {
 
       {/* Dialog de modification - Responsive */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="w-11/12 md:max-w-md rounded-lg">
+        <DialogContent className="w-11/12 md:max-w-md rounded-lg border-border">
           <DialogHeader>
-            <DialogTitle className="text-lg md:text-xl">Modifier l'abonnement</DialogTitle>
+            <DialogTitle 
+              className="text-lg md:text-xl"
+              style={{ color: colors.primaryDark }}
+            >
+              Modifier l'abonnement
+            </DialogTitle>
           </DialogHeader>
           {editSubscription && (
             <div className="space-y-4">
@@ -735,7 +874,7 @@ const AdminSubscriptions = () => {
                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
                     Utilisateur
                   </p>
-                  <p className="text-sm md:text-base font-semibold">
+                  <p className="text-sm md:text-base font-semibold" style={{ color: colors.textPrimary }}>
                     {editSubscription.user?.firstName}{" "}
                     {editSubscription.user?.lastName}
                   </p>
@@ -744,7 +883,9 @@ const AdminSubscriptions = () => {
                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
                     Plan
                   </p>
-                  <p className="text-sm md:text-base font-semibold">{editSubscription.plan?.name}</p>
+                  <p className="text-sm md:text-base font-semibold" style={{ color: colors.textPrimary }}>
+                    {editSubscription.plan?.name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
@@ -758,20 +899,38 @@ const AdminSubscriptions = () => {
                   <p className="text-xs md:text-sm font-medium text-muted-foreground">
                     Date de début
                   </p>
-                  <p className="text-xs md:text-sm">{formatDate(editSubscription.startDate)}</p>
+                  <p className="text-xs md:text-sm" style={{ color: colors.textSecondary }}>
+                    {formatDate(editSubscription.startDate)}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endDate" className="text-xs md:text-sm">Date d'expiration</Label>
+                <Label 
+                  htmlFor="endDate" 
+                  className="text-xs md:text-sm"
+                  style={{ color: colors.textPrimary }}
+                >
+                  Date d'expiration
+                </Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal text-xs md:text-sm",
+                        "w-full justify-start text-left font-normal text-xs md:text-sm border-border",
                         !editEndDate && "text-muted-foreground"
                       )}
+                      style={{
+                        borderColor: colors.primaryDark,
+                        color: colors.primaryDark,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
                       <Calendar className="mr-2 h-3 w-3 md:h-4 md:w-4" />
                       {editEndDate ? (
@@ -781,7 +940,7 @@ const AdminSubscriptions = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0 border-border">
                     <CalendarComponent
                       mode="single"
                       selected={editEndDate}
@@ -802,11 +961,35 @@ const AdminSubscriptions = () => {
                   variant="outline"
                   onClick={() => setIsEditDialogOpen(false)}
                   className="text-xs md:text-sm"
+                  style={{
+                    borderColor: colors.primaryDark,
+                    color: colors.primaryDark,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${colors.primaryDark}15`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                 >
                   <X className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                   Annuler
                 </Button>
-                <Button onClick={handleSaveEdit} disabled={!editEndDate} className="text-xs md:text-sm">
+                <Button 
+                  onClick={handleSaveEdit} 
+                  disabled={!editEndDate} 
+                  className="text-xs md:text-sm"
+                  style={{
+                    backgroundColor: colors.primaryDark,
+                    color: colors.lightBg,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#5D801F';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryDark;
+                  }}
+                >
                   <Save className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                   Enregistrer
                 </Button>
