@@ -7,8 +7,6 @@ import api from "@/lib/api"
 interface Booking {
   id: string
   service: string
-
-  
   time: string
   date: string
   status: "confirmed" | "pending" | "cancelled"
@@ -19,9 +17,9 @@ interface Booking {
 }
 
 const statusColors = {
-  confirmed: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
-  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
-  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+  confirmed: "bg-green-100 text-green-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  cancelled: "bg-red-100 text-red-800",
 }
 
 const statusTranslations = {
@@ -173,15 +171,15 @@ export function BookingsCalendar() {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-white border-[#D3D3D3]">
         <div className="mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Prochaines réservations</h3>
+          <Calendar className="h-5 w-5 text-[#8B4513]" />
+          <h3 className="text-lg font-semibold text-[#8B4513]">Prochaines réservations</h3>
         </div>
         
         <div className="space-y-3">
           {[1, 2, 3, 4].map((index) => (
-            <div key={index} className="rounded-lg border border-border bg-background p-4 animate-pulse">
+            <div key={index} className="rounded-lg border border-[#D3D3D3] bg-white p-4 animate-pulse">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="h-4 w-32 bg-gray-200 rounded"></div>
@@ -193,7 +191,7 @@ export function BookingsCalendar() {
           ))}
         </div>
         
-        <div className="flex items-center justify-center mt-4 text-sm text-muted-foreground">
+        <div className="flex items-center justify-center mt-4 text-sm text-gray-600">
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
           Chargement des réservations...
         </div>
@@ -202,13 +200,13 @@ export function BookingsCalendar() {
   }
 
   return (
-    <Card className="p-6 bg-card border-border">
+    <Card className="p-6 bg-white border-[#D3D3D3]">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">Prochaines réservations</h3>
+          <Calendar className="h-5 w-5 text-[#8B4513]" />
+          <h3 className="text-lg font-semibold text-[#8B4513]">Prochaines réservations</h3>
           {upcomingBookings.length > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="secondary" className="ml-2 bg-[#6B8E23]/10 text-[#6B8E23]">
               {upcomingBookings.length}
             </Badge>
           )}
@@ -217,7 +215,7 @@ export function BookingsCalendar() {
         <button 
           onClick={fetchUpcomingBookings}
           disabled={loading}
-          className="p-2 hover:bg-accent rounded-md transition-colors"
+          className="p-2 hover:bg-[#6B8E23]/10 rounded-md transition-colors text-[#8B4513]"
           title="Actualiser"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -228,15 +226,15 @@ export function BookingsCalendar() {
         <div className="text-center py-8">
           <div className="text-red-600 mb-3">
             <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">{error}</p>
+            <p className="font-medium text-[#8B4513]">{error}</p>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-sm text-gray-600 mb-4">
             Impossible de charger les réservations
           </p>
           <button 
             onClick={fetchUpcomingBookings}
             disabled={loading}
-            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 text-sm disabled:opacity-50"
+            className="px-4 py-2 bg-[#556B2F] text-white rounded hover:bg-[#6B8E23] text-sm disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -249,14 +247,14 @@ export function BookingsCalendar() {
           </button>
         </div>
       ) : upcomingBookings.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        <div className="text-center py-8 text-gray-600">
           <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p className="font-medium">Aucune réservation à venir</p>
+          <p className="font-medium text-[#8B4513]">Aucune réservation à venir</p>
           <p className="text-sm">Les prochaines réservations apparaîtront ici</p>
           <button 
             onClick={fetchUpcomingBookings}
             disabled={loading}
-            className="mt-3 px-3 py-1 text-xs bg-accent text-accent-foreground rounded hover:bg-accent/80"
+            className="mt-3 px-3 py-1 text-xs bg-[#6B8E23]/10 text-[#8B4513] rounded hover:bg-[#6B8E23]/20"
           >
             Actualiser
           </button>
@@ -265,20 +263,20 @@ export function BookingsCalendar() {
         <>
           <div className="space-y-3">
             {upcomingBookings.map((booking) => (
-              <div key={booking.id} className="rounded-lg border border-border bg-background p-4 hover:bg-accent/50 transition-colors">
+              <div key={booking.id} className="rounded-lg border border-[#D3D3D3] bg-white p-4 hover:bg-[#6B8E23]/10 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <p className="font-medium text-foreground">{booking.service}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-[#8B4513]">{booking.service}</p>
+                    <p className="text-sm text-gray-600">
                       {booking.date} à {booking.time}
                     </p>
                     {booking.clientName && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-600">
                         Client: {booking.clientName}
                       </p>
                     )}
                     {booking.prestataireName && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-600">
                         Prestataire: {booking.prestataireName}
                       </p>
                     )}
@@ -294,12 +292,12 @@ export function BookingsCalendar() {
             ))}
           </div>
 
-          <div className="mt-4 text-xs text-muted-foreground text-center">
+          <div className="mt-4 text-xs text-gray-600 text-center">
             {upcomingBookings.length} réservation(s) à venir • 
             <button 
               onClick={fetchUpcomingBookings}
               disabled={loading}
-              className="ml-1 underline hover:text-foreground disabled:opacity-50"
+              className="ml-1 underline hover:text-[#8B4513] disabled:opacity-50"
             >
               Actualiser
             </button>

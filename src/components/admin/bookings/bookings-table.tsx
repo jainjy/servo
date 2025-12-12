@@ -25,10 +25,10 @@ interface Booking {
 }
 
 const statusColors = {
-  confirmed: "bg-success/20 text-success",
-  pending: "bg-warning/20 text-warning",
-  cancelled: "bg-destructive/20 text-destructive",
-  completed: "bg-chart-1/20 text-blue-500",
+  confirmed: "bg-green-600/20 text-green-800",
+  pending: "bg-yellow-600/20 text-yellow-800",
+  cancelled: "bg-red-600/20 text-red-800",
+  completed: "bg-blue-500/20 text-blue-700",
 }
 
 const statusLabels = {
@@ -225,19 +225,19 @@ export function BookingsTable() {
 
   if (loading) {
     return (
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#D3D3D3]">
         <div className="p-6">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B4513]" />
               <Input
                 type="search"
                 placeholder="Rechercher par service, client ou prestataire..."
                 disabled
-                className="pl-10 bg-background border-input"
+                className="pl-10 bg-white border-[#D3D3D3]"
               />
             </div>
-            <Button variant="outline" className="border-border bg-transparent" disabled>
+            <Button variant="outline" className="border-[#D3D3D3] bg-transparent" disabled>
               Filtres
             </Button>
           </div>
@@ -246,23 +246,23 @@ export function BookingsTable() {
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map((index) => (
-              <Card key={index} className="border-border bg-card p-6 animate-pulse">
+              <Card key={index} className="border-[#D3D3D3] bg-white p-6 animate-pulse">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-48 bg-muted rounded"></div>
-                    <div className="h-3 w-32 bg-muted rounded"></div>
-                    <div className="h-6 w-20 bg-muted rounded"></div>
+                    <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                    <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                    <div className="h-6 w-20 bg-gray-200 rounded"></div>
                   </div>
                 </div>
                 <div className="space-y-3 mb-4">
-                  <div className="h-6 w-16 bg-muted rounded"></div>
+                  <div className="h-6 w-16 bg-gray-200 rounded"></div>
                   <div className="space-y-2">
-                    <div className="h-3 w-40 bg-muted rounded"></div>
-                    <div className="h-3 w-40 bg-muted rounded"></div>
+                    <div className="h-3 w-40 bg-gray-200 rounded"></div>
+                    <div className="h-3 w-40 bg-gray-200 rounded"></div>
                   </div>
                   <div className="space-y-1">
-                    <div className="h-3 w-32 bg-muted rounded"></div>
-                    <div className="h-3 w-32 bg-muted rounded"></div>
+                    <div className="h-3 w-32 bg-gray-200 rounded"></div>
+                    <div className="h-3 w-32 bg-gray-200 rounded"></div>
                   </div>
                 </div>
               </Card>
@@ -275,20 +275,20 @@ export function BookingsTable() {
 
   if (error) {
     return (
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#D3D3D3]">
         <div className="p-6">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B4513]" />
               <Input
                 type="search"
                 placeholder="Rechercher par service, client ou prestataire..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background border-input"
+                className="pl-10 bg-white border-[#D3D3D3]"
               />
             </div>
-            <Button variant="outline" className="border-border bg-transparent">
+            <Button variant="outline" className="border-[#D3D3D3] bg-transparent">
               Filtres
             </Button>
           </div>
@@ -299,7 +299,7 @@ export function BookingsTable() {
             <p className="text-red-600 font-medium mb-4">{error}</p>
             <Button
               onClick={fetchBookings}
-              className="bg-success hover:bg-success/90"
+              className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
             >
               <Loader2 className="h-4 w-4 mr-2" />
               Réessayer
@@ -312,20 +312,20 @@ export function BookingsTable() {
 
   return (
     <>
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#D3D3D3]">
         <div className="p-6">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B4513]" />
               <Input
                 type="search"
                 placeholder="Rechercher par service, client ou prestataire..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background border-input"
+                className="pl-10 bg-white border-[#D3D3D3] focus:border-[#6B8E23]"
               />
             </div>
-            <Button variant="outline" className="border-border bg-transparent">
+            <Button variant="outline" className="border-[#D3D3D3] bg-transparent text-[#8B4513] hover:bg-[#6B8E23] hover:text-white">
               Filtres
             </Button>
           </div>
@@ -333,20 +333,20 @@ export function BookingsTable() {
 
         <div className="p-6">
           {filteredBookings.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="font-medium">Aucune réservation trouvée</p>
+            <div className="text-center py-12 text-gray-600">
+              <p className="font-medium text-[#8B4513]">Aucune réservation trouvée</p>
               <p className="text-sm">Essayez de modifier vos critères de recherche</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
               {filteredBookings.map((booking) => (
-                <Card key={booking.id} className="border-border bg-card p-6 hover:shadow-lg transition-shadow">
+                <Card key={booking.id} className="border-[#D3D3D3] bg-white p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+                      <h3 className="font-semibold text-[#8B4513] line-clamp-2 mb-1">
                         {booking.service}
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-2">{booking.address}</p>
+                      <p className="text-sm text-gray-600 mb-2">{booking.address}</p>
                       <Badge 
                         variant="secondary" 
                         className={statusColors[booking.status as keyof typeof statusColors]}
@@ -358,31 +358,31 @@ export function BookingsTable() {
 
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-lg text-foreground">
+                      <span className="font-semibold text-lg text-[#556B2F]">
                         {booking.price} €
                       </span>
                     </div>
 
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Client:</span>
-                        <span className="font-medium text-foreground">{booking.client}</span>
+                        <span className="text-gray-600">Client:</span>
+                        <span className="font-medium text-[#8B4513]">{booking.client}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Prestataire:</span>
-                        <span className="font-medium text-foreground">{booking.vendor}</span>
+                        <span className="text-gray-600">Prestataire:</span>
+                        <span className="font-medium text-[#8B4513]">{booking.vendor}</span>
                       </div>
                     </div>
 
                     <div className="text-sm space-y-1">
-                      <div className="font-medium text-foreground">
+                      <div className="font-medium text-[#8B4513]">
                         {new Date(booking.startAt).toLocaleDateString("fr-FR", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
                         })}
                       </div>
-                      <div className="text-muted-foreground">
+                      <div className="text-gray-600">
                         {new Date(booking.startAt).toLocaleTimeString("fr-FR", {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -396,12 +396,12 @@ export function BookingsTable() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-[#D3D3D3]">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleViewDetails(booking)}
-                      className="flex-1 border-border hover:bg-accent"
+                      className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23] hover:text-white"
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       Détails
@@ -411,7 +411,7 @@ export function BookingsTable() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleContact(booking)}
-                      className="flex-1 border-border hover:bg-accent"
+                      className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23] hover:text-white"
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Contacter
@@ -425,7 +425,7 @@ export function BookingsTable() {
                         size="sm"
                         onClick={() => handleConfirm(booking)}
                         disabled={confirmingBooking === booking.id}
-                        className="flex-1 bg-success hover:bg-success/90"
+                        className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                       >
                         {confirmingBooking === booking.id ? (
                           <>
@@ -447,7 +447,7 @@ export function BookingsTable() {
                         size="sm"
                         onClick={() => handleCancel(booking)}
                         disabled={cancellingBooking === booking.id}
-                        className="flex-1"
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                       >
                         {cancellingBooking === booking.id ? (
                           <>
@@ -471,11 +471,11 @@ export function BookingsTable() {
       </Card>
 
       <Dialog open={isDetailModalOpen} onOpenChange={closeDetailModal}>
-        <DialogContent className="max-w-2xl bg-card border-border">
+        <DialogContent className="max-w-2xl bg-white border-[#D3D3D3]">
           {selectedBooking && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-foreground flex items-center gap-2">
+                <DialogTitle className="text-[#8B4513] flex items-center gap-2">
                   <Eye className="h-5 w-5" />
                   Détails de la réservation
                 </DialogTitle>
@@ -484,7 +484,7 @@ export function BookingsTable() {
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-xl font-bold text-foreground">{selectedBooking.service}</h2>
+                    <h2 className="text-xl font-bold text-[#8B4513]">{selectedBooking.service}</h2>
                     <Badge 
                       variant="secondary" 
                       className={`mt-2 ${statusColors[selectedBooking.status as keyof typeof statusColors]}`}
@@ -492,45 +492,45 @@ export function BookingsTable() {
                       {statusLabels[selectedBooking.status as keyof typeof statusLabels]}
                     </Badge>
                   </div>
-                  <span className="text-2xl font-bold text-foreground">{selectedBooking.price} €</span>
+                  <span className="text-2xl font-bold text-[#556B2F]">{selectedBooking.price} €</span>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">Description</h3>
-                  <p className="text-muted-foreground">{selectedBooking.description}</p>
+                  <h3 className="font-semibold text-[#8B4513] mb-2">Description</h3>
+                  <p className="text-gray-600">{selectedBooking.description}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <h3 className="font-semibold text-[#8B4513] flex items-center gap-2">
                       <User className="h-4 w-4" />
                       Client
                     </h3>
                     <div className="space-y-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Nom:</span>
-                        <p className="font-medium text-foreground">{selectedBooking.client}</p>
+                        <span className="text-gray-600">Nom:</span>
+                        <p className="font-medium text-[#8B4513]">{selectedBooking.client}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Téléphone:</span>
-                        <p className="font-medium text-foreground">{selectedBooking.phone}</p>
+                        <span className="text-gray-600">Téléphone:</span>
+                        <p className="font-medium text-[#8B4513]">{selectedBooking.phone}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Email:</span>
-                        <p className="font-medium text-foreground">{selectedBooking.email}</p>
+                        <span className="text-gray-600">Email:</span>
+                        <p className="font-medium text-[#8B4513]">{selectedBooking.email}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <h3 className="font-semibold text-[#8B4513] flex items-center gap-2">
                       <Building className="h-4 w-4" />
                       Prestataire
                     </h3>
                     <div className="space-y-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Entreprise:</span>
-                        <p className="font-medium text-foreground">{selectedBooking.vendor}</p>
+                        <span className="text-gray-600">Entreprise:</span>
+                        <p className="font-medium text-[#8B4513]">{selectedBooking.vendor}</p>
                       </div>
                     </div>
                   </div>
@@ -538,20 +538,20 @@ export function BookingsTable() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <h3 className="font-semibold text-[#8B4513] flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       Adresse
                     </h3>
-                    <p className="text-muted-foreground text-sm">{selectedBooking.address}</p>
+                    <p className="text-gray-600 text-sm">{selectedBooking.address}</p>
                   </div>
 
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <h3 className="font-semibold text-[#8B4513] flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       Horaires
                     </h3>
                     <div className="text-sm space-y-1">
-                      <div className="font-medium text-foreground">
+                      <div className="font-medium text-[#8B4513]">
                         {new Date(selectedBooking.startAt).toLocaleDateString("fr-FR", {
                           weekday: 'long',
                           day: "2-digit",
@@ -559,7 +559,7 @@ export function BookingsTable() {
                           year: "numeric",
                         })}
                       </div>
-                      <div className="text-muted-foreground">
+                      <div className="text-gray-600">
                         De {new Date(selectedBooking.startAt).toLocaleTimeString("fr-FR", {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -574,16 +574,16 @@ export function BookingsTable() {
 
                 {selectedBooking.notes && (
                   <div>
-                    <h3 className="font-semibold text-foreground mb-2">Notes supplémentaires</h3>
-                    <p className="text-muted-foreground text-sm">{selectedBooking.notes}</p>
+                    <h3 className="font-semibold text-[#8B4513] mb-2">Notes supplémentaires</h3>
+                    <p className="text-gray-600 text-sm">{selectedBooking.notes}</p>
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-4 border-t border-border">
+                <div className="flex gap-2 pt-4 border-t border-[#D3D3D3]">
                   <Button
                     variant="outline"
                     onClick={() => handleContact(selectedBooking)}
-                    className="flex-1 border-border hover:bg-accent"
+                    className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-[#6B8E23] hover:text-white"
                   >
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Contacter
@@ -594,7 +594,7 @@ export function BookingsTable() {
                       variant="default"
                       onClick={() => handleConfirm(selectedBooking)}
                       disabled={confirmingBooking === selectedBooking.id}
-                      className="flex-1 bg-success hover:bg-success/90"
+                      className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                     >
                       {confirmingBooking === selectedBooking.id ? (
                         <>
@@ -615,7 +615,7 @@ export function BookingsTable() {
                       variant="destructive"
                       onClick={() => handleCancel(selectedBooking)}
                       disabled={cancellingBooking === selectedBooking.id}
-                      className="flex-1"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                     >
                       {cancellingBooking === selectedBooking.id ? (
                         <>
@@ -638,9 +638,9 @@ export function BookingsTable() {
       </Dialog>
 
       <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
-        <DialogContent className="max-w-2xl bg-card border-border">
+        <DialogContent className="max-w-2xl bg-white border-[#D3D3D3]">
           <DialogHeader>
-            <DialogTitle className="text-foreground flex items-center gap-2">
+            <DialogTitle className="text-[#8B4513] flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
               Contacter le client
             </DialogTitle>
@@ -648,47 +648,47 @@ export function BookingsTable() {
 
           {contactBooking && (
             <div className="space-y-6">
-              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+              <div className="bg-[#6B8E23]/10 rounded-lg p-4 space-y-3">
                 <div>
-                  <h3 className="font-semibold text-foreground">Client</h3>
-                  <p className="text-muted-foreground">{contactBooking.client}</p>
+                  <h3 className="font-semibold text-[#8B4513]">Client</h3>
+                  <p className="text-gray-600">{contactBooking.client}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground">Email</h4>
-                    <p className="text-foreground">{contactBooking.email}</p>
+                    <h4 className="text-sm font-semibold text-gray-600">Email</h4>
+                    <p className="text-[#8B4513]">{contactBooking.email}</p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground">Téléphone</h4>
-                    <p className="text-foreground">{contactBooking.phone}</p>
+                    <h4 className="text-sm font-semibold text-gray-600">Téléphone</h4>
+                    <p className="text-[#8B4513]">{contactBooking.phone}</p>
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-muted-foreground">Réservation</h4>
-                  <p className="text-foreground">{contactBooking.service}</p>
+                  <h4 className="text-sm font-semibold text-gray-600">Réservation</h4>
+                  <p className="text-[#8B4513]">{contactBooking.service}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Message</label>
+                <label className="text-sm font-semibold text-[#8B4513]">Message</label>
                 <textarea
                   value={contactMessage}
                   onChange={(e) => setContactMessage(e.target.value)}
                   placeholder="Entrez votre message..."
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-lg border border-[#D3D3D3] bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
                   rows={5}
                   disabled={contactSending}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-600">
                   {contactMessage.length} caractères
                 </p>
               </div>
 
-              <div className="flex gap-2 pt-4 border-t border-border">
+              <div className="flex gap-2 pt-4 border-t border-[#D3D3D3]">
                 <Button
                   variant="outline"
                   onClick={() => setIsContactModalOpen(false)}
-                  className="flex-1 border-border"
+                  className="flex-1 border-[#D3D3D3] text-[#8B4513] hover:bg-red-600 hover:text-white"
                   disabled={contactSending}
                 >
                   Annuler
@@ -696,7 +696,7 @@ export function BookingsTable() {
                 <Button
                   onClick={handleSendMessage}
                   disabled={contactSending || !contactMessage.trim()}
-                  className="flex-1 bg-success hover:bg-success/90"
+                  className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                 >
                   {contactSending ? (
                     <>

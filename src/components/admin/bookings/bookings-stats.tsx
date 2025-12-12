@@ -64,7 +64,7 @@ export function BookingsStats() {
       value: stats.total.toLocaleString(),
       icon: Calendar,
       color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      bgColor: "bg-[#6B8E23]/10",
     },
     {
       name: "Confirmées",
@@ -93,7 +93,7 @@ export function BookingsStats() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Card key={index} className="p-6 bg-card border-border">
+          <Card key={index} className="p-6 bg-white border-[#D3D3D3]">
             <div className="animate-pulse">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-lg bg-gray-300"></div>
@@ -112,12 +112,12 @@ export function BookingsStats() {
   if (error) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6 bg-card border-border col-span-4">
+        <Card className="p-6 bg-white border-[#D3D3D3] col-span-4">
           <div className="text-center text-red-600">
             <p>{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              className="mt-2 px-4 py-2 bg-[#556B2F] text-white rounded hover:bg-[#6B8E23]"
             >
               Réessayer
             </button>
@@ -130,14 +130,14 @@ export function BookingsStats() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statsCards.map((stat) => (
-        <Card key={stat.name} className="p-6 bg-card border-border hover:shadow-md transition-shadow">
+        <Card key={stat.name} className="p-6 bg-white border-[#D3D3D3] hover:shadow-md transition-shadow">
           <div className="flex items-center gap-4">
             <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.bgColor}`}>
               <stat.icon className={`h-6 w-6 ${stat.color}`} />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">{stat.name}</p>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-sm font-medium text-[#8B4513]">{stat.name}</p>
+              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
             </div>
           </div>
         </Card>

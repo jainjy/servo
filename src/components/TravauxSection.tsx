@@ -23,7 +23,6 @@ import {
   TreePalm,
   Building,
   BookCheck,
-  // Ajout de Loader2 pour le spinner
   Loader2,
   Plus,
 } from "lucide-react";
@@ -147,10 +146,6 @@ export const PhotosModal = ({ isOpen, onClose, prestation }) => {
               <Share2 className="h-4 w-4 mr-2" />
               Partager
             </Button>
-            {/* <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-              <FileText className="h-4 w-4 mr-2" />
-              Demander un devis
-            </Button> */}
           </div>
         </div>
       </div>
@@ -170,7 +165,6 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
     dateSouhaitee: "",
     budget: "",
   });
-  // NOUVEL ÉTAT POUR LA SOUMISSION
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
 
@@ -194,7 +188,6 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Début de la soumission
     setIsSubmitting(true);
 
     try {
@@ -206,8 +199,8 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
         contactEmail: formData.email,
         contactTel: formData.telephone,
         lieuAdresse: formData.adresse,
-        lieuAdresseCp: "75000", // À adapter avec un système de géocodage
-        lieuAdresseVille: "Paris", // À adapter avec un système de géocodage
+        lieuAdresseCp: "75000",
+        lieuAdresseVille: "Paris",
         optionAssurance: false,
         description: formData.message,
         devis: `Budget estimé: ${formData.budget}, Date souhaitée: ${formData.dateSouhaitee}`,
@@ -226,7 +219,6 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
       console.error("Erreur création demande:", error);
       toast.error("Erreur lors de la création de la demande");
     } finally {
-      // Fin de la soumission
       setIsSubmitting(false);
     }
   };
@@ -243,8 +235,8 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-[#6B8E23]/10 rounded-lg">
+              <FileText className="h-6 w-6 text-[#6B8E23]" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
@@ -260,7 +252,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
             size="icon"
             onClick={onClose}
             className="absolute lg:relative right-2 top-2 h-8 w-8 bg-red-600 text-white font-bold rounded-full hover:bg-gray-100"
-            disabled={isSubmitting} // Désactiver la fermeture pendant la soumission
+            disabled={isSubmitting}
           >
             <X className="h-5 w-5" />
           </Button>
@@ -280,7 +272,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="Votre nom"
                 required
                 className="w-full"
-                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -295,7 +287,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="Votre prénom"
                 required
                 className="w-full"
-                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -314,7 +306,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="votre@email.com"
                 required
                 className="w-full"
-                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -329,7 +321,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 placeholder="06 12 34 56 78"
                 required
                 className="w-full"
-                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -345,7 +337,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
               onChange={handleChange}
               placeholder="Adresse complète du projet"
               className="w-full"
-              disabled={isSubmitting} // Désactiver les inputs pendant la soumission
+              disabled={isSubmitting}
             />
           </div>
 
@@ -362,7 +354,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 value={formData.dateSouhaitee}
                 onChange={handleChange}
                 className="w-full"
-                disabled={isSubmitting} // Désactiver les inputs pendant la soumission
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -375,7 +367,7 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
                 onChange={handleChange}
                 className="w-full rounded-lg border border-gray-300 p-3"
                 required
-                disabled={isSubmitting} // Désactiver le select pendant la soumission
+                disabled={isSubmitting}
               >
                 <option value="">Sélectionnez un budget</option>
                 <option value="0-5000">0 - 5 000 €</option>
@@ -397,23 +389,22 @@ export const DevisModal = ({ isOpen, onClose, prestation }) => {
               placeholder="Décrivez votre projet en détail..."
               rows={4}
               className="w-full"
-              disabled={isSubmitting} // Désactiver la textarea pendant la soumission
+              disabled={isSubmitting}
             />
           </div>
 
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-900 mb-2">
+          <div className="bg-[#6B8E23]/10 rounded-lg p-4">
+            <h3 className="font-semibold text-[#8B4513] mb-2">
               Prestation sélectionnée
             </h3>
-            <p className="text-blue-800 text-sm">{prestation.libelle}</p>
-            <p className="text-blue-600 text-xs">{prestation.description}</p>
+            <p className="text-[#8B4513] text-sm">{prestation.libelle}</p>
+            <p className="text-[#6B8E23] text-xs">{prestation.description}</p>
           </div>
 
           <div className="grid lg:flex gap-3 pt-4 border-t">
-            {/* BOUTON DE SOUMISSION AVEC SPINNER ET DÉSACTIVATION */}
             <Button
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -458,10 +449,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     isOpen: false,
     prestation: null,
   });
-  // NOUVEL ÉTAT POUR LE CHARGEMENT DES SERVICES
   const [isLoadingServices, setIsLoadingServices] = useState(false);
-  // NOUVEL ÉTAT POUR LE FILTRE MÉTIERS
-  const [metierFilter, setMetierFilter] = useState("TOUS"); // "TOUS", "AVEC_METIERS", "SANS_METIERS"
+  const [metierFilter, setMetierFilter] = useState("TOUS");
 
   const { user, isAuthenticated } = useAuth();
 
@@ -482,7 +471,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
   const currentCategory = categories[categorie];
 
-  // Track le chargement des services
   useEffect(() => {
     if (servicesCategorie?.services) {
       servicesCategorie.services.forEach(service => {
@@ -494,14 +482,12 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   }, [servicesCategorie, currentCategory]);
 
   const fetchServicesCategorie = async (cat) => {
-    // Début du chargement
     setIsLoadingServices(true);
     try {
       const response = await api.get(`/categories/name/${cat}/services`);
       console.log("Catégories de services:", response.data);
       setServicesCategorie(response.data);
 
-      // Initialiser les index d'images pour chaque prestation
       const initialIndexes = {};
       response.data.services?.forEach((service) => {
         initialIndexes[service.id] = 0;
@@ -513,12 +499,10 @@ const IntelligibleSection = ({ showAllPrestations }) => {
         error
       );
     } finally {
-      // Fin du chargement
       setIsLoadingServices(false);
     }
   };
 
-  // Fonction de recherche corrigée
   const search = (e) => {
     const mot = e.target.value;
     setSearchFilter(mot);
@@ -541,26 +525,22 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     setCategorie(validCategorie);
     fetchServicesCategorie(categories[validCategorie].sectionId);
     
-    // Appliquer le filtre de recherche si présent dans l'URL
     if (searchParam) {
       setSearchFilter(decodeURIComponent(searchParam));
     }
   }, [location.search, navigate]);
 
-  // Filtrage des prestations basé sur la recherche et le type sélectionné
   useEffect(() => {
     const currentPrestations = servicesCategorie?.services || [];
 
     let filtered = currentPrestations;
 
-    // Filtre par type
     if (selectedType !== "TOUS") {
       filtered = filtered.filter(
         (prestation) => prestation.libelle === selectedType
       );
     }
 
-    // Filtre par métiers
     if (metierFilter === "AVEC_METIERS") {
       filtered = filtered.filter(
         (prestation) => prestation.metiers && prestation.metiers.length > 0
@@ -571,7 +551,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
       );
     }
 
-    // Filtre par recherche
     if (searchFilter) {
       filtered = filtered.filter(
         (prestation) =>
@@ -607,7 +586,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   };
 
   const openPhotosModal = (prestation) => {
-    // Track la visualisation des photos
     trackConstructionInteraction(prestation.id, prestation.libelle, 'view_photos', {
       imageCount: prestation.images?.length || 0
     });
@@ -615,7 +593,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   };
 
   const openDevisModal = (prestation) => {
-    // Track la demande de devis
     trackConstructionInteraction(prestation.id, prestation.libelle, 'devis_request', {
       type: prestation.libelle,
       price: prestation.price
@@ -653,10 +630,10 @@ const IntelligibleSection = ({ showAllPrestations }) => {
   }: FilterButtonProps) => {
     const baseClasses = "inline-flex items-center px-4 py-2 rounded-full text-xs border-2 transition-all duration-300";
 
-    const selectedClasses = "bg-slate-900 text-white border-transparent shadow-lg scale-105";
+    const selectedClasses = "bg-[#556B2F] text-white border-transparent shadow-lg scale-105";
     const unselectedClasses = isAllButton
       ? "bg-white text-gray-700 border-gray-300 hover:border-black hover:text-black hover:shadow-md"
-      : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md";
+      : "bg-white text-gray-700 border-gray-300 hover:border-[#6B8E23] hover:text-[#6B8E23] hover:shadow-md";
 
     return (
       <button
@@ -670,11 +647,9 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     );
   };
 
-  // États pour la sélection multiple
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fonction pour basculer la sélection
   const handleToggleType = (type: string) => {
     setSelectedTypes(prev => {
       if (type === "TOUS") {
@@ -690,19 +665,15 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     });
   };
 
-  // Fonction pour appliquer la sélection
   const handleApplySelection = () => {
     if (selectedTypes.length === 1) {
       setSelectedType(selectedTypes[0]);
     } else if (selectedTypes.length > 1) {
-      // Gérer la logique pour plusieurs sélections
-      // Par exemple : setSelectedType("MULTIPLE") ou autre logique
-      setSelectedType(selectedTypes[0]); // Temporaire - première sélection
+      setSelectedType(selectedTypes[0]);
     }
     setIsModalOpen(false);
   };
 
-  // Initialiser la sélection quand le modal s'ouvre
   useEffect(() => {
     if (isModalOpen) {
       setSelectedTypes(selectedType && selectedType !== "TOUS" ? [selectedType] : []);
@@ -721,7 +692,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             className='h-full w-full object-cover'
             src="https://i.pinimg.com/736x/75/69/97/75699783760fa330cd3fdb2de372cbb3.jpg" alt="" />
         </div>
-
 
         <div className="relative container mx-auto px-4 pt-20 pb-16">
           <div className="text-center mb-0 lg:mb-12">
@@ -743,12 +713,12 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               navigate({ search: currentParams.toString() }, { replace: true });
             }}
           >
-            <TabsList className="grid md:w-1/2 w-full md:grid-cols-3 grid-cols-1 bg-white/80 backdrop-blur-sm rounded-xl h-auto mb-8 mx-auto shadow-md border border-white/30">
+            <TabsList className="grid md:w-1/2 w-full md:grid-cols-3 grid-cols-1 bg-white/80 backdrop-blur-sm rounded-xl h-auto mb-8 mx-auto shadow-md border border-[#D3D3D3]">
               {sections.map((section) => (
                 <TabsTrigger
                   key={section.id}
                   value={section.id}
-                  className="py-3 data-[state=active]:bg-black data-[state=active]:text-white relative"
+                  className="py-3 data-[state=active]:bg-[#556B2F] data-[state=active]:text-white relative"
                 >
                   <div className="flex items-center gap-2">
                     <section.icon className="h-4 w-4" />
@@ -760,33 +730,32 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
             {sections.map((section) => (
               <TabsContent key={section.id} value={section.id}>
-                <div className="bg-white/90 backdrop-blur-md rounded-3xl px-8 py-4 mb-12 shadow-sm border border-white/20 flex flex-col gap-6">
+                <div className="bg-white/90 backdrop-blur-md rounded-3xl px-8 py-4 mb-12 shadow-sm border border-[#D3D3D3] flex flex-col gap-6">
 
                   {/* Section Recherche */}
                   <div className="relative flex-1 md:min-w-[300px] w-24 mx-auto">
                     <Input
                       placeholder="Rechercher une prestation..."
-                      className="md:w-96 w-60  p-4 pl-12 pr-4 md:ml-0 -ml-12    bg-white border-2 border-slate-800 rounded-2xl shadow-sm 
-               transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                      className="md:w-96 w-60  p-4 pl-12 pr-4 md:ml-0 -ml-12    bg-white border-2 border-[#556B2F] rounded-2xl shadow-sm 
+               transition-all duration-300 focus:border-[#6B8E23] focus:ring-2 focus:ring-[#6B8E23]/20
                disabled:opacity-50 disabled:cursor-not-allowed"
                       value={searchFilter}
                       onChange={search}
                       disabled={isLoadingServices}
                     />
-                    <Search className="absolute top-2 md:left-4 -left-8 transform h-5 w-5 text-slate-800" />
+                    <Search className="absolute top-2 md:left-4 -left-8 transform h-5 w-5 text-[#556B2F]" />
                   </div>
 
                   {/* Section Filtres par type */}
                   <div className="flex-1">
                     <div className="flex justify-center items-start gap-3 mb-3">
-                      <BookCheck className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
-                      <span className="text-xs font-semibold text-gray-700">
+                      <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-[#8B4513]">
                         {section.label.toUpperCase()} :
                       </span>
                     </div>
 
                     <div className="flex flex-wrap gap-2 max-h-36 overflow-y-hidden mx-auto justify-center ">
-                      {/* Bouton TOUS */}
                       <FilterButton
                         label="TOUS"
                         isSelected={selectedType === "TOUS"}
@@ -795,7 +764,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                         isAllButton
                       />
 
-                      {/* Boutons des sous-sections */}
                       {section.subsections.map((subsection) => (
                         <FilterButton
                           key={subsection}
@@ -808,11 +776,11 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                     </div>
                   </div>
 
-                  {/* NOUVEAU : Filtre Métiers */}
+                  {/* Filtre Métiers */}
                   <div className="flex-1 border-t pt-4">
                     <div className="flex justify-center items-start gap-3 mb-3">
-                      <BookCheck className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
-                      <span className="text-xs font-semibold text-gray-700">
+                      <BookCheck className="h-4 w-4 text-[#8B4513] mt-0.5 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-[#8B4513]">
                         MÉTIERS :
                       </span>
                     </div>
@@ -845,7 +813,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
           </Tabs>
 
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-semibold text-gray-700 mr-2 flex items-center gap-2">
+            <span className="text-sm font-semibold text-[#8B4513] mr-2 flex items-center gap-2">
               <BookCheck className="h-4 w-4" />
               LISTES :
             </span>
@@ -853,8 +821,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             {/* Bouton TOUS */}
             <button
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${selectedType === "TOUS"
-                ? "bg-black text-white border-transparent shadow-lg scale-105"
-                : "bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:text-blue-600 hover:shadow-md"
+                ? "bg-[#556B2F] text-white border-transparent shadow-lg scale-105"
+                : "bg-white text-gray-700 border-[#D3D3D3] hover:border-[#6B8E23] hover:text-[#6B8E23] hover:shadow-md"
                 } ${isLoadingServices ? "opacity-50 cursor-not-allowed" : ""}`}
               onClick={() => setSelectedType("TOUS")}
               disabled={isLoadingServices}
@@ -867,8 +835,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               <button
                 key={type.id}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 transition-all duration-300 ${selectedType === type.libelle
-                  ? "bg-slate-900 text-white border-transparent shadow-lg scale-105"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-slate-400 hover:text-slate-600 hover:shadow-md"
+                  ? "bg-[#556B2F] text-white border-transparent shadow-lg scale-105"
+                  : "bg-white text-gray-700 border-[#D3D3D3] hover:border-[#6B8E23] hover:text-[#6B8E23] hover:shadow-md"
                   } ${isLoadingServices ? "opacity-50 cursor-not-allowed" : ""}`}
                 onClick={() => setSelectedType(type.libelle)}
                 disabled={isLoadingServices}
@@ -880,7 +848,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             {/* Bouton Voir plus (si plus de 5 éléments) */}
             {servicesCategorie?.services && servicesCategorie.services.length > 5 && (
               <button
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 border-dashed border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-all duration-300"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border-2 border-dashed border-[#D3D3D3] text-gray-600 hover:border-[#6B8E23] hover:text-[#6B8E23] transition-all duration-300"
                 onClick={() => setIsModalOpen(true)}
                 disabled={isLoadingServices}
               >
@@ -894,14 +862,14 @@ const IntelligibleSection = ({ showAllPrestations }) => {
             <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
                 {/* En-tête du modal */}
-                <div className="flex items-center justify-between px-6 py-2 border-b border-slate-700">
+                <div className="flex items-center justify-between px-6 py-2 border-b border-[#D3D3D3]">
                   <div className="flex items-center gap-3">
-                    <BookCheck className="h-5 w-5 text-slate-900" />
+                    <BookCheck className="h-5 w-5 text-[#8B4513]" />
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <h3 className="text-lg font-semibold text-[#8B4513]">
                         Toutes les listes
                       </h3>
-                      <p className="text-xs text-slate-900">
+                      <p className="text-xs text-[#8B4513]">
                         {servicesCategorie?.services?.length || 0} éléments disponibles
                       </p>
                     </div>
@@ -920,8 +888,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                     {/* Bouton TOUS dans le modal */}
                     <button
                       className={`inline-flex items-center px-3 py-2 rounded-lg text-sm border transition-all duration-200 ${selectedTypes.includes("TOUS")
-                        ? "bg-slate-600 text-white border-blue-500 shadow-lg"
-                        : "bg-slate-800 text-slate-300 border-slate-600 hover:border-blue-400 hover:text-white"
+                        ? "bg-[#556B2F] text-white border-[#6B8E23] shadow-lg"
+                        : "bg-gray-50 text-gray-700 border-[#D3D3D3] hover:border-[#6B8E23] hover:text-[#6B8E23]"
                         }`}
                       onClick={() => handleToggleType("TOUS")}
                     >
@@ -933,8 +901,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                       <button
                         key={type.id}
                         className={`inline-flex items-center px-3 py-2 rounded-full text-sm border transition-all duration-200 ${selectedTypes.includes(type.libelle)
-                          ? "bg-blue-600 text-white border-blue-800 shadow-lg"
-                          : "text-slate-900 border-slate-600 hover:border-blue-800 hover:text-blue-800"
+                          ? "bg-[#6B8E23] text-white border-[#556B2F] shadow-lg"
+                          : "text-gray-700 border-[#D3D3D3] hover:border-[#556B2F] hover:text-[#556B2F]"
                           }`}
                         onClick={() => handleToggleType(type.libelle)}
                       >
@@ -945,8 +913,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                 </div>
 
                 {/* Pied du modal avec sélection multiple */}
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-white">
-                  <div className="text-sm text-slate-400">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-[#D3D3D3] bg-white">
+                  <div className="text-sm text-gray-500">
                     {selectedTypes.length > 0 ? (
                       <span>
                         {selectedTypes.length} élément(s) sélectionné(s)
@@ -960,8 +928,8 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                     <button
                       onClick={handleApplySelection}
                       className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedTypes.length > 0
-                        ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
-                        : "bg-slate-700 text-slate-400 cursor-not-allowed"
+                        ? "bg-[#556B2F] text-white hover:bg-[#6B8E23] shadow-lg"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
                         }`}
                       disabled={selectedTypes.length === 0}
                     >
@@ -970,7 +938,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
                     <button
                       onClick={() => setIsModalOpen(false)}
-                      className="px-5 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white bg-red-700 hover:bg-red-600 transition-all duration-200"
+                      className="px-5 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-white bg-red-600 hover:bg-red-700 transition-all duration-200"
                     >
                       Fermer
                     </button>
@@ -1001,7 +969,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               return (
                 <Card
                   key={prestation.id}
-                  className="group my-2 lg:my-4 overflow-hidden border border-gray-200 bg-white hover:shadow-md transition-all duration-300 rounded-2xl cursor-pointer"
+                  className="group my-2 lg:my-4 overflow-hidden border border-[#D3D3D3] bg-white hover:shadow-md transition-all duration-300 rounded-2xl cursor-pointer"
                 >
                   <div className="relative">
                     {/* Section Image */}
@@ -1015,7 +983,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                         className="w-full h-full rounded-md object-cover opacity-80  transition-transform"
                       />
 
-                      <div className="absolute top-3 left-3 bg-white/90 rounded-full px-2 py-1 text-xs font-semibold text-gray-800">
+                      <div className="absolute top-3 left-3 bg-white/90 rounded-full px-2 py-1 text-xs font-semibold text-[#8B4513]">
                         {prestation.libelle}
                       </div>
 
@@ -1047,7 +1015,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
 
                     {/* Section Contenu */}
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 text-sm mb-2">
+                      <h3 className="font-semibold text-[#8B4513] text-sm mb-2">
                         {prestation.libelle}
                       </h3>
                       <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">
@@ -1060,7 +1028,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                           {prestation.metiers.map((metierService) => (
                             <span
                               key={metierService.metier.id}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200"
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#6B8E23]/10 text-[#556B2F] border border-[#6B8E23]/20"
                             >
                               {metierService.metier.libelle}
                             </span>
@@ -1080,7 +1048,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
                           </Button>
                         )}
                         <Button
-                          className="text-white font-medium bg-slate-900 rounded-lg text-xs hover:bg-black transition-colors duration-200 flex-1"
+                          className="text-white font-medium bg-[#556B2F] rounded-lg text-xs hover:bg-[#6B8E23] transition-colors duration-200 flex-1"
                           onClick={() => openDevisModal(prestation)}
                         >
                           <FileText className="h-3 w-3 mr-1" />
@@ -1104,7 +1072,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
         )}
 
         <div className="flex justify-end mr-5">
-          <div className="inline-flex items-center gap-3 bg-slate-900 my-5 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg animate-pulse ">
+          <div className="inline-flex items-center gap-3 bg-[#556B2F] my-5 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg animate-pulse ">
             <div className="bg-white/10 p-1.5 rounded-lg">
               <Clock className="h-5 w-5 text-white" />
             </div>
@@ -1112,14 +1080,13 @@ const IntelligibleSection = ({ showAllPrestations }) => {
               <p className="text-white font-semibold text-sm">
                 DEVIS ENVOYÉ DANS LES 48H
               </p>
-              <p className="text-blue-100/80 text-xs">
+              <p className="text-white/80 text-xs">
                 Réponse sous 2 jours ouvrés
               </p>
             </div>
           </div>
         </div>
       </section>
-
 
       <PhotosModal
         isOpen={photosModal.isOpen}
@@ -1131,7 +1098,6 @@ const IntelligibleSection = ({ showAllPrestations }) => {
         onClose={closeDevisModal}
         prestation={devisModal.prestation}
       />
-
     </>
   );
 };
