@@ -501,7 +501,7 @@ const DomicileLayout = () => {
                 `${
                   selected
                     ? "bg-[#556B2F] text-white"
-                    : "bg-white text-[#556B2F] hover:bg-[#6B8E23]"
+                    : "bg-white text-[#556B2F] hover:bg-[#6B8E23] hover:text-white"
                 } px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#556B2F] text-sm`
               }
             >

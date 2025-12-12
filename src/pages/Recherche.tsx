@@ -152,6 +152,26 @@ useEffect(() => {
     checkAuthentication();
   }, []);
 
+  // =============== VERROUILLER LE SCROLL DU BODY QUAND LA CARTE EST OUVERTE ===============
+  useEffect(() => {
+    if (showMapModal) {
+      // Verrouiller le scroll en ajoutant overflow-hidden
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      // Réactiver le scroll en supprimant overflow-hidden
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+
+    // Cleanup: s'assurer que le scroll est réactivé au démontage
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [showMapModal]);
+  // =====================================================================================
+
   const checkAuthentication = () => {
     try {
       const token = localStorage.getItem("auth-token");
@@ -1297,19 +1317,19 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
         </div>
       </main>
 
-      {/* // =============== MODAL DE LA CARTE (EN BAS À DROITE) =============== */}
+      {/* // =============== MODAL DE LA CARTE (CENTRÉ ET AGRANDI) =============== */}
       {showMapModal && (
         <div className="fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-300 overflow-hidden
-          // Mobile: prend tout l'écran
-          bottom-0 right-0 w-full h-3/4
-          // Tablet: taille moyenne
-          md:bottom-4 md:right-4 md:w-[calc(100vw-2rem)] md:h-3/5 md:max-w-[700px] md:max-h-[600px]
-          // Desktop: taille fixe
-          lg:bottom-8 lg:right-8 lg:w-[600px] lg:h-[500px]"
+          // Mobile: prend tout l'écran sauf padding haut
+          top-16 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] h-[calc(100vh-8rem)]
+          // Tablet: taille plus grande et centrée
+          md:top-20 md:w-[calc(100%-2rem)] md:h-[calc(100vh-10rem)] md:max-w-4xl
+          // Desktop: taille complète avec padding
+          lg:w-[90vw] lg:h-[80vh] lg:max-w-6xl"
         >
           {/* Header de la carte */}
-          <div className="bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+          <div className="bg-white p-3 md:p-4 border-b flex items-center justify-between flex-wrap gap-2 z-[9999]">
+            <div className="flex items-center z-50 gap-2 md:gap-3 flex-1 min-w-0">
               <MapPin className="h-4 w-4 md:h-5 md:w-5 text-blue-600 flex-shrink-0" />
               <span className="font-semibold text-sm md:text-base truncate">
                 Carte de la Réunion
@@ -1383,7 +1403,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
           </div>
 
           {/* Contenu de la carte */}
-          <div className="h-[calc(100%-120px)] md:h-[calc(100%-130px)] bg-gray-100 relative">
+          <div className="h-[calc(100%-220px)] overflow-hidden md:h-[calc(100%-130px)] bg-gray-100 relative">
             {mapLoading ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
@@ -1446,7 +1466,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
             </div>
             
             <button
-              onClick={() => navigate('/map')}
+              onClick={() => navigate('/carte')}
               className="text-xs md:text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors self-end sm:self-auto"
             >
               Voir carte complète →
