@@ -35,11 +35,24 @@ export function ServicesStats() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="bg-card border-border">
+          <Card 
+            key={i} 
+            className="border-l-4 border-l-transparent"
+            style={{ 
+              backgroundColor: '#FFFFFF0',
+              borderColor: '#D3D3D3'
+            }}
+          >
             <CardContent className="p-6">
               <div className="animate-pulse">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-6 bg-muted rounded w-1/2"></div>
+                <div 
+                  className="h-4 rounded w-3/4 mb-2"
+                  style={{ backgroundColor: '#D3D3D3' }}
+                ></div>
+                <div 
+                  className="h-6 rounded w-1/2"
+                  style={{ backgroundColor: '#D3D3D3' }}
+                ></div>
               </div>
             </CardContent>
           </Card>
@@ -51,68 +64,70 @@ export function ServicesStats() {
   if (!stats) {
     return null;
   }
+  
   function setShowAddArtworkModal(arg0: boolean): void {
     throw new Error("Function not implemented.");
   }
+
+  const statsData = [
+    {
+      title: "Services",
+      value: stats.totalServices,
+      description: "Services disponibles",
+      color: "border-l-[#556B2F]"
+    },
+    {
+      title: "Catégories",
+      value: stats.totalCategories,
+      description: "Catégories actives",
+      color: "border-l-[#6B8E23]"
+    },
+    {
+      title: "Métiers",
+      value: stats.totalMetiers,
+      description: "Métiers associés",
+      color: "border-l-[#8B4513]"
+    },
+    {
+      title: "Top Catégorie",
+      value: stats.servicesByCategory[0]?.count || 0,
+      description: stats.servicesByCategory[0]?.category || "Aucune",
+      color: "border-l-[#556B2F]"
+    }
+  ];
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Services
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.totalServices}
-          </div>
-          <p className="text-xs text-muted-foreground">Services disponibles</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Catégories
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.totalCategories}
-          </div>
-          <p className="text-xs text-muted-foreground">Catégories actives</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Métiers
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.totalMetiers}
-          </div>
-          <p className="text-xs text-muted-foreground">Métiers associés</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-foreground">
-            Top Catégorie
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.servicesByCategory[0]?.count || 0}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {stats.servicesByCategory[0]?.category || "Aucune"}
-          </p>
-        </CardContent>
-      </Card>
+      {statsData.map((stat, index) => (
+        <Card 
+          key={index} 
+          className={`border-l-4 hover:shadow-lg transition-shadow ${stat.color}`}
+          style={{ 
+            backgroundColor: '#FFFFFF0',
+            borderColor: '#D3D3D3'
+          }}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle 
+              className="text-sm font-medium"
+              style={{ color: '#556B2F' }}
+            >
+              {stat.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div 
+              className="text-2xl font-bold"
+              style={{ color: '#556B2F' }}
+            >
+              {stat.value}
+            </div>
+            <p className="text-xs text-gray-800">
+              {stat.description}
+            </p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,50 +75,84 @@ export function CategoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-foreground">
+      <DialogContent 
+        className="sm:max-w-[500px] border"
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
+        <DialogHeader className="space-y-2">
+          <DialogTitle 
+            className="text-xl font-bold"
+            style={{ color: '#556B2F' }}
+          >
             {mode === "create"
               ? "Créer une catégorie"
               : "Modifier la catégorie"}
           </DialogTitle>
+          <DialogDescription className="text-gray-800">
+            {mode === "create"
+              ? "Ajoutez une nouvelle catégorie de service"
+              : "Modifiez les informations de la catégorie"}
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-foreground">
-              Nom de la catégorie
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-3">
+            <Label 
+              htmlFor="name" 
+              className="font-medium block"
+              style={{ color: '#556B2F' }}
+            >
+              Nom de la catégorie <span className="text-[#8B4513]">*</span>
             </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Plomberie, Électricité, Jardinage..."
-              className="bg-background border-input"
+              style={{ 
+                borderColor: '#D3D3D3',
+                color: '#556B2F'
+              }}
+              className="focus:ring-1 focus:ring-[#6B8E23]"
               disabled={loading}
+              required
             />
+            <p className="text-xs text-gray-800">
+              Ce nom sera visible par les utilisateurs
+            </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-6 border-t" style={{ borderColor: '#D3D3D3' }}>
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
-              className="border-border"
+              style={{ 
+                borderColor: '#D3D3D3',
+                color: '#8B4513'
+              }}
             >
               Annuler
             </Button>
             <Button
               type="submit"
-              disabled={loading}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={loading || !name.trim()}
+              style={{ 
+                backgroundColor: '#6B8E23',
+                color: 'white',
+                borderColor: '#6B8E23',
+                opacity: loading || !name.trim() ? 0.7 : 1
+              }}
             >
               {loading
                 ? "Enregistrement..."
                 : mode === "create"
-                ? "Créer"
-                : "Modifier"}
+                ? "Créer la catégorie"
+                : "Enregistrer les modifications"}
             </Button>
           </div>
         </form>

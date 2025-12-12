@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DemandeAudit from "@/components/DemandeAudit";
- // Import de la modale
 import { 
   Search, 
   Eye, 
@@ -27,12 +26,12 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 
-// Types et statuts pour les audits
+// Types et statuts pour les audits avec la nouvelle palette
 const STATUT_AUDIT = {
-  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  in_progress: { label: "En cours", color: "bg-blue-100 text-blue-800" },
-  completed: { label: "Terminé", color: "bg-green-100 text-green-800" },
-  cancelled: { label: "Annulé", color: "bg-red-100 text-red-800" }
+  pending: { label: "En attente", color: "bg-[#D3D3D3]/30 text-[#8B4513]" },
+  in_progress: { label: "En cours", color: "bg-[#6B8E23]/20 text-[#6B8E23]" },
+  completed: { label: "Terminé", color: "bg-[#556B2F]/20 text-[#556B2F]" },
+  cancelled: { label: "Annulé", color: "bg-[#8B4513]/10 text-[#8B4513]" }
 };
 
 const TYPE_AUDIT = {
@@ -84,16 +83,21 @@ const AuditsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: '#556B2F' }}>
             Demandes d'audit
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-800">
             Gérer toutes les demandes d'audit de la plateforme
           </p>
         </div>
         <Button
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+          className="transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+          style={{ 
+            backgroundColor: '#6B8E23',
+            color: 'white',
+            borderColor: '#6B8E23'
+          }}
         >
           <ShieldCheck className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
           Nouvel audit
@@ -170,15 +174,22 @@ export function AuditsStats() {
     return (
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {[...Array(5)].map((_, index) => (
-          <Card key={index} className="p-6">
+          <Card 
+            key={index} 
+            className="p-6"
+            style={{ 
+              backgroundColor: '#FFFFFF0',
+              borderColor: '#D3D3D3'
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold mb-2">
-                  <div className="h-6 bg-gray-200 rounded animate-pulse w-16"></div>
+                  <div className="h-6 rounded animate-pulse w-16" style={{ backgroundColor: '#D3D3D3' }}></div>
                 </div>
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                <div className="h-4 rounded animate-pulse w-20" style={{ backgroundColor: '#D3D3D3' }}></div>
               </div>
-              <div className="p-3 rounded-full bg-gray-200 animate-pulse">
+              <div className="p-3 rounded-full animate-pulse" style={{ backgroundColor: '#D3D3D3' }}>
                 <div className="h-6 w-6"></div>
               </div>
             </div>
@@ -188,6 +199,72 @@ export function AuditsStats() {
     );
   }
 
+  const statsCards = [
+    {
+      name: "Total audits",
+      value: formatNumber(stats.total),
+      icon: ShieldCheck,
+      color: "text-[#556B2F]",
+      bgColor: "bg-[#556B2F]/10",
+    },
+    {
+      name: "En attente",
+      value: formatNumber(stats.pending),
+      icon: Clock,
+      color: "text-[#8B4513]",
+      bgColor: "bg-[#8B4513]/10",
+    },
+    {
+      name: "En cours",
+      value: formatNumber(stats.in_progress),
+      icon: TrendingUp,
+      color: "text-[#6B8E23]",
+      bgColor: "bg-[#6B8E23]/10",
+    },
+    {
+      name: "Terminés",
+      value: formatNumber(stats.completed),
+      icon: CheckCircle,
+      color: "text-[#556B2F]",
+      bgColor: "bg-[#556B2F]/10",
+    },
+    {
+      name: "Annulés",
+      value: formatNumber(stats.cancelled),
+      icon: XCircle,
+      color: "text-[#8B4513]",
+      bgColor: "bg-[#8B4513]/10",
+    },
+  ];
+
+  return (
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {statsCards.map((stat) => (
+        <Card 
+          key={stat.name} 
+          className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-[#6B8E23]"
+          style={{ 
+            backgroundColor: '#FFFFFF0',
+            borderColor: '#D3D3D3'
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-2xl font-bold mb-2" style={{ color: '#556B2F' }}>
+                {stat.value}
+              </div>
+              <div className="text-sm text-gray-800">
+                {stat.name}
+              </div>
+            </div>
+            <div className={`p-3 rounded-full ${stat.bgColor} border`} style={{ borderColor: '#D3D3D3' }}>
+              <stat.icon className={`h-6 w-6 ${stat.color}`} />
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 // Composant principal pour le tableau des audits
@@ -271,10 +348,8 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
     try {
       setActionLoading(audit.id);
       
-      // Correction de l'URL de suppression
       await api.delete(`/add_audit/delete/${audit.id}`);
 
-      // Mettre à jour la liste localement
       setAudits(prev => prev.filter(a => a.id !== audit.id));
     } catch (error: any) {
       console.error("Error deleting audit:", error);
@@ -286,10 +361,13 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
 
   if (loading) {
     return (
-      <div className="min-h-[400px] bg-gray-50 flex items-center justify-center rounded-lg">
+      <div 
+        className="min-h-[400px] flex items-center justify-center rounded-lg"
+        style={{ backgroundColor: '#FFFFFF0' }}
+      >
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Chargement des audits...</p>
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: '#6B8E23' }} />
+          <p className="text-gray-800">Chargement des audits...</p>
         </div>
       </div>
     );
@@ -297,38 +375,113 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
 
   if (error) {
     return (
-      <Card className="p-8 text-center">
-        <p className="text-destructive mb-4">{error}</p>
-        <Button onClick={fetchAudits}>Réessayer</Button>
+      <Card 
+        className="p-8 text-center"
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
+        <p className="mb-4 text-gray-800">{error}</p>
+        <Button 
+          onClick={fetchAudits}
+          style={{ 
+            backgroundColor: '#6B8E23',
+            color: 'white',
+            borderColor: '#6B8E23'
+          }}
+        >
+          Réessayer
+        </Button>
       </Card>
     );
   }
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen" style={{ backgroundColor: '#FFFFFF0' }}>
         <div className="container mx-auto px-4 py-8">
           {/* Barre de filtres */}
-          <Card className="p-6 mb-8">
+          <Card 
+            className="p-6 mb-8"
+            style={{ 
+              backgroundColor: '#FFFFFF0',
+              borderColor: '#D3D3D3'
+            }}
+          >
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Search 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                  size={20} 
+                  style={{ color: '#8B4513' }}
+                />
                 <Input
                   placeholder="Rechercher par titre, responsable, client..."
                   className="pl-10"
+                  style={{ 
+                    borderColor: '#D3D3D3',
+                    color: '#556B2F'
+                  }}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" className="border-border bg-transparent">
-                <Search className="mr-2" size={16} />
-                
+              
+              <select
+                className="p-2 border rounded-lg"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  backgroundColor: '#FFFFFF0',
+                  color: '#556B2F'
+                }}
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">Tous les statuts</option>
+                {Object.entries(STATUT_AUDIT).map(([key, statut]) => (
+                  <option key={key} value={key}>{statut.label}</option>
+                ))}
+              </select>
+              
+              <select
+                className="p-2 border rounded-lg"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  backgroundColor: '#FFFFFF0',
+                  color: '#556B2F'
+                }}
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="">Tous les types</option>
+                {Object.entries(TYPE_AUDIT).map(([key, type]) => (
+                  <option key={key} value={key}>{type}</option>
+                ))}
+              </select>
+
+              <Button 
+                variant="outline" 
+                className="border-border bg-transparent"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#6B8E23'
+                }}
+              >
+                <Filter className="mr-2" size={16} />
+                Plus de filtres
               </Button>
             </div>
             
             {error && (
-              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                <p className="text-destructive text-sm">{error}</p>
+              <div 
+                className="mt-4 p-3 rounded-md"
+                style={{ 
+                  backgroundColor: '#8B4513'/10,
+                  border: '1px solid #8B4513'/20
+                }}
+              >
+                <p className="text-sm text-gray-800">{error}</p>
               </div>
             )}
           </Card>
@@ -336,12 +489,27 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
           {/* Liste des audits */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredAudits.map((audit) => (
-              <Card key={audit.id} className="overflow-hidden hover:shadow-xl transition-all duration-300">
+              <Card 
+                key={audit.id} 
+                className="overflow-hidden hover:shadow-xl transition-all duration-300"
+                style={{ 
+                  backgroundColor: '#FFFFFF0',
+                  borderColor: '#D3D3D3'
+                }}
+              >
                 {/* En-tête avec statut */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+                <div 
+                  className="p-4 text-white"
+                  style={{ 
+                    background: 'linear-gradient(to right, #556B2F, #6B8E23)'
+                  }}
+                >
                   <div className="flex justify-between items-start">
                     <div>
-                      <Badge className="bg-white/20 text-white border-0">
+                      <Badge 
+                        className="text-white border-0"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                      >
                         {TYPE_AUDIT[audit.type as keyof typeof TYPE_AUDIT] || audit.type}
                       </Badge>
                     </div>
@@ -362,27 +530,27 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
                 <div className="p-6">
                   {/* Informations client */}
                   <div className="mb-4">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#556B2F' }}>
                       <User size={16} />
                       Client
                     </h3>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Nom:</span>
-                        <span className="font-medium">
+                        <span className="text-gray-800">Nom:</span>
+                        <span className="font-medium" style={{ color: '#556B2F' }}>
                           {audit.user?.firstName} {audit.user?.lastName}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Email:</span>
-                        <span className="font-medium truncate ml-2">
+                        <span className="text-gray-800">Email:</span>
+                        <span className="font-medium truncate ml-2" style={{ color: '#556B2F' }}>
                           {audit.user?.email}
                         </span>
                       </div>
                       {audit.user?.companyName && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Entreprise:</span>
-                          <span className="font-medium">{audit.user.companyName}</span>
+                          <span className="text-gray-800">Entreprise:</span>
+                          <span className="font-medium" style={{ color: '#556B2F' }}>{audit.user.companyName}</span>
                         </div>
                       )}
                     </div>
@@ -391,19 +559,19 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
                   {/* Description */}
                   {audit.description && (
                     <div className="mb-4">
-                      <h3 className="font-semibold mb-2 flex items-center gap-2">
+                      <h3 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#556B2F' }}>
                         <FileText size={16} />
                         Description
                       </h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <p className="text-sm line-clamp-2 text-gray-800">
                         {audit.description}
                       </p>
                     </div>
                   )}
 
                   {/* Date de création */}
-                  <div className="flex items-center gap-1 text-sm text-gray-500 mb-4">
-                    <Calendar size={14} />
+                  <div className="flex items-center gap-1 text-sm mb-4 text-gray-800">
+                    <Calendar size={14} style={{ color: '#6B8E23' }} />
                     <span>
                       Créé le {new Date(audit.createdAt).toLocaleDateString('fr-FR')}
                     </span>
@@ -411,14 +579,16 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-            
-                    
                     {audit.statut === 'pending' && (
                       <Button
                         size="sm"
                         onClick={() => handleStatusUpdate(audit, 'in_progress')}
                         disabled={actionLoading === audit.id}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                        className="flex-1 text-white"
+                        style={{ 
+                          backgroundColor: '#6B8E23',
+                          borderColor: '#6B8E23'
+                        }}
                       >
                         {actionLoading === audit.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -434,7 +604,11 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
                         size="sm"
                         onClick={() => handleStatusUpdate(audit, 'completed')}
                         disabled={actionLoading === audit.id}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                        className="flex-1 text-white"
+                        style={{ 
+                          backgroundColor: '#556B2F',
+                          borderColor: '#556B2F'
+                        }}
                       >
                         {actionLoading === audit.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -451,7 +625,11 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
                         size="sm"
                         onClick={() => handleStatusUpdate(audit, 'cancelled')}
                         disabled={actionLoading === audit.id}
-                        className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                        className="flex-1 hover:bg-[#8B4513]/10"
+                        style={{ 
+                          borderColor: '#8B4513'/30,
+                          color: '#8B4513'
+                        }}
                       >
                         {actionLoading === audit.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -463,17 +641,22 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
                     )}
 
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDelete(audit)}
                       disabled={actionLoading === audit.id}
-                      className="flex-1"
+                      className="flex-1 hover:bg-[#8B4513]/10"
+                      style={{ 
+                        borderColor: '#8B4513'/30,
+                        color: '#8B4513'
+                      }}
                     >
                       {actionLoading === audit.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <Trash2 className="h-4 w-4" />
                       )}
+                      Supprimer
                     </Button>
                   </div>
                 </div>
@@ -482,12 +665,18 @@ export function AuditsTable({ audits, setAudits }: AuditsTableProps) {
           </div>
 
           {filteredAudits.length === 0 && (
-            <Card className="p-12 text-center">
-              <ShieldCheck className="mx-auto mb-4 text-gray-400" size={48} />
-              <h3 className="text-xl font-semibold mb-2">
+            <Card 
+              className="p-12 text-center"
+              style={{ 
+                backgroundColor: '#FFFFFF0',
+                borderColor: '#D3D3D3'
+              }}
+            >
+              <ShieldCheck className="mx-auto mb-4" size={48} style={{ color: '#8B4513' }} />
+              <h3 className="text-xl font-semibold mb-2" style={{ color: '#556B2F' }}>
                 Aucun audit trouvé
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-800">
                 {searchQuery || statusFilter || typeFilter 
                   ? "Essayez de modifier vos critères de recherche"
                   : "Aucune demande d'audit n'a été créée pour le moment"

@@ -198,45 +198,82 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto border"
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
         <DialogHeader className="space-y-2">
-          <DialogTitle className="text-2xl font-bold text-foreground">
+          <DialogTitle 
+            className="text-2xl font-bold"
+            style={{ color: '#556B2F' }}
+          >
             {mode === "create" ? "Nouveau service" : "Modifier le service"}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className="text-gray-800">
             {mode === "create" ? "Créer un nouveau service pour votre catalogue" : "Modifier les détails du service existant"}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-foreground font-semibold">
-                Nom du service <span className="text-destructive">*</span>
+              <Label 
+                htmlFor="name" 
+                className="font-semibold"
+                style={{ color: '#556B2F' }}
+              >
+                Nom du service <span className="text-[#8B4513]">*</span>
               </Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-background border-input focus-visible:ring-1 focus-visible:ring-primary"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#556B2F'
+                }}
+                className="focus-visible:ring-1 focus-visible:ring-[#6B8E23]"
                 placeholder="Ex: Réparation moteur"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-foreground font-semibold">
+              <Label 
+                htmlFor="category" 
+                className="font-semibold"
+                style={{ color: '#556B2F' }}
+              >
                 Catégorie
               </Label>
               <Select
                 value={formData.categoryId}
                 onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
               >
-                <SelectTrigger className="bg-background border-input focus-visible:ring-1 focus-visible:ring-primary">
+                <SelectTrigger 
+                  style={{ 
+                    borderColor: '#D3D3D3',
+                    color: '#556B2F'
+                  }}
+                  className="focus-visible:ring-1 focus-visible:ring-[#6B8E23]"
+                >
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
+                <SelectContent 
+                  className="border"
+                  style={{ 
+                    backgroundColor: '#FFFFFF0',
+                    borderColor: '#D3D3D3'
+                  }}
+                >
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id.toString()}>
+                    <SelectItem 
+                      key={category.id} 
+                      value={category.id.toString()}
+                      style={{ color: '#556B2F' }}
+                    >
                       {category.name}
                     </SelectItem>
                   ))}
@@ -246,32 +283,51 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-foreground font-semibold">
+                <Label 
+                  className="font-semibold"
+                  style={{ color: '#556B2F' }}
+                >
                   Métiers associés
                 </Label>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-gray-800">
                   {formData.metierIds.length} sélectionné{formData.metierIds.length !== 1 ? 's' : ''}
                 </span>
               </div>
               
               {/* Barre de recherche des métiers */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" 
+                  style={{ color: '#8B4513' }}
+                />
                 <Input
                   type="text"
                   placeholder="Rechercher un métier..."
                   value={metierSearch}
                   onChange={(e) => setMetierSearch(e.target.value)}
-                  className="bg-background border-input pl-10 focus-visible:ring-1 focus-visible:ring-primary"
+                  style={{ 
+                    borderColor: '#D3D3D3',
+                    color: '#556B2F'
+                  }}
+                  className="pl-10 focus-visible:ring-1 focus-visible:ring-[#6B8E23]"
                 />
               </div>
 
               {/* Liste des métiers */}
-              <div className="border border-input rounded-lg bg-background max-h-48 overflow-y-auto p-3">
+              <div 
+                className="border rounded-lg max-h-48 overflow-y-auto p-3"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  backgroundColor: '#FFFFFF0'
+                }}
+              >
                 {filteredMetiers.length > 0 ? (
                   <div className="space-y-3">
                     {filteredMetiers.map((metier) => (
-                      <div key={metier.id} className="flex items-center space-x-3 hover:bg-accent p-2 rounded-md transition-colors">
+                      <div 
+                        key={metier.id} 
+                        className="flex items-center space-x-3 hover:bg-[#D3D3D3]/10 p-2 rounded-md transition-colors"
+                      >
                         <Checkbox
                           id={`metier-${metier.id}`}
                           checked={formData.metierIds.includes(metier.id.toString())}
@@ -279,10 +335,14 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
                             handleMetierChange(metier.id.toString(), checked as boolean)
                           }
                           className="cursor-pointer"
+                          style={{ 
+                            color: '#6B8E23'
+                          }}
                         />
                         <label
                           htmlFor={`metier-${metier.id}`}
                           className="text-sm font-medium cursor-pointer flex-1"
+                          style={{ color: '#556B2F' }}
                         >
                           {metier.libelle}
                         </label>
@@ -290,7 +350,7 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">
+                  <p className="text-sm text-gray-800 text-center py-4">
                     Aucun métier trouvé
                   </p>
                 )}
@@ -298,26 +358,43 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-foreground font-semibold">
+              <Label 
+                htmlFor="description" 
+                className="font-semibold"
+                style={{ color: '#556B2F' }}
+              >
                 Description
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-background border-input min-h-[100px] focus-visible:ring-1 focus-visible:ring-primary"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#556B2F'
+                }}
+                className="min-h-[100px] focus-visible:ring-1 focus-visible:ring-[#6B8E23]"
                 placeholder="Description détaillée du service..."
               />
             </div>
 
             {/* Section Images */}
             <div className="space-y-3">
-              <Label className="text-foreground font-semibold">
+              <Label 
+                className="font-semibold"
+                style={{ color: '#556B2F' }}
+              >
                 Images du service
               </Label>
               
               {/* Upload d'image */}
-              <div className="border-2 border-dashed border-primary/30 hover:border-primary/60 rounded-lg p-8 text-center transition-colors bg-primary/5">
+              <div 
+                className="border-2 border-dashed rounded-lg p-8 text-center transition-colors hover:border-[#6B8E23]/60 cursor-pointer"
+                style={{ 
+                  borderColor: '#6B8E23'/30,
+                  backgroundColor: '#6B8E23'/5
+                }}
+              >
                 <input
                   type="file"
                   id="image-upload"
@@ -328,20 +405,20 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
                 />
                 <label
                   htmlFor="image-upload"
-                  className={`cursor-pointer flex flex-col items-center justify-center gap-3 ${
+                  className={`flex flex-col items-center justify-center gap-3 ${
                     uploading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {uploading ? (
-                    <Upload className="h-10 w-10 text-primary animate-pulse" />
+                    <Upload className="h-10 w-10 animate-pulse" style={{ color: '#6B8E23' }} />
                   ) : (
-                    <ImagePlus className="h-10 w-10 text-primary" />
+                    <ImagePlus className="h-10 w-10" style={{ color: '#6B8E23' }} />
                   )}
                   <div>
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-sm font-medium" style={{ color: '#556B2F' }}>
                       {uploading ? 'Upload en cours...' : 'Cliquez pour ajouter une image'}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-gray-800 mt-1">
                       PNG, JPG, JPEG jusqu'à 5MB
                     </p>
                   </div>
@@ -351,7 +428,7 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
               {/* Aperçu des images */}
               {formData.images.length > 0 && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <p className="text-sm text-gray-800 mb-2">
                     {formData.images.length} image{formData.images.length !== 1 ? 's' : ''} ajoutée{formData.images.length !== 1 ? 's' : ''}
                   </p>
                   <div className="grid grid-cols-4 gap-3">
@@ -360,12 +437,17 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
                         <img
                           src={image}
                           alt={`Service image ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border border-input"
+                          className="w-full h-24 object-cover rounded-lg border"
+                          style={{ borderColor: '#D3D3D3' }}
                         />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
-                          className="absolute -top-3 -right-3 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-destructive/90"
+                          className="absolute -top-3 -right-3 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                          style={{ 
+                            backgroundColor: '#8B4513',
+                            color: 'white'
+                          }}
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -381,15 +463,22 @@ export function ServiceModal({ open, onOpenChange, service, mode, onServiceUpdat
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)} 
-              className="border-border"
               disabled={loading || uploading}
+              style={{ 
+                borderColor: '#D3D3D3',
+                color: '#8B4513'
+              }}
             >
               Annuler
             </Button>
             <Button 
               type="submit" 
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={loading || uploading}
+              style={{ 
+                backgroundColor: '#6B8E23',
+                color: 'white',
+                borderColor: '#6B8E23'
+              }}
             >
               {loading ? "Chargement..." : mode === "create" ? "Créer le service" : "Enregistrer les modifications"}
             </Button>

@@ -93,7 +93,7 @@ export function AssignCategoryModal({
       return;
     }
 
-    if (selectedServices.length === 0) {
+    if (selectedServices.length === 0 && !bulkAssign) {
       toast.error("Veuillez sélectionner au moins un service");
       return;
     }
@@ -152,26 +152,44 @@ export function AssignCategoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-foreground flex items-center gap-2">
-            <Tag className="h-5 w-5" />
+      <DialogContent 
+        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto border"
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
+        <DialogHeader className="space-y-2">
+          <DialogTitle 
+            className="flex items-center gap-2"
+            style={{ color: '#556B2F' }}
+          >
+            <Tag className="h-5 w-5" style={{ color: '#6B8E23' }} />
             Assigner des catégories aux services
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className="text-gray-800">
             Sélectionnez une catégorie et les services à associer
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Mode d'assignation rapide */}
-          <Card className="p-4 bg-blue-50 border-blue-200">
+          <Card 
+            className="p-4 border-l-4 border-l-[#6B8E23]"
+            style={{ 
+              backgroundColor: '#6B8E23'/5,
+              borderColor: '#6B8E23'/20
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-blue-900">
+                <h4 
+                  className="font-semibold"
+                  style={{ color: '#556B2F' }}
+                >
                   Assignation rapide
                 </h4>
-                <p className="text-sm text-blue-700">
+                <p className="text-sm" style={{ color: '#6B8E23' }}>
                   Assigner tous les services sans catégorie à une même catégorie
                 </p>
               </div>
@@ -179,7 +197,11 @@ export function AssignCategoryModal({
                 variant={bulkAssign ? "default" : "outline"}
                 size="sm"
                 onClick={() => setBulkAssign(!bulkAssign)}
-                className={bulkAssign ? "bg-blue-600 hover:bg-blue-700" : ""}
+                style={{ 
+                  backgroundColor: bulkAssign ? '#6B8E23' : 'transparent',
+                  borderColor: bulkAssign ? '#6B8E23' : '#D3D3D3',
+                  color: bulkAssign ? 'white' : '#6B8E23'
+                }}
               >
                 {bulkAssign ? "Activé" : "Activer"}
               </Button>
@@ -188,7 +210,9 @@ export function AssignCategoryModal({
 
           {/* Sélection de catégorie */}
           <div className="space-y-3">
-            <Label className="text-foreground">Catégorie</Label>
+            <Label className="font-medium" style={{ color: '#556B2F' }}>
+              Catégorie
+            </Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
               {categories.map((category) => (
                 <button
@@ -197,12 +221,20 @@ export function AssignCategoryModal({
                   onClick={() => setSelectedCategory(category.id)}
                   className={`p-3 rounded-lg border text-left transition-colors ${
                     selectedCategory === category.id
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background border-border hover:bg-accent"
+                      ? "border-[#6B8E23]"
+                      : "border-[#D3D3D3] hover:bg-[#D3D3D3]/10"
                   }`}
+                  style={{
+                    backgroundColor: selectedCategory === category.id 
+                      ? '#6B8E23'/10 
+                      : '#FFFFFF0',
+                    color: selectedCategory === category.id 
+                      ? '#6B8E23' 
+                      : '#556B2F'
+                  }}
                 >
                   <div className="font-medium">{category.name}</div>
-                  <div className="text-sm opacity-75">
+                  <div className="text-sm opacity-75 text-gray-800">
                     {category._count?.services || 0} service(s)
                   </div>
                 </button>
@@ -213,7 +245,7 @@ export function AssignCategoryModal({
           {/* Liste des services sans catégorie */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-foreground">
+              <Label className="font-medium" style={{ color: '#556B2F' }}>
                 Services sans catégorie ({servicesWithoutCategory.length})
               </Label>
               {!bulkAssign && (
@@ -221,7 +253,10 @@ export function AssignCategoryModal({
                   variant="outline"
                   size="sm"
                   onClick={selectAllServices}
-                  className="border-border"
+                  style={{ 
+                    borderColor: '#D3D3D3',
+                    color: '#6B8E23'
+                  }}
                 >
                   {selectedServices.length === filteredServices.length
                     ? "Tout désélectionner"
@@ -232,19 +267,26 @@ export function AssignCategoryModal({
 
             {/* Barre de recherche */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search 
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" 
+                style={{ color: '#8B4513' }}
+              />
               <Input
                 placeholder="Rechercher un service..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background border-input"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#556B2F'
+                }}
+                className="pl-10"
               />
             </div>
 
             {/* Liste des services */}
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {filteredServices.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-gray-800">
                   {searchQuery
                     ? "Aucun service trouvé"
                     : "Aucun service sans catégorie"}
@@ -255,17 +297,25 @@ export function AssignCategoryModal({
                     key={service.id}
                     className={`p-3 rounded-lg border transition-colors ${
                       selectedServices.includes(service.id)
-                        ? "bg-primary/10 border-primary"
-                        : "bg-background border-border hover:bg-accent"
+                        ? "border-[#6B8E23]"
+                        : "border-[#D3D3D3] hover:bg-[#D3D3D3]/10"
                     }`}
+                    style={{
+                      backgroundColor: selectedServices.includes(service.id)
+                        ? '#6B8E23'/10
+                        : '#FFFFFF0'
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="font-medium text-foreground">
+                        <div 
+                          className="font-medium"
+                          style={{ color: '#556B2F' }}
+                        >
                           {service.libelle}
                         </div>
                         {service.description && (
-                          <div className="text-sm text-muted-foreground mt-1">
+                          <div className="text-sm text-gray-800 mt-1">
                             {service.description}
                           </div>
                         )}
@@ -281,6 +331,10 @@ export function AssignCategoryModal({
                               handleSingleAssign(service.id, selectedCategory)
                             }
                             className="h-8 w-8 p-0"
+                            style={{ 
+                              borderColor: '#6B8E23',
+                              color: '#6B8E23'
+                            }}
                             title={`Assigner à ${
                               categories.find((c) => c.id === selectedCategory)
                                 ?.name
@@ -297,8 +351,8 @@ export function AssignCategoryModal({
                             onClick={() => toggleServiceSelection(service.id)}
                             className={`h-6 w-6 rounded border flex items-center justify-center transition-colors ${
                               selectedServices.includes(service.id)
-                                ? "bg-primary border-primary text-primary-foreground"
-                                : "bg-background border-border hover:bg-accent"
+                                ? "border-[#6B8E23] bg-[#6B8E23] text-white"
+                                : "border-[#D3D3D3] hover:bg-[#D3D3D3]/10"
                             }`}
                           >
                             {selectedServices.includes(service.id) && (
@@ -315,8 +369,11 @@ export function AssignCategoryModal({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-between items-center pt-4 border-t border-border">
-            <div className="text-sm text-muted-foreground">
+          <div 
+            className="flex justify-between items-center pt-4 border-t"
+            style={{ borderColor: '#D3D3D3' }}
+          >
+            <div className="text-sm text-gray-800">
               {bulkAssign ? (
                 <span>
                   Tous les services seront assignés à la catégorie sélectionnée
@@ -331,7 +388,10 @@ export function AssignCategoryModal({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
-                className="border-border"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#8B4513'
+                }}
               >
                 Annuler
               </Button>
@@ -342,7 +402,12 @@ export function AssignCategoryModal({
                   !selectedCategory ||
                   (selectedServices.length === 0 && !bulkAssign)
                 }
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                style={{ 
+                  backgroundColor: '#6B8E23',
+                  color: 'white',
+                  borderColor: '#6B8E23',
+                  opacity: loading || !selectedCategory || (selectedServices.length === 0 && !bulkAssign) ? 0.7 : 1
+                }}
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

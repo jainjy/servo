@@ -30,8 +30,8 @@ interface Service {
 }
 
 const statusColors = {
-  active: "bg-success/20 text-success",
-  inactive: "bg-muted text-muted-foreground",
+  active: "bg-[#6B8E23]/20 text-[#6B8E23]",
+  inactive: "bg-[#D3D3D3]/20 text-gray-800",
 }
 
 export function ServicesTable() {
@@ -103,29 +103,54 @@ export function ServicesTable() {
 
   if (loading) {
     return (
-      <Card className="bg-card flex flex-col gap-4 border-border p-6">
-        <img src="/loading.gif" alt="" className='w-24 h-24' />
-        <div className="text-center text-muted-foreground">Chargement des services...</div>
+      <Card 
+        className="flex flex-col gap-4 p-6 items-center justify-center"
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
+        <div className="w-16 h-16 border-4 border-t-transparent border-[#6B8E23] rounded-full animate-spin"></div>
+        <div className="text-center text-gray-800">Chargement des services...</div>
       </Card>
     )
   }
 
   return (
     <>
-      <Card className="bg-card border-border">
+      <Card 
+        className="mb-6"
+        style={{ 
+          backgroundColor: '#FFFFFF0',
+          borderColor: '#D3D3D3'
+        }}
+      >
         <div className="p-6">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search 
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" 
+                style={{ color: '#8B4513' }}
+              />
               <Input
                 type="search"
                 placeholder="Rechercher par nom, catégorie ou métier..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background border-input"
+                style={{ 
+                  borderColor: '#D3D3D3',
+                  color: '#556B2F'
+                }}
+                className="pl-10"
               />
             </div>
-            <Button variant="outline" className="border-border bg-transparent">
+            <Button 
+              variant="outline" 
+              style={{ 
+                borderColor: '#D3D3D3',
+                color: '#6B8E23'
+              }}
+            >
               Filtres
             </Button>
           </div>
@@ -133,7 +158,7 @@ export function ServicesTable() {
 
         <div className="p-6">
           {filteredServices.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="text-center text-gray-800 py-8">
               {searchQuery ? "Aucun service trouvé pour votre recherche" : "Aucun service disponible"}
             </div>
           ) : (
@@ -142,48 +167,89 @@ export function ServicesTable() {
                 const stats = getVendorStats(service)
 
                 return (
-                  <Card key={service.id} className="border-border bg-card p-6 hover:shadow-lg transition-shadow">
+                  <Card 
+                    key={service.id} 
+                    className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-[#6B8E23]"
+                    style={{ 
+                      backgroundColor: '#FFFFFF0',
+                      borderColor: '#D3D3D3'
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+                        <h3 
+                          className="font-semibold line-clamp-2 mb-1"
+                          style={{ color: '#556B2F' }}
+                        >
                           {service.name}
                         </h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="border-border text-foreground text-xs">
+                          <Badge 
+                            variant="outline" 
+                            className="text-xs"
+                            style={{ 
+                              borderColor: '#D3D3D3',
+                              color: '#8B4513'
+                            }}
+                          >
                             {service.category || "Non catégorisé"}
                           </Badge>
                           <Badge
                             variant="secondary"
-                            className={statusColors[service.status as keyof typeof statusColors]}
+                            className={`text-xs ${statusColors[service.status as keyof typeof statusColors]}`}
                           >
                             {service.status === "active" ? "Actif" : "Inactif"}
                           </Badge>
                         </div>
                       </div>
                       {service.images.length > 0 ? (
-                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        <div 
+                          className="w-12 h-12 rounded flex items-center justify-center border"
+                          style={{ 
+                            backgroundColor: '#D3D3D3'/20,
+                            borderColor: '#D3D3D3'
+                          }}
+                        >
+                          <ImageIcon 
+                            className="h-6 w-6" 
+                            style={{ color: '#8B4513' }}
+                          />
                         </div>
                       ) : null}
                     </div>
 
                     {service.description && (
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      <p className="text-sm text-gray-800 mb-4 line-clamp-2">
                         {service.description}
                       </p>
                     )}
 
                     <div className="space-y-3 mb-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Métiers:</span>
+                        <span className="text-sm text-gray-800">Métiers:</span>
                         <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
                           {service.metiers.slice(0, 2).map(metier => (
-                            <Badge key={metier.id} variant="outline" className="text-xs">
+                            <Badge 
+                              key={metier.id} 
+                              variant="outline" 
+                              className="text-xs"
+                              style={{ 
+                                borderColor: '#D3D3D3',
+                                color: '#6B8E23'
+                              }}
+                            >
                               {metier.libelle}
                             </Badge>
                           ))}
                           {service.metiers.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs"
+                              style={{ 
+                                borderColor: '#D3D3D3',
+                                color: '#8B4513'
+                              }}
+                            >
                               +{service.metiers.length - 2}
                             </Badge>
                           )}
@@ -191,36 +257,46 @@ export function ServicesTable() {
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Prestataires:</span>
-                        <span className="text-sm font-medium text-foreground">
+                        <span className="text-sm text-gray-800">Prestataires:</span>
+                        <span 
+                          className="text-sm font-medium"
+                          style={{ color: '#556B2F' }}
+                        >
                           {stats.totalVendors}
                         </span>
                       </div>
 
                       {/* <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Note moyenne:</span>
+                        <span className="text-sm text-gray-800">Note moyenne:</span>
                         <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-warning text-warning" />
-                          <span className="text-sm font-medium text-foreground">
+                          <Star className="h-4 w-4" style={{ color: '#8B4513' }} />
+                          <span className="text-sm font-medium" style={{ color: '#556B2F' }}>
                             {stats.avgRating.toFixed(1)}
                           </span>
                         </div>
                       </div> */}
 
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Réservations totales:</span>
-                        <span className="text-sm font-medium text-foreground">
+                        <span className="text-sm text-gray-800">Réservations totales:</span>
+                        <span 
+                          className="text-sm font-medium"
+                          style={{ color: '#556B2F' }}
+                        >
                           {stats.totalBookings}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                    <div className="flex gap-2 mt-4 pt-4 border-t" style={{ borderColor: '#D3D3D3' }}>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleView(service)}
-                        className="flex-1 border-border hover:bg-accent"
+                        className="flex-1 hover:bg-[#556B2F]/10"
+                        style={{ 
+                          borderColor: '#D3D3D3',
+                          color: '#556B2F'
+                        }}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Voir
@@ -230,7 +306,11 @@ export function ServicesTable() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(service)}
-                        className="flex-1 border-border hover:bg-accent"
+                        className="flex-1 hover:bg-[#6B8E23]/10"
+                        style={{ 
+                          borderColor: '#D3D3D3',
+                          color: '#6B8E23'
+                        }}
                       >
                         <Edit className="h-4 w-4 mr-2" />
                         Modifier
@@ -238,10 +318,14 @@ export function ServicesTable() {
                     </div>
 
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDelete(service)}
-                      className="w-full mt-2"
+                      className="w-full mt-2 hover:bg-[#8B4513]/10"
+                      style={{ 
+                        borderColor: '#8B4513'/30,
+                        color: '#8B4513'
+                      }}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Supprimer
