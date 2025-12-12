@@ -59,8 +59,9 @@ export default function AdminDiscussions() {
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
-    const isAtBottom = 
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
     setShowScrollButton(!isAtBottom);
   };
 
@@ -139,6 +140,7 @@ export default function AdminDiscussions() {
       console.error("Erreur chargement stats artisans:", error);
     }
   };
+
   // Fonction pour extraire la note du message AVIS_LAISSE
   const extractRatingFromMessage = (content) => {
     const match = content.match(/Note:\s*(\d+)\/5/);
@@ -167,6 +169,7 @@ export default function AdminDiscussions() {
       </div>
     );
   };
+
   const handleSend = async () => {
     if (input.trim().length === 0) return;
 
@@ -264,7 +267,7 @@ export default function AdminDiscussions() {
 
     // Sinon, afficher les initiales
     return (
-      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F0F8FF] text-[#556B2F] font-semibold text-xs">
         {getInitials(user)}
       </div>
     );
@@ -347,16 +350,16 @@ export default function AdminDiscussions() {
   }
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full bg-[#FFFFFF]">
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)]">
         {/* Côté gauche - Informations du projet */}
-        <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-20">
+        <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-[#D3D3D3] p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-20">
           <div className="max-w-2xl mx-auto">
             {/* Bouton de retour */}
-            <div className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+            <div className="bg-white border-b border-[#D3D3D3] px-4 py-3 lg:px-6">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+                className="flex items-center gap-2 text-[#8B4513] hover:text-[#6B8E23] transition-colors font-medium"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Retour</span>
@@ -364,7 +367,7 @@ export default function AdminDiscussions() {
             </div>
             {/* Informations principales */}
             <div className="relative space-y-1">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-[#8B4513]">
                 Demande #{demande.id}
               </h1>
               <p className="text-sm text-gray-600 mt-1">
@@ -393,11 +396,11 @@ export default function AdminDiscussions() {
 
               {/* Date */}
               <div className="flex items-center gap-5 mt-4">
-                <h3 className="text-md font-semibold text-gray-500">
+                <h3 className="text-md font-semibold text-[#8B4513]">
                   Date de la demande :
                 </h3>
                 <div className="flex items-center gap-3 text-md font-semibold text-gray-900">
-                  <Calendar className="w-4 h-4 text-blue-600" />
+                  <Calendar className="w-4 h-4 text-[#556B2F]" />
                   <span>
                     {new Date(demande.createdAt).toLocaleDateString("fr-FR")}
                   </span>
@@ -406,12 +409,12 @@ export default function AdminDiscussions() {
 
               {/* Métier */}
               <div className="mt-4">
-                <h3 className="text-md font-semibold text-gray-500 mb-3 underline">
+                <h3 className="text-md font-semibold text-[#8B4513] mb-3 underline">
                   Artisan demandé
                 </h3>
                 <div className="flex flex-wrap gap-4">
                   {demande.metier && (
-                    <div className="flex items-center gap-3 bg-blue-50 text-blue-700 border-blue-200 px-3 py-2 rounded-xl border">
+                    <div className="flex items-center gap-3 bg-[#F5F5DC] text-[#556B2F] border-[#D3D3D3] px-3 py-2 rounded-xl border">
                       <Wrench className="w-4 h-4" />
                       <span className="text-sm font-semibold">
                         {demande.metier.libelle}
@@ -419,7 +422,7 @@ export default function AdminDiscussions() {
                     </div>
                   )}
                   {demande.service && (
-                    <div className="flex items-center gap-3 bg-green-50 text-green-700 border-green-200 px-3 py-2 rounded-xl border">
+                    <div className="flex items-center gap-3 bg-[#F0FFF0] text-[#6B8E23] border-[#D3D3D3] px-3 py-2 rounded-xl border">
                       <Zap className="w-4 h-4" />
                       <span className="text-sm font-semibold">
                         {demande.service.libelle}
@@ -431,7 +434,7 @@ export default function AdminDiscussions() {
 
               {/* Adresse */}
               <div className="mt-4">
-                <h3 className="text-md underline font-semibold text-gray-500 mb-2">
+                <h3 className="text-md underline font-semibold text-[#8B4513] mb-2">
                   Adresse du projet
                 </h3>
                 <div className="space-y-1">
@@ -457,14 +460,14 @@ export default function AdminDiscussions() {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 my-4"></div>
+            <div className="border-t border-[#D3D3D3] my-4"></div>
 
             {/* Description */}
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-[#8B4513] mb-2">
                 Description
               </h3>
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <div className="bg-[#F8F8FF] rounded-xl p-6 border border-[#D3D3D3]">
                 <p className="text-md text-gray-700 leading-relaxed">
                   {demande.description}
                 </p>
@@ -473,8 +476,8 @@ export default function AdminDiscussions() {
 
             {/* Informations de contact */}
             <div className="mt-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Contact</h3>
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-[#8B4513] mb-2">Contact</h3>
+              <div className="bg-[#F8F8FF] rounded-xl p-6 border border-[#D3D3D3]">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Nom</p>
@@ -498,7 +501,7 @@ export default function AdminDiscussions() {
             {demande.statut !== "validée" && !demande.demandeAcceptee && (
               <div className="mt-6 flex justify-center gap-4">
                 <button
-                  className="bg-green-500 text-white px-6 py-2 rounded-xl hover:bg-green-700 transition-colors"
+                  className="bg-[#6B8E23] text-white px-6 py-2 rounded-xl hover:bg-[#556B2F] transition-colors"
                   onClick={() => validate(true)}
                 >
                   ACCEPTER
@@ -517,11 +520,11 @@ export default function AdminDiscussions() {
         {/* Côté droit - Discussion (Desktop uniquement) */}
         <div className="hidden lg:flex w-1/2 flex-col bg-white">
           {/* Header discussion */}
-          <div className="border-b border-gray-200 px-6 py-3">
+          <div className="border-b border-[#D3D3D3] px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <MessageCircle className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-bold text-gray-900">
+                <MessageCircle className="w-5 h-5 text-[#556B2F]" />
+                <h2 className="text-xl font-bold text-[#8B4513]">
                   Discussion{" "}
                   {conversation && `(#${conversation.id.slice(0, 8)})`}
                 </h2>
@@ -549,7 +552,7 @@ export default function AdminDiscussions() {
             {showScrollButton && (
               <button
                 onClick={handleScrollToBottom}
-                className="fixed bottom-32 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+                className="fixed bottom-32 right-8 bg-[#6B8E23] hover:bg-[#556B2F] text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
                 title="Scroller vers le bas"
               >
                 <ArrowDown className="w-5 h-5" />
@@ -565,8 +568,8 @@ export default function AdminDiscussions() {
                 {artisansStats.length > 0 && (
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-3">
-                      <Users className="w-5 h-5 text-blue-600" />
-                      <h3 className="text-lg font-bold text-gray-900">
+                      <Users className="w-5 h-5 text-[#556B2F]" />
+                      <h3 className="text-lg font-bold text-[#8B4513]">
                         Suivi des Artisans
                       </h3>
                     </div>
@@ -576,15 +579,15 @@ export default function AdminDiscussions() {
                         return (
                           <div
                             key={artisan.userId}
-                            className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                            className="bg-white border border-[#D3D3D3] rounded-xl p-4 shadow-sm"
                           >
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                  <User className="w-4 h-4 text-blue-600" />
+                                <div className="w-8 h-8 rounded-full bg-[#F0F8FF] flex items-center justify-center">
+                                  <User className="w-4 h-4 text-[#556B2F]" />
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-gray-900">
+                                  <h4 className="font-semibold text-[#8B4513]">
                                     {artisan.user.companyName ||
                                       `${artisan.user.firstName} ${artisan.user.lastName}`}
                                   </h4>
@@ -607,7 +610,7 @@ export default function AdminDiscussions() {
                             <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
                               {artisan.rdv && (
                                 <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-blue-500" />
+                                  <Calendar className="w-4 h-4 text-[#556B2F]" />
                                   <span className="text-gray-600">
                                     RDV:{" "}
                                     {new Date(artisan.rdv).toLocaleDateString(
@@ -618,7 +621,7 @@ export default function AdminDiscussions() {
                               )}
                               {artisan.devis && (
                                 <div className="flex items-center gap-2">
-                                  <FileCheck className="w-4 h-4 text-green-500" />
+                                  <FileCheck className="w-4 h-4 text-[#6B8E23]" />
                                   <span className="text-gray-600">
                                     Devis envoyé
                                   </span>
@@ -626,7 +629,7 @@ export default function AdminDiscussions() {
                               )}
                               {artisan.factureMontant && (
                                 <div className="flex items-center gap-2">
-                                  <Euro className="w-4 h-4 text-purple-500" />
+                                  <Euro className="w-4 h-4 text-[#8B4513]" />
                                   <span className="text-gray-600">
                                     Facture: {artisan.factureMontant}€
                                   </span>
@@ -660,7 +663,7 @@ export default function AdminDiscussions() {
                       <div className="flex flex-col items-center">
                         {renderAvatar(message)}
                         {index < messages.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                         )}
                       </div>
                     )}
@@ -671,7 +674,7 @@ export default function AdminDiscussions() {
                       }`}
                     >
                       {!isCurrentUser(message) && (
-                        <div className="text-xs font-medium text-gray-600 mb-1">
+                        <div className="text-xs font-medium text-[#8B4513] mb-1">
                           {getSenderName(message)}
                         </div>
                       )}
@@ -679,8 +682,8 @@ export default function AdminDiscussions() {
                       <div
                         className={`rounded-2xl p-4 ${
                           isCurrentUser(message)
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                            ? "bg-[#6B8E23] text-white rounded-br-none"
+                            : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                         }`}
                       >
                         {message.urlFichier && (
@@ -692,7 +695,7 @@ export default function AdminDiscussions() {
                               className={`flex items-center gap-2 text-sm underline ${
                                 isCurrentUser(message)
                                   ? "text-blue-200"
-                                  : "text-blue-600"
+                                  : "text-[#556B2F]"
                               }`}
                             >
                               <FileText className="w-4 h-4" />
@@ -729,7 +732,7 @@ export default function AdminDiscussions() {
                       <div className="flex flex-col items-center">
                         {renderAvatar(message)}
                         {index < messages.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                         )}
                       </div>
                     )}
@@ -779,16 +782,16 @@ export default function AdminDiscussions() {
           </div>
 
           {/* Zone d'envoi de message */}
-          <div className="border-t border-gray-200 px-6 py-3 bg-gray-50">
+          <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
             <div className="flex gap-3">
               <label
-                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                   uploadingFile || demande?.statut == "terminée"
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-[#F0F8FF]"
                 }`}
               >
-                <Paperclip className="w-4 h-4" />
+                <Paperclip className="w-4 h-4 text-[#556B2F]" />
                 <input
                   type="file"
                   className="hidden"
@@ -802,7 +805,7 @@ export default function AdminDiscussions() {
               <input
                 type="text"
                 placeholder="Tapez votre message ici..."
-                className="disabled:cursor-not-allowed flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="disabled:cursor-not-allowed flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-md focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -817,7 +820,7 @@ export default function AdminDiscussions() {
               />
 
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
                 disabled={
                   sending ||
@@ -843,7 +846,7 @@ export default function AdminDiscussions() {
         <div className="lg:hidden fixed bottom-6 right-6 z-40">
           <button
             onClick={() => setShowChatModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
+            className="bg-[#6B8E23] hover:bg-[#556B2F] text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
             title="Ouvrir la discussion"
           >
             <MessageCircle className="w-6 h-6" />
@@ -855,10 +858,10 @@ export default function AdminDiscussions() {
           <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
             <div className="fixed inset-0 flex flex-col bg-white">
               {/* Header modale */}
-              <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-between bg-white">
+              <div className="border-b border-[#D3D3D3] px-4 py-3 flex items-center justify-between bg-white">
                 <div className="flex items-center gap-3">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <MessageCircle className="w-5 h-5 text-[#556B2F]" />
+                  <h2 className="text-xl font-bold text-[#8B4513]">
                     Discussion{" "}
                     {conversation && `(#${conversation.id.slice(0, 8)})`}
                   </h2>
@@ -884,7 +887,7 @@ export default function AdminDiscussions() {
                 {showScrollButton && (
                   <button
                     onClick={handleScrollToBottom}
-                    className="fixed bottom-32 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+                    className="fixed bottom-32 right-8 bg-[#6B8E23] hover:bg-[#556B2F] text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
                     title="Scroller vers le bas"
                   >
                     <ArrowDown className="w-5 h-5" />
@@ -900,8 +903,8 @@ export default function AdminDiscussions() {
                     {artisansStats.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2 mb-3">
-                          <Users className="w-5 h-5 text-blue-600" />
-                          <h3 className="text-lg font-bold text-gray-900">
+                          <Users className="w-5 h-5 text-[#556B2F]" />
+                          <h3 className="text-lg font-bold text-[#8B4513]">
                             Suivi des Artisans
                           </h3>
                         </div>
@@ -911,15 +914,15 @@ export default function AdminDiscussions() {
                             return (
                               <div
                                 key={artisan.userId}
-                                className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                                className="bg-white border border-[#D3D3D3] rounded-xl p-4 shadow-sm"
                               >
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                      <User className="w-4 h-4 text-blue-600" />
+                                    <div className="w-8 h-8 rounded-full bg-[#F0F8FF] flex items-center justify-center">
+                                      <User className="w-4 h-4 text-[#556B2F]" />
                                     </div>
                                     <div>
-                                      <h4 className="font-semibold text-gray-900">
+                                      <h4 className="font-semibold text-[#8B4513]">
                                         {artisan.user.companyName ||
                                           `${artisan.user.firstName} ${artisan.user.lastName}`}
                                       </h4>
@@ -942,7 +945,7 @@ export default function AdminDiscussions() {
                                 <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
                                   {artisan.rdv && (
                                     <div className="flex items-center gap-2">
-                                      <Calendar className="w-4 h-4 text-blue-500" />
+                                      <Calendar className="w-4 h-4 text-[#556B2F]" />
                                       <span className="text-gray-600">
                                         RDV:{" "}
                                         {new Date(
@@ -953,7 +956,7 @@ export default function AdminDiscussions() {
                                   )}
                                   {artisan.devis && (
                                     <div className="flex items-center gap-2">
-                                      <FileCheck className="w-4 h-4 text-green-500" />
+                                      <FileCheck className="w-4 h-4 text-[#6B8E23]" />
                                       <span className="text-gray-600">
                                         Devis envoyé
                                       </span>
@@ -961,7 +964,7 @@ export default function AdminDiscussions() {
                                   )}
                                   {artisan.factureMontant && (
                                     <div className="flex items-center gap-2">
-                                      <Euro className="w-4 h-4 text-purple-500" />
+                                      <Euro className="w-4 h-4 text-[#8B4513]" />
                                       <span className="text-gray-600">
                                         Facture: {artisan.factureMontant}€
                                       </span>
@@ -995,7 +998,7 @@ export default function AdminDiscussions() {
                           <div className="flex flex-col items-center">
                             {renderAvatar(message)}
                             {index < messages.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                              <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                             )}
                           </div>
                         )}
@@ -1006,7 +1009,7 @@ export default function AdminDiscussions() {
                           }`}
                         >
                           {!isCurrentUser(message) && (
-                            <div className="text-xs font-medium text-gray-600 mb-1">
+                            <div className="text-xs font-medium text-[#8B4513] mb-1">
                               {getSenderName(message)}
                             </div>
                           )}
@@ -1014,8 +1017,8 @@ export default function AdminDiscussions() {
                           <div
                             className={`rounded-2xl p-4 ${
                               isCurrentUser(message)
-                                ? "bg-blue-600 text-white rounded-br-none"
-                                : "bg-gray-100 text-gray-900 rounded-bl-none"
+                                ? "bg-[#6B8E23] text-white rounded-br-none"
+                                : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                             }`}
                           >
                             {message.urlFichier && (
@@ -1027,7 +1030,7 @@ export default function AdminDiscussions() {
                                   className={`flex items-center gap-2 text-sm underline ${
                                     isCurrentUser(message)
                                       ? "text-blue-200"
-                                      : "text-blue-600"
+                                      : "text-[#556B2F]"
                                   }`}
                                 >
                                   <FileText className="w-4 h-4" />
@@ -1066,7 +1069,7 @@ export default function AdminDiscussions() {
                           <div className="flex flex-col items-center">
                             {renderAvatar(message)}
                             {index < messages.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                              <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                             )}
                           </div>
                         )}
@@ -1116,16 +1119,16 @@ export default function AdminDiscussions() {
               </div>
 
               {/* Zone d'envoi de message */}
-              <div className="border-t border-gray-200 px-4 py-3 bg-gray-50">
+              <div className="border-t border-[#D3D3D3] px-4 py-3 bg-[#F8F8FF]">
                 <div className="flex gap-3">
                   <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                       uploadingFile || demande?.statut == "terminée"
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-gray-100"
+                        : "hover:bg-[#F0F8FF]"
                     }`}
                   >
-                    <Paperclip className="w-4 h-4" />
+                    <Paperclip className="w-4 h-4 text-[#556B2F]" />
                     <input
                       type="file"
                       className="hidden"
@@ -1141,7 +1144,7 @@ export default function AdminDiscussions() {
                   <input
                     type="text"
                     placeholder="Tapez votre message ici..."
-                    className="disabled:cursor-not-allowed flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="disabled:cursor-not-allowed flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-md focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -1156,7 +1159,7 @@ export default function AdminDiscussions() {
                   />
 
                   <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleSend}
                     disabled={
                       sending ||

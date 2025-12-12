@@ -48,7 +48,7 @@ const navigation = [
   { name: "Produits", href: "/admin/products", icon: ShoppingBag },
   { name: "Tourisme", href: "/admin/tourism", icon: Plane },
   { name: "Paiements", href: "/admin/payments", icon: CreditCard },
-  { name: "Demandes", href: "/admin/demandes", icon: FileCheck },
+  { name: "Demandes de services", href: "/admin/demandes", icon: FileCheck },
   { name: "Métiers", href: "/admin/metiers", icon: Ruler },
   {
     name: "demandes de Financements",

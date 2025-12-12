@@ -21,7 +21,7 @@ import {
   ThumbsUp,
   Lock,
   ArrowDown,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -151,6 +151,7 @@ export default function UserDiscussions() {
         return <Clock className="w-4 h-4" />;
     }
   };
+
   // Dans UserDiscussions.jsx, ajoutez cette fonction
   const handleConfirmerTravauxTermines = async (confirmer) => {
     try {
@@ -177,6 +178,7 @@ export default function UserDiscussions() {
       setLoadingArtisanId(null);
     }
   };
+
   // Charger la demande
   useEffect(() => {
     const fetchDemande = async () => {
@@ -286,7 +288,7 @@ export default function UserDiscussions() {
       return (
         <button
           onClick={() =>
-            isCurrentUser(message) ? "" : (navigate(`/professional/${user.id}`))
+            isCurrentUser(message) ? "" : navigate(`/professional/${user.id}`)
           }
           className="hover:opacity-80 transition-opacity"
         >
@@ -305,7 +307,7 @@ export default function UserDiscussions() {
         onClick={() => navigate(`/professional/${user.id}`)}
         className="hover:opacity-80 transition-opacity"
       >
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F0F8FF] text-[#556B2F] font-semibold text-xs">
           {getInitials(user)}
         </div>
       </button>
@@ -325,12 +327,14 @@ export default function UserDiscussions() {
         {[1, 2, 3, 4, 5].map((star) => (
           <div
             key={star}
-            className={`p-1 rounded ${star <= rating ? "bg-yellow-400" : "bg-gray-300"
-              }`}
+            className={`p-1 rounded ${
+              star <= rating ? "bg-yellow-400" : "bg-gray-300"
+            }`}
           >
             <Star
-              className={`w-5 h-5 ${star <= rating ? "text-yellow-600" : "text-gray-500"
-                }`}
+              className={`w-5 h-5 ${
+                star <= rating ? "text-yellow-600" : "text-gray-500"
+              }`}
               fill="currentColor"
             />
           </div>
@@ -450,12 +454,14 @@ export default function UserDiscussions() {
   };
 
   if (loading) {
-    return <div className="grid place-items-center h-screen">
-      <div className="flex flex-col items-center justify-center">
-        <img src="/loading.gif" className="h-32 w-32" alt="" />
-        <span>Chargment des données en cours . . . </span>
+    return (
+      <div className="grid place-items-center h-screen">
+        <div className="flex flex-col items-center justify-center">
+          <img src="/loading.gif" className="h-32 w-32" alt="" />
+          <span>Chargement des données en cours . . .</span>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   if (!demande) {
@@ -468,17 +474,17 @@ export default function UserDiscussions() {
   );
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full bg-[#FFFFFF]">
       <div className="flex flex-col lg:flex-row lg:h-screen">
         {/* Côté gauche - Informations du projet */}
-        <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-6 lg:p-8 overflow-y-auto mt-16 lg:mt-20">
+        <div className="w-full lg:w-1/2 bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-[#D3D3D3] p-4 sm:p-6 lg:p-8 overflow-y-auto mt-16 lg:mt-20">
           <div className="max-w-2xl mx-auto">
             {/* Informations principales */}
             {/* Bouton de retour */}
-            <div className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+            <div className="bg-white border-b border-[#D3D3D3] px-4 py-3 lg:px-6">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+                className="flex items-center gap-2 text-[#8B4513] hover:text-[#6B8E23] transition-colors font-medium"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Retour</span>
@@ -487,7 +493,7 @@ export default function UserDiscussions() {
             <div className="relative space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                  <h1 className="text-lg sm:text-xl font-bold text-[#8B4513]">
                     Demande #{demande.id}
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">
@@ -519,11 +525,11 @@ export default function UserDiscussions() {
 
               {/* Date */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5 pt-2">
-                <h3 className="text-sm sm:text-md font-semibold text-gray-500">
+                <h3 className="text-sm sm:text-md font-semibold text-[#8B4513]">
                   Date de la demande :
                 </h3>
                 <div className="flex items-center gap-2 text-sm sm:text-md font-semibold text-gray-900">
-                  <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <Calendar className="w-4 h-4 text-[#556B2F] flex-shrink-0" />
                   <span>
                     {new Date(demande.createdAt).toLocaleDateString("fr-FR")}
                   </span>
@@ -532,12 +538,12 @@ export default function UserDiscussions() {
 
               {/* Métier */}
               <div className="mt-4">
-                <h3 className="text-sm sm:text-md font-semibold text-gray-500 mb-3">
+                <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-3">
                   Service demandé
                 </h3>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                   {demande.metier && (
-                    <div className="flex items-center gap-2 bg-blue-50 text-blue-700 border-blue-200 px-3 py-2 rounded-xl border text-sm">
+                    <div className="flex items-center gap-2 bg-[#F5F5DC] text-[#556B2F] border-[#D3D3D3] px-3 py-2 rounded-xl border text-sm">
                       <Wrench className="w-4 h-4 flex-shrink-0" />
                       <span className="font-semibold truncate">
                         {demande.metier.libelle}
@@ -545,7 +551,7 @@ export default function UserDiscussions() {
                     </div>
                   )}
                   {demande.service && (
-                    <div className="flex items-center gap-2 bg-green-50 text-green-700 border-green-200 px-3 py-2 rounded-xl border text-sm">
+                    <div className="flex items-center gap-2 bg-[#F0FFF0] text-[#6B8E23] border-[#D3D3D3] px-3 py-2 rounded-xl border text-sm">
                       <Zap className="w-4 h-4 flex-shrink-0" />
                       <span className="font-semibold truncate">
                         {demande.service.libelle}
@@ -557,7 +563,7 @@ export default function UserDiscussions() {
 
               {/* Adresse */}
               <div className="mt-4">
-                <h3 className="text-sm sm:text-md font-semibold text-gray-500 mb-2">
+                <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-2">
                   Adresse du projet
                 </h3>
                 <div className="space-y-2">
@@ -587,14 +593,14 @@ export default function UserDiscussions() {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 my-4 sm:my-6"></div>
+            <div className="border-t border-[#D3D3D3] my-4 sm:my-6"></div>
 
             {/* Description */}
             <div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-[#8B4513] mb-3">
                 Description
               </h3>
-              <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-200">
+              <div className="bg-[#F8F8FF] rounded-xl p-4 sm:p-6 border border-[#D3D3D3]">
                 <p className="text-sm sm:text-md text-gray-700 leading-relaxed">
                   {demande.description}
                 </p>
@@ -603,10 +609,10 @@ export default function UserDiscussions() {
 
             {/* Informations de contact */}
             <div className="mt-6">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-[#8B4513] mb-3">
                 Vos informations
               </h3>
-              <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-200">
+              <div className="bg-[#F8F8FF] rounded-xl p-4 sm:p-6 border border-[#D3D3D3]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <p className="text-xs sm:text-sm text-gray-500">Nom</p>
@@ -635,14 +641,14 @@ export default function UserDiscussions() {
             {/* Artisans avec actions */}
             {artisans.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+                <h3 className="text-lg sm:text-xl font-bold text-[#8B4513] mb-4">
                   Artisans intéressés ({artisans.length})
                 </h3>
                 <div className="space-y-3 sm:space-y-4">
                   {artisans.map((artisan) => (
                     <div
                       key={artisan.userId}
-                      className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 hover:shadow-md transition-shadow duration-200"
+                      className="bg-white border border-[#D3D3D3] rounded-xl p-3 sm:p-4 hover:shadow-md transition-shadow duration-200"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -653,7 +659,7 @@ export default function UserDiscussions() {
                             }
                             className="text-left hover:opacity-80 transition-opacity w-full"
                           >
-                            <h4 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors text-sm sm:text-base truncate">
+                            <h4 className="font-semibold text-[#556B2F] hover:text-[#6B8E23] transition-colors text-sm sm:text-base truncate">
                               {artisan.user.companyName ||
                                 `${artisan.user.firstName} ${artisan.user.lastName}`}
                             </h4>
@@ -668,7 +674,7 @@ export default function UserDiscussions() {
                                   alt="Avatar"
                                   className="lg:w-8 lg:h-8 w-6 h-6 rounded-full object-cover flex-shrink-0"
                                 />
-                                <span className="text-xs text-blue-600 font-medium">
+                                <span className="text-xs text-[#6B8E23] font-medium">
                                   Consulter le profil professionnel
                                 </span>
                               </div>
@@ -681,13 +687,13 @@ export default function UserDiscussions() {
                         >
                           <button
                             onClick={() => setShowActionsMenu(artisan.userId)}
-                            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+                            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-[#D3D3D3] bg-white hover:bg-[#F8F8FF]"
                           >
-                            <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+                            <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4 text-[#556B2F]" />
                           </button>
 
                           {showActionsMenu === artisan.userId && (
-                            <div className="absolute right-0 top-full mt-1 w-40 sm:w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                            <div className="absolute right-0 top-full mt-1 w-40 sm:w-48 bg-white rounded-lg shadow-lg border border-[#D3D3D3] z-10">
                               <div className="p-1 sm:p-2 space-y-1">
                                 {/* Lien vers le profil dans le menu */}
                                 <button
@@ -695,7 +701,7 @@ export default function UserDiscussions() {
                                     setShowActionsMenu(false);
                                     navigate(`/professional/${artisan.userId}`);
                                   }}
-                                  className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                                  className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-[#6B8E23] hover:bg-[#F0FFF0] rounded-md"
                                 >
                                   <User className="w-3 h-3 sm:w-4 sm:h-4" />
                                   Voir le profil
@@ -726,7 +732,7 @@ export default function UserDiscussions() {
                                       onClick={() =>
                                         handlePayerFacture(artisan.userId)
                                       }
-                                      className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-md"
+                                      className="flex items-center gap-2 w-full px-2 sm:px-3 py-2 text-left text-xs sm:text-sm text-[#556B2F] hover:bg-[#F0F8FF] rounded-md"
                                       disabled={
                                         artisan.factureStatus === "validee"
                                       }
@@ -828,7 +834,7 @@ export default function UserDiscussions() {
           <button
             draggable
             onClick={() => setShowChatModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
+            className="bg-[#6B8E23] hover:bg-[#556B2F] text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
             title="Ouvrir la discussion"
           >
             <MessageCircle className="w-6 h-6" />
@@ -838,11 +844,11 @@ export default function UserDiscussions() {
         {/* Côté droit - Discussion (Desktop uniquement) */}
         <div className="hidden lg:flex w-1/2 flex-col bg-white mt-20">
           {/* Header discussion */}
-          <div className="border-b border-gray-200 px-6 py-3">
+          <div className="border-b border-[#D3D3D3] px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <MessageCircle className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-bold text-gray-900">
+                <MessageCircle className="w-5 h-5 text-[#556B2F]" />
+                <h2 className="text-xl font-bold text-[#8B4513]">
                   Discussion{" "}
                   {conversation && `(#${conversation.id.slice(0, 8)})`}
                 </h2>
@@ -870,7 +876,7 @@ export default function UserDiscussions() {
             {showScrollButton && (
               <button
                 onClick={handleScrollToBottom}
-                className="fixed bottom-32 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+                className="fixed bottom-32 right-8 bg-[#6B8E23] hover:bg-[#556B2F] text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
                 title="Scroller vers le bas"
               >
                 <ArrowDown className="w-5 h-5" />
@@ -893,7 +899,7 @@ export default function UserDiscussions() {
                       <div className="flex flex-col items-center">
                         {renderAvatar(message)}
                         {index < messages.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                         )}
                       </div>
                     )}
@@ -905,7 +911,7 @@ export default function UserDiscussions() {
                     >
                       {/* Nom de l'expéditeur pour les messages des autres */}
                       {!isCurrentUser(message) && (
-                        <div className="text-xs font-medium text-gray-600 mb-1">
+                        <div className="text-xs font-medium text-[#8B4513] mb-1">
                           {getSenderName(message)}
                         </div>
                       )}
@@ -913,8 +919,8 @@ export default function UserDiscussions() {
                       <div
                         className={`rounded-2xl p-4 ${
                           isCurrentUser(message)
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-gray-100 text-gray-900 rounded-bl-none"
+                            ? "bg-[#6B8E23] text-white rounded-br-none"
+                            : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                         }`}
                       >
                         {/* Fichier joint */}
@@ -928,7 +934,7 @@ export default function UserDiscussions() {
                               className={`flex items-center gap-2 text-sm underline ${
                                 isCurrentUser(message)
                                   ? "text-blue-200"
-                                  : "text-blue-600"
+                                  : "text-[#556B2F]"
                               }`}
                             >
                               <FileText className="w-4 h-4" />
@@ -960,7 +966,10 @@ export default function UserDiscussions() {
                                     if (artisan)
                                       handleSignerDevis(artisan.userId);
                                   }}
-                                  disabled={loadingArtisanId === message.expediteurId || demande?.statut === "terminée"}
+                                  disabled={
+                                    loadingArtisanId === message.expediteurId ||
+                                    demande?.statut === "terminée"
+                                  }
                                   className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
                                   {loadingArtisanId === message.expediteurId ? (
@@ -1004,8 +1013,10 @@ export default function UserDiscussions() {
                                     if (artisan)
                                       handlePayerFacture(artisan.userId);
                                   }}
-                                  disabled={loadingArtisanId === message.expediteurId}
-                                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                  disabled={
+                                    loadingArtisanId === message.expediteurId
+                                  }
+                                  className="px-3 py-1 bg-[#6B8E23] text-white text-sm rounded hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
                                   {loadingArtisanId === message.expediteurId ? (
                                     <>
@@ -1096,7 +1107,7 @@ export default function UserDiscussions() {
                       <div className="flex flex-col items-center">
                         {renderAvatar(message)}
                         {index < messages.length - 1 && (
-                          <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                          <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                         )}
                       </div>
                     )}
@@ -1146,17 +1157,17 @@ export default function UserDiscussions() {
           </div>
 
           {/* Zone d'envoi de message */}
-          <div className="border-t border-gray-200 px-6 py-3 bg-gray-50">
+          <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
             <div className="flex gap-3">
               {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                   uploadingFile
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-[#F0F8FF]"
                 }`}
               >
-                <Paperclip className="w-4 h-4" />
+                <Paperclip className="w-4 h-4 text-[#556B2F]" />
                 <input
                   type="file"
                   className="hidden"
@@ -1170,7 +1181,7 @@ export default function UserDiscussions() {
               <input
                 type="text"
                 placeholder="Tapez votre message ici..."
-                className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-md focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -1185,7 +1196,7 @@ export default function UserDiscussions() {
               />
 
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-2 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
                 disabled={
                   sending ||
@@ -1212,10 +1223,10 @@ export default function UserDiscussions() {
           <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
             <div className="fixed inset-0 flex flex-col bg-white">
               {/* Header modale */}
-              <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-between bg-white">
+              <div className="border-b border-[#D3D3D3] px-4 py-3 flex items-center justify-between bg-white">
                 <div className="flex items-center gap-3">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <MessageCircle className="w-5 h-5 text-[#556B2F]" />
+                  <h2 className="text-xl font-bold text-[#8B4513]">
                     Discussion{" "}
                     {conversation && `(#${conversation.id.slice(0, 8)})`}
                   </h2>
@@ -1251,7 +1262,7 @@ export default function UserDiscussions() {
                           <div className="flex flex-col items-center">
                             {renderAvatar(message)}
                             {index < messages.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                              <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                             )}
                           </div>
                         )}
@@ -1263,7 +1274,7 @@ export default function UserDiscussions() {
                         >
                           {/* Nom de l'expéditeur pour les messages des autres */}
                           {!isCurrentUser(message) && (
-                            <div className="text-xs font-medium text-gray-600 mb-1">
+                            <div className="text-xs font-medium text-[#8B4513] mb-1">
                               {getSenderName(message)}
                             </div>
                           )}
@@ -1271,8 +1282,8 @@ export default function UserDiscussions() {
                           <div
                             className={`rounded-2xl p-4 ${
                               isCurrentUser(message)
-                                ? "bg-blue-600 text-white rounded-br-none"
-                                : "bg-gray-100 text-gray-900 rounded-bl-none"
+                                ? "bg-[#6B8E23] text-white rounded-br-none"
+                                : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                             }`}
                           >
                             {/* Fichier joint */}
@@ -1286,7 +1297,7 @@ export default function UserDiscussions() {
                                   className={`flex items-center gap-2 text-sm underline ${
                                     isCurrentUser(message)
                                       ? "text-blue-200"
-                                      : "text-blue-600"
+                                      : "text-[#556B2F]"
                                   }`}
                                 >
                                   <FileText className="w-4 h-4" />
@@ -1321,10 +1332,15 @@ export default function UserDiscussions() {
                                         if (artisan)
                                           handleSignerDevis(artisan.userId);
                                       }}
-                                      disabled={loadingArtisanId === message.expediteurId || demande?.statut === "terminée"}
+                                      disabled={
+                                        loadingArtisanId ===
+                                          message.expediteurId ||
+                                        demande?.statut === "terminée"
+                                      }
                                       className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                     >
-                                      {loadingArtisanId === message.expediteurId ? (
+                                      {loadingArtisanId ===
+                                      message.expediteurId ? (
                                         <>
                                           <LoadingSpinnerSmall />
                                           <span>Signature...</span>
@@ -1342,7 +1358,8 @@ export default function UserDiscussions() {
                                 ) : (
                                   <div className="flex gap-2">
                                     <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
-                                      déjà signé <CheckCircle className="w-4 h-4" />
+                                      déjà signé{" "}
+                                      <CheckCircle className="w-4 h-4" />
                                     </span>
                                   </div>
                                 )}
@@ -1366,10 +1383,14 @@ export default function UserDiscussions() {
                                         if (artisan)
                                           handlePayerFacture(artisan.userId);
                                       }}
-                                      disabled={loadingArtisanId === message.expediteurId}
-                                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                      disabled={
+                                        loadingArtisanId ===
+                                        message.expediteurId
+                                      }
+                                      className="px-3 py-1 bg-[#6B8E23] text-white text-sm rounded hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                     >
-                                      {loadingArtisanId === message.expediteurId ? (
+                                      {loadingArtisanId ===
+                                      message.expediteurId ? (
                                         <>
                                           <LoadingSpinnerSmall />
                                           <span>Paiement...</span>
@@ -1399,7 +1420,9 @@ export default function UserDiscussions() {
                                         onClick={() =>
                                           handleConfirmerTravauxTermines(true)
                                         }
-                                        disabled={loadingArtisanId === "confirming"}
+                                        disabled={
+                                          loadingArtisanId === "confirming"
+                                        }
                                         className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                       >
                                         {loadingArtisanId === "confirming" ? (
@@ -1415,7 +1438,9 @@ export default function UserDiscussions() {
                                         onClick={() =>
                                           handleConfirmerTravauxTermines(false)
                                         }
-                                        disabled={loadingArtisanId === "confirming"}
+                                        disabled={
+                                          loadingArtisanId === "confirming"
+                                        }
                                         className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                       >
                                         Refuser
@@ -1423,7 +1448,8 @@ export default function UserDiscussions() {
                                     </>
                                   ) : (
                                     <span className="flex gap-2 px-3 py-1 bg-green-500 text-white text-sm rounded">
-                                      accepté <CheckCircle className="w-4 h-4" />
+                                      accepté{" "}
+                                      <CheckCircle className="w-4 h-4" />
                                     </span>
                                   )}
                                 </div>
@@ -1450,7 +1476,7 @@ export default function UserDiscussions() {
                           <div className="flex flex-col items-center">
                             {renderAvatar(message)}
                             {index < messages.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                              <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                             )}
                           </div>
                         )}
@@ -1473,17 +1499,17 @@ export default function UserDiscussions() {
               </div>
 
               {/* Zone d'envoi de message */}
-              <div className="border-t border-gray-200 px-4 py-3 bg-gray-50">
+              <div className="border-t border-[#D3D3D3] px-4 py-3 bg-[#F8F8FF]">
                 <div className="flex gap-3">
                   {/* Bouton d'upload de fichier */}
                   <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                       uploadingFile
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-gray-100"
+                        : "hover:bg-[#F0F8FF]"
                     }`}
                   >
-                    <Paperclip className="w-4 h-4" />
+                    <Paperclip className="w-4 h-4 text-[#556B2F]" />
                     <input
                       type="file"
                       className="hidden"
@@ -1495,7 +1521,7 @@ export default function UserDiscussions() {
                   <input
                     type="text"
                     placeholder="Tapez votre message ici..."
-                    className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-sm focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -1510,7 +1536,7 @@ export default function UserDiscussions() {
                   />
 
                   <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleSend}
                     disabled={
                       sending ||
@@ -1537,9 +1563,9 @@ export default function UserDiscussions() {
       {/* Modale de paiement */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Paiement de la facture
               </h3>
               <button
@@ -1552,8 +1578,8 @@ export default function UserDiscussions() {
 
             <div className="p-6">
               <div className="text-center mb-6">
-                <CreditCard className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                <h4 className="text-lg font-semibold text-gray-900">
+                <CreditCard className="w-12 h-12 text-[#556B2F] mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-[#8B4513]">
                   Simulation de paiement Stripe
                 </h4>
                 <p className="text-gray-600 mt-2">
@@ -1561,10 +1587,10 @@ export default function UserDiscussions() {
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <div className="bg-[#F8F8FF] rounded-lg p-4 mb-6 border border-[#D3D3D3]">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Montant à payer:</span>
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-lg font-bold text-[#8B4513]">
                     {artisans.find((a) => a.userId === selectedArtisan)
                       ?.factureMontant || 0}
                     €
@@ -1572,7 +1598,7 @@ export default function UserDiscussions() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Artisan:</span>
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm text-[#556B2F]">
                     {artisans.find((a) => a.userId === selectedArtisan)?.user
                       .companyName ||
                       artisans.find((a) => a.userId === selectedArtisan)?.user
@@ -1602,7 +1628,7 @@ export default function UserDiscussions() {
                 </button>
                 <button
                   onClick={handleConfirmPayment}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] transition-colors flex items-center gap-2"
                 >
                   <CreditCard className="w-4 h-4" />
                   Simuler le paiement
@@ -1615,9 +1641,9 @@ export default function UserDiscussions() {
       {/* Modale de notation */}
       {showReviewModal && reviewArtisan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Noter l'artisan
               </h3>
               <button
@@ -1631,7 +1657,7 @@ export default function UserDiscussions() {
             <div className="p-6">
               <div className="text-center mb-6">
                 <Star className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-                <h4 className="text-lg font-semibold text-gray-900">
+                <h4 className="text-lg font-semibold text-[#8B4513]">
                   {reviewArtisan.user.companyName ||
                     `${reviewArtisan.user.firstName} ${reviewArtisan.user.lastName}`}
                 </h4>
@@ -1645,7 +1671,7 @@ export default function UserDiscussions() {
               <div className="space-y-4">
                 {/* Notation par étoiles */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-3">
                     Votre note *
                   </label>
                   <div className="flex justify-center gap-2">
@@ -1656,7 +1682,7 @@ export default function UserDiscussions() {
                         className={`p-2 rounded-lg transition-all ${
                           star <= reviewRating
                             ? "bg-yellow-100 text-yellow-500"
-                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                            : "bg-[#F8F8FF] text-gray-400 hover:bg-[#F0F8FF] border border-[#D3D3D3]"
                         }`}
                       >
                         <Star
@@ -1684,21 +1710,21 @@ export default function UserDiscussions() {
 
                 {/* Commentaire */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Votre avis (optionnel)
                   </label>
                   <textarea
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                     placeholder="Partagez votre expérience avec cet artisan..."
                   />
                 </div>
 
                 {/* Informations sur ce qui sera noté */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-[#F0F8FF] border border-[#D3D3D3] rounded-lg p-3">
+                  <p className="text-sm text-[#556B2F]">
                     <strong>Note concernera :</strong>
                     <br />• L'artisan{" "}
                     {reviewArtisan.user.companyName ||

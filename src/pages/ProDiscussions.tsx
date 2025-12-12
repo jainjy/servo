@@ -32,6 +32,7 @@ import { useMessaging } from "@/hooks/useMessaging";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/Loading/LoadingSpinner";
 import { useAuth } from "@/hooks/useAuth";
+
 export default function ProDiscussions() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -85,9 +86,11 @@ export default function ProDiscussions() {
   } = useMessaging(id);
   const [currentUserId, setCurrentUserId] = useState(null);
   const { user } = useAuth();
+
   useEffect(() => {
     setCurrentUserId(user?.id);
   }, []);
+
   // Gérer l'affichage du bouton scroll
   const handleScroll = (e) => {
     const container = e.target;
@@ -163,6 +166,7 @@ export default function ProDiscussions() {
       setLoadingRendezVous(false);
     }
   };
+
   // Fonction pour confirmer le paiement
   const handleConfirmerPaiement = async (confirmer) => {
     try {
@@ -208,6 +212,7 @@ export default function ProDiscussions() {
       toast.error("Erreur lors du marquage des travaux comme terminés");
     }
   };
+
   // Fonction pour extraire la note du message AVIS_LAISSE
   const extractRatingFromMessage = (content) => {
     const match = content.match(/Note:\s*(\d+)\/5/);
@@ -236,6 +241,7 @@ export default function ProDiscussions() {
       </div>
     );
   };
+
   const handleSubmitDevis = async (montant, description, file) => {
     try {
       setLoadingDevis(true);
@@ -562,7 +568,7 @@ export default function ProDiscussions() {
 
     // Sinon, afficher les initiales
     return (
-      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 font-semibold text-xs">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F0F8FF] text-[#556B2F] font-semibold text-xs">
         {getInitials(user)}
       </div>
     );
@@ -638,16 +644,16 @@ export default function ProDiscussions() {
   }
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full bg-[#FFFFFF]">
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)]">
         {/* Côté gauche - Informations du projet */}
-        <div className="w-full lg:w-1/2 lg:h-auto h-[680px] bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-0">
+        <div className="w-full lg:w-1/2 lg:h-auto h-[680px] bg-white rounded-lg lg:rounded-l-lg lg:rounded-r-none shadow-sm border-b lg:border-b-0 lg:border-r border-[#D3D3D3] p-4 sm:p-1 lg:p-8 overflow-y-auto lg:mt-0 mt-0">
           <div className="overflow-y-auto max-w-2xl mx-auto">
             {/* Bouton de retour */}
-            <div className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+            <div className="bg-white border-b border-[#D3D3D3] px-4 py-3 lg:px-6">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
+                className="flex items-center gap-2 text-[#8B4513] hover:text-[#6B8E23] transition-colors font-medium"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Retour</span>
@@ -656,11 +662,11 @@ export default function ProDiscussions() {
             {/* Header avec badge */}
             <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#556B2F] to-[#6B8E23] rounded-lg flex items-center justify-center flex-shrink-0">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                  <h1 className="text-lg sm:text-xl font-bold text-[#8B4513]">
                     Demande #{demande.id}
                   </h1>
                   <p className="text-sm text-gray-600 mt-1">
@@ -683,7 +689,7 @@ export default function ProDiscussions() {
                   {demande.statut || "En attente"}
                 </span>
                 {!isConnected && (
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-300">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-[#D3D3D3]">
                     Hors ligne
                   </span>
                 )}
@@ -692,8 +698,8 @@ export default function ProDiscussions() {
 
             {/* Métadonnées */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                <div className="flex items-center gap-2 text-blue-700">
+              <div className="bg-[#F0F8FF] rounded-xl p-3 border border-[#D3D3D3]">
+                <div className="flex items-center gap-2 text-[#556B2F]">
                   <Calendar className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     Date de la demande
@@ -704,8 +710,8 @@ export default function ProDiscussions() {
                 </p>
               </div>
 
-              <div className="bg-green-50 rounded-xl p-3 border border-green-200">
-                <div className="flex items-center gap-2 text-green-700">
+              <div className="bg-[#F0FFF0] rounded-xl p-3 border border-[#D3D3D3]">
+                <div className="flex items-center gap-2 text-[#6B8E23]">
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm font-medium">Localisation</span>
                 </div>
@@ -717,13 +723,13 @@ export default function ProDiscussions() {
 
             {/* Services */}
             <div className="mb-6">
-              <h3 className="text-sm sm:text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <Wrench className="w-4 h-4 text-blue-600" />
+              <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-3 flex items-center gap-2">
+                <Wrench className="w-4 h-4 text-[#556B2F]" />
                 Services demandés
               </h3>
               <div className="flex flex-col sm:flex-row gap-2">
                 {demande.metier && (
-                  <div className="flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-lg text-sm">
+                  <div className="flex items-center gap-2 bg-[#F5F5DC] text-[#556B2F] border border-[#D3D3D3] px-3 py-2 rounded-lg text-sm">
                     <Wrench className="w-4 h-4" />
                     <span className="font-medium">
                       {demande.metier.libelle}
@@ -731,7 +737,7 @@ export default function ProDiscussions() {
                   </div>
                 )}
                 {demande.service && (
-                  <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg text-sm">
+                  <div className="flex items-center gap-2 bg-[#F0FFF0] text-[#6B8E23] border border-[#D3D3D3] px-3 py-2 rounded-lg text-sm">
                     <Zap className="w-4 h-4" />
                     <span className="font-medium">
                       {demande.service.libelle}
@@ -743,11 +749,11 @@ export default function ProDiscussions() {
 
             {/* Adresse complète */}
             <div className="mb-6">
-              <h3 className="text-sm sm:text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-red-500" />
+              <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-3 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#8B4513]" />
                 Adresse du projet
               </h3>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="bg-[#F8F8FF] rounded-lg p-4 border border-[#D3D3D3]">
                 <p className="text-sm text-gray-900 font-medium mb-2">
                   {demande.lieuAdresse}
                 </p>
@@ -770,11 +776,11 @@ export default function ProDiscussions() {
 
             {/* Description */}
             <div className="mb-6">
-              <h3 className="text-sm sm:text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-purple-600" />
+              <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-3 flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-[#556B2F]" />
                 Description
               </h3>
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="bg-[#F8F8FF] rounded-xl p-4 border border-[#D3D3D3]">
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {demande.description}
                 </p>
@@ -783,11 +789,11 @@ export default function ProDiscussions() {
 
             {/* Contact */}
             <div>
-              <h3 className="text-sm sm:text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <User className="w-4 h-4 text-green-600" />
+              <h3 className="text-sm sm:text-md font-semibold text-[#8B4513] mb-3 flex items-center gap-2">
+                <User className="w-4 h-4 text-[#6B8E23]" />
                 Informations de contact
               </h3>
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="bg-[#F8F8FF] rounded-xl p-4 border border-[#D3D3D3]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Nom complet</p>
@@ -816,11 +822,11 @@ export default function ProDiscussions() {
         {/* Côté droit - Discussion (Desktop uniquement) */}
         <div className="hidden lg:flex w-1/2 flex-col bg-white">
           {/* Header discussion */}
-          <div className="border-b border-gray-200 px-6 py-3">
+          <div className="border-b border-[#D3D3D3] px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <MessageCircle className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-bold text-gray-900">
+                <MessageCircle className="w-5 h-5 text-[#556B2F]" />
+                <h2 className="text-xl font-bold text-[#8B4513]">
                   Discussion{" "}
                   {conversation && `(#${conversation.id.slice(0, 8)})`}
                 </h2>
@@ -848,7 +854,7 @@ export default function ProDiscussions() {
             {showScrollButton && (
               <button
                 onClick={handleScrollToBottom}
-                className="fixed bottom-32 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
+                className="fixed bottom-32 right-8 bg-[#6B8E23] hover:bg-[#556B2F] text-white p-3 rounded-full shadow-lg transition-all duration-200 z-40 flex items-center justify-center"
                 title="Scroller vers le bas"
               >
                 <ArrowDown className="w-5 h-5" />
@@ -882,7 +888,7 @@ export default function ProDiscussions() {
                         <div className="flex flex-col items-center">
                           {renderAvatar(message)}
                           {index < messages.length - 1 && (
-                            <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                            <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                           )}
                         </div>
                       )}
@@ -894,7 +900,7 @@ export default function ProDiscussions() {
                       >
                         {/* Nom de l'expéditeur pour les messages des autres */}
                         {!isCurrentUser(message) && (
-                          <div className="text-xs font-medium text-gray-600 mb-1">
+                          <div className="text-xs font-medium text-[#8B4513] mb-1">
                             {getSenderName(message)}
                           </div>
                         )}
@@ -902,8 +908,8 @@ export default function ProDiscussions() {
                         <div
                           className={`rounded-2xl p-4 ${
                             isCurrentUser(message)
-                              ? "bg-blue-600 text-white rounded-br-none"
-                              : "bg-gray-100 text-gray-900 rounded-bl-none"
+                              ? "bg-[#6B8E23] text-white rounded-br-none"
+                              : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                           }`}
                         >
                           {/* Fichier joint */}
@@ -916,7 +922,7 @@ export default function ProDiscussions() {
                                 className={`flex items-center gap-2 text-sm underline ${
                                   isCurrentUser(message)
                                     ? "text-blue-200"
-                                    : "text-blue-600"
+                                    : "text-[#556B2F]"
                                 }`}
                               >
                                 <FileText className="w-4 h-4" />
@@ -976,7 +982,7 @@ export default function ProDiscussions() {
                         <div className="flex flex-col items-center">
                           {renderAvatar(message)}
                           {index < messages.length - 1 && (
-                            <div className="w-0.5 h-full bg-gray-200 mt-2"></div>
+                            <div className="w-0.5 h-full bg-[#D3D3D3] mt-2"></div>
                           )}
                         </div>
                       )}
@@ -1027,24 +1033,23 @@ export default function ProDiscussions() {
           </div>
 
           {/* Zone d'envoi de message avec bouton d'actions */}
-          <div className="border-t border-gray-200 px-6 py-3 bg-gray-50">
+          <div className="border-t border-[#D3D3D3] px-6 py-3 bg-[#F8F8FF]">
             <div className="flex gap-3 items-center">
               {/* Bouton d'actions */}
               <div className="relative" ref={actionsMenuRef}>
                 <button
                   onClick={() => setShowActionsMenu(!showActionsMenu)}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors shadow-sm"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-[#D3D3D3] bg-white hover:bg-[#F0F8FF] transition-colors shadow-sm"
                 >
-                  <MoreVertical className="w-4 h-4 text-gray-600" />
+                  <MoreVertical className="w-4 h-4 text-[#556B2F]" />
                 </button>
                 {/* Menu déroulant des actions */}
-
                 {showActionsMenu && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-10 overflow-hidden">
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-[#D3D3D3] z-10 overflow-hidden">
                     <div className="p-2">
                       <button
                         onClick={handleProposerRendezVous}
-                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors duration-200"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0F8FF] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
                         disabled={artisanDetails && artisanDetails.rdv}
                       >
                         <Calendar className="w-4 h-4" />
@@ -1059,7 +1064,7 @@ export default function ProDiscussions() {
                       </button>
                       <button
                         onClick={handleEnvoyerDevis}
-                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors duration-200"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0FFF0] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
                         disabled={artisanDetails && artisanDetails.devisFileUrl}
                       >
                         <FileDigit className="w-4 h-4" />
@@ -1075,7 +1080,7 @@ export default function ProDiscussions() {
 
                       <button
                         onClick={handleEnvoyerFacture}
-                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors duration-200"
+                        className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F8F8FF] hover:text-[#556B2F] rounded-lg transition-colors duration-200"
                         disabled={
                           artisanDetails && artisanDetails.factureFileUrl
                         }
@@ -1132,7 +1137,7 @@ export default function ProDiscussions() {
                         )}
 
                       <>
-                        <div className="border-t border-gray-200 my-2"></div>
+                        <div className="border-t border-[#D3D3D3] my-2"></div>
                         <button
                           onClick={handleAfficherActions}
                           className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 rounded-lg transition-colors duration-200"
@@ -1148,13 +1153,13 @@ export default function ProDiscussions() {
 
               {/* Bouton d'upload de fichier */}
               <label
-                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-300 cursor-pointer bg-white shadow-sm ${
+                className={`flex items-center justify-center w-10 h-10 rounded-xl border border-[#D3D3D3] cursor-pointer bg-white shadow-sm ${
                   uploadingFile
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-[#F0F8FF]"
                 }`}
               >
-                <Paperclip className="w-4 h-4 text-gray-600" />
+                <Paperclip className="w-4 h-4 text-[#556B2F]" />
                 <input
                   type="file"
                   className="hidden"
@@ -1171,7 +1176,7 @@ export default function ProDiscussions() {
               <input
                 type="text"
                 placeholder="Tapez votre message ici..."
-                className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-900 border border-gray-200 text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-md focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200 shadow-sm"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -1190,7 +1195,7 @@ export default function ProDiscussions() {
               />
 
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-3 rounded-xl font-semibold text-md transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSend}
                 disabled={
                   sending ||
@@ -1217,7 +1222,7 @@ export default function ProDiscussions() {
         <div className="lg:hidden fixed bottom-6 right-6 z-40">
           <button
             onClick={() => setShowChatModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
+            className="bg-[#6B8E23] hover:bg-[#556B2F] text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center w-16 h-16"
             title="Ouvrir la discussion"
           >
             <MessageCircle className="w-6 h-6" />
@@ -1229,10 +1234,10 @@ export default function ProDiscussions() {
           <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
             <div className="fixed inset-0 flex flex-col bg-white">
               {/* Header modale */}
-              <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-between bg-white">
+              <div className="border-b border-[#D3D3D3] px-4 py-3 flex items-center justify-between bg-white">
                 <div className="flex items-center gap-3">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <MessageCircle className="w-5 h-5 text-[#556B2F]" />
+                  <h2 className="text-xl font-bold text-[#8B4513]">
                     Discussion{" "}
                     {conversation && `(#${conversation.id.slice(0, 8)})`}
                   </h2>
@@ -1244,19 +1249,19 @@ export default function ProDiscussions() {
                       onClick={() =>
                         setShowMobileActionsMenu(!showMobileActionsMenu)
                       }
-                      className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100"
+                      className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-[#F0F8FF]"
                     >
-                      <MoreVertical className="w-5 h-5 text-gray-600" />
+                      <MoreVertical className="w-5 h-5 text-[#556B2F]" />
                     </button>
                     {showMobileActionsMenu && (
-                      <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-10 overflow-hidden">
+                      <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-[#D3D3D3] z-10 overflow-hidden">
                         <div className="p-2">
                           <button
                             onClick={() => {
                               handleProposerRendezVous();
                               setShowMobileActionsMenu(false);
                             }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors duration-200"
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0F8FF] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
                             disabled={artisanDetails && artisanDetails.rdv}
                           >
                             <Calendar className="w-4 h-4" />
@@ -1274,7 +1279,7 @@ export default function ProDiscussions() {
                               handleEnvoyerDevis();
                               setShowMobileActionsMenu(false);
                             }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg transition-colors duration-200"
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F0FFF0] hover:text-[#6B8E23] rounded-lg transition-colors duration-200"
                             disabled={
                               artisanDetails && artisanDetails.devisFileUrl
                             }
@@ -1295,7 +1300,7 @@ export default function ProDiscussions() {
                               handleEnvoyerFacture();
                               setShowMobileActionsMenu(false);
                             }}
-                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-colors duration-200"
+                            className="flex items-center gap-3 w-full px-3 py-3 text-left text-sm text-gray-700 hover:bg-[#F8F8FF] hover:text-[#556B2F] rounded-lg transition-colors duration-200"
                             disabled={
                               artisanDetails && artisanDetails.factureFileUrl
                             }
@@ -1356,7 +1361,7 @@ export default function ProDiscussions() {
                             )}
 
                           <>
-                            <div className="border-t border-gray-200 my-2"></div>
+                            <div className="border-t border-[#D3D3D3] my-2"></div>
                             <button
                               onClick={() => {
                                 handleAfficherActions();
@@ -1414,7 +1419,7 @@ export default function ProDiscussions() {
                         >
                           {/* Nom de l'expéditeur pour les messages des autres */}
                           {!isCurrentUser(message) && (
-                            <div className="text-xs font-medium text-gray-600 mb-1">
+                            <div className="text-xs font-medium text-[#8B4513] mb-1">
                               {getSenderName(message)}
                             </div>
                           )}
@@ -1422,8 +1427,8 @@ export default function ProDiscussions() {
                           <div
                             className={`rounded-2xl p-4 ${
                               isCurrentUser(message)
-                                ? "bg-blue-600 text-white rounded-br-none"
-                                : "bg-gray-100 text-gray-900 rounded-bl-none"
+                                ? "bg-[#6B8E23] text-white rounded-br-none"
+                                : "bg-[#F8F8FF] text-gray-900 rounded-bl-none border border-[#D3D3D3]"
                             }`}
                           >
                             {/* Fichier joint */}
@@ -1436,7 +1441,7 @@ export default function ProDiscussions() {
                                   className={`flex items-center gap-2 text-sm underline ${
                                     isCurrentUser(message)
                                       ? "text-blue-200"
-                                      : "text-blue-600"
+                                      : "text-[#556B2F]"
                                   }`}
                                 >
                                   <FileText className="w-4 h-4" />
@@ -1514,17 +1519,17 @@ export default function ProDiscussions() {
               </div>
 
               {/* Zone d'envoi de message pour mobile */}
-              <div className="border-t border-gray-200 px-4 py-3 bg-gray-50">
+              <div className="border-t border-[#D3D3D3] px-4 py-3 bg-[#F8F8FF]">
                 <div className="flex gap-3 items-center">
                   {/* Bouton d'upload de fichier */}
                   <label
-                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-gray-300 cursor-pointer ${
+                    className={`flex items-center justify-center px-4 py-2 rounded-xl border border-[#D3D3D3] cursor-pointer ${
                       uploadingFile
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-gray-100"
+                        : "hover:bg-[#F0F8FF]"
                     }`}
                   >
-                    <Paperclip className="w-4 h-4" />
+                    <Paperclip className="w-4 h-4 text-[#556B2F]" />
                     <input
                       type="file"
                       className="hidden"
@@ -1536,7 +1541,7 @@ export default function ProDiscussions() {
                   <input
                     type="text"
                     placeholder="Tapez votre message ici..."
-                    className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="flex-1 px-4 py-2 rounded-xl bg-white text-gray-900 border border-[#D3D3D3] text-sm focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all duration-200"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -1554,7 +1559,7 @@ export default function ProDiscussions() {
                   />
 
                   <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#6B8E23] hover:bg-[#556B2F] text-white px-5 py-2 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleSend}
                     disabled={
                       sending ||
@@ -1581,9 +1586,9 @@ export default function ProDiscussions() {
       {/* Panneau des actions de l'artisan */}
       {showActionsPanel && artisanDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-xl">
-              <h3 className="text-xl font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3] sticky top-0 bg-white rounded-t-xl">
+              <h3 className="text-xl font-bold text-[#8B4513]">
                 Mes actions sur cette demande
               </h3>
               <button
@@ -1596,9 +1601,9 @@ export default function ProDiscussions() {
 
             <div className="p-6 space-y-6">
               {/* Rendez-vous */}
-              <div className="bg-blue-50 rounded-xl border border-blue-200 p-4">
+              <div className="bg-[#F0F8FF] rounded-xl border border-[#D3D3D3] p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-blue-900 text-lg flex items-center gap-2">
+                  <h4 className="font-semibold text-[#556B2F] text-lg flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
                     Rendez-vous
                   </h4>
@@ -1608,7 +1613,7 @@ export default function ProDiscussions() {
                         setShowActionsPanel(false);
                         setShowEditRendezVousModal(true);
                       }}
-                      className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-white px-3 py-1 rounded-lg border border-blue-200"
+                      className="flex items-center gap-2 text-sm text-[#6B8E23] hover:text-[#556B2F] transition-colors bg-white px-3 py-1 rounded-lg border border-[#D3D3D3]"
                     >
                       <Edit className="w-3 h-3" />
                       Modifier
@@ -1616,9 +1621,9 @@ export default function ProDiscussions() {
                   )}
                 </div>
                 {artisanDetails.rdv ? (
-                  <div className="bg-white p-4 rounded-lg border border-blue-100">
+                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                     <p className="text-sm text-gray-700">
-                      <strong className="text-blue-800">Date:</strong>{" "}
+                      <strong className="text-[#556B2F]">Date:</strong>{" "}
                       {new Date(artisanDetails.rdv).toLocaleDateString(
                         "fr-FR",
                         {
@@ -1639,22 +1644,22 @@ export default function ProDiscussions() {
                     </p>
                     {artisanDetails.rdvNotes && (
                       <p className="text-sm mt-2 text-gray-700">
-                        <strong className="text-blue-800">Notes:</strong>{" "}
+                        <strong className="text-[#556B2F]">Notes:</strong>{" "}
                         {artisanDetails.rdvNotes}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-blue-100">
+                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-[#D3D3D3]">
                     Aucun rendez-vous proposé
                   </p>
                 )}
               </div>
 
               {/* Devis */}
-              <div className="bg-green-50 rounded-xl border border-green-200 p-4">
+              <div className="bg-[#F0FFF0] rounded-xl border border-[#D3D3D3] p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-green-900 text-lg flex items-center gap-2">
+                  <h4 className="font-semibold text-[#6B8E23] text-lg flex items-center gap-2">
                     <FileDigit className="w-5 h-5" />
                     Devis
                   </h4>
@@ -1664,7 +1669,7 @@ export default function ProDiscussions() {
                         setShowActionsPanel(false);
                         setShowEditDevisModal(true);
                       }}
-                      className="flex items-center gap-2 text-sm text-green-600 hover:text-green-800 transition-colors bg-white px-3 py-1 rounded-lg border border-green-200"
+                      className="flex items-center gap-2 text-sm text-[#6B8E23] hover:text-[#556B2F] transition-colors bg-white px-3 py-1 rounded-lg border border-[#D3D3D3]"
                     >
                       <Edit className="w-3 h-3" />
                       Modifier
@@ -1672,45 +1677,45 @@ export default function ProDiscussions() {
                   )}
                 </div>
                 {artisanDetails.devisFileUrl ? (
-                  <div className="bg-white p-4 rounded-lg border border-green-100">
+                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                     <p className="text-sm text-gray-700">
-                      <strong className="text-green-800">Montant:</strong>{" "}
+                      <strong className="text-[#6B8E23]">Montant:</strong>{" "}
                       {artisanDetails.factureMontant}€
                     </p>
                     <p className="text-sm text-gray-700 mt-1">
-                      <strong className="text-green-800">Description:</strong>{" "}
+                      <strong className="text-[#6B8E23]">Description:</strong>{" "}
                       {artisanDetails.devis}
                     </p>
                     <a
                       href={artisanDetails.devisFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-green-600 hover:text-green-800 mt-2 transition-colors"
+                      className="flex items-center gap-2 text-sm text-[#6B8E23] hover:text-[#556B2F] mt-2 transition-colors"
                     >
                       <Download className="w-4 h-4" />
                       Télécharger le devis
                     </a>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-green-100">
+                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-[#D3D3D3]">
                     Aucun devis envoyé
                   </p>
                 )}
               </div>
 
               {/* Facture */}
-              <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
+              <div className="bg-[#F8F8FF] rounded-xl border border-[#D3D3D3] p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-purple-900 text-lg flex items-center gap-2">
+                  <h4 className="font-semibold text-[#556B2F] text-lg flex items-center gap-2">
                     <DollarSign className="w-5 h-5" />
                     Facture
                   </h4>
                 </div>
                 {artisanDetails.factureFileUrl ? (
-                  <div className="bg-white p-4 rounded-lg border border-purple-100">
+                  <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-sm text-gray-700">
-                        <strong className="text-purple-800">Montant:</strong>{" "}
+                        <strong className="text-[#556B2F]">Montant:</strong>{" "}
                         {artisanDetails.factureMontant}€
                       </p>
                       <span
@@ -1733,21 +1738,21 @@ export default function ProDiscussions() {
                       href={artisanDetails.factureFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 mt-2 transition-colors"
+                      className="flex items-center gap-2 text-sm text-[#556B2F] hover:text-[#6B8E23] mt-2 transition-colors"
                     >
                       <Download className="w-4 h-4" />
                       Télécharger la facture
                     </a>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-purple-100">
+                  <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border border-[#D3D3D3]">
                     Aucune facture envoyée
                   </p>
                 )}
               </div>
               {/* Section Confirmation Paiement */}
               {artisanDetails?.factureStatus === "validee" && (
-                <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-4">
+                <div className="bg-yellow-50 rounded-xl border border-[#D3D3D3] p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-yellow-900 text-lg flex items-center gap-2">
                       <CheckCircle className="w-5 h-5" />
@@ -1755,13 +1760,13 @@ export default function ProDiscussions() {
                     </h4>
                   </div>
                   {artisanDetails.factureConfirmee ? (
-                    <div className="bg-white p-4 rounded-lg border border-yellow-100">
+                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                       <p className="text-sm text-green-600 font-medium">
                         ✓ Paiement confirmé
                       </p>
                     </div>
                   ) : (
-                    <div className="bg-white p-4 rounded-lg border border-yellow-100">
+                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                       <p className="text-sm text-gray-700 mb-3">
                         Le client a payé la facture. Veuillez confirmer la
                         réception du paiement.
@@ -1779,7 +1784,7 @@ export default function ProDiscussions() {
 
               {/* Section Travaux */}
               {artisanDetails?.factureConfirmee && (
-                <div className="bg-orange-50 rounded-xl border border-orange-200 p-4">
+                <div className="bg-orange-50 rounded-xl border border-[#D3D3D3] p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-orange-900 text-lg flex items-center gap-2">
                       <Wrench className="w-5 h-5" />
@@ -1787,7 +1792,7 @@ export default function ProDiscussions() {
                     </h4>
                   </div>
                   {artisanDetails.travauxTermines ? (
-                    <div className="bg-white p-4 rounded-lg border border-orange-100">
+                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                       <p className="text-sm text-green-600 font-medium">
                         ✓ Travaux marqués comme terminés
                       </p>
@@ -1796,7 +1801,7 @@ export default function ProDiscussions() {
                       </p>
                     </div>
                   ) : (
-                    <div className="bg-white p-4 rounded-lg border border-orange-100">
+                    <div className="bg-white p-4 rounded-lg border border-[#D3D3D3]">
                       <p className="text-sm text-gray-700 mb-3">
                         Une fois les travaux terminés, vous pouvez les marquer
                         comme terminés.
@@ -1813,10 +1818,10 @@ export default function ProDiscussions() {
               )}
             </div>
 
-            <div className="flex justify-end p-6 border-t border-gray-200 sticky bottom-0 bg-white rounded-b-xl">
+            <div className="flex justify-end p-6 border-t border-[#D3D3D3] sticky bottom-0 bg-white rounded-b-xl">
               <button
                 onClick={() => setShowActionsPanel(false)}
-                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="px-6 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] transition-colors"
               >
                 Fermer
               </button>
@@ -1829,9 +1834,9 @@ export default function ProDiscussions() {
       {/* Modale Édition Rendez-vous */}
       {showEditRendezVousModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Modifier le rendez-vous
               </h3>
               <button
@@ -1846,7 +1851,7 @@ export default function ProDiscussions() {
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Date du rendez-vous
                   </label>
                   <input
@@ -1860,12 +1865,12 @@ export default function ProDiscussions() {
                     }
                     disabled={loadingEditRendezVous}
                     min={new Date().toISOString().split("T")[0]}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Heure du rendez-vous
                   </label>
                   <input
@@ -1878,12 +1883,12 @@ export default function ProDiscussions() {
                       }))
                     }
                     disabled={loadingEditRendezVous}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Notes supplémentaires
                   </label>
                   <textarea
@@ -1896,7 +1901,7 @@ export default function ProDiscussions() {
                     }
                     disabled={loadingEditRendezVous}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="Informations complémentaires..."
                   />
                 </div>
@@ -1923,7 +1928,7 @@ export default function ProDiscussions() {
                     !currentRendezVous?.heure ||
                     loadingEditRendezVous
                   }
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 flex items-center gap-2"
                 >
                   {loadingEditRendezVous ? (
                     <>
@@ -1943,9 +1948,9 @@ export default function ProDiscussions() {
       {/* Modale Édition Devis */}
       {showEditDevisModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Modifier le devis
               </h3>
               <button
@@ -1960,7 +1965,7 @@ export default function ProDiscussions() {
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Montant du devis (€)
                   </label>
                   <input
@@ -1973,14 +1978,14 @@ export default function ProDiscussions() {
                       }))
                     }
                     disabled={loadingEditDevis}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="0.00"
                     step="0.01"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Description du devis
                   </label>
                   <textarea
@@ -1993,13 +1998,13 @@ export default function ProDiscussions() {
                     }
                     disabled={loadingEditDevis}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="Détail des prestations..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Nouveau fichier de devis (PDF) - Optionnel
                   </label>
                   <input
@@ -2009,7 +2014,7 @@ export default function ProDiscussions() {
                       setCurrentDevis((prev) => ({ ...prev, file }))
                     )}
                     disabled={loadingEditDevis}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                   {currentDevis?.file && (
                     <p className="text-sm text-green-600 mt-2">
@@ -2040,7 +2045,7 @@ export default function ProDiscussions() {
                     !currentDevis?.description ||
                     loadingEditDevis
                   }
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 flex items-center gap-2"
                 >
                   {loadingEditDevis ? (
                     <>
@@ -2060,9 +2065,9 @@ export default function ProDiscussions() {
       {/* Modale Rendez-vous */}
       {showRendezVousModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Proposer un rendez-vous
               </h3>
               <button
@@ -2077,7 +2082,7 @@ export default function ProDiscussions() {
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Date du rendez-vous
                   </label>
                   <input
@@ -2086,12 +2091,12 @@ export default function ProDiscussions() {
                     value={rendezVousDate}
                     onChange={(e) => setRendezVousDate(e.target.value)}
                     disabled={loadingRendezVous}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Heure du rendez-vous
                   </label>
                   <input
@@ -2099,12 +2104,12 @@ export default function ProDiscussions() {
                     value={rendezVousHeure}
                     onChange={(e) => setRendezVousHeure(e.target.value)}
                     disabled={loadingRendezVous}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Notes supplémentaires (optionnel)
                   </label>
                   <textarea
@@ -2112,7 +2117,7 @@ export default function ProDiscussions() {
                     onChange={(e) => setRendezVousNotes(e.target.value)}
                     disabled={loadingRendezVous}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="Informations complémentaires sur le rendez-vous..."
                   />
                 </div>
@@ -2137,7 +2142,7 @@ export default function ProDiscussions() {
                   disabled={
                     !rendezVousDate || !rendezVousHeure || loadingRendezVous
                   }
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   {loadingRendezVous ? (
                     <>
@@ -2157,9 +2162,9 @@ export default function ProDiscussions() {
       {/* Modale Facture */}
       {showFactureModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Envoyer une facture
               </h3>
               <button
@@ -2174,7 +2179,7 @@ export default function ProDiscussions() {
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Montant de la facture (€)
                   </label>
                   <input
@@ -2182,14 +2187,14 @@ export default function ProDiscussions() {
                     value={factureMontant}
                     onChange={(e) => setFactureMontant(e.target.value)}
                     disabled={loadingFacture}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="0.00"
                     step="0.01"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Fichier de facture (PDF)
                   </label>
                   <input
@@ -2197,7 +2202,7 @@ export default function ProDiscussions() {
                     accept=".pdf"
                     onChange={handleFileChange(setFactureFile)}
                     disabled={loadingFacture}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                   {factureFile && (
                     <p className="text-sm text-green-600 mt-2">
@@ -2220,7 +2225,7 @@ export default function ProDiscussions() {
                     handleSubmitFacture(factureMontant, factureFile)
                   }
                   disabled={!factureMontant || !factureFile || loadingFacture}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#556B2F] text-white rounded-lg hover:bg-[#6B8E23] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   {loadingFacture ? (
                     <>
@@ -2240,9 +2245,9 @@ export default function ProDiscussions() {
       {/* Modale Devis */}
       {showDevisModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 border border-[#D3D3D3]">
+            <div className="flex items-center justify-between p-6 border-b border-[#D3D3D3]">
+              <h3 className="text-lg font-bold text-[#8B4513]">
                 Envoyer un devis
               </h3>
               <button
@@ -2257,7 +2262,7 @@ export default function ProDiscussions() {
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Montant du devis (€)
                   </label>
                   <input
@@ -2265,14 +2270,14 @@ export default function ProDiscussions() {
                     value={devisMontant}
                     onChange={(e) => setDevisMontant(e.target.value)}
                     disabled={loadingDevis}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="0.00"
                     step="0.01"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Description du devis
                   </label>
                   <textarea
@@ -2280,13 +2285,13 @@ export default function ProDiscussions() {
                     onChange={(e) => setDevisDescription(e.target.value)}
                     disabled={loadingDevis}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                     placeholder="Détail des prestations et conditions..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#8B4513] mb-2">
                     Fichier du devis (PDF)
                   </label>
                   <input
@@ -2294,7 +2299,7 @@ export default function ProDiscussions() {
                     accept=".pdf"
                     onChange={handleFileChange(setDevisFile)}
                     disabled={loadingDevis}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 border border-[#D3D3D3] rounded-lg focus:ring-2 focus:ring-[#556B2F] focus:border-[#556B2F] disabled:opacity-50"
                   />
                   {devisFile && (
                     <p className="text-sm text-green-600 mt-2">
@@ -2322,7 +2327,7 @@ export default function ProDiscussions() {
                     !devisFile ||
                     loadingDevis
                   }
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#6B8E23] text-white rounded-lg hover:bg-[#556B2F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   {loadingDevis ? (
                     <>
