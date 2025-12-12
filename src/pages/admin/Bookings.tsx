@@ -5,10 +5,10 @@ import { BookingsCalendar } from "@/components/admin/bookings/bookings-calendar"
 
 const BookingsPage = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#FFFFFF0]" style={{ backgroundColor: '#FFFFFF0' }}>
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Réservations</h1>
-        <p className="text-muted-foreground">Gérer toutes les réservations de services</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[#8B4513]">Réservations</h1>
+        <p className="text-muted-foreground mt-1">Gérer toutes les réservations de services</p>
       </div>
 
       <BookingsStats />

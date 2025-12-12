@@ -12,10 +12,13 @@ export default function TourismPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tourisme & Expériences</h1>
+          <h1 className="text-3xl font-bold text-[#8B4513]">Tourisme & Expériences</h1>
           <p className="text-muted-foreground mt-1">Gérez les activités touristiques, visites et expériences locales</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button 
+          onClick={() => setIsModalOpen(true)} 
+          className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Nouvelle expérience
         </Button>
