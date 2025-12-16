@@ -1,5 +1,4 @@
-import type React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,16 +22,15 @@ import {
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
-
 // Types et statuts alignés avec le backend
 const STATUT_ANNONCE = {
-  draft: { label: "Brouillon", color: "bg-blue-100 text-blue-800" },
+  pending: { label: "Brouillon", color: "bg-yellow-100 text-yellow-800" },
   for_sale: { label: "À vendre", color: "bg-green-100 text-green-800" },
   for_rent: { label: "À louer", color: "bg-purple-100 text-purple-800" },
   sold: { label: "Vendu", color: "bg-gray-100 text-gray-800" },
   rented: { label: "Loué", color: "bg-gray-100 text-gray-800" },
+  both: { label: "Vente et Location", color: "bg-blue-100 text-blue-800" },
 };
-
 const TYPE_BIEN = {
   house: "Maison / Villa",
   apartment: "Appartement",
@@ -57,18 +55,15 @@ const TYPE_BIEN = {
   cellier: "Cellier",
   cave: "Cave",
 };
-
 const LISTING_TYPE = {
   sale: "Vente",
   rent: "Location",
   both: "Vente et Location",
 };
-
 const TYPE_LOCATION = {
   longue_duree: "Longue durée",
   saisonniere: "Saisonnière",
 };
-
 interface ListingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -94,7 +89,6 @@ interface ListingModalProps {
     latitude: number | null;
     socialLoan?: boolean;
     isSHLMR?: boolean;
-    
   };
   mode: "create" | "edit";
   onSuccess?: () => void;
@@ -106,14 +100,12 @@ interface ListingModalProps {
     role?: "user" | "admin" | "professional";
   };
 }
-
 // Interface pour les images temporaires
 interface TemporaryImage {
   file: File;
   previewUrl: string;
   id: string;
 }
-
 // Composant Modal
 const Modal = ({
   isOpen,
@@ -129,14 +121,12 @@ const Modal = ({
   size?: "sm" | "md" | "lg" | "xl";
 }) => {
   if (!isOpen) return null;
-
   const sizeClasses = {
     sm: "max-w-md",
     md: "max-w-2xl",
     lg: "max-w-4xl",
     xl: "max-w-6xl",
   };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fadeIn">
       <div
@@ -158,7 +148,6 @@ const Modal = ({
     </div>
   );
 };
-
 export function ListingModal({
   open,
   onOpenChange,
@@ -174,10 +163,9 @@ export function ListingModal({
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
-
   // Vérifier si l'utilisateur est un pro certifié
-  const isProfessional = currentUser?.role === "professional" || currentUser?.role === "admin";
-
+  const isProfessional =
+    currentUser?.role === "professional" || currentUser?.role === "admin";
   const [formData, setFormData] = useState({
     // Étape 1 - Informations générales
     title: "",
@@ -204,9 +192,7 @@ export function ListingModal({
     // Nouveau champ
     socialLoan: false,
     isSHLMR: false,
-
   });
-
   const etapes = [
     { numero: 1, titre: "Type et prix" },
     { numero: 2, titre: "Caractéristiques" },
@@ -214,7 +200,6 @@ export function ListingModal({
     { numero: 4, titre: "Médias" },
     { numero: 5, titre: "Publication" },
   ];
-
   useEffect(() => {
     if (open && listing) {
       setFormData({
@@ -232,7 +217,7 @@ export function ListingModal({
         rentType: listing.rentType || "longue_duree",
         features: listing.features || [],
         images: listing.images || [],
-        status: listing.status || "draft",
+        status: listing.status || "pending",
         latitude: listing.latitude ?? null,
         longitude: listing.longitude ?? null,
         socialLoan: listing.socialLoan || false,
@@ -258,7 +243,7 @@ export function ListingModal({
         rentType: "longue_duree",
         features: [],
         images: [],
-        status: "draft",
+        status: "pending",
         latitude: null,
         longitude: null,
         socialLoan: false,
@@ -270,7 +255,28 @@ export function ListingModal({
       setEtape(1);
     }
   }, [open, listing]);
-
+  // Mise à jour automatique du status si listingType change et que le status n'est pas pending
+  useEffect(() => {
+    if (formData.status !== "pending") {
+      let newStatus;
+      switch (formData.listingType) {
+        case "rent":
+          newStatus = "for_rent";
+          break;
+        case "sale":
+          newStatus = "for_sale";
+          break;
+        case "both":
+          newStatus = "both";
+          break;
+        default:
+          newStatus = "for_sale";
+      }
+      if (formData.status !== newStatus) {
+        setFormData((prev) => ({ ...prev, status: newStatus }));
+      }
+    }
+  }, [formData.listingType, formData.status]);
   // Nettoyer les URLs temporaires
   useEffect(() => {
     return () => {
@@ -279,14 +285,11 @@ export function ListingModal({
       });
     };
   }, [temporaryImages]);
-
   const handleImageUpload = async (files: File[]): Promise<string[]> => {
     const uploadedUrls: string[] = [];
-
     for (const file of files) {
       const formDataUpload = new FormData();
       formDataUpload.append("file", file);
-
       try {
         const response = await api.post(
           "/upload/property-image",
@@ -297,7 +300,6 @@ export function ListingModal({
             },
           }
         );
-
         if (response.data.url) {
           uploadedUrls.push(response.data.url);
         }
@@ -306,10 +308,8 @@ export function ListingModal({
         throw new Error("Erreur lors de l'upload des images");
       }
     }
-
     return uploadedUrls;
   };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -318,12 +318,10 @@ export function ListingModal({
         previewUrl: URL.createObjectURL(file),
         id: Math.random().toString(36).substr(2, 9),
       }));
-
       setTemporaryImages((prev) => [...prev, ...newTemporaryImages]);
       e.target.value = "";
     }
   };
-
   const removeTemporaryImage = (id: string) => {
     const imageToRemove = temporaryImages.find((img) => img.id === id);
     if (imageToRemove) {
@@ -331,15 +329,12 @@ export function ListingModal({
     }
     setTemporaryImages((prev) => prev.filter((img) => img.id !== id));
   };
-
   const removeExistingImage = (imageUrl: string) => {
     setExistingImages((prev) => prev.filter((img) => img !== imageUrl));
     setImagesToDelete((prev) => [...prev, imageUrl]);
   };
-
   const uploadAllImages = async (): Promise<string[]> => {
     if (temporaryImages.length === 0) return [];
-
     setUploadingImages(true);
     try {
       const files = temporaryImages.map((img) => img.file);
@@ -349,10 +344,8 @@ export function ListingModal({
       setUploadingImages(false);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     // Validation des champs requis avant soumission
     if (!formData.title.trim()) {
       toast.error("Veuillez entrer un titre pour l'annonce");
@@ -382,19 +375,15 @@ export function ListingModal({
       toast.error("Veuillez ajouter au moins une image");
       return;
     }
-
     setLoading(true);
-
     try {
       // Uploader toutes les nouvelles images
       const newImageUrls = await uploadAllImages();
-
       // Combiner les images existantes (sans celles supprimées) avec les nouvelles
       const finalImages = [
         ...existingImages.filter((img) => !imagesToDelete.includes(img)),
         ...newImageUrls,
       ];
-
       const payload = {
         title: formData.title,
         type: formData.type,
@@ -414,12 +403,10 @@ export function ListingModal({
         latitude: formData.latitude,
         longitude: formData.longitude,
         socialLoan: formData.socialLoan,
-        isSHLMR: formData.isSHLMR, 
+        isSHLMR: formData.isSHLMR,
         ownerId: listing?.ownerId || currentUser?.id || "default-owner-id",
       };
-
       console.log("Payload envoyé:", payload); // Pour debug
-
       if (mode === "create") {
         await api.post("/properties", payload);
         toast.success("Annonce créée avec succès");
@@ -427,7 +414,6 @@ export function ListingModal({
         await api.put(`/properties/${listing?.id}`, payload);
         toast.success("Annonce modifiée avec succès");
       }
-
       onOpenChange(false);
       if (onSuccess) {
         onSuccess();
@@ -443,7 +429,6 @@ export function ListingModal({
       setLoading(false);
     }
   };
-
   const etapeSuivante = () => {
     // Validation avant de passer à l'étape suivante
     if (etape === 1) {
@@ -486,14 +471,11 @@ export function ListingModal({
         return;
       }
     }
-
     if (etape < 5) setEtape(etape + 1);
   };
-
   const etapePrecedente = () => {
     if (etape > 1) setEtape(etape - 1);
   };
-
   const equipementsDisponibles = [
     "pool",
     "garden",
@@ -505,7 +487,6 @@ export function ListingModal({
     "air_conditioning",
     "fiber_optic",
   ];
-
   const allImages = [
     ...existingImages.map((url) => ({
       type: "existing" as const,
@@ -518,7 +499,6 @@ export function ListingModal({
       id: img.id,
     })),
   ];
-
   const handleLocationChange = (lat: number, lng: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -526,7 +506,6 @@ export function ListingModal({
       longitude: lng,
     }));
   };
-
   return (
     <>
       {/* Modal de sélection de position */}
@@ -537,7 +516,6 @@ export function ListingModal({
         longitude={formData.longitude}
         onLocationChange={handleLocationChange}
       />
-
       <Modal
         isOpen={open}
         onClose={() => onOpenChange(false)}
@@ -551,17 +529,26 @@ export function ListingModal({
               {etapes.map((step, index) => (
                 <div key={step.numero} className="flex items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${etape >= step.numero
-                        ? "bg-blue-600 border-blue-600 text-white"
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                      etape >= step.numero
+                        ? "text-white"
                         : "border-gray-300 text-gray-500"
-                      }`}
+                    }`}
+                    style={{
+                      backgroundColor:
+                        etape >= step.numero ? "#556B2F" : "transparent",
+                      borderColor: etape >= step.numero ? "#556B2F" : "#D3D3D3",
+                    }}
                   >
                     {step.numero}
                   </div>
                   {index < etapes.length - 1 && (
                     <div
-                      className={`w-12 h-1 mx-2 ${etape > step.numero ? "bg-blue-600" : "bg-gray-300"
-                        }`}
+                      className={`w-12 h-1 mx-2`}
+                      style={{
+                        backgroundColor:
+                          etape > step.numero ? "#556B2F" : "#D3D3D3",
+                      }}
                     />
                   )}
                 </div>
@@ -569,12 +556,11 @@ export function ListingModal({
             </div>
             <div
               className="text-center font-medium"
-              style={{ color: "#0A0A0A" }}
+              style={{ color: "#556B2F" }}
             >
               {etapes.find((s) => s.numero === etape)?.titre}
             </div>
           </div>
-
           {/* Étape 1 - Type et prix */}
           {etape === 1 && (
             <div className="space-y-6 animate-fadeIn">
@@ -595,29 +581,27 @@ export function ListingModal({
                   ))}
                 </select>
               </div>
-
               {/* Ajouter le champ rentType si le type est location */}
               {(formData.listingType === "rent" ||
                 formData.listingType === "both") && (
-                  <div className="mt-4">
-                    <Label className="block mb-2">Type de location *</Label>
-                    <select
-                      className="w-full p-3 border rounded-lg"
-                      value={formData.rentType}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rentType: e.target.value })
-                      }
-                      required
-                    >
-                      {Object.entries(TYPE_LOCATION).map(([key, value]) => (
-                        <option key={key} value={key}>
-                          {value}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
+                <div className="mt-4">
+                  <Label className="block mb-2">Type de location *</Label>
+                  <select
+                    className="w-full p-3 border rounded-lg"
+                    value={formData.rentType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rentType: e.target.value })
+                    }
+                    required
+                  >
+                    {Object.entries(TYPE_LOCATION).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <Label className="block mb-2">Type de bien *</Label>
                 <select
@@ -635,7 +619,6 @@ export function ListingModal({
                   ))}
                 </select>
               </div>
-
               <div>
                 <Label className="block mb-2">Prix *</Label>
                 <div className="relative">
@@ -655,7 +638,6 @@ export function ListingModal({
                   />
                 </div>
               </div>
-
               <div>
                 <Label className="block mb-2">Titre de l'annonce *</Label>
                 <Input
@@ -667,7 +649,6 @@ export function ListingModal({
                   placeholder="Ex: Superbe appartement vue panoramique..."
                 />
               </div>
-
               <div>
                 <Label className="block mb-2">Description *</Label>
                 <Textarea
@@ -682,7 +663,6 @@ export function ListingModal({
               </div>
             </div>
           )}
-
           {/* Étape 2 - Caractéristiques */}
           {etape === 2 && (
             <div className="space-y-6 animate-fadeIn">
@@ -706,7 +686,6 @@ export function ListingModal({
                     />
                   </div>
                 </div>
-
                 <div>
                   <Label className="block mb-2">Nombre de pièces *</Label>
                   <Input
@@ -719,7 +698,6 @@ export function ListingModal({
                     placeholder="Ex: 3"
                   />
                 </div>
-
                 <div>
                   <Label className="block mb-2">Nombre de chambres *</Label>
                   <Input
@@ -733,7 +711,6 @@ export function ListingModal({
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label className="block mb-2">Salles de bain</Label>
@@ -747,7 +724,6 @@ export function ListingModal({
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <Label className="block mb-2">Adresse complète *</Label>
@@ -767,7 +743,6 @@ export function ListingModal({
                     />
                   </div>
                 </div>
-
                 <div>
                   <Label className="block mb-2">Ville *</Label>
                   <Input
@@ -780,7 +755,6 @@ export function ListingModal({
                   />
                 </div>
               </div>
-
               {/* Sélection de la position */}
               <div>
                 <Label className="block mb-2">Position sur la carte</Label>
@@ -805,7 +779,6 @@ export function ListingModal({
                   Permet d'afficher le bien sur la carte.
                 </div>
               </div>
-
               {/* Groupe d'options spéciales mutuellement exclusives - Seulement pour les pros */}
               {isProfessional && (
                 <div className="mt-6 p-4 border rounded-lg">
@@ -818,20 +791,23 @@ export function ListingModal({
                         checked={formData.socialLoan}
                         onChange={(e) => {
                           const isChecked = e.target.checked;
-                          setFormData(prev => ({ 
-                            ...prev, 
+                          setFormData((prev) => ({
+                            ...prev,
                             socialLoan: isChecked,
                             // Si on coche Prêt Social, on décoche SHLMR
-                            isSHLMR: isChecked ? false : prev.isSHLMR
+                            isSHLMR: isChecked ? false : prev.isSHLMR,
                           }));
                         }}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <Label htmlFor="socialLoan" className="text-sm font-medium">
+                      <Label
+                        htmlFor="socialLoan"
+                        className="text-sm font-medium"
+                      >
                         Prêt Social Location Accession (PSLA)
                       </Label>
                     </div>
-                    
+
                     {/* Option 3 : SHLMR - COMPORTEMENT TOGGLE */}
                     <div className="flex items-center space-x-2">
                       <input
@@ -840,11 +816,11 @@ export function ListingModal({
                         checked={formData.isSHLMR}
                         onChange={(e) => {
                           const isChecked = e.target.checked;
-                          setFormData(prev => ({ 
-                            ...prev, 
+                          setFormData((prev) => ({
+                            ...prev,
                             isSHLMR: isChecked,
                             // Si on coche SHLMR, on décoche Prêt Social
-                            socialLoan: isChecked ? false : prev.socialLoan
+                            socialLoan: isChecked ? false : prev.socialLoan,
                           }));
                         }}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -858,7 +834,6 @@ export function ListingModal({
               )}
             </div>
           )}
-
           {/* Étape 3 - Équipements */}
           {etape === 3 && (
             <div className="space-y-6 animate-fadeIn">
@@ -899,15 +874,15 @@ export function ListingModal({
               </div>
             </div>
           )}
-
           {/* Étape 4 - Médias */}
           {etape === 4 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
                 <Label className="block mb-2">Photos du bien</Label>
                 <div
-                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${uploadingImages ? "opacity-50" : "hover:border-blue-400"
-                    }`}
+                  className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
+                    uploadingImages ? "opacity-50" : "hover:border-blue-400"
+                  }`}
                 >
                   <Upload className="mx-auto mb-3 text-gray-400" size={48} />
                   <div
@@ -936,10 +911,11 @@ export function ListingModal({
                   />
                   <Label
                     htmlFor="property-images"
-                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${uploadingImages
+                    className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white transition-colors ${
+                      uploadingImages
                         ? "opacity-50 cursor-not-allowed"
                         : "cursor-pointer hover:bg-gray-50"
-                      }`}
+                    }`}
                   >
                     {uploadingImages ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -950,7 +926,6 @@ export function ListingModal({
                   </Label>
                 </div>
               </div>
-
               {allImages.length > 0 && (
                 <div>
                   <div className="flex justify-between items-center mb-2">
@@ -997,7 +972,6 @@ export function ListingModal({
                   </div>
                 </div>
               )}
-
               {allImages.length === 0 && !uploadingImages && (
                 <div className="text-center py-8 text-gray-500">
                   <Home className="mx-auto mb-3 text-gray-300" size={48} />
@@ -1010,7 +984,6 @@ export function ListingModal({
               )}
             </div>
           )}
-
           {/* Étape 5 - Publication */}
           {etape === 5 && (
             <div className="space-y-6 animate-fadeIn">
@@ -1027,16 +1000,17 @@ export function ListingModal({
                       onChange={(e) =>
                         setFormData({ ...formData, status: e.target.value })
                       }
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      className="w-4 h-4 border-gray-300 focus:ring-2"
+                      style={{ accentColor: "#556B2F" }}
                     />
                     <Label htmlFor="status-draft" className="cursor-pointer">
                       <div className="font-medium">Brouillon</div>
                       <div className="text-sm text-gray-500">
-                        L'annonce ne sera pas visible publiquement. Vous pourrez la modifier et la publier plus tard.
+                        L'annonce ne sera pas visible publiquement. Vous pourrez
+                        la modifier et la publier plus tard.
                       </div>
                     </Label>
                   </div>
-
                   <div className="flex items-center space-x-3">
                     <input
                       type="radio"
@@ -1046,12 +1020,25 @@ export function ListingModal({
                       checked={formData.status !== "pending"}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          const newStatus =
-                            formData.listingType === "rent" ? "for_rent" : "for_sale";
+                          let newStatus;
+                          switch (formData.listingType) {
+                            case "rent":
+                              newStatus = "for_rent";
+                              break;
+                            case "sale":
+                              newStatus = "for_sale";
+                              break;
+                            case "both":
+                              newStatus = "both";
+                              break;
+                            default:
+                              newStatus = "for_sale";
+                          }
                           setFormData({ ...formData, status: newStatus });
                         }
                       }}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      className="w-4 h-4 border-gray-300 focus:ring-2"
+                      style={{ accentColor: "#556B2F" }}
                     />
                     <Label htmlFor="status-publish" className="cursor-pointer">
                       <div className="font-medium">Publier maintenant</div>
@@ -1060,137 +1047,141 @@ export function ListingModal({
                         {formData.listingType === "rent"
                           ? " en tant qu'annonce de location"
                           : formData.listingType === "sale"
-                            ? " en tant qu'annonce de vente"
-                            : " en tant qu'annonce de vente et location"}
+                          ? " en tant qu'annonce de vente"
+                          : " en tant qu'annonce de vente et location"}
                         .
                       </div>
                     </Label>
                   </div>
                 </div>
               </div>
-
-              <Card className="p-6 bg-blue-50 border-blue-200">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <CheckCircle className="text-blue-600" size={20} />
+              <Card
+                className="p-6 border-2"
+                style={{ backgroundColor: "#F5F5DC", borderColor: "#6B8E23" }}
+              >
+                <h3
+                  className="font-semibold mb-4 flex items-center gap-2"
+                  style={{ color: "#556B2F" }}
+                >
+                  <CheckCircle size={20} style={{ color: "#556B2F" }} />
                   Récapitulatif
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Titre:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                    <span style={{ color: "#8B4513" }}>Titre:</span>
+                    <span className="font-medium" style={{ color: "#556B2F" }}>
                       {formData.title}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Type:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                    <span style={{ color: "#8B4513" }}>Type:</span>
+                    <span className="font-medium" style={{ color: "#556B2F" }}>
                       {TYPE_BIEN[formData.type]}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Prix:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                    <span style={{ color: "#8B4513" }}>Prix:</span>
+                    <span className="font-medium" style={{ color: "#556B2F" }}>
                       {formData.price} €
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Surface:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                    <span style={{ color: "#8B4513" }}>Surface:</span>
+                    <span className="font-medium" style={{ color: "#556B2F" }}>
                       {formData.surface} m²
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Type d'annonce:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                    <span style={{ color: "#8B4513" }}>Type d'annonce:</span>
+                    <span className="font-medium" style={{ color: "#556B2F" }}>
                       {LISTING_TYPE[formData.listingType]}
                     </span>
                   </div>
                   {(formData.listingType === "rent" ||
                     formData.listingType === "both") && (
-                      <div className="flex justify-between">
-                        <span style={{ color: "#5A6470" }}>
-                          Type de location:
-                        </span>
-                        <span
-                          className="font-medium"
-                          style={{ color: "#0A0A0A" }}
-                        >
-                          {TYPE_LOCATION[formData.rentType]}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex justify-between">
+                      <span style={{ color: "#8B4513" }}>
+                        Type de location:
+                      </span>
+                      <span
+                        className="font-medium"
+                        style={{ color: "#556B2F" }}
+                      >
+                        {TYPE_LOCATION[formData.rentType]}
+                      </span>
+                    </div>
+                  )}
                   {isProfessional && (
                     <>
                       <div className="flex justify-between">
-                        <span style={{ color: "#5A6470" }}>Prêt Social (PSLA):</span>
-                        <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                        <span style={{ color: "#8B4513" }}>
+                          Prêt Social (PSLA):
+                        </span>
+                        <span
+                          className="font-medium"
+                          style={{ color: "#556B2F" }}
+                        >
                           {formData.socialLoan ? "Oui" : "Non"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span style={{ color: "#5A6470" }}>SHLMR:</span>
-                        <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                        <span style={{ color: "#8B4513" }}>SHLMR:</span>
+                        <span
+                          className="font-medium"
+                          style={{ color: "#556B2F" }}
+                        >
                           {formData.isSHLMR ? "Oui" : "Non"}
                         </span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between">
-                    <span style={{ color: "#5A6470" }}>Images:</span>
-                    <span className="font-medium" style={{ color: "#0A0A0A" }}>
+                    <span style={{ color: "#8B4513" }}>Images:</span>
+                    <span className="font-medium" style={{ color: "#556B2F" }}>
                       {allImages.length} image(s)
                       {temporaryImages.length > 0 &&
                         ` (${temporaryImages.length} nouvelle(s))`}
                     </span>
                   </div>
-                  <div className="flex justify-between border-t pt-3 mt-3">
-                    <span style={{ color: "#5A6470" }} className="font-medium">Statut après publication:</span>
+                  <div
+                    className="flex justify-between border-t pt-3 mt-3"
+                    style={{ borderColor: "#D3D3D3" }}
+                  >
+                    <span style={{ color: "#8B4513" }} className="font-medium">
+                      Statut après publication:
+                    </span>
                     <span
-                      className="font-bold px-2 py-1 rounded text-xs"
-                      style={{
-                        backgroundColor:
-                          formData.status === "pending"
-                            ? "#fef3c7"
-                            : formData.listingType === "rent"
-                              ? "#dbeafe"
-                              : "#dcfce7",
-                        color:
-                          formData.status === "pending"
-                            ? "#92400e"
-                            : formData.listingType === "rent"
-                              ? "#1e40af"
-                              : "#15803d",
-                      }}
+                      className={`font-bold px-2 py-1 rounded text-xs ${
+                        STATUT_ANNONCE[formData.status].color
+                      }`}
                     >
-                      {formData.status === "pending"
-                        ? "Brouillon"
-                        : formData.listingType === "rent"
-                          ? "À louer"
-                          : "À vendre"}
+                      {STATUT_ANNONCE[formData.status].label}
                     </span>
                   </div>
                 </div>
               </Card>
             </div>
           )}
-
           {/* Navigation entre étapes */}
-          <div className="flex justify-between pt-6 mt-6 border-t">
+          <div
+            className="flex justify-between pt-6 mt-6"
+            style={{ borderColor: "#D3D3D3" }}
+          >
             <Button
               type="button"
               variant="outline"
               onClick={etapePrecedente}
               disabled={etape === 1 || loading || uploadingImages}
+              style={{ borderColor: "#D3D3D3", color: "#556B2F" }}
             >
               <ChevronLeft className="mr-2" size={16} />
               Précédent
             </Button>
-
             {etape < 5 ? (
               <Button
                 type="button"
                 onClick={etapeSuivante}
-                style={{ backgroundColor: "#0052FF", color: "white" }}
+                style={{ backgroundColor: "#556B2F", color: "white" }}
                 disabled={loading || uploadingImages}
               >
                 {uploadingImages ? (
@@ -1207,13 +1198,14 @@ export function ListingModal({
                   variant="outline"
                   onClick={etapePrecedente}
                   disabled={loading || uploadingImages}
+                  style={{ borderColor: "#D3D3D3", color: "#556B2F" }}
                 >
                   <ChevronLeft className="mr-2" size={16} />
                   Précédent
                 </Button>
                 <Button
                   type="submit"
-                  style={{ backgroundColor: "#0052FF", color: "white" }}
+                  style={{ backgroundColor: "#556B2F", color: "white" }}
                   disabled={loading || uploadingImages}
                 >
                   {loading || uploadingImages ? (
@@ -1226,8 +1218,8 @@ export function ListingModal({
                       ? "Upload..."
                       : "Sauvegarde..."
                     : mode === "create"
-                      ? "Publier"
-                      : "Modifier"}{" "}
+                    ? "Publier"
+                    : "Modifier"}{" "}
                   l'annonce
                 </Button>
               </div>
@@ -1235,7 +1227,6 @@ export function ListingModal({
           </div>
         </form>
       </Modal>
-
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }

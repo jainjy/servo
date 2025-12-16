@@ -34,6 +34,7 @@ import {
   ChevronDown,
   Calendar,
   Clock3,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { tourismeAPI } from "../../lib/api";
@@ -170,6 +171,7 @@ const AdminModal = ({
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const [submitting, setSubmitting] = useState(false); // Ajoutez cette ligne
 
   const handleTypeChange = (e) => {
     const selectedValue = e.target.value;
@@ -250,6 +252,7 @@ const AdminModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true); // Début du chargement
     setUploading(true);
 
     try {
@@ -297,10 +300,12 @@ const AdminModal = ({
         onSubmit(response.data.data);
         toast.success(
           editingListing
-            ? `${formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
-            } modifié avec succès ✅`
-            : `${formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
-            } créé avec succès ✅`
+            ? `${
+                formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
+              } modifié avec succès ✅`
+            : `${
+                formData.isTouristicPlace ? "Lieu touristique" : "Hébergement"
+              } créé avec succès ✅`
         );
       }
     } catch (error) {
@@ -309,15 +314,19 @@ const AdminModal = ({
         error.response?.data?.error || "Erreur lors de la soumission"
       );
     } finally {
+      setSubmitting(false); // Fin du chargement
       setUploading(false);
     }
   };
 
-  const handleClose = () => {
-    setFormData(defaultForm);
-    setUploadedFiles([]);
-    onClose();
-  };
+ const handleClose = () => {
+   if (submitting) {
+     return;
+   }
+   setFormData(defaultForm);
+   setUploadedFiles([]);
+   onClose();
+ };
 
   if (!isOpen) return null;
 
@@ -326,15 +335,19 @@ const AdminModal = ({
       <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b" style={{ borderColor: COLORS.separator }}>
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold" style={{ color: COLORS.secondaryText }}>
+            <h3
+              className="text-2xl font-bold"
+              style={{ color: COLORS.secondaryText }}
+            >
               {editingListing
-                ? `Modifier ${formData.isTouristicPlace
-                  ? "le lieu touristique"
-                  : "l'hébergement"
-                }`
+                ? `Modifier ${
+                    formData.isTouristicPlace
+                      ? "le lieu touristique"
+                      : "l'hébergement"
+                  }`
                 : contentType === "accommodations"
-                  ? "Nouvel hébergement"
-                  : "Nouveau lieu touristique"}
+                ? "Nouvel hébergement"
+                : "Nouveau lieu touristique"}
             </h3>
             <button
               onClick={handleClose}
@@ -348,14 +361,17 @@ const AdminModal = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {!editingListing && (
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: COLORS.secondaryText }}
+              >
                 Type de contenu *
               </label>
               <select
                 className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                style={{ 
+                style={{
                   borderColor: COLORS.separator,
-                  color: COLORS.smallText
+                  color: COLORS.smallText,
                 }}
                 value={
                   formData.isTouristicPlace ? "touristic_place" : formData.type
@@ -378,14 +394,17 @@ const AdminModal = ({
           {formData.isTouristicPlace && (
             <>
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: COLORS.secondaryText }}
+                >
                   Catégorie *
                 </label>
                 <select
                   className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                  style={{ 
+                  style={{
                     borderColor: COLORS.separator,
-                    color: COLORS.smallText
+                    color: COLORS.smallText,
                   }}
                   value={formData.category || ""}
                   onChange={(e) =>
@@ -407,15 +426,18 @@ const AdminModal = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Horaires d'ouverture
                   </label>
                   <input
                     type="text"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     placeholder="Ex: 9h-18h, fermé le lundi"
                     value={formData.openingHours || ""}
@@ -428,15 +450,18 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Tarif d'entrée
                   </label>
                   <input
                     type="text"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     placeholder="Ex: Gratuit, 10€, Enfants: 5€"
                     value={formData.entranceFee || ""}
@@ -452,15 +477,18 @@ const AdminModal = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Site web
                   </label>
                   <input
                     type="url"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.website || ""}
                     onChange={(e) =>
@@ -472,15 +500,18 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Contact
                   </label>
                   <input
                     type="text"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     placeholder="Ex: +33 1 23 45 67 89"
                     value={formData.contactInfo || ""}
@@ -500,14 +531,17 @@ const AdminModal = ({
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Type d'hébergement *
                   </label>
                   <select
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.type}
                     onChange={(e) =>
@@ -522,7 +556,10 @@ const AdminModal = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Prix (€) *
                   </label>
                   <input
@@ -531,9 +568,9 @@ const AdminModal = ({
                     min="0"
                     step="0.01"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.price}
                     onChange={(e) =>
@@ -548,16 +585,19 @@ const AdminModal = ({
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Chambres
                   </label>
                   <input
                     type="number"
                     min="1"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.bedrooms || ""}
                     onChange={(e) =>
@@ -571,16 +611,19 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Salles de bain
                   </label>
                   <input
                     type="number"
                     min="1"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.bathrooms || ""}
                     onChange={(e) =>
@@ -594,7 +637,10 @@ const AdminModal = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Voyageurs max *
                   </label>
                   <input
@@ -602,9 +648,9 @@ const AdminModal = ({
                     required
                     min="1"
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.maxGuests}
                     onChange={(e) =>
@@ -630,19 +676,25 @@ const AdminModal = ({
                       }))
                     }
                   />
-                  <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>
+                  <span
+                    className="ml-2 text-sm"
+                    style={{ color: COLORS.smallText }}
+                  >
                     Réservation instantanée
                   </span>
                 </label>
                 <div>
-                  <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+                  <label
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: COLORS.secondaryText }}
+                  >
                     Politique d'annulation
                   </label>
                   <select
                     className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                    style={{ 
+                    style={{
                       borderColor: COLORS.separator,
-                      color: COLORS.smallText
+                      color: COLORS.smallText,
                     }}
                     value={formData.cancellationPolicy}
                     onChange={(e) =>
@@ -662,10 +714,16 @@ const AdminModal = ({
           )}
 
           <div>
-            <label className="block text-sm font-semibold mb-4" style={{ color: COLORS.secondaryText }}>
+            <label
+              className="block text-sm font-semibold mb-4"
+              style={{ color: COLORS.secondaryText }}
+            >
               Images {uploading && "(Upload en cours...)"}
             </label>
-            <div className="border-2 border-dashed rounded-xl p-6 text-center mb-4" style={{ borderColor: COLORS.separator }}>
+            <div
+              className="border-2 border-dashed rounded-xl p-6 text-center mb-4"
+              style={{ borderColor: COLORS.separator }}
+            >
               <input
                 type="file"
                 ref={fileInputRef}
@@ -727,16 +785,19 @@ const AdminModal = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: COLORS.secondaryText }}
+              >
                 Titre *
               </label>
               <input
                 type="text"
                 required
                 className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                style={{ 
+                style={{
                   borderColor: COLORS.separator,
-                  color: COLORS.smallText
+                  color: COLORS.smallText,
                 }}
                 value={formData.title}
                 onChange={(e) =>
@@ -745,16 +806,19 @@ const AdminModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: COLORS.secondaryText }}
+              >
                 Ville *
               </label>
               <input
                 type="text"
                 required
                 className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                style={{ 
+                style={{
                   borderColor: COLORS.separator,
-                  color: COLORS.smallText
+                  color: COLORS.smallText,
                 }}
                 value={formData.city}
                 onChange={(e) =>
@@ -765,15 +829,18 @@ const AdminModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: COLORS.secondaryText }}
+            >
               Description
             </label>
             <textarea
               rows={3}
               className="w-full p-3 border-2 rounded-xl focus:ring-2"
-              style={{ 
+              style={{
                 borderColor: COLORS.separator,
-                color: COLORS.smallText
+                color: COLORS.smallText,
               }}
               value={formData.description}
               onChange={(e) =>
@@ -787,7 +854,10 @@ const AdminModal = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: COLORS.secondaryText }}
+              >
                 Note
               </label>
               <input
@@ -796,9 +866,9 @@ const AdminModal = ({
                 max="5"
                 step="0.1"
                 className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                style={{ 
+                style={{
                   borderColor: COLORS.separator,
-                  color: COLORS.smallText
+                  color: COLORS.smallText,
                 }}
                 value={formData.rating}
                 onChange={(e) =>
@@ -810,16 +880,19 @@ const AdminModal = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: COLORS.secondaryText }}
+              >
                 Nombre d'avis
               </label>
               <input
                 type="number"
                 min="0"
                 className="w-full p-3 border-2 rounded-xl focus:ring-2"
-                style={{ 
+                style={{
                   borderColor: COLORS.separator,
-                  color: COLORS.smallText
+                  color: COLORS.smallText,
                 }}
                 value={formData.reviewCount}
                 onChange={(e) =>
@@ -833,7 +906,10 @@ const AdminModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2" style={{ color: COLORS.secondaryText }}>
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: COLORS.secondaryText }}
+            >
               Équipements
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -860,7 +936,10 @@ const AdminModal = ({
                       }
                     }}
                   />
-                  <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>
+                  <span
+                    className="ml-2 text-sm"
+                    style={{ color: COLORS.smallText }}
+                  >
                     {amenity.label}
                   </span>
                 </label>
@@ -881,7 +960,12 @@ const AdminModal = ({
                   }))
                 }
               />
-              <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>Disponible</span>
+              <span
+                className="ml-2 text-sm"
+                style={{ color: COLORS.smallText }}
+              >
+                Disponible
+              </span>
             </label>
             <label className="flex items-center">
               <input
@@ -895,7 +979,10 @@ const AdminModal = ({
                   }))
                 }
               />
-              <span className="ml-2 text-sm" style={{ color: COLORS.smallText }}>
+              <span
+                className="ml-2 text-sm"
+                style={{ color: COLORS.smallText }}
+              >
                 Mettre en vedette
               </span>
             </label>
@@ -915,7 +1002,16 @@ const AdminModal = ({
               className="flex-1 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300"
               style={{ backgroundColor: COLORS.primary }}
             >
-              {editingListing ? "Modifier" : "Créer"}
+              {submitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                  {editingListing ? "Modification..." : "Création..."}
+                </>
+              ) : editingListing ? (
+                "Modifier"
+              ) : (
+                "Créer"
+              )}
             </button>
           </div>
         </form>
@@ -925,7 +1021,7 @@ const AdminModal = ({
 };
 
 // Composant DetailModal séparé
-const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
+const DetailModal = ({ isOpen, onClose, selectedListing }) => {
   if (!isOpen || !selectedListing) return null;
 
   const isTouristicPlace = selectedListing.isTouristicPlace;
@@ -1131,18 +1227,7 @@ const DetailModal = ({ isOpen, onClose, selectedListing, onBook }) => {
             >
               Fermer
             </button>
-            {!isTouristicPlace && (
-              <button
-                onClick={() => {
-                  onClose();
-                  onBook(selectedListing);
-                }}
-                className="flex-1 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
-                style={{ backgroundColor: COLORS.primary }}
-              >
-                Réserver maintenant
-              </button>
-            )}
+  
           </div>
         </div>
       </div>
@@ -1760,16 +1845,7 @@ export default function TourismPage() {
     });
   };
 
-  const handleBooking = (listing) => {
-    setSelectedListing(listing);
-    setBookingForm((prev) => ({
-      ...prev,
-      listingId: listing.id,
-      guests: listing.maxGuests || 2,
-    }));
-    setShowBookingModal(true);
-  };
-
+ 
   const handleAdminSubmit = async (formData) => {
     try {
       console.log("📤 Envoi des données avec images:", formData);
@@ -3129,7 +3205,6 @@ export default function TourismPage() {
         isOpen={showDetailModal}
         onClose={handleCloseDetailModal}
         selectedListing={selectedListing}
-        onBook={handleBooking}
       />
 
       <ActivityDetailModal

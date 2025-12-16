@@ -38,6 +38,7 @@ import {
   User,
   Mail,
   AlertCircle,
+  Images,
 } from "lucide-react";
 import api from "@/lib/api";
 import AuthService from "@/services/authService";
@@ -453,6 +454,107 @@ const ModalConfirmationLoue = ({ isOpen, onClose, annonce, onConfirm }) => {
   );
 };
 
+// Modal pour visualiser les images
+const ModalGalerieImages = ({ isOpen, onClose, annonce }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  if (!isOpen || !annonce) return null;
+
+  const images = annonce.images && annonce.images.length > 0 
+    ? annonce.images 
+    : [];
+
+  if (images.length === 0) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Galerie d'images" size="lg">
+        <div className="flex flex-col items-center justify-center py-12">
+          <Images size={48} style={{ color: COLORS.SEPARATOR }} className="mb-4" />
+          <p style={{ color: COLORS.SECONDARY_TEXT }}>Aucune image disponible</p>
+        </div>
+      </Modal>
+    );
+  }
+
+  const goToPrevious = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Galerie d'images" size="lg">
+      <div className="space-y-4">
+        {/* Image principale */}
+        <div className="relative bg-gray-100 rounded-lg overflow-hidden" 
+             style={{ aspectRatio: "16/9" }}>
+          <img
+            src={images[currentImageIndex]}
+            alt={`${annonce.title} - Image ${currentImageIndex + 1}`}
+            className="w-full h-full object-cover"
+          />
+          
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={goToPrevious}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all"
+                title="Image précédente"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                onClick={goToNext}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all"
+                title="Image suivante"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
+
+          {/* Compteur d'images */}
+          <div className="absolute bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm">
+            {currentImageIndex + 1} / {images.length}
+          </div>
+        </div>
+
+        {/* Miniatures */}
+        {images.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {images.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                  currentImageIndex === index ? "border-blue-500" : "border-gray-300"
+                }`}
+                style={{
+                  borderColor: currentImageIndex === index ? COLORS.PRIMARY_DARK : COLORS.SEPARATOR
+                }}
+              >
+                <img
+                  src={image}
+                  alt={`Miniature ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Informations */}
+        <div className="text-sm" style={{ color: COLORS.SECONDARY_TEXT }}>
+          <p><strong>Propriété:</strong> {annonce.title}</p>
+          <p><strong>Localisation:</strong> {annonce.address}, {annonce.city}</p>
+          <p><strong>Nombre d'images:</strong> {images.length}</p>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const ListingsPage = () => {
   const [annonces, setAnnonces] = useState([]);
   const [filtres, setFiltres] = useState({
@@ -463,6 +565,7 @@ const ListingsPage = () => {
   const [showModalCreation, setShowModalCreation] = useState(false);
   const [showModalStatistiques, setShowModalStatistiques] = useState(false);
   const [showModalConfirmationLoue, setShowModalConfirmationLoue] = useState(false);
+  const [showModalGalerie, setShowModalGalerie] = useState(false);
   const [annonceSelectionnee, setAnnonceSelectionnee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -926,19 +1029,19 @@ const ListingsPage = () => {
                     <Badge
                       className={`${
                         STATUT_ANNONCE[annonce.status]?.color
-                      } text-xs`}
+                      } text-xs font-semibold px-3 py-1.5`}
                     >
                       {STATUT_ANNONCE[annonce.status]?.label}
                     </Badge>
                   </div>
-                  <div className="absolute top-2 right-2 flex gap-1 flex-wrap">
+                  <div className="absolute top-2 right-2 flex gap-2 flex-wrap max-w-[140px]">
                     {disponibilite.vente && (
                       <Badge
                         variant="secondary"
-                        className="text-xs"
+                        className="text-xs font-semibold px-2.5 py-1"
                         style={{ 
-                          backgroundColor: `${COLORS.LOGO}20`,
-                          color: COLORS.LOGO 
+                          backgroundColor: `${COLORS.LOGO}`,
+                          color: COLORS.LIGHT_BG 
                         }}
                       >
                         Vente
@@ -947,10 +1050,10 @@ const ListingsPage = () => {
                     {disponibilite.location && (
                       <Badge
                         variant="secondary"
-                        className="text-xs"
+                        className="text-xs font-semibold px-2.5 py-1"
                         style={{ 
-                          backgroundColor: `${COLORS.PRIMARY_DARK}20`,
-                          color: COLORS.PRIMARY_DARK 
+                          backgroundColor: `${COLORS.PRIMARY_DARK}`,
+                          color: COLORS.LIGHT_BG 
                         }}
                       >
                         Location
@@ -959,10 +1062,10 @@ const ListingsPage = () => {
                     {annonce.rentType === "saisonniere" && (
                       <Badge
                         variant="secondary"
-                        className="text-xs"
+                        className="text-xs font-semibold px-2.5 py-1"
                         style={{ 
-                          backgroundColor: "#7C3AED20",
-                          color: "#7C3AED" 
+                          backgroundColor: "#7C3AED",
+                          color: COLORS.LIGHT_BG 
                         }}
                       >
                         Saisonnière
@@ -971,10 +1074,10 @@ const ListingsPage = () => {
                     {annonce.isPSLA && (
                       <Badge
                         variant="secondary"
-                        className="text-xs"
+                        className="text-xs font-semibold px-2.5 py-1"
                         style={{ 
-                          backgroundColor: "#EA580C20",
-                          color: "#EA580C" 
+                          backgroundColor: "#EA580C",
+                          color: COLORS.LIGHT_BG 
                         }}
                       >
                         PSLA
@@ -983,10 +1086,10 @@ const ListingsPage = () => {
                     {annonce.isSHLMR && (
                       <Badge
                         variant="secondary"
-                        className="text-xs"
+                        className="text-xs font-semibold px-2.5 py-1"
                         style={{ 
-                          backgroundColor: "#4F46E520",
-                          color: "#4F46E5" 
+                          backgroundColor: "#4F46E5",
+                          color: COLORS.LIGHT_BG 
                         }}
                       >
                         SHLMR
@@ -1069,6 +1172,23 @@ const ListingsPage = () => {
 
                   {/* Actions - Boutons principaux */}
                   <div className="flex gap-2 mb-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setAnnonceSelectionnee(annonce);
+                        setShowModalGalerie(true);
+                      }}
+                      className="flex-1 p-2 h-8 sm:h-9"
+                      style={{ 
+                        borderColor: COLORS.SEPARATOR,
+                        color: COLORS.SECONDARY_TEXT 
+                      }}
+                      title="Galerie d'images"
+                    >
+                      <Images size={14} />
+                    </Button>
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -1254,6 +1374,15 @@ const ListingsPage = () => {
         mode={annonceSelectionnee ? "edit" : "create"}
         onSuccess={sauvegarderAnnonce}
         currentUser={user}
+      />
+
+      <ModalGalerieImages
+        isOpen={showModalGalerie}
+        onClose={() => {
+          setShowModalGalerie(false);
+          setAnnonceSelectionnee(null);
+        }}
+        annonce={annonceSelectionnee}
       />
 
       <ModalStatistiques
