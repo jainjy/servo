@@ -33,7 +33,8 @@ import {
   DollarSign,
   FileText,
   Calendar1,
-  Home
+  Home,
+  Trash2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
@@ -508,10 +509,12 @@ export default function MonComptePage() {
                     >
                       <Settings2 /> Demandes de services
                     </Button>
-                   <Button
+                    <Button
                       variant="outline"
                       className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
-                      onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
+                      onClick={() =>
+                        handleNavigation("/mon-compte/demandes-immobilier")
+                      }
                     >
                       <Home className="mr-2 h-4 w-4" />
                       Demandes immobilières
@@ -570,6 +573,27 @@ export default function MonComptePage() {
                         </div>
                       </>
                     )}
+                    <Separator className="bg-[#D3D3D3]" />
+                    <div className="pt-2 mt-4">
+                      <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                        <p className="text-xs text-red-600 font-semibold mb-3 flex items-center gap-2">
+                          <span className="w-2 h-2 bg-red-600 rounded-full" />
+                          ZONE DE DANGER
+                        </p>
+                        <p className="text-xs text-red-700 mb-3 leading-relaxed">
+                          La suppression de votre compte est permanente et irréversible. Toutes vos données seront supprimées.
+                        </p>
+                        <Button
+                          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 gap-2 transition-all duration-200 shadow-md hover:shadow-lg"
+                          onClick={() =>
+                            handleNavigation("/mon-compte/delete-account")
+                          }
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Supprimer définitivement mon compte
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

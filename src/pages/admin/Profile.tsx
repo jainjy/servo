@@ -17,6 +17,7 @@ import {
   EyeOff,
   Lock,
   Check,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ import { useAuth } from "@/hooks/useAuth";
 import UserService from "@/services/userService";
 import { toast } from "sonner";
 import {LocationPickerModal} from "@/components/location-picker-modal";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   id: string;
@@ -81,6 +83,7 @@ interface UserProfile {
 
 const ProfilePage = () => {
   const { user: authUser } = useAuth();
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -828,7 +831,7 @@ const ProfilePage = () => {
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">
-          <div className="grid">
+          <div className="grid gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -855,6 +858,37 @@ const ProfilePage = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Nouvelle section - Suppression de compte */}
+            {user.role=="professional"&&<Card className="border-red-200 bg-red-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-600">
+                  <Trash2 className="h-5 w-5" />
+                  Zone de danger
+                </CardTitle>
+                <CardDescription>
+                  Actions irréversibles concernant votre compte
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border border-red-200 rounded-lg bg-white">
+                  <h4 className="font-medium text-red-900 mb-2">
+                    Supprimer votre compte
+                  </h4>
+                  <p className="text-sm text-red-700 mb-4">
+                    La suppression de votre compte est permanente et irréversible. Toutes vos données, annonces et informations seront supprimées.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    onClick={() => navigate("/pro/delete-account")}
+                    className="gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Supprimer mon compte
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>}
           </div>
         </TabsContent>
       </Tabs>

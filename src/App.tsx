@@ -193,6 +193,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 // IMPORT DE LA NOUVELLE PAGE D'ACCOMPAGNEMENT
 import AccompagnementPage from "./pages/AccompagnementPage";
 import ConseilPage from "./pages/ConseilPage";
+import DeleteAccountPage from "./pages/DeleteAccountPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -278,9 +279,12 @@ const App = () => {
                     element={<ServicesPartnersPage />}
                   />
                   <Route path="/" element={<Index />} />
-                  
+
                   {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
-                  <Route path="/accompagnement" element={<AccompagnementPage />} />
+                  <Route
+                    path="/accompagnement"
+                    element={<AccompagnementPage />}
+                  />
                   <Route path="conseil" element={<ConseilPage />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/digitalisation" element={<Digitalisation />} />
@@ -310,7 +314,7 @@ const App = () => {
                   />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   <Route path="/services-ibr" element={<ServicesIBRPage />} />
-                  
+
                   {/* Section entreprise */}
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
@@ -417,7 +421,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-                  
+
                   {/* Routes Bâtiments */}
                   <Route path="/batiments" element={<BatimentsLayout />} />
                   <Route
@@ -440,7 +444,7 @@ const App = () => {
                     path="/formation-podcasts"
                     element={<BatimentsLayout />}
                   />
-                  
+
                   {/* Routes Partenaires */}
                   <Route path="/agences" element={<Agence />} />
                   <Route path="/constructeurs" element={<Constructeur />} />
@@ -487,6 +491,7 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
+
                   <Route path="/recherche" element={<Recherche />} />
                   <Route path="/achat/:id" element={<PropertyPage />} />
                   <Route path="/location/:id" element={<PropertyPage />} />
@@ -537,7 +542,7 @@ const App = () => {
                     path="/estimations"
                     element={<EstimationImmobilierPage />}
                   />
-                  
+
                   {/* Routes d'authentification */}
                   <Route path="/login" element={<LoginRoleSelectionPage />} />
                   <Route path="/login/professional" element={<ProLogin />} />
@@ -610,7 +615,7 @@ const App = () => {
                     path="/investir/:type"
                     element={<InvestissementDetail />}
                   />
-                  
+
                   {/* Section pro Routes */}
                   <Route
                     path="/pro"
@@ -692,8 +697,13 @@ const App = () => {
                       element={<ProReservations />}
                     />
                     <Route path="media" element={<AdminMedia />} />
+                    
+                    <Route
+                      path="delete-account"
+                      element={<DeleteAccountPage />}
+                    />
                   </Route>
-                  
+
                   {/* Section Mon Compte Routes */}
                   <Route
                     path="/mon-compte"
@@ -715,6 +725,10 @@ const App = () => {
                       element={<GestionLocationSaisonniere />}
                     />
                     <Route
+                      path="delete-account"
+                      element={<DeleteAccountPage />}
+                    />
+                    <Route
                       path="mes-reservations-cours"
                       element={<UserReservations />}
                     />
@@ -728,7 +742,7 @@ const App = () => {
                     />
                     <Route path="mes-commandes" element={<UserOrders />} />
                   </Route>
-                  
+
                   {/* Section Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
@@ -776,7 +790,7 @@ const App = () => {
                       element={<InvestmentDemandesPage />}
                     />
                   </Route>
-                  
+
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
@@ -784,7 +798,7 @@ const App = () => {
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                 </Routes>
-                
+
                 {/* Pop-up publicité globale */}
                 {user && user.role !== "admin" && (
                   <AdvertisementPopup refreshMinutes={3} />

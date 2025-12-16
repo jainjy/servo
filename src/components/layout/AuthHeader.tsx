@@ -824,14 +824,7 @@ export function AuthHeader() {
                         <User className="mr-2 h-4 w-4" />
                         Profil
                       </Link>
-                      <Link
-                        to="/admin/settings"
-                        className="flex items-center px-2 py-2 text-sm hover:bg-[#6B8E23]/10 rounded transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Settings className="mr-2 h-4 w-4" />
-                        Paramètres
-                      </Link>
+
                     </>
                   ) : (
                     <>
