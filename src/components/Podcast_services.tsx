@@ -225,9 +225,9 @@ const PodcastsEntreprise: React.FC = () => {
   // Test de débogage supplémentaire
   useEffect(() => {
     // console.log('📊 État actuel de videoEpisodes:', {
-      count: videoEpisodes.length,
-      videos: videoEpisodes
-    });
+    //   count: videoEpisodes.length,
+    //   videos: videoEpisodes
+    // });
   }, [videoEpisodes]);
 
   const handlePlayMedia = () => {
