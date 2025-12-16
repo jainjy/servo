@@ -193,6 +193,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 // IMPORT DE LA NOUVELLE PAGE D'ACCOMPAGNEMENT
 import AccompagnementPage from "./pages/AccompagnementPage";
 import ConseilPage from "./pages/ConseilPage";
+import AdminConseilPage from "./pages/AdminConseilPage";
+import UserConseilPage from "./pages/UserConseilPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
 const queryClient = new QueryClient();
 
@@ -719,6 +721,7 @@ const App = () => {
                     <Route path="demandes" element={<MesDemande />} />
                     <Route path="agenda" element={<AgendaPage />} />
                     <Route path="documents" element={<MesDocumentsPage />} />
+                    <Route path="conseil" element={<UserConseilPage />} />
                     <Route
                       path="locationSaisonniere"
                       element={<GestionLocationSaisonniere />}
@@ -750,6 +753,7 @@ const App = () => {
                     <Route path="listings" element={<Listings />} />
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
+                    <Route path="conseil" element={<AdminConseilPage />} />
                     <Route
                       path="demandeDroitFamille"
                       element={<DemandeDroitFamille />}

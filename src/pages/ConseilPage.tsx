@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   MessageCircle, Shield, Target, Users, TrendingUp, CheckCircle,
@@ -6,7 +6,7 @@ import {
   ArrowRight, Search, Filter, Clock, Star, MapPin, Phone, Mail,
   Calendar, ChevronRight, Users2, Building2, Scale, Brain, Rocket,
   GraduationCap, Globe, Target as TargetIcon, Shield as ShieldIcon,
-  Award as AwardIcon, ThumbsUp, X, Send
+  Award as AwardIcon, ThumbsUp, X, Send, AlertCircle, User, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,16 +14,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { conseilService } from "@/services/conseilService";
 
 // Palette de couleurs basée sur vos spécifications
 const colors = {
-  logo: "#556B2F",           // Olive green
-  primaryDark: "#6B8E23",    // Yellow-green
-  lightBg: "#FFFFF0",        // White
-  separator: "#D3D3D3",      // Light gray
-  secondaryText: "#8B4513",  // Saddle brown
-
-  // Couleurs supplémentaires
+  logo: "#556B2F",
+  primaryDark: "#6B8E23",
+  lightBg: "#FFFFF0",
+  separator: "#D3D3D3",
+  secondaryText: "#8B4513",
   primaryLight: "#8FBC8F",
   secondaryLight: "#A0522D",
   cardBg: "#FFFFFF",
@@ -36,7 +35,7 @@ const colors = {
 };
 
 // Animations
-const containerVariants: Variants = {
+const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -46,7 +45,7 @@ const containerVariants: Variants = {
   }
 };
 
-const itemVariants: Variants = {
+const itemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -58,7 +57,7 @@ const itemVariants: Variants = {
   }
 };
 
-const cardHoverVariants: Variants = {
+const cardHoverVariants = {
   initial: { y: 0, scale: 1 },
   hover: {
     y: -8,
@@ -70,7 +69,7 @@ const cardHoverVariants: Variants = {
   }
 };
 
-const modalVariants: Variants = {
+const modalVariants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: {
     opacity: 1,
@@ -139,6 +138,8 @@ const ConseilPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("tous");
   const [showMoreProcess, setShowMoreProcess] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userInfo, setUserInfo] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     nom: "",
@@ -148,8 +149,39 @@ const ConseilPage = () => {
     besoin: "",
     conseilType: "",
     budget: "",
-    message: ""
+    message: "",
+    expertId: null
   });
+
+  // Vérifier l'authentification au chargement
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem("auth-token");
+    setIsAuthenticated(!!token);
+    
+    if (token) {
+      try {
+        const response = await conseilService.getUserInfo();
+        if (response.success && response.data) {
+          setUserInfo(response.data);
+          
+          // Pré-remplir le formulaire avec les infos utilisateur
+          setFormData(prev => ({
+            ...prev,
+            nom: `${response.data.firstName || ''} ${response.data.lastName || ''}`.trim(),
+            email: response.data.email || '',
+            telephone: response.data.phone || '',
+            entreprise: response.data.companyName || response.data.commercialName || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Erreur chargement infos utilisateur:', error);
+      }
+    }
+  };
 
   // Statistiques avec animations
   const stats = [
@@ -159,7 +191,7 @@ const ConseilPage = () => {
     { value: "24h", label: "Réponse garantie", icon: Clock, color: colors.accentGold },
   ];
 
-  // Types de conseil disponibles
+  // Types de conseil disponibles (données par défaut)
   const conseilTypes: ConseilType[] = [
     {
       id: 1,
@@ -268,7 +300,7 @@ const ConseilPage = () => {
     }
   ];
 
-  // Conseillers experts
+  // Conseillers experts (données par défaut)
   const conseillers: Conseiller[] = [
     {
       id: 1,
@@ -467,40 +499,124 @@ const ConseilPage = () => {
     setSelectedConseiller(conseiller);
     setFormData(prev => ({
       ...prev,
-      message: `Bonjour ${conseiller.name},\n\nJe souhaiterais prendre rendez-vous pour discuter de votre expertise en "${conseiller.specialty}".`
+      message: `Bonjour ${conseiller.name},\n\nJe souhaiterais prendre rendez-vous pour discuter de votre expertise en "${conseiller.specialty}".`,
+      expertId: conseiller.id
     }));
     setShowContactModal(true);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleSubmitContact = (e: React.FormEvent) => {
+  const handleSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      // Valider les champs requis
+      if (!formData.nom || !formData.email || !formData.besoin || !formData.conseilType) {
+        toast.error("Veuillez remplir tous les champs obligatoires", {
+          description: "Nom, email, type de conseil et besoin sont requis"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Préparer les données pour l'API
+      const demandeData = {
+        conseilType: formData.conseilType,
+        besoin: formData.besoin,
+        budget: formData.budget || "surdevis",
+        message: formData.message || "",
+        nom: formData.nom,
+        email: formData.email,
+        telephone: formData.telephone,
+        entreprise: formData.entreprise,
+        expertId: formData.expertId
+      };
+
+      // Envoyer la demande via l'API
+      const response = await conseilService.sendDemandeConseil(demandeData);
+
+      if (response.success) {
+        // Réinitialiser le formulaire
+        setFormData({
+          nom: "",
+          email: "",
+          telephone: "",
+          entreprise: "",
+          besoin: "",
+          conseilType: "",
+          budget: "",
+          message: "",
+          expertId: null
+        });
+        
+        setSelectedConseiller(null);
+        setShowContactModal(false);
+        
+        toast.success("Demande envoyée avec succès !", {
+          description: response.message || "Un expert vous contactera dans les 24 heures."
+        });
+
+        // Rediriger vers la page des demandes si connecté
+        if (isAuthenticated) {
+          setTimeout(() => {
+            // Pour React, on peut utiliser window.location ou un router client-side
+            window.location.href = '/conseil';
+          }, 2000);
+        }
+      } else {
+        throw new Error(response.error || "Erreur lors de l'envoi");
+      }
+    } catch (error: any) {
+      console.error('Erreur envoi demande:', error);
+      
+      if (error.message?.includes('Non authentifié') || error.response?.status === 401) {
+        toast.error("Connexion requise", {
+          description: "Veuillez vous connecter pour envoyer une demande de conseil",
+          action: {
+            label: "Se connecter",
+            onClick: () => {
+              window.location.href = '/login?redirect=/conseil';
+            }
+          }
+        });
+      } else {
+        toast.error("Erreur lors de l'envoi", {
+          description: error.message || "Une erreur est survenue. Veuillez réessayer."
+        });
+      }
+    } finally {
       setIsLoading(false);
-      setShowContactModal(false);
-      toast.success("Votre demande de conseil a été envoyée !", {
-        description: "Un expert vous contactera dans les 24 heures."
+    }
+  };
+
+  const handleOpenContactModal = () => {
+    if (!isAuthenticated) {
+      toast.info("Connexion recommandée", {
+        description: "Pour un meilleur suivi, nous vous recommandons de vous connecter",
+        action: {
+          label: "Se connecter",
+          onClick: () => {
+            window.location.href = '/login?redirect=/conseil';
+          }
+        },
+        duration: 5000
       });
-      setFormData({
-        nom: "",
-        email: "",
-        telephone: "",
-        entreprise: "",
-        besoin: "",
-        conseilType: "",
-        budget: "",
-        message: ""
-      });
-      setSelectedConseiller(null);
-    }, 2000);
+    }
+    setShowContactModal(true);
+  };
+
+  // Fonction pour gérer la navigation
+  const navigateToLogin = () => {
+    setShowContactModal(false);
+    window.location.href = '/login?redirect=/conseil';
   };
 
   return (
@@ -540,7 +656,7 @@ const ConseilPage = () => {
             {[
               { value: "150+", label: "Audits réalisés" },
               { value: "98%", label: "Clients satisfaits" },
-              { value: "12 ans", label: "d’expertise" },
+              { value: "12 ans", label: "d'expertise" },
               { value: "300+", label: "Conseils délivrés" },
             ].map((s, i) => (
               <div
@@ -555,16 +671,21 @@ const ConseilPage = () => {
 
           {/* Buttons */}
           <div className="flex flex-wrap justify-center gap-3">
-            <button className="px-6 py-2.5 rounded-xl bg-logo hover:bg-logo/80 font-semibold text-sm">
+            <button 
+              className="px-6 py-2.5 rounded-xl bg-logo hover:bg-logo/80 font-semibold text-sm"
+              onClick={() => document.getElementById('types-conseil')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               Découvrir nos conseils
             </button>
-            <button className="px-6 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-semibold text-sm">
+            <button 
+              className="px-6 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-semibold text-sm"
+              onClick={handleOpenContactModal}
+            >
               Demander un conseil
             </button>
           </div>
         </div>
       </section>
-
 
       {/* Section Notre Processus améliorée */}
       <motion.section
@@ -876,6 +997,7 @@ const ConseilPage = () => {
                             e.currentTarget.style.backgroundColor = 'transparent';
                           }
                         }}
+                        onClick={() => handleTypeSelect(type)}
                       >
                         <span className="relative z-10">
                           {selectedType === type.id ? "✓ Sélectionné" : "Choisir ce conseil"}
@@ -1372,7 +1494,7 @@ const ConseilPage = () => {
                     e.currentTarget.style.backgroundColor = colors.primaryDark;
                     e.currentTarget.style.borderColor = colors.primaryDark;
                   }}
-                  onClick={() => setShowContactModal(true)}
+                  onClick={handleOpenContactModal}
                 >
                   <Calendar className="h-5 w-5 mr-3 relative z-10" />
                   <span className="relative z-10">Demander un conseil personnalisé</span>
@@ -1489,17 +1611,45 @@ const ConseilPage = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* En-tête du modal */}
+            {/* En-tête du modal avec info connexion */}
             <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
-                  {selectedConseiller
-                    ? `Contacter ${selectedConseiller.name}`
-                    : "Demande de conseil"}
-                </h2>
-                <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
+                    {selectedConseiller
+                      ? `Contacter ${selectedConseiller.name}`
+                      : "Demande de conseil"}
+                  </h2>
+                  {!isAuthenticated && (
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs"
+                      style={{ backgroundColor: `${colors.warning}15`, color: colors.warning }}>
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Non connecté</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm" style={{ color: colors.textSecondary }}>
                   Un expert vous répondra sous 24h
                 </p>
+                
+                {/* Lien connexion pour non connectés */}
+                {!isAuthenticated && (
+                  <div className="mt-2 p-2 rounded-lg text-xs"
+                    style={{ backgroundColor: `${colors.primaryDark}08` }}>
+                    <p className="flex items-center gap-1" style={{ color: colors.textSecondary }}>
+                      <User className="h-3 w-3" />
+                      <span>Pour un meilleur suivi, </span>
+                      <button
+                        type="button"
+                        className="font-semibold hover:underline focus:outline-none"
+                        style={{ color: colors.primaryDark }}
+                        onClick={navigateToLogin}
+                      >
+                        connectez-vous
+                      </button>
+                    </p>
+                  </div>
+                )}
               </div>
               <Button
                 variant="ghost"
@@ -1529,10 +1679,11 @@ const ConseilPage = () => {
                     value={formData.nom}
                     onChange={handleInputChange}
                     required
+                    disabled={isAuthenticated && userInfo?.firstName}
                     className="w-full rounded-xl transition-all duration-300"
                     style={{
                       borderColor: colors.separator,
-                      backgroundColor: colors.cardBg
+                      backgroundColor: isAuthenticated && userInfo?.firstName ? `${colors.separator}15` : colors.cardBg
                     }}
                     placeholder="Votre nom"
                     onFocus={(e) => {
@@ -1544,6 +1695,11 @@ const ConseilPage = () => {
                       e.target.style.boxShadow = 'none';
                     }}
                   />
+                  {isAuthenticated && userInfo?.firstName && (
+                    <p className="text-xs mt-1" style={{ color: colors.textSecondary }}>
+                      Pré-rempli depuis votre profil
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: colors.textPrimary }}>
@@ -1555,10 +1711,11 @@ const ConseilPage = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
+                    disabled={isAuthenticated && userInfo?.email}
                     className="w-full rounded-xl transition-all duration-300"
                     style={{
                       borderColor: colors.separator,
-                      backgroundColor: colors.cardBg
+                      backgroundColor: isAuthenticated && userInfo?.email ? `${colors.separator}15` : colors.cardBg
                     }}
                     placeholder="votre@email.com"
                     onFocus={(e) => {
@@ -1582,10 +1739,11 @@ const ConseilPage = () => {
                   value={formData.telephone}
                   onChange={handleInputChange}
                   required
+                  disabled={isAuthenticated && userInfo?.phone}
                   className="w-full rounded-xl transition-all duration-300"
                   style={{
                     borderColor: colors.separator,
-                    backgroundColor: colors.cardBg
+                    backgroundColor: isAuthenticated && userInfo?.phone ? `${colors.separator}15` : colors.cardBg
                   }}
                   placeholder="Votre numéro"
                   onFocus={(e) => {
@@ -1607,10 +1765,11 @@ const ConseilPage = () => {
                   name="entreprise"
                   value={formData.entreprise}
                   onChange={handleInputChange}
+                  disabled={isAuthenticated && userInfo?.companyName}
                   className="w-full rounded-xl transition-all duration-300"
                   style={{
                     borderColor: colors.separator,
-                    backgroundColor: colors.cardBg
+                    backgroundColor: isAuthenticated && userInfo?.companyName ? `${colors.separator}15` : colors.cardBg
                   }}
                   placeholder="Nom de votre entreprise"
                   onFocus={(e) => {
@@ -1626,11 +1785,12 @@ const ConseilPage = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: colors.textPrimary }}>
-                  Type de conseil recherché
+                  Type de conseil recherché *
                 </label>
                 <Select
                   value={formData.conseilType}
                   onValueChange={(value) => setFormData({ ...formData, conseilType: value })}
+                  required
                 >
                   <SelectTrigger className="w-full rounded-xl transition-all duration-300"
                     style={{
@@ -1729,6 +1889,37 @@ const ConseilPage = () => {
                 />
               </div>
 
+              {/* Indicateur d'expert sélectionné */}
+              {selectedConseiller && (
+                <div className="p-3 rounded-lg flex items-center gap-3"
+                  style={{ backgroundColor: `${colors.primaryDark}08` }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                    style={{ backgroundColor: selectedConseiller.avatarColor }}>
+                    {selectedConseiller.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                      Demande adressée à {selectedConseiller.name}
+                    </p>
+                    <p className="text-xs" style={{ color: colors.textSecondary }}>
+                      {selectedConseiller.title}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedConseiller(null);
+                      setFormData(prev => ({ ...prev, expertId: null }));
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full font-semibold gap-2 border-2 transition-all duration-300 py-4 rounded-xl relative overflow-hidden group/submit"
@@ -1750,25 +1941,15 @@ const ConseilPage = () => {
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                      className="w-5 h-5 border-2 rounded-full mr-2"
-                      style={{
-                        borderColor: colors.lightBg,
-                        borderTopColor: 'transparent'
-                      }}
-                    />
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Envoi en cours...
                   </div>
                 ) : (
                   <>
                     <Send className="h-4 w-4 relative z-10" />
-                    <span className="relative z-10">ENVOYER MA DEMANDE</span>
+                    <span className="relative z-10">
+                      {isAuthenticated ? 'ENVOYER MA DEMANDE' : 'ENVOYER SANS CONNEXION'}
+                    </span>
                     <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover/submit:translate-x-[100%] transition-transform duration-700" />
                   </>
                 )}
@@ -1779,6 +1960,11 @@ const ConseilPage = () => {
                 <p className="text-xs" style={{ color: colors.textSecondary }}>
                   Vos informations sont traitées de manière confidentielle et ne seront jamais partagées sans votre consentement.
                 </p>
+                {!isAuthenticated && (
+                  <p className="text-xs mt-2" style={{ color: colors.textSecondary }}>
+                    Vous pourrez suivre votre demande en vous connectant ultérieurement.
+                  </p>
+                )}
               </div>
             </form>
           </motion.div>
