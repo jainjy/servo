@@ -39,6 +39,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
+import { AdCard } from "./Publicite";
 
 // Données locales de fallback
 const localRentProperties = [
@@ -134,7 +135,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   onFilter,
 }) => {
   const navigate = useNavigate();
-  
+
   // Initialisation du tracking
   const {
     trackPropertyView,
@@ -155,15 +156,15 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
   const [extras, setExtras] = useState<string | undefined>(undefined);
   const [typeBienLocation, setTypeBienLocation] = useState<string | undefined>(undefined);
   const [localisation, setLocalisation] = useState("");
-  
+
   // État pour le filtre de rayon - TOUJOURS VISIBLE
   const [radiusKm, setRadiusKm] = useState(5);
   const [radiusFilterEnabled, setRadiusFilterEnabled] = useState(false);
-  
+
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  
+
   // État pour le type de location
   const [rentType, setRentType] = useState<"longue_duree" | "saisonniere">("longue_duree");
 
@@ -189,11 +190,11 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
       Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }, []);
 
@@ -262,7 +263,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       setError(null);
       const response = await api.get("/properties");
       if (!response.data) throw new Error("Erreur lors de la récupération des propriétés");
-      
+
       const properties = response.data.map((p: any) => ({
         ...p,
         latitude: Number(p.latitude),
@@ -270,9 +271,9 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       }));
 
       const forRent = properties
-        .filter((p: any) => 
-          p.status === "for_rent" && 
-          p.isActive && 
+        .filter((p: any) =>
+          p.status === "for_rent" &&
+          p.isActive &&
           p.rentType === rentType
         )
         .map((p: any, i: number) => ({
@@ -369,7 +370,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       // Recherche générale
       if (searchQuery && searchQuery.trim()) {
         const searchTerm = searchQuery.toLowerCase();
-        const matchesGeneral = 
+        const matchesGeneral =
           (p.title || "").toLowerCase().includes(searchTerm) ||
           (p.description || "").toLowerCase().includes(searchTerm) ||
           (p.city || "").toLowerCase().includes(searchTerm) ||
@@ -525,7 +526,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 className="pl-12 h-12 text-lg border-gray-300 focus:border-[#556B2F] focus:ring-[#556B2F]"
               />
             </div>
-            
+
             {/* Bouton filtres mobile */}
             <div className="lg:hidden mb-4">
               <Button
@@ -557,7 +558,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {/* Localisation */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -574,7 +575,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   />
                 </div>
               </div>
-              
+
               {/* Budget */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -590,7 +591,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   />
                 </div>
               </div>
-              
+
               {/* REMPLACEMENT: Recherche par rayon à la place du bouton Recherche */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -607,7 +608,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                     {radiusFilterEnabled ? "ON" : "OFF"}
                   </Button>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Navigation className="h-4 w-4 text-[#556B2F]" />
@@ -615,7 +616,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                     </span>
                   </div>
-                  
+
                   <Slider
                     value={[radiusKm]}
                     min={0}
@@ -624,7 +625,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                     onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                     className="w-full"
                   />
-                  
+
                   <div className="flex gap-1">
                     {[5, 10, 15, 20].map((value) => (
                       <Button
@@ -642,7 +643,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Bouton réinitialiser */}
             {activeFiltersCount > 0 && (
               <div className="mt-4 flex justify-end">
@@ -688,7 +689,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 <p className="text-gray-600">
                   Essayez de modifier vos critères de recherche
                 </p>
-                <Button 
+                <Button
                   onClick={handleResetFilters}
                   variant="outline"
                   className="mt-4"
@@ -750,14 +751,14 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                                 {property.type}
                               </span>
                             </div>
-                            
+
                             <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                               <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                 {rentType === "saisonniere" ? "SAISONNIÈRE" : "À LOUER"}
                               </span>
                               {distanceInfo}
                             </div>
-                            
+
                             {totalImages > 1 && (
                               <>
                                 <Button
@@ -788,7 +789,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="p-4">
                             <div className="mb-3">
                               <h3 className="font-bold text-[#8B4513] text-base mb-2 line-clamp-2 leading-snug">
@@ -799,7 +800,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                                 <span>{property.city}</span>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center gap-4 text-sm text-gray-700 mb-4">
                               {property.surface && (
                                 <div className="flex items-center gap-1.5">
@@ -820,7 +821,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                                 </div>
                               )}
                             </div>
-                            
+
                             {featuresArr.length > 0 && (
                               <div className="flex flex-wrap gap-2 mb-4">
                                 {featuresArr.slice(0, 3).map((feature, index) => (
@@ -834,7 +835,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                                 ))}
                               </div>
                             )}
-                            
+
                             <div className="flex gap-3">
                               <Button
                                 className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
@@ -892,7 +893,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       <X className="h-5 w-5" />
                     </Button>
                   </div>
-                  
+
                   <div className="p-4 space-y-6">
                     {/* Filtres mobiles */}
                     <div>
@@ -916,7 +917,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium text-gray-900">Recherche par rayon</p>
@@ -925,18 +926,16 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           <button
                             type="button"
                             onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                              radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
-                            }`}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
+                              }`}
                           >
                             <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
-                              }`}
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
+                                }`}
                             />
                           </button>
                         </div>
-                        
+
                         {radiusFilterEnabled && (
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
@@ -944,7 +943,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                                 Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                               </span>
                             </div>
-                            
+
                             <input
                               type="range"
                               min="0"
@@ -953,7 +952,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                               onChange={(e) => setRadiusKm(parseInt(e.target.value))}
                               className="w-full h-2 bg-gray-200 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#556B2F]"
                             />
-                            
+
                             <div className="flex gap-2">
                               {[5, 10, 15, 20, 30].map((value) => (
                                 <Button
@@ -972,7 +971,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Autres filtres mobiles */}
                     <div className="space-y-4">
                       <div>
@@ -988,7 +987,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium text-gray-900 mb-3">Budget ({rentType === "saisonniere" ? "€/semaine" : "€/mois"})</h4>
                         <div className="relative">
@@ -999,7 +998,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           />
                         </div>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium text-gray-900 mb-3">Surface (m²)</h4>
                         <div className="grid grid-cols-2 gap-4">
@@ -1019,13 +1018,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium text-gray-900 mb-3">Caractéristiques</h4>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Select 
-                              value={chambres?.toString()} 
+                            <Select
+                              value={chambres?.toString()}
                               onValueChange={(v) => setChambres(v ? parseInt(v) : undefined)}
                             >
                               <SelectTrigger>
@@ -1039,8 +1038,8 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                             </Select>
                           </div>
                           <div>
-                            <Select 
-                              value={pieces?.toString()} 
+                            <Select
+                              value={pieces?.toString()}
                               onValueChange={(v) => setPieces(v ? parseInt(v) : undefined)}
                             >
                               <SelectTrigger>
@@ -1056,7 +1055,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="sticky bottom-0 bg-white pt-4 border-t">
                       <Button
                         onClick={() => {
@@ -1067,7 +1066,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       >
                         Appliquer les filtres
                       </Button>
-                      
+
                       {activeFiltersCount > 0 && (
                         <Button
                           variant="outline"
@@ -1096,7 +1095,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           onSuccess={(id: string) => setSentRequests((prev) => ({ ...prev, [id]: true }))}
           onPropertyContact={handlePropertyContact}
         />
-        
+
         <LocationPickerModal
           open={isLocationModalOpen}
           onClose={() => setIsLocationModalOpen(false)}
@@ -1125,13 +1124,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
       {/* Hero Section avec margin-top */}
       <div className="mt-20 relative">
         <div className="fixed -z-10 overflow-hidden bg-black w-full h-96 top-0">
-          <img 
+          <img
             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80"
-            className="opacity-45 object-cover w-full h-full" 
-            alt="Background location" 
+            className="opacity-45 object-cover w-full h-full"
+            alt="Background location"
           />
         </div>
-        
+
         <div className="pt-2 w-11/12 mx-auto flex flex-col">
           <span className="text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold">
             Locations Immobilières
@@ -1141,7 +1140,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           </span>
         </div>
       </div>
-      
+
       <section className="container mx-auto px-4 mt-8">
         <div className="space-y-6">
           {/* Barre de recherche principale */}
@@ -1156,17 +1155,16 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 className="pl-12 h-14 text-lg border-gray-300 focus:border-[#556B2F] focus:ring-[#556B2F] rounded-xl"
               />
             </div>
-            
+
             {/* Boutons de sélection du type de location */}
             <div className="flex justify-center gap-4 mb-6">
               <Button
                 onClick={() => setRentType("longue_duree")}
                 variant={rentType === "longue_duree" ? "default" : "outline"}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold ${
-                  rentType === "longue_duree"
-                    ? "bg-[#556B2F] text-white hover:bg-[#6B8E23]"
-                    : "border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
-                }`}
+                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold ${rentType === "longue_duree"
+                  ? "bg-[#556B2F] text-white hover:bg-[#6B8E23]"
+                  : "border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
+                  }`}
               >
                 <Home className="h-5 w-5" />
                 <span>Location Longue Durée</span>
@@ -1175,17 +1173,16 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               <Button
                 onClick={() => setRentType("saisonniere")}
                 variant={rentType === "saisonniere" ? "default" : "outline"}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold ${
-                  rentType === "saisonniere"
-                    ? "bg-[#556B2F] text-white hover:bg-[#6B8E23]"
-                    : "border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
-                }`}
+                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold ${rentType === "saisonniere"
+                  ? "bg-[#556B2F] text-white hover:bg-[#6B8E23]"
+                  : "border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/10"
+                  }`}
               >
                 <Calendar className="h-5 w-5" />
                 <span>Location Saisonnière</span>
               </Button>
             </div>
-            
+
             {/* Bouton filtres mobile */}
             <div className="lg:hidden mb-4">
               <Button
@@ -1197,7 +1194,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 Filtres avancés {activeFiltersCount > 0 && `(${activeFiltersCount})`}
               </Button>
             </div>
-            
+
             {/* Grille de filtres desktop - REMPLACEMENT DU BOUTON RECHERCHE PAR RAYON */}
             <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-4">
               {/* Type de bien */}
@@ -1237,7 +1234,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {/* Localisation */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1254,7 +1251,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 </div>
               </div>
-              
+
               {/* Budget */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -1272,7 +1269,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   </span>
                 </div>
               </div>
-              
+
               {/* REMPLACEMENT: Recherche par rayon à la place du bouton Recherche */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -1282,18 +1279,16 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   <button
                     type="button"
                     onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${
-                      radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-300'
-                    }`}
+                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-300'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                        radiusFilterEnabled ? 'translate-x-8' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-8' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Navigation className="h-4 w-4 text-[#556B2F]" />
@@ -1301,7 +1296,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                     </span>
                   </div>
-                  
+
                   <Slider
                     value={[radiusKm]}
                     min={0}
@@ -1310,7 +1305,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                     onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                     className="w-full"
                   />
-                  
+
                   <div className="flex gap-1">
                     {[5, 10, 15, 20, 30].map((value) => (
                       <Button
@@ -1328,7 +1323,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Filtres avancés (non-rayon) - Desktop */}
             <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div>
@@ -1356,13 +1351,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Chambres
                 </label>
-                <Select 
-                  value={chambres?.toString()} 
+                <Select
+                  value={chambres?.toString()}
                   onValueChange={(v) => setChambres(v ? parseInt(v) : undefined)}
                 >
                   <SelectTrigger className="h-12">
@@ -1377,13 +1372,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Pièces
                 </label>
-                <Select 
-                  value={pieces?.toString()} 
+                <Select
+                  value={pieces?.toString()}
                   onValueChange={(v) => setPieces(v ? parseInt(v) : undefined)}
                 >
                   <SelectTrigger className="h-12">
@@ -1398,7 +1393,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 </Select>
               </div>
             </div>
-            
+
             {/* Bouton réinitialiser */}
             {activeFiltersCount > 0 && (
               <div className="mt-4 flex justify-end">
@@ -1413,7 +1408,14 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
               </div>
             )}
           </div>
-          
+
+          <AdCard
+            mediaType="image"
+            imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+            title="Découvrez notre nouvelle offre"
+            description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+          />
+
           {/* Résultats */}
           <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">
@@ -1447,7 +1449,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                 <p className="text-gray-600 max-w-md mx-auto mb-6">
                   Essayez de modifier vos critères de recherche ou contactez-nous pour une recherche personnalisée.
                 </p>
-                <Button 
+                <Button
                   onClick={handleResetFilters}
                   className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                 >
@@ -1506,14 +1508,14 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
 
                             {/* Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                            
+
                             {/* Badges */}
                             <div className="absolute top-3 left-3">
                               <span className="bg-[#6B8E23] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                 {property.type}
                               </span>
                             </div>
-                            
+
                             <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                               <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                 {rentType === "saisonniere" ? "SAISONNIÈRE" : "À LOUER"}
@@ -1634,6 +1636,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
             )}
           </div>
         </div>
+
       </section>
 
       {/* Modal filtres mobile */}
@@ -1665,7 +1668,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
-                
+
                 <div className="p-4 space-y-6">
                   {/* Section Localisation et Rayon mobile */}
                   <div>
@@ -1689,7 +1692,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900">Recherche par rayon</p>
@@ -1698,25 +1701,23 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                         <button
                           type="button"
                           onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">
                             Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                           </span>
                         </div>
-                        
+
                         <Slider
                           value={[radiusKm]}
                           min={0}
@@ -1725,7 +1726,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                           className="w-full"
                         />
-                        
+
                         <div className="flex gap-2">
                           {[5, 10, 15, 20, 30].map((value) => (
                             <Button
@@ -1743,7 +1744,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Autres filtres mobiles */}
                   <div className="space-y-4">
                     <div>
@@ -1770,7 +1771,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-900 mb-3">
                         {rentType === "saisonniere" ? "Prix max (€/semaine)" : "Prix max (€/mois)"}
@@ -1783,7 +1784,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-900 mb-3">Surface (m²)</h4>
                       <div className="grid grid-cols-2 gap-4">
@@ -1803,13 +1804,13 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-900 mb-3">Caractéristiques</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Select 
-                            value={chambres?.toString()} 
+                          <Select
+                            value={chambres?.toString()}
                             onValueChange={(v) => setChambres(v ? parseInt(v) : undefined)}
                           >
                             <SelectTrigger>
@@ -1823,8 +1824,8 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                           </Select>
                         </div>
                         <div>
-                          <Select 
-                            value={pieces?.toString()} 
+                          <Select
+                            value={pieces?.toString()}
                             onValueChange={(v) => setPieces(v ? parseInt(v) : undefined)}
                           >
                             <SelectTrigger>
@@ -1840,7 +1841,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="sticky bottom-0 bg-white pt-4 border-t">
                     <Button
                       onClick={() => {
@@ -1851,7 +1852,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
                     >
                       Appliquer les filtres
                     </Button>
-                    
+
                     {activeFiltersCount > 0 && (
                       <Button
                         variant="outline"
@@ -1880,7 +1881,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
         onSuccess={(id: string) => setSentRequests((prev) => ({ ...prev, [id]: true }))}
         onPropertyContact={handlePropertyContact}
       />
-      
+
       <LocationPickerModal
         open={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
@@ -1898,6 +1899,12 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           price: p.price,
           status: p.status,
         }))}
+      />
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
       />
     </div>
   );

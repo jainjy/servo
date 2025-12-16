@@ -121,7 +121,7 @@ export default function BillingSection() {
   const handleDownloadInvoice = async (invoiceId) => {
     try {
       const response = await professionalBillingAPI.downloadInvoice(invoiceId);
-      console.log("Facture téléchargée:", response.data);
+      // console.log("Facture téléchargée:", response.data);
       toast({
         title: "Facture téléchargée",
         description: "Le PDF a été généré avec succès",

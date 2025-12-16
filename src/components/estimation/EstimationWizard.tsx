@@ -541,7 +541,7 @@ function EstimationWizard({
     setError(null);
 
     try {
-      console.log('📤 Envoi des données d\'estimation...', data);
+      // console.log('📤 Envoi des données d\'estimation...', data);
       const response = await estimationAPI.submitEstimation(data);
 
       if (response.data.success) {

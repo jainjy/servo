@@ -105,7 +105,7 @@ const PodcastsEntreprise: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        console.log('🔄 Début du chargement des vidéos Entreprise...');
+        // console.log('🔄 Début du chargement des vidéos Entreprise...');
 
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({
@@ -113,28 +113,28 @@ const PodcastsEntreprise: React.FC = () => {
           limit: 50
         });
 
-        console.log('📦 Réponse COMPLÈTE de l\'API:', response);
-        console.log('🔍 Structure de la réponse Axios:', {
-          data: response.data,
-          status: response.status,
-          statusText: response.statusText
-        });
+        // console.log('📦 Réponse COMPLÈTE de l\'API:', response);
+        // console.log('🔍 Structure de la réponse Axios:', {
+        //   data: response.data,
+        //   status: response.status,
+        //   statusText: response.statusText
+        // });
 
         // CORRECTION : Les données sont dans response.data (Axios)
         const apiData = response.data;
 
-        console.log('🔍 Structure des données API:', {
-          success: apiData.success,
-          hasData: !!apiData.data,
-          dataIsArray: Array.isArray(apiData.data),
-          dataLength: apiData.data?.length,
-          pagination: apiData.pagination
-        });
+        // console.log('🔍 Structure des données API:', {
+        //   success: apiData.success,
+        //   hasData: !!apiData.data,
+        //   dataIsArray: Array.isArray(apiData.data),
+        //   dataLength: apiData.data?.length,
+        //   pagination: apiData.pagination
+        // });
 
         if (apiData.success && Array.isArray(apiData.data)) {
-          console.log('✅ Structure de réponse valide');
-          console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
-          console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
+          // console.log('✅ Structure de réponse valide');
+          // console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
+          // console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
 
           const entrepriseVideos: VideoEpisode[] = apiData.data
             .filter((video: any) => {
@@ -142,28 +142,28 @@ const PodcastsEntreprise: React.FC = () => {
               const isActive = video.isActive !== false;
               const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
 
-              console.log('📋 Filtrage vidéo:', {
-                id: video.id,
-                title: video.title,
-                category: video.category,
-                isEntreprise: isEntreprise,
-                isActive: isActive,
-                hasVideoUrl: hasVideoUrl,
-                videoUrl: video.videoUrl
-              });
+              // console.log('📋 Filtrage vidéo:', {
+              //   id: video.id,
+              //   title: video.title,
+              //   category: video.category,
+              //   isEntreprise: isEntreprise,
+              //   isActive: isActive,
+              //   hasVideoUrl: hasVideoUrl,
+              //   videoUrl: video.videoUrl
+              // });
 
               const shouldInclude = isEntreprise && isActive && hasVideoUrl;
-              console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
+              // console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
 
               return shouldInclude;
             })
             .map((video: any, index: number) => {
-              console.log(`🔄 Mapping de la vidéo "${video.title}":`, {
-                id: video.id,
-                videoUrl: video.videoUrl,
-                thumbnailUrl: video.thumbnailUrl,
-                createdAt: video.createdAt
-              });
+              // console.log(`🔄 Mapping de la vidéo "${video.title}":`, {
+              //   id: video.id,
+              //   videoUrl: video.videoUrl,
+              //   thumbnailUrl: video.thumbnailUrl,
+              //   createdAt: video.createdAt
+              // });
 
               const mappedVideo = {
                 id: video.id,
@@ -181,19 +181,19 @@ const PodcastsEntreprise: React.FC = () => {
                 fileSize: video.fileSize || 0
               };
 
-              console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
+              // console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
               return mappedVideo;
             });
 
-          console.log('🎉 Vidéos Entreprise après filtrage:', entrepriseVideos.length);
-          console.log('📺 Liste complète des vidéos filtrées:', entrepriseVideos);
+          // console.log('🎉 Vidéos Entreprise après filtrage:', entrepriseVideos.length);
+          // console.log('📺 Liste complète des vidéos filtrées:', entrepriseVideos);
 
           setVideoEpisodes(entrepriseVideos);
 
-          if (entrepriseVideos.length === 0) {
-            console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
-            console.log('🔍 Contenu de apiData.data:', apiData.data);
-          }
+          // if (entrepriseVideos.length === 0) {
+          //   console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
+          //   console.log('🔍 Contenu de apiData.data:', apiData.data);
+          // }
 
         } else {
           console.warn('⚠️ Structure de réponse inattendue:', {
@@ -214,7 +214,7 @@ const PodcastsEntreprise: React.FC = () => {
         setError(err.message);
         setVideoEpisodes([]);
       } finally {
-        console.log('🏁 Chargement terminé');
+        // console.log('🏁 Chargement terminé');
         setLoading(false);
       }
     };
@@ -224,10 +224,10 @@ const PodcastsEntreprise: React.FC = () => {
 
   // Test de débogage supplémentaire
   useEffect(() => {
-    console.log('📊 État actuel de videoEpisodes:', {
-      count: videoEpisodes.length,
-      videos: videoEpisodes
-    });
+    // console.log('📊 État actuel de videoEpisodes:', {
+    //   count: videoEpisodes.length,
+    //   videos: videoEpisodes
+    // });
   }, [videoEpisodes]);
 
   const handlePlayMedia = () => {
@@ -283,7 +283,7 @@ const PodcastsEntreprise: React.FC = () => {
 
   // Composant de carte vidéo
   const VideoCard = ({ episode }: { episode: VideoEpisode }) => {
-    console.log('🎬 Rendu de VideoCard pour:', episode.title);
+    // console.log('🎬 Rendu de VideoCard pour:', episode.title);
     return (
       <div
         className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${episode.featured ? 'border-2 border-purple-600' : 'border-gray-200'
@@ -305,7 +305,7 @@ const PodcastsEntreprise: React.FC = () => {
               console.warn('❌ Erreur de chargement de l\'image:', episode.thumbnailUrl);
               e.currentTarget.src = defaultThumbnails[0];
             }}
-            onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
+            // onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
 
@@ -346,7 +346,7 @@ const PodcastsEntreprise: React.FC = () => {
             </div>
             <button
               onClick={() => {
-                console.log('🎯 Clic sur Regarder pour:', episode.title);
+                // console.log('🎯 Clic sur Regarder pour:', episode.title);
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
               }}
@@ -361,12 +361,12 @@ const PodcastsEntreprise: React.FC = () => {
     );
   };
 
-  console.log('📱 Rendu du composant principal:', {
-    loading,
-    error,
-    videoCount: videoEpisodes.length,
-    videos: videoEpisodes
-  });
+  // console.log('📱 Rendu du composant principal:', {
+  //   loading,
+  //   error,
+  //   videoCount: videoEpisodes.length,
+  //   videos: videoEpisodes
+  // });
 
   if (loading) {
     return ( 

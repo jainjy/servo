@@ -22,7 +22,7 @@ export function ArtProfessionalServicesStats() {
       try {
 
         const response = await api.get("/oeuvre/stats");
-        console.log("Données reçues :", response.data);
+        // console.log("Données reçues :", response.data);
 
         // Vérification que totalGlobal existe
         if (!response.data?.totalGlobal) {

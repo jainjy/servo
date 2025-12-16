@@ -33,7 +33,7 @@ export function BookingsStats() {
         const response = await api.get('/admin/bookings/stats')
         const data = response.data.data
         
-        console.log("Données réservations reçues:", data)
+        // console.log("Données réservations reçues:", data)
 
         // Adaptation des données selon la structure de votre API
         const processedData: BookingStatsData = {

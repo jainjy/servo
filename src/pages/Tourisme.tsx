@@ -200,13 +200,13 @@ export const TourismSection = () => {
     };
 
     setFilters(resetFilters);
-    console.log("🔄 Filtres complètement réinitialisés");
+    // console.log("🔄 Filtres complètement réinitialisés");
   };
 
   // Debug useEffect pour surveiller la synchronisation
   useEffect(() => {
-    console.log("🔍 État actuel - Listings:", listings.length);
-    console.log("🔍 État actuel - FilteredListings:", filteredListings.length);
+    // console.log("🔍 État actuel - Listings:", listings.length);
+    // console.log("🔍 État actuel - FilteredListings:", filteredListings.length);
 
     if (listings.length !== filteredListings.length) {
       console.warn("⚠️ INCOHÉRENCE DÉTECTÉE: listings != filteredListings");
@@ -220,7 +220,7 @@ export const TourismSection = () => {
     listings: TourismListing[],
     currentFilters: SearchFilters
   ) => {
-    console.log("🔍 ANALYSE DES FILTRES:");
+    // console.log("🔍 ANALYSE DES FILTRES:");
 
     let filteredCount = 0;
 
@@ -263,24 +263,24 @@ export const TourismSection = () => {
 
       if (isFiltered) {
         filteredCount++;
-        console.log(`❌ ${listing.title} est filtré car:`, {
-          destination: !matchesDestination,
-          type: !matchesType,
-          rating:
-            !matchesRating &&
-            `rating=${listing.rating} < filtre=${currentFilters.rating}`,
-          amenities: !matchesAmenities,
-          instantBook: !matchesInstantBook,
-          price:
-            !matchesPrice &&
-            `prix=${listing.price} hors [${currentFilters.minPrice}-${currentFilters.maxPrice}]`,
-          prixListing: listing.price,
-          prixMaxFiltre: currentFilters.maxPrice,
-        });
+        // console.log(`❌ ${listing.title} est filtré car:`, {
+        //   destination: !matchesDestination,
+        //   type: !matchesType,
+        //   rating:
+        //     !matchesRating &&
+        //     `rating=${listing.rating} < filtre=${currentFilters.rating}`,
+        //   amenities: !matchesAmenities,
+        //   instantBook: !matchesInstantBook,
+        //   price:
+        //     !matchesPrice &&
+        //     `prix=${listing.price} hors [${currentFilters.minPrice}-${currentFilters.maxPrice}]`,
+        //   prixListing: listing.price,
+        //   prixMaxFiltre: currentFilters.maxPrice,
+        // });
       }
     });
 
-    console.log(`📊 Total filtré: ${filteredCount}/${listings.length}`);
+    // console.log(`📊 Total filtré: ${filteredCount}/${listings.length}`);
   };
 
   // TRACKING: Chargement des hébergements
@@ -371,10 +371,10 @@ export const TourismSection = () => {
           resetAllFilters();
           setFilteredListings(accommodationsOnly);
 
-          console.log("✅ Hébergements chargés:", accommodationsOnly.length);
-          console.log(
-            "✅ Filtres réinitialisés - devrait montrer tous les hébergements"
-          );
+          // console.log("✅ Hébergements chargés:", accommodationsOnly.length);
+          // console.log(
+          //   "✅ Filtres réinitialisés - devrait montrer tous les hébergements"
+          // );
 
           const initialIndexes: { [key: string]: number } = {};
           accommodationsOnly.forEach((listing: TourismListing) => {
@@ -400,10 +400,10 @@ export const TourismSection = () => {
             setListings(accommodationsOnly);
             resetAllFilters();
             setFilteredListings(accommodationsOnly);
-            console.log(
-              "✅ Hébergements chargés (fallback):",
-              accommodationsOnly.length
-            );
+            // console.log(
+            //   "✅ Hébergements chargés (fallback):",
+            //   accommodationsOnly.length
+            // );
           }
         } catch (fallbackError) {
           console.error("Erreur fallback:", fallbackError);
@@ -420,8 +420,8 @@ export const TourismSection = () => {
   useEffect(() => {
     let results = listings;
 
-    console.log("🎯 DÉBUT FILTRAGE - Filtres actuels:", filters);
-    console.log("🎯 Listings avant filtrage:", listings.length);
+    // console.log("🎯 DÉBUT FILTRAGE - Filtres actuels:", filters);
+    // console.log("🎯 Listings avant filtrage:", listings.length);
 
     if (filters.destination) {
       results = results.filter(
@@ -433,19 +433,19 @@ export const TourismSection = () => {
             .toLowerCase()
             .includes(filters.destination.toLowerCase())
       );
-      console.log("🎯 Après filtre destination:", results.length);
+      // console.log("🎯 Après filtre destination:", results.length);
     }
 
     if (filters.type.length > 0) {
       results = results.filter((listing) =>
         filters.type.includes(listing.type)
       );
-      console.log("🎯 Après filtre type:", results.length);
+      // console.log("🎯 Après filtre type:", results.length);
     }
 
     if (filters.rating > 0) {
       results = results.filter((listing) => listing.rating >= filters.rating);
-      console.log("🎯 Après filtre rating:", results.length);
+      // console.log("🎯 Après filtre rating:", results.length);
     }
 
     if (filters.amenities.length > 0) {
@@ -454,27 +454,27 @@ export const TourismSection = () => {
           listing.amenities.includes(amenity)
         )
       );
-      console.log("🎯 Après filtre amenities:", results.length);
+      // console.log("🎯 Après filtre amenities:", results.length);
     }
 
     if (filters.instantBook) {
       results = results.filter((listing) => listing.instantBook ?? false);
-      console.log("🎯 Après filtre instantBook:", results.length);
+      // console.log("🎯 Après filtre instantBook:", results.length);
     }
 
     results = results.filter(
       (listing) =>
         listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
-    console.log("🎯 Après filtre prix:", results.length);
+    // console.log("🎯 Après filtre prix:", results.length);
 
     analyzeFiltering(listings, filters);
 
-    console.log("🔍 Filtrage appliqué:", {
-      total: listings.length,
-      filtrés: results.length,
-      filtres: filters,
-    });
+    // console.log("🔍 Filtrage appliqué:", {
+    //   total: listings.length,
+    //   filtrés: results.length,
+    //   filtres: filters,
+    // });
 
     setFilteredListings(results);
   }, [filters, listings]);
@@ -623,7 +623,7 @@ export const TourismSection = () => {
           await trackTourismInteraction(
             selectedListing.id,
             selectedListing.title,
-            "booking_confirmed",
+            booking_confirmed,
             {
               bookingId: response.data.data.id,
               totalAmount: response.data.data.totalAmount,

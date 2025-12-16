@@ -377,7 +377,7 @@ export default function SubscriptionPaymentPage() {
     );
   }
 
-  console.log("Données d'abonnement reçues :", subscriptionData);
+  // console.log("Données d'abonnement reçues :", subscriptionData);
 
   return (
     <Elements stripe={stripePromise}>

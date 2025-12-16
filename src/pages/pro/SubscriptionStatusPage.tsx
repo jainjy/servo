@@ -100,7 +100,7 @@ const SubscriptionStatusPage = () => {
     try {
       const response = await api.get("/auth/subscription/status");
       setSubscription(response.data);
-      console.log("data:",response.data,"plan:", response.data.plan,"planId:", response.data.planId);
+      // console.log("data:",response.data,"plan:", response.data.plan,"planId:", response.data.planId);
 
       if (response.data?.endDate) {
         const endDate = new Date(response.data.endDate);
@@ -158,7 +158,7 @@ const SubscriptionStatusPage = () => {
   };
 
   const handleUpgrade = (planId = null) => {
-    console.log("handleUpgrade called with planId:", planId);
+    // console.log("handleUpgrade called with planId:", planId);
     if (planId) {
       const selectedPlan = subscriptionPlans.find((plan) => plan.id == planId);
       if (selectedPlan) {

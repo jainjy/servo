@@ -59,7 +59,7 @@ export function ServicesCard() {
     const fetchServices = async () => {
         try {
             const response = await api.get('/harmonie/services')
-            console.log("Reponse du data : ", response.data)
+            // console.log("Reponse du data : ", response.data)
             setServices(response.data)
         } catch (error) {
             console.error('Erreur lors du chargement des services:', error)

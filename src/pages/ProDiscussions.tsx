@@ -259,7 +259,7 @@ export default function ProDiscussions() {
           },
         }
       );
-      console.log("Response envoyer devis:", response);
+      // console.log("Response envoyer devis:", response);
       toast.success("Devis envoyé avec succès");
       setShowDevisModal(false);
 
@@ -292,7 +292,7 @@ export default function ProDiscussions() {
           },
         }
       );
-      console.log("Response envoyer facture:", response);
+      // console.log("Response envoyer facture:", response);
 
       toast.success("Facture envoyée avec succès");
       setShowFactureModal(false);
@@ -354,7 +354,7 @@ export default function ProDiscussions() {
           },
         }
       );
-      console.log("Response modifier devis:", response);
+      // console.log("Response modifier devis:", response);
 
       toast.success("Devis modifié avec succès");
       setShowEditDevisModal(false);
@@ -577,7 +577,7 @@ export default function ProDiscussions() {
   const handleProposerRendezVous = () => {
     setShowActionsMenu(false);
     setShowRendezVousModal(true);
-    console.log(artisanDetails);
+    // console.log(artisanDetails);
   };
 
   const handleEnvoyerFacture = () => {
@@ -593,7 +593,7 @@ export default function ProDiscussions() {
   const handleAfficherActions = () => {
     setShowActionsMenu(false);
     setShowActionsPanel(true);
-    console.log(artisanDetails);
+    // console.log(artisanDetails);
   };
 
   const handleFileChange = (setFileFunction) => (event) => {

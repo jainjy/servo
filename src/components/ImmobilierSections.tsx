@@ -99,12 +99,12 @@ const ImmobilierSections = () => {
 
     // Mettre à jour les annonces après ajout
     const handleAddAnnonce = (newAnnonce: Annonce) => {
-        console.log("Nouvelle annonce ajoutée:", newAnnonce);
+        // console.log("Nouvelle annonce ajoutée:", newAnnonce);
         fetchAnnonces();
     };
 
     const handleAddAudit = (newAudit: any) => {
-        console.log("Nouvel audit ajouté:", newAudit);
+        // console.log("Nouvel audit ajouté:", newAudit);
         // Afficher un message de confirmation
         alert('Votre demande d\'audit a été soumise avec succès ! Notre équipe vous contactera sous 48h.');
     };

@@ -110,17 +110,17 @@ export function VendorsTable() {
   }
 
   const handleViewProfile = (vendor: (typeof vendors)[0]) => {
-    console.log("Voir le profil:", vendor)
+    // console.log("Voir le profil:", vendor)
     // Implémentez la logique de visualisation du profil ici
   }
 
   const handleApproveKYC = (vendor: (typeof vendors)[0]) => {
-    console.log("Approuver KYC:", vendor)
+    // console.log("Approuver KYC:", vendor)
     // Implémentez la logique d'approbation KYC ici
   }
 
   const handleRejectKYC = (vendor: (typeof vendors)[0]) => {
-    console.log("Rejeter KYC:", vendor)
+    // console.log("Rejeter KYC:", vendor)
     // Implémentez la logique de rejet KYC ici
   }
 

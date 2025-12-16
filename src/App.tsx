@@ -201,6 +201,7 @@ const ScrollToHash = () => {
   const { scrollToSection } = useSmoothScroll();
 
   useEffect(() => {
+    
     if (typeof window === "undefined") return;
 
     if (location.hash) {
@@ -218,8 +219,6 @@ const ScrollToHash = () => {
         }
       }, 50);
       return () => clearInterval(timer);
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [location.pathname, location.hash, scrollToSection]);
 
@@ -234,7 +233,6 @@ const App = () => {
     if (!user) {
       return;
     }
-    console.log("User ID for Socket Connection:", user.id);
   }, [user]);
 
   useEffect(() => {
@@ -269,8 +267,9 @@ const App = () => {
               {/* Intégration du GlobalTracking pour le tracking des pages */}
               <GlobalTracking />
 
-              <ScrollToHash />
               <ScrollToTop />
+              <ScrollToHash />
+              
               <Layout>
                 <Routes>
                   {/* Section publiques Routes */}

@@ -58,7 +58,7 @@ export default function DevisContent() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  console.log("Données du formulaire:", formData);
+                  // console.log("Données du formulaire:", formData);
                   // TODO: Envoyer les données à l'API
                   alert("Votre demande de devis a été envoyée avec succès!");
                   setFormData({

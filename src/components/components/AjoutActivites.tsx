@@ -54,7 +54,7 @@ const AjoutActivitesModal = ({
   // AJOUT: Initialiser le formulaire avec les données d'édition
   useEffect(() => {
     if (editingActivity && isOpen) {
-      console.log("📝 Initialisation avec activité à éditer:", editingActivity);
+      // console.log("📝 Initialisation avec activité à éditer:", editingActivity);
       
       setFormData({
         name: editingActivity.name || '',
@@ -103,22 +103,22 @@ const AjoutActivitesModal = ({
       submitData.append("isActive", formData.isActive.toString());
       submitData.append("sortOrder", formData.sortOrder.toString());
 
-      console.log("📋 Données à envoyer:", {
-        isEditing: !!editingActivity,
-        activityId: editingActivity?.id,
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        icon: formData.icon,
-        color: formData.color,
-        isActive: formData.isActive.toString(),
-        sortOrder: formData.sortOrder.toString(),
-        hasImage: !!formData.imageFile
-      });
+      // console.log("📋 Données à envoyer:", {
+      //   isEditing: !!editingActivity,
+      //   activityId: editingActivity?.id,
+      //   name: formData.name.trim(),
+      //   description: formData.description.trim(),
+      //   icon: formData.icon,
+      //   color: formData.color,
+      //   isActive: formData.isActive.toString(),
+      //   sortOrder: formData.sortOrder.toString(),
+      //   hasImage: !!formData.imageFile
+      // });
 
       // Ajouter l'image si elle existe
       if (formData.imageFile) {
         submitData.append("image", formData.imageFile);
-        console.log("📷 Image ajoutée:", formData.imageFile.name);
+        // console.log("📷 Image ajoutée:", formData.imageFile.name);
       }
 
       let response;
@@ -126,11 +126,11 @@ const AjoutActivitesModal = ({
       // AJOUT: Logique différente pour modification vs ajout
       if (editingActivity) {
         // MODIFICATION: Appeler PUT
-        console.log(`🔄 Modification catégorie ID: ${editingActivity.id}`);
+        // console.log(`🔄 Modification catégorie ID: ${editingActivity.id}`);
         
         // Si pas d'image sélectionnée mais une image existe déjà, on l'envoie quand même
         if (!formData.imageFile && editingActivity.image) {
-          console.log("ℹ️ Conservation de l'image existante");
+          // console.log("ℹ️ Conservation de l'image existante");
         }
         
         response = await api.put(`/ActivityCategory/${editingActivity.id}`, submitData, {
@@ -140,7 +140,7 @@ const AjoutActivitesModal = ({
         });
       } else {
         // AJOUT: Appeler POST
-        console.log("➕ Ajout nouvelle catégorie");
+        // console.log("➕ Ajout nouvelle catégorie");
         response = await api.post("/ActivityCategory", submitData, {
           headers: {
             "Content-Type": "multipart/form-data",

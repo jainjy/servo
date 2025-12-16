@@ -106,10 +106,10 @@ const Donation: React.FC = () => {
         // Simulation de traitement
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log('Donation submitted:', {
-                ...formData,
-                finalAmount: showCustomAmount ? parseFloat(formData.customAmount) || 0 : formData.amount
-            });
+            // console.log('Donation submitted:', {
+            //     ...formData,
+            //     finalAmount: showCustomAmount ? parseFloat(formData.customAmount) || 0 : formData.amount
+            // });
             alert('Merci pour votre généreux don ! Votre soutien transforme des vies.');
             // Reset form
             setFormData({

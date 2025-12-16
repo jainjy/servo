@@ -287,7 +287,7 @@ const EditMediaModal: React.FC<{
         isPremium: formData.isPremium // Pour les vidéos seulement
       };
 
-      console.log('📤 Données envoyées au backend:', updateData);
+      // console.log('📤 Données envoyées au backend:', updateData);
 
       await onSave(media.id, updateData);
       onClose();
@@ -696,20 +696,20 @@ const AdminMedia: React.FC = () => {
   // Sauvegarder les modifications - FONCTION CORRIGÉE
   const handleSaveMedia = async (id: string, data: any) => {
     try {
-      console.log('🔄 Début de la modification de la vidéo ID:', id);
-      console.log('📦 Données reçues du formulaire:', data);
+      // console.log('🔄 Début de la modification de la vidéo ID:', id);
+      // console.log('📦 Données reçues du formulaire:', data);
 
       // Utiliser la méthode avec retry pour plus de robustesse
       const updatedVideo = await MediaService.updateVideoWithRetry(id, data);
 
-      console.log('✅ Modification réussie:', updatedVideo);
+      // console.log('✅ Modification réussie:', updatedVideo);
 
       // Mettre à jour l'état local avec les données retournées par le backend
       setVideos(prev => prev.map(v =>
         v.id === id ? { ...v, ...updatedVideo } : v
       ));
 
-      console.log('✅ État local mis à jour');
+      // console.log('✅ État local mis à jour');
       return updatedVideo;
 
     } catch (err: any) {

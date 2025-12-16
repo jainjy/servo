@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
+import { AdCard } from "@/pages/Publicite";
 
 const GestionImmobilier = () => {
   const [activeService, setActiveService] = useState("gestion");
@@ -313,7 +314,7 @@ const GestionImmobilier = () => {
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    console.log("Formulaire contact soumis:", contactFormData);
+    // console.log("Formulaire contact soumis:", contactFormData);
     alert(
       "Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."
     );
@@ -456,18 +457,25 @@ const GestionImmobilier = () => {
         </div>
       </section>
 
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
+
       {/* Services Section */}
       <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
         <div className="container mx-auto px-4">
-         
-            <h2 className=" text-2xl text-center md:text-3xl font-bold text-[#8B4513] mb-4">
-              Nos Services de Gestion
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Une gamme complète de services pour optimiser la gestion de votre
-              bien immobilier
-            </p>
-          
+
+          <h2 className=" text-2xl text-center md:text-3xl font-bold text-[#8B4513] mb-4">
+            Nos Services de Gestion
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Une gamme complète de services pour optimiser la gestion de votre
+            bien immobilier
+          </p>
+
 
           {/* Service Navigation */}
           <motion.div
@@ -484,11 +492,10 @@ const GestionImmobilier = () => {
               >
                 <Button
                   variant={activeService === service.id ? "default" : "outline"}
-                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${
-                    activeService === service.id
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${activeService === service.id
                       ? "bg-[#6B8E23] text-white"
                       : "text-gray-700 border-gray-300 hover:bg-gray-100"
-                  }`}
+                    }`}
                   onClick={() => setActiveService(service.id)}
                 >
                   <service.icon className="h-3 w-3 mr-2" />
@@ -891,7 +898,7 @@ const GestionImmobilier = () => {
                 type="submit"
                 className="w-full bg-[#6B8E23] hover:bg-[#556B2F] text-white py-3 rounded-lg text-base font-semibold transition-all duration-300 hover:scale-[1.02]"
                 disabled={!selectedService}
-        
+
               >
                 Envoyer ma demande
               </Button>
@@ -1069,6 +1076,13 @@ const GestionImmobilier = () => {
           </motion.form>
         </DialogContent>
       </Dialog>
+
+       <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
     </div>
   );
 };

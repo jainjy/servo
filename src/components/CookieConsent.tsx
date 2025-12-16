@@ -45,7 +45,7 @@ export default function CookieConsent() {
             longitude: pos.coords.longitude,
           };
           localStorage.setItem("user_location", JSON.stringify(location));
-          console.log("🌍 Localisation sauvegardée :", location);
+          // console.log("🌍 Localisation sauvegardée :", location);
         },
         (err) => console.error("Erreur géolocalisation :", err),
         { enableHighAccuracy: true }

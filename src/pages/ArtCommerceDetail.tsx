@@ -43,9 +43,9 @@ const ArtCommerceDetail = () => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        console.log("🔄 Tentative de récupération du service ID:", id);
+        // console.log("🔄 Tentative de récupération du service ID:", id);
         const res = await api.get(`/services/${id}`);
-        console.log("✅ Réponse reçue:", res.data.users);
+        // console.log("✅ Réponse reçue:", res.data.users);
         setService(res.data);
         setError("");
       } catch (err) {

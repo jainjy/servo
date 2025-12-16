@@ -275,7 +275,7 @@ const ContactModal = ({ isOpen, onClose, investmentType }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Simulation d'envoi de formulaire
-    console.log('Formulaire soumis:', { ...formData, investmentType });
+    // console.log('Formulaire soumis:', { ...formData, investmentType });
     toast.info(
       "Votre demande a été envoyée ! Un conseiller vous contactera dans les 24h."
     );

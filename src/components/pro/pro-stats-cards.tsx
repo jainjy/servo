@@ -82,10 +82,10 @@ export function ProStatsCards() {
   const fetchBookingStats = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Début du chargement des statistiques pour le professionnel:', user?.id)
+      // console.log('🔄 Début du chargement des statistiques pour le professionnel:', user?.id)
 
       const response = await api.get('/tourisme-bookings?limit=1000')
-      console.log('📊 Réponse API complète:', response)
+      // console.log('📊 Réponse API complète:', response)
 
       let bookings: TourismeBooking[] = []
       let averageRating = 0
@@ -93,20 +93,20 @@ export function ProStatsCards() {
       let responseRate = 0
 
       if (response.data.success) {
-        console.log('✅ API retourne success: true')
+        // console.log('✅ API retourne success: true')
 
         if (response.data.data) {
-          console.log('📁 Données dans response.data.data:', response.data.data)
+          // console.log('📁 Données dans response.data.data:', response.data.data)
 
           if (Array.isArray(response.data.data)) {
             bookings = response.data.data
-            console.log(`📚 ${bookings.length} réservations chargées (structure array directe)`)
+            // console.log(`📚 ${bookings.length} réservations chargées (structure array directe)`)
           } else if (response.data.data.bookings) {
             bookings = response.data.data.bookings
             averageRating = response.data.data.averageRating || 0
             activeClients = response.data.data.activeClients || 0
             responseRate = response.data.data.responseRate || 0
-            console.log(`📚 ${bookings.length} réservations chargées (structure avec bookings)`)
+            // console.log(`📚 ${bookings.length} réservations chargées (structure avec bookings)`)
           }
         }
       } else if (Array.isArray(response.data)) {
@@ -119,7 +119,7 @@ export function ProStatsCards() {
       }
 
       const filteredBookings = bookings.filter(booking => booking.listing.provider === user?.id)
-      console.log('📊 Réservations filtrées pour ce professionnel:', filteredBookings.length)
+      // console.log('📊 Réservations filtrées pour ce professionnel:', filteredBookings.length)
 
       // Recalculate stats for this professional only
       const proAverageRating = filteredBookings.length > 0
@@ -139,12 +139,12 @@ export function ProStatsCards() {
         ? (filteredBookings.filter(b => b.specialRequests && b.specialRequests.length > 0).length / filteredBookings.length) * 100
         : 0
 
-      console.log('🎯 Données finales extraites:', {
-        bookingsCount: filteredBookings.length,
-        averageRating: proAverageRating,
-        activeClients: proActiveClients,
-        responseRate: proResponseRate
-      })
+      // console.log('🎯 Données finales extraites:', {
+      //   bookingsCount: filteredBookings.length,
+      //   averageRating: proAverageRating,
+      //   activeClients: proActiveClients,
+      //   responseRate: proResponseRate
+      // })
 
       calculateRealStats(filteredBookings, {
         averageRating: proAverageRating,
@@ -161,10 +161,10 @@ export function ProStatsCards() {
   }
 
   const calculateRealStats = (bookings: TourismeBooking[], extraStats: { averageRating: number, activeClients: number, responseRate: number }) => {
-    console.log('🧮 Calcul des statistiques avec:', {
-      totalBookings: bookings.length,
-      extraStats
-    })
+    // console.log('🧮 Calcul des statistiques avec:', {
+    //   totalBookings: bookings.length,
+    //   extraStats
+    // })
 
     const currentMonth = new Date().getMonth()
     const currentYear = new Date().getFullYear()
@@ -257,7 +257,7 @@ export function ProStatsCards() {
       },
     ]
 
-    console.log('📊 Statistiques finales calculées:', realStats)
+    // console.log('📊 Statistiques finales calculées:', realStats)
     setStats(realStats)
   }
 

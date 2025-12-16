@@ -60,12 +60,12 @@ export function StatsCards() {
           }))
         ])
 
-        console.log("Données reçues des APIs:", {
-          users: usersStats.data,
-          tourisme: tourismeStats.data,
-          bookings: bookingsStats.data,
-          demandes: demandesStats.data
-        })
+        // console.log("Données reçues des APIs:", {
+        //   users: usersStats.data,
+        //   tourisme: tourismeStats.data,
+        //   bookings: bookingsStats.data,
+        //   demandes: demandesStats.data
+        // })
 
         const processedData: StatsData = {
           activeUsers: usersStats.data?.active || usersStats.data?.total || 0,

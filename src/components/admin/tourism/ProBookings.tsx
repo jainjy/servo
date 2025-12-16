@@ -1215,14 +1215,14 @@ export const ProBookings = () => {
 
   const fetchFlightReservations = async () => {
     try {
-      console.log("🔄 Chargement des réservations de vols...");
+      // console.log("🔄 Chargement des réservations de vols...");
 
       const reservationsResponse = await api.get("/Vol/reservations");
-      console.log("📡 Réponse API réservations:", reservationsResponse.data);
+      // console.log("📡 Réponse API réservations:", reservationsResponse.data);
 
       if (reservationsResponse.data.success && reservationsResponse.data.data) {
         const reservationsData = reservationsResponse.data.data;
-        console.log(`✈️ ${reservationsData.length} réservation(s) de vol trouvée(s)`, reservationsData);
+        // console.log(`✈️ ${reservationsData.length} réservation(s) de vol trouvée(s)`, reservationsData);
 
         setFlightReservations(reservationsData);
         calculateFlightStats(reservationsData);
@@ -1240,7 +1240,7 @@ export const ProBookings = () => {
       console.error("❌ Erreur critique chargement réservations vols:", error);
 
       const mockData = getMockFlightReservations();
-      console.log("🔄 Utilisation des données mockées:", mockData);
+      // console.log("🔄 Utilisation des données mockées:", mockData);
       setFlightReservations(mockData);
       calculateFlightStats(mockData);
     }
@@ -1376,7 +1376,7 @@ export const ProBookings = () => {
     };
 
     const qrString = JSON.stringify(qrData);
-    console.log('🎫 QR Code data:', qrString);
+    // console.log('🎫 QR Code data:', qrString);
     alert(`QR Code généré pour: ${booking.confirmationNumber}\nDonnées: ${qrString}`);
   };
 
@@ -1438,7 +1438,7 @@ export const ProBookings = () => {
   };
 
   const calculateFlightStats = (reservationsData: FlightReservation[]) => {
-    console.log("📈 Calcul stats pour réservations vols:", reservationsData);
+    // console.log("📈 Calcul stats pour réservations vols:", reservationsData);
 
     const confirmedAndCompleted = reservationsData.filter(
       (b) => b.status === "confirmed" || b.status === "completed" || b.status === "paid"
@@ -1452,11 +1452,11 @@ export const ProBookings = () => {
       0
     );
 
-    console.log("📊 Stats calculées vols:", {
-      total: reservationsData.length,
-      totalPassengers,
-      totalRevenue
-    });
+    // console.log("📊 Stats calculées vols:", {
+    //   total: reservationsData.length,
+    //   totalPassengers,
+    //   totalRevenue
+    // });
 
     const statsData: BookingStats = {
       total: reservationsData.length,
@@ -1571,7 +1571,7 @@ export const ProBookings = () => {
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
-      console.log(`🔄 Mise à jour statut ${activeTab}:`, bookingId, status);
+      // console.log(`🔄 Mise à jour statut ${activeTab}:`, bookingId, status);
 
       if (activeTab === 'accommodation') {
         const response = await api.put(`/tourisme-bookings/${bookingId}/status`, { status });
@@ -1593,7 +1593,7 @@ export const ProBookings = () => {
           setFlightReservations(prev => prev.map(booking =>
             booking.id === bookingId ? response.data.data : booking
           ));
-          console.log(`✅ Statut vol mis à jour: ${bookingId} -> ${status}`);
+          // console.log(`✅ Statut vol mis à jour: ${bookingId} -> ${status}`);
         }
       }
 
@@ -1613,7 +1613,7 @@ export const ProBookings = () => {
 
   const sendReminder = async (bookingId: string) => {
     try {
-      console.log('📨 Envoi rappel pour réservation:', bookingId);
+      // console.log('📨 Envoi rappel pour réservation:', bookingId);
 
       const booking = filteredBookings.find(b => b.id === bookingId);
       if (booking) {
@@ -1711,7 +1711,7 @@ export const ProBookings = () => {
   };
 
   const exportToCSV = () => {
-    console.log('Export CSV pour:', activeTab);
+    // console.log('Export CSV pour:', activeTab);
     alert(`Export CSV pour ${activeTab} en cours...`);
   };
 

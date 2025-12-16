@@ -72,7 +72,7 @@ const ListeDemandesDevis = () => {
       
       const response = await demandeDevisAPI.getDevisUtilisateur(user.id);
       // Combiner et transformer les demandes et devis en un seul tableau
-      console.log('Réponse API:', response); // Pour déboguer
+      // console.log('Réponse API:', response); // Pour déboguer
       const demandesTransformees = [
         ...(response.demandes || []).map((d: any) => ({
           id: d.id,

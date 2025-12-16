@@ -105,7 +105,7 @@ const PodcastsDomicile: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        console.log('🔄 Début du chargement des médias Domicile...');
+        // console.log('🔄 Début du chargement des médias Domicile...');
 
         // Récupérer les vidéos
         const videosResponse = await MediaService.getVideos({
@@ -113,22 +113,22 @@ const PodcastsDomicile: React.FC = () => {
           limit: 50
         });
 
-        console.log('📦 Réponse COMPLÈTE des vidéos:', videosResponse);
+        // console.log('📦 Réponse COMPLÈTE des vidéos:', videosResponse);
 
         const apiData = videosResponse.data;
 
-        console.log('🔍 Structure des données API:', {
-          success: apiData.success,
-          hasData: !!apiData.data,
-          dataIsArray: Array.isArray(apiData.data),
-          dataLength: apiData.data?.length,
-          pagination: apiData.pagination
-        });
+        // console.log('🔍 Structure des données API:', {
+        //   success: apiData.success,
+        //   hasData: !!apiData.data,
+        //   dataIsArray: Array.isArray(apiData.data),
+        //   dataLength: apiData.data?.length,
+        //   pagination: apiData.pagination
+        // });
 
         let domicileMedia: MediaEpisode[] = [];
 
         if (apiData.success && Array.isArray(apiData.data)) {
-          console.log('✅ Structure de réponse valide pour les vidéos');
+          // console.log('✅ Structure de réponse valide pour les vidéos');
 
           const videoMedia: MediaEpisode[] = apiData.data
             .filter((video: any) => {
@@ -137,7 +137,7 @@ const PodcastsDomicile: React.FC = () => {
               const hasMediaUrl = video.videoUrl && video.videoUrl.trim() !== '';
 
               const shouldInclude = isDomicile && isActive && hasMediaUrl;
-              console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
+              // console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
 
               return shouldInclude;
             })
@@ -169,7 +169,7 @@ const PodcastsDomicile: React.FC = () => {
           });
 
           if (imagesResponse?.data?.success && Array.isArray(imagesResponse.data.data)) {
-            console.log('🖼️ Données images trouvées:', imagesResponse.data.data.length);
+            // console.log('🖼️ Données images trouvées:', imagesResponse.data.data.length);
 
             const imageMedia: MediaEpisode[] = imagesResponse.data.data
               .filter((image: any) => {
@@ -199,16 +199,16 @@ const PodcastsDomicile: React.FC = () => {
             domicileMedia = [...domicileMedia, ...imageMedia];
           }
         } catch (imageError) {
-          console.log('ℹ️ Aucun service images disponible ou erreur:', imageError);
+          // console.log('ℹ️ Aucun service images disponible ou erreur:', imageError);
         }
 
-        console.log('🎉 Médias Domicile après filtrage:', domicileMedia.length);
-        console.log('📺 Liste complète des médias filtrés:', domicileMedia);
+        // console.log('🎉 Médias Domicile après filtrage:', domicileMedia.length);
+        // console.log('📺 Liste complète des médias filtrés:', domicileMedia);
 
         setMediaEpisodes(domicileMedia);
 
         if (domicileMedia.length === 0) {
-          console.log('⚠️ Aucun média trouvé après filtrage');
+          // console.log('⚠️ Aucun média trouvé après filtrage');
         }
 
       } catch (err: any) {
@@ -221,7 +221,7 @@ const PodcastsDomicile: React.FC = () => {
         setError(err.message);
         setMediaEpisodes([]);
       } finally {
-        console.log('🏁 Chargement terminé');
+        // console.log('🏁 Chargement terminé');
         setLoading(false);
       }
     };
@@ -320,7 +320,7 @@ const PodcastsDomicile: React.FC = () => {
               console.warn('❌ Erreur de chargement de l\'image:', episode.thumbnailUrl);
               e.currentTarget.src = defaultThumbnails[0];
             }}
-            onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
+            // onLoad={() => console.log('✅ Image chargée:', episode.thumbnailUrl)}
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
 
@@ -363,7 +363,7 @@ const PodcastsDomicile: React.FC = () => {
             </div>
             <button
               onClick={() => {
-                console.log('🎯 Clic sur média pour:', episode.title);
+                // console.log('🎯 Clic sur média pour:', episode.title);
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
                 setIsPlaying(false);

@@ -72,7 +72,7 @@ const NetworkStatus: React.FC<NetworkStatusProps> = ({
       }
     } catch (error) {
       setIsRetrying(false);
-      console.log("Toujours hors ligne");
+      // console.log("Toujours hors ligne");
     }
   };
 

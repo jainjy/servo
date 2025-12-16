@@ -485,7 +485,7 @@ const IntelligibleSection = ({ showAllPrestations }) => {
     setIsLoadingServices(true);
     try {
       const response = await api.get(`/categories/name/${cat}/services`);
-      console.log("Catégories de services:", response.data);
+      // console.log("Catégories de services:", response.data);
       setServicesCategorie(response.data);
 
       const initialIndexes = {};

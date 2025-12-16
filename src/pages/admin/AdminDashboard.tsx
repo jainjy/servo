@@ -133,7 +133,7 @@ export default function AdminDashboard() {
       })
       
       if (response.status === 200) {
-        console.log(`Rapport automatique envoyé à ${email} à ${new Date().toLocaleTimeString()}`)
+        // console.log(`Rapport automatique envoyé à ${email} à ${new Date().toLocaleTimeString()}`)
       } else {
         throw new Error("Erreur lors de l'envoi automatique du rapport")
       }

@@ -114,7 +114,7 @@ const MesDocumentsPage = () => {
     try {
       setLoading(true);
       const response = await api.get("/client/documents/mes-documents");
-      console.log(response.data.data);
+      // console.log(response.data.data);
       if (response.data) {
         const data = await response.data;
         setDocuments(data.data || []);
@@ -142,10 +142,10 @@ const MesDocumentsPage = () => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log("Fichiers sélectionnés:", files);
+    // console.log("Fichiers sélectionnés:", files);
 
     if (!files || files.length === 0) {
-      console.log("Aucun fichier sélectionné");
+      // console.log("Aucun fichier sélectionné");
       return;
     }
 
@@ -491,7 +491,7 @@ const MesDocumentsPage = () => {
               variant="outline"
               size="sm"
               onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-              className="hidden md:grid border-[#D3D3D3] text-[#556B2F]"
+              className="hidden  md:grid grid-cols-2 border-[#D3D3D3] text-[#556B2F]"
             >
               {viewMode === "grid" ? (
                 <>

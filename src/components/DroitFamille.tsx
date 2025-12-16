@@ -142,7 +142,7 @@ export default function DroitFamille() {
                 description
             };
 
-            console.log("📤 Sending data:", payload);
+            // console.log("📤 Sending data:", payload);
 
             const response = await api.post(
                 "/droitFamille",
@@ -154,7 +154,7 @@ export default function DroitFamille() {
                 }
             );
 
-            console.log("✅ Demande envoyée:", response.data);
+            // console.log("✅ Demande envoyée:", response.data);
             toast.success("Votre demande a été envoyée !");
             closeModal();
 

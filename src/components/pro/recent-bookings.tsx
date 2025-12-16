@@ -159,7 +159,7 @@ export function RecentBookings() {
     try {
       await sendMessage(bookingId)
       // Optionnel: Afficher un toast de succès
-      console.log('Message envoyé avec succès')
+      // console.log('Message envoyé avec succès')
     } catch (error) {
       console.error('Erreur:', error)
     } finally {
@@ -373,7 +373,7 @@ export function RecentBookings() {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8"
-                    onClick={() => console.log('Voir détails', booking.id)}
+                    // onClick={() => console.log('Voir détails', booking.id)}
                     style={{ 
                       color: theme.secondaryText,
                       backgroundColor: 'transparent'

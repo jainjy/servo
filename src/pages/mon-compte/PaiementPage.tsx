@@ -398,7 +398,7 @@ export default function PaiementPage() {
     try {
       const response = await paymentsAPI.downloadReceipt(transactionId);
       // Ici vous pouvez gérer le téléchargement du fichier
-      console.log("Reçu téléchargé:", response.data);
+      // console.log("Reçu téléchargé:", response.data);
       toast({ title: "Reçu téléchargé" });
     } catch (error) {
       console.error("Erreur téléchargement reçu:", error);
@@ -414,7 +414,7 @@ export default function PaiementPage() {
     try {
       const response = await paymentsAPI.downloadInvoice(invoiceId);
       // Ici vous pouvez gérer le téléchargement du fichier PDF
-      console.log("Facture téléchargée:", response.data);
+      // console.log("Facture téléchargée:", response.data);
       toast({ title: "Facture téléchargée" });
     } catch (error) {
       console.error("Erreur téléchargement facture:", error);

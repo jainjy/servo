@@ -240,7 +240,7 @@ const MedecinePlantes = () => {
         toast.info("Lien copié dans le presse-papier ! 📋");
       }
     } catch (err) {
-      console.log('Erreur de partage:', err);
+      // console.log('Erreur de partage:', err);
     }
   };
 

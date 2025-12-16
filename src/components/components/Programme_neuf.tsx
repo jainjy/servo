@@ -137,7 +137,7 @@ const ProgrammeNeuf = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         // Ici, vous intégreriez l'envoi vers votre CRM/email
-        console.log('Données du formulaire:', formData);
+        // console.log('Données du formulaire:', formData);
         alert('Merci ! Nous vous recontactons sous 24h.');
     };
 

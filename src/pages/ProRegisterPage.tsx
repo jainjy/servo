@@ -161,7 +161,7 @@ const ProRegisterPage = () => {
     let finalUserType = "CLIENT"; // Valeur par défaut
     if (subscriptionData) {
       // Mapping exact basé sur les abonnements de vos images
-      console.log(subscriptionData);
+      // console.log(subscriptionData);
       const subscriptionToUserType: { [key: string]: string } = {
         "Pro Immobilier Complet": "AGENCE",
         "Prestataires de Services": "PRESTATAIRE",
@@ -207,7 +207,7 @@ const ProRegisterPage = () => {
   // Afficher l'abonnement sélectionné dans le formulaire
   useEffect(() => {
     if (subscriptionData) {
-      console.log("Subscription selected:", subscriptionData);
+      // console.log("Subscription selected:", subscriptionData);
       // Pré-remplir userType basé sur l'abonnement exact
       const subscriptionToUserType: { [key: string]: string } = {
         "Pro Immobilier Complet": "AGENCE",

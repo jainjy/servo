@@ -180,7 +180,7 @@ export function ProfessionalServicesTable({
     // Pour l'instant, on affiche un message
     // Vous pouvez implémenter une modale d'édition ici
     toast.info("Fonctionnalité d'édition à implémenter");
-    console.log("Édition du service:", serviceId);
+    // console.log("Édition du service:", serviceId);
   }, []);
 
   const handleToggleAvailability = useCallback(

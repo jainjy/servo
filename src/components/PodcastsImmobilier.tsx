@@ -132,7 +132,7 @@ const PodcastsImmobilier: React.FC = () => {
   React.useEffect(() => {
     const handleFullscreenChange = () => {
       // Vous pouvez ajouter un état pour gérer l'état du plein écran si besoin
-      console.log('Fullscreen changed');
+      // console.log('Fullscreen changed');
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -152,7 +152,7 @@ const PodcastsImmobilier: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        console.log('🔄 Début du chargement des vidéos Immobilier...');
+        // console.log('🔄 Début du chargement des vidéos Immobilier...');
 
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({
@@ -160,28 +160,28 @@ const PodcastsImmobilier: React.FC = () => {
           limit: 50
         });
 
-        console.log('📦 Réponse COMPLÈTE de l\'API:', response);
-        console.log('🔍 Structure de la réponse Axios:', {
-          data: response.data, // ← C'est ici que se trouvent vos données !
-          status: response.status,
-          statusText: response.statusText
-        });
+        // console.log('📦 Réponse COMPLÈTE de l\'API:', response);
+        // console.log('🔍 Structure de la réponse Axios:', {
+        //   data: response.data, // ← C'est ici que se trouvent vos données !
+        //   status: response.status,
+        //   statusText: response.statusText
+        // });
 
         // CORRECTION : Les données sont dans response.data (Axios)
         const apiData = response.data;
 
-        console.log('🔍 Structure des données API:', {
-          success: apiData.success,
-          hasData: !!apiData.data,
-          dataIsArray: Array.isArray(apiData.data),
-          dataLength: apiData.data?.length,
-          pagination: apiData.pagination
-        });
+        // console.log('🔍 Structure des données API:', {
+        //   success: apiData.success,
+        //   hasData: !!apiData.data,
+        //   dataIsArray: Array.isArray(apiData.data),
+        //   dataLength: apiData.data?.length,
+        //   pagination: apiData.pagination
+        // });
 
         if (apiData.success && Array.isArray(apiData.data)) {
-          console.log('✅ Structure de réponse valide');
-          console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
-          console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
+          // console.log('✅ Structure de réponse valide');
+          // console.log('🎯 Nombre total de vidéos dans apiData.data:', apiData.data.length);
+          // console.log('🔍 Détail de la première vidéo:', apiData.data[0]);
 
           const immobilierVideos: VideoEpisode[] = apiData.data
             .filter((video: any) => {
@@ -189,28 +189,28 @@ const PodcastsImmobilier: React.FC = () => {
               const isActive = video.isActive !== false;
               const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
 
-              console.log('📋 Filtrage vidéo:', {
-                id: video.id,
-                title: video.title,
-                category: video.category,
-                isImmobilier: isImmobilier,
-                isActive: isActive,
-                hasVideoUrl: hasVideoUrl,
-                videoUrl: video.videoUrl
-              });
+              // console.log('📋 Filtrage vidéo:', {
+              //   id: video.id,
+              //   title: video.title,
+              //   category: video.category,
+              //   isImmobilier: isImmobilier,
+              //   isActive: isActive,
+              //   hasVideoUrl: hasVideoUrl,
+              //   videoUrl: video.videoUrl
+              // });
 
               const shouldInclude = isImmobilier && isActive && hasVideoUrl;
-              console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
+              // console.log(`📊 Vidéo "${video.title}" incluse: ${shouldInclude}`);
 
               return shouldInclude;
             })
             .map((video: any, index: number) => {
-              console.log(`🔄 Mapping de la vidéo "${video.title}":`, {
-                id: video.id,
-                videoUrl: video.videoUrl,
-                thumbnailUrl: video.thumbnailUrl,
-                createdAt: video.createdAt
-              });
+              // console.log(`🔄 Mapping de la vidéo "${video.title}":`, {
+              //   id: video.id,
+              //   videoUrl: video.videoUrl,
+              //   thumbnailUrl: video.thumbnailUrl,
+              //   createdAt: video.createdAt
+              // });
 
               const mappedVideo = {
                 id: video.id,
@@ -228,18 +228,18 @@ const PodcastsImmobilier: React.FC = () => {
                 fileSize: video.fileSize || 0
               };
 
-              console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
+              // console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
               return mappedVideo;
             });
 
-          console.log('🎉 Vidéos Immobilier après filtrage:', immobilierVideos.length);
-          console.log('📺 Liste complète des vidéos filtrées:', immobilierVideos);
+          // console.log('🎉 Vidéos Immobilier après filtrage:', immobilierVideos.length);
+          // console.log('📺 Liste complète des vidéos filtrées:', immobilierVideos);
 
           setVideoEpisodes(immobilierVideos);
 
           if (immobilierVideos.length === 0) {
-            console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
-            console.log('🔍 Contenu de apiData.data:', apiData.data);
+            // console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
+            // console.log('🔍 Contenu de apiData.data:', apiData.data);
           }
 
         } else {
@@ -261,7 +261,7 @@ const PodcastsImmobilier: React.FC = () => {
         setError(err.message);
         setVideoEpisodes([]);
       } finally {
-        console.log('🏁 Chargement terminé');
+        // console.log('🏁 Chargement terminé');
         setLoading(false);
       }
     };
@@ -271,10 +271,10 @@ const PodcastsImmobilier: React.FC = () => {
 
   // Test de débogage supplémentaire
   useEffect(() => {
-    console.log('📊 État actuel de videoEpisodes:', {
-      count: videoEpisodes.length,
-      videos: videoEpisodes
-    });
+    // console.log('📊 État actuel de videoEpisodes:', {
+    //   count: videoEpisodes.length,
+    //   videos: videoEpisodes
+    // });
   }, [videoEpisodes]);
 
   // Le reste du code reste inchangé...
@@ -333,7 +333,7 @@ const PodcastsImmobilier: React.FC = () => {
 
   // Composant de carte vidéo
   const VideoCard = ({ episode }: { episode: VideoEpisode }) => {
-    console.log('🎬 Rendu de VideoCard pour:', episode.title);
+    // console.log('🎬 Rendu de VideoCard pour:', episode.title);
     return (
       <div
         className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border group cursor-pointer ${episode.featured ? 'border-2 border-purple-500' : 'border-gray-100'
@@ -412,12 +412,12 @@ const PodcastsImmobilier: React.FC = () => {
     );
   };
 
-  console.log('📱 Rendu du composant principal:', {
-    loading,
-    error,
-    videoCount: videoEpisodes.length,
-    videos: videoEpisodes
-  });
+  // console.log('📱 Rendu du composant principal:', {
+  //   loading,
+  //   error,
+  //   videoCount: videoEpisodes.length,
+  //   videos: videoEpisodes
+  // });
 
   if (loading) {
     return (

@@ -23,6 +23,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { AdCard } from "./Publicite";
 
 // Types
 interface AssuranceService {
@@ -586,7 +587,12 @@ export default function Assurance() {
           <ModalAssurance isOpen={isModalOpen} onClose={handleCloseModal} data={selectedCategorie} />
         </div>
       </section>
-
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
       {/* Section Services d'Assurance */}
       <section className="py-8 lg:py-4 bg-white" id="services-assurance">
         <div className="container mx-auto px-4">
@@ -748,6 +754,14 @@ export default function Assurance() {
           onSubmit={handleSubmit}
         />
       )}
+
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
+
     </div>
   );
 }

@@ -620,7 +620,7 @@ const ListingsPage = () => {
   // Fonction pour créer une réservation automatique
   const creerReservationAutomatique = async (annonce, clientId) => {
     try {
-      console.log(`🔄 Création réservation automatique pour annonce: ${annonce.id}, client: ${clientId}`);
+      // console.log(`🔄 Création réservation automatique pour annonce: ${annonce.id}, client: ${clientId}`);
       
       // Calculer les dates (7 jours après aujourd'hui, durée 7 nuits)
       const dateDebut = new Date();
@@ -657,7 +657,7 @@ const ListingsPage = () => {
         }
       }));
       
-      console.log("✅ Réservation créée avec succès:", response.data);
+      // console.log("✅ Réservation créée avec succès:", response.data);
       
       return { 
         success: true, 
@@ -670,13 +670,13 @@ const ListingsPage = () => {
       
       // Essayer avec l'endpoint spécial
       try {
-        console.log("🔄 Tentative via endpoint spécial auto-from-property...");
+        // console.log("🔄 Tentative via endpoint spécial auto-from-property...");
         
         const responseAlt = await api.post(`/locations-saisonnieres/auto-from-property/${annonce.id}`, {
           clientId: clientId
         });
         
-        console.log("✅ Réservation créée via endpoint spécial:", responseAlt.data);
+        // console.log("✅ Réservation créée via endpoint spécial:", responseAlt.data);
         
         return { 
           success: true, 
