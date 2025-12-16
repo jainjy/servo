@@ -236,7 +236,7 @@ const Alimentation = () => {
 
   // CORRIGÉ: Fonction pour naviguer vers la catégorie
   const handleCategoryClick = (category) => {
-    console.log("🟢 Catégorie cliquée:", category);
+    // console.log("🟢 Catégorie cliquée:", category);
 
     const categoryData = {
       name: category.name,
@@ -247,11 +247,11 @@ const Alimentation = () => {
     };
 
     // DEBUG: Vérifier les données avant navigation
-    console.log("📋 Données de navigation:", categoryData);
-    console.log(
-      "🔗 URL de navigation:",
-      `/alimentation/food-category/${encodeURIComponent(category.foodCategory)}`
-    );
+    // console.log("📋 Données de navigation:", categoryData);
+    // console.log(
+    //   "🔗 URL de navigation:",
+    //   `/alimentation/food-category/${encodeURIComponent(category.foodCategory)}`
+    // );
 
     // Utiliser foodCategory pour la navigation
     navigate(

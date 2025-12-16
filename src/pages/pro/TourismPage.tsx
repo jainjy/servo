@@ -253,7 +253,7 @@ const AdminModal = ({
     setUploading(true);
 
     try {
-      console.log("📝 Préparation soumission formulaire:", formData);
+      // console.log("📝 Préparation soumission formulaire:", formData);
       const submitData = new FormData();
 
       Object.keys(formData).forEach((key) => {
@@ -291,7 +291,7 @@ const AdminModal = ({
         response = await tourismeAPI.createListingWithImages(submitData);
       }
 
-      console.log("📥 Réponse API:", response.data);
+      // console.log("📥 Réponse API:", response.data);
 
       if (response.data.success) {
         onSubmit(response.data.data);
@@ -1162,7 +1162,7 @@ const AirlineModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Données compagnie aérienne:", formData);
+    // console.log("Données compagnie aérienne:", formData);
     toast.success("Compagnie aérienne ajoutée avec succès");
     onClose();
   };
@@ -1367,7 +1367,7 @@ export default function TourismPage() {
     };
 
     setFilters(resetFilters);
-    console.log("🔄 Filtres complètement réinitialisés");
+    // console.log("🔄 Filtres complètement réinitialisés");
   };
 
   // Charger les données en fonction du type de contenu
@@ -1388,7 +1388,7 @@ export default function TourismPage() {
     try {
       setLoading(true);
       const response = await tourismeAPI.getAccommodations();
-      console.log("🏨 Réponse API hébergements:", response.data);
+      // console.log("🏨 Réponse API hébergements:", response.data);
 
       if (response.data.success) {
         const listingsData = response.data.data;
@@ -1401,7 +1401,7 @@ export default function TourismPage() {
         });
         setCurrentImageIndex(initialIndexes);
 
-        console.log("✅ Hébergements chargés:", listingsData.length);
+        // console.log("✅ Hébergements chargés:", listingsData.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des hébergements:", error);
@@ -1415,7 +1415,7 @@ export default function TourismPage() {
     try {
       setLoading(true);
       const response = await tourismeAPI.getTouristicPlaces();
-      console.log("🏛️ Réponse API lieux touristiques:", response.data);
+      // console.log("🏛️ Réponse API lieux touristiques:", response.data);
 
       if (response.data.success) {
         const placesData = response.data.data;
@@ -1428,7 +1428,7 @@ export default function TourismPage() {
         });
         setCurrentImageIndex(initialIndexes);
 
-        console.log("✅ Lieux touristiques chargés:", placesData.length);
+        // console.log("✅ Lieux touristiques chargés:", placesData.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des lieux touristiques:", error);
@@ -1442,12 +1442,12 @@ export default function TourismPage() {
     try {
       setFlightsLoading(true);
       const response = await tourismeAPI.getFlights();
-      console.log("✈️ Réponse API vols:", response.data);
+      // console.log("✈️ Réponse API vols:", response.data);
 
       if (response.data.success) {
         const flightsData = response.data.data;
         setFlights(flightsData);
-        console.log("✅ Vols chargés:", flightsData.length);
+        // console.log("✅ Vols chargés:", flightsData.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des vols:", error);
@@ -1461,11 +1461,11 @@ export default function TourismPage() {
     try {
       setActivitiesLoading(true);
       const response = await api.get('/ActivityCategory');
-      console.log("🎯 Réponse API activités:", response.data);
+      // console.log("🎯 Réponse API activités:", response.data);
 
       if (response.data.success) {
         setActivities(response.data.data);
-        console.log("✅ Activités chargées:", response.data.data.length);
+        // console.log("✅ Activités chargées:", response.data.data.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des activités:", error);
@@ -1489,15 +1489,15 @@ export default function TourismPage() {
         contentType: contentType === "flights" || contentType === "activities" ? null : contentType,
       });
 
-      console.log("📊 Réponse API stats:", response.data);
+      // console.log("📊 Réponse API stats:", response.data);
 
       if (response.data.success) {
         setStats(response.data.data);
-        console.log(
-          "✅ Stats mises à jour pour:",
-          contentType,
-          response.data.data
-        );
+        // console.log(
+        //   "✅ Stats mises à jour pour:",
+        //   contentType,
+        //   response.data.data
+        // );
       }
     } catch (error) {
       console.error("Erreur lors du chargement des statistiques:", error);
@@ -1512,8 +1512,8 @@ export default function TourismPage() {
 
     let results = listings;
 
-    console.log("🎯 DÉBUT FILTRAGE - Filtres actuels:", filters);
-    console.log("🎯 Listings avant filtrage:", listings.length);
+    // console.log("🎯 DÉBUT FILTRAGE - Filtres actuels:", filters);
+    // console.log("🎯 Listings avant filtrage:", listings.length);
 
     if (filters.destination) {
       results = results.filter(
@@ -1525,26 +1525,26 @@ export default function TourismPage() {
             .toLowerCase()
             .includes(filters.destination.toLowerCase())
       );
-      console.log("🎯 Après filtre destination:", results.length);
+      // console.log("🎯 Après filtre destination:", results.length);
     }
 
     if (contentType === "accommodations" && filters.type.length > 0) {
       results = results.filter((listing) =>
         filters.type.includes(listing.type)
       );
-      console.log("🎯 Après filtre type:", results.length);
+      // console.log("🎯 Après filtre type:", results.length);
     }
 
     if (contentType === "touristic_places" && filters.category.length > 0) {
       results = results.filter((listing) =>
         filters.category.includes(listing.category)
       );
-      console.log("🎯 Après filtre catégorie:", results.length);
+      // console.log("🎯 Après filtre catégorie:", results.length);
     }
 
     if (filters.rating > 0) {
       results = results.filter((listing) => listing.rating >= filters.rating);
-      console.log("🎯 Après filtre rating:", results.length);
+      // console.log("🎯 Après filtre rating:", results.length);
     }
 
     if (filters.amenities.length > 0) {
@@ -1553,25 +1553,25 @@ export default function TourismPage() {
           listing.amenities.includes(amenity)
         )
       );
-      console.log("🎯 Après filtre amenities:", results.length);
+      // console.log("🎯 Après filtre amenities:", results.length);
     }
 
     if (filters.instantBook) {
       results = results.filter((listing) => listing.instantBook);
-      console.log("🎯 Après filtre instantBook:", results.length);
+      // console.log("🎯 Après filtre instantBook:", results.length);
     }
 
     results = results.filter(
       (listing) =>
         listing.price >= filters.minPrice && listing.price <= filters.maxPrice
     );
-    console.log("🎯 Après filtre prix:", results.length);
+    // console.log("🎯 Après filtre prix:", results.length);
 
-    console.log("🔍 Filtrage appliqué:", {
-      total: listings.length,
-      filtrés: results.length,
-      filtres: filters,
-    });
+    // console.log("🔍 Filtrage appliqué:", {
+    //   total: listings.length,
+    //   filtrés: results.length,
+    //   filtres: filters,
+    // });
 
     setFilteredListings(results);
   }, [filters, listings, contentType]);
@@ -1583,7 +1583,7 @@ export default function TourismPage() {
     }
 
     try {
-      console.log("🗑️ Suppression activité:", id);
+      // console.log("🗑️ Suppression activité:", id);
       const response = await api.delete(`/ActivityCategory/${id}`);
       
       if (response.data.success) {
@@ -1598,7 +1598,7 @@ export default function TourismPage() {
           setShowActivityDetailModal(false);
         }
         
-        console.log("✅ Activité supprimée avec succès");
+        // console.log("✅ Activité supprimée avec succès");
       }
     } catch (error) {
       console.error("❌ Erreur suppression activité:", error);
@@ -1626,7 +1626,7 @@ export default function TourismPage() {
     }
 
     try {
-      console.log("🗑️ Suppression:", id);
+      // console.log("🗑️ Suppression:", id);
       await tourismeAPI.deleteListing(id);
       toast.success(
         contentType === "touristic_places"
@@ -1636,13 +1636,13 @@ export default function TourismPage() {
 
       setListings((prev) => {
         const updated = prev.filter((listing) => listing.id !== id);
-        console.log("📊 Listings après suppression:", updated.length);
+        // console.log("📊 Listings après suppression:", updated.length);
         return updated;
       });
 
       resetAllFilters();
       await loadStats();
-      console.log("✅ Suppression terminée");
+      // console.log("✅ Suppression terminée");
     } catch (error) {
       const backendMessage = error.response?.data?.error;
       toast.error(backendMessage || "Erreur lors de la suppression");
@@ -1652,9 +1652,9 @@ export default function TourismPage() {
 
   const toggleAvailability = async (id) => {
     try {
-      console.log("🔄 Bascule disponibilité:", id);
+      // console.log("🔄 Bascule disponibilité:", id);
       const response = await tourismeAPI.toggleAvailability(id);
-      console.log("📥 Réponse disponibilité:", response.data);
+      // console.log("📥 Réponse disponibilité:", response.data);
 
       if (response.data.success) {
         setListings((prev) =>
@@ -1671,7 +1671,7 @@ export default function TourismPage() {
 
         toast.success(response.data.message);
         await loadStats();
-        console.log("✅ Disponibilité basculée");
+        // console.log("✅ Disponibilité basculée");
       }
     } catch (error) {
       console.error("❌ Erreur bascule disponibilité:", error);
@@ -1684,9 +1684,9 @@ export default function TourismPage() {
 
   const toggleFeatured = async (id) => {
     try {
-      console.log("⭐ Bascule vedette:", id);
+      // console.log("⭐ Bascule vedette:", id);
       const response = await tourismeAPI.toggleFeatured(id);
-      console.log("📥 Réponse vedette:", response.data);
+      // console.log("📥 Réponse vedette:", response.data);
 
       if (response.data.success) {
         setListings((prev) =>
@@ -1703,7 +1703,7 @@ export default function TourismPage() {
 
         toast.success(response.data.message);
         await loadStats();
-        console.log("✅ Statut vedette basculé");
+        // console.log("✅ Statut vedette basculé");
       }
     } catch (error) {
       console.error("❌ Erreur bascule vedette:", error);
@@ -1772,7 +1772,7 @@ export default function TourismPage() {
 
   const handleAdminSubmit = async (formData) => {
     try {
-      console.log("📤 Envoi des données avec images:", formData);
+      // console.log("📤 Envoi des données avec images:", formData);
       setShowAdminModal(false);
       setEditingListing(null);
       resetAllFilters();
@@ -1783,7 +1783,7 @@ export default function TourismPage() {
         await loadAccommodations();
       }
       await loadStats();
-      console.log("✅ Opération terminée avec succès");
+      // console.log("✅ Opération terminée avec succès");
     } catch (error) {
       console.error("❌ Erreur opération:", error);
       toast.error(error.response?.data?.error || "Erreur lors de l'opération");
@@ -3143,7 +3143,7 @@ export default function TourismPage() {
           isOpen={showFlightModal}
           onClose={() => setShowFlightModal(false)}
           onSubmit={(flightData) => {
-            console.log("Nouveau vol:", flightData);
+            // console.log("Nouveau vol:", flightData);
             toast.success("Vol ajouté avec succès");
             setShowFlightModal(false);
             loadFlights();
@@ -3157,7 +3157,7 @@ export default function TourismPage() {
           onClose={() => setShowActivitiesModal(false)}
           editingActivity={editingActivity}
           onSubmit={(activitesData) => {
-            console.log("Nouvelle activité:", activitesData);
+            // console.log("Nouvelle activité:", activitesData);
             toast.success(editingActivity ? "Activité modifiée avec succès" : "Activité ajoutée avec succès");
             setShowActivitiesModal(false);
             setEditingActivity(null);

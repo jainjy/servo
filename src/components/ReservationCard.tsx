@@ -106,17 +106,17 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
   const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
-    console.log(`🔄 ReservationCard mounted for reservation ${reservation.id}`);
-    console.log(`📊 Reservation data:`, {
-      id: reservation.id,
-      statut: reservation.statut,
-      propertyTitle: reservation.property?.title,
-      isOwner,
-    });
+    // console.log(`🔄 ReservationCard mounted for reservation ${reservation.id}`);
+    // console.log(`📊 Reservation data:`, {
+    //   id: reservation.id,
+    //   statut: reservation.statut,
+    //   propertyTitle: reservation.property?.title,
+    //   isOwner,
+    // });
     
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
-      console.log(`📱 Window width: ${window.innerWidth}px, isMobile: ${mobile}`);
+      // console.log(`📱 Window width: ${window.innerWidth}px, isMobile: ${mobile}`);
       setIsMobileView(mobile);
     };
     
@@ -124,13 +124,13 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
     window.addEventListener('resize', checkMobile);
     
     return () => {
-      console.log(`🧹 ReservationCard cleanup for reservation ${reservation.id}`);
+      // console.log(`🧹 ReservationCard cleanup for reservation ${reservation.id}`);
       window.removeEventListener('resize', checkMobile);
     };
   }, [reservation.id, reservation.statut, isOwner]);
 
   const getStatusConfig = (statut: LocationSaisonniere['statut']) => {
-    console.log(`🎨 Getting status config for: ${statut}`);
+    // console.log(`🎨 Getting status config for: ${statut}`);
     switch (statut) {
       case 'en_attente':
         return {
@@ -188,8 +188,8 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
   ];
 
   const handleStatusSelect = (statut: LocationSaisonniere['statut']) => {
-    console.log(`🎯 Status selected: ${statut} for reservation ${reservation.id}`);
-    console.log(`📤 Calling onStatusChange with:`, { id: reservation.id, statut });
+    // console.log(`🎯 Status selected: ${statut} for reservation ${reservation.id}`);
+    // console.log(`📤 Calling onStatusChange with:`, { id: reservation.id, statut });
     onStatusChange(reservation.id, statut);
     setShowStatusSelector(false);
   };
@@ -199,12 +199,12 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
     const end = new Date(fin);
     const diff = end.getTime() - start.getTime();
     const nuits = Math.ceil(diff / (1000 * 3600 * 24));
-    console.log(`📅 Calculating nights: ${debut} to ${fin} = ${nuits} nights`);
+    // console.log(`📅 Calculating nights: ${debut} to ${fin} = ${nuits} nights`);
     return nuits;
   };
 
   const renderDesktopView = () => {
-    console.log(`🖥️ Rendering desktop view for reservation ${reservation.id}`);
+    // console.log(`🖥️ Rendering desktop view for reservation ${reservation.id}`);
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-6">
@@ -269,7 +269,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
               <div className="relative">
                 <button
                   onClick={() => {
-                    console.log(`🎯 Status selector clicked for reservation ${reservation.id}`);
+                    // console.log(`🎯 Status selector clicked for reservation ${reservation.id}`);
                     setShowStatusSelector(!showStatusSelector);
                   }}
                   className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg font-medium border-2 transition-all ${statusConfig.color} hover:shadow-md`}
@@ -323,7 +323,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => {
-                console.log(`👁️ View details clicked for reservation ${reservation.id}`);
+                // console.log(`👁️ View details clicked for reservation ${reservation.id}`);
                 onViewDetails(reservation);
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl"
@@ -334,7 +334,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
 
             <button
               onClick={() => {
-                console.log(`📋 Toggle details clicked, current state: ${showDetails}`);
+                // console.log(`📋 Toggle details clicked, current state: ${showDetails}`);
                 setShowDetails(!showDetails);
               }}
               className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
@@ -346,7 +346,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
             {isOwner && reservation.client && (
               <button
                 onClick={() => {
-                  console.log(`📧 Contact client clicked: ${reservation.client?.email}`);
+                  // console.log(`📧 Contact client clicked: ${reservation.client?.email}`);
                   window.location.href = `mailto:${reservation.client?.email}`;
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
@@ -361,7 +361,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
             <div className="relative">
               <button
                 onClick={() => {
-                  console.log(`⚙️ Actions menu clicked, current state: ${showActions}`);
+                  // console.log(`⚙️ Actions menu clicked, current state: ${showActions}`);
                   setShowActions(!showActions);
                 }}
                 className="p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all duration-300 hover:scale-105"
@@ -374,7 +374,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
                   {isOwner && (
                     <button
                       onClick={() => {
-                        console.log(`🗑️ Delete clicked for reservation ${reservation.id}`);
+                        // console.log(`🗑️ Delete clicked for reservation ${reservation.id}`);
                         onRemove(reservation.id);
                         setShowActions(false);
                       }}
@@ -387,7 +387,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
                   {!isOwner && reservation.statut === 'en_attente' && (
                     <button
                       onClick={() => {
-                        console.log(`❌ Cancel reservation clicked for ${reservation.id}`);
+                        // console.log(`❌ Cancel reservation clicked for ${reservation.id}`);
                         onStatusChange(reservation.id, 'annulee');
                         setShowActions(false);
                       }}
@@ -399,7 +399,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
                   )}
                   <button
                     onClick={() => {
-                      console.log(`🏠 View property clicked for ${reservation.propertyId}`);
+                      // console.log(`🏠 View property clicked for ${reservation.propertyId}`);
                       onViewDetails(reservation);
                       setShowActions(false);
                     }}
@@ -517,7 +517,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
           <div 
             className="fixed inset-0 z-40" 
             onClick={() => {
-              console.log(`🖱️ Click outside to close menus`);
+              // console.log(`🖱️ Click outside to close menus`);
               setShowActions(false);
               setShowStatusSelector(false);
             }}
@@ -528,7 +528,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
   };
 
   const renderMobileView = () => {
-    console.log(`📱 Rendering mobile view for reservation ${reservation.id}`);
+    // console.log(`📱 Rendering mobile view for reservation ${reservation.id}`);
     return (
       <div className="bg-white rounded-xl border border-gray-100 p-4 hover:border-blue-200 hover:shadow-lg transition-all duration-500">
         {/* En-tête mobile */}
@@ -547,7 +547,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
           
           <button
             onClick={() => {
-              console.log(`📱 Mobile details toggle clicked, current state: ${showDetails}`);
+              // console.log(`📱 Mobile details toggle clicked, current state: ${showDetails}`);
               setShowDetails(!showDetails);
             }}
             className="p-2 text-gray-500"
@@ -562,7 +562,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
           <div className="relative">
             <button
               onClick={() => {
-                console.log(`📱 Mobile status selector clicked for reservation ${reservation.id}`);
+                // console.log(`📱 Mobile status selector clicked for reservation ${reservation.id}`);
                 setShowStatusSelector(!showStatusSelector);
               }}
               className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg font-medium border ${statusConfig.color}`}
@@ -606,7 +606,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => {
-              console.log(`📱 Mobile view details clicked for reservation ${reservation.id}`);
+              // console.log(`📱 Mobile view details clicked for reservation ${reservation.id}`);
               onViewDetails(reservation);
             }}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2"
@@ -618,7 +618,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
           {isOwner && reservation.client && (
             <button
               onClick={() => {
-                console.log(`📱 Mobile contact client clicked: ${reservation.client?.email}`);
+                // console.log(`📱 Mobile contact client clicked: ${reservation.client?.email}`);
                 window.location.href = `mailto:${reservation.client?.email}`;
               }}
               className="px-3 py-2 rounded-lg font-medium text-sm flex items-center gap-2 border border-green-200 text-green-600 hover:bg-green-50"
@@ -630,7 +630,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
           {!isOwner && reservation.statut === 'en_attente' && (
             <button
               onClick={() => {
-                console.log(`📱 Mobile cancel reservation clicked for ${reservation.id}`);
+                // console.log(`📱 Mobile cancel reservation clicked for ${reservation.id}`);
                 onStatusChange(reservation.id, 'annulee');
               }}
               className="px-3 py-2 rounded-lg font-medium text-sm flex items-center gap-2 border border-red-200 text-red-600 hover:bg-red-50"

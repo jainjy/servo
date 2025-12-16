@@ -225,11 +225,11 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
         setFilteredPoints(categoryPoints);
       }
 
-      console.log("📊 Données carte chargées:", {
-        category,
-        total: mapPoints.length,
-        filtered: filteredPoints.length
-      });
+      // console.log("📊 Données carte chargées:", {
+      //   category,
+      //   total: mapPoints.length,
+      //   filtered: filteredPoints.length
+      // });
 
       setMapError(null);
 
@@ -302,7 +302,7 @@ const CarteBoutton: React.FC<CarteBouttonProps> = ({
 
   // Gérer le clic sur un point de la carte
   const handleMapPointClick = (point: MapPoint) => {
-    console.log("Point carte cliqué:", point);
+    // console.log("Point carte cliqué:", point);
     setSelectedMapPoint(point);
   };
 

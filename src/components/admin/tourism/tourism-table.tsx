@@ -47,7 +47,7 @@ export function TourismTable() {
       setLoading(true)
       setError(null)
 
-      console.log("📊 Chargement des expériences touristiques...")
+      // console.log("📊 Chargement des expériences touristiques...")
 
       const response = await api.get('/admin/tourisme', {
         params: {
@@ -56,7 +56,7 @@ export function TourismTable() {
         }
       })
 
-      console.log("📊 Réponse API tourisme:", response.data)
+      // console.log("📊 Réponse API tourisme:", response.data)
 
       const listings = response.data?.data || response.data || []
 
@@ -78,11 +78,11 @@ export function TourismTable() {
         status: listing.available ? 'active' : 'suspended'
       }))
 
-      console.log("🎯 Expériences transformées:", transformedExperiences)
+      // console.log("🎯 Expériences transformées:", transformedExperiences)
 
       setExperiences(transformedExperiences)
     } catch (error) {
-      console.error("❌ Erreur lors du chargement:", error)
+      // console.error("❌ Erreur lors du chargement:", error)
       setError("Erreur lors du chargement des expériences")
       setExperiences([])
     } finally {
@@ -102,7 +102,7 @@ export function TourismTable() {
 
     try {
       setDeletingId(experience.id)
-      console.log("🗑️ Suppression de l'expérience:", experience.id)
+      // console.log("🗑️ Suppression de l'expérience:", experience.id)
 
       await api.delete(`/admin/tourisme/${experience.id}`)
 

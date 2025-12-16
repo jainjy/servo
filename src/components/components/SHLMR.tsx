@@ -189,7 +189,7 @@ const LogementsSHLMR = () => {
             setError(null);
 
             const response = await api.get("/properties/shlmr");
-            console.log("Réponse API SHLMR:", response.data);
+            // console.log("Réponse API SHLMR:", response.data);
 
             if (response.data.success) {
                 const transformedProperties = response.data.data.map((property) => ({

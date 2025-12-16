@@ -113,7 +113,7 @@ export function ProPerformanceCharts() {
       }
 
       const filteredBookings = bookings.filter(booking => booking.listing.provider === user?.id)
-      console.log('Bookings chargés:', filteredBookings.length, 'sur', bookings.length)
+      // console.log('Bookings chargés:', filteredBookings.length, 'sur', bookings.length)
 
       // Récupérer les avis pour les notes
       let reviews: Review[] = []
@@ -132,11 +132,11 @@ export function ProPerformanceCharts() {
           reviews = reviewsResponse.data.reviews
         }
       } catch (error) {
-        console.log('Endpoint reviews non disponible')
+        // console.log('Endpoint reviews non disponible')
         reviews = []
       }
 
-      console.log('Reviews chargés:', reviews.length)
+      // console.log('Reviews chargés:', reviews.length)
 
       // Filter reviews to only include those for the current professional's listings
       const proListingIds = new Set(filteredBookings.map(b => b.listing.id))
@@ -167,7 +167,7 @@ export function ProPerformanceCharts() {
       return date
     }).reverse()
 
-    console.log('Calcul revenue data pour', bookings.length, 'bookings')
+    // console.log('Calcul revenue data pour', bookings.length, 'bookings')
 
     const result = last7Days.map(date => {
       const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
@@ -190,7 +190,7 @@ export function ProPerformanceCharts() {
       const revenue = dayBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0)
       const bookingsCount = dayBookings.length
 
-      console.log(`Date ${dateStr}: ${bookingsCount} bookings, ${revenue}€`)
+      // console.log(`Date ${dateStr}: ${bookingsCount} bookings, ${revenue}€`)
 
       return {
         date: dateStr,
@@ -199,7 +199,7 @@ export function ProPerformanceCharts() {
       }
     })
 
-    console.log('Revenue data final:', result)
+    // console.log('Revenue data final:', result)
     return result
   }
 
@@ -210,7 +210,7 @@ export function ProPerformanceCharts() {
       return date
     }).reverse()
 
-    console.log('Calcul rating data - Reviews:', reviews.length, 'Bookings:', bookings.length)
+    // console.log('Calcul rating data - Reviews:', reviews.length, 'Bookings:', bookings.length)
 
     // Si pas de reviews, utiliser les ratings des listings des bookings
     let ratingsToUse: {rating: number, createdAt: string}[] = []
@@ -230,7 +230,7 @@ export function ProPerformanceCharts() {
         }))
     }
 
-    console.log('Ratings à utiliser:', ratingsToUse.length)
+    // console.log('Ratings à utiliser:', ratingsToUse.length)
 
     const result = last6Months.map(monthDate => {
       const monthStr = monthDate.toLocaleDateString('fr-FR', { month: 'short' })
@@ -249,7 +249,7 @@ export function ProPerformanceCharts() {
         ? monthRatings.reduce((sum, item) => sum + item.rating, 0) / monthRatings.length
         : 0 // 0 si vraiment pas de données
 
-      console.log(`Mois ${monthStr}: ${monthRatings.length} ratings, moyenne: ${averageRating}`)
+      // console.log(`Mois ${monthStr}: ${monthRatings.length} ratings, moyenne: ${averageRating}`)
 
       return {
         month: monthStr,
@@ -257,7 +257,7 @@ export function ProPerformanceCharts() {
       }
     })
 
-    console.log('Rating data final:', result)
+    // console.log('Rating data final:', result)
     return result
   }
 
@@ -377,10 +377,10 @@ export function ProPerformanceCharts() {
   const hasRevenueData = revenueData.some(item => item.revenue > 0 || item.bookings > 0)
   const hasRatingData = ratingData.some(item => item.rating > 0)
 
-  console.log('Render - Has revenue data:', hasRevenueData)
-  console.log('Render - Has rating data:', hasRatingData)
-  console.log('Render - Revenue data:', revenueData)
-  console.log('Render - Rating data:', ratingData)
+  // console.log('Render - Has revenue data:', hasRevenueData)
+  // console.log('Render - Has rating data:', hasRatingData)
+  // console.log('Render - Revenue data:', revenueData)
+  // console.log('Render - Rating data:', ratingData)
 
   return (
     <div className="space-y-6">

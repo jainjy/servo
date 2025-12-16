@@ -418,7 +418,7 @@ export function ListingModal({
         ownerId: listing?.ownerId || currentUser?.id || "default-owner-id",
       };
 
-      console.log("Payload envoyé:", payload); // Pour debug
+      // console.log("Payload envoyé:", payload); // Pour debug
 
       if (mode === "create") {
         await api.post("/properties", payload);

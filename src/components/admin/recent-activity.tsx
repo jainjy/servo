@@ -38,7 +38,7 @@ export function RecentActivity() {
         setLoading(true)
         setError(null)
 
-        console.log("🔄 Début du chargement des activités...")
+        // console.log("🔄 Début du chargement des activités...")
 
         // Récupérer les données avec des fallbacks robustes
         const [
@@ -55,13 +55,13 @@ export function RecentActivity() {
           api.get('/admin/reviews?limit=5')
         ])
 
-        console.log("📊 Résultats des APIs:", {
-          bookings: recentBookings,
-          listings: recentListings,
-          users: recentUsers,
-          demandes: recentDemandes,
-          reviews: recentReviews
-        })
+        // console.log("📊 Résultats des APIs:", {
+        //   bookings: recentBookings,
+        //   listings: recentListings,
+        //   users: recentUsers,
+        //   demandes: recentDemandes,
+        //   reviews: recentReviews
+        // })
 
         // Extraire les données avec fallback
         const bookingsData = recentBookings.status === 'fulfilled' 
@@ -84,13 +84,13 @@ export function RecentActivity() {
           ? (recentReviews.value.data?.data || recentReviews.value.data || [])
           : []
 
-        console.log("📦 Données transformées:", {
-          bookings: bookingsData,
-          listings: listingsData,
-          users: usersData,
-          demandes: demandesData,
-          reviews: reviewsData
-        })
+        // console.log("📦 Données transformées:", {
+        //   bookings: bookingsData,
+        //   listings: listingsData,
+        //   users: usersData,
+        //   demandes: demandesData,
+        //   reviews: reviewsData
+        // })
 
         // Transformer les données en activités
         const transformedActivities = transformToActivities(
@@ -101,12 +101,12 @@ export function RecentActivity() {
           reviewsData
         )
 
-        console.log("🎯 Activités transformées:", transformedActivities)
+        // console.log("🎯 Activités transformées:", transformedActivities)
 
         // Si aucune activité n'est trouvée, créer des données de démo
         let finalActivities = transformedActivities
         if (transformedActivities.length === 0) {
-          console.log("⚠️ Aucune activité trouvée, utilisation des données de démo")
+          // console.log("⚠️ Aucune activité trouvée, utilisation des données de démo")
           finalActivities = generateDemoActivities()
         }
 
@@ -185,13 +185,13 @@ export function RecentActivity() {
   ): Activity[] => {
     const activities: Activity[] = []
 
-    console.log("🛠 Transformation des données:", {
-      bookingsCount: bookings.length,
-      listingsCount: listings.length,
-      usersCount: users.length,
-      demandesCount: demandes.length,
-      reviewsCount: reviews.length
-    })
+    // console.log("🛠 Transformation des données:", {
+    //   bookingsCount: bookings.length,
+    //   listingsCount: listings.length,
+    //   usersCount: users.length,
+    //   demandesCount: demandes.length,
+    //   reviewsCount: reviews.length
+    // })
 
     try {
       // Activités des réservations

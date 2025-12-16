@@ -217,12 +217,12 @@ const Header = () => {
     if (!user?.id) return;
     setNotifLoading(true);
     try {
-      console.log("📨 Chargement des notifications...");
+      // console.log("📨 Chargement des notifications...");
       const response = await api.get(`/notifications/user/${user.id}`);
       const { notifications = [], unreadCount = 0 } = response.data || {};
-      console.log(
-        `✅ ${notifications.length} notifications chargées, ${unreadCount} non lues`
-      );
+      // console.log(
+      //   `✅ ${notifications.length} notifications chargées, ${unreadCount} non lues`
+      // );
       setNotifications(notifications);
       setNotificationCount(unreadCount);
     } catch (error) {
@@ -239,7 +239,7 @@ const Header = () => {
   const handleMarkAsRead = async (notificationId: string) => {
     if (!user?.id) return;
     try {
-      console.log(`📨 Marquer comme lu: ${notificationId}`);
+      // console.log(`📨 Marquer comme lu: ${notificationId}`);
       await api.post(`/notifications/user/${user.id}/read/${notificationId}`);
       // Mettre à jour localement
       setNotifications((prev) =>
@@ -262,7 +262,7 @@ const Header = () => {
   const handleMarkAsUnread = async (notificationId: string) => {
     if (!user?.id) return;
     try {
-      console.log(`📨 Marquer comme non lu: ${notificationId}`);
+      // console.log(`📨 Marquer comme non lu: ${notificationId}`);
       await api.post(`/notifications/user/${user.id}/unread/${notificationId}`);
       // Mettre à jour localement
       setNotifications((prev) =>
@@ -285,7 +285,7 @@ const Header = () => {
   const handleMarkAllAsRead = async () => {
     if (!user?.id) return;
     try {
-      console.log("📨 Marquer toutes comme lues");
+      // console.log("📨 Marquer toutes comme lues");
       await api.post(`/notifications/user/${user.id}/read-all`);
       // Mettre à jour localement
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
@@ -306,7 +306,7 @@ const Header = () => {
   const handleClearAll = async () => {
     if (!user?.id) return;
     try {
-      console.log("🗑️ Supprimer toutes les notifications");
+      // console.log("🗑️ Supprimer toutes les notifications");
       await api.post(`/notifications/user/${user.id}/clear-all`);
       // Recharger les notifications
       await loadNotifications();
@@ -325,7 +325,7 @@ const Header = () => {
   const handleDeleteNotification = async (notificationId: string) => {
     if (!user?.id) return;
     try {
-      console.log(`🗑️ Supprimer notification: ${notificationId}`);
+      // console.log(`🗑️ Supprimer notification: ${notificationId}`);
       await api.delete(
         `/notifications/user/${user.id}/delete/${notificationId}`
       );

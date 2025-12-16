@@ -195,18 +195,18 @@ useEffect(() => {
       const allPoints = await MapService.getAllMapPoints();
       
       // DEBUG: Vérifier les données
-      console.log("📊 Données carte chargées:", {
-        total: allPoints.length,
-        users: allPoints.filter(p => p.type === "user").length,
-        properties: allPoints.filter(p => p.type === "property").length,
-        firstPoints: allPoints.slice(0, 3).map(p => ({
-          id: p.id,
-          name: p.name,
-          type: p.type,
-          lat: p.latitude,
-          lng: p.longitude
-        }))
-      });
+      // console.log("📊 Données carte chargées:", {
+      //   total: allPoints.length,
+      //   users: allPoints.filter(p => p.type === "user").length,
+      //   properties: allPoints.filter(p => p.type === "property").length,
+      //   firstPoints: allPoints.slice(0, 3).map(p => ({
+      //     id: p.id,
+      //     name: p.name,
+      //     type: p.type,
+      //     lat: p.latitude,
+      //     lng: p.longitude
+      //   }))
+      // });
       
       setMapPoints(allPoints);
       setFilteredMapPoints(allPoints);
@@ -284,7 +284,7 @@ useEffect(() => {
 
   // Fonction pour gérer le clic sur un point de la carte
 const handleMapPointClick = useCallback((point: MapPoint) => {
-  console.log("Point carte cliqué:", point);
+  // console.log("Point carte cliqué:", point);
   setSelectedMapPoint(point);
 }, []);
 
@@ -743,7 +743,7 @@ const handleMapPointClick = useCallback((point: MapPoint) => {
 
     try {
       const response = await api.post("/recherche", { prompt: q });
-      console.log("Réponse API:", response.data);
+      // console.log("Réponse API:", response.data);
 
       if (response.data.success && Array.isArray(response.data.results)) {
         const normalizedResults = normalizeApiResults(response.data.results);

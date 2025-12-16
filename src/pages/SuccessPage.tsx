@@ -15,7 +15,7 @@ const SuccessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, plan, metiers, metiersLabel } = location.state || {};
-  console.log({ user, plan, metiers, metiersLabel } );
+  // console.log({ user, plan, metiers, metiersLabel } );
   const handleGoToDashboard = () => {
     navigate("/pro");
   };

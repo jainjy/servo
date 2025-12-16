@@ -30,7 +30,7 @@ export default function SettingsPage() {
 
   const handleSave = () => {
     // Simulation de sauvegarde
-    console.log("Sauvegarde des paramètres:", settings)
+    // console.log("Sauvegarde des paramètres:", settings)
     // Ici vous feriez un appel API pour sauvegarder les paramètres
   }
 

@@ -64,7 +64,7 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
   // Fonction pour récupérer et mettre à jour les utilisateurs
   const fetchAndUpdateUsers = () => {
     const storedUsers = localStorage.getItem("user-data");
-    console.log("🔄 Actualisation des utilisateurs depuis localStorage:", storedUsers);
+    // console.log("🔄 Actualisation des utilisateurs depuis localStorage:", storedUsers);
 
     if (storedUsers) {
       try {
@@ -78,7 +78,7 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
         }));
 
         setUsers(formattedUsers);
-        console.log("✅ Utilisateurs chargés depuis localStorage :", formattedUsers);
+        // console.log("✅ Utilisateurs chargés depuis localStorage :", formattedUsers);
 
         // Pré-remplir automatiquement le champ utilisateur
         if (formattedUsers.length === 1) {
@@ -133,7 +133,7 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
   useEffect(() => {
     if (open) {
-      console.log("🎯 Modal ouvert - Actualisation des données...");
+      // console.log("🎯 Modal ouvert - Actualisation des données...");
       fetchFormData();
       fetchAndUpdateUsers(); // Actualisation automatique à l'ouverture
     }
@@ -147,14 +147,14 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
 
   const fetchFormData = async () => {
     try {
-      console.log("📥 Chargement des catégories et métiers...");
+      // console.log("📥 Chargement des catégories et métiers...");
       const [categoriesRes, metiersRes] = await Promise.all([
         api.get('/harmonie/categories'),
         api.get('/harmonie/metiers')
       ])
       setCategories(categoriesRes.data)
       setMetiers(metiersRes.data)
-      console.log("✅ Catégories et métiers chargés avec succès");
+      // console.log("✅ Catégories et métiers chargés avec succès");
     } catch (error) {
       console.error('❌ Erreur lors du chargement des données:', error)
     }
@@ -259,7 +259,7 @@ export function ServiceModalPro({ open, onOpenChange, service, mode, onServiceUp
         images: Array.isArray(formData.images) ? formData.images : [],
       };
 
-      console.log("📤 Payload envoyé au backend:", payload);
+      // console.log("📤 Payload envoyé au backend:", payload);
 
       if (mode === "create") {
         await api.post("/harmonie/new", payload);

@@ -312,7 +312,7 @@ const QuoteModal: React.FC<{
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulation d'envoi
-    console.log("Demande de devis envoyée:", { service, ...formData });
+    // console.log("Demande de devis envoyée:", { service, ...formData });
     alert("Votre demande de devis a été envoyée avec succès ! Nous vous recontacterons dans les 24h.");
     onSubmit(formData);
     setFormData({ name: "", email: "", phone: "", message: "", deadline: "", budget: "" });
@@ -517,12 +517,12 @@ export default function ConstructionServicesPage() {
 
   const handleQuoteSubmit = (formData: any) => {
     // Simulation d'envoi à une API
-    console.log("Devis soumis:", { service: quoteService, ...formData });
+    // console.log("Devis soumis:", { service: quoteService, ...formData });
     // Ici vous ajouteriez l'appel API réel
   };
 
   const handleContactSubmit = (formData: any) => {
-    console.log("Contact soumis:", formData);
+    // console.log("Contact soumis:", formData);
     alert("Votre message a été envoyé ! Nous vous recontacterons rapidement.");
     setShowContactModal(false);
   };

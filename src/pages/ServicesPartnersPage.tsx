@@ -87,7 +87,7 @@ const ServicesPartnersPage = () => {
       setLoading(true);
       setError(null);
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      console.log('🔄 Chargement des données depuis:', API_BASE_URL);
+      // console.log('🔄 Chargement des données depuis:', API_BASE_URL);
 
       // Récupérer tous les services en parallèle
       const requests = [
@@ -119,7 +119,7 @@ const ServicesPartnersPage = () => {
       if (servicesRes.ok) {
         const servicesData = await servicesRes.json();
         const parsedServices = parseApiData(servicesData, 'services');
-        console.log('✅ Services chargés:', parsedServices.length);
+        // console.log('✅ Services chargés:', parsedServices.length);
         setServices(parsedServices.map((service: any) => ({ ...service, type: 'service' })));
       } else {
         console.warn('❌ Erreur services:', servicesRes.status);
@@ -129,7 +129,7 @@ const ServicesPartnersPage = () => {
       if (propertiesRes.ok) {
         const propertiesData = await propertiesRes.json();
         const parsedProperties = parseApiData(propertiesData, 'properties');
-        console.log('✅ Propriétés chargées:', parsedProperties.length);
+        // console.log('✅ Propriétés chargées:', parsedProperties.length);
         setProperties(parsedProperties.map((property: any) => ({ ...property, type: 'property' })));
       } else {
         console.warn('❌ Erreur propriétés:', propertiesRes.status);
@@ -139,7 +139,7 @@ const ServicesPartnersPage = () => {
       if (productsRes.ok) {
         const productsData = await productsRes.json();
         const parsedProducts = parseApiData(productsData, 'products');
-        console.log('✅ Produits chargés:', parsedProducts.length);
+        // console.log('✅ Produits chargés:', parsedProducts.length);
         setProducts(parsedProducts.map((product: any) => ({ ...product, type: 'product' })));
       } else {
         console.warn('❌ Erreur produits:', productsRes.status);
@@ -149,7 +149,7 @@ const ServicesPartnersPage = () => {
       if (alimentsRes.ok) {
         const alimentsData = await alimentsRes.json();
         const parsedAliments = parseApiData(alimentsData, 'aliments');
-        console.log('✅ Aliments chargés:', parsedAliments.length);
+        // console.log('✅ Aliments chargés:', parsedAliments.length);
         setAliments(parsedAliments.map((aliment: any) => ({ ...aliment, type: 'aliment' })));
       } else {
         console.warn('❌ Erreur aliments:', alimentsRes.status);
@@ -453,7 +453,7 @@ const ServicesPartnersPage = () => {
             <button
               className="w-full mt-4 bg-[#556B2F] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#6B8E23] transition-colors duration-300"
               onClick={() => {
-                console.log('Détails item:', item);
+                // console.log('Détails item:', item);
                 alert(`Détails: ${displayName}\nType: ${config.label}\nPrix: ${displayPrice || 'N/A'}€`);
               }}
             >

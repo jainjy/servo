@@ -2190,7 +2190,7 @@ const PropertyListings: React.FC<PropertyListingsProps> = ({
         onChange={setLocalisation}
         onLocationSelect={(location) => {
           setLocalisation(location.address);
-          console.log("Location selected:", location);
+          // console.log("Location selected:", location);
         }}
         properties={[
           ...buyProperties,

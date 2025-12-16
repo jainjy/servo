@@ -40,14 +40,14 @@ const Cart = ({ isOpen, onClose }) => {
 
   // Synchroniser avec les items du contexte
   useEffect(() => {
-    console.log("🔄 [CART] - Synchronisation des items du panier:", cartItems?.length);
+    // console.log("🔄 [CART] - Synchronisation des items du panier:", cartItems?.length);
     setLocalCartItems(cartItems || []);
   }, [cartItems]);
 
   // Vérifier l'authentification et tracker l'ouverture du panier
   useEffect(() => {
     if (isOpen) {
-      console.log("🛒 [CART] - Ouverture du panier, vérification auth...");
+      // console.log("🛒 [CART] - Ouverture du panier, vérification auth...");
       checkAuthentication();
       
       // Track l'ouverture du panier
@@ -148,34 +148,34 @@ const Cart = ({ isOpen, onClose }) => {
       const token = localStorage.getItem("auth-token");
       const userData = localStorage.getItem("user-data");
 
-      console.log("🔍 [CART AUTH] - Vérification détaillée:");
-      console.log("📍 Token:", token ? "Présent" : "Absent");
-      console.log("📍 UserData:", userData ? "Présent" : "Absent");
+      // console.log("🔍 [CART AUTH] - Vérification détaillée:");
+      // console.log("📍 Token:", token ? "Présent" : "Absent");
+      // console.log("📍 UserData:", userData ? "Présent" : "Absent");
 
       if (token && token !== "null" && token !== "undefined") {
         setIsAuthenticated(true);
-        console.log("✅ [CART AUTH] - Utilisateur authentifié");
+        // console.log("✅ [CART AUTH] - Utilisateur authentifié");
 
         if (userData && userData !== "null" && userData !== "undefined") {
           try {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
-            console.log("👤 [CART AUTH] - Données utilisateur:", parsedUser);
+            // console.log("👤 [CART AUTH] - Données utilisateur:", parsedUser);
           } catch (error) {
-            console.error("❌ [CART AUTH] - Erreur parsing user data:", error);
+            // console.error("❌ [CART AUTH] - Erreur parsing user data:", error);
             setUser({ firstName: "Utilisateur", lastName: "" });
           }
         } else {
-          console.log("⚠️ [CART AUTH] - Données utilisateur manquantes");
+          // console.log("⚠️ [CART AUTH] - Données utilisateur manquantes");
           setUser({ firstName: "Utilisateur", lastName: "" });
         }
       } else {
-        console.log("❌ [CART AUTH] - Aucun token valide - Utilisateur non authentifié");
+        // console.log("❌ [CART AUTH] - Aucun token valide - Utilisateur non authentifié");
         setIsAuthenticated(false);
         setUser(null);
       }
     } catch (error) {
-      console.error("💥 [CART AUTH] - Erreur lors de la vérification auth:", error);
+      // console.error("💥 [CART AUTH] - Erreur lors de la vérification auth:", error);
       setIsAuthenticated(false);
       setUser(null);
     }
@@ -253,17 +253,17 @@ const Cart = ({ isOpen, onClose }) => {
 
   // Rediriger vers la page de connexion
   const redirectToLogin = () => {
-    console.log("🔐 [CART] - Redirection vers login");
+    // console.log("🔐 [CART] - Redirection vers login");
     onClose();
     navigate("/login");
   };
 
   // Fonction de checkout améliorée avec meilleur débogage
   const handleCheckout = async () => {
-    console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
+    // console.log("🎯 [CART CHECKOUT] - Début du processus de commande");
     
     // DEBUG: Afficher les items
-    console.log("📦 Items dans le panier:", JSON.stringify(localCartItems, null, 2));
+    // console.log("📦 Items dans le panier:", JSON.stringify(localCartItems, null, 2));
 
     // Validation
     if (!isAuthenticated) {
@@ -298,7 +298,7 @@ const Cart = ({ isOpen, onClose }) => {
         paymentMethod: "card"
       };
 
-      console.log("📤 Données envoyées au backend:", JSON.stringify(orderData, null, 2));
+      // console.log("📤 Données envoyées au backend:", JSON.stringify(orderData, null, 2));
 
       // Appel API
       const response = await api.post('/orders', orderData);

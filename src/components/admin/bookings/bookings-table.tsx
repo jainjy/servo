@@ -61,7 +61,7 @@ export function BookingsTable() {
       setLoading(true)
       setError(null)
 
-      console.log("🔄 Chargement des réservations depuis l'API...")
+      // console.log("🔄 Chargement des réservations depuis l'API...")
 
       const response = await api.get('/tourisme-bookings', {
         params: {
@@ -70,16 +70,16 @@ export function BookingsTable() {
         }
       })
 
-      console.log("📊 Réponse API réservations:", response.data)
+      // console.log("📊 Réponse API réservations:", response.data)
 
       const apiBookings = response.data?.data || response.data || []
       const transformedBookings = transformApiBookings(apiBookings)
 
-      console.log("🎯 Réservations transformées:", transformedBookings)
+      // console.log("🎯 Réservations transformées:", transformedBookings)
 
       setBookings(transformedBookings)
     } catch (error) {
-      console.error("❌ Erreur lors du chargement des réservations:", error)
+      // console.error("❌ Erreur lors du chargement des réservations:", error)
       setError("Erreur lors du chargement des réservations")
       setBookings([])
     } finally {
@@ -137,7 +137,7 @@ export function BookingsTable() {
   const handleConfirm = async (booking: Booking) => {
     try {
       setConfirmingBooking(booking.id)
-      console.log("✅ Confirmation de la réservation:", booking.id)
+      // console.log("✅ Confirmation de la réservation:", booking.id)
 
       await api.put(`/tourisme-bookings/${booking.id}/status`, {
         status: 'confirmed'
@@ -174,12 +174,12 @@ export function BookingsTable() {
 
     try {
       setContactSending(true)
-      console.log("📧 Envoi du message au client:", {
-        bookingId: contactBooking.id,
-        clientEmail: contactBooking.email,
-        clientPhone: contactBooking.phone,
-        message: contactMessage
-      })
+      // console.log("📧 Envoi du message au client:", {
+      //   bookingId: contactBooking.id,
+      //   clientEmail: contactBooking.email,
+      //   clientPhone: contactBooking.phone,
+      //   message: contactMessage
+      // })
 
       toast.success("Message envoyé avec succès")
       setIsContactModalOpen(false)
@@ -200,7 +200,7 @@ export function BookingsTable() {
 
     try {
       setCancellingBooking(booking.id)
-      console.log("🗑️ Annulation de la réservation:", booking.id)
+      // console.log("🗑️ Annulation de la réservation:", booking.id)
 
       await api.delete(`/tourisme-bookings/${booking.id}`)
 

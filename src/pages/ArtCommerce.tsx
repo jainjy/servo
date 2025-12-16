@@ -47,7 +47,7 @@ const ArtCommerce: React.FC = () => {
         const res = await api.get("/oeuvre/all");
         const data = await res.data;
         setServices(data || []);
-        console.log(data);
+        // console.log(data);
       } catch (err) {
         console.error("Erreur de chargement des services :", err);
       } finally {

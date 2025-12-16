@@ -249,7 +249,7 @@ const InvestirEtranger = () => {
   };
 
   const handleAddAudit = (audit: any) => {
-    console.log('✅ Audit ajouté avec succès:', audit);
+    // console.log('✅ Audit ajouté avec succès:', audit);
     alert("Votre demande d'audit a été enregistrée avec succès !");
   };
 

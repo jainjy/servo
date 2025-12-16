@@ -306,7 +306,7 @@ const ModalDemande = ({ open, onClose, userId, onDemandeCreated }) => {
                   value={selectedMetier}
                   onChange={(e) => {
                     setSelectedMetier(e.target.value);
-                    console.log(e.target.value);
+                    // console.log(e.target.value);
                   }}
                   className="w-full bg-[#6B8E23]/5 border border-[#D3D3D3] px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent appearance-none transition-all duration-200"
                 >
@@ -680,7 +680,7 @@ const MesDemande = () => {
 
   useEffect(() => {
     fetchData();
-    console.log(user);
+    // console.log(user);
   }, [userId]);
 
   const filteredDemandes =

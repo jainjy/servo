@@ -136,7 +136,7 @@ export function AuthHeader() {
   // Récupérer l'utilisateur connecté et initialiser les notifications
   useEffect(() => {
     const user = AuthService.getCurrentUser();
-    console.log("👤 Utilisateur connecté:", user);
+    // console.log("👤 Utilisateur connecté:", user);
     setCurrentUser(user);
 
     if (user) {
@@ -219,14 +219,14 @@ export function AuthHeader() {
       try {
         const results: SearchResult[] = [];
 
-        console.log("🔍 Recherche lancée pour:", query);
+        // console.log("🔍 Recherche lancée pour:", query);
 
         // Recherche utilisateurs
         try {
           const usersResponse = await api.get(`/users`, {
             params: { search: query },
           });
-          console.log("👥 Réponse utilisateurs:", usersResponse.data);
+          // console.log("👥 Réponse utilisateurs:", usersResponse.data);
 
           // Gérer les différents formats de réponse
           let usersData = Array.isArray(usersResponse.data)
@@ -256,7 +256,7 @@ export function AuthHeader() {
           const listingsResponse = await api.get(`/anonce/affiche_anonce`, {
             params: { search: query },
           });
-          console.log("🏠 Réponse annonces brute:", listingsResponse.data);
+          // console.log("🏠 Réponse annonces brute:", listingsResponse.data);
 
           // Gérer le format {success, message, data}
           let listingsData = Array.isArray(listingsResponse.data)
@@ -289,7 +289,7 @@ export function AuthHeader() {
           const servicesResponse = await api.get(`/services`, {
             params: { search: query },
           });
-          console.log("🔧 Réponse services:", servicesResponse.data);
+          // console.log("🔧 Réponse services:", servicesResponse.data);
 
           let servicesData = Array.isArray(servicesResponse.data)
             ? servicesResponse.data
@@ -313,7 +313,7 @@ export function AuthHeader() {
           console.warn("⚠️ Erreur recherche services:", err);
         }
 
-        console.log("✅ Résultats trouvés:", results.length, results);
+        // console.log("✅ Résultats trouvés:", results.length, results);
         setSearchResults(results);
         setShowResults(results.length > 0);
       } catch (error) {
@@ -326,7 +326,7 @@ export function AuthHeader() {
   };
 
   const markAsRead = async (id: number) => {
-    console.log(`🟡 Tentative de marquer comme lue la notification ${id}`);
+    // console.log(`🟡 Tentative de marquer comme lue la notification ${id}`);
 
     const success = await NotificationService.markAsRead(id);
 
@@ -335,7 +335,7 @@ export function AuthHeader() {
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
-      console.log(`✅ Notification ${id} marquée comme lue avec succès`);
+      // console.log(`✅ Notification ${id} marquée comme lue avec succès`);
     } else {
       console.error(
         `❌ Échec du marquage comme lue pour la notification ${id}`
@@ -344,7 +344,7 @@ export function AuthHeader() {
   };
 
   const markAllAsRead = async () => {
-    console.log("🟡 Marquage de toutes les notifications comme lues");
+    // console.log("🟡 Marquage de toutes les notifications comme lues");
 
     setIsDeletingAll(true);
 
@@ -386,9 +386,9 @@ export function AuthHeader() {
         }))
       );
       setUnreadCount(0);
-      console.log(
-        `✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`
-      );
+      // console.log(
+      //   `✅ ${successCount}/${unreadNotifications.length} notifications marquées comme lues`
+      // );
     } else {
       console.error("❌ Aucune notification n'a pu être marquée comme lue");
     }

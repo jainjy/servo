@@ -110,10 +110,10 @@ export const ProTouristicPlaceBookings = () => {
       const userPlacesData = allPlaces.filter((place: any) => place.idPrestataire);
       
       setUserPlaces(userPlacesData);
-      console.log('🏛️ Lieux du prestataire:', userPlacesData);
+      // console.log('🏛️ Lieux du prestataire:', userPlacesData);
 
       if (userPlacesData.length === 0) {
-        console.log('ℹ️ Aucun lieu touristique créé par ce prestataire');
+        // console.log('ℹ️ Aucun lieu touristique créé par ce prestataire');
         setBookings([]);
         setFilteredBookings([]);
         calculateStats([]);
@@ -126,7 +126,7 @@ export const ProTouristicPlaceBookings = () => {
         limit: 1000
       });
 
-      console.log('📊 Réponse API réservations:', bookingsResponse.data);
+      // console.log('📊 Réponse API réservations:', bookingsResponse.data);
 
       if (bookingsResponse.data.success) {
         const bookingsData = bookingsResponse.data.data;
@@ -137,7 +137,7 @@ export const ProTouristicPlaceBookings = () => {
           placeIds.includes(booking.place.id)
         );
 
-        console.log('✅ Réservations filtrées:', userBookings);
+        // console.log('✅ Réservations filtrées:', userBookings);
         
         setBookings(userBookings);
         setFilteredBookings(userBookings);
@@ -438,7 +438,7 @@ export const ProTouristicPlaceBookings = () => {
 
   const sendReminder = async (bookingId: string) => {
     try {
-      console.log('📨 Envoi rappel pour réservation:', bookingId);
+      // console.log('📨 Envoi rappel pour réservation:', bookingId);
     } catch (error) {
       console.error("❌ Erreur envoi rappel:", error);
     }
@@ -455,7 +455,7 @@ export const ProTouristicPlaceBookings = () => {
     };
     
     const qrString = JSON.stringify(qrData);
-    console.log('🎫 QR Code data:', qrString);
+    // console.log('🎫 QR Code data:', qrString);
   };
 
   const getStatusIcon = (status: TouristicPlaceBooking["status"]) => {

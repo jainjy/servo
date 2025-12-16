@@ -429,8 +429,8 @@ export default function ServicesIBRPage() {
       const categoriesResponse = await api.get("/services-ibr/categories");
       setCategories(categoriesResponse.data);
 
-      console.log("✅ Services IBR:", servicesResponse.data.length);
-      console.log("✅ Catégories IBR:", categoriesResponse.data.length);
+      // console.log("✅ Services IBR:", servicesResponse.data.length);
+      // console.log("✅ Catégories IBR:", categoriesResponse.data.length);
     } catch (error) {
       console.error("Erreur lors du chargement des données IBR:", error);
     } finally {

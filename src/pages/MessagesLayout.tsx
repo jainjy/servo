@@ -13,7 +13,7 @@ export default function MessagesLayout() {
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     setCurrentUser(user);
-    console.log("curentUser", currentUser);
+    // console.log("curentUser", currentUser);
   }, []);
 
   const content = () => {

@@ -30,7 +30,7 @@ const PropertyCard = ({
 
   const handleContact = (e) => {
     e.stopPropagation();
-    console.log("Contacter pour le bien:", id);
+    // console.log("Contacter pour le bien:", id);
     // Logique pour contacter l'agent
   };
 

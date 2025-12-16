@@ -51,16 +51,16 @@ const OwnerReservations = () => {
 
   // Détecter la taille de l'écran
   useEffect(() => {
-    console.log("🔄 OwnerReservations component mounted");
-    console.log("👤 User info:", {
-      id: user?.id,
-      role: user?.role,
-      email: user?.email
-    });
+    // console.log("🔄 OwnerReservations component mounted");
+    // console.log("👤 User info:", {
+    //   id: user?.id,
+    //   role: user?.role,
+    //   email: user?.email
+    // });
     
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
-      console.log(`📱 Window width: ${window.innerWidth}px, isMobile: ${mobile}`);
+      // console.log(`📱 Window width: ${window.innerWidth}px, isMobile: ${mobile}`);
       setIsMobile(mobile);
     };
     
@@ -68,7 +68,7 @@ const OwnerReservations = () => {
     window.addEventListener('resize', checkMobile);
     
     return () => {
-      console.log("🧹 OwnerReservations component cleanup");
+      // console.log("🧹 OwnerReservations component cleanup");
       window.removeEventListener('resize', checkMobile);
     };
   }, [user]);
@@ -76,49 +76,49 @@ const OwnerReservations = () => {
   // Charger les réservations
   const loadReservations = async () => {
     if (!isAuthenticated || !user?.id) {
-      console.log('❌ OwnerReservations: User not authenticated or no user ID');
+      // console.log('❌ OwnerReservations: User not authenticated or no user ID');
       setLoading(false);
       return;
     }
     
     setLoading(true);
     try {
-      console.log('🔄 OwnerReservations: Loading owner reservations...', { 
-        userId: user.id,
-        userRole: user.role
-      });
+      // console.log('🔄 OwnerReservations: Loading owner reservations...', { 
+      //   userId: user.id,
+      //   userRole: user.role
+      // });
       
       // Pour les propriétaires: toutes les réservations de leurs propriétés
-      console.log(`🌐 Making API call to: /locations-saisonnieres/proprietaire/${user.id}`);
+      // console.log(`🌐 Making API call to: /locations-saisonnieres/proprietaire/${user.id}`);
       const response = await api.get(`/locations-saisonnieres/proprietaire/${user.id}`);
       
-      console.log('📥 API Response:', {
-        status: response.status,
-        dataLength: response.data?.length,
-        dataSample: response.data?.[0]
-      });
+      // console.log('📥 API Response:', {
+      //   status: response.status,
+      //   dataLength: response.data?.length,
+      //   dataSample: response.data?.[0]
+      // });
 
       if (response.data && Array.isArray(response.data)) {
-        console.log(`✅ ${response.data.length} owner reservations loaded`);
+        // console.log(`✅ ${response.data.length} owner reservations loaded`);
         
         // Log des détails des réservations
         response.data.forEach((res: LocationSaisonniere, index: number) => {
-          console.log(`📋 Reservation ${index + 1}:`, {
-            id: res.id,
-            propertyTitle: res.property?.title,
-            client: res.client ? `${res.client.firstName} ${res.client.lastName}` : 'No client',
-            statut: res.statut,
-            prixTotal: res.prixTotal
-          });
+          // console.log(`📋 Reservation ${index + 1}:`, {
+          //   id: res.id,
+          //   propertyTitle: res.property?.title,
+          //   client: res.client ? `${res.client.firstName} ${res.client.lastName}` : 'No client',
+          //   statut: res.statut,
+          //   prixTotal: res.prixTotal
+          // });
         });
         
         setReservations(response.data);
         
         // Charger les statistiques avancées
-        console.log('📊 Loading advanced statistics...');
+        // console.log('📊 Loading advanced statistics...');
         const statsResponse = await api.get(`/locations-saisonnieres/proprietaire/${user.id}/stats`);
         
-        console.log('📈 Stats response:', statsResponse.data);
+        // console.log('📈 Stats response:', statsResponse.data);
         
         const statsData = {
           total: response.data.length,
@@ -134,7 +134,7 @@ const OwnerReservations = () => {
           occupationRate: statsResponse.data?.occupationRate || 0,
         };
         
-        console.log('📊 Statistics calculated:', statsData);
+        // console.log('📊 Statistics calculated:', statsData);
         setStats(statsData);
       } else {
         console.error('❌ Invalid data format from API:', response.data);
@@ -157,41 +157,41 @@ const OwnerReservations = () => {
         variant: "destructive"
       });
     } finally {
-      console.log('🏁 OwnerReservations: Loading finished');
+      // console.log('🏁 OwnerReservations: Loading finished');
       setLoading(false);
     }
   };
 
   // Charger au montage
   useEffect(() => {
-    console.log("🔍 OwnerReservations: useEffect triggered", {
-      isAuthenticated,
-      userId: user?.id,
-      loading
-    });
+    // console.log("🔍 OwnerReservations: useEffect triggered", {
+    //   isAuthenticated,
+    //   userId: user?.id,
+    //   loading
+    // });
     
     if (isAuthenticated && user?.id) {
-      console.log("🚀 Starting to load reservations...");
+      // console.log("🚀 Starting to load reservations...");
       loadReservations();
     } else {
-      console.log("⏸️ Skipping load - user not authenticated");
+      // console.log("⏸️ Skipping load - user not authenticated");
       setLoading(false);
     }
   }, [isAuthenticated, user?.id]);
 
   // Filtrer les réservations
   const filteredReservations = React.useMemo(() => {
-    console.log("🔍 Filtering owner reservations:", {
-      totalReservations: reservations.length,
-      activeTab,
-      searchTerm,
-    });
+    // console.log("🔍 Filtering owner reservations:", {
+    //   totalReservations: reservations.length,
+    //   activeTab,
+    //   searchTerm,
+    // });
     
     let filtered = reservations;
 
     if (activeTab !== "all") {
       filtered = filtered.filter((reservation) => reservation.statut === activeTab);
-      console.log(`🎯 Filtered by status "${activeTab}": ${filtered.length} reservations`);
+      // console.log(`🎯 Filtered by status "${activeTab}": ${filtered.length} reservations`);
     }
 
     if (searchTerm) {
@@ -203,36 +203,36 @@ const OwnerReservations = () => {
         reservation.client?.lastName?.toLowerCase().includes(term) ||
         reservation.client?.email?.toLowerCase().includes(term)
       );
-      console.log(`🔍 Filtered by search term "${searchTerm}": ${filtered.length} reservations`);
+      // console.log(`🔍 Filtered by search term "${searchTerm}": ${filtered.length} reservations`);
     }
 
-    console.log(`✅ Final filtered count: ${filtered.length} reservations`);
+    // console.log(`✅ Final filtered count: ${filtered.length} reservations`);
     return filtered;
   }, [reservations, activeTab, searchTerm]);
 
   // Changer le statut d'une réservation
   const handleStatusChange = async (id: number, statut: LocationSaisonniere['statut']) => {
-    console.log(`🔄 OwnerReservations: Status change requested`, {
-      reservationId: id,
-      newStatus: statut,
-      currentStatus: reservations.find(r => r.id === id)?.statut,
-      clientInfo: reservations.find(r => r.id === id)?.client
-    });
+    // console.log(`🔄 OwnerReservations: Status change requested`, {
+    //   reservationId: id,
+    //   newStatus: statut,
+    //   currentStatus: reservations.find(r => r.id === id)?.statut,
+    //   clientInfo: reservations.find(r => r.id === id)?.client
+    // });
     
     setUpdatingIds((s) => [...s, id]);
     try {
-      console.log(`🌐 Making API call to update status for reservation ${id}`);
+      // console.log(`🌐 Making API call to update status for reservation ${id}`);
       
       const response = await api.patch(`/locations-saisonnieres/${id}/statut`, { statut });
       
-      console.log('✅ API response:', response.data);
+      // console.log('✅ API response:', response.data);
       
       if (response.data) {
         setReservations((prev) =>
           prev.map((r) => r.id === id ? { ...r, statut, updatedAt: new Date().toISOString() } : r)
         );
 
-        console.log(`✅ Status updated locally for reservation ${id}`);
+        // console.log(`✅ Status updated locally for reservation ${id}`);
         
         // Recharger les statistiques
         if (user?.id) {
@@ -264,29 +264,29 @@ const OwnerReservations = () => {
     } finally {
       setUpdatingIds((s) => {
         const newIds = s.filter((x) => x !== id);
-        console.log(`🏁 Updating IDs after completion:`, newIds);
+        // console.log(`🏁 Updating IDs after completion:`, newIds);
         return newIds;
       });
     }
   };
 
   const handleRemove = async (id: number) => {
-    console.log(`🗑️ OwnerReservations: Remove requested for reservation ${id}`);
+    // console.log(`🗑️ OwnerReservations: Remove requested for reservation ${id}`);
     
     if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?")) {
-      console.log('❌ Delete cancelled by user');
+      // console.log('❌ Delete cancelled by user');
       return;
     }
 
     setUpdatingIds((s) => [...s, id]);
     try {
-      console.log(`🌐 Making API call to delete reservation ${id}`);
+      // console.log(`🌐 Making API call to delete reservation ${id}`);
       
       await api.delete(`/locations-saisonnieres/${id}`);
       
       setReservations((prev) => {
         const newReservations = prev.filter((r) => r.id !== id);
-        console.log(`✅ Reservation ${id} removed locally. New count: ${newReservations.length}`);
+        // console.log(`✅ Reservation ${id} removed locally. New count: ${newReservations.length}`);
         return newReservations;
       });
       
@@ -322,16 +322,16 @@ const OwnerReservations = () => {
   };
 
   const handleViewDetails = (reservation: LocationSaisonniere) => {
-    console.log("👁️ View details clicked for reservation:", {
-      id: reservation.id,
-      propertyId: reservation.propertyId,
-      propertyTitle: reservation.property?.title,
-      clientInfo: reservation.client
-    });
+    // console.log("👁️ View details clicked for reservation:", {
+    //   id: reservation.id,
+    //   propertyId: reservation.propertyId,
+    //   propertyTitle: reservation.property?.title,
+    //   clientInfo: reservation.client
+    // });
     
     // Naviguer vers la page du bien ou ouvrir un modal
     if (reservation.propertyId) {
-      console.log(`🔗 Opening property page: /immobilier/${reservation.propertyId}`);
+      // console.log(`🔗 Opening property page: /immobilier/${reservation.propertyId}`);
       window.open(`/immobilier/${reservation.propertyId}`, '_blank');
     } else {
       console.warn('⚠️ No propertyId found for reservation:', reservation.id);
@@ -339,7 +339,7 @@ const OwnerReservations = () => {
   };
 
   const handleExport = () => {
-    console.log(`📤 Export requested for ${filteredReservations.length} reservations`);
+    // console.log(`📤 Export requested for ${filteredReservations.length} reservations`);
     
     if (filteredReservations.length === 0) {
       console.warn('⚠️ No reservations to export');
@@ -367,7 +367,7 @@ const OwnerReservations = () => {
       'Date création': new Date(r.createdAt).toLocaleDateString("fr-FR"),
     }));
 
-    console.log('📊 CSV data prepared:', csvData.length, 'rows');
+    // console.log('📊 CSV data prepared:', csvData.length, 'rows');
 
     const headers = Object.keys(csvData[0] || {});
     const csvContent = [
@@ -383,7 +383,7 @@ const OwnerReservations = () => {
     a.click();
     URL.revokeObjectURL(url);
     
-    console.log('✅ CSV file downloaded');
+    // console.log('✅ CSV file downloaded');
     
     toast({
       title: "Export réussi",
@@ -393,7 +393,7 @@ const OwnerReservations = () => {
   };
 
   if (!isAuthenticated) {
-    console.log('🔒 OwnerReservations: User not authenticated, showing login message');
+    // console.log('🔒 OwnerReservations: User not authenticated, showing login message');
     return (
       <div className="min-h-screen mt-12 bg-gray-50 p-4 md:p-6 flex items-center justify-center">
         <p className="text-gray-600">
@@ -404,17 +404,17 @@ const OwnerReservations = () => {
   }
 
   if (loading) {
-    console.log('⏳ OwnerReservations: Loading spinner shown');
+    // console.log('⏳ OwnerReservations: Loading spinner shown');
     return <LoadingSpinner text="Chargement des locations saisonnières" />;
   }
 
-  console.log('🎨 OwnerReservations: Rendering main component', {
-    reservationsCount: reservations.length,
-    filteredCount: filteredReservations.length,
-    stats,
-    activeTab,
-    searchTerm
-  });
+  // console.log('🎨 OwnerReservations: Rendering main component', {
+  //   reservationsCount: reservations.length,
+  //   filteredCount: filteredReservations.length,
+  //   stats,
+  //   activeTab,
+  //   searchTerm
+  // });
 
   return (
     <div className="min-h-screen bg-gray-50 mt-10 p-4 md:p-6">
@@ -510,7 +510,7 @@ const OwnerReservations = () => {
                 placeholder="Rechercher client, bien, ville..."
                 value={searchTerm}
                 onChange={(e) => {
-                  console.log(`🔍 Search term changed: "${e.target.value}"`);
+                  // console.log(`🔍 Search term changed: "${e.target.value}"`);
                   setSearchTerm(e.target.value);
                 }}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
@@ -536,7 +536,7 @@ const OwnerReservations = () => {
             <button
               key={tab.id}
               onClick={() => {
-                console.log(`📌 Tab clicked: ${tab.id}`);
+                // console.log(`📌 Tab clicked: ${tab.id}`);
                 setActiveTab(tab.id);
               }}
               className={`px-3 md:px-6 py-2 md:py-3 text-xs md:text-sm font-medium rounded-md md:rounded-lg transition-all duration-200 flex items-center gap-1 md:gap-2 whitespace-nowrap ${

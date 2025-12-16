@@ -108,12 +108,12 @@ const handleClose = () => {
                 formData.append('images', image);
             });
 
-            console.log('📤 Envoi vers /api/anonce...');
+            // console.log('📤 Envoi vers /api/anonce...');
 
             // UTILISATION DE LA NOUVELLE API
             const response = await annonceAPI.createAnnonce(formData);
             
-            console.log('✅ Annonce créée:', response.data);
+            // console.log('✅ Annonce créée:', response.data);
 
             // Appeler la fonction parent pour ajouter l'annonce
             onAddAnnonce(response.data.property);

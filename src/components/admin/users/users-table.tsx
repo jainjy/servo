@@ -155,7 +155,7 @@ export function UsersTable() {
 
     try {
       await api.delete(`/users/${user.id}`);
-      console.log("User deleted successfully");
+      // console.log("User deleted successfully");
       toast.success("Utilisateur supprimé avec succès");
       fetchUsers();
     } catch (error) {

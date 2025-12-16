@@ -38,7 +38,7 @@ export function BookingsCalendar() {
       setLoading(true)
       setError(null)
 
-      console.log("🔄 Chargement des réservations depuis l'API...")
+      // console.log("🔄 Chargement des réservations depuis l'API...")
 
       // Appel API réel - utiliser l'endpoint tourisme-bookings
       const response = await api.get('/tourisme-bookings', {
@@ -49,14 +49,14 @@ export function BookingsCalendar() {
         }
       })
 
-      console.log("📊 Réponse API réservations:", response.data)
+      // console.log("📊 Réponse API réservations:", response.data)
 
       // Transformer les données de l'API
       const apiBookings = response.data?.data || response.data || []
 
       const transformedBookings = transformApiBookings(apiBookings)
 
-      console.log("🎯 Réservations transformées:", transformedBookings)
+      // console.log("🎯 Réservations transformées:", transformedBookings)
 
       setUpcomingBookings(transformedBookings.slice(0, 4)) // Garder seulement 4 réservations
 

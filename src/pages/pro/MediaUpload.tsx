@@ -153,13 +153,13 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
         uploadFormData.append('thumbnail', files.thumbnail);
       }
 
-      console.log('📤 Données envoyées:');
-      console.log('Titre:', formData.title);
-      console.log('Description:', formData.description);
-      console.log('Catégorie:', formData.category || 'Aucune');
-      console.log('Statut:', formData.isActive);
-      console.log('Fichier média:', files.media?.name);
-      console.log('Fichier thumbnail:', files.thumbnail?.name);
+      // console.log('📤 Données envoyées:');
+      // console.log('Titre:', formData.title);
+      // console.log('Description:', formData.description);
+      // console.log('Catégorie:', formData.category || 'Aucune');
+      // console.log('Statut:', formData.isActive);
+      // console.log('Fichier média:', files.media?.name);
+      // console.log('Fichier thumbnail:', files.thumbnail?.name);
 
       const endpoint = type === 'podcast' 
         ? '/admin/media/podcasts' 
@@ -180,7 +180,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
         timeout: 300000,
       });
 
-      console.log('✅ Réponse du serveur:', response.data);
+      // console.log('✅ Réponse du serveur:', response.data);
 
       if (response.data.success) {
         onUploadSuccess(response.data.data);

@@ -99,7 +99,7 @@ const ServicesPage = () => {
         };
 
         const parsedServices = parseApiData(data);
-        console.log('Services chargés:', parsedServices.length);
+        // console.log('Services chargés:', parsedServices.length);
         setServices(parsedServices);
 
         // Extraire les catégories uniques des services
@@ -204,8 +204,8 @@ const ServicesPage = () => {
       return;
     }
     
-    console.log("Email:", email);
-    console.log("Message:", message);
+    // console.log("Email:", email);
+    // console.log("Message:", message);
     setShowMessageCard(false);
     setEmail('');
     setMessage('');

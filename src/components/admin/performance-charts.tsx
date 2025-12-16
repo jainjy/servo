@@ -39,7 +39,7 @@ export function PerformanceCharts() {
         ])
 
         const bookingsData: AnalyticsData = bookingsResponse.data.data
-        console.log("Données analytics reçues:", bookingsData)
+        // console.log("Données analytics reçues:", bookingsData)
 
         const chartData = transformDataForCharts(bookingsData.monthly)
         setData(chartData)

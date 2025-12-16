@@ -101,7 +101,7 @@ const AppointmentForm = ({ isOpen, onClose, service }) => {
         message: formData.message
       });
 
-      console.log("✅ Rendez-vous créé:", response.data);
+      // console.log("✅ Rendez-vous créé:", response.data);
       alert("Rendez-vous confirmé ! Nous vous contacterons rapidement.");
       onClose();
 
@@ -404,18 +404,18 @@ const BienEtre = () => {
 
   const fetchServices = async () => {
     try {
-      console.log("🔄 DÉBUT DE LA RÉCUPÉRATION DES DONNÉES");
+      // console.log("🔄 DÉBUT DE LA RÉCUPÉRATION DES DONNÉES");
       const response = await api.get('/harmonie/views');
 
-      console.log("🎯 RÉPONSE COMPLÈTE DE L'API:", response);
-      console.log("📦 DONNÉES BRUTES:", response.data);
+      // console.log("🎯 RÉPONSE COMPLÈTE DE L'API:", response);
+      // console.log("📦 DONNÉES BRUTES:", response.data);
 
       if (response.data) {
-        console.log("🔍 DÉTAIL PAR CATÉGORIE:");
-        console.log("Formateur:", response.data.Formateur);
-        console.log("Masseur:", response.data.Masseur);
-        console.log("Thérapeute:", response.data.Thérapeute);
-        console.log("Podcasteur:", response.data.Podcasteur);
+        // console.log("🔍 DÉTAIL PAR CATÉGORIE:");
+        // console.log("Formateur:", response.data.Formateur);
+        // console.log("Masseur:", response.data.Masseur);
+        // console.log("Thérapeute:", response.data.Thérapeute);
+        // console.log("Podcasteur:", response.data.Podcasteur);
       } else {
         console.warn("⚠️ AUCUNE DONNÉE DANS LA RÉPONSE");
       }
@@ -437,13 +437,13 @@ const BienEtre = () => {
   }, []);
 
   useEffect(() => {
-    console.log("🔄 SERVICES BY CATEGORY MIS À JOUR:", servicesByCategory);
+    // console.log("🔄 SERVICES BY CATEGORY MIS À JOUR:", servicesByCategory);
   }, [servicesByCategory]);
 
   useEffect(() => {
-    console.log(`📌 ONGLET ACTIF: ${activeTab}`);
-    console.log(`📊 DONNÉES POUR ${activeTab}:`, servicesByCategory[activeTab]);
-    console.log(`🔢 NOMBRE DE SERVICES: ${servicesByCategory[activeTab]?.length || 0}`);
+    // console.log(`📌 ONGLET ACTIF: ${activeTab}`);
+    // console.log(`📊 DONNÉES POUR ${activeTab}:`, servicesByCategory[activeTab]);
+    // console.log(`🔢 NOMBRE DE SERVICES: ${servicesByCategory[activeTab]?.length || 0}`);
   }, [activeTab, servicesByCategory]);
 
   const getAllServices = () => {

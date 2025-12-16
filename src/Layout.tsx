@@ -30,7 +30,7 @@ function Layout({ children }) {
   });
   const aCacher = "/mon-compte/demandes/messages";
   const hideOther = location.pathname.includes(aCacher);
-  console.log(location.pathname.includes(aCacher));
+  // console.log(location.pathname.includes(aCacher));
 
   return (
     <div className="min-h-screen flex flex-col">

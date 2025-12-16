@@ -73,7 +73,7 @@ const OffresExclusives = () => {
     const catLower = category?.toLowerCase() || '';
     const typeLower = type?.toLowerCase() || '';
     
-    console.log('getButtonConfig - Catégorie:', category, 'Type:', type);
+    // console.log('getButtonConfig - Catégorie:', category, 'Type:', type);
     
     // RÈGLE SPÉCIALE : Si la catégorie contient "immobilier" (même en minuscule)
     // ALORS c'est un devis immobilier, peu importe le type
@@ -134,7 +134,7 @@ const OffresExclusives = () => {
 
   // Fonction pour gérer l'action du bouton
   const handleButtonAction = (offre: Offre, action: string) => {
-    console.log('Action bouton:', action, 'pour offre:', offre.title);
+    // console.log('Action bouton:', action, 'pour offre:', offre.title);
     
     switch (action) {
       case 'acheter':
@@ -182,14 +182,14 @@ const OffresExclusives = () => {
 
   // Fonction pour gérer les réservations
   const handleReservation = (offre: Offre) => {
-    console.log('Réservation pour:', offre.title);
+    // console.log('Réservation pour:', offre.title);
     toast.success(`Réservation initiée pour ${offre.title}`);
     // Ici vous pouvez rediriger vers une page de réservation ou ouvrir un modal
   };
 
   // Fonction pour gérer les devis
   const handleDevis = (offre: Offre) => {
-    console.log('Demande de devis pour:', offre.title);
+    // console.log('Demande de devis pour:', offre.title);
     setSelectedOffre(offre);
     setModalDevisOpen(true);
   };
@@ -197,7 +197,7 @@ const OffresExclusives = () => {
   // Fonction de soumission du devis
   const handleDevisSubmit = async (formData: any) => {
     try {
-      console.log('Demande de devis pour:', selectedOffre?.title, formData);
+      // console.log('Demande de devis pour:', selectedOffre?.title, formData);
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success(`Votre demande de devis pour ${selectedOffre?.title} a été envoyée avec succès !`);
       setModalDevisOpen(false);
@@ -234,7 +234,7 @@ const OffresExclusives = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log('🔍 Début du chargement des offres...');
+        // console.log('🔍 Début du chargement des offres...');
         
         const [flashResponse, categoriesResponse, statsResponse] = await Promise.all([
           offresExclusivesAPI.getOffresFlash(),
@@ -242,17 +242,17 @@ const OffresExclusives = () => {
           offresExclusivesAPI.getStats()
         ]);
 
-        console.log('📦 Réponse flash:', flashResponse);
+        // console.log('📦 Réponse flash:', flashResponse);
         
         if (flashResponse.data.success) {
           const data = flashResponse.data.data || [];
-          console.log('✅ Offres reçues:', data.length, 'offres');
-          console.log('📋 Détail des offres:', data.map((o: any) => ({
-            title: o.title,
-            category: o.category,
-            type: o.type,
-            price: o.price
-          })));
+          // console.log('✅ Offres reçues:', data.length, 'offres');
+          // console.log('📋 Détail des offres:', data.map((o: any) => ({
+          //   title: o.title,
+          //   category: o.category,
+          //   type: o.type,
+          //   price: o.price
+          // })));
           
           // Compter par type
           const counts: {[key: string]: number} = {};
@@ -260,7 +260,7 @@ const OffresExclusives = () => {
             const type = o.type || 'Non défini';
             counts[type] = (counts[type] || 0) + 1;
           });
-          console.log('📊 Distribution par type:', counts);
+          // console.log('📊 Distribution par type:', counts);
           
           setOffresFlash(data);
         } else {
@@ -284,7 +284,7 @@ const OffresExclusives = () => {
         console.error('❌ Erreur chargement données:', error);
       } finally {
         setLoading(false);
-        console.log('✅ Chargement terminé');
+        // console.log('✅ Chargement terminé');
       }
     };
 

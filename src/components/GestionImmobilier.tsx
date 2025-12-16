@@ -313,7 +313,7 @@ const GestionImmobilier = () => {
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    console.log("Formulaire contact soumis:", contactFormData);
+    // console.log("Formulaire contact soumis:", contactFormData);
     alert(
       "Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais."
     );

@@ -26,15 +26,15 @@ export function TourismStats() {
       setLoading(true)
       setError(null)
 
-      console.log("📊 Chargement des statistiques touristiques...")
+      // console.log("📊 Chargement des statistiques touristiques...")
 
       const [tourismResponse, bookingsResponse] = await Promise.all([
         api.get('/admin/tourisme/stats'),
         api.get('/tourisme-bookings', { params: { limit: 1000 } })
       ])
 
-      console.log("📊 Réponse stats tourisme:", tourismResponse.data)
-      console.log("📊 Réponse réservations:", bookingsResponse.data)
+      // console.log("📊 Réponse stats tourisme:", tourismResponse.data)
+      // console.log("📊 Réponse réservations:", bookingsResponse.data)
 
       const tourismData = tourismResponse.data?.data || tourismResponse.data
       const bookingsData = bookingsResponse.data?.data || bookingsResponse.data || []
@@ -53,7 +53,7 @@ export function TourismStats() {
         totalParticipants: totalParticipants
       }
 
-      console.log("🎯 Statistiques combinées:", combinedStats)
+      // console.log("🎯 Statistiques combinées:", combinedStats)
 
       setStats(combinedStats)
     } catch (error) {

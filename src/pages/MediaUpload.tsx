@@ -82,7 +82,7 @@ const MediaUpload = ({ type, onUploadSuccess, onClose }) => {
         response = await mediaService.uploadVideo(uploadData);
       }
 
-      console.log('📦 Upload response:', response);
+      // console.log('📦 Upload response:', response);
 
       if (response.success) {
         onUploadSuccess(response.data);

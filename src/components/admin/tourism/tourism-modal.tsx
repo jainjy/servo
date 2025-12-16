@@ -36,7 +36,7 @@ export function TourismModal({ open, onOpenChange, experience, mode }: TourismMo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Tourism form submitted:", formData)
+    // console.log("[v0] Tourism form submitted:", formData)
     onOpenChange(false)
   }
 

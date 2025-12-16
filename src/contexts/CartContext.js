@@ -77,11 +77,11 @@ const CartPage = () => {
       }
 
       // Simulation de commande réussie
-      console.log("🚀 Commande passée avec succès:", {
-        items: cartItems,
-        total: total,
-        deliveryInfo: hasProducts ? deliveryInfo : "Aucune livraison nécessaire (service)"
-      });
+      // console.log("🚀 Commande passée avec succès:", {
+      //   items: cartItems,
+      //   total: total,
+      //   deliveryInfo: hasProducts ? deliveryInfo : "Aucune livraison nécessaire (service)"
+      // });
 
       toast.success("🎉 Commande passée avec succès !");
       

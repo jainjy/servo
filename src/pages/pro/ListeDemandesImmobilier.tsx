@@ -642,27 +642,27 @@ const ListeDemandesImmobilier = () => {
   // Fonction pour charger les demandes depuis l'API
   const loadDemandes = async () => {
     if (!isAuthenticated || !user?.id) {
-      console.log('❌ Utilisateur non authentifié ou ID manquant');
+      // console.log('❌ Utilisateur non authentifié ou ID manquant');
       setLoading(false);
       return;
     }
     
     setLoading(true);
     try {
-      console.log('🔄 Chargement des demandes depuis l\'API...', { 
-        isArtisan, 
-        userId: user.id,
-        userRole: user.role
-      });
+      // console.log('🔄 Chargement des demandes depuis l\'API...', { 
+      //   isArtisan, 
+      //   userId: user.id,
+      //   userRole: user.role
+      // });
       
       let response;
       
       if (isArtisan) {
         response = await demandeImmobilierAPI.getArtisanDemandes(user.id);
-        console.log('🏗️ Mode ARTISAN - Demandes pour ses propriétés:', response.data);
+        // console.log('🏗️ Mode ARTISAN - Demandes pour ses propriétés:', response.data);
       } else {
         response = await demandeImmobilierAPI.getUserDemandes(user.id);
-        console.log('👤 Mode CLIENT - Demandes envoyées:', response.data);
+        // console.log('👤 Mode CLIENT - Demandes envoyées:', response.data);
       }
 
       if (response.data && Array.isArray(response.data)) {
@@ -679,7 +679,7 @@ const ListeDemandesImmobilier = () => {
         }));
         
         setDemandes(formattedDemandes);
-        console.log(`✅ ${formattedDemandes.length} demandes chargées`);
+        // console.log(`✅ ${formattedDemandes.length} demandes chargées`);
       } else {
         console.error('❌ Format de données invalide:', response.data);
         setDemandes([]);
@@ -709,7 +709,7 @@ const ListeDemandesImmobilier = () => {
   // Écouter les événements de nouvelle demande
   useEffect(() => {
     const handleNewDemande = () => {
-      console.log('🔄 Événement: Nouvelle demande détectée, rechargement...');
+      // console.log('🔄 Événement: Nouvelle demande détectée, rechargement...');
       loadDemandes();
     };
 
@@ -781,7 +781,7 @@ const ListeDemandesImmobilier = () => {
   const handleStatusChange = async (id: number, statut: string) => {
     setUpdatingIds((s) => [...s, id]);
     try {
-      console.log(`🔄 Changement statut demande ${id} -> ${statut}`);
+      // console.log(`🔄 Changement statut demande ${id} -> ${statut}`);
       
       const response = await demandeImmobilierAPI.updateStatut(id, statut);
       

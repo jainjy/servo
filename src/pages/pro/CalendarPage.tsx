@@ -197,7 +197,7 @@ const transformerDonneesAPI = (apiData) => {
     return [];
   }
 
-  console.log("Transformation des données API:", apiData.data.events);
+  // console.log("Transformation des données API:", apiData.data.events);
 
   return apiData.data.events
     .filter((event) => {
@@ -295,7 +295,7 @@ const transformerDonneesAPI = (apiData) => {
         sourceData: event,
       };
 
-      console.log("Rendez-vous transformé:", rendezVous);
+      // console.log("Rendez-vous transformé:", rendezVous);
       return rendezVous;
     });
 };
@@ -670,7 +670,7 @@ const ModalRendezVous = ({
         serviceId: formData.serviceId || 1,
       };
 
-      console.log("Données envoyées:", appointmentData);
+      // console.log("Données envoyées:", appointmentData);
 
       if (rendezVous?.id && !rendezVous.id.startsWith("event_")) {
         await api.put(`/planning/${rendezVous.id}`, appointmentData);
@@ -1377,14 +1377,14 @@ const CalendarPage = () => {
       setChargement(true);
       setErreur(null);
 
-      console.log("Début du chargement des rendez-vous...");
+      // console.log("Début du chargement des rendez-vous...");
       const response = await api.get("/planning");
 
-      console.log("Réponse API reçue:", response.data);
+      // console.log("Réponse API reçue:", response.data);
 
       if (response.data.success) {
         const rendezVousTransformes = transformerDonneesAPI(response.data);
-        console.log("Rendez-vous transformés:", rendezVousTransformes);
+        // console.log("Rendez-vous transformés:", rendezVousTransformes);
         setRendezVous(rendezVousTransformes);
         toast.success(`${rendezVousTransformes.length} rendez-vous chargés`);
       } else {

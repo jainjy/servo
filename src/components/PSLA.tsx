@@ -226,7 +226,7 @@ const CartesBiensImmobiliers = () => {
   const handleVoirDetails = (property: any, e: React.MouseEvent) => {
     e.stopPropagation();
     // Ici vous pouvez naviguer vers une page de détails ou ouvrir un modal de détails
-    console.log("Voir détails pour:", property.id);
+    // console.log("Voir détails pour:", property.id);
 
     navigate(`/immobilier/${property.id}`);
   };

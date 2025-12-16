@@ -244,9 +244,9 @@ const ProOrders = () => {
   // Charger les statistiques
   const fetchStats = async () => {
     try {
-      console.log('📊 Chargement des statistiques...');
+      // console.log('📊 Chargement des statistiques...');
       const response = await ordersProAPI.getProStats();
-      console.log('✅ Statistiques reçues:', response.data);
+      // console.log('✅ Statistiques reçues:', response.data);
       setStats(response.data.stats);
     } catch (error) {
       console.error('❌ Erreur chargement statistiques:', error);
@@ -256,10 +256,10 @@ const ProOrders = () => {
   // Charger les statistiques par type de produit
   const fetchProductTypeStats = async () => {
     try {
-      console.log('📈 Chargement des statistiques par type de produit...');
+      // console.log('📈 Chargement des statistiques par type de produit...');
       const response = await ordersProAPI.getProProductTypes();
       if (response.data.success) {
-        console.log('✅ Statistiques types produits reçues:', response.data.productTypes);
+        // console.log('✅ Statistiques types produits reçues:', response.data.productTypes);
         setProductTypeStats(response.data.productTypes);
       }
     } catch (error) {
@@ -272,14 +272,14 @@ const ProOrders = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${status})...`);
+      // console.log(`🔄 Chargement des commandes (productType: ${productType}, status: ${status})...`);
       
       const response = await ordersProAPI.getProOrders({
         productType: productType !== 'all' ? productType : undefined,
         status: status !== 'all' ? status : undefined
       });
       
-      console.log('✅ Commandes reçues:', response.data);
+      // console.log('✅ Commandes reçues:', response.data);
       
       if (response.data.success) {
         let filteredOrders = response.data.orders || [];
@@ -347,12 +347,12 @@ const ProOrders = () => {
   // Mettre à jour le statut d'une commande
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      console.log(`🔄 Mise à jour statut commande ${orderId} vers: ${newStatus}`);
+      // console.log(`🔄 Mise à jour statut commande ${orderId} vers: ${newStatus}`);
       
       const response = await ordersProAPI.updateOrderStatus(orderId, newStatus);
       
       if (response.data.success) {
-        console.log('✅ Statut mis à jour avec succès');
+        // console.log('✅ Statut mis à jour avec succès');
         fetchOrders(activeTab, statusFilter);
         triggerNotificationsUpdate();
       } else {

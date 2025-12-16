@@ -129,7 +129,7 @@ const MapPage: React.FC = () => {
   }, [points, filters]);
 
   const handlePointClick = (point: MapPoint) => {
-    console.log("Point cliqué:", point);
+    // console.log("Point cliqué:", point);
     setSelectedPoint(point);
   };
 

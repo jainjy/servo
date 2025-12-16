@@ -114,7 +114,7 @@ const MesDocumentsPage = () => {
     try {
       setLoading(true);
       const response = await api.get("/client/documents/mes-documents");
-      console.log(response.data.data);
+      // console.log(response.data.data);
       if (response.data) {
         const data = await response.data;
         setDocuments(data.data || []);
@@ -142,10 +142,10 @@ const MesDocumentsPage = () => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log("Fichiers sélectionnés:", files);
+    // console.log("Fichiers sélectionnés:", files);
 
     if (!files || files.length === 0) {
-      console.log("Aucun fichier sélectionné");
+      // console.log("Aucun fichier sélectionné");
       return;
     }
 

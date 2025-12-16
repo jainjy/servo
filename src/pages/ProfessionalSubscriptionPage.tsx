@@ -40,7 +40,7 @@ const ProfessionalSubscriptionPage = () => {
       setLoading(true);
       const response = await subscriptionPlansAPI.getAllPlans();
       if (response.success) {
-        console.log("Plans récupérés:", response.data);
+        // console.log("Plans récupérés:", response.data);
         // Mapper les données de l'API avec les icônes appropriées
         const plansWithIcons = response.data.map((plan) => {
           let icon;

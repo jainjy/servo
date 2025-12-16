@@ -109,7 +109,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
     gsap.registerPlugin(ScrollTrigger);
   }, []);
 
-  console.log("Détails de la propriété:", property);
+  // console.log("Détails de la propriété:", property);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
@@ -244,7 +244,7 @@ const PropertyDetailPage = ({ property }: PropertyDetailPageProps) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
-      console.log("✅ Toutes les images ont été téléchargées !");
+      // console.log("✅ Toutes les images ont été téléchargées !");
     } catch (error) {
       console.error("❌ Erreur lors du téléchargement des images :", error);
     }

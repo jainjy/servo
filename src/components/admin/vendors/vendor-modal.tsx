@@ -36,7 +36,7 @@ export function VendorModal({ open, onOpenChange, vendor, mode }: VendorModalPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Vendor form submitted:", formData)
+    // console.log("[v0] Vendor form submitted:", formData)
     onOpenChange(false)
   }
 

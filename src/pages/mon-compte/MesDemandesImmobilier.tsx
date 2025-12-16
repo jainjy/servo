@@ -231,10 +231,10 @@ const DemandeImmoCard = ({
               }
 
               if (/validée|validee|valide/i.test(status)) {
-                console.log("Demande:", demande);
-                console.log("Status:", status);
-                console.log("Property:", demande.property);
-                console.log("Owner:", demande.property?.owner);
+                // console.log("Demande:", demande);
+                // console.log("Status:", status);
+                // console.log("Property:", demande.property);
+                // console.log("Owner:", demande.property?.owner);
                 return (
                   <div className="flex items-center gap-2">
                     <DeleteButton
@@ -538,7 +538,7 @@ const MesDemandesImmobilier = () => {
       try {
         const resp = await api.get(`/demandes/immobilier/user/${user.id}`);
         const all = resp.data || [];
-        console.log("Données reçues de l'API:", all);
+        // console.log("Données reçues de l'API:", all);
         setDemandes(all); // Émettre un événement pour recharger les notifications
         window.dispatchEvent(new CustomEvent("notifications:reload"));
       } catch (err) {
