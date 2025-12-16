@@ -73,7 +73,6 @@ const LoginRoleSelectionPage = () => {
 
   return (
     <div className="relative min-h-screen flex overflow-hidden ">
-      
       <div className="absolute inset-0 bg-black/80 backdrop-blur-lg -z-10"></div>
       <div className="absolute inset-0 -z-20">
         {/* Remplace cette image par un élément img classique */}
@@ -83,18 +82,20 @@ const LoginRoleSelectionPage = () => {
           className="w-full h-full object-cover"
         />
       </div>
-                
-            {/* Bouton Retour stylé en haut à gauche */}
-            <div className="absolute top-6 left-6 z-30">
-              <Button
-                variant="outline"
-                className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
-                onClick={()=>{navigate(-1)}}
-              >
-                <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
-                <span className="font-semibold">Retour</span>
-              </Button>
-            </div>
+
+      {/* Bouton Retour stylé en haut à gauche */}
+      <div className="absolute top-6 left-6 z-30">
+        <Button
+          variant="outline"
+          className="px-6 py-3 border-white/30 bg-black/40 backdrop-blur-md text-white hover:bg-white/20 hover:text-white hover:border-white/50 transition-all duration-300 rounded-2xl shadow-2xl group"
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-semibold">Retour</span>
+        </Button>
+      </div>
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
       <div className="w-full">
