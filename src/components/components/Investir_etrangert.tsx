@@ -14,6 +14,7 @@ import {
 import React, { useState } from 'react';
 import Api from '../../lib/api.js';
 import DemandeAudit from '../../components/DemandeAudit.tsx';
+import { AdCard } from '@/pages/Publicite.tsx';
 
 interface InvestFormData {
   nom: string;
@@ -259,23 +260,23 @@ const InvestirEtranger = () => {
   return (
     <div className="min-h-screen  text-[#2a2a2a]">
       {/* Hero Section */}
-     <section className="text-white py-16">
-                <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
-                    <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
-                    <img src="https://i.pinimg.com/736x/a3/44/d8/a344d8a87a5fcf100d50161769059f48.jpg" className='h-full object-cover w-full' alt="" />
-                </div>
-                <div className="container mx-auto px-4 mt-10">
-                    <div className="max-w-4xl mx-auto text-center">
-                       <h1 className="text-4xl lg:text-5xl font-semibold mb-4 tracking-[0.2em] text-gray-100 dark:text-white">
-  INVESTISSEMENT
-</h1>
-                        <p className="text-sm lg:text-md opacity-90 mb-8 max-w-2xl mx-auto">
-                            Diversifiez votre patrimoine avec nos solutions clés en main
-                            dans les marchés porteurs à fort potentiel
-                        </p>
-                    </div>
-                </div>
-            </section>
+      <section className="text-white py-16">
+        <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
+          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <img src="https://i.pinimg.com/736x/a3/44/d8/a344d8a87a5fcf100d50161769059f48.jpg" className='h-full object-cover w-full' alt="" />
+        </div>
+        <div className="container mx-auto px-4 mt-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl lg:text-5xl font-semibold mb-4 tracking-[0.2em] text-gray-100 dark:text-white">
+              INVESTISSEMENT
+            </h1>
+            <p className="text-sm lg:text-md opacity-90 mb-8 max-w-2xl mx-auto">
+              Diversifiez votre patrimoine avec nos solutions clés en main
+              dans les marchés porteurs à fort potentiel
+            </p>
+          </div>
+        </div>
+      </section>
       {/* Navigation Pays */}
       <section className="py-4 bg-[#FFFFFF]">
         <div className="container mx-auto px-4">
@@ -284,11 +285,10 @@ const InvestirEtranger = () => {
               <button
                 key={key}
                 onClick={() => setPaysActive(key)}
-                className={`px-6 py-2 flex items-center gap-3 rounded-xl font-semibold transition-all duration-300 transform border ${
-                  paysActive === key
-                    ? `bg-gradient-to-r ${pays.couleur} text-white shadow-lg border-transparent`
-                    : 'bg-[#FFFFFF] text-[#556B2F] border-[#D3D3D3] hover:bg-[#F7F7F7]'
-                }`}
+                className={`px-6 py-2 flex items-center gap-3 rounded-xl font-semibold transition-all duration-300 transform border ${paysActive === key
+                  ? `bg-gradient-to-r ${pays.couleur} text-white shadow-lg border-transparent`
+                  : 'bg-[#FFFFFF] text-[#556B2F] border-[#D3D3D3] hover:bg-[#F7F7F7]'
+                  }`}
               >
                 <div className="text-xl mb-1">{pays.image}</div>
                 <span className="text-sm lg:text-base">{pays.nom}</span>
@@ -483,9 +483,8 @@ const InvestirEtranger = () => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className={`w-full bg-[#FFFFFF] text-[#556B2F] hover:bg-[#F3F3F3] font-bold py-3 px-8 rounded-lg transition-all duration-300 transform shadow-md ${
-                        loading ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105'
-                      }`}
+                      className={`w-full bg-[#FFFFFF] text-[#556B2F] hover:bg-[#F3F3F3] font-bold py-3 px-8 rounded-lg transition-all duration-300 transform shadow-md ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105'
+                        }`}
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -523,6 +522,13 @@ const InvestirEtranger = () => {
         </div>
       </section>
 
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
+
       {/* Section Vente/Location/Gestion */}
       <section className="py-8 bg-[#FAFAFA] border-t border-[#D3D3D3]">
         <div className="container mx-auto px-4">
@@ -540,11 +546,10 @@ const InvestirEtranger = () => {
               <button
                 key={key}
                 onClick={() => setTypeBien(key)}
-                className={`px-3 lg:px-6 py-3 rounded-xl font-semibold text-sm lg:text-base transition-all duration-300 transform border ${
-                  typeBien === key
-                    ? `bg-gradient-to-r ${service.couleur} text-white shadow-lg border-transparent`
-                    : 'bg-[#FFFFFF] text-[#556B2F] border-[#D3D3D3] hover:bg-[#F7F7F7] shadow-sm'
-                }`}
+                className={`px-3 lg:px-6 py-3 rounded-xl font-semibold text-sm lg:text-base transition-all duration-300 transform border ${typeBien === key
+                  ? `bg-gradient-to-r ${service.couleur} text-white shadow-lg border-transparent`
+                  : 'bg-[#FFFFFF] text-[#556B2F] border-[#D3D3D3] hover:bg-[#F7F7F7] shadow-sm'
+                  }`}
               >
                 {service.titre}
               </button>
@@ -667,6 +672,13 @@ const InvestirEtranger = () => {
         isOpen={isAuditModalOpen}
         onClose={closeAuditModal}
         onAddAudit={handleAddAudit}
+      />
+
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
       />
     </div>
   );

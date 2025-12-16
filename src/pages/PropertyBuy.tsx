@@ -38,6 +38,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
+import { AdCard } from "./Publicite";
 
 // Chargement dynamique du Header seulement
 const Header = lazy(() => import('@/components/layout/Header'));
@@ -151,7 +152,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 }) => {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
-  
+
   // Initialisation du tracking
   const {
     trackImmobilierView,
@@ -169,11 +170,11 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
   const [surfaceMax, setSurfaceMax] = useState<number | undefined>(undefined);
   const [typeBienAchat, setTypeBienAchat] = useState<string | undefined>(undefined);
   const [localisation, setLocalisation] = useState("");
-  
+
   // État pour le filtre de rayon - TOUJOURS VISIBLE
   const [radiusKm, setRadiusKm] = useState(5);
   const [radiusFilterEnabled, setRadiusFilterEnabled] = useState(false);
-  
+
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -201,11 +202,11 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
       Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }, []);
 
@@ -280,7 +281,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       setError(null);
       const response = await api.get("/properties");
       if (!response.data) throw new Error("Erreur lors de la récupération des propriétés");
-      
+
       const properties = response.data.map((p: any) => ({
         ...p,
         latitude: Number(p.latitude),
@@ -367,7 +368,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
       // Recherche générale
       if (searchQuery && searchQuery.trim()) {
         const searchTerm = searchQuery.toLowerCase();
-        const matchesGeneral = 
+        const matchesGeneral =
           (p.title || "").toLowerCase().includes(searchTerm) ||
           (p.description || "").toLowerCase().includes(searchTerm) ||
           (p.city || "").toLowerCase().includes(searchTerm) ||
@@ -525,7 +526,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   className="pl-12 h-12 text-lg border-gray-300 focus:border-[#556B2F] focus:ring-[#556B2F]"
                 />
               </div>
-              
+
               {/* Bouton filtres mobile */}
               <div className="lg:hidden mb-4">
                 <Button
@@ -557,7 +558,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Localisation */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -574,7 +575,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     />
                   </div>
                 </div>
-                
+
                 {/* Budget */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -590,7 +591,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     />
                   </div>
                 </div>
-                
+
                 {/* REMPLACEMENT: Contrôle de rayon à la place du bouton Recherche */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -607,7 +608,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       {radiusFilterEnabled ? "ON" : "OFF"}
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Navigation className="h-4 w-4 text-[#556B2F]" />
@@ -615,7 +616,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                       </span>
                     </div>
-                    
+
                     <Slider
                       value={[radiusKm]}
                       min={0}
@@ -624,7 +625,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                       className="w-full"
                     />
-                    
+
                     <div className="flex gap-1">
                       {[5, 10, 15, 20].map((value) => (
                         <Button
@@ -642,7 +643,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* Bouton réinitialiser */}
               {activeFiltersCount > 0 && (
                 <div className="mt-4 flex justify-end">
@@ -656,6 +657,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </Button>
                 </div>
               )}
+
+              <AdCard
+                mediaType="image"
+                imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+                title="Découvrez notre nouvelle offre"
+                description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+              />
             </div>
 
             {/* Résultats */}
@@ -688,7 +696,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   <p className="text-gray-600">
                     Essayez de modifier vos critères de recherche
                   </p>
-                  <Button 
+                  <Button
                     onClick={handleResetFilters}
                     variant="outline"
                     className="mt-4"
@@ -750,14 +758,14 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                   {property.type}
                                 </span>
                               </div>
-                              
+
                               <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                                 <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                   À VENDRE
                                 </span>
                                 {distanceInfo}
                               </div>
-                              
+
                               {totalImages > 1 && (
                                 <>
                                   <Button
@@ -788,7 +796,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                 </span>
                               </div>
                             </div>
-                            
+
                             <div className="p-4">
                               <div className="mb-3">
                                 <h3 className="font-bold text-[#8B4513] text-base mb-2 line-clamp-2 leading-snug">
@@ -799,7 +807,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                   <span>{property.city}</span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex items-center gap-4 text-sm text-gray-700 mb-4">
                                 {property.surface && (
                                   <div className="flex items-center gap-1.5">
@@ -820,7 +828,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                   </div>
                                 )}
                               </div>
-                              
+
                               {featuresArr.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-4">
                                   {featuresArr.slice(0, 3).map((feature, index) => (
@@ -834,7 +842,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                                   ))}
                                 </div>
                               )}
-                              
+
                               <div className="flex gap-3">
                                 <Button
                                   className="flex-1 bg-[#556B2F] hover:bg-[#6B8E23] text-white"
@@ -892,7 +900,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         <X className="h-5 w-5" />
                       </Button>
                     </div>
-                    
+
                     <div className="p-4 space-y-6">
                       {/* Filtres mobiles */}
                       <div>
@@ -916,7 +924,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-gray-900">Recherche par rayon</p>
@@ -925,25 +933,23 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                             <button
                               type="button"
                               onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
-                              }`}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
+                                }`}
                             >
                               <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                  radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
-                                }`}
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
+                                  }`}
                               />
                             </button>
                           </div>
-                          
+
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="text-sm font-medium">
                                 Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                               </span>
                             </div>
-                            
+
                             <Slider
                               value={[radiusKm]}
                               min={0}
@@ -952,7 +958,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                               className="w-full"
                             />
-                            
+
                             <div className="flex gap-2">
                               {[5, 10, 15, 20, 30].map((value) => (
                                 <Button
@@ -970,7 +976,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Autres filtres mobiles */}
                       <div className="space-y-4">
                         <div>
@@ -986,7 +992,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                             </SelectContent>
                           </Select>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-medium text-gray-900 mb-3">Budget (€)</h4>
                           <div className="grid grid-cols-2 gap-4">
@@ -1006,7 +1012,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                             </div>
                           </div>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-medium text-gray-900 mb-3">Surface (m²)</h4>
                           <div className="grid grid-cols-2 gap-4">
@@ -1026,13 +1032,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                             </div>
                           </div>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-medium text-gray-900 mb-3">Caractéristiques</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Select 
-                                value={bedrooms?.toString()} 
+                              <Select
+                                value={bedrooms?.toString()}
                                 onValueChange={(v) => setBedrooms(v ? parseInt(v) : undefined)}
                               >
                                 <SelectTrigger>
@@ -1046,8 +1052,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                               </Select>
                             </div>
                             <div>
-                              <Select 
-                                value={bathrooms?.toString()} 
+                              <Select
+                                value={bathrooms?.toString()}
                                 onValueChange={(v) => setBathrooms(v ? parseInt(v) : undefined)}
                               >
                                 <SelectTrigger>
@@ -1063,7 +1069,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="sticky bottom-0 bg-white pt-4 border-t">
                         <Button
                           onClick={() => {
@@ -1074,7 +1080,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         >
                           Appliquer les filtres
                         </Button>
-                        
+
                         {activeFiltersCount > 0 && (
                           <Button
                             variant="outline"
@@ -1103,7 +1109,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
             onSuccess={(id: string) => setSentRequests((prev) => ({ ...prev, [id]: true }))}
             onPropertyContact={handlePropertyContact}
           />
-          
+
           <LocationPickerModal
             open={isLocationModalOpen}
             onClose={() => setIsLocationModalOpen(false)}
@@ -1132,17 +1138,17 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
     <div className="min-h-screen">
       <Suspense fallback={<LoadingFallback />}>
         <Header />
-        
+
         {/* Hero Section avec margin-top */}
         <div className="mt-20 relative">
           <div className="fixed -z-10 overflow-hidden bg-black w-full h-96 top-0">
-            <img 
+            <img
               src="https://i.pinimg.com/1200x/c1/df/87/c1df875d53d18c0e8cd9ac21a20c035c.jpg"
-              className="opacity-45 object-cover w-full h-full" 
-              alt="Background immobilier" 
+              className="opacity-45 object-cover w-full h-full"
+              alt="Background immobilier"
             />
           </div>
-          
+
           <div className="pt-2 w-11/12 mx-auto flex flex-col">
             <span className="text-2xl lg:text-5xl text-white text-center tracking-wider font-serif font-semibold">
               Propriétés à vendre
@@ -1152,7 +1158,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
             </span>
           </div>
         </div>
-        
+
         <section className="container mx-auto px-4 mt-8">
           <div className="space-y-6">
             {/* Barre de recherche principale */}
@@ -1167,7 +1173,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   className="pl-12 h-14 text-lg border-gray-300 focus:border-[#556B2F] focus:ring-[#556B2F] rounded-xl"
                 />
               </div>
-              
+
               {/* Bouton filtres mobile */}
               <div className="lg:hidden mb-4">
                 <Button
@@ -1179,7 +1185,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   Filtres avancés {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                 </Button>
               </div>
-              
+
               {/* Grille de filtres desktop - REMPLACEMENT DU BOUTON RECHERCHE PAR RAYON */}
               <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-4">
                 {/* Type de bien */}
@@ -1201,7 +1207,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Localisation */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1218,7 +1224,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   </div>
                 </div>
-                
+
                 {/* Budget */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -1245,7 +1251,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 {/* REMPLACEMENT: Recherche par rayon à la place du bouton Recherche */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -1255,18 +1261,16 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <button
                       type="button"
                       onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${
-                        radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-300'
-                      }`}
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-300'
+                        }`}
                     >
                       <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                          radiusFilterEnabled ? 'translate-x-8' : 'translate-x-1'
-                        }`}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-8' : 'translate-x-1'
+                          }`}
                       />
                     </button>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <Navigation className="h-4 w-4 text-[#556B2F]" />
@@ -1274,7 +1278,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                       </span>
                     </div>
-                    
+
                     <Slider
                       value={[radiusKm]}
                       min={0}
@@ -1283,7 +1287,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                       className="w-full"
                     />
-                    
+
                     <div className="flex gap-1">
                       {[5, 10, 15, 20, 30].map((value) => (
                         <Button
@@ -1301,7 +1305,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* Filtres avancés (non-rayon) - Desktop */}
               <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
@@ -1329,13 +1333,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Chambres
                   </label>
-                  <Select 
-                    value={bedrooms?.toString()} 
+                  <Select
+                    value={bedrooms?.toString()}
                     onValueChange={(v) => setBedrooms(v ? parseInt(v) : undefined)}
                   >
                     <SelectTrigger className="h-12">
@@ -1350,13 +1354,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Salles de bain
                   </label>
-                  <Select 
-                    value={bathrooms?.toString()} 
+                  <Select
+                    value={bathrooms?.toString()}
                     onValueChange={(v) => setBathrooms(v ? parseInt(v) : undefined)}
                   >
                     <SelectTrigger className="h-12">
@@ -1371,7 +1375,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   </Select>
                 </div>
               </div>
-              
+
               {/* Bouton réinitialiser */}
               {activeFiltersCount > 0 && (
                 <div className="mt-4 flex justify-end">
@@ -1386,7 +1390,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                 </div>
               )}
             </div>
-            
+
             {/* Résultats */}
             <div className="mt-4 bg-white rounded-xl shadow-lg p-6 ">
               <div className="flex justify-between items-center mb-6">
@@ -1420,7 +1424,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                   <p className="text-gray-600 max-w-md mx-auto mb-6">
                     Essayez de modifier vos critères de recherche ou contactez-nous pour une recherche personnalisée.
                   </p>
-                  <Button 
+                  <Button
                     onClick={handleResetFilters}
                     className="bg-[#556B2F] hover:bg-[#6B8E23] text-white"
                   >
@@ -1479,14 +1483,14 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
 
                               {/* Overlay */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                              
+
                               {/* Badges */}
                               <div className="absolute top-3 left-3">
                                 <span className="bg-[#6B8E23] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                   {property.type}
                                 </span>
                               </div>
-                              
+
                               <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                                 <span className="bg-[#8B4513] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                                   À VENDRE
@@ -1639,7 +1643,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
-                
+
                 <div className="p-4 space-y-6">
                   {/* Section Localisation et Rayon mobile */}
                   <div>
@@ -1663,7 +1667,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900">Recherche par rayon</p>
@@ -1672,25 +1676,23 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         <button
                           type="button"
                           onClick={() => setRadiusFilterEnabled(!radiusFilterEnabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${radiusFilterEnabled ? 'bg-[#556B2F]' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${radiusFilterEnabled ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium">
                             Rayon: <span className="text-[#556B2F] font-bold">{radiusKm} km</span>
                           </span>
                         </div>
-                        
+
                         <Slider
                           value={[radiusKm]}
                           min={0}
@@ -1699,7 +1701,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           onValueChange={(v) => setRadiusKm(v[0] ?? 0)}
                           className="w-full"
                         />
-                        
+
                         <div className="flex gap-2">
                           {[5, 10, 15, 20, 30].map((value) => (
                             <Button
@@ -1717,7 +1719,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Autres filtres mobiles */}
                   <div className="space-y-4">
                     <div>
@@ -1733,7 +1735,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-900 mb-3">Budget (€)</h4>
                       <div className="grid grid-cols-2 gap-4">
@@ -1753,7 +1755,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-900 mb-3">Surface (m²)</h4>
                       <div className="grid grid-cols-2 gap-4">
@@ -1773,13 +1775,13 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="font-medium text-gray-900 mb-3">Caractéristiques</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Select 
-                            value={bedrooms?.toString()} 
+                          <Select
+                            value={bedrooms?.toString()}
                             onValueChange={(v) => setBedrooms(v ? parseInt(v) : undefined)}
                           >
                             <SelectTrigger>
@@ -1793,8 +1795,8 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                           </Select>
                         </div>
                         <div>
-                          <Select 
-                            value={bathrooms?.toString()} 
+                          <Select
+                            value={bathrooms?.toString()}
                             onValueChange={(v) => setBathrooms(v ? parseInt(v) : undefined)}
                           >
                             <SelectTrigger>
@@ -1810,7 +1812,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="sticky bottom-0 bg-white pt-4 border-t">
                     <Button
                       onClick={() => {
@@ -1821,7 +1823,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
                     >
                       Appliquer les filtres
                     </Button>
-                    
+
                     {activeFiltersCount > 0 && (
                       <Button
                         variant="outline"
@@ -1850,7 +1852,7 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
         onSuccess={(id: string) => setSentRequests((prev) => ({ ...prev, [id]: true }))}
         onPropertyContact={handlePropertyContact}
       />
-      
+
       <LocationPickerModal
         open={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
@@ -1868,6 +1870,12 @@ const PropertyBuy: React.FC<PropertyBuyProps> = ({
           price: p.price,
           status: p.status,
         }))}
+      />
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
       />
     </div>
   );

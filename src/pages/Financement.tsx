@@ -1325,6 +1325,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { AdCard } from "./Publicite";
 
 // Types
 interface FinancementPartenaire {
@@ -1515,59 +1516,59 @@ export default function Financement() {
 
       {/* Hero Section */}
       <section className="relative py-24 overflow-hidden">
-  {/* Image de fond avec overlay */}
-  <div className="absolute inset-0">
-    <div
-      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url('https://i.pinimg.com/736x/f5/54/90/f55490b75ccfbbb66a4ba58fc2724328.jpg')`,
-      }}
-    />
-    {/* Overlay noir avec opacité */}
-    <div className="absolute inset-0 bg-black/60"></div>
-    {/* Option: dégradé supplémentaire pour plus de contraste */}
-    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/70"></div>
-  </div>
-  
-  <div className="container mx-auto px-4 h-24 relative z-10">
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="text-center max-w-4xl mx-auto"
-    >
-      <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-        Financement
-      </h1>
-      <p className="text-sm text-slate-100 mb-4 lg:mb-10 leading-relaxed drop-shadow">
-        Des solutions adaptées pour financer tous vos projets avec nos partenaires de confiance.
-        Accompagnement personnalisé de A à Z.
-      </p>
+        {/* Image de fond avec overlay */}
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url('https://i.pinimg.com/736x/f5/54/90/f55490b75ccfbbb66a4ba58fc2724328.jpg')`,
+            }}
+          />
+          {/* Overlay noir avec opacité */}
+          <div className="absolute inset-0 bg-black/60"></div>
+          {/* Option: dégradé supplémentaire pour plus de contraste */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/70"></div>
+        </div>
 
-      <div className="flex flex-wrap gap-5 justify-center">
-        <motion.div>
-          <Button
-            className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300 shadow-lg hover:shadow-xl"
-            onClick={() => openModal('service')}
+        <div className="container mx-auto px-4 h-24 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center max-w-4xl mx-auto"
           >
-            <FileText className="h-5 w-5 mr-3" />
-            Découvrir nos services
-          </Button>
-        </motion.div>
+            <h1 className="text-2xl lg:text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+              Financement
+            </h1>
+            <p className="text-sm text-slate-100 mb-4 lg:mb-10 leading-relaxed drop-shadow">
+              Des solutions adaptées pour financer tous vos projets avec nos partenaires de confiance.
+              Accompagnement personnalisé de A à Z.
+            </p>
 
-        <motion.div>
-          <Button
-            className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300 shadow-lg hover:shadow-xl"
-            onClick={() => openModal('simulation')}
-          >
-            <Calculator className="h-5 w-5 mr-3" />
-            Simuler mon financement
-          </Button>
-        </motion.div>
-      </div>
-    </motion.div>
-  </div>
-</section>
+            <div className="flex flex-wrap gap-5 justify-center">
+              <motion.div>
+                <Button
+                  className="bg-[#8B4513] hover:bg-[#A0522D] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#8B4513] hover:border-[#A0522D] transition-all duration-300 shadow-lg hover:shadow-xl"
+                  onClick={() => openModal('service')}
+                >
+                  <FileText className="h-5 w-5 mr-3" />
+                  Découvrir nos services
+                </Button>
+              </motion.div>
+
+              <motion.div>
+                <Button
+                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white rounded-xl px-8 py-5 text-lg font-semibold border-2 border-[#556B2F] hover:border-[#6B8E23] transition-all duration-300 shadow-lg hover:shadow-xl"
+                  onClick={() => openModal('simulation')}
+                >
+                  <Calculator className="h-5 w-5 mr-3" />
+                  Simuler mon financement
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Section Financement détaillé */}
       <section className="py-2 lg:py-20 bg-[#FAFAFA]" id="financement-detail">
@@ -1581,7 +1582,7 @@ export default function Financement() {
             <h2 className="text-2xl lg:text-4xl font-bold mb-2 text-[#8B4513]">
               Nos Solutions de <span className="text-[#556B2F]">Financement</span>
             </h2>
-            
+
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1622,7 +1623,7 @@ export default function Financement() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -5 }}
               >
-                <Card 
+                <Card
                   className="p-6 h-full border border-[#D3D3D3] rounded-2xl hover:shadow-xl transition-all duration-300 cursor-pointer bg-white group"
                   onClick={service.onClick}
                 >
@@ -1653,7 +1654,12 @@ export default function Financement() {
           </div>
         </div>
       </section>
-
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
       {/* Section Partenaires Financement */}
       <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">
@@ -1754,10 +1760,10 @@ export default function Financement() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-secondary-text">
+            <h2 className="text-2xl lg:text-4xl font-bold mb-6 text-slate-200">
               Prêt à concrétiser votre projet ?
             </h2>
-            <p className="text-sm text-slate-900 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm text-slate-100 mb-10 max-w-2xl mx-auto leading-relaxed">
               Nos experts sont à votre écoute pour vous accompagner dans votre financement
             </p>
             <motion.div>
@@ -1783,6 +1789,12 @@ export default function Financement() {
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
+      <AdCard
+        mediaType="image"
+        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
+        title="Découvrez notre nouvelle offre"
+        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
+      />
     </div>
   );
 }
@@ -2109,8 +2121,8 @@ function FinancementModal({ type, data, onClose, onOpenModal, onSimulationSubmit
             <label className="block text-sm font-medium text-slate-700 mb-3 text-left">
               Durée du prêt
             </label>
-            <Select 
-              value={formData.duree} 
+            <Select
+              value={formData.duree}
               onValueChange={(value) => handleSelectChange('duree', value)}
             >
               <SelectTrigger className="rounded-xl border-[#D3D3D3] focus:border-[#556B2F]">
