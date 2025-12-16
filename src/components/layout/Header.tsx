@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { X, Search, Building2Icon } from "lucide-react";
+import { X, Search, Building2Icon, MapPin, MessageSquare, Briefcase } from "lucide-react";
 // Import des icônes
 import {
   Menu,
@@ -1940,6 +1940,12 @@ const Header = () => {
                       >
                         <Package className="mr-2 h-4 w-4" />
                         Mes Commandes
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/mon-compte/conseil")}
+                      >
+                       <Briefcase className="h-4 w-4" />
+                         Mes demandes Conseils
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/demandes")}
