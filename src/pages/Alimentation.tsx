@@ -41,6 +41,35 @@ import { useCart } from "@/hooks/useCart";
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/api";
 
+// Composant Skeleton Loading pour les catégories
+const CategoryCardSkeleton = () => (
+  <Card className="p-4 flex flex-col border-0 bg-white/90 backdrop-blur-md shadow-xl">
+    <div className="w-full h-32 rounded-md mb-4 bg-gray-300 animate-pulse" />
+    <div className="h-6 bg-gray-300 rounded mb-2 animate-pulse" />
+    <div className="h-4 bg-gray-300 rounded mb-4 w-3/4 animate-pulse" />
+    <div className="h-10 bg-gray-300 rounded animate-pulse" />
+  </Card>
+);
+
+const SectionSkeleton = () => (
+  <div className="bg-white/80 p-5 pb-14 my-5 rounded-lg backdrop-blur-sm">
+    <div className="flex items-center justify-between gap-4 mb-8">
+      <div className="flex items-center gap-4 w-full">
+        <div className="p-3 rounded-2xl bg-gray-300 w-14 h-14 animate-pulse" />
+        <div className="flex-1">
+          <div className="h-6 bg-gray-300 rounded w-1/3 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse" />
+        </div>
+      </div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[1, 2, 3, 4].map((i) => (
+        <CategoryCardSkeleton key={i} />
+      ))}
+    </div>
+  </div>
+);
+
 // Composant Contact Modal
 const ContactModal = ({ isOpen, onClose, type }) => {
   if (!isOpen) return null;
@@ -132,6 +161,7 @@ const ContactModal = ({ isOpen, onClose, type }) => {
 const Alimentation = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactModalType, setContactModalType] = useState("contact");
   const [products, setProducts] = useState([]);
@@ -174,6 +204,7 @@ const Alimentation = () => {
 
   const fetchCategories = async () => {
     try {
+      setIsCategoriesLoading(true);
       const response = await api.get("/aliments/categories");
       setCategories(response.data);
 
@@ -188,6 +219,8 @@ const Alimentation = () => {
         "Erreur lors du chargement des catégories alimentaires:",
         error
       );
+    } finally {
+      setIsCategoriesLoading(false);
     }
   };
 
@@ -469,7 +502,7 @@ const Alimentation = () => {
           {/* En-tête avec animation */}
           <div className="bg-white/90 py-5 rounded-lg backdrop-blur-sm">
             <div className="text-center mb-5 animate-fade-in">
-              <h1 className="tracking-widest  text-xl lg:text-5xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] bg-clip-text text-transparent">
+              <h1 className="tracking-widest h-full text-xl lg:text-5xl md:text-4xl font-bold mb-4 text-logo">
                 Manger a la reunion
               </h1>
               <p className="text-sm px-2 lg:text-sm text-[#8B4513] max-w-2xl mx-auto leading-relaxed">
@@ -524,7 +557,14 @@ const Alimentation = () => {
           )}
 
           {/* Sections dynamiques */}
-          {filteredSections.map((section, sectionIndex) => {
+          {isCategoriesLoading ? (
+            <>
+              <SectionSkeleton />
+              <SectionSkeleton />
+              <SectionSkeleton />
+            </>
+          ) : (
+            filteredSections.map((section, sectionIndex) => {
             const IconComponent = section.icon;
             const animationDelays = {
               container: `${0.2 + sectionIndex * 0.2}s`,
@@ -662,7 +702,8 @@ const Alimentation = () => {
                 </div>
               </div>
             );
-          })}
+            })
+          )}
           <div className="text-center mt-12">
             <Card className="bg-white/80 backdrop-blur-md rounded-3xl p-8 border-0">
               <h3 className="text-2xl font-bold text-gray-800 mb-4">

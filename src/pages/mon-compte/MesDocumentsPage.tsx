@@ -491,7 +491,7 @@ const MesDocumentsPage = () => {
               variant="outline"
               size="sm"
               onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-              className="hidden md:grid border-[#D3D3D3] text-[#556B2F]"
+              className="hidden  md:grid grid-cols-2 border-[#D3D3D3] text-[#556B2F]"
             >
               {viewMode === "grid" ? (
                 <>

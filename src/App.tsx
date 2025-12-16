@@ -200,25 +200,30 @@ const ScrollToHash = () => {
   const { scrollToSection } = useSmoothScroll();
 
   useEffect(() => {
+    console.log("🔗 ScrollToHash triggered, hash:", location.hash, "pathname:", location.pathname);
+    
     if (typeof window === "undefined") return;
 
     if (location.hash) {
       const id = decodeURIComponent(location.hash.replace("#", ""));
+      console.log("🎯 Looking for element with id:", id);
       let attempts = 0;
       const maxAttempts = 20;
       const timer = setInterval(() => {
         attempts++;
         const el = document.getElementById(id);
         if (el) {
+          console.log("✅ Found element, scrolling to section");
           scrollToSection(id);
           clearInterval(timer);
         } else if (attempts >= maxAttempts) {
+          console.log("❌ Element not found after 20 attempts");
           clearInterval(timer);
         }
       }, 50);
       return () => clearInterval(timer);
     } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      console.log("📭 No hash detected");
     }
   }, [location.pathname, location.hash, scrollToSection]);
 
@@ -268,8 +273,9 @@ const App = () => {
               {/* Intégration du GlobalTracking pour le tracking des pages */}
               <GlobalTracking />
 
-              <ScrollToHash />
               <ScrollToTop />
+              <ScrollToHash />
+              
               <Layout>
                 <Routes>
                   {/* Section publiques Routes */}

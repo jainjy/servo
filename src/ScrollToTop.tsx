@@ -2,24 +2,69 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
-    // Solution multi-navigateur pour le scroll to top
-    setTimeout(() => {
-      // Essayer window.scrollTo d'abord (desktop/modern browsers)
-      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-      
-      // Fallback pour iOS Safari et certains navigateurs mobiles
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      
-      // Forcer le reflow sur mobile
-      if (document.scrollingElement) {
-        document.scrollingElement.scrollTop = 0;
+    const scrollToTop = () => {
+      // 1. Fonction helper pour scroller un élément
+      const scrollElementToTop = (element: HTMLElement | Window) => {
+        try {
+          if (element === window) {
+            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+          } else if (element && 'scrollTo' in element) {
+            (element as HTMLElement).scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        } catch (error) {
+          // Fallback si smooth n'est pas supporté
+          if (element === window) {
+            window.scrollTo(0, 0);
+          } else {
+            (element as HTMLElement).scrollTop = 0;
+          }
+        }
+      };
+
+      // 2. Scroller la fenêtre principale
+      scrollElementToTop(window);
+
+      // 3. Scroller le conteneur AppPullToRefresh
+      const appContainer = document.querySelector('.app-pull-to-refresh') as HTMLElement;
+      if (appContainer && appContainer.scrollTop > 0) {
+        scrollElementToTop(appContainer);
       }
-    }, 0);
-  }, [pathname]);
+
+      // 4. Scroller d'autres éléments potentiellement scrollables
+      const scrollableSelectors = [
+        '.app-pull-to-refresh',
+        '[class*="scroll"]',
+        'main',
+        '[role="main"]',
+        '[data-scrollable]',
+        '.scrollable',
+        '.scroll-container',
+        '.scroll-area'
+      ];
+
+      scrollableSelectors.forEach(selector => {
+        if (selector === '.app-pull-to-refresh') return; // Déjà géré
+        
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((element: Element) => {
+          const el = element as HTMLElement;
+          if (el.scrollTop > 0 && el !== appContainer) {
+            scrollElementToTop(el);
+          }
+        });
+      });
+    };
+
+    // Attendre que la page soit prête
+    const timer = setTimeout(scrollToTop, 150);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [location.pathname]);
 
   return null;
 };
