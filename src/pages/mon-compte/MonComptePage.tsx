@@ -33,6 +33,7 @@ import {
   DollarSign,
   FileText,
   Calendar1,
+  Home
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AuthService from "@/services/authService";
@@ -507,14 +508,13 @@ export default function MonComptePage() {
                     >
                       <Settings2 /> Demandes de services
                     </Button>
-                    <Button
+                   <Button
                       variant="outline"
                       className="w-full justify-start text-left hover:bg-[#556B2F]/5 border-[#D3D3D3]"
-                      onClick={() =>
-                        handleNavigation("/mon-compte/demandes-immobilier")
-                      }
+                      onClick={() => handleNavigation("/mon-compte/demandes-immobilier")}
                     >
-                      🏠 Demandes immobilières
+                      <Home className="mr-2 h-4 w-4" />
+                      Demandes immobilières
                     </Button>
                     <Button
                       variant="outline"

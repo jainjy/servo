@@ -20,7 +20,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
+import ServoLogo from "../components/components/ServoLogo";
 const LoginRoleSelectionPage = () => {
   const navigate = useNavigate();
 
@@ -98,17 +98,10 @@ const LoginRoleSelectionPage = () => {
       <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full"></div>
       <div className="w-full">
+       
         <Link to="/">
           <div className="text-center">
-            <div className="flex justify-center my-2">
-              <div className="w-16 h-16  rounded-full overflow-hidden flex items-center justify-center shadow-lg">
-                <img
-                  src="/logo.png"
-                  className="h-full w-ful rounded-lg"
-                  alt="Logo SERVO"
-                />
-              </div>
-            </div>
+               <ServoLogo />
             <CardTitle className="text-xl lg:text-4xl font-bold text-white tracking-wide mb-2">
               Connectez-vous à votre compte
             </CardTitle>
