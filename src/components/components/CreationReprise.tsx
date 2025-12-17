@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Briefcase, Users, TrendingUp, Target, ArrowRight, CheckCircle, Clock, Award } from 'lucide-react';
+import { Briefcase, Users, TrendingUp, Target, ArrowRight, CheckCircle, Clock, Award, X, User, Mail, Phone, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import api from '@/lib/api';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
@@ -34,7 +37,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
     </div>
     <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
     
-    {/* Ligne décorative */}
     <motion.div 
       className="h-1 w-0 bg-[#556B2F] mt-4 rounded-full group-hover:w-full transition-all duration-500"
       initial={false}
@@ -42,8 +44,283 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
   </motion.div>
 );
 
+const ModalDemandeVisite = ({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) => {
+  const [formData, setFormData] = useState({
+    nomPrenom: "",
+    email: "",
+    telephone: "",
+    message: "",
+    dateSouhaitee: "",
+    heureSouhaitee: "",
+  });
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [formErrors, setFormErrors] = useState({
+    dateSouhaitee: false,
+    heureSouhaitee: false
+  });
+
+  const { user, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (open && user && isAuthenticated) {
+      const nomComplet = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      
+      setFormData(prev => ({
+        ...prev,
+        nomPrenom: nomComplet,
+        email: user.email || '',
+        telephone: user.phone || user.telephone || user.mobile || '',
+      }));
+    } else if (open) {
+      setFormData({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+      });
+    }
+  }, [open, user, isAuthenticated]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.dateSouhaitee || !formData.heureSouhaitee) {
+      setFormErrors({
+        dateSouhaitee: !formData.dateSouhaitee,
+        heureSouhaitee: !formData.heureSouhaitee
+      });
+      toast.error("Veuillez sélectionner une date et un créneau horaire.");
+      return;
+    }
+
+    setFormErrors({ dateSouhaitee: false, heureSouhaitee: false });
+    
+    if (!isAuthenticated || !user) {
+      toast.error('Veuillez vous connecter pour demander un rendez-vous.');
+      return;
+    }
+
+    setLoadingSubmit(true);
+    try {
+      const payload = {
+        nomComplet: formData.nomPrenom,
+        email: formData.email,
+        telephone: formData.telephone,
+        projetDetails: formData.message,
+        dateChoisie: formData.dateSouhaitee,
+        heureChoisie: formData.heureSouhaitee,
+        userId: user.id
+      };
+
+      const response = await api.post('/rendez-vous-entreprise', payload);
+
+      toast.success("Votre demande de rendez-vous a bien été envoyée.");
+
+      setFormData({
+        nomPrenom: "",
+        email: "",
+        telephone: "",
+        message: "",
+        dateSouhaitee: "",
+        heureSouhaitee: "",
+      });
+      
+      onClose();
+    } catch (err: any) {
+      console.error('Erreur en envoyant la demande de rendez-vous', err);
+      
+      if (err.response?.status === 400) {
+        toast.error(err.response.data.message || 'Données invalides');
+      } else if (err.response?.status === 500) {
+        toast.error('Erreur serveur. Veuillez réessayer plus tard.');
+      } else {
+        toast.error('Impossible d\'envoyer la demande. Veuillez réessayer.');
+      }
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({ ...prev, [name]: false }));
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl border border-[#D3D3D3] flex flex-col">
+        <div className="bg-[#556B2F] px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-white text-xl font-bold">Demander un rendez-vous</h2>
+              <p className="text-white/80 text-sm mt-1">
+                Pour la création ou reprise d'entreprise
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-white hover:bg-white hover:bg-opacity-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-y-auto flex-1 p-6">
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5 text-[#8B4513]" />
+                <span className="text-[#8B4513] font-medium">Vos coordonnées</span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] w-4 h-4" />
+                  <input
+                    name="nomPrenom"
+                    value={formData.nomPrenom}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-gray-50 border border-[#D3D3D3] pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent transition-all duration-200"
+                    placeholder="Nom et Prénom"
+                  />
+                </div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] w-4 h-4" />
+                  <input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-gray-50 border border-[#D3D3D3] pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent transition-all duration-200"
+                    placeholder="Adresse email"
+                  />
+                </div>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] w-4 h-4" />
+                  <input
+                    name="telephone"
+                    type="tel"
+                    value={formData.telephone}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-gray-50 border border-[#D3D3D3] pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent transition-all duration-200"
+                    placeholder="Téléphone"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#8B4513]" />
+                <span className="text-[#8B4513] font-medium">Disponibilités</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] w-4 h-4" />
+                  <input
+                    name="dateSouhaitee"
+                    type="date"
+                    value={formData.dateSouhaitee}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
+                    required
+                    className={`w-full bg-gray-50 border ${
+                      formErrors.dateSouhaitee ? 'border-red-500' : 'border-[#D3D3D3]'
+                    } pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent transition-all duration-200`}
+                  />
+                </div>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#556B2F] w-4 h-4 z-10" />
+                  <select
+                    name="heureSouhaitee"
+                    value={formData.heureSouhaitee}
+                    onChange={handleChange}
+                    required
+                    className={`w-full bg-gray-50 border ${
+                      formErrors.heureSouhaitee ? 'border-red-500' : 'border-[#D3D3D3]'
+                    } pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent transition-all duration-200 appearance-none hover:bg-white`}
+                  >
+                    <option value="">Sélectionnez un créneau</option>
+                    <option value="08:00">Matin : 08h00</option>
+                    <option value="10:00">Matin : 10h00</option>
+                    <option value="14:00">Après-midi : 14h00</option>
+                    <option value="16:00">Après-midi : 16h00</option>
+                    <option value="18:00">Soir : 18h00</option>
+                  </select>
+                </div>
+              </div>
+              
+              {(formErrors.dateSouhaitee || formErrors.heureSouhaitee) && (
+                <div className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                  <X className="w-4 h-4" />
+                  Veuillez sélectionner une date et un créneau horaire pour continuer
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-[#8B4513] font-medium text-sm">
+                Détails de votre projet (optionnel)
+              </label>
+              <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                className="w-full bg-gray-50 border border-[#D3D3D3] p-4 rounded-xl h-32 resize-none focus:outline-none focus:ring-2 focus:ring-[#6B8E23] focus:border-transparent transition-all duration-200"
+                placeholder="Décrivez brièvement votre projet de création ou reprise d'entreprise..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-[#D3D3D3] p-6 bg-gray-50">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-white text-gray-700 border border-[#D3D3D3] px-6 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={loadingSubmit}
+              className="flex-1 bg-[#6B8E23] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#556B2F] transition-all duration-200 shadow-lg shadow-[#6B8E23]/25 flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <Calendar className="w-4 h-4" />
+              {loadingSubmit ? 'Envoi...' : 'Demander un rendez-vous'}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+};
 const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+
   const services = [
     {
       icon: <Briefcase className="w-6 h-6" />,
@@ -67,7 +344,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     }
   ];
 
-  // Animation pour la section d'en-tête
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -91,7 +367,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     }
   };
 
-  // Animation pour le background
   const backgroundVariants = {
     hidden: { opacity: 0, scale: 1.1 },
     visible: { 
@@ -155,7 +430,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     { number: "24h", label: "Réponse sous", icon: <Clock className="w-5 h-5" /> }
   ];
 
-  // Animation pour les statistiques
   const statsContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -180,7 +454,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     }
   };
 
-  // Animation pour le CTA
   const ctaVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -194,17 +467,23 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
     }
   };
 
-  // Animation pour le bouton CTA
   const buttonVariants = {
     initial: { scale: 1 },
     hover: { 
       scale: 1.05,
       transition: {
-        duration: 0.2,
-        yoyo: Infinity
+        duration: 0.2
       }
     },
     tap: { scale: 0.95 }
+  };
+
+  const handleOpenModal = () => {
+    if (!isAuthenticated || !user) {
+      toast.error('Veuillez vous connecter pour prendre rendez-vous.');
+      return;
+    }
+    setIsModalOpen(true);
   };
 
   return (
@@ -215,7 +494,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="container mx-auto px-4 max-w-7xl">
-        {/* En-tête avec animation */}
         <motion.div 
           className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'
           variants={backgroundVariants}
@@ -266,7 +544,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
           </motion.p>
         </motion.div>
 
-        {/* Services avec animation */}
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
           initial={{ opacity: 0 }}
@@ -285,7 +562,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
           ))}
         </motion.div>
 
-        {/* Statistiques avec animation */}
         <motion.div 
           className="bg-[#FFFFF0] rounded-2xl shadow-lg p-8 mb-16 border border-[#D3D3D3]"
           initial={{ opacity: 0, y: 50 }}
@@ -324,7 +600,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
           </motion.div>
         </motion.div>
 
-        {/* CTA avec animation */}
         <motion.div 
           className="text-center"
           variants={ctaVariants}
@@ -347,7 +622,6 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
               nous pouvons vous aider à réussir votre création ou reprise d'entreprise.
             </p>
             
-            {/* Boutons CTA animés */}
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 justify-center"
               variants={containerVariants}
@@ -360,25 +634,16 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
                 initial="initial"
                 whileHover="hover"
                 whileTap="tap"
+                onClick={handleOpenModal}
                 className="bg-[#FFFFF0] text-[#556B2F] px-8 py-3 rounded-lg font-semibold hover:bg-[#FFFFF0]/90 transition-colors duration-300 shadow-lg flex items-center justify-center gap-2"
               >
                 <span>Prendre rendez-vous</span>
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
               
-              <motion.button 
-                variants={buttonVariants}
-                initial="initial"
-                whileHover="hover"
-                whileTap="tap"
-                className="border-2 border-[#FFFFF0] text-[#FFFFF0] px-8 py-3 rounded-lg font-semibold hover:bg-[#FFFFF0] hover:text-[#556B2F] transition-colors duration-300 flex items-center justify-center gap-2"
-              >
-                <span>Télécharger notre brochure</span>
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
+              
             </motion.div>
 
-            {/* Élément décoratif animé */}
             <motion.div 
               className="flex justify-center mt-6"
               animate={{ y: [0, -5, 0] }}
@@ -389,6 +654,11 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
           </motion.div>
         </motion.div>
       </div>
+
+      <ModalDemandeVisite 
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </motion.section>
   );
 };
