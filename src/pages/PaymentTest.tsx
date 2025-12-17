@@ -6,7 +6,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 
-const stripePromise = loadStripe("pk_test_xxxxxxxxx");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function PaymentRequestForm() {
   const stripe = useStripe();
