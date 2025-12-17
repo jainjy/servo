@@ -39,7 +39,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useImmobilierTracking } from "@/hooks/useImmobilierTracking";
 import { ModalDemandeVisite } from "@/components/ModalDemandeVisite";
-import { AdCard } from "./Publicite";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 // Données locales de fallback
 const localRentProperties = [
@@ -1409,12 +1409,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
             )}
           </div>
 
-          <AdCard
-            mediaType="image"
-            imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-            title="Découvrez notre nouvelle offre"
-            description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-          />
+         <AdvertisementPopup />
 
           {/* Résultats */}
           <div className="mt-4 bg-white rounded-xl shadow-lg p-6">
@@ -1900,12 +1895,7 @@ const PropertyRent: React.FC<PropertyRentProps> = ({
           status: p.status,
         }))}
       />
-      <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+      <AdvertisementPopup />
     </div>
   );
 };

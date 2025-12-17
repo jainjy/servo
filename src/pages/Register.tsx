@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import ServoLogo from "@/components/components/ServoLogo";
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -60,27 +61,21 @@ const RegisterPage = () => {
     importedContactsConsent: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1);
   const { register } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 🎯 LOGIQUE DE L'ÉTAPE 1 : Validation de base et passage à l'étape 2
-    if (step === 1) {
-      // 1. Vérification des champs de base
-      if (
-        !formData.firstName ||
-        !formData.lastName ||
-        !formData.email ||
-        !formData.phone
-      ) {
-        toast.error(
-          "Veuillez remplir toutes les informations personnelles requises"
-        );
-        return;
-      }
-      // 🛑 NOTA BENE : La vérification des conditions (acceptTerms) est maintenant ignorée ici.
-      // 2. Si tout est bon, on passe à l'étape 2
-      setStep(2);
+    // Vérification des champs obligatoires
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      toast.error(
+        "Veuillez remplir tous les champs obligatoires"
+      );
       return;
     }
     if (!formData.acceptTerms) {
@@ -167,16 +162,9 @@ const RegisterPage = () => {
           <div className="relative z-10 flex flex-col justify-center px-16 text-white">
             <div className="mb-8">
               <div className="flex items-center gap-3">
-                <div className="w-10 overflow-hidden h-10 rounded-full bg-black flex items-center justify-center">
-                  <img
-                    src="/logo.png"
-                    className="h-10 w-10 rounded-full"
-                    alt="Logo"
-                  />
-                </div>
-                <h1 className="text-2xl redhawk tracking-wide font-bold">
-                  SERVO
-                </h1>
+
+                <ServoLogo />
+
               </div>
               <p className="text-md font-semibold">
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
@@ -216,68 +204,113 @@ const RegisterPage = () => {
             </div>
           </div>
         </div>
-        <div className="relative flex-1 flex bg-[#FFFFFF] overflow-y-auto">
-          <div className="w-full max-w-2xl">
-            <Card className="border-0 p-0 m-0 h-full rounded-none">
-              <CardHeader>
+        <div className="relative flex-1 flex flex-col bg-[#FFFFFF]">
+          <div className="w-full max-w-2xl flex flex-col h-full">
+            <Card className="border-0 p-0 m-0 rounded-none flex flex-col h-full">
+              {/* En-tête sticky */}
+              <CardHeader className="sticky top-0 z-10 bg-[#FFFFFF] border-b border-gray-100">
                 <div className="flex justify-between items-center">
                   <div className="flex flex-col items-start justify-center">
                     <CardTitle className="text-2xl font-bold text-gray-900">
                       Créer un compte
                     </CardTitle>
                     <CardDescription className="text-gray-600">
-                      {step === 1
-                        ? "Informations de base"
-                        : "Finalisez votre inscription"}
+                      Complétez vos informations
                     </CardDescription>
-                  </div>
-                  <div className="absolute right-4 top-4 flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 1 ? "bg-[#556B2F]" : "bg-[#6B8E23]"
-                      }`}
-                    ></div>
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 2 ? "bg-[#556B2F]" : "bg-[#D3D3D3]"
-                      }`}
-                    ></div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              {/* Contenu scrollable */}
+              <CardContent className="flex-1 overflow-y-auto">
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {step === 1 ? (
-                    <>
-                      {/* Informations personnelles */}
-                      <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Prénom *
-                          </label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              placeholder="Votre prénom"
-                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.firstName}
-                              onChange={(e) =>
-                                handleInputChange("firstName", e.target.value)
-                              }
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Nom *
-                          </label>
+                  {/* Informations personnelles */}
+                  <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Prénom *
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Votre prénom"
+                          className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          value={formData.firstName}
+                          onChange={(e) =>
+                            handleInputChange("firstName", e.target.value)
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Nom *
+                      </label>
+                      <Input
+                        placeholder="Votre nom"
+                        className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                        value={formData.lastName}
+                        onChange={(e) =>
+                          handleInputChange("lastName", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Email *
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="email"
+                          placeholder="votre@email.mg"
+                          className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          value={formData.email}
+                          onChange={(e) =>
+                            handleInputChange("email", e.target.value)
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Téléphone *
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="+261 34 12 345 67"
+                          className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          value={formData.phone}
+                          onChange={(e) =>
+                            handleInputChange("phone", e.target.value)
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Adresse */}
+                  <div className="relative space-y-1">
+                    <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Adresse *
+                        </label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            placeholder="Votre nom"
-                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.lastName}
+                            placeholder="Votre adresse complète"
+                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                            value={formData.address}
                             onChange={(e) =>
-                              handleInputChange("lastName", e.target.value)
+                              handleInputChange("address", e.target.value)
                             }
                             required
                           />
@@ -285,290 +318,220 @@ const RegisterPage = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
-                          Email *
+                          Complément d'adresse
                         </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <Input
-                            type="email"
-                            placeholder="votre@email.mg"
-                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.email}
-                            onChange={(e) =>
-                              handleInputChange("email", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
+                        <Input
+                          placeholder="Appartement, étage, etc."
+                          className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          value={formData.addressComplement}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "addressComplement",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Code postal *
+                        </label>
+                        <Input
+                          placeholder="75001"
+                          className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          value={formData.zipCode}
+                          onChange={(e) =>
+                            handleInputChange("zipCode", e.target.value)
+                          }
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">
-                          Téléphone *
+                          Ville *
+                        </label>
+                        <Input
+                          placeholder="Paris"
+                          className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                          value={formData.city}
+                          onChange={(e) =>
+                            handleInputChange("city", e.target.value)
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Mot de passe */}
+                  <div className="space-y-2">
+                    <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Mot de passe *
                         </label>
                         <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            placeholder="+261 34 12 345 67"
-                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.phone}
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Créez un mot de passe sécurisé"
+                            className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                            value={formData.password}
                             onChange={(e) =>
-                              handleInputChange("phone", e.target.value)
+                              handleInputChange("password", e.target.value)
                             }
                             required
                           />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-gray-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-400" />
+                            )}
+                          </Button>
                         </div>
+                        <p className="text-[10px] text-gray-500">
+                          * Minimum 8 caractères avec majuscules, minuscules
+                          et chiffres
+                        </p>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      {/* Étape 2 */}
-                      {/* Adresse */}
-                      <div className="relative space-y-1">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Adresse *
-                          </label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              placeholder="Votre adresse complète"
-                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.address}
-                              onChange={(e) =>
-                                handleInputChange("address", e.target.value)
-                              }
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Complément d'adresse
-                          </label>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Confirmer le mot de passe *
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            placeholder="Appartement, étage, etc."
-                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.addressComplement}
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirmez votre mot de passe"
+                            className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                            value={formData.confirmPassword}
                             onChange={(e) =>
                               handleInputChange(
-                                "addressComplement",
+                                "confirmPassword",
                                 e.target.value
                               )
                             }
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Code postal *
-                            </label>
-                            <Input
-                              placeholder="75001"
-                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.zipCode}
-                              onChange={(e) =>
-                                handleInputChange("zipCode", e.target.value)
-                              }
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Ville *
-                            </label>
-                            <Input
-                              placeholder="Paris"
-                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.city}
-                              onChange={(e) =>
-                                handleInputChange("city", e.target.value)
-                              }
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      {/* Mot de passe */}
-                      <div className="space-y-2">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Mot de passe *
-                          </label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Créez un mot de passe sécurisé"
-                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.password}
-                              onChange={(e) =>
-                                handleInputChange("password", e.target.value)
-                              }
-                              required
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
-                              onClick={() => setShowPassword(!showPassword)}
-                            >
-                              {showPassword ? (
-                                <EyeOff className="h-4 w-4 text-gray-400" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-gray-400" />
-                              )}
-                            </Button>
-                          </div>
-                          <p className="text-[10px] text-gray-500">
-                            * Minimum 8 caractères avec majuscules, minuscules
-                            et chiffres
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Confirmer le mot de passe *
-                          </label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              type={showConfirmPassword ? "text" : "password"}
-                              placeholder="Confirmez votre mot de passe"
-                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.confirmPassword}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  "confirmPassword",
-                                  e.target.value
-                                )
-                              }
-                              required
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
-                              onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                              }
-                            >
-                              {showConfirmPassword ? (
-                                <EyeOff className="h-4 w-4 text-gray-400" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-gray-400" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Conditions - Étape 1 */}
-                      <div className="space-y-4 pt-4 border-t border-[#D3D3D3]">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="acceptTerms"
-                            checked={formData.acceptTerms}
-                            onCheckedChange={(checked) =>
-                              handleInputChange(
-                                "acceptTerms",
-                                checked as boolean
-                              )
-                            }
                             required
                           />
-                          <label
-                            htmlFor="acceptTerms"
-                            className="text-xs text-gray-600 cursor-pointer"
-                          >
-                            J'accepte les{" "}
-                            <a
-                              href="/terms"
-                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
-                            >
-                              conditions d'utilisation
-                            </a>{" "}
-                            et la{" "}
-                            <a
-                              href="/privacy"
-                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
-                            >
-                              politique de confidentialité
-                            </a>
-                          </label>
-                        </div>
-                        {/* RGPD - Importation des contacts */}
-                        <div className="flex items-start space-x-2">
-                          <Checkbox
-                            id="importedContactsConsent"
-                            checked={formData.importedContactsConsent || false}
-                            onCheckedChange={(checked) =>
-                              handleInputChange(
-                                "importedContactsConsent",
-                                checked as boolean
-                              )
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
                             }
-                          />
-                          <label
-                            htmlFor="importedContactsConsent"
-                            className="text-xs text-gray-600 leading-snug cursor-pointer"
                           >
-                            Les personnes qui utilisent notre service ont pu
-                            importer vos coordonnées sur{" "}
-                            <span className="font-semibold">Servo</span>.{" "}
-                            <a
-                              href="/en-savoir-plus"
-                              className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              En savoir plus
-                            </a>
-                          </label>
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4 text-gray-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-400" />
+                            )}
+                          </Button>
                         </div>
                       </div>
-                    </>
-                  )}
-                  {/* Boutons de navigation */}
-                  <div className="flex gap-4">
-                    {step === 2 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="flex-1 h-11 border-[#D3D3D3]"
-                        onClick={() => setStep(1)}
+
+                    </div>
+                  </div>
+                  {/* Conditions */}
+                  <div className="space-y-4 pt-4 border-t border-[#D3D3D3]">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="acceptTerms"
+                        checked={formData.acceptTerms}
+                        onCheckedChange={(checked) =>
+                          handleInputChange(
+                            "acceptTerms",
+                            checked as boolean
+                          )
+                        }
+                        required
+                      />
+                      <label
+                        htmlFor="acceptTerms"
+                        className="text-xs text-gray-600 cursor-pointer"
                       >
-                        Retour
-                      </Button>
-                    )}
+                        J'accepte les{" "}
+                        <a
+                          href="/terms"
+                          className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
+                        >
+                          conditions d'utilisation
+                        </a>{" "}
+                        et la{" "}
+                        <a
+                          href="/privacy"
+                          className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
+                        >
+                          politique de confidentialité
+                        </a>
+                      </label>
+                    </div>
+                    {/* RGPD - Importation des contacts */}
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="importedContactsConsent"
+                        checked={formData.importedContactsConsent || false}
+                        onCheckedChange={(checked) =>
+                          handleInputChange(
+                            "importedContactsConsent",
+                            checked as boolean
+                          )
+                        }
+                      />
+                      <label
+                        htmlFor="importedContactsConsent"
+                        className="text-xs text-gray-600 leading-snug cursor-pointer"
+                      >
+                        Les personnes qui utilisent notre service ont pu
+                        importer vos coordonnées sur{" "}
+                        <span className="font-semibold">Servo</span>.{" "}
+                        <a
+                          href="/en-savoir-plus"
+                          className="text-[#556B2F] hover:text-[#556B2F]/90 font-medium"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          En savoir plus
+                        </a>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Boutons de navigation - sticky en bas */}
+                  <div className="sticky bottom-0 z-10 bg-[#FFFFFF] border-t border-gray-400 px-6 pt-5 space-y-3">
                     <Button
                       type="submit"
-                      className={`${
-                        step === 2 ? "flex-1" : "w-full"
-                      } h-11 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#556B2F]/90 hover:to-[#6B8E23]/90 text-white font-semibold`}
+                      className="w-full h-11 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#556B2F]/90 hover:to-[#6B8E23]/90 text-white font-semibold"
                       disabled={isLoading}
                     >
                       {isLoading ? (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          {step === 1
-                            ? "Chargement..."
-                            : "Création du compte..."}
+                          Création du compte...
                         </div>
-                      ) : step === 1 ? (
-                        "Continuer"
                       ) : (
                         "Créer mon compte"
                       )}
                     </Button>
-                  </div>
-                  <div className="text-center text-sm text-gray-600 mb-4">
-                    Vous avez déjà un compte ?{" "}
-                    <a
-                      href="/login"
-                      className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
-                    >
-                      Se connecter
-                    </a>
+                    <div className="text-center text-sm text-gray-600">
+                      Vous avez déjà un compte ?{" "}
+                      <a
+                        href="/login"
+                        className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
+                      >
+                        Se connecter
+                      </a>
+                    </div>
                   </div>
                 </form>
               </CardContent>

@@ -9,7 +9,6 @@ import { ArrowRight } from "lucide-react";
 import AdvertisementPopup from "@/components/AdvertisementPopup";
 import CardCarte from "@/components/components/CardCarte";
 import AnnoncesImmobilieres from "@/components/components/CardsOlimmo";
-import { AdCard } from "./Publicite";
 
 const Hero = lazy(() => import("@/components/Hero"));
 const ServiceCards = lazy(() => import("@/components/ServiceCards"));
@@ -115,12 +114,6 @@ const Index = () => {
           )}
 
           {/* <EmplacementPub /> */}
-          <AdCard
-            mediaType="image"
-            imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-            title="Découvrez notre nouvelle offre"
-            description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-          />
 
 
           {/* Section biens immobiliers */}
@@ -161,12 +154,7 @@ const Index = () => {
             </div>
             <PropertyListings cardsOnly maxItems={4} />
             <Slider />
-            <AdCard
-              mediaType="video"
-              videoUrl={Ads}
-              title="Découvrez notre nouvelle offre"
-              description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-            />
+           <AdvertisementPopup />
             <AnnoncesImmobilieres />
           </>
         </Suspense>

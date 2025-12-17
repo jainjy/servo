@@ -14,7 +14,7 @@ import {
 import React, { useState } from 'react';
 import Api from '../../lib/api.js';
 import DemandeAudit from '../../components/DemandeAudit.tsx';
-import { AdCard } from '@/pages/Publicite.tsx';
+import AdvertisementPopup from '../AdvertisementPopup.tsx';
 
 interface InvestFormData {
   nom: string;
@@ -522,12 +522,7 @@ const InvestirEtranger = () => {
         </div>
       </section>
 
-      <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+      <AdvertisementPopup />
 
       {/* Section Vente/Location/Gestion */}
       <section className="py-8 bg-[#FAFAFA] border-t border-[#D3D3D3]">
@@ -674,12 +669,7 @@ const InvestirEtranger = () => {
         onAddAudit={handleAddAudit}
       />
 
-      <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+      <AdvertisementPopup />
     </div>
   );
 };

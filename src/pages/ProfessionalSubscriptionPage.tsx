@@ -19,6 +19,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { subscriptionPlansAPI } from "@/lib/api/subscriptionPlans";
+import ServoLogo from "@/components/components/ServoLogo";
 const ProfessionalSubscriptionPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -277,13 +278,7 @@ const ProfessionalSubscriptionPage = () => {
       <div className="w-full p-6 pt-24">
         <div className="text-center mb-8">
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full overflow-hidden my-4 flex items-center justify-center shadow-lg">
-              <img
-                src="/logo.png"
-                className="h-full w-full rounded-lg"
-                alt="Logo SERVO"
-              />
-            </div>
+            <ServoLogo />
           </div>
           <CardTitle className="text-4xl font-bold text-gray-200 mb-4 tracking-wide">
             Choisissez votre abonnement professionnel

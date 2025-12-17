@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useRedirectPath } from "@/hooks/useRedirectPath";
 import { toast } from "sonner";
+import ServoLogo from "@/components/components/ServoLogo";
 const LoginPage = () => {
   const navigate = useNavigate();
   const redirectPath = useRedirectPath();
@@ -73,17 +74,10 @@ const LoginPage = () => {
             <div className="mb-8">
               <Link to="/">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
-                    <img
-                      src="/logo.png"
-                      className="h-10 w-10 rounded-full"
-                      alt="Logo"
-                    />
-                  </div>
-                  <h1 className="text-3xl azonix font-bold">SERVO</h1>
+                  <ServoLogo />
                 </div>
               </Link>
-              <p className="text-[#8B4513] text-lg">
+              <p className="text-[#8B4513] text-sm text-justify">
                 Des biens immobiliers, ses services additionnels, produits
                 adaptés à vos besoins et vos locations au sein d’une seule
                 plateforme
