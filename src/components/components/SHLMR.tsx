@@ -30,7 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { ModalDemandeVisite } from '@/components/ModalDemandeVisite';
 import { Card } from "@/components/ui/card";
 import { Ruler } from "lucide-react";
-import { AdCard } from '@/pages/Publicite';
+import AdvertisementPopup from '../AdvertisementPopup';
 
 // Couleurs fournies
 const COLORS = {
@@ -565,12 +565,7 @@ const LogementsSHLMR = () => {
                                 </div>
                             </motion.div>
                         </div>
-                        <AdCard
-                            mediaType="image"
-                            imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-                            title="Découvrez notre nouvelle offre"
-                            description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-                        />
+                       <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -682,12 +677,7 @@ const LogementsSHLMR = () => {
                                 </div>
                             </div>
                         </div>
-                        <AdCard
-                            mediaType="image"
-                            imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-                            title="Découvrez notre nouvelle offre"
-                            description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-                        />
+                        <AdvertisementPopup />
                     </motion.section>
                 )}
             </AnimatePresence>
@@ -905,12 +895,7 @@ const LogementsSHLMR = () => {
                                 })}
                             </div>
 
-                            <AdCard
-                            mediaType="image"
-                            imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-                            title="Découvrez notre nouvelle offre"
-                            description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-                        />
+                           <AdvertisementPopup />
 
                             {/* Message si aucun résultat */}
                             {logements.length === 0 && (

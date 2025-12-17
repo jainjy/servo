@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { LocationPickerModal } from "@/components/location-picker-modal";
 import api from "@/lib/api";
 import { formatDate } from "date-fns";
+import ServoLogo from "@/components/components/ServoLogo";
 
 const ProRegisterPage = () => {
   const navigate = useNavigate();
@@ -299,17 +300,10 @@ const ProRegisterPage = () => {
               </Button>
             </div>
             <div className="mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 overflow-hidden h-10 rounded-full bg-black flex items-center justify-center">
-                  <img
-                    src="/logo.png"
-                    className="h-full w-full rounded-full"
-                    alt="Logo"
-                  />
-                </div>
-                <h1 className="text-2xl font-bold azonix tracking-wider">
-                  SERVO
-                </h1>
+              <div className="flex justify-center items-center gap-3">
+
+                <ServoLogo />
+
               </div>
               <p className="text-md font-semibold">
                 REJOIGNEZ LA SUPER APP DE L'HABITAT
@@ -349,10 +343,11 @@ const ProRegisterPage = () => {
             </div>
           </div>
         </div>
-        <div className="relative flex-1 flex bg-[#FFFFFF] overflow-y-auto">
-          <div className="w-full max-w-2xl">
-            <Card className="border-0 p-0 m-0 h-full rounded-none">
-              <CardHeader>
+        <div className="relative flex-1 flex flex-col bg-[#FFFFFF]">
+          <div className="w-full max-w-2xl flex flex-col h-full">
+            <Card className="border-0 p-0 m-0 rounded-none flex flex-col h-full">
+              {/* En-tête sticky */}
+              <CardHeader className="sticky top-0 z-10 bg-[#FFFFFF] border-b border-gray-100">
                 <div className="flex justify-between items-center">
                   <div className="flex flex-col items-start justify-center">
                     <CardTitle className="text-2xl font-bold text-gray-900">
@@ -366,19 +361,18 @@ const ProRegisterPage = () => {
                   </div>
                   <div className="absolute right-4 top-4 flex items-center gap-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 1 ? "bg-[#556B2F]" : "bg-[#6B8E23]"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${step === 1 ? "bg-[#556B2F]" : "bg-[#6B8E23]"
+                        }`}
                     ></div>
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        step === 2 ? "bg-[#556B2F]" : "bg-[#D3D3D3]"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${step === 2 ? "bg-[#556B2F]" : "bg-[#D3D3D3]"
+                        }`}
                     ></div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              {/* Contenu scrollable */}
+              <CardContent className="flex-1 overflow-y-auto">
                 <form onSubmit={handleSubmit} className="space-y-2">
                   {step === 1 ? (
                     <>
@@ -416,79 +410,85 @@ const ProRegisterPage = () => {
                           />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">
-                          Email *
-                        </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <Input
-                            type="email"
-                            placeholder="votre@email.mg"
-                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.email}
-                            onChange={(e) =>
-                              handleInputChange("email", e.target.value)
-                            }
-                            required
-                          />
+                      <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
+                            Email *
+                          </label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              type="email"
+                              placeholder="votre@email.mg"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              value={formData.email}
+                              onChange={(e) =>
+                                handleInputChange("email", e.target.value)
+                              }
+                              required
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">
-                          Téléphone *
-                        </label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <Input
-                            placeholder="+261 34 12 345 67"
-                            className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.phone}
-                            onChange={(e) =>
-                              handleInputChange("phone", e.target.value)
-                            }
-                            required
-                          />
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">
+                            Téléphone *
+                          </label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              placeholder="+261 34 12 345 67"
+                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              value={formData.phone}
+                              onChange={(e) =>
+                                handleInputChange("phone", e.target.value)
+                              }
+                              required
+                            />
+                          </div>
                         </div>
                       </div>
                       {/* Informations entreprise (si professionnel) */}
                       {formData.role === "professional" && (
                         <>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Nom de l'entreprise *
-                            </label>
-                            <div className="relative">
-                              <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-gray-700">
+                                Nom de l'entreprise *
+                              </label>
+                              <div className="relative">
+                                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Input
+                                  placeholder="Nom de votre société"
+                                  className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                  value={formData.companyName}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "companyName",
+                                      e.target.value
+                                    )
+                                  }
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-gray-700">
+                                Nom commercial
+                              </label>
                               <Input
-                                placeholder="Nom de votre société"
-                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                                value={formData.companyName}
+                                placeholder="Nom commercial"
+                                className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                value={formData.commercialName}
                                 onChange={(e) =>
                                   handleInputChange(
-                                    "companyName",
+                                    "commercialName",
                                     e.target.value
                                   )
                                 }
-                                required
                               />
                             </div>
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">
-                              Nom commercial
-                            </label>
-                            <Input
-                              placeholder="Nom commercial"
-                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.commercialName}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  "commercialName",
-                                  e.target.value
-                                )
-                              }
-                            />
                           </div>
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
@@ -508,9 +508,6 @@ const ProRegisterPage = () => {
                           </div>
                         </>
                       )}
-                    </>
-                  ) : (
-                    <>
                       {/* Étape 2 - Métiers avec recherche améliorée */}
                       <div className="space-y-4">
                         <div>
@@ -518,10 +515,10 @@ const ProRegisterPage = () => {
                             Sélectionnez vos métiers *
                             {(formData.userType === "VENDEUR" ||
                               formData.userType === "BIEN_ETRE") && (
-                              <span className="ml-2 text-xs text-[#6B8E23] font-normal">
-                                (Tous sélectionnés automatiquement)
-                              </span>
-                            )}
+                                <span className="ml-2 text-xs text-[#6B8E23] font-normal">
+                                  (Tous sélectionnés automatiquement)
+                                </span>
+                              )}
                           </label>
 
                           {/* Barre de recherche */}
@@ -564,19 +561,17 @@ const ProRegisterPage = () => {
                                     onClick={() =>
                                       handleMetierToggle(metier.id)
                                     }
-                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                                      formData.metiers.includes(metier.id)
-                                        ? "border-[#556B2F] bg-gradient-to-r from-[#556B2F]/10 to-[#556B2F]/20 shadow-md"
-                                        : "border-[#D3D3D3] bg-[#FFFFFF] hover:border-[#556B2F]/50 hover:shadow-sm"
-                                    }`}
+                                    className={`group relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${formData.metiers.includes(metier.id)
+                                      ? "border-[#556B2F] bg-gradient-to-r from-[#556B2F]/10 to-[#556B2F]/20 shadow-md"
+                                      : "border-[#D3D3D3] bg-[#FFFFFF] hover:border-[#556B2F]/50 hover:shadow-sm"
+                                      }`}
                                   >
                                     {/* Checkbox personnalisé */}
                                     <div
-                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                        formData.metiers.includes(metier.id)
-                                          ? "border-[#556B2F] bg-[#556B2F]"
-                                          : "border-[#D3D3D3] group-hover:border-[#556B2F]/50"
-                                      }`}
+                                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${formData.metiers.includes(metier.id)
+                                        ? "border-[#556B2F] bg-[#556B2F]"
+                                        : "border-[#D3D3D3] group-hover:border-[#556B2F]/50"
+                                        }`}
                                     >
                                       {formData.metiers.includes(metier.id) && (
                                         <CheckCircle className="h-4 w-4 text-white fill-current" />
@@ -585,11 +580,10 @@ const ProRegisterPage = () => {
 
                                     {/* Texte du métier */}
                                     <span
-                                      className={`text-sm font-medium transition-all ${
-                                        formData.metiers.includes(metier.id)
-                                          ? "text-[#556B2F]"
-                                          : "text-gray-700 group-hover:text-gray-900"
-                                      }`}
+                                      className={`text-sm font-medium transition-all ${formData.metiers.includes(metier.id)
+                                        ? "text-[#556B2F]"
+                                        : "text-gray-700 group-hover:text-gray-900"
+                                        }`}
                                     >
                                       {metier.libelle}
                                     </span>
@@ -616,41 +610,48 @@ const ProRegisterPage = () => {
                           </div>
                         </div>
                       </div>
+                    </>
+                  ) : (
+                    <>
+                      
 
                       {/* Adresse */}
                       <div className="space-y-2">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Adresse *
-                          </label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              Adresse *
+                            </label>
+                            <div className="relative">
+                              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                placeholder="Votre adresse complète"
+                                className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                value={formData.address}
+                                onChange={(e) =>
+                                  handleInputChange("address", e.target.value)
+                                }
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              Complément d'adresse
+                            </label>
                             <Input
-                              placeholder="Votre adresse complète"
-                              className="pl-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.address}
+                              placeholder="Appartement, étage, etc."
+                              className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                              value={formData.addressComplement}
                               onChange={(e) =>
-                                handleInputChange("address", e.target.value)
+                                handleInputChange(
+                                  "addressComplement",
+                                  e.target.value
+                                )
                               }
-                              required
                             />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Complément d'adresse
-                          </label>
-                          <Input
-                            placeholder="Appartement, étage, etc."
-                            className="h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                            value={formData.addressComplement}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "addressComplement",
-                                e.target.value
-                              )
-                            }
-                          />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -683,7 +684,7 @@ const ProRegisterPage = () => {
                           </div>
                         </div>
                         {/* Coordonnées GPS (optionnelles) */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">
                               Position géographique *
@@ -697,10 +698,10 @@ const ProRegisterPage = () => {
                               <MapPin className="h-4 w-4 mr-2" />
                               {formData.latitude && formData.longitude
                                 ? `Position définie: ${parseFloat(
-                                    formData.latitude
-                                  ).toFixed(4)}, ${parseFloat(
-                                    formData.longitude
-                                  ).toFixed(4)}`
+                                  formData.latitude
+                                ).toFixed(4)}, ${parseFloat(
+                                  formData.longitude
+                                ).toFixed(4)}`
                                 : "Cliquez pour sélectionner sur la carte"}
                             </Button>
                             <p className="text-xs text-gray-500">
@@ -731,75 +732,78 @@ const ProRegisterPage = () => {
                       </div>
                       {/* Mot de passe */}
                       <div className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Mot de passe *
-                          </label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Créez un mot de passe sécurisé"
-                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.password}
-                              onChange={(e) =>
-                                handleInputChange("password", e.target.value)
-                              }
-                              required
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
-                              onClick={() => setShowPassword(!showPassword)}
-                            >
-                              {showPassword ? (
-                                <EyeOff className="h-4 w-4 text-gray-400" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-gray-400" />
-                              )}
-                            </Button>
+                        <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              Mot de passe *
+                            </label>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Créez un mot de passe sécurisé"
+                                className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                value={formData.password}
+                                onChange={(e) =>
+                                  handleInputChange("password", e.target.value)
+                                }
+                                required
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? (
+                                  <EyeOff className="h-4 w-4 text-gray-400" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-gray-400" />
+                                )}
+                              </Button>
+                            </div>
+                            <p className="text-[10px] text-gray-500">
+                              Minimum 8 caractères avec majuscules, minuscules et
+                              chiffres
+                            </p>
                           </div>
-                          <p className="text-[10px] text-gray-500">
-                            Minimum 8 caractères avec majuscules, minuscules et
-                            chiffres
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
-                            Confirmer le mot de passe *
-                          </label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              type={showConfirmPassword ? "text" : "password"}
-                              placeholder="Confirmez votre mot de passe"
-                              className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
-                              value={formData.confirmPassword}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  "confirmPassword",
-                                  e.target.value
-                                )
-                              }
-                              required
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
-                              onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                              }
-                            >
-                              {showConfirmPassword ? (
-                                <EyeOff className="h-4 w-4 text-gray-400" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-gray-400" />
-                              )}
-                            </Button>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              Confirmer le mot de passe *
+                            </label>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Confirmez votre mot de passe"
+                                className="pl-10 pr-10 h-11 bg-[#FFFFFF] border-[#D3D3D3]"
+                                value={formData.confirmPassword}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    "confirmPassword",
+                                    e.target.value
+                                  )
+                                }
+                                required
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 top-0 h-11 w-11 hover:bg-transparent"
+                                onClick={() =>
+                                  setShowConfirmPassword(!showConfirmPassword)
+                                }
+                              >
+                                {showConfirmPassword ? (
+                                  <EyeOff className="h-4 w-4 text-gray-400" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-gray-400" />
+                                )}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -871,47 +875,48 @@ const ProRegisterPage = () => {
                       </div>
                     </>
                   )}
-                  {/* Boutons de navigation */}
-                  <div className="flex gap-4">
-                    {step === 2 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="flex-1 h-11 border-[#D3D3D3]"
-                        onClick={() => setStep(1)}
-                      >
-                        Retour
-                      </Button>
-                    )}
-                    <Button
-                      type="submit"
-                      className={`${
-                        step === 2 ? "flex-1" : "w-full"
-                      } h-11 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] hover:from-[#6B8E23]/90 hover:to-[#556B2F]/90 text-white font-semibold`}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          {step === 1
-                            ? "Chargement..."
-                            : "Création du compte..."}
-                        </div>
-                      ) : step === 1 ? (
-                        "Continuer"
-                      ) : (
-                        "Créer mon compte"
+                  {/* Boutons de navigation - sticky en bas */}
+                  <div className="sticky bottom-0 z-10 bg-[#FFFFFF] border-t border-gray-300 px-6 pb-0 pt-5 space-y-3">
+                    <div className="flex gap-4">
+                      {step === 2 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="flex-1 h-11 border-[#D3D3D3]"
+                          onClick={() => setStep(1)}
+                        >
+                          Retour
+                        </Button>
                       )}
-                    </Button>
-                  </div>
-                  <div className="text-center text-sm text-gray-600 mb-4">
-                    Déjà un compte ?{" "}
-                    <a
-                      href="/login"
-                      className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
-                    >
-                      Se connecter
-                    </a>
+                      <Button
+                        type="submit"
+                        className={`${step === 2 ? "flex-1" : "w-full"
+                          } h-11 bg-gradient-to-r from-[#6B8E23] to-[#556B2F] hover:from-[#6B8E23]/90 hover:to-[#556B2F]/90 text-white font-semibold`}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            {step === 1
+                              ? "Chargement..."
+                              : "Création du compte..."}
+                          </div>
+                        ) : step === 1 ? (
+                          "Continuer"
+                        ) : (
+                          "Créer mon compte"
+                        )}
+                      </Button>
+                    </div>
+                    <div className="text-center text-sm text-gray-600">
+                      Déjà un compte ?{" "}
+                      <a
+                        href="/login"
+                        className="text-[#556B2F] ml-2 hover:text-[#556B2F]/90 font-medium"
+                      >
+                        Se connecter
+                      </a>
+                    </div>
                   </div>
                 </form>
               </CardContent>

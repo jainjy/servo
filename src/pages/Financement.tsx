@@ -1325,7 +1325,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { AdCard } from "./Publicite";
+import AdvertisementPopup from "@/components/AdvertisementPopup";
 
 // Types
 interface FinancementPartenaire {
@@ -1654,12 +1654,7 @@ export default function Financement() {
           </div>
         </div>
       </section>
-      <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+     <AdvertisementPopup />
       {/* Section Partenaires Financement */}
       <section className="lg:py-20 bg-white" id="partenaires">
         <div className="container mx-auto px-4">
@@ -1789,12 +1784,7 @@ export default function Financement() {
           onSimulationSubmit={handleSimulationSubmit}
         />
       )}
-      <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+      <AdvertisementPopup />
     </div>
   );
 }

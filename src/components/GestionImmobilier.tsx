@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
-import { AdCard } from "@/pages/Publicite";
+import AdvertisementPopup from "./AdvertisementPopup";
 
 const GestionImmobilier = () => {
   const [activeService, setActiveService] = useState("gestion");
@@ -457,12 +457,7 @@ const GestionImmobilier = () => {
         </div>
       </section>
 
-      <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+      <AdvertisementPopup />
 
       {/* Services Section */}
       <section id="services" className="py-12 bg-gray-50" ref={servicesRef}>
@@ -1077,12 +1072,7 @@ const GestionImmobilier = () => {
         </DialogContent>
       </Dialog>
 
-       <AdCard
-        mediaType="image"
-        imageUrl="https://i.pinimg.com/1200x/55/3a/94/553a94400adf760f4965ccd1f6395286.jpg"
-        title="Découvrez notre nouvelle offre"
-        description="Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée.Profitez de réductions exclusives sur une sélection de produits pendant une durée limitée."
-      />
+       <AdvertisementPopup />
     </div>
   );
 };
