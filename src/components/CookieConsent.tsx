@@ -8,6 +8,7 @@ export default function CookieConsent() {
   const [preferences, setPreferences] = useState({
     necessary: true,
     performance: false,
+    geolocation: false,
   });
 
   // 🔹 Au chargement, lire les préférences et la localisation depuis Local Storage
@@ -31,21 +32,27 @@ export default function CookieConsent() {
     setVisible(false);
   };
 
-  // 🔹 Accepter tous les cookies + récupérer géolocalisation
+  // 🔹 Accepter tous les cookies + récupérer géolocalisation (AVEC CONSENTEMENT)
   const handleAcceptAll = () => {
-    const prefs = { necessary: true, performance: true };
+    const prefs = { necessary: true, performance: true, geolocation: true };
     savePreferences(prefs);
+    
+    requestGeolocation();
+  };
 
-    // Récupérer la géolocalisation
-    if (navigator.geolocation) {
+  // 🔹 Demander la géolocalisation SEULEMENT si l'utilisateur a donné son consentement
+  const requestGeolocation = () => {
+    if (navigator.geolocation && preferences.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const location = {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
+            timestamp: new Date().toISOString(),
           };
           localStorage.setItem("user_location", JSON.stringify(location));
-          // console.log("🌍 Localisation sauvegardée :", location);
+          localStorage.setItem("geolocation_consent", "true");
+          // console.log("🌍 Localisation sauvegardée avec consentement :", location);
         },
         (err) => console.error("Erreur géolocalisation :", err),
         { enableHighAccuracy: true }
@@ -95,7 +102,21 @@ export default function CookieConsent() {
                     }
                   />
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                    Géolocalisation (RGPD)
+                  </span>
+                  <Switch
+                    checked={preferences.geolocation}
+                    onCheckedChange={(checked) =>
+                      setPreferences({ ...preferences, geolocation: checked })
+                    }
+                  />
+                </div>
               </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
+                La géolocalisation est désactivée par défaut. Activez-la uniquement si vous souhaitez que nous accédions à votre localisation. Conformément au RGPD, votre consentement explicite est requis.
+              </p>
 
               {/* Actions */}
               <div className="mt-5 flex flex-wrap gap-2 justify-end">

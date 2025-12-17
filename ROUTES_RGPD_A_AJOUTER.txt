@@ -1,0 +1,57 @@
+/**
+ * ROUTES RGPD À AJOUTER À App.tsx
+ * 
+ * Ajoutez les imports suivants en haut du fichier App.tsx :
+ */
+
+import MentionsLegales from "./pages/MentionsLegales";
+import PolitiqueConfidentialiteComplete from "./pages/PolitiqueConfidentialiteComplete";
+import GestionDroitsRGPD from "./pages/GestionDroitsRGPD";
+import ContactDPO from "./pages/ContactDPO";
+import RGPDInfo from "./pages/RGPDInfo";
+
+/**
+ * Ajoutez ces routes dans le composant <Routes> :
+ */
+
+// Routes RGPD et légales
+<Route path="/mentions-legales" element={<MentionsLegales />} />
+<Route path="/politique-confidentialite" element={<PolitiqueConfidentialiteComplete />} />
+<Route path="/gestion-droits-rgpd" element={<GestionDroitsRGPD />} />
+<Route path="/contact-dpo" element={<ContactDPO />} />
+<Route path="/rgpd-info" element={<RGPDInfo />} />
+
+// Route conditions d'utilisation (déjà existante)
+<Route path="/terms" element={<Terms />} />
+
+/**
+ * FICHIERS CRÉÉS / MODIFIÉS
+ * 
+ * CRÉÉS :
+ * ✅ src/pages/MentionsLegales.tsx
+ * ✅ src/pages/PolitiqueConfidentialiteComplete.tsx
+ * ✅ src/pages/GestionDroitsRGPD.tsx
+ * ✅ src/pages/ContactDPO.tsx
+ * 
+ * MODIFIÉS :
+ * ✅ src/components/CookieConsent.tsx - Ajout consentement géolocalisation
+ * ✅ src/pages/Terms.tsx - Mise à jour contenu complet SERVO
+ * ✅ src/pages/RGPDInfo.tsx - Remplacement contenu personnalisé
+ * 
+ * 
+ * PROCHAINES ÉTAPES RECOMMANDÉES :
+ * 
+ * 1. Ajouter les routes dans App.tsx
+ * 2. Mettre à jour les liens de navigation (header, footer)
+ * 3. Remplir les informations spécifiques :
+ *    - SIRET/Numéro entreprise dans MentionsLegales
+ *    - Coordonnées téléphone exactes
+ *    - Hébergeur / prestataire données
+ * 4. Implémenter les endpoints API :
+ *    - POST /users/export-data
+ *    - DELETE /users/delete-account
+ *    - POST /users/request-limitation
+ *    - POST /contact/dpo
+ * 5. Tester tous les formulaires et fonctionnalités
+ * 6. Consulter un juriste pour validation finale
+ */

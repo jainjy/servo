@@ -124,6 +124,10 @@ import RGPDInfo from "@/pages/RGPDInfo";
 import ImportInfo from "@/pages/ImportInfo";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
+import MentionsLegales from "@/pages/MentionsLegales";
+import PolitiqueConfidentialiteComplete from "@/pages/PolitiqueConfidentialiteComplete";
+import GestionDroitsRGPD from "@/pages/GestionDroitsRGPD";
+import ContactDPO from "@/pages/ContactDPO";
 import CreationReprise from "./components/components/CreationReprise";
 import AuditMediation from "./components/components/AuditMediation";
 import AidesLeveesFonds from "./components/components/AideFonds";
@@ -800,6 +804,12 @@ const App = () => {
                   <Route path="/import-info" element={<ImportInfo />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
+                  
+                  {/* Routes RGPD et légales */}
+                  <Route path="/mentions-legales" element={<MentionsLegales />} />
+                  <Route path="/politique-confidentialite" element={<PolitiqueConfidentialiteComplete />} />
+                  <Route path="/gestion-droits-rgpd" element={<GestionDroitsRGPD />} />
+                  <Route path="/contact-dpo" element={<ContactDPO />} />
                 </Routes>
 
                 {/* Pop-up publicité globale */}

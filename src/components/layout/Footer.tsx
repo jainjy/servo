@@ -255,11 +255,14 @@ const Footer: React.FC = () => {
 
             {/* Liens légaux */}
             <div className="flex flex-wrap items-center justify-center gap-6">
+              
               {[
                 { to: '/cookies', label: 'Cookies' },
-                { to: '/confidentialite', label: 'Confidentialité' },
-                { to: '/mentions_legales', label: 'Mentions légales' },
-                
+                { to: '/politique-confidentialite', label: 'Confidentialité' },
+                { to: '/mentions-legales', label: 'Mentions légales' },
+                { to: '/terms', label: 'Conditions d\'utilisation' },
+                { to: '/gestion-droits-rgpd', label: 'Mes droits RGPD' },
+                // { to: '/contact-dpo', label: 'Contact DPO' },
               ].map((link, index) => (
                 <Link
                   key={link.to}
