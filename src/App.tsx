@@ -193,6 +193,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 // IMPORT DE LA NOUVELLE PAGE D'ACCOMPAGNEMENT
 import AccompagnementPage from "./pages/AccompagnementPage";
 import ConseilPage from "./pages/ConseilPage";
+import PaymentTest from "./pages/PaymentTest";
 import AdminConseilPage from "./pages/AdminConseilPage";
 import UserConseilPage from "./pages/UserConseilPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
@@ -289,7 +290,8 @@ const App = () => {
                     path="/accompagnement"
                     element={<AccompagnementPage />}
                   />
-                  <Route path="conseil" element={<ConseilPage />} />
+                  <Route path="/conseil" element={<ConseilPage />} />
+                  <Route path="/payement-test" element={<PaymentTest />} />
                   <Route path="/bien-etre" element={<BienEtre />} />
                   <Route path="/digitalisation" element={<Digitalisation />} />
                   <Route

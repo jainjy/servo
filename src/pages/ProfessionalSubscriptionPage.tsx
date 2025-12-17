@@ -290,7 +290,7 @@ const ProfessionalSubscriptionPage = () => {
           </CardDescription>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {subscriptionPlans.map((plan) => {
+          {subscriptionPlans.filter(plan => plan.id !== "wellness").map((plan) => {
             const color = getColorClasses(plan.color);
             const isSelected = selectedPlan === plan.id;
             const isRedirecting = isSelected && redirecting;
