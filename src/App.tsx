@@ -165,6 +165,7 @@ import UserReservations from "./pages/UserReservations";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
 import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import RendezVous from "./components/admin/rendezvous/rendezvous";
 import Donation from "./components/components/Don";
 import ProTouristicPlaceBookings from "./components/pro/ProTouristicPlaceBookings";
 import AccountSuspended from "./pages/AccountSuspended";
@@ -775,6 +776,7 @@ const App = () => {
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
                     <Route path="conseil" element={<AdminConseilPage />} />
+                    <Route path="rendezvous" element={<RendezVous/>} />
                     <Route path="media" element={<AdminMedia />} />
                     <Route
                       path="demandeDroitFamille"
