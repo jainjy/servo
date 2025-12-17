@@ -18,7 +18,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { X, Search, Building2Icon, MapPin, MessageSquare, Briefcase } from "lucide-react";
+import {
+  X,
+  Search,
+  Building2Icon,
+  MapPin,
+  MessageSquare,
+  Briefcase,
+} from "lucide-react";
 // Import des icônes
 import {
   Menu,
@@ -474,13 +481,13 @@ const Header = () => {
         // href: "/estimation-immobilier",
         // image: "https://i.pinimg.com/1200x/2a/33/c7/2a33c7347de60d0c65be83a72c4495be.jpg"
         // },
-        // {
-        // title: "Podcasts",
-        // description: "Vidéos fournies par des experts",
-        // href: "/podcasts/immobilier",
-        // image:
-        // "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        // },
+        {
+          title: "Podcasts",
+          description: "Vidéos fournies par des experts",
+          href: "/podcasts/immobilier",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
         // {
         // title: "TRAVAUX & CONSTRUCTION ",
         // items: [
@@ -752,13 +759,13 @@ const Header = () => {
         // image:
         // "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg",
         // },
-        // {
-        // title: "Podcasts",
-        // description: " Ressources pour entrepreneurs",
-        // href: "/podcast_service",
-        // image:
-        // "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-        // },
+        {
+          title: "Podcasts",
+          description: " Ressources pour entrepreneurs",
+          href: "/podcast_service",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
       ],
     },
     // {
@@ -1012,6 +1019,34 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
         },
+        {
+          title: "Activités & loisirs",
+          description: "Découvertes & aventures",
+          href: "/activiteLoisirs",
+          image:
+            "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
+        {
+          title: "Voyages",
+          description: "Cours & ateliers locaux",
+          href: "/voyages",
+          image:
+            "https://i.pinimg.com/736x/d9/23/b0/d923b0be1d7ff9ca3e729cf83a4e3a60.jpg",
+        },
+        {
+          title: "Lieux historiques & culturels",
+          description: "Explorez le patrimoine local",
+          href: "/lieux_historique",
+          image:
+            "https://i.pinimg.com/1200x/91/01/6a/91016ac95b54c8a72d47945497fc1ddc.jpg",
+        },
+        {
+          title: "Podcasts",
+          description: "Ressources sur vivre à la Réunion",
+          href: "/podcasts/reunion",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
       ],
     },
     /*** Nos partenaire*/
@@ -1045,6 +1080,13 @@ const Header = () => {
           href: "/plombiers",
           image:
             "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",
+        },
+        {
+          title: "Podcasts",
+          description: "Témoignages et interviews de partenaires",
+          href: "/podcasts/partenaires",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
       ],
     },
@@ -1944,8 +1986,8 @@ const Header = () => {
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/conseil")}
                       >
-                       <Briefcase className="h-4 w-4" />
-                         Mes demandes Conseils
+                        <Briefcase className="h-4 w-4" />
+                        Mes demandes Conseils
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => navigate("/mon-compte/demandes")}

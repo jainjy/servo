@@ -7,8 +7,6 @@ import {
   Edit,
   Trash2,
   Eye,
-  EyeOff,
-  Upload,
   Search,
   BarChart3,
   Users,
@@ -18,10 +16,8 @@ import {
   X,
   Play,
   Calendar,
-  FileText,
   Headphones,
   Clock,
-  Download,
   MoreVertical
 } from "lucide-react";
 import { MediaService } from "../../lib/api";

@@ -196,6 +196,8 @@ import ConseilPage from "./pages/ConseilPage";
 import AdminConseilPage from "./pages/AdminConseilPage";
 import UserConseilPage from "./pages/UserConseilPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
+import PodcastsReunion from "./components/PodcastsReunion";
+import PodcastsPartenaires from "./components/PodcastsPartenaires";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -271,7 +273,7 @@ const App = () => {
 
               <ScrollToTop />
               <ScrollToHash />
-              
+
               <Layout>
                 <Routes>
                   {/* Section publiques Routes */}
@@ -373,6 +375,14 @@ const App = () => {
                   <Route
                     path="/podcasts/immobilier"
                     element={<PodcastsImmobilier />}
+                  />
+                  <Route
+                    path="/podcasts/reunion"
+                    element={<PodcastsReunion />}
+                  />
+                  <Route
+                    path="/podcasts/partenaires"
+                    element={<PodcastsPartenaires />}
                   />
                   <Route
                     path="/podcasts/assurance-finance"
@@ -698,7 +708,7 @@ const App = () => {
                       element={<ProReservations />}
                     />
                     <Route path="media" element={<AdminMedia />} />
-                    
+
                     <Route
                       path="delete-account"
                       element={<DeleteAccountPage />}

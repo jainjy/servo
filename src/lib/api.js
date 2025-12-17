@@ -47,55 +47,61 @@ api.interceptors.response.use(
 export const demandeImmobilierAPI = {
   // Récupérer toutes les demandes (admin)
   getAllDemandes: () => api.get("/demandes/immobilier"),
-  
+
   // Récupérer les demandes d'un utilisateur (client)
   getUserDemandes: (userId) => api.get(`/demandes/immobilier/user/${userId}`),
-  
+
   // Récupérer les demandes pour les propriétés d'un artisan/professionnel
-  getArtisanDemandes: (userId) => api.get(`/demandes/immobilier/owner/${userId}`),
-  
+  getArtisanDemandes: (userId) =>
+    api.get(`/demandes/immobilier/owner/${userId}`),
+
   // Mettre à jour le statut d'une demande
-  updateStatut: (id, statut) => 
+  updateStatut: (id, statut) =>
     api.patch(`/demandes/immobilier/${id}/statut`, { statut }),
-  
+
   // Supprimer une demande
-  deleteDemande: (id, hardDelete = false) => 
-    api.delete(`/demandes/immobilier/${id}${hardDelete ? '?hardDelete=true' : ''}`),
-  
+  deleteDemande: (id, hardDelete = false) =>
+    api.delete(
+      `/demandes/immobilier/${id}${hardDelete ? "?hardDelete=true" : ""}`
+    ),
+
   // Créer une demande
   createDemande: (data) => api.post("/demandes/immobilier", data),
-  
+
   // Récupérer l'historique d'une demande
   getHistory: (id) => api.get(`/demandes/immobilier/${id}/history`),
-  
+
   // Récupérer l'historique utilisateur
-  getUserHistory: (userId) => api.get(`/demandes/immobilier/user/${userId}/history`),
+  getUserHistory: (userId) =>
+    api.get(`/demandes/immobilier/user/${userId}/history`),
 };
 // Services pour les locations saisonnières
 export const locationSaisonniereAPI = {
   // Créer une location saisonnière
   createLocation: (data) => api.post("/locations-saisonniere", data),
-  
+
   // Récupérer les locations d'un client
-  getClientLocations: (userId) => api.get(`/locations-saisonniere/client/${userId}`),
-  
+  getClientLocations: (userId) =>
+    api.get(`/locations-saisonniere/client/${userId}`),
+
   // Récupérer les locations d'un artisan
-  getArtisanLocations: (userId) => api.get(`/locations-saisonniere/artisan/${userId}`),
-  
+  getArtisanLocations: (userId) =>
+    api.get(`/locations-saisonniere/artisan/${userId}`),
+
   // Mettre à jour le statut d'une location
-  updateLocationStatus: (id, status) => 
+  updateLocationStatus: (id, status) =>
     api.patch(`/locations-saisonniere/${id}/status`, { status }),
-  
+
   // Annuler une location
   cancelLocation: (id) => api.delete(`/locations-saisonniere/${id}`),
-  
+
   // Récupérer les détails d'une location
   getLocationDetails: (id) => api.get(`/locations-saisonniere/${id}`),
-  
+
   // Payer une location
-  processPayment: (id, paymentData) => 
+  processPayment: (id, paymentData) =>
     api.post(`/locations-saisonniere/${id}/paiement`, paymentData),
-  
+
   // Générer un contrat
   generateContract: (id) => api.get(`/locations-saisonniere/${id}/contrat`),
 };
@@ -129,7 +135,8 @@ export const financementAPI = {
   // Gestion des partenaires - Admin
   getProfessionals: () => api.get("/financement/admin/professionals"),
   createPartenaire: (data) => api.post("/financement/admin/partenaires", data),
-  updatePartenaire: (id, data) => api.put(`/financement/admin/partenaires/${id}`, data),
+  updatePartenaire: (id, data) =>
+    api.put(`/financement/admin/partenaires/${id}`, data),
   deletePartenaire: (id) => api.delete(`/financement/admin/partenaires/${id}`),
 
   // Services financiers - Professionnels
@@ -157,12 +164,12 @@ export const tourismeAPI = {
         "Content-Type": "multipart/form-data",
       },
     }),
-    
+
   getListings: (params = {}) => api.get("/admin/tourisme", { params }),
-  
+
   // CORRECTION : Ajouter le paramètre contentType
   getStats: (params = {}) => api.get("/admin/tourisme/stats", { params }),
-  
+
   createListing: (data) => api.post("/admin/tourisme", data),
   updateListing: (id, data) => api.put(`/admin/tourisme/${id}`, data),
   deleteListing: (id) => api.delete(`/admin/tourisme/${id}`),
@@ -179,14 +186,14 @@ export const tourismeAPI = {
   getTouristicPlaces: (params = {}) =>
     api.get("/admin/tourisme/places", { params }),
   getFlights: (params = {}) => api.get("/Vol/flights", { params }),
-   checkPlaceAvailability: (placeId, visitDate) => 
+  checkPlaceAvailability: (placeId, visitDate) =>
     touristicPlaceBookingsAPI.checkAvailability(placeId, visitDate),
 
   createPlaceBooking: (userId, bookingData) =>
     touristicPlaceBookingsAPI.createBooking(userId, bookingData),
 
   // Utilisez la méthode existante getTouristicPlaces
-  getTouristicPlaces: (params = {}) => 
+  getTouristicPlaces: (params = {}) =>
     api.get("/admin/tourisme/places", { params }),
 
   // Méthode de secours
@@ -474,8 +481,8 @@ export const offresExclusivesAPI = {
   getStats: () => api.get("/offres-exclusives/stats"),
 
   // Récupérer les catégories
-  getCategories: () => api.get("/offres-exclusives/categories")
-}; 
+  getCategories: () => api.get("/offres-exclusives/categories"),
+};
 export const touristicPlaceBookingsAPI = {
   // Créer une réservation
   createBooking: (userId, data) =>
@@ -516,7 +523,6 @@ export const touristicPlaceBookingsAPI = {
     api.get("/touristic-place-bookings", {
       params: { placeId, ...params },
     }),
-    
 };
 
 // Service utilitaire pour les réservations
@@ -563,46 +569,45 @@ export const bookingService = {
 export const flightsAPI = {
   // Récupérer tous les vols
   getFlights: (params = {}) => api.get("/vol", { params }),
-  
+
   // Récupérer un vol par ID
   getFlightById: (id) => api.get(`/vol/${id}`),
-  
+
   // Créer un vol
   createFlight: (data) => api.post("/vol", data),
-  
+
   // Modifier un vol
   updateFlight: (id, data) => api.put(`/vol/${id}`, data),
-  
+
   // Supprimer un vol
   deleteFlight: (id) => api.delete(`/vol/${id}`),
-  
+
   // Statistiques des vols
   getFlightStats: () => api.get("/vol/stats"),
   // Créer une réservation de vol
-   createReservation: (flightId, data) => 
-        api.post(`/Vol/reservation/${flightId}/reserver`, data),
-    getReservations: (params = {}) => 
-    api.get("/Vol/reservations", { params }),
-  
-  updateReservationStatus: (id, status) => 
-    api.put(`/Vol/reservations/${id}/status`, { status }),  
+  createReservation: (flightId, data) =>
+    api.post(`/Vol/reservation/${flightId}/reserver`, data),
+  getReservations: (params = {}) => api.get("/Vol/reservations", { params }),
+
+  updateReservationStatus: (id, status) =>
+    api.put(`/Vol/reservations/${id}/status`, { status }),
 };
 // Services pour les commandes professionnelles
 // Services pour les commandes professionnelles
 export const ordersProAPI = {
   // Récupérer les commandes du pro avec filtres
-  getProOrders: (params = {}) => api.get('/orders/pro', { params }),
-  
+  getProOrders: (params = {}) => api.get("/orders/pro", { params }),
+
   // Récupérer les statistiques du pro
-  getProStats: () => api.get('/orders/pro/stats'),
-  
+  getProStats: () => api.get("/orders/pro/stats"),
+
   // Récupérer les statistiques par type de produit
-  getProProductTypes: () => api.get('/orders/pro/product-types'),
-  
+  getProProductTypes: () => api.get("/orders/pro/product-types"),
+
   // Mettre à jour le statut d'une commande
-  updateOrderStatus: (orderId, status) => 
+  updateOrderStatus: (orderId, status) =>
     api.put(`/orders/pro/${orderId}/status`, { status }),
-  
+
   // Récupérer les détails d'une commande spécifique
   getOrderDetails: (orderId) => api.get(`/orders/pro/${orderId}`),
 };
