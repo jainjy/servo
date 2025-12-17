@@ -1,5 +1,5 @@
-// SubscriptionPaymentPage.jsx - Adaptation pour paiement d'abonnement
-import React, { useState } from "react";
+// SubscriptionPaymentPage.jsx - Adaptation pour paiement d'abonnement avec Google Pay/Apple Pay
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -7,6 +7,7 @@ import {
   CardElement,
   useStripe,
   useElements,
+  PaymentRequestButtonElement,
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,8 @@ import {
   Clock,
   Copy,
   AlertCircle,
+  Smartphone,
+  CreditCard as ApplePayIcon,
 } from "lucide-react";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,58 +38,136 @@ const CheckoutForm = ({ subscriptionData }) => {
   const [message, setMessage] = useState("");
   const { confirmPayment } = useAuth();
   const [copiedCard, setCopiedCard] = useState(null);
+  const [paymentRequest, setPaymentRequest] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("card"); // 'card', 'google_pay', 'apple_pay'
 
-const handlePayment = async () => {
-  if (!stripe || !elements) return;
-  setIsProcessing(true);
-  setMessage("");
-  try {
-    // Utiliser la nouvelle route
-    const response = await api.post(
-      "/subscription-payments/create-payment-intent",
-      {
-        amount: parseInt(subscriptionData.price),
-        planId: subscriptionData.truePlanId,
-      }
-    );
-    const { clientSecret, paymentIntentId } = response.data;
+  useEffect(() => {
+    if (!stripe) return;
 
-    // Confirmer le paiement
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name: "Nom du pro", // À adapter avec user data
-        },
+    // Configuration du PaymentRequest pour Google Pay/Apple Pay
+    const pr = stripe.paymentRequest({
+      country: "FR",
+      currency: "eur",
+      total: {
+        label: `Abonnement ${subscriptionData.planTitle}`,
+        amount: Math.round(subscriptionData.price * 100), // Montant en centimes
       },
+      requestPayerName: true,
+      requestPayerEmail: true,
     });
 
-    if (result.error) {
-      setMessage(result.error.message || "Erreur lors du paiement");
-    } else if (result.paymentIntent.status === "succeeded") {
-      // Utiliser la nouvelle route de confirmation
-      const confirmResponse = await api.post(
-        "/subscription-payments/confirm-upgrade",
-        {
-          paymentIntentId: paymentIntentId,
-        }
-      );
+    // Vérifier si Google Pay/Apple Pay est disponible
+    pr.canMakePayment().then((result) => {
+      if (result) {
+        setPaymentRequest(pr);
+      }
+    });
 
-      if (confirmResponse.data.success) {
-        setMessage("✅ Paiement réussi ! Abonnement mis à jour.");
+    // Gérer la complétion du paiement via Google Pay/Apple Pay
+    pr.on("paymentmethod", async (ev) => {
+      setIsProcessing(true);
+      setMessage("");
+
+      try {
+        // Créer le PaymentIntent côté serveur
+        const response = await api.post(
+          "/subscription-payments/create-payment-intent",
+          {
+            amount: parseInt(subscriptionData.price),
+            planId: subscriptionData.truePlanId,
+          }
+        );
+
+        const { clientSecret } = response.data;
+
+        // Confirmer le paiement avec la méthode de Google Pay/Apple Pay
+        const { error: confirmError } = await stripe.confirmCardPayment(
+          clientSecret,
+          {
+            payment_method: ev.paymentMethod.id,
+          },
+          { handleActions: false }
+        );
+
+        if (confirmError) {
+          ev.complete("fail");
+          setMessage(confirmError.message || "Erreur lors du paiement");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Confirmer la mise à jour de l'abonnement
+        await api.post("/subscription-payments/confirm-upgrade", {
+          paymentIntentId: response.data.paymentIntentId,
+        });
+
+        ev.complete("success");
+        setMessage("✅ Paiement réussi via Google Pay/Apple Pay !");
         toast.success("Abonnement mis à jour avec succès");
         setTimeout(() => {
           navigate("/pro/subscription");
         }, 2000);
+      } catch (err) {
+        console.error("Erreur paiement Google Pay/Apple Pay:", err);
+        ev.complete("fail");
+        setMessage(err.response?.data?.error || "Erreur lors du paiement.");
+        setIsProcessing(false);
       }
+    });
+  }, [stripe, subscriptionData]);
+
+  const handlePayment = async () => {
+    if (!stripe || !elements) return;
+    setIsProcessing(true);
+    setMessage("");
+
+    try {
+      // Utiliser la nouvelle route
+      const response = await api.post(
+        "/subscription-payments/create-payment-intent",
+        {
+          amount: parseInt(subscriptionData.price),
+          planId: subscriptionData.truePlanId,
+        }
+      );
+      const { clientSecret, paymentIntentId } = response.data;
+
+      // Confirmer le paiement
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            name: "Nom du pro", // À adapter avec user data
+          },
+        },
+      });
+
+      if (result.error) {
+        setMessage(result.error.message || "Erreur lors du paiement");
+      } else if (result.paymentIntent.status === "succeeded") {
+        // Utiliser la nouvelle route de confirmation
+        const confirmResponse = await api.post(
+          "/subscription-payments/confirm-upgrade",
+          {
+            paymentIntentId: paymentIntentId,
+          }
+        );
+
+        if (confirmResponse.data.success) {
+          setMessage("✅ Paiement réussi ! Abonnement mis à jour.");
+          toast.success("Abonnement mis à jour avec succès");
+          setTimeout(() => {
+            navigate("/pro/subscription");
+          }, 2000);
+        }
+      }
+    } catch (err) {
+      console.error("Erreur paiement:", err);
+      setMessage(err.response?.data?.error || "Erreur lors du paiement.");
+    } finally {
+      setIsProcessing(false);
     }
-  } catch (err) {
-    console.error("Erreur paiement:", err);
-    setMessage(err.response?.data?.error || "Erreur lors du paiement.");
-  } finally {
-    setIsProcessing(false);
-  }
-};
+  };
 
   const copyToClipboard = (text, cardType) => {
     navigator.clipboard.writeText(text);
@@ -150,57 +231,146 @@ const handlePayment = async () => {
                 </div>
               </div>
 
-              {/* Section carte bancaire */}
+              {/* Sélection de la méthode de paiement */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Informations de carte bancaire
+                  Méthode de paiement
                 </label>
-                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                  <CardElement
-                    options={{
-                      style: {
-                        base: {
-                          fontSize: "16px",
-                          color: "#1f2937",
-                          "::placeholder": {
-                            color: "#9ca3af",
-                          },
-                          fontFamily: "Inter, sans-serif",
-                        },
-                      },
-                      hidePostalCode: true,
-                    }}
-                  />
-                </div>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                  <Button
+                    type="button"
+                    variant={paymentMethod === "card" ? "default" : "outline"}
+                    className={`h-12 ${
+                      paymentMethod === "card" ? "bg-blue-600 text-white" : ""
+                    }`}
+                    onClick={() => setPaymentMethod("card")}
+                  >
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    Carte bancaire
+                  </Button>
 
-              {/* Badges de sécurité */}
-              <div className="flex items-center justify-between text-sm text-gray-600 mb-6">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-green-500" />
-                  <span>Paiement sécurisé SSL</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-blue-500" />
-                  <span>Chiffrement 256-bit</span>
-                </div>
-              </div>
+                  {paymentRequest && (
+                    <>
+                      <Button
+                        type="button"
+                        variant={
+                          paymentMethod === "google_pay" ? "default" : "outline"
+                        }
+                        className={`h-12 ${
+                          paymentMethod === "google_pay"
+                            ? "bg-black text-white"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setPaymentMethod("google_pay");
+                          setTimeout(() => {
+                            paymentRequest.show();
+                          }, 100);
+                        }}
+                      >
+                        <Smartphone className="h-5 w-5 mr-2" />
+                        Google Pay
+                      </Button>
 
-              {/* Bouton de paiement */}
-              <Button
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg rounded-xl shadow-lg transition-all duration-200 mb-4"
-                onClick={handlePayment}
-                disabled={isProcessing || !subscriptionData.price}
-              >
-                {isProcessing ? (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 animate-spin" />
-                    Traitement en cours...
-                  </div>
-                ) : (
-                  `Payer ${subscriptionData.price} € - Finaliser`
+                      <Button
+                        type="button"
+                        variant={
+                          paymentMethod === "apple_pay" ? "default" : "outline"
+                        }
+                        className={`h-12 ${
+                          paymentMethod === "apple_pay"
+                            ? "bg-black text-white"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setPaymentMethod("apple_pay");
+                          setTimeout(() => {
+                            paymentRequest.show();
+                          }, 100);
+                        }}
+                      >
+                        <ApplePayIcon className="h-5 w-5 mr-2" />
+                        Apple Pay
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {/* Bouton Google Pay/Apple Pay intégré */}
+                {paymentRequest &&
+                  (paymentMethod === "google_pay" ||
+                    paymentMethod === "apple_pay") && (
+                    <div className="mb-6">
+                      <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 min-h-[60px] flex items-center justify-center">
+                        <PaymentRequestButtonElement
+                          options={{ paymentRequest }}
+                          className="w-full"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        {paymentMethod === "google_pay"
+                          ? "Cliquez pour payer avec Google Pay"
+                          : "Cliquez pour payer avec Apple Pay"}
+                      </p>
+                    </div>
+                  )}
+
+                {/* Section carte bancaire */}
+                {paymentMethod === "card" && (
+                  <>
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Informations de carte bancaire
+                      </label>
+                      <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <CardElement
+                          options={{
+                            style: {
+                              base: {
+                                fontSize: "16px",
+                                color: "#1f2937",
+                                "::placeholder": {
+                                  color: "#9ca3af",
+                                },
+                                fontFamily: "Inter, sans-serif",
+                              },
+                            },
+                            hidePostalCode: true,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Badges de sécurité */}
+                    <div className="flex items-center justify-between text-sm text-gray-600 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-green-500" />
+                        <span>Paiement sécurisé SSL</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-blue-500" />
+                        <span>Chiffrement 256-bit</span>
+                      </div>
+                    </div>
+
+                    {/* Bouton de paiement */}
+                    <Button
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg rounded-xl shadow-lg transition-all duration-200 mb-4"
+                      onClick={handlePayment}
+                      disabled={isProcessing || !subscriptionData.price}
+                    >
+                      {isProcessing ? (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-5 w-5 animate-spin" />
+                          Traitement en cours...
+                        </div>
+                      ) : (
+                        `Payer ${subscriptionData.price} € - Finaliser`
+                      )}
+                    </Button>
+                  </>
                 )}
-              </Button>
+              </div>
 
               {message && (
                 <div
@@ -224,7 +394,8 @@ const handlePayment = async () => {
                 </h3>
               </div>
               <p className="text-sm text-gray-600 mb-4">
-                Utilisez ces numéros pour tester différents scénarios. Mois : 12/34, CVV : 123
+                Utilisez ces numéros pour tester différents scénarios. Mois :
+                12/34, CVV : 123
               </p>
 
               <div className="space-y-3">
@@ -245,7 +416,12 @@ const handlePayment = async () => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => copyToClipboard(card.number.replace(/\s/g, ""), card.type)}
+                        onClick={() =>
+                          copyToClipboard(
+                            card.number.replace(/\s/g, ""),
+                            card.type
+                          )
+                        }
                         className="flex-shrink-0"
                       >
                         {copiedCard === card.type ? (
@@ -302,7 +478,10 @@ const handlePayment = async () => {
                   </p>
                   <ul className="space-y-2">
                     {subscriptionData.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-sm"
+                      >
                         <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                         <span className="text-gray-700">{feature}</span>
                       </li>
@@ -337,6 +516,16 @@ const handlePayment = async () => {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Informations sur les paiements mobiles */}
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-xs text-blue-700 text-center">
+                  <strong>Paiements mobiles acceptés :</strong>
+                  <br />
+                  Google Pay et Apple Pay disponibles pour un paiement rapide et
+                  sécurisé.
+                </p>
               </div>
 
               {/* Conditions */}
@@ -376,8 +565,6 @@ export default function SubscriptionPaymentPage() {
       </div>
     );
   }
-
-  // console.log("Données d'abonnement reçues :", subscriptionData);
 
   return (
     <Elements stripe={stripePromise}>
