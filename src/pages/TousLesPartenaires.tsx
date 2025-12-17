@@ -148,16 +148,29 @@ const TousLesPartenaires = () => {
 
   return (
     <div className="bg-white min-h-screen pt-16">
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+      <main className="container mx-auto px-0 py-2 max-w-7xl">
         {/* En-tête */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Tous Nos Partenaires
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Découvrez notre réseau complet de professionnels et partenaires de
-            confiance
-          </p>
+        <div className="relative mb-2">
+          <div
+            className="absolute inset-0 bg-cover bg-center overflow-hidden"
+            style={{
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200")',
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-900/60 to-blue-900/40" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(0,0,0,0.3)_80%)]" />
+          </div>
+
+          <div className="relative text-center py-20 px-0">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+              Tous Nos Partenaires
+            </h1>
+            <p className="text-lg md:text-xl text-gray-100 max-w-3xl mx-auto drop-shadow-md">
+              Découvrez notre réseau complet de professionnels et partenaires de
+              confiance
+            </p>
+          </div>
         </div>
 
         {/* Filtres */}
