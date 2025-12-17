@@ -1,4 +1,4 @@
-// src/pages/admin/AdminConseilPage.tsx - Version avec nouvelle palette
+// src/pages/admin/AdminConseilPage.tsx - Version corrigée
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -8,7 +8,8 @@ import {
   Download, Send, Users, BarChart, RefreshCw,
   MoreVertical, Edit, Trash2, FileText, EyeOff,
   Shield, AlertCircle, UserCheck, UserPlus,
-  Loader2
+  Loader2, Briefcase, Target, TrendingUp,
+  Handshake, PieChart, Coins, Rocket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { conseilService, conseilAdminService } from "@/services/conseilService";
+import { accompagnementService } from "@/services/accompagnementService";
 
 // Types
 interface DemandeConseil {
@@ -48,6 +50,26 @@ interface DemandeConseil {
   suivis: any[];
 }
 
+interface DemandeAccompagnement {
+  id: number;
+  conseilType: string;
+  besoin: string;
+  budget: string;
+  message: string;
+  nom: string;
+  email: string;
+  telephone: string;
+  entreprise: string;
+  expertId: string | null;
+  statut: string;
+  origine: string;
+  createdAt: string;
+  updatedAt: string;
+  expert: any;
+  user: any;
+  suivis: any[];
+}
+
 interface Expert {
   id: string;
   firstName: string;
@@ -64,8 +86,16 @@ interface Expert {
 }
 
 const AdminConseilPage = () => {
-  const [demandes, setDemandes] = useState<DemandeConseil[]>([]);
-  const [filteredDemandes, setFilteredDemandes] = useState<DemandeConseil[]>([]);
+  const [activeTab, setActiveTab] = useState("conseil");
+  
+  // États pour les demandes de conseil
+  const [demandesConseil, setDemandesConseil] = useState<DemandeConseil[]>([]);
+  const [filteredDemandesConseil, setFilteredDemandesConseil] = useState<DemandeConseil[]>([]);
+  
+  // États pour les demandes d'accompagnement
+  const [demandesAccompagnement, setDemandesAccompagnement] = useState<DemandeAccompagnement[]>([]);
+  const [filteredDemandesAccompagnement, setFilteredDemandesAccompagnement] = useState<DemandeAccompagnement[]>([]);
+  
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -82,22 +112,32 @@ const AdminConseilPage = () => {
     en_attente: 0,
     en_cours: 0,
     terminee: 0,
-    annulee: 0
+    annulee: 0,
+    totalAccompagnement: 0,
+    en_attenteAccompagnement: 0
   });
 
-  // États pour les filtres
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("tous");
-  const [expertFilter, setExpertFilter] = useState("tous");
-  const [typeFilter, setTypeFilter] = useState("tous");
-  const [dateFilter, setDateFilter] = useState("tous");
+  // États pour les filtres - Conseil
+  const [searchTermConseil, setSearchTermConseil] = useState("");
+  const [statusFilterConseil, setStatusFilterConseil] = useState("tous");
+  const [expertFilterConseil, setExpertFilterConseil] = useState("tous");
+  const [typeFilterConseil, setTypeFilterConseil] = useState("tous");
+  const [dateFilterConseil, setDateFilterConseil] = useState("tous");
+
+  // États pour les filtres - Accompagnement
+  const [searchTermAccompagnement, setSearchTermAccompagnement] = useState("");
+  const [statusFilterAccompagnement, setStatusFilterAccompagnement] = useState("tous");
+  const [expertFilterAccompagnement, setExpertFilterAccompagnement] = useState("tous");
+  const [typeFilterAccompagnement, setTypeFilterAccompagnement] = useState("tous");
+  const [dateFilterAccompagnement, setDateFilterAccompagnement] = useState("tous");
 
   // États pour les modals
-  const [selectedDemande, setSelectedDemande] = useState<DemandeConseil | null>(null);
+  const [selectedDemande, setSelectedDemande] = useState<DemandeConseil | DemandeAccompagnement | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [isAccompagnement, setIsAccompagnement] = useState(false);
 
   // États pour les formulaires
   const [responseMessage, setResponseMessage] = useState("");
@@ -109,24 +149,38 @@ const AdminConseilPage = () => {
   // États pour le suivi
   const [showSuiviModal, setShowSuiviModal] = useState(false);
 
+  // Types d'accompagnement
+  const [accompagnementTypes, setAccompagnementTypes] = useState<any[]>([]);
+
   // Charger les données
   useEffect(() => {
     loadData();
   }, []);
 
-  // Filtrer les demandes
+  // Filtrer les demandes de conseil
   useEffect(() => {
-    filterDemandes();
-  }, [demandes, searchTerm, statusFilter, expertFilter, typeFilter, dateFilter]);
+    filterDemandesConseil();
+  }, [demandesConseil, searchTermConseil, statusFilterConseil, expertFilterConseil, typeFilterConseil, dateFilterConseil]);
+
+  // Filtrer les demandes d'accompagnement
+  useEffect(() => {
+    filterDemandesAccompagnement();
+  }, [demandesAccompagnement, searchTermAccompagnement, statusFilterAccompagnement, expertFilterAccompagnement, typeFilterAccompagnement, dateFilterAccompagnement]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       
-      // Charger les experts
+      // Charger les experts - utiliser le service conseil ou accompagnement
       const expertsResponse = await conseilService.getExperts();
       if (expertsResponse.success) {
         setExperts(expertsResponse.data);
+      }
+
+      // CORRECTION : utiliser getTypesAccompagnement au lieu de getTypes
+      const typesResponse = await accompagnementService.getTypesAccompagnement();
+      if (typesResponse.success) {
+        setAccompagnementTypes(typesResponse.data);
       }
 
       // Charger les stats détaillées
@@ -137,16 +191,85 @@ const AdminConseilPage = () => {
           en_attente: statsResponse.data.demandesEnAttente || 0,
           en_cours: statsResponse.data.demandesEnCours || 0,
           terminee: statsResponse.data.demandesTerminees || 0,
-          annulee: statsResponse.data.demandesAnnulees || 0
+          annulee: statsResponse.data.demandesAnnulees || 0,
+          totalAccompagnement: statsResponse.data.totalAccompagnement || 0,
+          en_attenteAccompagnement: statsResponse.data.enAttenteAccompagnement || 0
         });
       }
 
-      // Charger toutes les demandes
-      await loadDemandes();
+      // Charger toutes les demandes de conseil
+      await loadDemandesConseil();
+      
+      // Charger toutes les demandes d'accompagnement
+      await loadDemandesAccompagnement();
 
     } catch (error) {
       console.error("Erreur chargement données:", error);
       toast.error("Erreur lors du chargement des données");
+      
+      // Charger des données par défaut pour les types d'accompagnement en cas d'erreur
+      const defaultTypes = [
+        {
+          id: 1,
+          title: "Accompagnement Création",
+          description: "De l'idée à la création de votre entreprise",
+          category: "creation",
+          duration: "3-6 mois",
+          price: "À partir de 1 500€",
+          icon: "Rocket",
+          color: "#6B8E23",
+          details: [
+            "Étude de faisabilité complète",
+            "Business plan détaillé",
+            "Choix de la structure juridique",
+            "Formalités d'immatriculation",
+            "Aides et subventions"
+          ],
+          isFeatured: true,
+          isPopular: false
+        },
+        {
+          id: 2,
+          title: "Accompagnement Croissance",
+          description: "Développez et optimisez votre entreprise existante",
+          category: "croissance",
+          duration: "6-12 mois",
+          price: "À partir de 2 500€",
+          icon: "TrendingUp",
+          color: "#27AE60",
+          details: [
+            "Stratégie de développement",
+            "Optimisation des processus",
+            "Analyse de marché",
+            "Plan de croissance",
+            "Recrutement stratégique"
+          ],
+          isFeatured: false,
+          isPopular: true
+        },
+        {
+          id: 3,
+          title: "Transition & Transmission",
+          description: "Préparez la transmission ou la cession de votre entreprise",
+          category: "transition",
+          duration: "12-24 mois",
+          price: "Sur devis personnalisé",
+          icon: "Handshake",
+          color: "#8B4513",
+          details: [
+            "Évaluation de l'entreprise",
+            "Préparation à la transmission",
+            "Recherche d'acquéreurs",
+            "Négociation",
+            "Accompagnement juridique"
+          ],
+          isFeatured: false,
+          isPopular: false
+        }
+      ];
+      
+      setAccompagnementTypes(defaultTypes);
+      
     } finally {
       setLoading(false);
     }
@@ -161,72 +284,46 @@ const AdminConseilPage = () => {
     }
   };
 
-  const loadDemandes = async () => {
+  const loadDemandesConseil = async () => {
     try {
       const response = await conseilAdminService.getAllDemandes();
       if (response.success) {
-        setDemandes(response.data);
-        setFilteredDemandes(response.data);
+        // Filtrer pour n'avoir que les demandes de conseil (origine différente)
+        const conseilDemandes = response.data.filter((d: DemandeConseil) => 
+          d.origine !== "page_accompagnement"
+        );
+        setDemandesConseil(conseilDemandes);
+        setFilteredDemandesConseil(conseilDemandes);
       }
     } catch (error) {
-      console.error("Erreur chargement demandes:", error);
-      toast.error("Erreur lors du chargement des demandes");
-      // Données de test en cas d'erreur
-      const testDemandes: DemandeConseil[] = [
-        {
-          id: 1,
-          conseilType: "Audit Stratégique",
-          besoin: "Besoin d'un audit complet pour notre stratégie digitale",
-          budget: "5k-10k",
-          message: "Nous souhaitons optimiser notre présence en ligne...",
-          nom: "Jean Dupont",
-          email: "jean@entreprise.fr",
-          telephone: "+33 6 12 34 56 78",
-          entreprise: "TechCorp",
-          serviceId: 1,
-          metierId: 2,
-          expertId: "1",
-          statut: "en_cours",
-          origine: "page_conseil",
-          createdAt: "2024-01-15T10:30:00Z",
-          updatedAt: "2024-01-16T14:20:00Z",
-          service: { id: 1, libelle: "Consulting Stratégique" },
-          metier: { id: 2, libelle: "Consultant" },
-          expert: {
-            id: "1",
-            firstName: "Sophie",
-            lastName: "Laurent",
-            email: "sophie@expert.fr"
-          },
-          user: {
-            id: "user1",
-            firstName: "Jean",
-            lastName: "Dupont",
-            email: "jean@entreprise.fr",
-            phone: "+33 6 12 34 56 78"
-          },
-          suivis: [
-            {
-              id: 1,
-              message: "Premier contact établi avec le client",
-              type: "message",
-              createdAt: "2024-01-15T11:00:00Z",
-              user: { firstName: "Sophie", lastName: "Laurent" }
-            }
-          ]
-        },
-      ];
-      setDemandes(testDemandes);
-      setFilteredDemandes(testDemandes);
+      console.error("Erreur chargement demandes conseil:", error);
+      toast.error("Erreur lors du chargement des demandes de conseil");
     }
   };
 
-  const filterDemandes = () => {
-    let filtered = [...demandes];
+  const loadDemandesAccompagnement = async () => {
+    try {
+      const response = await conseilAdminService.getAllDemandes();
+      if (response.success) {
+        // Filtrer pour n'avoir que les demandes d'accompagnement
+        const accompagnementDemandes = response.data.filter((d: DemandeAccompagnement) => 
+          d.origine === "page_accompagnement"
+        );
+        setDemandesAccompagnement(accompagnementDemandes);
+        setFilteredDemandesAccompagnement(accompagnementDemandes);
+      }
+    } catch (error) {
+      console.error("Erreur chargement demandes accompagnement:", error);
+      toast.error("Erreur lors du chargement des demandes d'accompagnement");
+    }
+  };
+
+  const filterDemandesConseil = () => {
+    let filtered = [...demandesConseil];
 
     // Filtre par recherche
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (searchTermConseil) {
+      const term = searchTermConseil.toLowerCase();
       filtered = filtered.filter(d =>
         d.nom.toLowerCase().includes(term) ||
         d.email.toLowerCase().includes(term) ||
@@ -237,39 +334,90 @@ const AdminConseilPage = () => {
     }
 
     // Filtre par statut
-    if (statusFilter !== "tous") {
-      filtered = filtered.filter(d => d.statut === statusFilter);
+    if (statusFilterConseil !== "tous") {
+      filtered = filtered.filter(d => d.statut === statusFilterConseil);
     }
 
     // Filtre par expert
-    if (expertFilter !== "tous") {
-      if (expertFilter === "non_assignee") {
+    if (expertFilterConseil !== "tous") {
+      if (expertFilterConseil === "non_assignee") {
         filtered = filtered.filter(d => !d.expertId);
       } else {
-        filtered = filtered.filter(d => d.expertId === expertFilter);
+        filtered = filtered.filter(d => d.expertId === expertFilterConseil);
       }
     }
 
     // Filtre par type
-    if (typeFilter !== "tous") {
-      filtered = filtered.filter(d => d.conseilType === typeFilter);
+    if (typeFilterConseil !== "tous") {
+      filtered = filtered.filter(d => d.conseilType === typeFilterConseil);
     }
 
     // Filtre par date
-    if (dateFilter === "today") {
+    if (dateFilterConseil === "today") {
       const today = new Date().toISOString().split('T')[0];
       filtered = filtered.filter(d => d.createdAt.startsWith(today));
-    } else if (dateFilter === "week") {
+    } else if (dateFilterConseil === "week") {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       filtered = filtered.filter(d => new Date(d.createdAt) > weekAgo);
-    } else if (dateFilter === "month") {
+    } else if (dateFilterConseil === "month") {
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       filtered = filtered.filter(d => new Date(d.createdAt) > monthAgo);
     }
 
-    setFilteredDemandes(filtered);
+    setFilteredDemandesConseil(filtered);
+  };
+
+  const filterDemandesAccompagnement = () => {
+    let filtered = [...demandesAccompagnement];
+
+    // Filtre par recherche
+    if (searchTermAccompagnement) {
+      const term = searchTermAccompagnement.toLowerCase();
+      filtered = filtered.filter(d =>
+        d.nom.toLowerCase().includes(term) ||
+        d.email.toLowerCase().includes(term) ||
+        d.conseilType.toLowerCase().includes(term) ||
+        d.entreprise?.toLowerCase().includes(term) ||
+        d.besoin.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtre par statut
+    if (statusFilterAccompagnement !== "tous") {
+      filtered = filtered.filter(d => d.statut === statusFilterAccompagnement);
+    }
+
+    // Filtre par expert
+    if (expertFilterAccompagnement !== "tous") {
+      if (expertFilterAccompagnement === "non_assignee") {
+        filtered = filtered.filter(d => !d.expertId);
+      } else {
+        filtered = filtered.filter(d => d.expertId === expertFilterAccompagnement);
+      }
+    }
+
+    // Filtre par type
+    if (typeFilterAccompagnement !== "tous") {
+      filtered = filtered.filter(d => d.conseilType === typeFilterAccompagnement);
+    }
+
+    // Filtre par date
+    if (dateFilterAccompagnement === "today") {
+      const today = new Date().toISOString().split('T')[0];
+      filtered = filtered.filter(d => d.createdAt.startsWith(today));
+    } else if (dateFilterAccompagnement === "week") {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      filtered = filtered.filter(d => new Date(d.createdAt) > weekAgo);
+    } else if (dateFilterAccompagnement === "month") {
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      filtered = filtered.filter(d => new Date(d.createdAt) > monthAgo);
+    }
+
+    setFilteredDemandesAccompagnement(filtered);
   };
 
   const getStatusBadge = (statut: string) => {
@@ -287,37 +435,64 @@ const AdminConseilPage = () => {
     }
   };
 
-  const handleViewDetails = (demande: DemandeConseil) => {
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "Accompagnement Création":
+        return <Rocket className="h-4 w-4 text-[#6B8E23]" />;
+      case "Accompagnement Croissance":
+        return <TrendingUp className="h-4 w-4 text-[#27AE60]" />;
+      case "Transition & Transmission":
+        return <Handshake className="h-4 w-4 text-[#8B4513]" />;
+      case "Expertise Comptable & Fiscale":
+        return <PieChart className="h-4 w-4 text-[#2C3E50]" />;
+      case "Stratégie Marketing & Digital":
+        return <Target className="h-4 w-4 text-[#D4AF37]" />;
+      case "Financement & Levée de Fonds":
+        return <Coins className="h-4 w-4 text-[#F39C12]" />;
+      default:
+        return <Briefcase className="h-4 w-4 text-[#556B2F]" />;
+    }
+  };
+
+  const handleViewDetails = (demande: DemandeConseil | DemandeAccompagnement, isAccomp: boolean = false) => {
     setSelectedDemande(demande);
+    setIsAccompagnement(isAccomp);
     setShowDetailModal(true);
   };
 
-  const handleRespond = (demande: DemandeConseil) => {
+  const handleRespond = (demande: DemandeConseil | DemandeAccompagnement, isAccomp: boolean = false) => {
     setSelectedDemande(demande);
+    setIsAccompagnement(isAccomp);
     setResponseMessage("");
     setShowResponseModal(true);
   };
 
-  const handleAssignExpert = (demande: DemandeConseil) => {
+  const handleAssignExpert = (demande: DemandeConseil | DemandeAccompagnement, isAccomp: boolean = false) => {
     setSelectedDemande(demande);
+    setIsAccompagnement(isAccomp);
     setSelectedExpertId(demande.expertId || "non_assignee");
     setShowAssignModal(true);
   };
 
-  const handleAddSuivi = (demande: DemandeConseil) => {
+  const handleAddSuivi = (demande: DemandeConseil | DemandeAccompagnement, isAccomp: boolean = false) => {
     setSelectedDemande(demande);
+    setIsAccompagnement(isAccomp);
     setSuiviMessage("");
     setSuiviType("message");
     setShowSuiviModal(true);
   };
 
-  const handleUpdateStatus = async (demandeId: number, newStatut: string) => {
+  const handleUpdateStatus = async (demandeId: number, newStatut: string, isAccomp: boolean = false) => {
     try {
       setLoadingUpdateStatus(prev => ({ ...prev, [demandeId]: true }));
       const response = await conseilAdminService.updateDemandeStatus(demandeId, newStatut);
       if (response.success) {
         toast.success(`Statut mis à jour: ${newStatut}`);
-        await loadDemandes();
+        if (isAccomp) {
+          await loadDemandesAccompagnement();
+        } else {
+          await loadDemandesConseil();
+        }
       } else {
         toast.error(response.error || "Erreur lors de la mise à jour du statut");
       }
@@ -342,7 +517,11 @@ const AdminConseilPage = () => {
         toast.success("Réponse envoyée avec succès");
         setShowResponseModal(false);
         setResponseMessage("");
-        await loadDemandes();
+        if (isAccompagnement) {
+          await loadDemandesAccompagnement();
+        } else {
+          await loadDemandesConseil();
+        }
       } else {
         toast.error(response.error || "Erreur lors de l'envoi de la réponse");
       }
@@ -368,7 +547,11 @@ const AdminConseilPage = () => {
         toast.success(expertIdToAssign ? "Expert assigné avec succès" : "Expert désassigné avec succès");
         setShowAssignModal(false);
         setSelectedExpertId("non_assignee");
-        await loadDemandes();
+        if (isAccompagnement) {
+          await loadDemandesAccompagnement();
+        } else {
+          await loadDemandesConseil();
+        }
       } else {
         toast.error(response.error || "Erreur lors de l'assignation");
       }
@@ -398,7 +581,11 @@ const AdminConseilPage = () => {
         setShowSuiviModal(false);
         setSuiviMessage("");
         setSuiviType("message");
-        await loadDemandes();
+        if (isAccompagnement) {
+          await loadDemandesAccompagnement();
+        } else {
+          await loadDemandesConseil();
+        }
       } else {
         toast.error(response.error || "Erreur lors de l'ajout du suivi");
       }
@@ -413,8 +600,9 @@ const AdminConseilPage = () => {
   const exportToCSV = async () => {
     try {
       setLoadingExport(true);
+      const dataToExport = activeTab === "conseil" ? filteredDemandesConseil : filteredDemandesAccompagnement;
       const headers = ['ID', 'Client', 'Email', 'Entreprise', 'Type', 'Budget', 'Statut', 'Expert', 'Date création'];
-      const csvData = filteredDemandes.map(d => [
+      const csvData = dataToExport.map(d => [
         d.id,
         d.nom,
         d.email,
@@ -435,7 +623,7 @@ const AdminConseilPage = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `demandes_conseil_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `demandes_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -467,9 +655,9 @@ const AdminConseilPage = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#8B4513]">Gestion des Demandes de Conseil</h1>
+            <h1 className="text-3xl font-bold text-[#8B4513]">Gestion des Demandes</h1>
             <p className="text-[#000000] mt-2 opacity-80">
-              Gérez et suivez toutes les demandes de conseil des clients
+              Gérez et suivez toutes les demandes de conseil et d'accompagnement
             </p>
           </div>
           <div className="flex gap-2">
@@ -484,7 +672,8 @@ const AdminConseilPage = () => {
             <Button
               variant="outline"
               onClick={exportToCSV}
-              disabled={loadingExport || filteredDemandes.length === 0}
+              disabled={loadingExport || 
+                (activeTab === "conseil" ? filteredDemandesConseil.length === 0 : filteredDemandesAccompagnement.length === 0)}
               className="flex items-center gap-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingExport ? (
@@ -506,12 +695,12 @@ const AdminConseilPage = () => {
             >
               {loadingRefresh ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Actualisation...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-4 w-4 mr-2" />
                   Actualiser
                 </>
               )}
@@ -520,11 +709,11 @@ const AdminConseilPage = () => {
         </div>
 
         {/* Cartes de statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-6">
           <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
             <div className="text-center">
               <div className="text-3xl font-bold text-[#556B2F]">{stats.total}</div>
-              <div className="text-sm text-[#000000]">Total Demandes</div>
+              <div className="text-sm text-[#000000]">Total Conseil</div>
             </div>
           </Card>
           <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
@@ -547,6 +736,18 @@ const AdminConseilPage = () => {
           </Card>
           <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
             <div className="text-center">
+              <div className="text-3xl font-bold text-[#27AE60]">{stats.totalAccompagnement}</div>
+              <div className="text-sm text-[#000000]">Total Accomp.</div>
+            </div>
+          </Card>
+          <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-[#D4AF37]">{stats.en_attenteAccompagnement}</div>
+              <div className="text-sm text-[#000000]">Attente Accomp.</div>
+            </div>
+          </Card>
+          <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
+            <div className="text-center">
               <div className="text-3xl font-bold text-[#D32F2F]">{stats.annulee}</div>
               <div className="text-sm text-[#000000]">Annulées</div>
             </div>
@@ -554,223 +755,482 @@ const AdminConseilPage = () => {
         </div>
       </div>
 
-      {/* Filtres */}
-      <Card className="p-4 mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#000000]">Recherche</label>
-            <div className="relative">
-              <Input
-                placeholder="Nom, email, entreprise..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]"
-              />
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#000000]" />
+      {/* Onglets */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <TabsList className="bg-[#F5F5F5] border border-[#D3D3D3]">
+          <TabsTrigger 
+            value="conseil" 
+            className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Demandes de Conseil ({demandesConseil.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="accompagnement" 
+            className="data-[state=active]:bg-[#27AE60] data-[state=active]:text-white"
+          >
+            <Briefcase className="h-4 w-4 mr-2" />
+            Demandes d'Accompagnement ({demandesAccompagnement.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Onglet Conseil */}
+        <TabsContent value="conseil" className="mt-6">
+          {/* Filtres Conseil */}
+          <Card className="p-4 mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Recherche</label>
+                <div className="relative">
+                  <Input
+                    placeholder="Nom, email, entreprise..."
+                    value={searchTermConseil}
+                    onChange={(e) => setSearchTermConseil(e.target.value)}
+                    className="pl-10 border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]"
+                  />
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#000000]" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Statut</label>
+                <Select value={statusFilterConseil} onValueChange={setStatusFilterConseil}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
+                    <SelectValue placeholder="Tous les statuts" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Tous les statuts</SelectItem>
+                    <SelectItem value="en_attente">En attente</SelectItem>
+                    <SelectItem value="en_cours">En cours</SelectItem>
+                    <SelectItem value="terminee">Terminée</SelectItem>
+                    <SelectItem value="annulee">Annulée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Expert</label>
+                <Select value={expertFilterConseil} onValueChange={setExpertFilterConseil}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
+                    <SelectValue placeholder="Tous les experts" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Tous les experts</SelectItem>
+                    <SelectItem value="non_assignee">Non assignées</SelectItem>
+                    {experts.map(expert => (
+                      <SelectItem key={expert.id} value={expert.id}>
+                        {expert.firstName} {expert.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Type</label>
+                <Select value={typeFilterConseil} onValueChange={setTypeFilterConseil}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
+                    <SelectValue placeholder="Tous les types" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Tous les types</SelectItem>
+                    <SelectItem value="Audit Stratégique">Audit Stratégique</SelectItem>
+                    <SelectItem value="Médiation & Résolution">Médiation & Résolution</SelectItem>
+                    <SelectItem value="Conseil en Stratégie">Conseil en Stratégie</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Date</label>
+                <Select value={dateFilterConseil} onValueChange={setDateFilterConseil}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
+                    <SelectValue placeholder="Toutes les dates" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Toutes les dates</SelectItem>
+                    <SelectItem value="today">Aujourd'hui</SelectItem>
+                    <SelectItem value="week">Cette semaine</SelectItem>
+                    <SelectItem value="month">Ce mois</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
+          </Card>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#000000]">Statut</label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
-                <SelectValue placeholder="Tous les statuts" />
-              </SelectTrigger>
-              <SelectContent className="border-[#D3D3D3]">
-                <SelectItem value="tous">Tous les statuts</SelectItem>
-                <SelectItem value="en_attente">En attente</SelectItem>
-                <SelectItem value="en_cours">En cours</SelectItem>
-                <SelectItem value="terminee">Terminée</SelectItem>
-                <SelectItem value="annulee">Annulée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#000000]">Expert</label>
-            <Select value={expertFilter} onValueChange={setExpertFilter}>
-              <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
-                <SelectValue placeholder="Tous les experts" />
-              </SelectTrigger>
-              <SelectContent className="border-[#D3D3D3]">
-                <SelectItem value="tous">Tous les experts</SelectItem>
-                <SelectItem value="non_assignee">Non assignées</SelectItem>
-                {experts.map(expert => (
-                  <SelectItem key={expert.id} value={expert.id}>
-                    {expert.firstName} {expert.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#000000]">Type</label>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
-                <SelectValue placeholder="Tous les types" />
-              </SelectTrigger>
-              <SelectContent className="border-[#D3D3D3]">
-                <SelectItem value="tous">Tous les types</SelectItem>
-                <SelectItem value="Audit Stratégique">Audit Stratégique</SelectItem>
-                <SelectItem value="Médiation & Résolution">Médiation & Résolution</SelectItem>
-                <SelectItem value="Conseil en Stratégie">Conseil en Stratégie</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-[#000000]">Date</label>
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="border-[#D3D3D3] focus:border-[#6B8E23] focus:ring-[#6B8E23] text-[#000000]">
-                <SelectValue placeholder="Toutes les dates" />
-              </SelectTrigger>
-              <SelectContent className="border-[#D3D3D3]">
-                <SelectItem value="tous">Toutes les dates</SelectItem>
-                <SelectItem value="today">Aujourd'hui</SelectItem>
-                <SelectItem value="week">Cette semaine</SelectItem>
-                <SelectItem value="month">Ce mois</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </Card>
-
-      {/* Tableau des demandes */}
-      <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
-        <div className="p-4 border-b border-[#D3D3D3]">
-          <h2 className="text-lg font-semibold text-[#8B4513]">
-            Demandes ({filteredDemandes.length})
-          </h2>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-[#D3D3D3]">
-                <TableHead className="text-[#000000] font-medium">ID</TableHead>
-                <TableHead className="text-[#000000] font-medium">Client</TableHead>
-                <TableHead className="text-[#000000] font-medium">Type</TableHead>
-                <TableHead className="text-[#000000] font-medium">Expert</TableHead>
-                <TableHead className="text-[#000000] font-medium">Statut</TableHead>
-                <TableHead className="text-[#000000] font-medium">Date</TableHead>
-                <TableHead className="text-right text-[#000000] font-medium">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredDemandes.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-[#000000] opacity-80">
-                    <EyeOff className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
-                    <p>Aucune demande trouvée</p>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredDemandes.map((demande) => (
-                  <TableRow key={demande.id} className="border-[#D3D3D3] hover:bg-[#F5F5F5]">
-                    <TableCell className="font-medium text-[#000000]">#{demande.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8 border border-[#D3D3D3]">
-                          <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
-                            {demande.nom.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium text-[#000000]">{demande.nom}</div>
-                          <div className="text-sm text-[#000000] opacity-80">{demande.entreprise}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium text-[#000000]">{demande.conseilType}</div>
-                      <div className="text-sm text-[#000000] opacity-80">{demande.budget}</div>
-                    </TableCell>
-                    <TableCell>
-                      {demande.expert ? (
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6 border border-[#D3D3D3]">
-                            <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
-                              {demande.expert.firstName?.charAt(0)}{demande.expert.lastName?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="text-sm text-[#000000]">{demande.expert.firstName} {demande.expert.lastName}</div>
-                            <div className="text-xs text-[#000000] opacity-70">{demande.expert.email}</div>
-                          </div>
-                        </div>
-                      ) : (
-                        <Badge variant="outline" className="text-[#000000] border-[#D3D3D3]">
-                          Non assigné
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(demande.statut)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-[#000000]">{new Date(demande.createdAt).toLocaleDateString()}</div>
-                      <div className="text-xs text-[#000000] opacity-70">
-                        {new Date(demande.createdAt).toLocaleTimeString()}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleViewDetails(demande)}
-                          className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleRespond(demande)}
-                          className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAssignExpert(demande)}
-                          className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
-                        >
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
-                        <Select
-                          value={demande.statut}
-                          onValueChange={(value) => handleUpdateStatus(demande.id, value)}
-                          disabled={loadingUpdateStatus[demande.id]}
-                        >
-                          <SelectTrigger className={`h-8 w-32 border-[#D3D3D3] text-xs ${loadingUpdateStatus[demande.id] ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            {loadingUpdateStatus[demande.id] ? (
-                              <div className="flex items-center gap-2">
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                                <span>Mise à jour...</span>
-                              </div>
-                            ) : (
-                              <SelectValue />
-                            )}
-                          </SelectTrigger>
-                          <SelectContent className="border-[#D3D3D3]">
-                            <SelectItem value="en_attente">En attente</SelectItem>
-                            <SelectItem value="en_cours">En cours</SelectItem>
-                            <SelectItem value="terminee">Terminée</SelectItem>
-                            <SelectItem value="annulee">Annulée</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </TableCell>
+          {/* Tableau des demandes de conseil */}
+          <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+            <div className="p-4 border-b border-[#D3D3D3]">
+              <h2 className="text-lg font-semibold text-[#8B4513]">
+                Demandes de Conseil ({filteredDemandesConseil.length})
+              </h2>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-[#D3D3D3]">
+                    <TableHead className="text-[#000000] font-medium">ID</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Client</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Type</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Expert</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Statut</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Date</TableHead>
+                    <TableHead className="text-right text-[#000000] font-medium">Actions</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filteredDemandesConseil.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-[#000000] opacity-80">
+                        <EyeOff className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
+                        <p>Aucune demande de conseil trouvée</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredDemandesConseil.map((demande) => (
+                      <TableRow key={demande.id} className="border-[#D3D3D3] hover:bg-[#F5F5F5]">
+                        <TableCell className="font-medium text-[#000000]">#{demande.id}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8 border border-[#D3D3D3]">
+                              <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
+                                {demande.nom.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium text-[#000000]">{demande.nom}</div>
+                              <div className="text-sm text-[#000000] opacity-80">{demande.entreprise}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium text-[#000000]">{demande.conseilType}</div>
+                          <div className="text-sm text-[#000000] opacity-80">{demande.budget}</div>
+                        </TableCell>
+                        <TableCell>
+                          {demande.expert ? (
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6 border border-[#D3D3D3]">
+                                <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
+                                  {demande.expert.firstName?.charAt(0)}{demande.expert.lastName?.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="text-sm text-[#000000]">{demande.expert.firstName} {demande.expert.lastName}</div>
+                                <div className="text-xs text-[#000000] opacity-70">{demande.expert.email}</div>
+                              </div>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="text-[#000000] border-[#D3D3D3]">
+                              Non assigné
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(demande.statut)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-[#000000]">{new Date(demande.createdAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-[#000000] opacity-70">
+                            {new Date(demande.createdAt).toLocaleTimeString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewDetails(demande, false)}
+                              className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRespond(demande, false)}
+                              className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAssignExpert(demande, false)}
+                              className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                            <Select
+                              value={demande.statut}
+                              onValueChange={(value) => handleUpdateStatus(demande.id, value, false)}
+                              disabled={loadingUpdateStatus[demande.id]}
+                            >
+                              <SelectTrigger className={`h-8 w-32 border-[#D3D3D3] text-xs ${loadingUpdateStatus[demande.id] ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                {loadingUpdateStatus[demande.id] ? (
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <span>Mise à jour...</span>
+                                  </div>
+                                ) : (
+                                  <SelectValue />
+                                )}
+                              </SelectTrigger>
+                              <SelectContent className="border-[#D3D3D3]">
+                                <SelectItem value="en_attente">En attente</SelectItem>
+                                <SelectItem value="en_cours">En cours</SelectItem>
+                                <SelectItem value="terminee">Terminée</SelectItem>
+                                <SelectItem value="annulee">Annulée</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Onglet Accompagnement */}
+        <TabsContent value="accompagnement" className="mt-6">
+          {/* Filtres Accompagnement */}
+          <Card className="p-4 mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Recherche</label>
+                <div className="relative">
+                  <Input
+                    placeholder="Nom, email, entreprise..."
+                    value={searchTermAccompagnement}
+                    onChange={(e) => setSearchTermAccompagnement(e.target.value)}
+                    className="pl-10 border-[#D3D3D3] focus:border-[#27AE60] focus:ring-[#27AE60] text-[#000000]"
+                  />
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#000000]" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Statut</label>
+                <Select value={statusFilterAccompagnement} onValueChange={setStatusFilterAccompagnement}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#27AE60] focus:ring-[#27AE60] text-[#000000]">
+                    <SelectValue placeholder="Tous les statuts" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Tous les statuts</SelectItem>
+                    <SelectItem value="en_attente">En attente</SelectItem>
+                    <SelectItem value="en_cours">En cours</SelectItem>
+                    <SelectItem value="terminee">Terminée</SelectItem>
+                    <SelectItem value="annulee">Annulée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Expert</label>
+                <Select value={expertFilterAccompagnement} onValueChange={setExpertFilterAccompagnement}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#27AE60] focus:ring-[#27AE60] text-[#000000]">
+                    <SelectValue placeholder="Tous les experts" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Tous les experts</SelectItem>
+                    <SelectItem value="non_assignee">Non assignées</SelectItem>
+                    {experts.map(expert => (
+                      <SelectItem key={expert.id} value={expert.id}>
+                        {expert.firstName} {expert.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Type</label>
+                <Select value={typeFilterAccompagnement} onValueChange={setTypeFilterAccompagnement}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#27AE60] focus:ring-[#27AE60] text-[#000000]">
+                    <SelectValue placeholder="Tous les types" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Tous les types</SelectItem>
+                    {accompagnementTypes && accompagnementTypes.length > 0 ? (
+                      accompagnementTypes.map(type => (
+                        <SelectItem key={type.id} value={type.title}>
+                          {type.title}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <>
+                        <SelectItem value="Accompagnement Création">Accompagnement Création</SelectItem>
+                        <SelectItem value="Accompagnement Croissance">Accompagnement Croissance</SelectItem>
+                        <SelectItem value="Transition & Transmission">Transition & Transmission</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-[#000000]">Date</label>
+                <Select value={dateFilterAccompagnement} onValueChange={setDateFilterAccompagnement}>
+                  <SelectTrigger className="border-[#D3D3D3] focus:border-[#27AE60] focus:ring-[#27AE60] text-[#000000]">
+                    <SelectValue placeholder="Toutes les dates" />
+                  </SelectTrigger>
+                  <SelectContent className="border-[#D3D3D3]">
+                    <SelectItem value="tous">Toutes les dates</SelectItem>
+                    <SelectItem value="today">Aujourd'hui</SelectItem>
+                    <SelectItem value="week">Cette semaine</SelectItem>
+                    <SelectItem value="month">Ce mois</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </Card>
+
+          {/* Tableau des demandes d'accompagnement */}
+          <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+            <div className="p-4 border-b border-[#D3D3D3]">
+              <h2 className="text-lg font-semibold text-[#27AE60]">
+                Demandes d'Accompagnement ({filteredDemandesAccompagnement.length})
+              </h2>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-[#D3D3D3]">
+                    <TableHead className="text-[#000000] font-medium">ID</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Client</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Type</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Expert</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Statut</TableHead>
+                    <TableHead className="text-[#000000] font-medium">Date</TableHead>
+                    <TableHead className="text-right text-[#000000] font-medium">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDemandesAccompagnement.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-[#000000] opacity-80">
+                        <EyeOff className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
+                        <p>Aucune demande d'accompagnement trouvée</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredDemandesAccompagnement.map((demande) => (
+                      <TableRow key={demande.id} className="border-[#D3D3D3] hover:bg-[#F5F5F5]">
+                        <TableCell className="font-medium text-[#000000]">#{demande.id}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8 border border-[#D3D3D3]">
+                              <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
+                                {demande.nom.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium text-[#000000]">{demande.nom}</div>
+                              <div className="text-sm text-[#000000] opacity-80">{demande.entreprise}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getTypeIcon(demande.conseilType)}
+                            <div>
+                              <div className="font-medium text-[#000000]">{demande.conseilType}</div>
+                              <div className="text-sm text-[#000000] opacity-80">{demande.budget}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {demande.expert ? (
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6 border border-[#D3D3D3]">
+                                <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
+                                  {demande.expert.firstName?.charAt(0)}{demande.expert.lastName?.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="text-sm text-[#000000]">{demande.expert.firstName} {demande.expert.lastName}</div>
+                                <div className="text-xs text-[#000000] opacity-70">{demande.expert.email}</div>
+                              </div>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="text-[#000000] border-[#D3D3D3]">
+                              Non assigné
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(demande.statut)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-[#000000]">{new Date(demande.createdAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-[#000000] opacity-70">
+                            {new Date(demande.createdAt).toLocaleTimeString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewDetails(demande, true)}
+                              className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#27AE60] hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRespond(demande, true)}
+                              className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#27AE60] hover:text-white"
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAssignExpert(demande, true)}
+                              className="h-8 px-2 border-[#D3D3D3] text-[#000000] hover:bg-[#27AE60] hover:text-white"
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                            <Select
+                              value={demande.statut}
+                              onValueChange={(value) => handleUpdateStatus(demande.id, value, true)}
+                              disabled={loadingUpdateStatus[demande.id]}
+                            >
+                              <SelectTrigger className={`h-8 w-32 border-[#D3D3D3] text-xs ${loadingUpdateStatus[demande.id] ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                {loadingUpdateStatus[demande.id] ? (
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <span>Mise à jour...</span>
+                                  </div>
+                                ) : (
+                                  <SelectValue />
+                                )}
+                              </SelectTrigger>
+                              <SelectContent className="border-[#D3D3D3]">
+                                <SelectItem value="en_attente">En attente</SelectItem>
+                                <SelectItem value="en_cours">En cours</SelectItem>
+                                <SelectItem value="terminee">Terminée</SelectItem>
+                                <SelectItem value="annulee">Annulée</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Modal Détails de la demande */}
       {selectedDemande && (
@@ -780,6 +1240,9 @@ const AdminConseilPage = () => {
               <DialogTitle className="flex items-center gap-2 text-[#8B4513]">
                 <FileText className="h-5 w-5 text-[#556B2F]" />
                 Détails de la demande #{selectedDemande.id}
+                {isAccompagnement && (
+                  <Badge className="ml-2 bg-[#27AE60] text-white">Accompagnement</Badge>
+                )}
               </DialogTitle>
             </DialogHeader>
 
@@ -824,8 +1287,11 @@ const AdminConseilPage = () => {
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-[#000000] opacity-80">Type de conseil</label>
-                    <div className="font-medium text-[#000000]">{selectedDemande.conseilType}</div>
+                    <label className="text-sm font-medium text-[#000000] opacity-80">Type de {isAccompagnement ? "d'accompagnement" : "conseil"}</label>
+                    <div className="font-medium text-[#000000] flex items-center gap-2">
+                      {isAccompagnement && getTypeIcon(selectedDemande.conseilType)}
+                      {selectedDemande.conseilType}
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-[#000000] opacity-80">Budget estimé</label>
@@ -907,14 +1373,22 @@ const AdminConseilPage = () => {
             <DialogFooter className="gap-2">
               <Button
                 variant="outline"
-                onClick={() => handleAssignExpert(selectedDemande)}
+                onClick={() => handleAddSuivi(selectedDemande, isAccompagnement)}
+                className="border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
+              >
+                <MessageSquare className="h-4 w-4 mr-2 text-[#556B2F]" />
+                Ajouter un suivi
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleAssignExpert(selectedDemande, isAccompagnement)}
                 className="border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
               >
                 <UserPlus className="h-4 w-4 mr-2 text-[#556B2F]" />
                 {selectedDemande.expert ? "Changer l'expert" : "Assigner un expert"}
               </Button>
               <Button 
-                onClick={() => handleRespond(selectedDemande)}
+                onClick={() => handleRespond(selectedDemande, isAccompagnement)}
                 className="bg-[#6B8E23] hover:bg-[#556B2F] text-white"
               >
                 <Send className="h-4 w-4 mr-2" />
@@ -929,7 +1403,10 @@ const AdminConseilPage = () => {
       <Dialog open={showResponseModal} onOpenChange={setShowResponseModal}>
         <DialogContent className="border-[#D3D3D3] bg-[#FFFFFF]">
           <DialogHeader>
-            <DialogTitle className="text-[#8B4513]">Répondre à la demande #{selectedDemande?.id}</DialogTitle>
+            <DialogTitle className="text-[#8B4513]">
+              Répondre à la demande #{selectedDemande?.id}
+              {isAccompagnement && " (Accompagnement)"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -984,7 +1461,10 @@ const AdminConseilPage = () => {
       <Dialog open={showAssignModal} onOpenChange={setShowAssignModal}>
         <DialogContent className="border-[#D3D3D3] bg-[#FFFFFF]">
           <DialogHeader>
-            <DialogTitle className="text-[#8B4513]">Assigner un expert à la demande #{selectedDemande?.id}</DialogTitle>
+            <DialogTitle className="text-[#8B4513]">
+              Assigner un expert à la demande #{selectedDemande?.id}
+              {isAccompagnement && " (Accompagnement)"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -1051,7 +1531,10 @@ const AdminConseilPage = () => {
       <Dialog open={showSuiviModal} onOpenChange={setShowSuiviModal}>
         <DialogContent className="border-[#D3D3D3] bg-[#FFFFFF]">
           <DialogHeader>
-            <DialogTitle className="text-[#8B4513]">Ajouter un suivi à la demande #{selectedDemande?.id}</DialogTitle>
+            <DialogTitle className="text-[#8B4513]">
+              Ajouter un suivi à la demande #{selectedDemande?.id}
+              {isAccompagnement && " (Accompagnement)"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -1123,26 +1606,45 @@ const AdminConseilPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#556B2F]">{filteredDemandes.length}</div>
-                  <div className="text-sm text-[#000000]">Demandes filtrées</div>
+                  <div className="text-2xl font-bold text-[#556B2F]">{demandesConseil.length}</div>
+                  <div className="text-sm text-[#000000]">Demandes de conseil</div>
                 </div>
               </Card>
               <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#556B2F]">
-                    {demandes.filter(d => !d.expertId).length}
-                  </div>
-                  <div className="text-sm text-[#000000]">Non assignées</div>
+                  <div className="text-2xl font-bold text-[#27AE60]">{demandesAccompagnement.length}</div>
+                  <div className="text-sm text-[#000000]">Demandes d'accompagnement</div>
                 </div>
               </Card>
             </div>
 
             <div>
-              <h4 className="font-medium mb-2 text-[#8B4513]">Répartition par statut</h4>
+              <h4 className="font-medium mb-2 text-[#8B4513]">Répartition par statut (Conseil)</h4>
               <div className="space-y-2">
                 {['en_attente', 'en_cours', 'terminee', 'annulee'].map((statut) => {
-                  const count = demandes.filter(d => d.statut === statut).length;
-                  const percentage = demandes.length > 0 ? (count / demandes.length * 100).toFixed(1) : 0;
+                  const count = demandesConseil.filter(d => d.statut === statut).length;
+                  const percentage = demandesConseil.length > 0 ? (count / demandesConseil.length * 100).toFixed(1) : 0;
+                  return (
+                    <div key={statut} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(statut)}
+                        <span className="text-sm text-[#000000] opacity-80">{statut.replace('_', ' ')}</span>
+                      </div>
+                      <div className="text-sm text-[#000000]">
+                        {count} ({percentage}%)
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-medium mb-2 text-[#27AE60]">Répartition par statut (Accompagnement)</h4>
+              <div className="space-y-2">
+                {['en_attente', 'en_cours', 'terminee', 'annulee'].map((statut) => {
+                  const count = demandesAccompagnement.filter(d => d.statut === statut).length;
+                  const percentage = demandesAccompagnement.length > 0 ? (count / demandesAccompagnement.length * 100).toFixed(1) : 0;
                   return (
                     <div key={statut} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">

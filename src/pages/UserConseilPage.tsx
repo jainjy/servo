@@ -9,7 +9,10 @@ import {
   Shield, AlertCircle, UserCheck, UserPlus,
   MessageCircle, Plus, ChevronRight, FileIcon,
   CheckCircle2, XCircle as XCircleIcon, Loader2,
-  AlertTriangle
+  AlertTriangle, Briefcase, Rocket, TrendingUp,
+  Handshake, Target, Trophy, Award, Globe,
+  GraduationCap, HeartHandshake, ShieldCheck,
+  PieChart, Coins
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { conseilService } from "@/services/conseilService";
+import { accompagnementService } from "@/services/accompagnementService";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -47,6 +51,34 @@ interface DemandeConseil {
   updatedAt: string;
   service: any;
   metier: any;
+  expert: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    companyName: string;
+    avatar: string;
+  } | null;
+  user: any;
+  suivis: Suivi[];
+}
+
+interface DemandeAccompagnement {
+  id: number;
+  conseilType: string;
+  besoin: string;
+  budget: string;
+  message: string;
+  nom: string;
+  email: string;
+  telephone: string;
+  entreprise: string;
+  expertId: string | null;
+  statut: string;
+  origine: string;
+  createdAt: string;
+  updatedAt: string;
   expert: {
     id: string;
     firstName: string;
@@ -91,10 +123,19 @@ interface Expert {
 
 const UserConseilPage = () => {
   const { user: currentUser } = useAuth();
-  const [demandes, setDemandes] = useState<DemandeConseil[]>([]);
-  const [filteredDemandes, setFilteredDemandes] = useState<DemandeConseil[]>([]);
+  const [activeTab, setActiveTab] = useState("conseil");
+  
+  // États pour les demandes de conseil
+  const [demandesConseil, setDemandesConseil] = useState<DemandeConseil[]>([]);
+  const [filteredDemandesConseil, setFilteredDemandesConseil] = useState<DemandeConseil[]>([]);
+  
+  // États pour les demandes d'accompagnement
+  const [demandesAccompagnement, setDemandesAccompagnement] = useState<DemandeAccompagnement[]>([]);
+  const [filteredDemandesAccompagnement, setFilteredDemandesAccompagnement] = useState<DemandeAccompagnement[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingAccompagnement, setLoadingAccompagnement] = useState(false);
   
   // États de chargement pour les boutons
   const [loadingRefresh, setLoadingRefresh] = useState(false);
@@ -104,6 +145,21 @@ const UserConseilPage = () => {
   const [loadingCancel, setLoadingCancel] = useState(false);
   
   const [stats, setStats] = useState({
+    // Stats pour les conseils
+    totalConseil: 0,
+    en_attenteConseil: 0,
+    en_coursConseil: 0,
+    termineeConseil: 0,
+    annuleeConseil: 0,
+    
+    // Stats pour les accompagnements
+    totalAccompagnement: 0,
+    en_attenteAccompagnement: 0,
+    en_coursAccompagnement: 0,
+    termineeAccompagnement: 0,
+    annuleeAccompagnement: 0,
+    
+    // Compatibilité
     total: 0,
     en_attente: 0,
     en_cours: 0,
@@ -117,7 +173,7 @@ const UserConseilPage = () => {
   const [typeFilter, setTypeFilter] = useState("tous");
 
   // États pour les modals
-  const [selectedDemande, setSelectedDemande] = useState<DemandeConseil | null>(null);
+  const [selectedDemande, setSelectedDemande] = useState<DemandeConseil | DemandeAccompagnement | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showSuiviModal, setShowSuiviModal] = useState(false);
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
@@ -139,17 +195,28 @@ const UserConseilPage = () => {
   // Filtrer les demandes
   useEffect(() => {
     filterDemandes();
-  }, [demandes, searchTerm, statusFilter, typeFilter]);
+  }, [demandesConseil, demandesAccompagnement, searchTerm, statusFilter, typeFilter]);
 
   const loadDemandes = async () => {
     try {
       setLoading(true);
-      const response = await conseilService.getMesDemandes();
       
-      if (response.success) {
-        const demandesData = response.data || [];
-        // S'assurer que chaque demande a des suivis et que chaque suivi a un user
-        const demandesWithSafeSuivis = demandesData.map(demande => ({
+      // Charger les demandes de conseil
+      const conseilResponse = await conseilService.getMesDemandes();
+      
+      // Charger les demandes d'accompagnement
+      setLoadingAccompagnement(true);
+      const accompagnementResponse = await accompagnementService.getMesDemandes();
+      setLoadingAccompagnement(false);
+      
+      if (conseilResponse.success) {
+        const conseilData = conseilResponse.data || [];
+        // Filtrer pour n'avoir que les demandes de conseil (origine différente de page_accompagnement)
+        const demandesConseilFiltered = conseilData.filter((demande: DemandeConseil) => 
+          demande.origine !== "page_accompagnement"
+        );
+        
+        const demandesConseilWithSafeSuivis = demandesConseilFiltered.map(demande => ({
           ...demande,
           suivis: (demande.suivis || []).map(suivi => ({
             ...suivi,
@@ -157,19 +224,43 @@ const UserConseilPage = () => {
           }))
         }));
         
-        setDemandes(demandesWithSafeSuivis);
-        setFilteredDemandes(demandesWithSafeSuivis);
-        
-        // Calculer les stats directement avec les nouvelles données
-        calculateStats(demandesWithSafeSuivis);
-      } else {
-        toast.error(response.error || "Erreur lors du chargement des demandes");
+        setDemandesConseil(demandesConseilWithSafeSuivis);
+        setFilteredDemandesConseil(demandesConseilWithSafeSuivis);
       }
+      
+      if (accompagnementResponse.success) {
+        const accompagnementData = accompagnementResponse.data || [];
+        // Filtrer pour n'avoir que les demandes d'accompagnement (origine = page_accompagnement)
+        const demandesAccompagnementFiltered = accompagnementData.filter((demande: DemandeAccompagnement) => 
+          demande.origine === "page_accompagnement"
+        );
+        
+        const demandesAccompagnementWithSafeSuivis = demandesAccompagnementFiltered.map(demande => ({
+          ...demande,
+          suivis: (demande.suivis || []).map(suivi => ({
+            ...suivi,
+            user: suivi.user || { id: 'unknown', firstName: 'Utilisateur', lastName: '', email: '' }
+          }))
+        }));
+        
+        setDemandesAccompagnement(demandesAccompagnementWithSafeSuivis);
+        setFilteredDemandesAccompagnement(demandesAccompagnementWithSafeSuivis);
+      }
+      
+      // Calculer les stats combinées
+      const allDemandes = [
+        ...(conseilResponse.success ? conseilResponse.data || [] : []),
+        ...(accompagnementResponse.success ? accompagnementResponse.data || [] : [])
+      ];
+      
+      calculateStats(allDemandes);
+      
     } catch (error) {
       console.error("Erreur chargement demandes:", error);
       toast.error("Erreur lors du chargement de vos demandes");
+      
       // Données de démonstration en cas d'erreur
-      const demoDemandes: DemandeConseil[] = [
+      const demoDemandesConseil: DemandeConseil[] = [
         {
           id: 1,
           conseilType: "Audit Stratégique",
@@ -234,7 +325,7 @@ const UserConseilPage = () => {
           expertId: null,
           statut: "en_attente",
           origine: "page_conseil",
-          createdAt: new Date(Date.now() - 86400000).toISOString(), // Hier
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
           updatedAt: new Date(Date.now() - 86400000).toISOString(),
           service: { id: 3, libelle: "Stratégie Marketing" },
           metier: { id: 1, libelle: "Stratège" },
@@ -247,11 +338,63 @@ const UserConseilPage = () => {
           suivis: []
         }
       ];
-      setDemandes(demoDemandes);
-      setFilteredDemandes(demoDemandes);
+      
+      const demoDemandesAccompagnement: DemandeAccompagnement[] = [
+        {
+          id: 1001,
+          conseilType: "Accompagnement Création",
+          besoin: "Création d'une startup dans le domaine de la tech",
+          budget: "1 500€ - 3 000€",
+          message: "Je souhaite créer ma startup dans le domaine de la tech...",
+          nom: "Jean Dupont",
+          email: "jean@entreprise.fr",
+          telephone: "+33 6 12 34 56 78",
+          entreprise: "FutureTech Startup",
+          expertId: "3",
+          statut: "en_cours",
+          origine: "page_accompagnement",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          expert: {
+            id: "3",
+            firstName: "Thomas",
+            lastName: "Petit",
+            email: "thomas@expert.fr",
+            phone: "+33 6 34 56 78 90",
+            companyName: "Accompagnement Pro",
+            avatar: ""
+          },
+          user: {
+            id: "user1",
+            firstName: "Jean",
+            lastName: "Dupont"
+          },
+          suivis: [
+            {
+              id: 1,
+              message: "Première séance de diagnostic réalisée",
+              type: "message",
+              rendezVous: null,
+              createdAt: new Date().toISOString(),
+              user: { 
+                id: "3",
+                firstName: "Thomas", 
+                lastName: "Petit", 
+                email: "thomas@expert.fr" 
+              }
+            }
+          ]
+        }
+      ];
+      
+      setDemandesConseil(demoDemandesConseil);
+      setFilteredDemandesConseil(demoDemandesConseil);
+      setDemandesAccompagnement(demoDemandesAccompagnement);
+      setFilteredDemandesAccompagnement(demoDemandesAccompagnement);
       
       // Calculer les stats pour les données de démo
-      calculateStats(demoDemandes);
+      calculateStats([...demoDemandesConseil, ...demoDemandesAccompagnement]);
+      
     } finally {
       setLoading(false);
     }
@@ -266,16 +409,37 @@ const UserConseilPage = () => {
     }
   };
 
-  const calculateStats = (demandesData: DemandeConseil[]) => {
+  const calculateStats = (demandesData: any[]) => {
     try {
       setLoadingStats(true);
+      
+      // Séparer les demandes par origine
+      const demandesConseil = demandesData.filter(d => d.origine !== "page_accompagnement");
+      const demandesAccompagnement = demandesData.filter(d => d.origine === "page_accompagnement");
+      
       const newStats = {
+        // Stats conseil
+        totalConseil: demandesConseil.length,
+        en_attenteConseil: demandesConseil.filter(d => d.statut === "en_attente").length,
+        en_coursConseil: demandesConseil.filter(d => d.statut === "en_cours").length,
+        termineeConseil: demandesConseil.filter(d => d.statut === "terminee").length,
+        annuleeConseil: demandesConseil.filter(d => d.statut === "annulee").length,
+        
+        // Stats accompagnement
+        totalAccompagnement: demandesAccompagnement.length,
+        en_attenteAccompagnement: demandesAccompagnement.filter(d => d.statut === "en_attente").length,
+        en_coursAccompagnement: demandesAccompagnement.filter(d => d.statut === "en_cours").length,
+        termineeAccompagnement: demandesAccompagnement.filter(d => d.statut === "terminee").length,
+        annuleeAccompagnement: demandesAccompagnement.filter(d => d.statut === "annulee").length,
+        
+        // Stats globales (compatibilité)
         total: demandesData.length,
         en_attente: demandesData.filter(d => d.statut === "en_attente").length,
         en_cours: demandesData.filter(d => d.statut === "en_cours").length,
         terminee: demandesData.filter(d => d.statut === "terminee").length,
         annulee: demandesData.filter(d => d.statut === "annulee").length
       };
+      
       setStats(newStats);
     } catch (error) {
       console.error("Erreur calcul stats:", error);
@@ -285,12 +449,12 @@ const UserConseilPage = () => {
   };
 
   const filterDemandes = () => {
-    let filtered = [...demandes];
-
-    // Filtre par recherche
+    // Filtrer les demandes de conseil
+    let filteredConseil = [...demandesConseil];
+    
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(d =>
+      filteredConseil = filteredConseil.filter(d =>
         d.conseilType.toLowerCase().includes(term) ||
         (d.expert?.firstName?.toLowerCase() || "").includes(term) ||
         (d.expert?.lastName?.toLowerCase() || "").includes(term) ||
@@ -298,18 +462,40 @@ const UserConseilPage = () => {
         d.statut.toLowerCase().includes(term)
       );
     }
-
-    // Filtre par statut
+    
     if (statusFilter !== "tous") {
-      filtered = filtered.filter(d => d.statut === statusFilter);
+      filteredConseil = filteredConseil.filter(d => d.statut === statusFilter);
     }
-
-    // Filtre par type
+    
     if (typeFilter !== "tous") {
-      filtered = filtered.filter(d => d.conseilType === typeFilter);
+      filteredConseil = filteredConseil.filter(d => d.conseilType === typeFilter);
     }
-
-    setFilteredDemandes(filtered);
+    
+    setFilteredDemandesConseil(filteredConseil);
+    
+    // Filtrer les demandes d'accompagnement
+    let filteredAccompagnement = [...demandesAccompagnement];
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filteredAccompagnement = filteredAccompagnement.filter(d =>
+        d.conseilType.toLowerCase().includes(term) ||
+        (d.expert?.firstName?.toLowerCase() || "").includes(term) ||
+        (d.expert?.lastName?.toLowerCase() || "").includes(term) ||
+        d.besoin.toLowerCase().includes(term) ||
+        d.statut.toLowerCase().includes(term)
+      );
+    }
+    
+    if (statusFilter !== "tous") {
+      filteredAccompagnement = filteredAccompagnement.filter(d => d.statut === statusFilter);
+    }
+    
+    if (typeFilter !== "tous") {
+      filteredAccompagnement = filteredAccompagnement.filter(d => d.conseilType === typeFilter);
+    }
+    
+    setFilteredDemandesAccompagnement(filteredAccompagnement);
   };
 
   const getStatusBadge = (statut: string) => {
@@ -362,19 +548,38 @@ const UserConseilPage = () => {
     }
   };
 
-  const handleViewDetails = (demande: DemandeConseil) => {
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "Accompagnement Création":
+        return <Rocket className="h-4 w-4 text-[#6B8E23]" />;
+      case "Accompagnement Croissance":
+        return <TrendingUp className="h-4 w-4 text-[#27AE60]" />;
+      case "Transition & Transmission":
+        return <Handshake className="h-4 w-4 text-[#8B4513]" />;
+      case "Expertise Comptable & Fiscale":
+        return <PieChart className="h-4 w-4 text-[#2C3E50]" />;
+      case "Stratégie Marketing & Digital":
+        return <Target className="h-4 w-4 text-[#D4AF37]" />;
+      case "Financement & Levée de Fonds":
+        return <Coins className="h-4 w-4 text-[#F39C12]" />;
+      default:
+        return <Briefcase className="h-4 w-4 text-[#556B2F]" />;
+    }
+  };
+
+  const handleViewDetails = (demande: DemandeConseil | DemandeAccompagnement) => {
     setSelectedDemande(demande);
     setShowDetailModal(true);
   };
 
-  const handleAddSuivi = (demande: DemandeConseil) => {
+  const handleAddSuivi = (demande: DemandeConseil | DemandeAccompagnement) => {
     setSelectedDemande(demande);
     setSuiviMessage("");
     setSuiviType("note");
     setShowSuiviModal(true);
   };
 
-  const handleNewMessage = (demande: DemandeConseil) => {
+  const handleNewMessage = (demande: DemandeConseil | DemandeAccompagnement) => {
     setSelectedDemande(demande);
     setNewMessage("");
     setShowNewMessageModal(true);
@@ -383,7 +588,17 @@ const UserConseilPage = () => {
   const handleUpdateStatus = async (demandeId: number, newStatut: string, reason?: string) => {
     try {
       setLoadingUpdateStatus(true);
-      const response = await conseilService.updateStatut(demandeId, newStatut);
+      
+      // Utiliser le bon service selon l'origine
+      let response;
+      const demande = [...demandesConseil, ...demandesAccompagnement].find(d => d.id === demandeId);
+      
+      if (demande?.origine === "page_accompagnement") {
+        response = await accompagnementService.updateStatut(demandeId, newStatut);
+      } else {
+        response = await conseilService.updateStatut(demandeId, newStatut);
+      }
+      
       if (response.success) {
         toast.success(`Statut mis à jour: ${getStatusLabel(newStatut)}`);
         // Recharger les demandes pour mettre à jour les stats
@@ -411,10 +626,20 @@ const UserConseilPage = () => {
 
     try {
       setLoadingAddSuivi(true);
-      const response = await conseilService.addSuivi(selectedDemande.id, {
-        message: suiviMessage,
-        type: suiviType
-      });
+      
+      // Utiliser le bon service selon l'origine
+      let response;
+      if (selectedDemande.origine === "page_accompagnement") {
+        response = await accompagnementService.addSuivi(selectedDemande.id, {
+          message: suiviMessage,
+          type: suiviType
+        });
+      } else {
+        response = await conseilService.addSuivi(selectedDemande.id, {
+          message: suiviMessage,
+          type: suiviType
+        });
+      }
 
       if (response.success) {
         toast.success("Note ajoutée avec succès");
@@ -442,10 +667,20 @@ const UserConseilPage = () => {
 
     try {
       setLoadingSendMessage(true);
-      const response = await conseilService.addSuivi(selectedDemande.id, {
-        message: newMessage,
-        type: "message"
-      });
+      
+      // Utiliser le bon service selon l'origine
+      let response;
+      if (selectedDemande.origine === "page_accompagnement") {
+        response = await accompagnementService.addSuivi(selectedDemande.id, {
+          message: newMessage,
+          type: "message"
+        });
+      } else {
+        response = await conseilService.addSuivi(selectedDemande.id, {
+          message: newMessage,
+          type: "message"
+        });
+      }
 
       if (response.success) {
         toast.success("Message envoyé avec succès");
@@ -500,15 +735,19 @@ const UserConseilPage = () => {
   };
 
   const getTypeOptions = () => {
-    const types = Array.from(new Set(demandes.map(d => d.conseilType)));
-    return types.map(type => (
+    // Combiner les types de conseil et d'accompagnement
+    const conseilTypes = Array.from(new Set(demandesConseil.map(d => d.conseilType)));
+    const accompagnementTypes = Array.from(new Set(demandesAccompagnement.map(d => d.conseilType)));
+    const allTypes = [...conseilTypes, ...accompagnementTypes];
+    
+    return allTypes.map(type => (
       <SelectItem key={type} value={type}>
         {type}
       </SelectItem>
     ));
   };
 
-  const exportToPDF = (demande: DemandeConseil) => {
+  const exportToPDF = (demande: DemandeConseil | DemandeAccompagnement) => {
     toast.info("Export PDF en développement...");
     // Implémentation future de l'export PDF
   };
@@ -540,11 +779,11 @@ const UserConseilPage = () => {
 
   return (
     <div className="container mx-auto mt-10 p-4 md:p-6 bg-[#FFFFFF]">
-      {/* En-tête */}
+      {/* En-tête avec onglets */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#8B4513]">Mes Demandes de Conseil</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#8B4513]">Mes Demandes</h1>
             <p className="text-[#000000] mt-2 opacity-80">
               Suivez l'avancement de vos demandes et échangez avec les experts
             </p>
@@ -569,51 +808,169 @@ const UserConseilPage = () => {
                 </>
               )}
             </Button>
+          </div>
+        </div>
+
+        {/* Onglets */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="bg-[#F5F5F5] border border-[#D3D3D3]">
+            <TabsTrigger 
+              value="conseil" 
+              className="data-[state=active]:bg-[#6B8E23] data-[state=active]:text-white"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Conseils ({demandesConseil.length})
+            </TabsTrigger>
+            <TabsTrigger 
+              value="accompagnement" 
+              className="data-[state=active]:bg-[#27AE60] data-[state=active]:text-white"
+            >
+              <Briefcase className="h-4 w-4 mr-2" />
+              Accompagnements ({demandesAccompagnement.length})
+              {loadingAccompagnement && (
+                <Loader2 className="h-3 w-3 ml-2 animate-spin" />
+              )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="tous" 
+              className="data-[state=active]:bg-[#8B4513] data-[state=active]:text-white"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Toutes ({demandesConseil.length + demandesAccompagnement.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Boutons de création */}
+          <div className="mt-4 flex gap-4">
             <Button 
               size="sm" 
               className="flex items-center gap-2 bg-[#6B8E23] hover:bg-[#556B2F] text-white"
             >
               <a href="/conseil" className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                Nouvelle demande
+                Nouveau conseil
+              </a>
+            </Button>
+            <Button 
+              size="sm" 
+              className="flex items-center gap-2 bg-[#27AE60] hover:bg-[#219653] text-white"
+            >
+              <a href="/accompagnement" className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Nouvel accompagnement
               </a>
             </Button>
           </div>
-        </div>
+        </Tabs>
+      </div>
 
-        {/* Cartes de statistiques */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-          <Card className="p-4 bg-gradient-to-br from-[#FFFFFF] to-[#F5F5F5] border-[#D3D3D3]">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.total}</div>
-              <div className="text-sm text-[#000000]">Total</div>
-            </div>
-          </Card>
-          <Card className="p-4 bg-gradient-to-br from-[#FFF8E1] to-[#FFF3E0] border-[#D3D3D3]">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-[#8B4513]">{stats.en_attente}</div>
-              <div className="text-sm text-[#000000]">En Attente</div>
-            </div>
-          </Card>
-          <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.en_cours}</div>
-              <div className="text-sm text-[#000000]">En Cours</div>
-            </div>
-          </Card>
-          <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.terminee}</div>
-              <div className="text-sm text-[#000000]">Terminées</div>
-            </div>
-          </Card>
-          <Card className="p-4 bg-gradient-to-br from-[#FFEBEE] to-[#FFEBEE] border-[#D3D3D3]">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-[#D32F2F]">{stats.annulee}</div>
-              <div className="text-sm text-[#000000]">Annulées</div>
-            </div>
-          </Card>
-        </div>
+      {/* Cartes de statistiques - Afficher selon l'onglet actif */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        {activeTab === "conseil" || activeTab === "tous" ? (
+          <>
+            <Card className="p-4 bg-gradient-to-br from-[#FFFFFF] to-[#F5F5F5] border-[#D3D3D3]">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.totalConseil}</div>
+                <div className="text-sm text-[#000000]">Total Conseil</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-br from-[#FFF8E1] to-[#FFF3E0] border-[#D3D3D3]">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-[#8B4513]">{stats.en_attenteConseil}</div>
+                <div className="text-sm text-[#000000]">En Attente</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.en_coursConseil}</div>
+                <div className="text-sm text-[#000000]">En Cours</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.termineeConseil}</div>
+                <div className="text-sm text-[#000000]">Terminées</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-br from-[#FFEBEE] to-[#FFEBEE] border-[#D3D3D3]">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-[#D32F2F]">{stats.annuleeConseil}</div>
+                <div className="text-sm text-[#000000]">Annulées</div>
+              </div>
+            </Card>
+          </>
+        ) : null}
+        
+        {activeTab === "accompagnement" || activeTab === "tous" ? (
+          activeTab === "accompagnement" ? (
+            <>
+              <Card className="p-4 bg-gradient-to-br from-[#FFFFFF] to-[#F5F5F5] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#27AE60]">{stats.totalAccompagnement}</div>
+                  <div className="text-sm text-[#000000]">Total Accomp.</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#D4AF37]">{stats.en_attenteAccompagnement}</div>
+                  <div className="text-sm text-[#000000]">En Attente</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#8FBC8F]">{stats.en_coursAccompagnement}</div>
+                  <div className="text-sm text-[#000000]">En Cours</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#2E8B57]">{stats.termineeAccompagnement}</div>
+                  <div className="text-sm text-[#000000]">Terminées</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#FFEBEE] to-[#FFEBEE] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#DC143C]">{stats.annuleeAccompagnement}</div>
+                  <div className="text-sm text-[#000000]">Annulées</div>
+                </div>
+              </Card>
+            </>
+          ) : (
+            // Afficher uniquement le total pour l'onglet "tous"
+            <>
+              <Card className="p-4 bg-gradient-to-br from-[#FFFFFF] to-[#F5F5F5] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.totalConseil}</div>
+                  <div className="text-sm text-[#000000]">Conseils</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#FFFFFF] to-[#F5F5F5] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#27AE60]">{stats.totalAccompagnement}</div>
+                  <div className="text-sm text-[#000000]">Accomp.</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#8B4513]">{stats.en_attente}</div>
+                  <div className="text-sm text-[#000000]">En Attente</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.en_cours}</div>
+                  <div className="text-sm text-[#000000]">En Cours</div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-[#E8F5E9] to-[#F1F8E9] border-[#D3D3D3]">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-[#556B2F]">{stats.terminee}</div>
+                  <div className="text-sm text-[#000000]">Terminées</div>
+                </div>
+              </Card>
+            </>
+          )
+        ) : null}
       </div>
 
       {/* Filtres */}
@@ -663,226 +1020,695 @@ const UserConseilPage = () => {
         </div>
       </Card>
 
-      {/* Contenu principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Liste des demandes */}
-        <div className="lg:col-span-2">
-          <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
-            <div className="p-4 border-b border-[#D3D3D3]">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-[#8B4513]">
-                  Mes Demandes ({filteredDemandes.length})
-                </h2>
-                {loadingStats && (
-                  <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#000000]">
-                    <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                    Mise à jour...
-                  </Badge>
-                )}
-              </div>
-            </div>
-            
-            <div className="overflow-x-auto">
-              {filteredDemandes.length === 0 ? (
-                <div className="text-center py-12 px-4">
-                  <FileText className="h-12 w-12 mx-auto mb-4 text-[#D3D3D3]" />
-                  <h3 className="text-lg font-medium text-[#8B4513] mb-2">
-                    Aucune demande trouvée
-                  </h3>
-                  <p className="text-[#000000] mb-6 opacity-80">
-                    {searchTerm || statusFilter !== "tous" || typeFilter !== "tous"
-                      ? "Aucune demande ne correspond à vos critères de recherche."
-                      : "Vous n'avez pas encore de demande de conseil."}
-                  </p>
-                  {!searchTerm && statusFilter === "tous" && typeFilter === "tous" && (
-                    <Button 
-                      className="bg-[#6B8E23] hover:bg-[#556B2F] text-white"
-                    >
-                      <a href="/conseil" className="flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        Créer une demande
-                      </a>
-                    </Button>
-                  )}
+      {/* Contenu avec onglets */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Onglet Conseil */}
+        <TabsContent value="conseil" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Liste des demandes de conseil */}
+            <div className="lg:col-span-2">
+              <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-[#8B4513]">
+                      Mes Conseils ({filteredDemandesConseil.length})
+                    </h2>
+                    {loadingStats && (
+                      <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#000000]">
+                        <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                        Mise à jour...
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="divide-y divide-[#D3D3D3]">
-                  {filteredDemandes.map((demande) => (
-                    <motion.div
-                      key={demande.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 hover:bg-[#F5F5F5] cursor-pointer transition-colors border-b border-[#D3D3D3] last:border-0"
-                      onClick={() => handleViewDetails(demande)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            {getStatusIcon(demande.statut)}
-                            <span className="font-semibold text-[#8B4513]">
-                              {demande.conseilType}
-                            </span>
-                            <span className="text-sm text-[#000000] opacity-70">
-                              #{demande.id}
-                            </span>
-                          </div>
-                          
-                          <p className="text-sm text-[#000000] mb-3 line-clamp-2 opacity-90">
-                            {demande.besoin}
-                          </p>
-                          
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-[#000000] opacity-80">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>{formatDate(demande.createdAt)}</span>
-                            </div>
-                            
-                            {demande.expert && (
-                              <div className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                <span>
-                                  {demande.expert.firstName} {demande.expert.lastName}
+                
+                <div className="overflow-x-auto">
+                  {filteredDemandesConseil.length === 0 ? (
+                    <div className="text-center py-12 px-4">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-4 text-[#D3D3D3]" />
+                      <h3 className="text-lg font-medium text-[#8B4513] mb-2">
+                        Aucun conseil trouvé
+                      </h3>
+                      <p className="text-[#000000] mb-6 opacity-80">
+                        {searchTerm || statusFilter !== "tous" || typeFilter !== "tous"
+                          ? "Aucun conseil ne correspond à vos critères de recherche."
+                          : "Vous n'avez pas encore de demande de conseil."}
+                      </p>
+                      {!searchTerm && statusFilter === "tous" && typeFilter === "tous" && (
+                        <Button 
+                          className="bg-[#6B8E23] hover:bg-[#556B2F] text-white"
+                        >
+                          <a href="/conseil" className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            Demander un conseil
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#D3D3D3]">
+                      {filteredDemandesConseil.map((demande) => (
+                        <motion.div
+                          key={demande.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 hover:bg-[#F5F5F5] cursor-pointer transition-colors border-b border-[#D3D3D3] last:border-0"
+                          onClick={() => handleViewDetails(demande)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                {getStatusIcon(demande.statut)}
+                                <span className="font-semibold text-[#8B4513]">
+                                  {demande.conseilType}
+                                </span>
+                                <Badge variant="outline" className="text-xs border-[#6B8E23] text-[#6B8E23]">
+                                  Conseil
+                                </Badge>
+                                <span className="text-sm text-[#000000] opacity-70">
+                                  #{demande.id}
                                 </span>
                               </div>
-                            )}
+                              
+                              <p className="text-sm text-[#000000] mb-3 line-clamp-2 opacity-90">
+                                {demande.besoin}
+                              </p>
+                              
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-[#000000] opacity-80">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{formatDate(demande.createdAt)}</span>
+                                </div>
+                                
+                                {demande.expert && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    <span>
+                                      {demande.expert.firstName} {demande.expert.lastName}
+                                    </span>
+                                  </div>
+                                )}
+                                
+                                <div className="ml-auto">
+                                  {getStatusBadge(demande.statut)}
+                                </div>
+                              </div>
+                            </div>
                             
-                            <div className="ml-auto">
-                              {getStatusBadge(demande.statut)}
+                            <ChevronRight className="h-5 w-5 text-[#000000] ml-2" />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Dernières activités pour conseils */}
+            <div>
+              <Card className="sticky top-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
+                    <MessageSquare className="h-4 w-4 text-[#556B2F]" />
+                    Activités Récentes
+                  </h3>
+                </div>
+                
+                <div className="p-4">
+                  {demandesConseil.length === 0 ? (
+                    <div className="text-center py-4 text-[#000000] opacity-80">
+                      <MessageCircle className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
+                      Aucune activité récente
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                      {demandesConseil
+                        .flatMap(d => 
+                          (d.suivis || []).map(s => ({
+                            ...s,
+                            demandeId: d.id,
+                            demandeType: d.conseilType,
+                            demandeStatus: d.statut,
+                            user: s.user || { id: 'unknown', firstName: 'Utilisateur', lastName: '', email: '' }
+                          })) || []
+                        )
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .slice(0, 5)
+                        .map((suivi, index) => (
+                          <div key={index} className="pb-4 border-b border-[#D3D3D3] last:border-0 last:pb-0">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="h-8 w-8 border border-[#D3D3D3]">
+                                <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
+                                  {getSafeUserInitials(suivi.user)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-sm text-[#000000]">
+                                    {getSafeUserName(suivi.user)}
+                                  </span>
+                                  <span className="text-xs text-[#000000] opacity-70">
+                                    {formatDate(suivi.createdAt)}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-[#000000] mt-1 line-clamp-2 opacity-90">
+                                  {suivi.message}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#000000]">
+                                    #{suivi.demandeId}
+                                  </Badge>
+                                  <span className="text-xs text-[#000000] opacity-70">
+                                    {suivi.demandeType}
+                                  </span>
+                                  {suivi.type === "rendez_vous" && (
+                                    <Badge variant="secondary" className="text-xs bg-[#F5F5F5] text-[#000000]">
+                                      <Calendar className="h-3 w-3 mr-1" />
+                                      RDV
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        
-                        <ChevronRight className="h-5 w-5 text-[#000000] ml-2" />
-                      </div>
-                    </motion.div>
-                  ))}
+                        ))
+                      }
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </Card>
-        </div>
+              </Card>
 
-        {/* Dernières activités */}
-        <div>
-          <Card className="sticky top-6 border-[#D3D3D3] bg-[#FFFFFF]">
-            <div className="p-4 border-b border-[#D3D3D3]">
-              <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
-                <MessageSquare className="h-4 w-4 text-[#556B2F]" />
-                Activités Récentes
-              </h3>
-            </div>
-            
-            <div className="p-4">
-              {demandes.length === 0 ? (
-                <div className="text-center py-4 text-[#000000] opacity-80">
-                  <MessageCircle className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
-                  Aucune activité récente
+              {/* Conseils rapides */}
+              <Card className="mt-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
+                    <Star className="h-4 w-4 text-[#8B4513]" />
+                    Conseils rapides
+                  </h3>
                 </div>
-              ) : (
-                <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                  {demandes
-                    .flatMap(d => 
-                      (d.suivis || []).map(s => ({
-                        ...s,
-                        demandeId: d.id,
-                        demandeType: d.conseilType,
-                        demandeStatus: d.statut,
-                        user: s.user || { id: 'unknown', firstName: 'Utilisateur', lastName: '', email: '' }
-                      })) || []
-                    )
-                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .slice(0, 5)
-                    .map((suivi, index) => (
-                      <div key={index} className="pb-4 border-b border-[#D3D3D3] last:border-0 last:pb-0">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-8 w-8 border border-[#D3D3D3]">
-                            <AvatarFallback className="bg-[#F5F5F5] text-[#000000]">
-                              {getSafeUserInitials(suivi.user)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <span className="font-medium text-sm text-[#000000]">
-                                {getSafeUserName(suivi.user)}
-                              </span>
-                              <span className="text-xs text-[#000000] opacity-70">
-                                {formatDate(suivi.createdAt)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-[#000000] mt-1 line-clamp-2 opacity-90">
-                              {suivi.message}
-                            </p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#000000]">
-                                #{suivi.demandeId}
-                              </Badge>
-                              <span className="text-xs text-[#000000] opacity-70">
-                                {suivi.demandeType}
-                              </span>
-                              {suivi.type === "rendez_vous" && (
-                                <Badge variant="secondary" className="text-xs bg-[#F5F5F5] text-[#000000]">
-                                  <Calendar className="h-3 w-3 mr-1" />
-                                  RDV
+                <div className="p-4">
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <CheckCircle className="h-4 w-4 text-[#556B2F] mt-0.5" />
+                      <span>Répondez rapidement aux messages des experts</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <AlertTriangle className="h-4 w-4 text-[#8B4513] mt-0.5" />
+                      <span>Vérifiez régulièrement l'avancement de vos demandes</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <MessageSquare className="h-4 w-4 text-[#6B8E23] mt-0.5" />
+                      <span>N'hésitez pas à poser des questions complémentaires</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <Clock className="h-4 w-4 text-[#8B4513] mt-0.5" />
+                      <span>Les demandes urgentes sont traitées en priorité</span>
+                    </li>
+                  </ul>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Onglet Accompagnement */}
+        <TabsContent value="accompagnement" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Liste des demandes d'accompagnement */}
+            <div className="lg:col-span-2">
+              <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-[#27AE60]">
+                      Mes Accompagnements ({filteredDemandesAccompagnement.length})
+                    </h2>
+                    {loadingStats && (
+                      <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#000000]">
+                        <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                        Mise à jour...
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  {filteredDemandesAccompagnement.length === 0 ? (
+                    <div className="text-center py-12 px-4">
+                      <Briefcase className="h-12 w-12 mx-auto mb-4 text-[#D3D3D3]" />
+                      <h3 className="text-lg font-medium text-[#27AE60] mb-2">
+                        Aucun accompagnement trouvé
+                      </h3>
+                      <p className="text-[#000000] mb-6 opacity-80">
+                        {searchTerm || statusFilter !== "tous" || typeFilter !== "tous"
+                          ? "Aucun accompagnement ne correspond à vos critères de recherche."
+                          : "Vous n'avez pas encore de demande d'accompagnement."}
+                      </p>
+                      {!searchTerm && statusFilter === "tous" && typeFilter === "tous" && (
+                        <Button 
+                          className="bg-[#27AE60] hover:bg-[#219653] text-white"
+                        >
+                          <a href="/accompagnement" className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            Demander un accompagnement
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#D3D3D3]">
+                      {filteredDemandesAccompagnement.map((demande) => (
+                        <motion.div
+                          key={demande.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 hover:bg-[#F5F5F5] cursor-pointer transition-colors border-b border-[#D3D3D3] last:border-0"
+                          onClick={() => handleViewDetails(demande)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                {getStatusIcon(demande.statut)}
+                                {getTypeIcon(demande.conseilType)}
+                                <span className="font-semibold text-[#27AE60]">
+                                  {demande.conseilType}
+                                </span>
+                                <Badge className="bg-[#27AE60] text-white text-xs">
+                                  Accompagnement
                                 </Badge>
-                              )}
+                                <span className="text-sm text-[#000000] opacity-70">
+                                  #{demande.id}
+                                </span>
+                              </div>
+                              
+                              <p className="text-sm text-[#000000] mb-3 line-clamp-2 opacity-90">
+                                {demande.besoin}
+                              </p>
+                              
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-[#000000] opacity-80">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{formatDate(demande.createdAt)}</span>
+                                </div>
+                                
+                                {demande.expert && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    <span>
+                                      {demande.expert.firstName} {demande.expert.lastName}
+                                    </span>
+                                  </div>
+                                )}
+                                
+                                <div className="ml-auto">
+                                  {getStatusBadge(demande.statut)}
+                                </div>
+                              </div>
                             </div>
+                            
+                            <ChevronRight className="h-5 w-5 text-[#000000] ml-2" />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Dernières activités pour accompagnements */}
+            <div>
+              <Card className="sticky top-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <h3 className="font-semibold flex items-center gap-2 text-[#27AE60]">
+                    <Briefcase className="h-4 w-4 text-[#27AE60]" />
+                    Activités Accompagnement
+                  </h3>
+                </div>
+                
+                <div className="p-4">
+                  {demandesAccompagnement.length === 0 ? (
+                    <div className="text-center py-4 text-[#000000] opacity-80">
+                      <MessageCircle className="h-8 w-8 mx-auto mb-2 text-[#D3D3D3]" />
+                      Aucune activité récente
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                      {demandesAccompagnement
+                        .flatMap(d => 
+                          (d.suivis || []).map(s => ({
+                            ...s,
+                            demandeId: d.id,
+                            demandeType: d.conseilType,
+                            demandeStatus: d.statut,
+                            user: s.user || { id: 'unknown', firstName: 'Utilisateur', lastName: '', email: '' }
+                          })) || []
+                        )
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .slice(0, 5)
+                        .map((suivi, index) => (
+                          <div key={index} className="pb-4 border-b border-[#D3D3D3] last:border-0 last:pb-0">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="h-8 w-8 border border-[#D3D3D3]">
+                                <AvatarFallback className="bg-[#E8F5E9] text-[#27AE60]">
+                                  {getSafeUserInitials(suivi.user)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-sm text-[#000000]">
+                                    {getSafeUserName(suivi.user)}
+                                  </span>
+                                  <span className="text-xs text-[#000000] opacity-70">
+                                    {formatDate(suivi.createdAt)}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-[#000000] mt-1 line-clamp-2 opacity-90">
+                                  {suivi.message}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs border-[#27AE60] text-[#27AE60]">
+                                    #{suivi.demandeId}
+                                  </Badge>
+                                  <Badge className="text-xs bg-[#27AE60] text-white">
+                                    Accomp.
+                                  </Badge>
+                                  {suivi.type === "rendez_vous" && (
+                                    <Badge variant="secondary" className="text-xs bg-[#F5F5F5] text-[#000000]">
+                                      <Calendar className="h-3 w-3 mr-1" />
+                                      RDV
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Conseils spécifiques aux accompagnements */}
+              <Card className="mt-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <h3 className="font-semibold flex items-center gap-2 text-[#27AE60]">
+                    <Star className="h-4 w-4 text-[#27AE60]" />
+                    Conseils Accompagnement
+                  </h3>
+                </div>
+                <div className="p-4">
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <CheckCircle className="h-4 w-4 text-[#27AE60] mt-0.5" />
+                      <span>Préparez vos documents avant chaque session</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <AlertTriangle className="h-4 w-4 text-[#D4AF37] mt-0.5" />
+                      <span>Respectez les délais des livrables</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <Clock className="h-4 w-4 text-[#27AE60] mt-0.5" />
+                      <span>Les accompagnements sont planifiés sur plusieurs mois</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-[#000000]">
+                      <MessageSquare className="h-4 w-4 text-[#27AE60] mt-0.5" />
+                      <span>Communiquez régulièrement avec votre expert</span>
+                    </li>
+                  </ul>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Onglet Toutes les demandes */}
+        <TabsContent value="tous" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Liste combinée */}
+            <div className="lg:col-span-2">
+              <Card className="mb-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-[#8B4513]">
+                      Toutes mes demandes ({filteredDemandesConseil.length + filteredDemandesAccompagnement.length})
+                    </h2>
+                    {loadingStats && (
+                      <Badge variant="outline" className="text-xs border-[#D3D3D3] text-[#000000]">
+                        <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                        Mise à jour...
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  {filteredDemandesConseil.length === 0 && filteredDemandesAccompagnement.length === 0 ? (
+                    <div className="text-center py-12 px-4">
+                      <FileText className="h-12 w-12 mx-auto mb-4 text-[#D3D3D3]" />
+                      <h3 className="text-lg font-medium text-[#8B4513] mb-2">
+                        Aucune demande trouvée
+                      </h3>
+                      <p className="text-[#000000] mb-6 opacity-80">
+                        {searchTerm || statusFilter !== "tous" || typeFilter !== "tous"
+                          ? "Aucune demande ne correspond à vos critères de recherche."
+                          : "Vous n'avez pas encore de demande."}
+                      </p>
+                      <div className="flex gap-4 justify-center">
+                        <Button 
+                          className="bg-[#6B8E23] hover:bg-[#556B2F] text-white"
+                        >
+                          <a href="/conseil" className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            Nouveau conseil
+                          </a>
+                        </Button>
+                        <Button 
+                          className="bg-[#27AE60] hover:bg-[#219653] text-white"
+                        >
+                          <a href="/accompagnement" className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            Nouvel accompagnement
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#D3D3D3]">
+                      {/* Afficher d'abord les demandes de conseil */}
+                      {filteredDemandesConseil.map((demande) => (
+                        <motion.div
+                          key={`conseil-${demande.id}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 hover:bg-[#F5F5F5] cursor-pointer transition-colors border-b border-[#D3D3D3]"
+                          onClick={() => handleViewDetails(demande)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                {getStatusIcon(demande.statut)}
+                                <span className="font-semibold text-[#8B4513]">
+                                  {demande.conseilType}
+                                </span>
+                                <Badge variant="outline" className="text-xs border-[#6B8E23] text-[#6B8E23]">
+                                  Conseil
+                                </Badge>
+                                <span className="text-sm text-[#000000] opacity-70">
+                                  #{demande.id}
+                                </span>
+                              </div>
+                              
+                              <p className="text-sm text-[#000000] mb-3 line-clamp-2 opacity-90">
+                                {demande.besoin}
+                              </p>
+                              
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-[#000000] opacity-80">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{formatDate(demande.createdAt)}</span>
+                                </div>
+                                
+                                {demande.expert && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    <span>
+                                      {demande.expert.firstName} {demande.expert.lastName}
+                                    </span>
+                                  </div>
+                                )}
+                                
+                                <div className="ml-auto">
+                                  {getStatusBadge(demande.statut)}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <ChevronRight className="h-5 w-5 text-[#000000] ml-2" />
+                          </div>
+                        </motion.div>
+                      ))}
+                      
+                      {/* Afficher ensuite les demandes d'accompagnement */}
+                      {filteredDemandesAccompagnement.map((demande) => (
+                        <motion.div
+                          key={`accompagnement-${demande.id}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 hover:bg-[#F5F5F5] cursor-pointer transition-colors border-b border-[#D3D3D3] last:border-0"
+                          onClick={() => handleViewDetails(demande)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                {getStatusIcon(demande.statut)}
+                                {getTypeIcon(demande.conseilType)}
+                                <span className="font-semibold text-[#27AE60]">
+                                  {demande.conseilType}
+                                </span>
+                                <Badge className="text-xs bg-[#27AE60] text-white">
+                                  Accompagnement
+                                </Badge>
+                                <span className="text-sm text-[#000000] opacity-70">
+                                  #{demande.id}
+                                </span>
+                              </div>
+                              
+                              <p className="text-sm text-[#000000] mb-3 line-clamp-2 opacity-90">
+                                {demande.besoin}
+                              </p>
+                              
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-[#000000] opacity-80">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{formatDate(demande.createdAt)}</span>
+                                </div>
+                                
+                                {demande.expert && (
+                                  <div className="flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    <span>
+                                      {demande.expert.firstName} {demande.expert.lastName}
+                                    </span>
+                                  </div>
+                                )}
+                                
+                                <div className="ml-auto">
+                                  {getStatusBadge(demande.statut)}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <ChevronRight className="h-5 w-5 text-[#000000] ml-2" />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Statistiques globales */}
+            <div>
+              <Card className="sticky top-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
+                    <BarChart className="h-4 w-4 text-[#556B2F]" />
+                    Statistiques Globales
+                  </h3>
+                </div>
+                
+                <div className="p-4">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#000000]">Conseils</span>
+                      <div className="text-right">
+                        <div className="font-medium text-[#556B2F]">{stats.totalConseil}</div>
+                        <div className="text-xs text-[#000000] opacity-70">
+                          {stats.termineeConseil} terminés
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#000000]">Accompagnements</span>
+                      <div className="text-right">
+                        <div className="font-medium text-[#27AE60]">{stats.totalAccompagnement}</div>
+                        <div className="text-xs text-[#000000] opacity-70">
+                          {stats.termineeAccompagnement} terminés
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-[#D3D3D3]">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-[#000000]">Total</span>
+                        <div className="text-right">
+                          <div className="font-bold text-lg text-[#8B4513]">{stats.total}</div>
+                          <div className="text-xs text-[#000000] opacity-70">
+                            {stats.terminee} demandes terminées
                           </div>
                         </div>
                       </div>
-                    ))
-                  }
+                    </div>
+                    
+                    <div className="pt-2">
+                      <div className="text-xs text-[#000000] opacity-70">
+                        Taux de complétion:{" "}
+                        <span className="font-medium text-[#556B2F]">
+                          {stats.total > 0 ? Math.round((stats.terminee / stats.total) * 100) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-              
-              {demandes.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full mt-4 border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
-                  onClick={() => {
-                    const element = document.getElementById('demandes-list');
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                >
-                  Voir toutes les activités
-                </Button>
-              )}
-            </div>
-          </Card>
+              </Card>
 
-          {/* Conseils rapides */}
-          <Card className="mt-6 border-[#D3D3D3] bg-[#FFFFFF]">
-            <div className="p-4 border-b border-[#D3D3D3]">
-              <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
-                <Star className="h-4 w-4 text-[#8B4513]" />
-                Conseils rapides
-              </h3>
+              {/* Actions rapides */}
+              <Card className="mt-6 border-[#D3D3D3] bg-[#FFFFFF]">
+                <div className="p-4 border-b border-[#D3D3D3]">
+                  <h3 className="font-semibold flex items-center gap-2 text-[#8B4513]">
+                    <Rocket className="h-4 w-4 text-[#8B4513]" />
+                    Actions rapides
+                  </h3>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
+                    >
+                      <a href="/conseil" className="flex items-center gap-2 w-full">
+                        <MessageSquare className="h-4 w-4" />
+                        Nouveau conseil
+                      </a>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start border-[#D3D3D3] text-[#000000] hover:bg-[#27AE60] hover:text-white"
+                    >
+                      <a href="/accompagnement" className="flex items-center gap-2 w-full">
+                        <Briefcase className="h-4 w-4" />
+                        Nouvel accompagnement
+                      </a>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start border-[#D3D3D3] text-[#000000] hover:bg-[#8B4513] hover:text-white"
+                      onClick={handleRefresh}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Actualiser la liste
+                    </Button>
+                  </div>
+                </div>
+              </Card>
             </div>
-            <div className="p-4">
-              <ul className="space-y-3 text-sm">
-                <li className="flex items-start gap-2 text-[#000000]">
-                  <CheckCircle className="h-4 w-4 text-[#556B2F] mt-0.5" />
-                  <span>Répondez rapidement aux messages des experts</span>
-                </li>
-                <li className="flex items-start gap-2 text-[#000000]">
-                  <AlertTriangle className="h-4 w-4 text-[#8B4513] mt-0.5" />
-                  <span>Vérifiez régulièrement l'avancement de vos demandes</span>
-                </li>
-                <li className="flex items-start gap-2 text-[#000000]">
-                  <MessageSquare className="h-4 w-4 text-[#6B8E23] mt-0.5" />
-                  <span>N'hésitez pas à poser des questions complémentaires</span>
-                </li>
-                <li className="flex items-start gap-2 text-[#000000]">
-                  <Clock className="h-4 w-4 text-[#8B4513] mt-0.5" />
-                  <span>Les demandes urgentes sont traitées en priorité</span>
-                </li>
-              </ul>
-            </div>
-          </Card>
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Modal Détails de la demande */}
       {selectedDemande && (
@@ -891,9 +1717,19 @@ const UserConseilPage = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-[#8B4513]">
                 <FileText className="h-5 w-5 text-[#556B2F]" />
-                Demande #{selectedDemande.id}
-                <Badge variant="outline" className="ml-2 border-[#D3D3D3] text-[#000000]">
-                  {getStatusLabel(selectedDemande.statut)}
+                {selectedDemande?.origine === "page_accompagnement" ? "Accompagnement" : "Conseil"} #{selectedDemande?.id}
+                <Badge 
+                  variant="outline" 
+                  className={`ml-2 border-[#D3D3D3] text-[#000000] ${
+                    selectedDemande?.origine === "page_accompagnement" 
+                      ? 'bg-[#E8F5E9] text-[#27AE60]' 
+                      : 'bg-[#FFF8E1] text-[#8B4513]'
+                  }`}
+                >
+                  {selectedDemande?.origine === "page_accompagnement" ? "Accompagnement" : "Conseil"}
+                </Badge>
+                <Badge variant="outline" className="border-[#D3D3D3] text-[#000000]">
+                  {getStatusLabel(selectedDemande?.statut || "")}
                 </Badge>
               </DialogTitle>
             </DialogHeader>
@@ -921,9 +1757,12 @@ const UserConseilPage = () => {
               <Card className="p-4 border-[#D3D3D3] bg-[#FFFFFF]">
                 <h3 className="text-lg font-semibold mb-4 text-[#8B4513]">Détails de la demande</h3>
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-[#000000] opacity-80">Type de conseil</label>
-                    <div className="font-medium text-[#000000]">{selectedDemande.conseilType}</div>
+                  <div className="flex items-center gap-2">
+                    {selectedDemande.origine === "page_accompagnement" && getTypeIcon(selectedDemande.conseilType)}
+                    <div>
+                      <label className="text-sm font-medium text-[#000000] opacity-80">Type de {selectedDemande.origine === "page_accompagnement" ? "d'accompagnement" : "conseil"}</label>
+                      <div className="font-medium text-[#000000]">{selectedDemande.conseilType}</div>
+                    </div>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-[#000000] opacity-80">Budget estimé</label>
