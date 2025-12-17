@@ -106,11 +106,11 @@ const navigation = [
   // === DOCUMENTS & MÉDIAS ===
   { name: "Mes Documents", href: "/pro/documents", icon: FileText },
   // 🔥 NOUVEL ITEM : Gestion des Médias
-  {
-    name: "Gestion des Médias",
-    href: "/pro/media",
-    icon: Video,
-  },
+  // {
+  //   name: "Gestion des Médias",
+  //   href: "/pro/media",
+  //   icon: Video,
+  // },
 
   // === ÉDUCATION ===
   // {
@@ -232,7 +232,7 @@ export function ProSidebar() {
         sections.contacts.push(item);
       }
       // Documents & Médias
-      else if (["Mes Documents", "Gestion des Médias"].includes(item.name)) {
+      else if (["Mes Documents"].includes(item.name)) {
         sections.documentsMedias.push(item);
       }
       // Éducation (commenté)

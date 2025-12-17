@@ -1054,6 +1054,13 @@ const Header = () => {
       title: "NOS PARTENAIRES",
       items: [
         {
+          title: "Tous les partenaires",
+          description: "Découvrez l'ensemble de nos partenaires",
+          href: "/tous-les-partenaires",
+          image:
+            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg",
+        },
+        {
           title: "Agences",
           description: "Decouvrir notre partenariat agences",
           href: "/agences",
@@ -1069,14 +1076,14 @@ const Header = () => {
         // },
         {
           title: "Constructeurs",
-          description: "Fiche présentation et projets réalisés",
+          description: "Professionnels en construction et rénovation",
           href: "/constructeurs",
           image:
             "https://i.pinimg.com/1200x/31/cf/76/31cf76206178401a11c24710c63e7c43.jpg",
         },
         {
           title: "Plombiers",
-          description: "Fiche présentation et projets réalisés",
+          description: "Experts en plomberie et installations sanitaires",
           href: "/plombiers",
           image:
             "https://i.pinimg.com/736x/62/9d/2e/629d2e7b375223b81bcfa104e1f40c43.jpg",

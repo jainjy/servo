@@ -198,6 +198,7 @@ import UserConseilPage from "./pages/UserConseilPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
 import PodcastsReunion from "./components/PodcastsReunion";
 import PodcastsPartenaires from "./components/PodcastsPartenaires";
+import TousLesPartenaires from "./pages/TousLesPartenaires";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -329,6 +330,10 @@ const App = () => {
                   <Route
                     path="/account-suspended"
                     element={<AccountSuspended />}
+                  />
+                  <Route
+                    path="/tous-les-partenaires"
+                    element={<TousLesPartenaires />}
                   />
                   <Route
                     path="/podcast_service"
@@ -707,7 +712,7 @@ const App = () => {
                       path="reservations-cours"
                       element={<ProReservations />}
                     />
-                    <Route path="media" element={<AdminMedia />} />
+                    {/* <Route path="media" element={<AdminMedia />} /> */}
 
                     <Route
                       path="delete-account"
@@ -764,6 +769,7 @@ const App = () => {
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
                     <Route path="conseil" element={<AdminConseilPage />} />
+                    <Route path="media" element={<AdminMedia />} />
                     <Route
                       path="demandeDroitFamille"
                       element={<DemandeDroitFamille />}
