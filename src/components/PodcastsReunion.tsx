@@ -9,7 +9,6 @@ import {
   Video,
   Map,
   Sun,
-  
   TreePalm,
 } from "lucide-react";
 import { MediaService } from "../lib/api";
@@ -207,17 +206,22 @@ const PodcastsReunion: React.FC = () => {
 
   const isFavorite = (episodeId: string) => favorites.includes(episodeId);
 
+  // Mise à jour de la fonction getCategoryColor avec la nouvelle palette
   const getCategoryColor = (category: string) => {
     const colors = {
-      Réunion: "bg-gradient-to-r from-orange-500 to-red-500",
-      Tourisme: "bg-gradient-to-r from-blue-500 to-cyan-500",
-      Culture: "bg-gradient-to-r from-purple-500 to-pink-500",
-      Gastronomie: "bg-gradient-to-r from-yellow-500 to-amber-500",
-      Nature: "bg-gradient-to-r from-green-500 to-emerald-500",
-      Patrimoine: "bg-gradient-to-r from-indigo-500 to-purple-500",
-      Activités: "bg-gradient-to-r from-red-500 to-orange-500",
+      Réunion: "bg-gradient-to-r from-[#8B4513] to-[#A0522D]", // Saddle brown à sienna
+      Tourisme: "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B]", // Yellow-green à vert olive clair
+      Culture: "bg-gradient-to-r from-[#556B2F] to-[#6B8E23]", // Olive green à yellow-green
+      Gastronomie: "bg-gradient-to-r from-[#8B4513] to-[#CD853F]", // Saddle brown à peru
+      Nature: "bg-gradient-to-r from-[#2E8B57] to-[#3CB371]", // Sea green à medium sea green
+      Patrimoine: "bg-gradient-to-r from-[#8B4513] to-[#D2691E]", // Saddle brown à chocolate
+      Activités: "bg-gradient-to-r from-[#556B2F] to-[#8FBC8F]", // Olive green à dark sea green
+      Premium: "bg-gradient-to-r from-[#8B4513] to-[#D2691E]", // Pour le contenu premium
     };
-    return colors[category as keyof typeof colors] || "bg-gray-500";
+    return (
+      colors[category as keyof typeof colors] ||
+      "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B]"
+    );
   };
 
   const formatFileSize = (bytes: number) => {
@@ -233,12 +237,13 @@ const PodcastsReunion: React.FC = () => {
     return (
       <div
         className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border group ${
-          episode.featured ? "border-2 border-orange-600" : "border-gray-200"
+          episode.featured ? "border-2 border-[#8B4513]" : "border-[#D3D3D3]"
         }`}
       >
         {episode.featured && (
-          <div className="bg-orange-600 text-white px-4 py-1 text-sm font-semibold rounded-t-2xl">
-            ⭐ Vedette Réunion
+          <div className="bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white px-4 py-1 text-sm font-semibold rounded-t-2xl flex items-center justify-center">
+            <Star className="w-4 h-4 mr-2 fill-current" />
+            Vedette Réunion
           </div>
         )}
 
@@ -257,7 +262,7 @@ const PodcastsReunion: React.FC = () => {
           {/* Bouton play overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="bg-white/90 rounded-full p-4 transform group-hover:scale-110 transition-transform duration-300">
-              <Video className="w-8 h-8 text-orange-600" />
+              <Video className="w-8 h-8 text-[#6B8E23]" />
             </div>
           </div>
         </div>
@@ -277,7 +282,7 @@ const PodcastsReunion: React.FC = () => {
             </div>
           </div>
 
-          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-orange-600 transition-colors line-clamp-2">
+          <h4 className="font-bold text-lg text-gray-900 mb-3 group-hover:text-[#6B8E23] transition-colors line-clamp-2">
             {episode.title}
           </h4>
 
@@ -285,7 +290,7 @@ const PodcastsReunion: React.FC = () => {
             {episode.description}
           </p>
 
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-4 border-t border-[#D3D3D3]">
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <div className="flex items-center">
                 <Headphones className="w-4 h-4 mr-1" />
@@ -298,7 +303,7 @@ const PodcastsReunion: React.FC = () => {
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
               }}
-              className="flex items-center px-4 py-2 rounded-lg text-white bg-orange-600 hover:bg-orange-700 transition-colors group/btn"
+              className="flex items-center px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] transition-all duration-300 group/btn shadow-md hover:shadow-lg"
             >
               <Video className="w-4 h-4 mr-2" />
               Découvrir
@@ -332,29 +337,32 @@ const PodcastsReunion: React.FC = () => {
         className="relative py-20 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
-        {/* Overlay sombre pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-black/50"></div>
+        {/* Overlay avec gradient qui utilise les nouvelles couleurs */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#556B2F]/70 via-[#6B8E23]/50 to-[#FFFFFF0]/30"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center text-white">
             {/* Titre Principal */}
-            <h1 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight">
-              Découvrir <span className="text-orange-400">La Réunion</span>
+            <h1 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight drop-shadow-lg">
+              Découvrir{" "}
+              <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
+                La Réunion
+              </span>
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-md md:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
+            <p className="text-md md:text-xl text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
               Explorez l'île intense à travers nos vidéos : paysages, culture,
               gastronomie et aventures
             </p>
 
             {/* Statistiques */}
-            <div className="flex flex-wrap justify-center items-center gap-4 lg:gap-8 text-gray-200">
+            <div className="flex flex-wrap justify-center items-center gap-4 lg:gap-8">
               {/* Vue totales */}
-              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/20 bg-gradient-to-br from-[#556B2F]/30 to-[#6B8E23]/20 hover:from-[#556B2F]/40 hover:to-[#6B8E23]/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 lg:p-3 rounded-xl bg-blue-500/20 border border-blue-400/30 group-hover:bg-blue-500/30 transition-colors duration-300">
-                    <Headphones className="w-5 h-5 lg:w-6 lg:h-6 text-blue-300" />
+                  <div className="p-2 lg:p-3 rounded-xl bg-gradient-to-br from-[#6B8E23]/30 to-[#7BA05B]/30 border border-[#6B8E23]/30 group-hover:from-[#6B8E23]/40 group-hover:to-[#7BA05B]/40 transition-colors duration-300">
+                    <Headphones className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
@@ -362,7 +370,7 @@ const PodcastsReunion: React.FC = () => {
                         .reduce((total, ep) => total + ep.views, 0)
                         .toLocaleString()}
                     </span>
-                    <span className="text-xs lg:text-sm text-gray-300 opacity-80">
+                    <span className="text-xs lg:text-sm text-gray-200 opacity-90">
                       explorations
                     </span>
                   </div>
@@ -370,16 +378,16 @@ const PodcastsReunion: React.FC = () => {
               </div>
 
               {/* Vidéos disponibles */}
-              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/20 bg-gradient-to-br from-[#8B4513]/30 to-[#D2691E]/20 hover:from-[#8B4513]/40 hover:to-[#D2691E]/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 lg:p-3 rounded-xl bg-orange-500/20 border border-orange-400/30 group-hover:bg-orange-500/30 transition-colors duration-300">
-                    <Map className="w-5 h-5 lg:w-6 lg:h-6 text-orange-300" />
+                  <div className="p-2 lg:p-3 rounded-xl bg-gradient-to-br from-[#8B4513]/30 to-[#A0522D]/30 border border-[#8B4513]/30 group-hover:from-[#8B4513]/40 group-hover:to-[#A0522D]/40 transition-colors duration-300">
+                    <Map className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
                       {videoEpisodes.length}
                     </span>
-                    <span className="text-xs lg:text-sm text-gray-300 opacity-80">
+                    <span className="text-xs lg:text-sm text-gray-200 opacity-90">
                       découvertes
                     </span>
                   </div>
@@ -387,16 +395,16 @@ const PodcastsReunion: React.FC = () => {
               </div>
 
               {/* Vidéos premium */}
-              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="glass-card group p-4 lg:p-6 rounded-2xl backdrop-blur-md border border-white/20 bg-gradient-to-br from-[#556B2F]/30 to-[#8FBC8F]/20 hover:from-[#556B2F]/40 hover:to-[#8FBC8F]/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 lg:p-3 rounded-xl bg-yellow-500/20 border border-yellow-400/30 group-hover:bg-yellow-500/30 transition-colors duration-300">
-                    <TreePalm className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-300" />
+                  <div className="p-2 lg:p-3 rounded-xl bg-gradient-to-br from-[#556B2F]/30 to-[#8FBC8F]/30 border border-[#556B2F]/30 group-hover:from-[#556B2F]/40 group-hover:to-[#8FBC8F]/40 transition-colors duration-300">
+                    <TreePalm className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
                       {videoEpisodes.filter((ep) => ep.featured).length}
                     </span>
-                    <span className="text-xs lg:text-sm text-gray-300 opacity-80">
+                    <span className="text-xs lg:text-sm text-gray-200 opacity-90">
                       pépites
                     </span>
                   </div>
@@ -413,11 +421,11 @@ const PodcastsReunion: React.FC = () => {
         <section className="mb-16">
           <div className="hidden lg:flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-orange-100 rounded-2xl">
-                <Sun className="w-8 h-8 text-orange-600" />
+              <div className="p-3 bg-gradient-to-br from-[#6B8E23]/20 to-[#7BA05B]/20 rounded-2xl border border-[#6B8E23]/30">
+                <Sun className="w-8 h-8 text-[#6B8E23]" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">
+                <h2 className="text-3xl font-bold text-[#8B4513]">
                   L'Île Intense en Vidéo
                 </h2>
                 <p className="text-gray-600">
@@ -425,20 +433,20 @@ const PodcastsReunion: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
+            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border border-[#D3D3D3] shadow-sm">
               {activeTab === "all" ? videoEpisodes.length : favorites.length}{" "}
               vidéo(s) disponible(s)
             </div>
           </div>
 
           {/* Onglets */}
-          <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <div className="flex gap-4 mb-8 border-b border-[#D3D3D3]">
             <button
               onClick={() => setActiveTab("all")}
               className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
                 activeTab === "all"
-                  ? "border-orange-600 text-orange-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-[#6B8E23] text-[#6B8E23]"
+                  : "border-transparent text-gray-600 hover:text-[#556B2F]"
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -450,8 +458,8 @@ const PodcastsReunion: React.FC = () => {
               onClick={() => setActiveTab("favorites")}
               className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
                 activeTab === "favorites"
-                  ? "border-red-600 text-red-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-[#8B4513] text-[#8B4513]"
+                  : "border-transparent text-gray-600 hover:text-[#8B4513]"
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -470,7 +478,7 @@ const PodcastsReunion: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-[#D3D3D3]">
                 <Map className="w-20 h-20 mx-auto text-gray-300 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">
                   Aucune découverte disponible
@@ -489,7 +497,7 @@ const PodcastsReunion: React.FC = () => {
                 ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+            <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-[#D3D3D3]">
               <Heart className="w-20 h-20 mx-auto text-gray-300 mb-4" />
               <h3 className="text-2xl font-bold text-gray-600 mb-2">
                 Aucune découverte en favoris
@@ -504,23 +512,23 @@ const PodcastsReunion: React.FC = () => {
 
         {/* Section Catégories */}
         <section className="mb-16">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+          <h3 className="text-2xl font-bold text-[#8B4513] mb-8 text-center">
             Explorez par thème
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
+            <div className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
               <div className="text-3xl mb-2">🏝️</div>
               <h4 className="font-bold">Plages & Côtes</h4>
             </div>
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
+            <div className="bg-gradient-to-r from-[#2E8B57] to-[#3CB371] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
               <div className="text-3xl mb-2">🌋</div>
               <h4 className="font-bold">Volcans & Randonnées</h4>
             </div>
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
+            <div className="bg-gradient-to-r from-[#8B4513] to-[#D2691E] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
               <div className="text-3xl mb-2">🍽️</div>
               <h4 className="font-bold">Gastronomie</h4>
             </div>
-            <div className="bg-gradient-to-r from-yellow-500 to-amber-500 rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer">
+            <div className="bg-gradient-to-r from-[#556B2F] to-[#8FBC8F] rounded-2xl p-6 text-white text-center hover:scale-105 transition-transform duration-300 cursor-pointer shadow-lg hover:shadow-xl">
               <div className="text-3xl mb-2">🎭</div>
               <h4 className="font-bold">Culture & Traditions</h4>
             </div>
@@ -543,7 +551,7 @@ const PodcastsReunion: React.FC = () => {
                   videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 sm:p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#6B8E23] hover:to-[#7BA05B] text-white rounded-full p-2 sm:p-3 transition-all duration-200 hover:scale-110 backdrop-blur-sm shadow-lg"
             >
               <svg
                 className="h-4 w-4 sm:h-5 sm:w-5"
@@ -585,11 +593,11 @@ const PodcastsReunion: React.FC = () => {
                     >
                       <div className="absolute inset-0 bg-gray-600 rounded-full"></div>
                       <div
-                        className="absolute h-full bg-orange-600 rounded-full transition-all duration-100"
+                        className="absolute h-full bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] rounded-full transition-all duration-100"
                         style={{ width: `${progress}%` }}
                       ></div>
                       <div
-                        className="absolute top-1/2 w-3 h-3 bg-orange-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                        className="absolute top-1/2 w-3 h-3 bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
                         style={{ left: `calc(${progress}% - 6px)` }}
                       ></div>
                     </div>
@@ -605,7 +613,7 @@ const PodcastsReunion: React.FC = () => {
                     <div className="flex items-center space-x-3 sm:space-x-4">
                       <button
                         onClick={handlePlayMedia}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 sm:p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                        className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white rounded-full p-2 sm:p-3 shadow-lg transition-all duration-200 hover:scale-105"
                       >
                         {isPlaying ? (
                           <svg
@@ -631,7 +639,7 @@ const PodcastsReunion: React.FC = () => {
                       {/* Bouton plein écran */}
                       <button
                         onClick={toggleFullscreen}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 sm:p-2 transition-all duration-200"
+                        className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white rounded-full p-1.5 sm:p-2 transition-all duration-200 shadow-md"
                         title="Plein écran"
                       >
                         <svg
@@ -654,11 +662,11 @@ const PodcastsReunion: React.FC = () => {
               </div>
 
               {/* Titre de la vidéo */}
-              <div className="p-3 sm:p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+              <div className="p-3 sm:p-4 rounded-b-lg bg-gradient-to-r from-gray-800 to-gray-900 border-t border-gray-700">
                 <h1 className="text-base sm:text-lg font-bold text-white line-clamp-2">
                   {selectedEpisode.title}
                 </h1>
-                <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400 mt-1">
+                <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-300 mt-1">
                   <span>{selectedEpisode.views.toLocaleString()} vues</span>
                   <span>{selectedEpisode.date}</span>
                 </div>
@@ -666,7 +674,7 @@ const PodcastsReunion: React.FC = () => {
             </div>
 
             {/* Colonne de droite - Contenu */}
-            <div className="w-full lg:w-80 bg-gray-800 border-t lg:border-l border-gray-700 flex flex-col max-h-[40vh] sm:max-h-none">
+            <div className="w-full lg:w-80 bg-gradient-to-b from-gray-800 to-gray-900 border-t lg:border-l border-gray-700 flex flex-col max-h-[40vh] sm:max-h-none">
               {/* Contenu défilant */}
               <div className="flex-1 overflow-y-auto">
                 {/* Informations de base */}
@@ -680,16 +688,16 @@ const PodcastsReunion: React.FC = () => {
                       {selectedEpisode.category}
                     </span>
                     {selectedEpisode.featured && (
-                      <span className="flex items-center text-yellow-400 text-xs font-medium">
+                      <span className="flex items-center bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white px-2 py-1 rounded text-xs font-medium">
                         <Star className="w-3 h-3 mr-1 fill-current" />
                         Coup de cœur
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-400">
+                  <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-300">
                     <span className="flex items-center">
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-[#6B8E23]" />
                       {selectedEpisode.duration}
                     </span>
                   </div>
@@ -737,7 +745,7 @@ const PodcastsReunion: React.FC = () => {
                   <div className="flex space-x-2">
                     <button
                       onClick={handlePlayMedia}
-                      className="flex-1 flex items-center justify-center space-x-2 bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm"
+                      className="flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white py-2 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm shadow-md"
                     >
                       {isPlaying ? (
                         <>
@@ -768,10 +776,10 @@ const PodcastsReunion: React.FC = () => {
                       onClick={() =>
                         selectedEpisode && toggleFavorite(selectedEpisode.id)
                       }
-                      className={`p-2 rounded-lg transition-all duration-200 border text-xs ${
+                      className={`p-2 rounded-lg transition-all duration-200 border text-xs shadow-md ${
                         selectedEpisode && isFavorite(selectedEpisode.id)
-                          ? "bg-red-500/20 border-red-500/50 text-red-400"
-                          : "bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                          ? "bg-gradient-to-r from-[#8B4513] to-[#D2691E] border-[#8B4513]/50 text-white"
+                          : "bg-gray-700 border-gray-600 text-white hover:bg-gradient-to-r hover:from-[#8B4513]/20 hover:to-[#D2691E]/20"
                       }`}
                     >
                       <Heart
@@ -785,7 +793,7 @@ const PodcastsReunion: React.FC = () => {
 
                     <button
                       onClick={handleDownload}
-                      className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-200 border border-gray-600 text-xs"
+                      className="p-2 bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white rounded-lg transition-all duration-200 border border-[#6B8E23]/50 shadow-md text-xs"
                     >
                       <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                     </button>

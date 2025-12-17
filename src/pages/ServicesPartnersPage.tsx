@@ -535,12 +535,12 @@ const ServicesPartnersPage = () => {
           <h1 className="text-2xl lg:text-4xl md:text-5xl font-bold mb-2 lg:mb-6 text-secondary-text">
             {view === "default" ? "Tous nos services" :
               view === "partenaires" ? "Nos Partenaires" :
-                view === "services" ? "Demandes de Prestations" : "Aides"}
+                view === "services" ? "Tous nos services" : "Aides"}
           </h1>
           <p className="text-sm text-gray-100">
             {view === "default" ? "Découvrez l'ensemble de nos prestations et propriétés disponibles" :
               view === "partenaires" ? "Trouvez les meilleurs experts pour votre projet" :
-                view === "services" ? "Soumettez vos demandes de services" : "Obtenez de l'aide et des conseils"}
+                view === "services" ? "Découvrez l'ensemble de nos prestations et propriétés disponibles" : "Obtenez de l'aide et des conseils"}
           </p>
         </div>
       </div>
@@ -568,11 +568,11 @@ const ServicesPartnersPage = () => {
 
           <div className="flex flex-wrap gap-4 justify-center">
             <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${view === "default"
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${view === "services"
                   ? "border-[#556B2F] bg-[#556B2F] text-white shadow-lg"
                   : "border-[#556B2F] bg-[#FFFFF0] text-[#556B2F] hover:bg-[#556B2F]/10 shadow-md"
                 } text-sm font-semibold transform hover:scale-105`}
-              onClick={() => navigate('/services-partners?section=')}
+              onClick={() => navigate('/services-partners?section=prestations')}
             >
               TOUS NOS SERVICES
               <ChevronDown className="w-4 h-4" />
@@ -586,17 +586,6 @@ const ServicesPartnersPage = () => {
               onClick={() => navigate('/services-partners?section=partenaires')}
             >
               PRÉSENTATION PARTENAIRES
-              <ChevronDown className="w-4 h-4" />
-            </button>
-
-            <button
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-300 ${view === "services"
-                  ? "border-[#6B8E23] bg-[#6B8E23] text-white shadow-lg"
-                  : "border-[#6B8E23] bg-[#FFFFF0] text-[#6B8E23] hover:bg-[#6B8E23]/10 shadow-md"
-                } text-sm font-semibold transform hover:scale-105`}
-              onClick={() => navigate('/services-partners?section=prestations')}
-            >
-              DEMANDES DE PRESTATIONS
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>

@@ -1,7 +1,17 @@
 // components/PodcastsImmobilier.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Headphones, Clock, Heart, Star, Download, Video, Home, Calendar } from 'lucide-react';
-import { MediaService } from '../lib/api';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Play,
+  Headphones,
+  Clock,
+  Heart,
+  Star,
+  Download,
+  Video,
+  Home,
+  Calendar,
+} from "lucide-react";
+import { MediaService } from "../lib/api";
 
 interface VideoEpisode {
   id: string;
@@ -23,11 +33,13 @@ const PodcastsImmobilier: React.FC = () => {
   const [videoEpisodes, setVideoEpisodes] = useState<VideoEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedEpisode, setSelectedEpisode] = useState<VideoEpisode | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<VideoEpisode | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const [activeTab, setActiveTab] = useState<"all" | "favorites">("all");
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -39,7 +51,8 @@ const PodcastsImmobilier: React.FC = () => {
   ];
 
   // Image de background pour le titre
-  const headerBackgroundImage = "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
+  const headerBackgroundImage =
+    "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg";
 
   // Ajoutez cette fonction dans votre composant
 
@@ -55,7 +68,7 @@ const PodcastsImmobilier: React.FC = () => {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   // Mise à jour du temps et de la progression
@@ -135,14 +148,20 @@ const PodcastsImmobilier: React.FC = () => {
       // console.log('Fullscreen changed');
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullscreenChange
+      );
     };
   }, []);
   // Charger les vidéos de la catégorie Immobilier
@@ -156,8 +175,8 @@ const PodcastsImmobilier: React.FC = () => {
 
         // Utilisation de MediaService pour récupérer les vidéos
         const response = await MediaService.getVideos({
-          category: 'Immobilier',
-          limit: 50
+          category: "Immobilier",
+          limit: 50,
         });
 
         // console.log('📦 Réponse COMPLÈTE de l\'API:', response);
@@ -187,7 +206,8 @@ const PodcastsImmobilier: React.FC = () => {
             .filter((video: any) => {
               const isImmobilier = video.category === "Immobilier";
               const isActive = video.isActive !== false;
-              const hasVideoUrl = video.videoUrl && video.videoUrl.trim() !== '';
+              const hasVideoUrl =
+                video.videoUrl && video.videoUrl.trim() !== "";
 
               // console.log('📋 Filtrage vidéo:', {
               //   id: video.id,
@@ -215,17 +235,22 @@ const PodcastsImmobilier: React.FC = () => {
               const mappedVideo = {
                 id: video.id,
                 title: video.title,
-                description: video.description || 'Aucune description disponible',
+                description:
+                  video.description || "Aucune description disponible",
                 duration: video.duration || "00:00:00",
-                date: new Date(video.createdAt || new Date()).toLocaleDateString('fr-FR'),
+                date: new Date(
+                  video.createdAt || new Date()
+                ).toLocaleDateString("fr-FR"),
                 category: video.category,
                 views: video.views || 0,
                 featured: video.featured || video.isPremium || false,
                 videoUrl: video.videoUrl,
-                thumbnailUrl: video.thumbnailUrl || defaultThumbnails[index % defaultThumbnails.length],
+                thumbnailUrl:
+                  video.thumbnailUrl ||
+                  defaultThumbnails[index % defaultThumbnails.length],
                 isActive: video.isActive !== false,
-                mimeType: video.mimeType || 'video/mp4',
-                fileSize: video.fileSize || 0
+                mimeType: video.mimeType || "video/mp4",
+                fileSize: video.fileSize || 0,
               };
 
               // console.log(`✅ Vidéo mappée "${video.title}":`, mappedVideo);
@@ -241,22 +266,21 @@ const PodcastsImmobilier: React.FC = () => {
             // console.log('⚠️ Aucune vidéo trouvée après filtrage, mais apiData.data contenait:', apiData.data.length, 'éléments');
             // console.log('🔍 Contenu de apiData.data:', apiData.data);
           }
-
         } else {
-          console.warn('⚠️ Structure de réponse inattendue:', {
+          console.warn("⚠️ Structure de réponse inattendue:", {
             success: apiData.success,
             hasData: !!apiData.data,
             dataIsArray: Array.isArray(apiData.data),
-            apiData: apiData
+            apiData: apiData,
           });
           setVideoEpisodes([]);
         }
       } catch (err: any) {
-        console.error('❌ Erreur lors du chargement des vidéos:', err);
-        console.error('📋 Détails de l\'erreur:', {
+        console.error("❌ Erreur lors du chargement des vidéos:", err);
+        console.error("📋 Détails de l'erreur:", {
           message: err.message,
           stack: err.stack,
-          response: err.response
+          response: err.response,
         });
         setError(err.message);
         setVideoEpisodes([]);
@@ -291,7 +315,7 @@ const PodcastsImmobilier: React.FC = () => {
 
   const handleDownload = () => {
     if (selectedEpisode) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = selectedEpisode.videoUrl;
       link.download = `${selectedEpisode.title}.mp4`;
       document.body.appendChild(link);
@@ -301,47 +325,55 @@ const PodcastsImmobilier: React.FC = () => {
   };
 
   const toggleFavorite = (episodeId: string) => {
-    setFavorites(prev =>
+    setFavorites((prev) =>
       prev.includes(episodeId)
-        ? prev.filter(id => id !== episodeId)
+        ? prev.filter((id) => id !== episodeId)
         : [...prev, episodeId]
     );
   };
 
   const isFavorite = (episodeId: string) => favorites.includes(episodeId);
 
+  // Mise à jour de la fonction getCategoryColor avec la nouvelle palette
   const getCategoryColor = (category: string) => {
     const colors = {
-      'Immobilier': 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      'Bâtiment & Construction': 'bg-gradient-to-r from-orange-500 to-amber-500',
-      'Bien-être & Santé': 'bg-gradient-to-r from-green-500 to-teal-500',
-      'Entreprise': 'bg-gradient-to-r from-purple-500 to-pink-500',
-      'Investissement': 'bg-gradient-to-r from-amber-500 to-yellow-500'
+      Immobilier: "bg-gradient-to-r from-[#8B4513] to-[#A0522D]", // Saddle brown à sienna
+      "Bâtiment & Construction": "bg-gradient-to-r from-[#8B4513] to-[#D2691E]", // Saddle brown à chocolate
+      "Bien-être & Santé": "bg-gradient-to-r from-[#556B2F] to-[#8FBC8F]", // Olive green à dark sea green
+      Entreprise: "bg-gradient-to-r from-[#556B2F] to-[#6B8E23]", // Olive green à yellow-green
+      Investissement: "bg-gradient-to-r from-[#8B4513] to-[#CD853F]", // Saddle brown à peru
+      Réunion: "bg-gradient-to-r from-[#8B4513] to-[#A0522D]",
+      Tourisme: "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B]",
+      Partenaires: "bg-gradient-to-r from-[#556B2F] to-[#6B8E23]",
+      Premium: "bg-gradient-to-r from-[#8B4513] to-[#D2691E]",
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-500';
+    return (
+      colors[category as keyof typeof colors] ||
+      "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B]"
+    );
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
-
-
 
   // Composant de carte vidéo
   const VideoCard = ({ episode }: { episode: VideoEpisode }) => {
     // console.log('🎬 Rendu de VideoCard pour:', episode.title);
     return (
       <div
-        className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border group cursor-pointer ${episode.featured ? 'border-2 border-purple-500' : 'border-gray-100'
-          }`}
+        className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border group cursor-pointer ${
+          episode.featured ? "border-2 border-[#8B4513]" : "border-[#D3D3D3]"
+        }`}
       >
         {episode.featured && (
-          <div className="bg-purple-500 text-white px-3 py-1 text-xs font-medium rounded-t-xl">
-            ⭐ Vedette
+          <div className="bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white px-3 py-1 text-xs font-medium rounded-t-xl flex items-center justify-center">
+            <Star className="w-3 h-3 mr-1 fill-current" />
+            Vedette
           </div>
         )}
 
@@ -359,7 +391,7 @@ const PodcastsImmobilier: React.FC = () => {
           {/* Overlay play */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
             <div className="bg-white/80 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
-              <Video className="w-5 h-5 text-purple-600" />
+              <Video className="w-5 h-5 text-[#6B8E23]" />
             </div>
           </div>
         </div>
@@ -368,7 +400,11 @@ const PodcastsImmobilier: React.FC = () => {
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
-            <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(episode.category)}`}>
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(
+                episode.category
+              )}`}
+            >
               {episode.category}
             </span>
             <div className="flex items-center text-gray-500 text-xs">
@@ -378,7 +414,7 @@ const PodcastsImmobilier: React.FC = () => {
           </div>
 
           {/* Title */}
-          <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-2 text-sm leading-tight">
+          <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-[#6B8E23] transition-colors line-clamp-2 text-sm leading-tight">
             {episode.title}
           </h4>
 
@@ -388,7 +424,7 @@ const PodcastsImmobilier: React.FC = () => {
           </p>
 
           {/* Footer */}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+          <div className="flex items-center justify-between pt-3 border-t border-[#D3D3D3]">
             <div className="flex items-center space-x-3 text-xs text-gray-500">
               <div className="flex items-center">
                 <Headphones className="w-3 h-3 mr-1" />
@@ -401,7 +437,7 @@ const PodcastsImmobilier: React.FC = () => {
                 setSelectedEpisode(episode);
                 setIsModalOpen(true);
               }}
-              className="flex items-center px-3 py-1.5 rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition-colors text-xs font-medium"
+              className="flex items-center px-3 py-1.5 rounded-lg text-white bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] transition-all duration-300 text-xs font-medium shadow-sm hover:shadow-md"
             >
               <Video className="w-3 h-3 mr-1" />
               Voir
@@ -425,7 +461,9 @@ const PodcastsImmobilier: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col justify-center items-center h-64">
             <img src="/loading.gif" alt="" />
-            <div className="text-gray-600">Chargement des vidéos Immobilier...</div>
+            <div className="text-gray-600">
+              Chargement des vidéos Immobilier...
+            </div>
           </div>
         </div>
       </div>
@@ -451,19 +489,23 @@ const PodcastsImmobilier: React.FC = () => {
         className="relative mt-16 py-6 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${headerBackgroundImage})` }}
       >
-        {/* Overlay sombre pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-black/50"></div>
+        {/* Overlay avec gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#556B2F]/70 via-[#6B8E23]/50 to-[#FFFFFF0]/30"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center text-white">
             {/* Titre Principal */}
-            <h1 className="text-xl md:text-4xl font-bold mb-2 leading-tight">
-              Podcast <span className="text-purple-400">Immobilier</span>
+            <h1 className="text-xl md:text-4xl font-bold mb-2 leading-tight drop-shadow-lg">
+              Podcast{" "}
+              <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
+                Immobilier
+              </span>
             </h1>
 
             {/* Sous-titre */}
-            <p className="text-md md:text-lg text-gray-200 max-w-3xl mx-auto leading-relaxed mb-8">
-              Découvrez nos visites virtuelles, conseils d'experts et analyses de marché en vidéo
+            <p className="text-md md:text-lg text-gray-100 max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-lg">
+              Découvrez nos visites virtuelles, conseils d'experts et analyses
+              de marché en vidéo
             </p>
 
             {/* Statistiques */}
@@ -471,14 +513,16 @@ const PodcastsImmobilier: React.FC = () => {
               {/* Glassmorphism Badge */}
               <div className="relative group">
                 <div className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-7 py-3 shadow-2xl transition-all duration-500 hover:bg-white/10 hover:border-white/20">
-                  <div className="p-3 bg-white/10 rounded-xl border border-white/10">
-                    <Headphones className="w-5 h-5 text-purple-300" />
+                  <div className="p-3 bg-gradient-to-br from-[#6B8E23]/30 to-[#7BA05B]/30 rounded-xl border border-[#6B8E23]/20">
+                    <Headphones className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-center">
                     <div className="text-xl font-black text-white drop-shadow-lg">
-                      {videoEpisodes.reduce((total, ep) => total + ep.views, 0).toLocaleString()}
+                      {videoEpisodes
+                        .reduce((total, ep) => total + ep.views, 0)
+                        .toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-300 font-light tracking-wide">
+                    <div className="text-sm text-gray-200 font-light tracking-wide">
                       Vues Totales
                     </div>
                   </div>
@@ -487,14 +531,14 @@ const PodcastsImmobilier: React.FC = () => {
 
               <div className="relative group">
                 <div className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-7 py-3 shadow-2xl transition-all duration-500 hover:bg-white/10 hover:border-white/20">
-                  <div className="p-3 bg-white/10 rounded-xl border border-white/10">
-                    <Video className="w-5 h-5 text-blue-300" />
+                  <div className="p-3 bg-gradient-to-br from-[#8B4513]/30 to-[#A0522D]/30 rounded-xl border border-[#8B4513]/20">
+                    <Video className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-center">
                     <div className="text-xl font-black text-white drop-shadow-lg">
                       {videoEpisodes.length}
                     </div>
-                    <div className="text-sm text-gray-300 font-light tracking-wide">
+                    <div className="text-sm text-gray-200 font-light tracking-wide">
                       Vidéos Disponibles
                     </div>
                   </div>
@@ -511,49 +555,61 @@ const PodcastsImmobilier: React.FC = () => {
         <section className="mb-16">
           <div className="hidden lg:flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-purple-100 rounded-2xl">
-                <Video className="w-8 h-8 text-purple-600" />
+              <div className="p-3 bg-gradient-to-br from-[#6B8E23]/20 to-[#7BA05B]/20 rounded-2xl border border-[#6B8E23]/30">
+                <Video className="w-8 h-8 text-[#6B8E23]" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Podcasts Immobilier</h2>
-                <p className="text-gray-600">Visites virtuelles, conseils experts et démonstrations pratiques</p>
+                <h2 className="text-3xl font-bold text-[#8B4513]">
+                  Podcasts Immobilier
+                </h2>
+                <p className="text-gray-600">
+                  Visites virtuelles, conseils experts et démonstrations
+                  pratiques
+                </p>
               </div>
             </div>
-            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border">
-              {activeTab === 'all' ? videoEpisodes.length : favorites.length} vidéo(s) disponible(s)
+            <div className="text-sm text-gray-500 bg-white px-4 py-2 rounded-full border border-[#D3D3D3] shadow-sm">
+              {activeTab === "all" ? videoEpisodes.length : favorites.length}{" "}
+              vidéo(s) disponible(s)
             </div>
           </div>
 
           {/* Onglets */}
-          <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <div className="flex gap-4 mb-8 border-b border-[#D3D3D3]">
             <button
-              onClick={() => setActiveTab('all')}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'all'
-                ? 'border-purple-600 text-purple-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              onClick={() => setActiveTab("all")}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
+                activeTab === "all"
+                  ? "border-[#6B8E23] text-[#6B8E23]"
+                  : "border-transparent text-gray-600 hover:text-[#556B2F]"
+              }`}
             >
               <div className="flex items-center space-x-2">
                 <Video className="w-5 h-5" />
-                <span className='text-xs'>Tous les podcasts ({videoEpisodes.length})</span>
+                <span className="text-xs">
+                  Tous les podcasts ({videoEpisodes.length})
+                </span>
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('favorites')}
-              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${activeTab === 'favorites'
-                ? 'border-red-600 text-red-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+              onClick={() => setActiveTab("favorites")}
+              className={`pb-4 px-6 font-semibold text-lg transition-all duration-300 border-b-2 ${
+                activeTab === "favorites"
+                  ? "border-[#8B4513] text-[#8B4513]"
+                  : "border-transparent text-gray-600 hover:text-[#8B4513]"
+              }`}
             >
               <div className="flex items-center space-x-2">
                 <Heart className="w-5 h-5" />
-                <span className='text-xs'>Mes favoris ({favorites.length})</span>
+                <span className="text-xs">
+                  Mes favoris ({favorites.length})
+                </span>
               </div>
             </button>
           </div>
 
           {/* Contenu de l'onglet */}
-          {activeTab === 'all' ? (
+          {activeTab === "all" ? (
             videoEpisodes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {videoEpisodes.map((episode) => (
@@ -561,14 +617,15 @@ const PodcastsImmobilier: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-[#D3D3D3]">
                 <Video className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucune vidéo disponible</h3>
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">
+                  Aucune vidéo disponible
+                </h3>
                 <p className="text-gray-500">
                   {error
                     ? "Une erreur est survenue lors du chargement des vidéos"
-                    : "Aucune vidéo immobilier n'est disponible pour le moment"
-                  }
+                    : "Aucune vidéo immobilier n'est disponible pour le moment"}
                 </p>
               </div>
             )
@@ -581,9 +638,11 @@ const PodcastsImmobilier: React.FC = () => {
                 ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-2xl shadow-lg border">
+            <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-[#D3D3D3]">
               <Heart className="w-20 h-20 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-2">Aucun podcast en favoris</h3>
+              <h3 className="text-2xl font-bold text-gray-600 mb-2">
+                Aucun podcast en favoris
+              </h3>
               <p className="text-gray-500">
                 Cliquez sur le cœur d'un podcast pour l'ajouter à vos favoris
               </p>
@@ -597,7 +656,6 @@ const PodcastsImmobilier: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           {/* Modal Container - Layout vertical sur mobile */}
           <div className="relative w-full max-w-7xl h-[90vh] bg-slate-900/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
-
             {/* Bouton fermeture */}
             <button
               onClick={() => {
@@ -608,10 +666,20 @@ const PodcastsImmobilier: React.FC = () => {
                   videoRef.current.currentTime = 0;
                 }
               }}
-              className="absolute top-2 right-2 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200 hover:scale-110 backdrop-blur-sm lg:top-4 lg:right-4 lg:p-3"
+              className="absolute top-2 right-2 z-50 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] hover:from-[#6B8E23] hover:to-[#7BA05B] text-white rounded-full p-2 transition-all duration-200 hover:scale-110 backdrop-blur-sm shadow-lg lg:top-4 lg:right-4 lg:p-3"
             >
-              <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-4 w-4 lg:h-5 lg:w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
 
@@ -631,7 +699,6 @@ const PodcastsImmobilier: React.FC = () => {
 
                 {/* Overlay de contrôle custom */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 lg:p-4">
-
                   {/* Barre de progression */}
                   <div className="mb-3 lg:mb-4 px-1 lg:px-2">
                     <div
@@ -644,13 +711,13 @@ const PodcastsImmobilier: React.FC = () => {
 
                       {/* Barre de progression */}
                       <div
-                        className="absolute h-full bg-red-600 rounded-full transition-all duration-100"
+                        className="absolute h-full bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] rounded-full transition-all duration-100"
                         style={{ width: `${progress}%` }}
                       ></div>
 
                       {/* Point de progression */}
                       <div
-                        className="absolute top-1/2 w-3 h-3 bg-red-600 rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                        className="absolute top-1/2 w-3 h-3 bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
                         style={{ left: `calc(${progress}% - 6px)` }}
                       ></div>
 
@@ -674,14 +741,22 @@ const PodcastsImmobilier: React.FC = () => {
                     <div className="flex items-center space-x-3 lg:space-x-4">
                       <button
                         onClick={handlePlayMedia}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 lg:p-3 backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                        className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white rounded-full p-2 lg:p-3 shadow-lg transition-all duration-200 hover:scale-105"
                       >
                         {isPlaying ? (
-                          <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="w-5 h-5 lg:w-6 lg:h-6"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                           </svg>
                         ) : (
-                          <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="w-5 h-5 lg:w-6 lg:h-6"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path d="M8 5v14l11-7z" />
                           </svg>
                         )}
@@ -689,7 +764,7 @@ const PodcastsImmobilier: React.FC = () => {
 
                       <div className="text-white">
                         <div className="text-xs lg:text-sm font-medium">
-                          {isPlaying ? 'En lecture' : 'En pause'}
+                          {isPlaying ? "En lecture" : "En pause"}
                         </div>
                       </div>
                     </div>
@@ -698,27 +773,46 @@ const PodcastsImmobilier: React.FC = () => {
                       {/* Bouton plein écran */}
                       <button
                         onClick={toggleFullscreen}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 lg:p-2 transition-all duration-200"
+                        className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white rounded-full p-1.5 lg:p-2 transition-all duration-200 shadow-md"
                         title="Plein écran"
                       >
-                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        <svg
+                          className="w-4 h-4 lg:w-5 lg:h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                          />
                         </svg>
                       </button>
 
                       <button
-                        onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                        className={`p-1.5 lg:p-2 rounded-full transition-all duration-200 ${selectedEpisode && isFavorite(selectedEpisode.id)
-                            ? 'bg-red-500 text-white hover:bg-red-600'
-                            : 'bg-white/10 text-white hover:bg-white/20'
-                          }`}
+                        onClick={() =>
+                          selectedEpisode && toggleFavorite(selectedEpisode.id)
+                        }
+                        className={`p-1.5 lg:p-2 rounded-full transition-all duration-200 shadow-md ${
+                          selectedEpisode && isFavorite(selectedEpisode.id)
+                            ? "bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white hover:from-[#A0522D] hover:to-[#D2691E]"
+                            : "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] text-white hover:from-[#556B2F] hover:to-[#6B8E23]"
+                        }`}
                       >
-                        <Heart className={`w-4 h-4 lg:w-5 lg:h-5 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
+                        <Heart
+                          className={`w-4 h-4 lg:w-5 lg:h-5 ${
+                            selectedEpisode && isFavorite(selectedEpisode.id)
+                              ? "fill-current"
+                              : ""
+                          }`}
+                        />
                       </button>
 
                       <button
                         onClick={handleDownload}
-                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 lg:p-2 transition-all duration-200"
+                        className="bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white rounded-full p-1.5 lg:p-2 transition-all duration-200 shadow-md"
                       >
                         <Download className="w-4 h-4 lg:w-5 lg:h-5" />
                       </button>
@@ -728,17 +822,17 @@ const PodcastsImmobilier: React.FC = () => {
               </div>
 
               {/* Titre de la vidéo sous la vidéo */}
-              <div className="p-3 lg:p-4 rounded-b-lg bg-gray-800 border-t border-gray-700">
+              <div className="p-3 lg:p-4 rounded-b-lg bg-gradient-to-r from-gray-800 to-gray-900 border-t border-gray-700">
                 <h1 className="text-base lg:text-lg font-bold text-white line-clamp-2">
                   {selectedEpisode.title}
                 </h1>
-                <div className="flex items-center space-x-3 lg:space-x-4 text-xs lg:text-sm text-gray-400 mt-1">
+                <div className="flex items-center space-x-3 lg:space-x-4 text-xs lg:text-sm text-gray-300 mt-1">
                   <span className="flex items-center">
-                    <Clock className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
+                    <Clock className="w-3 h-3 lg:w-4 lg:h-4 mr-1 text-[#6B8E23]" />
                     {selectedEpisode.duration}
                   </span>
                   <span className="flex items-center">
-                    <Headphones className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
+                    <Headphones className="w-3 h-3 lg:w-4 lg:h-4 mr-1 text-[#6B8E23]" />
                     {selectedEpisode.views.toLocaleString()} vues
                   </span>
                 </div>
@@ -746,30 +840,36 @@ const PodcastsImmobilier: React.FC = () => {
             </div>
 
             {/* Colonne de droite - Contenu */}
-            <div className="w-full lg:w-96 bg-gray-800 border-t lg:border-l border-gray-700 flex flex-col max-h-[50vh] lg:max-h-none">
+            <div className="w-full lg:w-96 bg-gradient-to-b from-gray-800 to-gray-900 border-t lg:border-l border-gray-700 flex flex-col max-h-[50vh] lg:max-h-none">
               {/* En-tête avec informations */}
               <div className="p-4 lg:p-6 border-b border-gray-700">
                 <div className="flex items-center space-x-3 mb-3 lg:mb-4">
                   {/* Avatar */}
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#6B8E23] to-[#7BA05B] rounded-full flex items-center justify-center shadow-lg">
                     <Video className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white">Ma Chaîne</div>
+                    <div className="text-sm font-semibold text-white">
+                      Ma Chaîne
+                    </div>
                     <div className="text-xs text-gray-400">Contenu premium</div>
                   </div>
                 </div>
 
                 {/* Badges */}
                 <div className="flex flex-wrap gap-2">
-                  <span className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(selectedEpisode.category)}`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium text-white ${getCategoryColor(
+                      selectedEpisode.category
+                    )}`}
+                  >
                     {selectedEpisode.category}
                   </span>
-                  <span className="px-2 py-1 rounded text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-gradient-to-r from-[#6B8E23]/20 to-[#7BA05B]/20 text-[#6B8E23] border border-[#6B8E23]/30">
                     Vidéo
                   </span>
                   {selectedEpisode.featured && (
-                    <span className="flex items-center text-yellow-400 text-xs font-medium">
+                    <span className="flex items-center bg-gradient-to-r from-[#8B4513] to-[#D2691E] text-white px-2 py-1 rounded text-xs font-medium">
                       <Star className="w-3 h-3 mr-1 fill-current" />
                       Vedette
                     </span>
@@ -781,7 +881,9 @@ const PodcastsImmobilier: React.FC = () => {
               <div className="flex-1 overflow-y-auto">
                 {/* Description */}
                 <div className="p-4 lg:p-6 border-b border-gray-700">
-                  <h3 className="text-base lg:text-lg font-semibold text-white mb-2 lg:mb-3">Description</h3>
+                  <h3 className="text-base lg:text-lg font-semibold text-white mb-2 lg:mb-3">
+                    Description
+                  </h3>
                   <p className="text-gray-300 text-sm leading-relaxed line-clamp-4 lg:line-clamp-none">
                     {selectedEpisode.description}
                   </p>
@@ -789,38 +891,56 @@ const PodcastsImmobilier: React.FC = () => {
 
                 {/* Informations techniques */}
                 <div className="p-4 lg:p-6 border-b border-gray-700">
-                  <h3 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Informations techniques</h3>
+                  <h3 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">
+                    Informations techniques
+                  </h3>
                   <div className="space-y-3 lg:space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Format</span>
-                      <span className="text-white font-medium text-sm">{selectedEpisode.mimeType}</span>
+                      <span className="text-white font-medium text-sm">
+                        {selectedEpisode.mimeType}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Taille</span>
-                      <span className="text-white font-medium text-sm">{formatFileSize(selectedEpisode.fileSize || 0)}</span>
+                      <span className="text-white font-medium text-sm">
+                        {formatFileSize(selectedEpisode.fileSize || 0)}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Durée</span>
-                      <span className="text-white font-medium text-sm">{selectedEpisode.duration}</span>
+                      <span className="text-white font-medium text-sm">
+                        {selectedEpisode.duration}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Date</span>
-                      <span className="text-white font-medium text-sm">{selectedEpisode.date}</span>
+                      <span className="text-white font-medium text-sm">
+                        {selectedEpisode.date}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Statistiques */}
                 <div className="p-4 lg:p-6">
-                  <h3 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Statistiques</h3>
+                  <h3 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">
+                    Statistiques
+                  </h3>
                   <div className="space-y-2 lg:space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Vues totales</span>
-                      <span className="text-white font-medium text-sm">{selectedEpisode.views.toLocaleString()}</span>
+                      <span className="text-gray-400 text-sm">
+                        Vues totales
+                      </span>
+                      <span className="text-white font-medium text-sm">
+                        {selectedEpisode.views.toLocaleString()}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400 text-sm">Qualité</span>
-                      <span className="text-green-400 font-medium text-sm">HD</span>
+                      <span className="text-[#6B8E23] font-medium text-sm">
+                        HD
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -831,18 +951,26 @@ const PodcastsImmobilier: React.FC = () => {
                 <div className="space-y-3">
                   <button
                     onClick={handlePlayMedia}
-                    className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white py-2 lg:py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm lg:text-base"
+                    className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white py-2 lg:py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm lg:text-base shadow-lg"
                   >
                     {isPlaying ? (
                       <>
-                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className="w-4 h-4 lg:w-5 lg:h-5"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                         </svg>
                         <span>Mettre en pause</span>
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className="w-4 h-4 lg:w-5 lg:h-5"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M8 5v14l11-7z" />
                         </svg>
                         <span>Lire la vidéo</span>
@@ -853,21 +981,34 @@ const PodcastsImmobilier: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2 lg:gap-3">
                     <button
                       onClick={handleDownload}
-                      className="flex items-center justify-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg font-medium transition-all duration-200 border border-gray-600 text-xs lg:text-sm"
+                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] hover:from-[#556B2F] hover:to-[#6B8E23] text-white py-2 rounded-lg font-medium transition-all duration-200 border border-[#6B8E23]/50 text-xs lg:text-sm shadow-md"
                     >
                       <Download className="w-3 h-3 lg:w-4 lg:h-4" />
                       <span>Télécharger</span>
                     </button>
 
                     <button
-                      onClick={() => selectedEpisode && toggleFavorite(selectedEpisode.id)}
-                      className={`flex items-center justify-center space-x-2 py-2 rounded-lg font-medium transition-all duration-200 border text-xs lg:text-sm ${selectedEpisode && isFavorite(selectedEpisode.id)
-                          ? 'bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30'
-                          : 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
-                        }`}
+                      onClick={() =>
+                        selectedEpisode && toggleFavorite(selectedEpisode.id)
+                      }
+                      className={`flex items-center justify-center space-x-2 py-2 rounded-lg font-medium transition-all duration-200 border text-xs lg:text-sm shadow-md ${
+                        selectedEpisode && isFavorite(selectedEpisode.id)
+                          ? "bg-gradient-to-r from-[#8B4513] to-[#D2691E] border-[#8B4513]/50 text-white hover:from-[#A0522D] hover:to-[#D2691E]"
+                          : "bg-gradient-to-r from-[#6B8E23] to-[#7BA05B] border-[#6B8E23]/50 text-white hover:from-[#556B2F] hover:to-[#6B8E23]"
+                      }`}
                     >
-                      <Heart className={`w-3 h-3 lg:w-4 lg:h-4 ${selectedEpisode && isFavorite(selectedEpisode.id) ? 'fill-current' : ''}`} />
-                      <span>{selectedEpisode && isFavorite(selectedEpisode.id) ? 'Favori' : 'J\'aime'}</span>
+                      <Heart
+                        className={`w-3 h-3 lg:w-4 lg:h-4 ${
+                          selectedEpisode && isFavorite(selectedEpisode.id)
+                            ? "fill-current"
+                            : ""
+                        }`}
+                      />
+                      <span>
+                        {selectedEpisode && isFavorite(selectedEpisode.id)
+                          ? "Favori"
+                          : "J'aime"}
+                      </span>
                     </button>
                   </div>
                 </div>
