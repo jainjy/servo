@@ -412,9 +412,6 @@ const ServicesPartnersPage = () => {
                 <div className="flex flex-wrap gap-2">
                   {[
                     { value: "service", label: "Services", icon: Wrench },
-                    { value: "property", label: "Immobilier", icon: Home },
-                    { value: "product", label: "Produits", icon: Car },
-                    { value: "aliment", label: "Aliments", icon: Utensils },
                   ].map((type) => (
                     <button
                       key={type.value}
@@ -821,12 +818,29 @@ const ServicesPartnersPage = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-     
-        {view === "partenaires" && <PartnersPage />}
-        {view === "services" && <ServicesPage />}
+        {view === "partenaires" && (
+          <PartnersPage
+            filters={filters}
+            setFilters={setFilters}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            AdvancedSearchBar={AdvancedSearchBar}
+          />
+        )}
+        {view === "services" && (
+          <ServicesPage
+            filters={filters}
+            setFilters={setFilters}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            AdvancedSearchBar={AdvancedSearchBar}
+          />
+        )}
       </main>
-
-
     </div>
   );
 };

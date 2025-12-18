@@ -36,7 +36,7 @@ interface ServiceCategory {
   label: string;
 }
 
-const ServicesPage = () => {
+const ServicesPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, setShowFilters, sortBy, setSortBy }: any) => {
   // États principaux
   const [showStatuses, setShowStatuses] = useState(false);
   const [services, setServices] = useState<ServiceType[]>([]);
@@ -568,6 +568,7 @@ const ServicesPage = () => {
 
   return (
     <>
+      <AdvancedSearchBar />
       {/* Section principale des services */}
       {!showStatuses && <ServicesSection />}
 

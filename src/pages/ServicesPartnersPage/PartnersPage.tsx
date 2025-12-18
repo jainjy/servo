@@ -61,7 +61,7 @@ interface Category {
   name: string;
 }
 
-const PartnersPage = () => {
+const PartnersPage = ({ AdvancedSearchBar, filters, setFilters, showFilters, setShowFilters, sortBy, setSortBy }: any) => {
   const [showExperts, setShowExperts] = useState(false);
   const [selectedMetier, setSelectedMetier] = useState<Metier | null>(null);
   const [metiers, setMetiers] = useState<Metier[]>([]);
@@ -456,6 +456,9 @@ const PartnersPage = () => {
             <p>{error}</p>
           </div>
         )}
+
+        {/* Barre de recherche avancée */}
+        <AdvancedSearchBar />
 
         {/* Affichage conditionnel */}
         {!showExperts && !loading && <MetiersGrid />}
