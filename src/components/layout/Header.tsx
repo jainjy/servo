@@ -1139,31 +1139,31 @@ const Header = () => {
         {
           title: "Photographie",
           description: "Captures artistiques et professionnelles",
-          href: "/produits#equipement",
+          href: "/photographie",
           image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
         },
         {
           title: "Sculpture",
           description: "Œuvres sculpturales uniques",
-          href: "/produits#materiaux",
+          href: "/sculpture",
           image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
         },
         {
           title: "Peinture",
           description: "Toiles et fresques originales",
-          href: "/produits#design",
+          href: "/peinture",
           image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
         },
         {
           title: "Artisanat",
           description: "Créations artisanales authentiques",
-          href: "/produits#design",
+          href: "/artisanat",
           image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
         },
         {
           title: "Marketplace créateurs",
           description: "Plateforme pour artistes et artisans",
-          href: "/produits#design",
+          href: "/marketplace-createurs",
           image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
         },
       ]
@@ -1262,28 +1262,28 @@ const Header = () => {
       {
         title: "Nutrition",
         description: "Conseils et plans alimentaires",
-        href: "/bien-etre",
+        href: "/nutrition",
         image:
           "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
       },
       {
         title: "Soins",
         description: "Produits et services de soins",
-        href: "/art-commerce",
+        href: "/soin",
         image:
           "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
       },
       {
         title: "Thérapeutes",
         description: "Professionnels du bien-être à domicile",
-        href: "/bien-etre",
+        href: "/therapeute",
         image:
           "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
       },
       {
         title: "Huiles essentielles",
         description: "Bienfaits des huiles naturelles",
-        href: "/podcasts-bien_etre",
+        href: "/huiles-essentielles",
         image:
           "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
       },
