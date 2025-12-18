@@ -153,8 +153,7 @@ const BoutiqueNaturel = () => {
     return (
       <div className="min-h-screen flex-col pt-16 bg-[#F6F8FA] flex items-center justify-center">
         <img src="/loading.gif" alt="" />
-        <p className="mt-4 text-gray-600">Chargement des produits naturels...</p>
-
+        <p className="mt-4 text-black">Chargement des produits de médecine naturelle...</p>
       </div>
     );
   }
@@ -191,49 +190,47 @@ const BoutiqueNaturel = () => {
       <div className="container mx-auto px-4 py-8">
         {/* En-tête de la catégorie */}
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
-          <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
+          <div className='absolute inset-0 w-full h-full bg-[#556B2F]/90'></div>
           <img src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" className='h-full object-cover w-full' alt="" />
         </div>
         <div className="mb-2">
           <div className="flex flex-col gap-5 justify-between items-center">
-            <div className="flex flex-col  items-center gap-5">
-
+            <div className="flex flex-col items-center gap-5">
               <h2 className="text-xl lg:text-5xl font-bold text-white tracking-widest">
-                {category?.name || decodeURIComponent(categoryName || "Produits Naturels").replace(/-/g, " ")}
+                {category?.name || "MÉDECINE NATURELLE"}
               </h2>
-              <p className="text-gray-200 text-xs lg:text-sm">
-                {category?.description || "Découvrez nos produits naturels et biologiques pour votre bien-être"}
+              <p className="text-white text-xs lg:text-sm">
+                Découvrez notre sélection de produits naturels pour votre bien-être et santé
               </p>
-
             </div>
 
             {/* Badges d'information */}
             <div className="hidden md:flex gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 backdrop-blur-lg border border-blue-400/40 shadow-lg hover:shadow-blue-500/25 transition-all duration-300 group">
-                <Truck className="h-3 w-3 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]" />
-                <span className="text-xs font-semibold text-blue-100 drop-shadow-[0_0_4px_rgba(96,165,250,0.4)]">Livraison 48h</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-lg border border-white/40">
+                <Truck className="h-3 w-3 text-white" />
+                <span className="text-xs font-semibold text-white">Livraison 48h</span>
               </div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 backdrop-blur-lg border border-green-400/40 shadow-lg hover:shadow-green-500/25 transition-all duration-300 group">
-                <ShieldCheck className="h-3 w-3 text-green-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                <span className="text-xs font-semibold text-green-100 drop-shadow-[0_0_4px_rgba(52,211,153,0.4)]">Naturel & Bio</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-lg border border-white/40">
+                <ShieldCheck className="h-3 w-3 text-white" />
+                <span className="text-xs font-semibold text-white">Naturel & Bio</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Produits naturels */}
-        <div className="bg-white rounded-3xl p-6">
+        <div className="bg-white rounded-3xl p-6 border border-[#D3D3D3]">
           {/* Barre de recherche */}
           <div className="mb-8 max-w-md mx-auto">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#8B4513]" />
               <input
                 type="text"
                 placeholder="Rechercher un produit..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#D3D3D3] focus:outline-none focus:ring-2 focus:ring-[#556B2F] focus:border-transparent transition-all"
               />
             </div>
           </div>
@@ -246,14 +243,14 @@ const BoutiqueNaturel = () => {
                   key={cat.id}
                   onClick={() => setSelectedProductType(cat.id)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedProductType === cat.id
-                    ? 'bg-slate-900 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                    ? 'bg-[#556B2F] text-white'
+                    : 'bg-[#FFFFFF] text-black border border-[#D3D3D3] hover:bg-[#6B8E23]/10'
                     }`}
                 >
                   {cat.name}
                   <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${selectedProductType === cat.id
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-gray-300 text-gray-700'
+                    ? 'bg-[#6B8E23] text-white'
+                    : 'bg-[#D3D3D3] text-black'
                     }`}>
                     {cat.count}
                   </span>
@@ -268,7 +265,7 @@ const BoutiqueNaturel = () => {
                 const benefits = getProductBenefits(product);
 
                 return (
-                  <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border-0 shadow-sm">
+                  <Card key={product.id} className="p-4 hover:shadow-lg transition-shadow group border border-[#D3D3D3]">
                     {product.images && product.images.length > 0 ? (
                       <div className="relative">
                         <div
@@ -278,7 +275,7 @@ const BoutiqueNaturel = () => {
                         {/* Badges sur l'image */}
                         <div className="absolute top-2 left-2 flex gap-2">
                           {product.isOrganic && (
-                            <Badge className="bg-green-500 text-white">
+                            <Badge className="bg-[#556B2F] text-white">
                               <Leaf className="h-3 w-3 mr-1" />
                               Bio
                             </Badge>
@@ -286,13 +283,13 @@ const BoutiqueNaturel = () => {
                           {product.origin && (
                             <Badge
                               variant="secondary"
-                              className="bg-white/90 text-gray-700"
+                              className="bg-white text-black border border-[#D3D3D3]"
                             >
                               {product.origin}
                             </Badge>
                           )}
                           {product.featured && (
-                            <Badge className="bg-amber-500 text-white">
+                            <Badge className="bg-[#8B4513] text-white">
                               <Star className="h-3 w-3 mr-1" />
                               Vedette
                             </Badge>
@@ -300,29 +297,29 @@ const BoutiqueNaturel = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-slate-900/20 to-slate-900/10 rounded-lg mb-4 flex items-center justify-center">
-                        <Package className="h-12 w-12 text-slate-900/40" />
+                      <div className="w-full h-48 bg-[#6B8E23]/10 rounded-lg mb-4 flex items-center justify-center border border-[#D3D3D3]">
+                        <Package className="h-12 w-12 text-[#556B2F]/40" />
                       </div>
                     )}
 
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-slate-900 transition-colors">
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-[#556B2F] transition-colors text-[#8B4513]">
                       {product.name}
                     </h3>
 
-                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                    <p className="text-black text-sm mb-3 line-clamp-2">
                       {product.description}
                     </p>
 
                     {/* Bénéfices du produit */}
                     {benefits.length > 0 && (
                       <div className="mb-3">
-                        <p className="text-xs text-gray-500 mb-1">Bénéfices:</p>
+                        <p className="text-xs text-black mb-1">Bénéfices:</p>
                         <div className="flex flex-wrap gap-1">
                           {benefits.map((benefit, index) => (
                             <Badge
                               key={index}
                               variant="outline"
-                              className="text-xs bg-slate-50 text-slate-700 border-slate-200"
+                              className="text-xs bg-[#6B8E23]/10 text-black border border-[#6B8E23]/20"
                             >
                               {benefit}
                             </Badge>
@@ -332,7 +329,7 @@ const BoutiqueNaturel = () => {
                     )}
 
                     {/* Informations supplémentaires */}
-                    <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
+                    <div className="flex items-center justify-between mb-3 text-sm text-black">
                       <span>Unité: {product.unit || "pièce"}</span>
                       {product.origin && (
                         <span className="flex items-center">
@@ -345,13 +342,13 @@ const BoutiqueNaturel = () => {
                     {/* Allergènes */}
                     {product.allergens && product.allergens.length > 0 && (
                       <div className="mb-3">
-                        <p className="text-xs text-gray-500 mb-1">Précautions:</p>
+                        <p className="text-xs text-black mb-1">Précautions:</p>
                         <div className="flex flex-wrap gap-1">
                           {product.allergens.map((allergen, index) => (
                             <Badge
                               key={index}
                               variant="outline"
-                              className="text-xs bg-amber-50 text-amber-600 border-amber-200"
+                              className="text-xs bg-[#8B4513]/10 text-black border border-[#8B4513]/20"
                             >
                               {allergen}
                             </Badge>
@@ -362,38 +359,38 @@ const BoutiqueNaturel = () => {
 
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <span className="text-2xl font-bold text-slate-900">
+                        <span className="text-2xl font-bold text-[#556B2F]">
                           €{typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                         </span>
                         {product.comparePrice && product.comparePrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through ml-2">
+                          <span className="text-sm text-black line-through ml-2">
                             €{product.comparePrice.toFixed(2)}
                           </span>
                         )}
                         {product.unit && (
-                          <span className="text-sm text-gray-500 ml-1">
+                          <span className="text-sm text-black ml-1">
                             / {product.unit}
                           </span>
                         )}
                       </div>
                       <Badge
                         variant={product.quantity > 0 ? "default" : "destructive"}
-                        className={product.quantity > 0 ? "bg-slate-900" : ""}
+                        className={product.quantity > 0 ? "bg-[#556B2F]" : ""}
                       >
                         {product.quantity > 0 ? "En stock" : "Rupture"}
                       </Badge>
                     </div>
 
                     {product.vendor?.companyName && (
-                      <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-                        <Sparkles className="h-4 w-4" />
+                      <div className="flex items-center gap-2 mb-4 text-sm text-black">
+                        <Sparkles className="h-4 w-4 text-[#556B2F]" />
                         <span>{product.vendor.companyName}</span>
                       </div>
                     )}
 
                     {/* Bouton Ajouter au panier */}
                     <Button
-                      className="w-full bg-slate-900 hover:bg-slate-700 text-white transition-all duration-300 shadow-md"
+                      className="w-full bg-[#556B2F] hover:bg-[#6B8E23] text-white border border-[#556B2F]"
                       onClick={() => handleAddToCart(product)}
                       disabled={product.quantity === 0 || addingProductId === product.id}
                     >
@@ -415,24 +412,24 @@ const BoutiqueNaturel = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit trouvé</h3>
-              <p className="text-muted-foreground mb-6">
+              <Search className="h-16 w-16 text-[#8B4513] mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2 text-[#8B4513]">Aucun produit trouvé</h3>
+              <p className="text-black mb-6">
                 {searchQuery
                   ? `Aucun produit ne correspond à "${searchQuery}"`
-                  : 'Aucun produit naturel disponible pour le moment.'}
+                  : 'Aucun produit de médecine naturelle disponible pour le moment.'}
               </p>
               {searchQuery ? (
                 <Button
                   onClick={() => setSearchQuery("")}
-                  className="bg-slate-900 hover:bg-slate-700"
+                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white border border-[#556B2F]"
                 >
                   Réinitialiser la recherche
                 </Button>
               ) : (
                 <Button
                   onClick={() => navigate("/bien-etre")}
-                  className="bg-slate-900 hover:bg-slate-700"
+                  className="bg-[#556B2F] hover:bg-[#6B8E23] text-white border border-[#556B2F]"
                 >
                   Retour au bien-être
                 </Button>
@@ -442,24 +439,24 @@ const BoutiqueNaturel = () => {
 
           {/* Section Informations importantes */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-slate-900/5 rounded-xl p-4 text-center">
-              <Leaf className="h-8 w-8 text-slate-900 mx-auto mb-2" />
-              <h4 className="font-semibold text-slate-900">100% Naturel</h4>
-              <p className="text-sm text-gray-600">
+            <div className="bg-[#6B8E23]/10 rounded-xl p-4 text-center border border-[#D3D3D3]">
+              <Leaf className="h-8 w-8 text-[#556B2F] mx-auto mb-2" />
+              <h4 className="font-semibold text-[#8B4513]">100% Naturel</h4>
+              <p className="text-sm text-black">
                 Produits naturels et biologiques certifiés
               </p>
             </div>
-            <div className="bg-slate-900/5 rounded-xl p-4 text-center">
-              <ShieldCheck className="h-8 w-8 text-slate-900 mx-auto mb-2" />
-              <h4 className="font-semibold text-slate-900">Qualité Premium</h4>
-              <p className="text-sm text-gray-600">
+            <div className="bg-[#6B8E23]/10 rounded-xl p-4 text-center border border-[#D3D3D3]">
+              <ShieldCheck className="h-8 w-8 text-[#556B2F] mx-auto mb-2" />
+              <h4 className="font-semibold text-[#8B4513]">Qualité Premium</h4>
+              <p className="text-sm text-black">
                 Sélection rigoureuse des meilleurs produits
               </p>
             </div>
-            <div className="bg-slate-900/5 rounded-xl p-4 text-center">
-              <Truck className="h-8 w-8 text-slate-900 mx-auto mb-2" />
-              <h4 className="font-semibold text-slate-900">Livraison Éco</h4>
-              <p className="text-sm text-gray-600">
+            <div className="bg-[#6B8E23]/10 rounded-xl p-4 text-center border border-[#D3D3D3]">
+              <Truck className="h-8 w-8 text-[#556B2F] mx-auto mb-2" />
+              <h4 className="font-semibold text-[#8B4513]">Livraison Éco</h4>
+              <p className="text-sm text-black">
                 Emballages recyclables et écologiques
               </p>
             </div>

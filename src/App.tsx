@@ -210,6 +210,10 @@ import FormationsPage from "./pages/FormationsPage";
 import AlternanceStagePage from "./pages/AlternanceStagePage";
 import OffresEmploiPage from "./pages/OffresEmploiPage";
 import LocationVoiturePage from "./pages/LocationVoiturePage";
+import Soin from "./pages/Soin";
+import Therapeute from "./pages/Therapeute";
+import HuilesEssentielles from "./pages/HuilesEssentielles";
+import Nutrition from "./pages/Nutrition";
 
 const queryClient = new QueryClient();
 
@@ -496,6 +500,19 @@ const App = () => {
                   <Route
                     path="/produits-naturels/categorie/:categoryName"
                     element={<BoutiqueNaturel />}
+                  />
+                  <Route
+                    path="/soin"
+                    element={<Soin />}
+                  />
+                  <Route
+                    path="/therapeute"
+                    element={<Therapeute />}
+                  />
+                  <Route path="/huiles-essentielles" element={<HuilesEssentielles />} />
+                  <Route path="/huiles-essentielles/:categoryName" element={<HuilesEssentielles />} />
+                  <Route path="/nutrition"
+                  element={<Nutrition />}
                   />
                   <Route
                     path="/comptabilite"

@@ -135,12 +135,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
 
     const sectionRef = useRef<HTMLDivElement>(null);
 
-  const scrollToSection = () => {
-    sectionRef.current?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
-    });
-  };
+    const scrollToSection = () => {
+        sectionRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    };
     const products: Product[] = [
         {
             id: 1,
@@ -300,7 +300,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                         <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
                             Nos Catégories
                         </h2>
-                        
+
                         {/* Barre de recherche */}
                         <div className="mb-8 max-w-md mx-auto">
                             <div className="relative">
@@ -356,8 +356,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                                     Aucun produit trouvé
                                 </h3>
                                 <p className="text-gray-500 mb-6">
-                                    {searchQuery 
-                                        ? `Aucun produit ne correspond à "${searchQuery}"` 
+                                    {searchQuery
+                                        ? `Aucun produit ne correspond à "${searchQuery}"`
                                         : 'Aucun produit disponible dans cette catégorie'}
                                 </p>
                                 {searchQuery && (
@@ -472,7 +472,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
                                         )}
                                     </div>
 
-                                    <button className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center">
+                                    <button className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center">
                                         <ShoppingCart className="w-5 h-5 mr-2" />
                                         Ajouter au panier
                                     </button>
