@@ -208,7 +208,8 @@ import TousLesPartenaires from "./pages/TousLesPartenaires";
 import FormationsPage from "./pages/FormationsPage";
 import AlternanceStagePage from "./pages/AlternanceStagePage";
 import OffresEmploiPage from "./pages/OffresEmploiPage";
-                 
+import LocationVoiturePage from "./pages/LocationVoiturePage";
+
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -288,6 +289,10 @@ const App = () => {
                 <Routes>
                   <Route path="/formations" element={<FormationsPage />} />
                   <Route path="/emploi" element={<OffresEmploiPage />} />
+                  <Route
+                    path="/location-voiture"
+                    element={<LocationVoiturePage />}
+                  />
                   <Route
                     path="/alternance-stages"
                     element={<AlternanceStagePage />}

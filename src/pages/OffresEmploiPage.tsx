@@ -660,7 +660,7 @@ const OffresEmploiPage = () => {
         style={{ backgroundImage: `url('/emploi.jpg')` }}
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] opacity-75"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#556B2F] to-[#6B8E23] opacity-50"></div>
 
         {/* Content */}
         <div className="relative max-w-7xl mx-auto">

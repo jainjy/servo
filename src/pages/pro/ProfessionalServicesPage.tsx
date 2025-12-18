@@ -4,9 +4,10 @@ import { Plus, Search, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { AvailableServicesModal } from "@/components/pro/available-services-modal";
-import { CreateCustomServiceModal } from "@/components/pro/CreateCustomServiceModal";
+
 import { ProfessionalServicesTable } from "@/components/pro/professional-services-table";
 import { ProfessionalServicesStats } from "@/components/pro/professional-services-stats";
+import { CreateCustomServiceModal } from "@/components/pro/CreateCustomServiceModal";
 
 // Nouvelle palette de couleurs
 const COLORS = {
