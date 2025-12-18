@@ -433,7 +433,7 @@ const PodcastsEntreprise: React.FC = () => {
             <h1 className="text-2xl lg:text-4xl font-bold mb-6 leading-tight drop-shadow-lg">
               Podcast{" "}
               <span className="text-white bg-gradient-to-r from-[#6B8E23] to-[#8FBC8F] bg-clip-text text-transparent">
-                Entreprise
+                Services
               </span>
             </h1>
 
@@ -513,7 +513,7 @@ const PodcastsEntreprise: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-3xl font-bold text-[#8B4513]">
-                  Podcasts Entreprise
+                  Podcasts Services
                 </h2>
                 <p className="text-gray-600">
                   Conseils stratégiques, études de cas et expertises business

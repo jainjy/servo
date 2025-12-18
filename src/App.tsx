@@ -205,6 +205,7 @@ import DeleteAccountPage from "./pages/DeleteAccountPage";
 import PodcastsReunion from "./components/PodcastsReunion";
 import PodcastsPartenaires from "./components/PodcastsPartenaires";
 import TousLesPartenaires from "./pages/TousLesPartenaires";
+import ExpertDashboardPage from "./pages/ExpertDashboardPage";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -677,6 +678,7 @@ const App = () => {
                       path="reservationPro"
                       element={<ProTouristicPlaceBookings />}
                     />
+                    <Route path="conseil" element={<ExpertDashboardPage />} />
                     <Route
                       path="subscription"
                       element={<SubscriptionStatusPage />}
