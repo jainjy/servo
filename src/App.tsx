@@ -161,7 +161,7 @@ import UserReservations from "./pages/UserReservations";
 import SubscriptionStatusPage from "./pages/pro/SubscriptionStatusPage";
 import SubscriptionPaymentPage from "./pages/pro/SubscriptionPaymentPage";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
-import RendezVous from "./components/admin/rendezvous/rendezvous";
+import RendezVous from "./components/admin/rendezvous/RendezVous";
 import Donation from "./components/components/Don";
 import ProTouristicPlaceBookings from "./components/pro/ProTouristicPlaceBookings";
 import AccountSuspended from "./pages/AccountSuspended";
