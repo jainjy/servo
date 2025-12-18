@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImage from '/logo.jpeg';
 
 interface ServoLogoProps {
   size?: number;
@@ -8,7 +9,7 @@ interface ServoLogoProps {
 }
 
 const ServoLogo: React.FC<ServoLogoProps> = ({
-  size = 120,
+  size = 130,
   variant = 'full',
   className = '',
   showTagline = false,
@@ -18,41 +19,15 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
   const iconSize = size * 0.4;
   const textSize = size * 0.2;
 
-  // Version SVG de l'icône
+  // Image logo au lieu du SVG
   const IconSVG = () => (
-    <svg
+    <img
+      src={logoImage}
+      alt="Servo Logo"
       width={iconSize}
       height={iconSize}
-      viewBox="0 0 100 100"
-      className="flex-shrink-0"
-    >
-      {/* Cercle extérieur */}
-      <circle cx="50" cy="50" r="45" fill={primaryColor} />
-      
-      {/* Cercle intérieur */}
-      <circle cx="50" cy="50" r="30" fill="white" />
-      
-      {/* Engrenage stylisé */}
-      <circle cx="50" cy="50" r="15" fill={secondaryColor} />
-      
-      {/* Croix intérieure (représentant le mouvement servo) */}
-      <rect x="47.5" y="30" width="5" height="40" rx="2.5" fill="white" />
-      <rect x="30" y="47.5" width="40" height="5" rx="2.5" fill="white" />
-      
-      {/* Détails d'engrenage */}
-      {[0, 45, 90, 135].map((rotation, index) => (
-        <rect
-          key={index}
-          x="47.5"
-          y="15"
-          width="5"
-          height="15"
-          rx="2.5"
-          fill={primaryColor}
-          transform={`rotate(${rotation} 50 50)`}
-        />
-      ))}
-    </svg>
+      className="flex-shrink-0 rounded-full"
+    />
   );
 
   // Version texte
@@ -66,7 +41,7 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
           lineHeight: 1
         }}
       >
-        SERVO
+        OLIPLUS
       </div>
       {showTagline && (
         <div 
