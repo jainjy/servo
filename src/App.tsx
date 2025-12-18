@@ -205,6 +205,7 @@ import DeleteAccountPage from "./pages/DeleteAccountPage";
 import PodcastsReunion from "./components/PodcastsReunion";
 import PodcastsPartenaires from "./components/PodcastsPartenaires";
 import TousLesPartenaires from "./pages/TousLesPartenaires";
+import ExpertDashboardPage from "./pages/ExpertDashboardPage";
 import FormationsPage from "./pages/FormationsPage";
 import AlternanceStagePage from "./pages/AlternanceStagePage";
 import OffresEmploiPage from "./pages/OffresEmploiPage";
@@ -684,6 +685,7 @@ const App = () => {
                       path="reservationPro"
                       element={<ProTouristicPlaceBookings />}
                     />
+                    <Route path="conseil" element={<ExpertDashboardPage />} />
                     <Route
                       path="subscription"
                       element={<SubscriptionStatusPage />}
