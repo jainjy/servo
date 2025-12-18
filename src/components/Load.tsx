@@ -123,11 +123,11 @@ export default function LoadingScreen({
                 setIsVisible(false); // Unmount visuel
                 setTimeout(() => {
                   onLoadingComplete?.(); // Callback final
-                }, 300);
-              }, 800);
-            }, 600);
-          }, 1000);
-        }, 200);
+                }, 200);
+              }, 600);
+            }, 300);
+          }, 600);
+        }, 100);
       }
     };
 
@@ -150,14 +150,14 @@ export default function LoadingScreen({
       {/* Styles globaux pour l'animation de zoom spécifique */}
       <style>{`
         @keyframes servoZoom {
-          0% { transform: scale(0.8); opacity: 0; filter: blur(10px); }
-          20% { transform: scale(1); opacity: 1; filter: blur(0px); }
-          80% { transform: scale(1.5); opacity: 1; letter-spacing: 1rem; }
-          100% { transform: scale(50); opacity: 0; letter-spacing: 5rem; filter: blur(20px); }
+          0% { transform: scale(0.8) translateZ(0); opacity: 0; }
+          15% { transform: scale(1) translateZ(0); opacity: 1; }
+          85% { transform: scale(1.8) translateZ(0); opacity: 1; }
+          100% { transform: scale(35) translateZ(0); opacity: 0; }
         }
         @keyframes circleDisappear {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(0); opacity: 0; }
+          0% { transform: scale(1) translateZ(0); opacity: 1; }
+          100% { transform: scale(0.01) translateZ(0); opacity: 0; }
         }
         @keyframes scan {
           0% { transform: translateY(-50vh); opacity: 0; }
@@ -166,7 +166,11 @@ export default function LoadingScreen({
           100% { transform: translateY(50vh); opacity: 0; }
         }
         .servo-animate {
-          animation: servoZoom 1.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+          animation: servoZoom 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+          will-change: transform, opacity;
+          transform: translateZ(0);
+          backface-visibility: hidden;
+          perspective: 1000px;
         }
         .glass-panel {
           background: rgba(26, 31, 21, 0.6);
@@ -196,15 +200,17 @@ export default function LoadingScreen({
           position: fixed;
           top: 50%;
           left: 50%;
-          width: 150vmax;
-          height: 150vmax;
-          transform: translate(-50%, -50%);
+          width: 100vmax;
+          height: 100vmax;
+          transform: translate(-50%, -50%) translateZ(0);
           border-radius: 50%;
           pointer-events: none;
           z-index: 10000;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
         }
         .circle-mask.background-circle-disappear {
-          animation: circleDisappear 0.8s cubic-bezier(0.7, 0, 0.3, 1) 0s forwards;
+          animation: circleDisappear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s forwards;
         }
         @keyframes floatOrb1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
@@ -498,17 +504,18 @@ export default function LoadingScreen({
 
           </div>
         ) : (
-          /* PHASE 2: ZOOM EFFECT - COMMENTED FOR TESTING */
-          <div className="absolute inset-0 flex items-center justify-center z-50">
-            <div className="servo-animate relative">
-              <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter text-white mix-blend-overlay">
+          /* PHASE 2: ZOOM EFFECT */
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="servo-animate relative" style={{ transformOrigin: 'center center' }}>
+              <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter text-white mix-blend-overlay select-none"
+                  style={{
+                    textShadow: '0 0 40px rgba(85, 107, 47, 0.6)',
+                    WebkitFontSmoothing: 'antialiased',
+                    WebkitTextStrokeWidth: '0.5px',
+                    WebkitTextStrokeColor: 'rgba(107, 142, 35, 0.3)'
+                  }}>
                 SERVO
               </h1>
-              <div className="absolute inset-0 flex items-center justify-center blur-xl opacity-50">
-                <h1 className="text-8xl md:text-9xl azonix font-bold tracking-tighter" style={{ color: colors.logoAccent }}>
-                  SERVO
-                </h1>
-              </div>
             </div>
           </div>
         )}
@@ -517,8 +524,9 @@ export default function LoadingScreen({
         {hideBackground && (
           <div className={`circle-mask ${hideBackground ? 'background-circle-disappear' : ''}`}
                style={{
-                 background: 'linear-gradient(135deg, #0a0f08 0%, #1a1f15 50%, #12160f 100%)',
-                 boxShadow: 'inset 0 0 100px rgba(0, 0, 0, 0.8)'
+                 background: 'radial-gradient(circle at center, #0a0f08 0%, #1a1f15 50%)',
+                 boxShadow: 'inset 0 0 80px rgba(0, 0, 0, 0.9)',
+                 pointerEvents: 'none'
                }}>
           </div>
         )}
