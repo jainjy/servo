@@ -205,6 +205,10 @@ import DeleteAccountPage from "./pages/DeleteAccountPage";
 import PodcastsReunion from "./components/PodcastsReunion";
 import PodcastsPartenaires from "./components/PodcastsPartenaires";
 import TousLesPartenaires from "./pages/TousLesPartenaires";
+import RachatServiceCard from "./components/components/Rachat";
+import CommunicationMarketing from "./components/components/CommunicationMarketing";
+import ConseilsAccompagnement from "./components/components/ConseilAccompagnement";
+import Juridique from "./components/components/Juridique";
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -319,6 +323,7 @@ const App = () => {
                   <Route path="/immobilier" element={<Immobilier />} />
                   <Route path="/achat" element={<PropertyBuy />} />
                   <Route path="/location" element={<PropertyRent />} />
+                  <Route path="/rachat" element={<RachatServiceCard />} />
                   <Route
                     path="/location-saisonniere"
                     element={<PropertyRent isSeasonal={true} />}
@@ -330,6 +335,8 @@ const App = () => {
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
                   <Route path="/aideFonds" element={<AidesLeveesFonds />} />
+                  <Route path="/communicationMarketing" element={<CommunicationMarketing />} />
+                  <Route path="/Conseil_accompagnement" element={<ConseilsAccompagnement />} />
                   <Route
                     path="/juridiqueLiquidation"
                     element={<JuridiqueLiquidation />}
@@ -474,6 +481,7 @@ const App = () => {
                   <Route path="/plombiers" element={<Plombier />} />
                   {/* Routes Domicile */}
                   <Route path="/domicile" element={<DomicileLayout />} />
+                  <Route path="/juridique" element={<Juridique />} />
                   <Route
                     path="/produits-commerces"
                     element={<DomicileLayout />}
