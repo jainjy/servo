@@ -1119,35 +1119,35 @@ const Header = () => {
         {
           title: "Photographie",
           description: "Captures artistiques et professionnelles",
-          href: "/produits#equipement",
+          href: "/photographie",
           image:
             "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Sculpture",
           description: "Œuvres sculpturales uniques",
-          href: "/produits#materiaux",
+          href: "/sculpture",
           image:
             "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Peinture",
           description: "Toiles et fresques originales",
-          href: "/produits#design",
+          href: "/peinture",
           image:
             "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Artisanat",
           description: "Créations artisanales authentiques",
-          href: "/produits#design",
+          href: "/artisanat",
           image:
             "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Marketplace créateurs",
           description: "Plateforme pour artistes et artisans",
-          href: "/produits#design",
+          href: "/marketplace-createurs",
           image:
             "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
