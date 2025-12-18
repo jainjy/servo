@@ -208,6 +208,13 @@ import TousLesPartenaires from "./pages/TousLesPartenaires";
 import FormationsPage from "./pages/FormationsPage";
 import AlternanceStagePage from "./pages/AlternanceStagePage";
 import OffresEmploiPage from "./pages/OffresEmploiPage";
+import PhotographiePage from "./pages/PhotographiePage";
+import SculpturePage from "./pages/SculpturePage";
+import PeinturePage from "./pages/PeinturePage";
+import ArtisanatPage from "./pages/ArtisanatPage";
+import MarketplaceCreateurs from "./pages/MarketplaceCreateurs";
+
+
                  
 const queryClient = new QueryClient();
 
@@ -837,6 +844,18 @@ const App = () => {
                     element={<GestionDroitsRGPD />}
                   />
                   <Route path="/contact-dpo" element={<ContactDPO />} />
+
+                  {/* Onglets Arts et Creations */}
+
+                  <Route path="/photographie" element={<PhotographiePage />} />
+                  <Route path="/sculpture" element={<SculpturePage />} />
+                  <Route path="/peinture" element={<PeinturePage />} />
+                  <Route path="/artisanat" element={<ArtisanatPage />} />
+                  <Route
+                    path="/marketplace-createurs"
+                    element={<MarketplaceCreateurs />}
+                  />
+
                 </Routes>
 
                 {/* Pop-up publicité globale */}
