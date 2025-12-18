@@ -489,7 +489,6 @@ const Header = () => {
             "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
         },
 
-
         // title: "Vivre à la Réunion",
         // items: [
         // {
@@ -1062,19 +1061,22 @@ const Header = () => {
           title: "Prestation Intérieur",
           description: "Services pour l'intérieur",
           href: "/travaux?categorie=interieurs",
-          image: "https://i.pinimg.com/1200x/fe/5c/1a/fe5c1a7e46c506905b0e124d1f9a374d.jpg"
+          image:
+            "https://i.pinimg.com/1200x/fe/5c/1a/fe5c1a7e46c506905b0e124d1f9a374d.jpg",
         },
         {
           title: "Prestation Extérieur",
           description: "Services pour l'extérieur",
           href: "/travaux?categorie=exterieurs",
-          image: "https://i.pinimg.com/736x/90/49/46/9049462b0f6124398a68da38949985a8.jpg"
+          image:
+            "https://i.pinimg.com/736x/90/49/46/9049462b0f6124398a68da38949985a8.jpg",
         },
         {
           title: "Construction",
           description: "Travaux de construction",
           href: "/travaux?categorie=constructions",
-          image: "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg"
+          image:
+            "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg",
         },
       ],
     },
@@ -1085,20 +1087,24 @@ const Header = () => {
           title: "Équipements",
           description: "Matériel & équipements haute performance",
           href: "/produits#equipement",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+          image:
+            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Matériaux",
           description: "Matériaux de construction qualité premium",
           href: "/produits#materiaux",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+          image:
+            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Design & Décoration",
           description: "Solutions esthétiques pour votre intérieur",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
-        }]
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
+        },
+      ],
     },
     {
       title: "ART & CREATIONS",
@@ -1107,33 +1113,38 @@ const Header = () => {
           title: "Photographie",
           description: "Captures artistiques et professionnelles",
           href: "/produits#equipement",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+          image:
+            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Sculpture",
           description: "Œuvres sculpturales uniques",
           href: "/produits#materiaux",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+          image:
+            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Peinture",
           description: "Toiles et fresques originales",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Artisanat",
           description: "Créations artisanales authentiques",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Marketplace créateurs",
           description: "Plateforme pour artistes et artisans",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
-      ]
+      ],
     },
     {
       title: "ENTREPRISE & PRO",
@@ -1142,46 +1153,52 @@ const Header = () => {
           title: "Création",
           description: "Accompagnement à la création d'entreprise",
           href: "/produits#equipement",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+          image:
+            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Rachat",
           description: "Accompagnement au rachat d'entreprise",
           href: "/produits#materiaux",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+          image:
+            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Cession / liquidation",
           description: "Accompagnement à la cession ou liquidation",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Communication & marketing",
           description: "Stratégies pour développer votre activité",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Comptabilité",
           description: "Gestion comptable et financière",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Juridique",
           description: "Conseils et services juridiques pour entreprises",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Conseils & accompagnement",
           description: "Support stratégique pour entrepreneurs",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
-
-      ]
+      ],
     },
     // {
     // title: "ALIMENTATION",
@@ -1224,44 +1241,44 @@ const Header = () => {
     // ],
     // },
     {
-    title: "SANTE & BIEN-ÊTRE",
-    items: [
-      {
-        title: "Cours à domicile",
-        description: "Formations & ateliers personnalisés",
-        href: "/bien-etre",
-        image:
-          "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
-      },
-      {
-        title: "Arts & commerces",
-        description: "Artisans & boutiques bien-être",
-        href: "/art-commerce",
-        image:
-          "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
-      },
-      {
-        title: "Thérapeutes & soins",
-        description: "Professionnels du bien-être à domicile",
-        href: "/bien-etre",
-        image:
-          "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
-      },
-      {
-        title: "Boutique & produits naturels",
-        description: "Produits pour le bien-être",
-        href: "/produits-naturels",
-        image:
-          "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
-      },
-      {
-        title: "Podcasts",
-        description: "Ressources pour le bien-être",
-        href: "/podcasts-bien_etre",
-        image:
-          "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-      },
-    ],
+      title: "SANTE & BIEN-ÊTRE",
+      items: [
+        {
+          title: "Cours à domicile",
+          description: "Formations & ateliers personnalisés",
+          href: "/bien-etre",
+          image:
+            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+        },
+        {
+          title: "Arts & commerces",
+          description: "Artisans & boutiques bien-être",
+          href: "/art-commerce",
+          image:
+            "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+        },
+        {
+          title: "Thérapeutes & soins",
+          description: "Professionnels du bien-être à domicile",
+          href: "/bien-etre",
+          image:
+            "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+        },
+        {
+          title: "Boutique & produits naturels",
+          description: "Produits pour le bien-être",
+          href: "/produits-naturels",
+          image:
+            "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+        },
+        {
+          title: "Podcasts",
+          description: "Ressources pour le bien-être",
+          href: "/podcasts-bien_etre",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
+      ],
     },
     {
       title: "EMPLOI & FORMATIONS",
@@ -1269,21 +1286,25 @@ const Header = () => {
         {
           title: "Formations (organismes, écoles, e‑learning)",
           description: "Développez vos compétences professionnelles",
-          href: "/produits#equipement",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+          href: "/formations",
+          image:
+            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Offres d’emploi",
           description: "Trouvez des opportunités de carrière",
-          href: "/produits#materiaux",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+          href: "/emploi",
+          image:
+            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Alternance & stage",
           description: "Programmes pour étudiants et jeunes professionnels",
-          href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
-        }]
+          href: "/alternance-stages",
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
+        },
+      ],
     },
     // {
     // title: "INVESTISSEMENT",

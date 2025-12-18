@@ -105,7 +105,7 @@ import NetworkStatus from "./components/NetworkStatus";
 import AdvertisementManager from "./components/admin/AdvertisementManager";
 import AdvertisementPopup from "./components/AdvertisementPopup";
 
-import ReservationTable from "./pages/pro/ReservationBien-etre"
+import ReservationTable from "./pages/pro/ReservationBien-etre";
 // Import des nouveaux composants immobilier
 import FinancementDemandesPro from "./pages/pro/FinancementDemandesPro";
 // Import des composants bâtiments
@@ -174,7 +174,7 @@ import UserLayout from "./pages/UserLayout";
 import InvestmentDemandesPage from "./pages/admin/InvestmentDemandesPage";
 import FinancementServicesAdmin from "./pages/admin/FinancementServicesAdmin";
 import ServicesIBRPage from "./pages/ServicesIBRPage";
-import { App as CapacitorApp } from '@capacitor/app';
+import { App as CapacitorApp } from "@capacitor/app";
 import Digitalisation from "./pages/Digitalisation";
 import GestionLocationSaisonniere from "./pages/GestionLocationSaisonniere";
 import PrivacyPolicyWidget from "./components/Confidentialite";
@@ -205,6 +205,10 @@ import DeleteAccountPage from "./pages/DeleteAccountPage";
 import PodcastsReunion from "./components/PodcastsReunion";
 import PodcastsPartenaires from "./components/PodcastsPartenaires";
 import TousLesPartenaires from "./pages/TousLesPartenaires";
+import FormationsPage from "./pages/FormationsPage";
+import AlternanceStagePage from "./pages/AlternanceStagePage";
+import OffresEmploiPage from "./pages/OffresEmploiPage";
+                 
 const queryClient = new QueryClient();
 
 const ScrollToHash = () => {
@@ -212,7 +216,6 @@ const ScrollToHash = () => {
   const { scrollToSection } = useSmoothScroll();
 
   useEffect(() => {
-    
     if (typeof window === "undefined") return;
 
     if (location.hash) {
@@ -248,17 +251,17 @@ const App = () => {
 
   useEffect(() => {
     // Gestion simple du bouton retour
-    CapacitorApp.addListener('backButton', () => {
+    CapacitorApp.addListener("backButton", () => {
       if (window.history.length > 1) {
         window.history.back();
       } else {
-        if (window.confirm('Voulez-vous quitter SERVO ?')) {
+        if (window.confirm("Voulez-vous quitter SERVO ?")) {
           CapacitorApp.exitApp();
         }
       }
     });
   }, []);
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -283,13 +286,18 @@ const App = () => {
 
               <Layout>
                 <Routes>
+                  <Route path="/formations" element={<FormationsPage />} />
+                  <Route path="/emploi" element={<OffresEmploiPage />} />
+                  <Route
+                    path="/alternance-stages"
+                    element={<AlternanceStagePage />}
+                  />
                   {/* Section publiques Routes */}
                   <Route
                     path="/services-partners"
                     element={<ServicesPartnersPage />}
                   />
                   <Route path="/" element={<Index />} />
-
                   {/* NOUVELLE ROUTE POUR LA PAGE D'ACCOMPAGNEMENT */}
                   <Route
                     path="/accompagnement"
@@ -325,7 +333,6 @@ const App = () => {
                   />
                   <Route path="/droitFamille" element={<DroitFamille />} />
                   <Route path="/services-ibr" element={<ServicesIBRPage />} />
-
                   {/* Section entreprise */}
                   <Route path="/reprise" element={<CreationReprise />} />
                   <Route path="/auditMediation" element={<AuditMediation />} />
@@ -444,7 +451,6 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-
                   {/* Routes Bâtiments */}
                   <Route path="/batiments" element={<BatimentsLayout />} />
                   <Route
@@ -467,7 +473,6 @@ const App = () => {
                     path="/formation-podcasts"
                     element={<BatimentsLayout />}
                   />
-
                   {/* Routes Partenaires */}
                   <Route path="/agences" element={<Agence />} />
                   <Route path="/constructeurs" element={<Constructeur />} />
@@ -514,7 +519,6 @@ const App = () => {
                     path="/gestion-immobilier"
                     element={<GestionImmobilier />}
                   />
-
                   <Route path="/recherche" element={<Recherche />} />
                   <Route path="/achat/:id" element={<PropertyPage />} />
                   <Route path="/location/:id" element={<PropertyPage />} />
@@ -565,7 +569,6 @@ const App = () => {
                     path="/estimations"
                     element={<EstimationImmobilierPage />}
                   />
-
                   {/* Routes d'authentification */}
                   <Route path="/login" element={<LoginRoleSelectionPage />} />
                   <Route path="/login/professional" element={<ProLogin />} />
@@ -638,7 +641,6 @@ const App = () => {
                     path="/investir/:type"
                     element={<InvestissementDetail />}
                   />
-
                   {/* Section pro Routes */}
                   <Route
                     path="/pro"
@@ -726,7 +728,6 @@ const App = () => {
                       element={<DeleteAccountPage />}
                     />
                   </Route>
-
                   {/* Section Mon Compte Routes */}
                   <Route
                     path="/mon-compte"
@@ -766,7 +767,6 @@ const App = () => {
                     />
                     <Route path="mes-commandes" element={<UserOrders />} />
                   </Route>
-
                   {/* Section Admin Routes */}
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
@@ -776,7 +776,7 @@ const App = () => {
                     <Route path="audits" element={<AuditsPage />} />
                     <Route path="payments" element={<Payements />} />
                     <Route path="conseil" element={<AdminConseilPage />} />
-                    <Route path="rendezvous" element={<RendezVous/>} />
+                    <Route path="rendezvous" element={<RendezVous />} />
                     <Route path="media" element={<AdminMedia />} />
                     <Route
                       path="demandeDroitFamille"
@@ -817,18 +817,25 @@ const App = () => {
                       element={<InvestmentDemandesPage />}
                     />
                   </Route>
-
                   {/* Section not found Routes */}
                   <Route path="*" element={<NotFound />} />
                   <Route path="/en-savoir-plus" element={<RGPDInfo />} />
                   <Route path="/import-info" element={<ImportInfo />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
-                  
                   {/* Routes RGPD et légales */}
-                  <Route path="/mentions-legales" element={<MentionsLegales />} />
-                  <Route path="/politique-confidentialite" element={<PolitiqueConfidentialiteComplete />} />
-                  <Route path="/gestion-droits-rgpd" element={<GestionDroitsRGPD />} />
+                  <Route
+                    path="/mentions-legales"
+                    element={<MentionsLegales />}
+                  />
+                  <Route
+                    path="/politique-confidentialite"
+                    element={<PolitiqueConfidentialiteComplete />}
+                  />
+                  <Route
+                    path="/gestion-droits-rgpd"
+                    element={<GestionDroitsRGPD />}
+                  />
                   <Route path="/contact-dpo" element={<ContactDPO />} />
                 </Routes>
 
