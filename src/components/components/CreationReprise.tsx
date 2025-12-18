@@ -494,33 +494,19 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
       viewport={{ once: true, amount: 0.2 }}
     >
       <div className="container mx-auto px-4 max-w-7xl">
-        <motion.div 
+        <div 
           className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'
-          variants={backgroundVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+         
         >
-          <motion.div 
-            className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'
-            animate={{
-              opacity: [0.5, 0.7, 0.5]
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
+          <div 
+            className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/70'
           />
-          <motion.img 
+          <img 
             src="https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg" 
             className='h-full object-cover w-full'
             alt="Background" 
-            initial={{ scale: 1.2 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 10, ease: "easeOut" }}
           />
-        </motion.div>
+        </div>
 
         <motion.div 
           className="text-center mb-16"
@@ -533,7 +519,7 @@ const CreationReprise: React.FC<CreationRepriseProps> = ({ className = '' }) => 
             variants={itemVariants}
             className="text-4xl md:text-5xl font-bold text-gray-100 mb-4"
           >
-            Création & Reprise
+            Création
           </motion.h2>
           <motion.p 
             variants={itemVariants}

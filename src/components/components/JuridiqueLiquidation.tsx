@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, FileText, Shield, AlertTriangle, Building, Users, Clock, CheckCircle, ArrowRight } from 'lucide-react';
+import { Scale, FileText, Shield, AlertTriangle, Building, Users, Clock, CheckCircle, ArrowRight, TrendingUp, Handshake, DollarSign } from 'lucide-react';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
@@ -16,14 +16,20 @@ interface LiquidationStepProps {
   duration: string;
 }
 
+interface CessionStepProps {
+  number: number;
+  title: string;
+  description: string;
+  duration: string;
+}
+
 interface JuridiqueLiquidationProps {
   className?: string;
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, features, urgent }) => (
-  <div className={`bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border relative ${
-    urgent ? 'border-red-200 hover:border-red-300' : 'border-gray-100 hover:border-purple-200'
-  }`}>
+  <div className={`bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border relative ${urgent ? 'border-red-200 hover:border-red-300' : 'border-gray-100 hover:border-purple-200'
+    }`}>
     {urgent && (
       <div className="absolute -top-2 -right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center">
         <AlertTriangle className="w-3 h-3 mr-1" />
@@ -31,9 +37,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, fea
       </div>
     )}
     <div className="flex items-start mb-4">
-      <div className={`p-3 rounded-xl mr-4 flex-shrink-0 ${
-        urgent ? 'bg-red-100 text-red-600' : 'bg-purple-100 text-purple-600'
-      }`}>
+      <div className={`p-3 rounded-xl mr-4 flex-shrink-0 ${urgent ? 'bg-red-100 text-red-600' : 'bg-purple-100 text-purple-600'
+        }`}>
         {icon}
       </div>
       <div>
@@ -44,9 +49,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, fea
     <ul className="space-y-2 mt-4">
       {features.map((feature, index) => (
         <li key={index} className="flex items-center text-gray-700">
-          <CheckCircle className={`w-4 h-4 mr-3 ${
-            urgent ? 'text-red-500' : 'text-purple-500'
-          }`} />
+          <CheckCircle className={`w-4 h-4 mr-3 ${urgent ? 'text-red-500' : 'text-purple-500'
+            }`} />
           <span className="text-sm">{feature}</span>
         </li>
       ))}
@@ -54,11 +58,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, fea
   </div>
 );
 
-const LiquidationStep: React.FC<LiquidationStepProps> = ({ 
-  number, 
-  title, 
-  description, 
-  duration 
+const LiquidationStep: React.FC<LiquidationStepProps> = ({
+  number,
+  title,
+  description,
+  duration
 }) => (
   <div className="flex items-start bg-gray-50 rounded-lg p-4 hover:bg-white transition-colors">
     <div className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-4 flex-shrink-0 mt-1">
@@ -76,54 +80,29 @@ const LiquidationStep: React.FC<LiquidationStepProps> = ({
   </div>
 );
 
+const CessionStep: React.FC<CessionStepProps> = ({
+  number,
+  title,
+  description,
+  duration
+}) => (
+  <div className="flex items-start bg-blue-50 rounded-lg p-4 hover:bg-white transition-colors">
+    <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm mr-4 flex-shrink-0 mt-1">
+      {number}
+    </div>
+    <div className="flex-1">
+      <div className="flex justify-between items-start mb-1">
+        <h4 className="font-semibold text-gray-900">{title}</h4>
+        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+          {duration}
+        </span>
+      </div>
+      <p className="text-gray-600 text-sm">{description}</p>
+    </div>
+  </div>
+);
+
 const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className = '' }) => {
-  const legalServices = [
-    {
-      icon: <Building className="w-6 h-6" />,
-      title: "Constitution & Formalités",
-      description: "Création et modification de votre structure juridique en toute conformité.",
-      features: [
-        "Choix de la forme juridique optimale",
-        "Rédaction des statuts sur mesure",
-        "Immatriculation et formalités",
-        "Modifications statutaires"
-      ]
-    },
-    {
-      icon: <FileText className="w-6 h-6" />,
-      title: "Contrats & Conventions",
-      description: "Rédaction et négociation de vos contrats commerciaux et internes.",
-      features: [
-        "Contrats de travail et avenants",
-        "Contrats commerciaux et partenariats",
-        "Conventions d'actionnaires",
-        "Protection de la propriété intellectuelle"
-      ]
-    },
-    {
-      icon: <Shield className="w-6 h-6" />,
-      title: "Conformité & RGPD",
-      description: "Mise en conformité légale et protection de vos données personnelles.",
-      features: [
-        "Audit de conformité complet",
-        "Mise en œuvre RGPD",
-        "Délégué à la protection des données",
-        "Formation des équipes"
-      ]
-    },
-    {
-      icon: <Scale className="w-6 h-6" />,
-      title: "Contentieux & Litiges",
-      description: "Défense de vos intérêts en justice et résolution des conflits.",
-      features: [
-        "Procédures prud'homales",
-        "Litiges commerciaux",
-        "Recouvrement de créances",
-        "Médiation et arbitrage"
-      ],
-      urgent: true
-    }
-  ];
 
   const liquidationTypes = [
     {
@@ -179,6 +158,60 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
     }
   ];
 
+  const cessionSteps = [
+    {
+      number: 1,
+      title: "Audit & Évaluation",
+      description: "Diagnostic complet : bilan financier, juridique et commercial",
+      duration: "2-3 semaines"
+    },
+    {
+      number: 2,
+      title: "Valorisation de l'Entreprise",
+      description: "Détermination du prix juste et des modalités de paiement",
+      duration: "1-2 semaines"
+    },
+    {
+      number: 3,
+      title: "Prospection d'Acquéreurs",
+      description: "Recherche et présentation aux repreneurs potentiels",
+      duration: "4-8 semaines"
+    },
+    {
+      number: 4,
+      title: "Négociation & Accord",
+      description: "Mise en accord sur les termes et signature des documents",
+      duration: "2-4 semaines"
+    },
+    {
+      number: 5,
+      title: "Finalisation du Transfert",
+      description: "Transfert des actifs, clients, contrats et clôture de la transition",
+      duration: "2-4 semaines"
+    }
+  ];
+
+  const cessionTypes = [
+    {
+      type: "Cession Totale",
+      description: "Vente complète de l'entreprise à un tiers ou société d'acquisition",
+      duration: "2-4 mois",
+      advantages: ["Sortie complète", "Maximisation de la valeur", "Transition accompagnée"]
+    },
+    {
+      type: "Cession Partielle",
+      description: "Vente d'une activité, division ou branche spécifique de l'entreprise",
+      duration: "2-3 mois",
+      advantages: ["Flexibilité", "Conservation d'activités", "Diversification"]
+    },
+    {
+      type: "Reprise par Management",
+      description: "Vente de l'entreprise à votre direction ou votre équipe",
+      duration: "3-6 mois",
+      advantages: ["Continuité garantie", "Confiance élevée", "Facilités de financement"]
+    }
+  ];
+
   const emergencyServices = [
     {
       title: "Urgence Cessation de Paiement",
@@ -209,7 +242,7 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
   return (
     <section className={`py-8 mt-12 rounded-lg ${className}`}>
       <div className="container mx-auto px-4 max-w-7xl">
-        
+
         {/* En-tête */}
         <div className='absolute inset-0 h-64 -z-10 w-full overflow-hidden'>
           <div className='absolute inset-0 w-full h-full backdrop-blur-sm bg-black/50'></div>
@@ -221,31 +254,12 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
         </div>
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
-            Juridique & Liquidation
+            Cession & Liquidation
           </h2>
           <p className="text-sm text-gray-200 max-w-4xl mx-auto leading-relaxed">
-            Services juridiques complets pour entreprises, de la création à la liquidation. 
+            Services juridiques complets pour entreprises, de la création à la liquidation.
             Notre expertise vous accompagne dans toutes les étapes de la vie de votre société.
           </p>
-        </div>
-
-        {/* Services Juridiques */}
-        <div className="mb-16 pt-5">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Nos Services Juridiques
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {legalServices.map((service, index) => (
-              <ServiceCard
-                key={index}
-                icon={service.icon}
-                title={service.title}
-                description={service.description}
-                features={service.features}
-                urgent={service.urgent}
-              />
-            ))}
-          </div>
         </div>
 
         {/* Types de Liquidation */}
@@ -275,6 +289,8 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
           </div>
         </div>
 
+
+
         {/* Processus de Liquidation */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           <div>
@@ -302,21 +318,19 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
             </h3>
             <div className="space-y-4">
               {emergencyServices.map((service, index) => (
-                <div 
+                <div
                   key={index}
-                  className={`border rounded-lg p-4 ${
-                    service.critical 
-                      ? 'border-red-200 bg-red-50' 
+                  className={`border rounded-lg p-4 ${service.critical
+                      ? 'border-red-200 bg-red-50'
                       : 'border-orange-200 bg-orange-50'
-                  }`}
+                    }`}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-semibold text-gray-900">{service.title}</h4>
-                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${
-                      service.critical
+                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${service.critical
                         ? 'bg-red-500 text-white'
                         : 'bg-orange-500 text-white'
-                    }`}>
+                      }`}>
                       {service.delay}
                     </span>
                   </div>
@@ -333,6 +347,85 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
           </div>
         </div>
 
+        {/* Types de Cession */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8 mb-16 border border-blue-100">
+          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
+            <Handshake className="w-8 h-8 mr-3 text-blue-600" />
+            Procédures de Cession
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {cessionTypes.map((procedure, index) => (
+              <div key={index} className="border border-blue-200 bg-white rounded-xl p-6 hover:border-blue-400 hover:shadow-xl transition-all">
+                <h4 className="font-bold text-lg text-gray-900 mb-3 flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+                  {procedure.type}
+                </h4>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{procedure.description}</p>
+                <div className="flex items-center text-sm text-blue-600 font-semibold mb-4">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Durée moyenne : {procedure.duration}
+                </div>
+                <div className="space-y-2">
+                  {procedure.advantages.map((advantage, idx) => (
+                    <div key={idx} className="flex items-center text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
+                      {advantage}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Processus de Cession */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 bg-blue-50 rounded-2xl p-8 border border-blue-100">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <DollarSign className="w-6 h-6 mr-3 text-blue-600" />
+              Processus de Cession
+            </h3>
+            <div className="space-y-4">
+              {cessionSteps.map((step) => (
+                <CessionStep
+                  key={step.number}
+                  number={step.number}
+                  title={step.title}
+                  description={step.description}
+                  duration={step.duration}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Avantages de la Cession */}
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <Building className="w-6 h-6 mr-3 text-blue-600" />
+              Avantages de la Cession
+            </h3>
+            <div className="space-y-3">
+              {[
+                "Sortie rentable et sécurisée de votre entreprise",
+                "Maximisation de la valeur lors de la vente",
+                "Accompagnement complet du dirigeant et de l'équipe",
+                "Gestion de la transmission de patrimoine",
+                "Optimisation fiscale et juridique de la transaction",
+                "Viabilité long terme pour l'acquéreur",
+                "Continuité de l'emploi pour vos collaborateurs",
+                "Réseau d'acquéreurs et investisseurs",
+                "Financement des acquisitions facilitées",
+                "Garantie légale et protection des risques"
+              ].map((advantage, idx) => (
+                <div key={idx} className="flex items-start bg-white rounded-lg p-3 border border-blue-100 hover:border-blue-300 transition-colors">
+                  <CheckCircle className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">{advantage}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* CTA Urgence Juridique */}
         <div className="text-center">
           <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl p-8 text-white">
@@ -343,21 +436,9 @@ const JuridiqueLiquidation: React.FC<JuridiqueLiquidationProps> = ({ className =
               </h3>
             </div>
             <p className="text-purple-100 text-sm mb-6 max-w-2xl mx-auto">
-              Notre cellule d'urgence juridique est disponible 24h/24 pour les situations 
+              Notre cellule d'urgence juridique est disponible 24h/24 pour les situations
               de crise nécessitant une intervention immédiate (cessation de paiement, saisie, contrôle).
             </p>
-             {/*
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="gap-2 bg-white text-purple-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-300 shadow-lg text-sm flex items-center justify-center">
-                <AlertTriangle /> Urgence Juridique - 24h/24
-              </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-purple-600 transition-colors duration-300 text-sm">
-                Consultation Préventive
-              </button>
-            </div>
-            <p className="text-purple-200 text-sm mt-4">
-              Avocats spécialisés disponibles immédiatement - Secret professionnel garanti
-            </p>*/}
           </div>
         </div>
       </div>
