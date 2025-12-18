@@ -34,12 +34,12 @@ const navigation = [
   // === GESTION DES ANNONCES & SERVICES ===
   { name: "Mes Annonces", href: "/pro/listings", icon: Building2 },
   { name: "Mes Services", href: "/pro/services", icon: Wrench },
-  // {
-  //   name: "Art et commerce Services",
-  //   href: "/pro/Art-commerce-services",
-  //   icon: Wrench,
-  // },
-  // { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
+  {
+    name: "Art et commerce Services",
+    href: "/pro/Art-commerce-services",
+    icon: Wrench,
+  },
+  { name: "Mes services Bien-etre", href: "/pro/harmonie", icon: Leaf },
 
   // === GESTION DES RÉSERVATIONS & COMMANDES ===
   { name: "Mon Agenda", href: "/pro/calendar", icon: Calendar },
@@ -58,11 +58,11 @@ const navigation = [
     href: "/pro/orders",
     icon: ShoppingCart,
   },
-  // {
-  //   name: "Reservations Cours",
-  //   href: "/pro/reservations-cours",
-  //   icon: Plus,
-  // },
+  {
+    name: "Reservations Cours",
+    href: "/pro/reservations-cours",
+    icon: Plus,
+  },
 
   // === GESTION DES PRODUITS ===
   { name: "Tourisme", href: "/pro/tourisme", icon: Plane },
@@ -113,11 +113,11 @@ const navigation = [
   // },
 
   // === ÉDUCATION ===
-  // {
-  //   name: "Cours à Domicile",
-  //   href: "/pro/cours-domicile",
-  //   icon: BookOpen,
-  // },
+  {
+    name: "Cours à Domicile",
+    href: "/pro/cours-domicile",
+    icon: BookOpen,
+  },
 
   // === AVIS & PARAMÈTRES ===
   { name: "Avis", href: "/pro/reviews", icon: Star },

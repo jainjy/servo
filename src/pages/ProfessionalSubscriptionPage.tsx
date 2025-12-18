@@ -145,26 +145,26 @@ const ProfessionalSubscriptionPage = () => {
       ],
       userTypes: ["VENDEUR"],
     },
-    // {
-    //   id: "wellness",
-    //   title: "Bien-être",
-    //   description: "Professionnels du bien-être",
-    //   price: "19",
-    //   period: "par mois",
-    //   icon: <Users className="h-16 w-16" />,
-    //   color: "lightgray",
-    //   popular: false,
-    //   features: [
-    //     "Profil bien-être",
-    //     "Réservations en ligne",
-    //     "Gestion des créneaux",
-    //     "Carte de fidélité",
-    //     "Avis clients",
-    //     "Promotions ciblées",
-    //     "Outils de communication",
-    //   ],
-    //   userTypes: ["BIEN_ETRE"],
-    // },
+    {
+      id: "wellness",
+      title: "Bien-être",
+      description: "Professionnels du bien-être",
+      price: "19",
+      period: "par mois",
+      icon: <Users className="h-16 w-16" />,
+      color: "lightgray",
+      popular: false,
+      features: [
+        "Profil bien-être",
+        "Réservations en ligne",
+        "Gestion des créneaux",
+        "Carte de fidélité",
+        "Avis clients",
+        "Promotions ciblées",
+        "Outils de communication",
+      ],
+      userTypes: ["BIEN_ETRE"],
+    },
   ];
   useEffect(() => {
     fetchSubscriptionPlans();
@@ -290,7 +290,7 @@ const ProfessionalSubscriptionPage = () => {
           </CardDescription>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {subscriptionPlans.filter(plan => plan.id !== "wellness").map((plan) => {
+          {subscriptionPlans.filter(plan => plan.id).map((plan) => {
             const color = getColorClasses(plan.color);
             const isSelected = selectedPlan === plan.id;
             const isRedirecting = isSelected && redirecting;
