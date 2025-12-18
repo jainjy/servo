@@ -13,7 +13,7 @@ export default function Terms() {
       id: 1,
       title: "1. Objet du service",
       icon: <BookOpen />,
-      content: `SERVO est une plateforme numérique intégrée mettant en relation des utilisateurs autour de multiples services :
+      content: `OLIPLUS est une plateforme numérique intégrée mettant en relation des utilisateurs autour de multiples services :
       
       • Immobilier (vente, location, locations saisonnières)
       • Produits et équipements
@@ -47,7 +47,7 @@ export default function Terms() {
       id: 3,
       title: "3. Utilisation acceptable du service",
       icon: <CheckCheck />,
-      content: `Vous vous engagez à utiliser SERVO de manière :
+      content: `Vous vous engagez à utiliser OLIPLUS de manière :
       
       ✓ Légale et conforme à la loi
       ✓ Respectueuse envers les autres utilisateurs
@@ -72,8 +72,8 @@ export default function Terms() {
       
       Vous restez propriétaire intégral des contenus que vous publiez (textes, photos, vidéos, descriptions).
       
-      Licence accordée à SERVO :
-      Vous accordez à SERVO une licence non-exclusive, gratuite et mondiale pour :
+      Licence accordée à OLIPLUS :
+      Vous accordez à OLIPLUS une licence non-exclusive, gratuite et mondiale pour :
       • Afficher et distribuer votre contenu
       • Améliorer et adapter le service
       • Utiliser à des fins analytiques
@@ -86,7 +86,7 @@ export default function Terms() {
       • Spam ou contenu malveillant
       • Données personnelles d'autrui sans consentement
       
-      SERVO se réserve le droit de supprimer ou modérer tout contenu violant ces règles.`,
+      OLIPLUS se réserve le droit de supprimer ou modérer tout contenu violant ces règles.`,
     },
     {
       id: 5,
@@ -94,7 +94,7 @@ export default function Terms() {
       icon: <CreditCard />,
       content: `Responsabilité des transactions :
       
-      SERVO met en relation les utilisateurs mais n'est pas partie aux transactions.
+      OLIPLUS met en relation les utilisateurs mais n'est pas partie aux transactions.
       Les utilisateurs sont seuls responsables :
       • De la légalité des transactions
       • De la qualité des biens/services
@@ -113,7 +113,7 @@ export default function Terms() {
       title: "6. Protection des données personnelles",
       icon: <Shield />,
       content: `Conformité RGPD :
-      SERVO collecte et traite vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD).
+      OLIPLUS collecte et traite vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD).
       
       Données collectées :
       • Données d'inscription (nom, email, téléphone)
@@ -137,14 +137,14 @@ export default function Terms() {
       title: "7. Limitation de responsabilité",
       icon: <Scale />,
       content: `Limitation générale :
-      SERVO s'efforce de maintenir la plateforme en ligne 24h/24. Nous ne garantissons cependant pas :
+      OLIPLUS s'efforce de maintenir la plateforme en ligne 24h/24. Nous ne garantissons cependant pas :
       • L'absence d'interruptions
       • L'absence d'erreurs ou de bugs
       • La compatibilité avec tous les appareils
       • La disponibilité constante
       
       Non-responsabilité :
-      En aucun cas, SERVO ne saurait être tenue responsable des dommages :
+      En aucun cas, OLIPLUS ne saurait être tenue responsable des dommages :
       • Directs ou indirects
       • Résultant de l'utilisation ou de l'impossibilité d'utilisation
       • Résultant d'interactions entre utilisateurs
@@ -159,8 +159,8 @@ export default function Terms() {
       id: 8,
       title: "8. Propriété intellectuelle",
       icon: "©️",
-      content: `Droits de SERVO :
-      L'ensemble du contenu de la plateforme (design, logo, code, textes, graphismes, vidéos) est la propriété exclusive de SERVO ou de ses partenaires.
+      content: `Droits de OLIPLUS :
+      L'ensemble du contenu de la plateforme (design, logo, code, textes, graphismes, vidéos) est la propriété exclusive de OLIPLUS ou de ses partenaires.
       
       Toute reproduction, représentation, modification ou exploitation non autorisée est strictement interdite.
       
@@ -172,7 +172,7 @@ export default function Terms() {
       title: "9. Modification des conditions",
       icon: <RefreshCcw />,
       content: `Droit de modification :
-      SERVO se réserve le droit de modifier à tout moment les présentes conditions d'utilisation.
+      OLIPLUS se réserve le droit de modifier à tout moment les présentes conditions d'utilisation.
       
       Notification :
       • Les modifications importantes seront notifiées aux utilisateurs
@@ -189,8 +189,8 @@ export default function Terms() {
       content: `Résiliation par l'utilisateur :
       Vous pouvez résilier votre compte à tout moment via vos paramètres de compte.
       
-      Résiliation par SERVO :
-      SERVO se réserve le droit de suspendre ou supprimer un compte en cas de :
+      Résiliation par OLIPLUS :
+      OLIPLUS se réserve le droit de suspendre ou supprimer un compte en cas de :
       • Violation des présentes conditions
       • Activité frauduleuse
       • Non-paiement des frais
@@ -270,7 +270,7 @@ export default function Terms() {
             Conditions d'utilisation
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Plateforme SERVO - {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+            Plateforme OLIPLUS - {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
 

@@ -44,7 +44,7 @@
   animation: scaleInEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* Animation du zoom SERVO pour fermeture du loading */
+/* Animation du zoom OLIPLUS pour fermeture du loading */
 @keyframes servoZoom {
   from {
     font-size: 3rem;

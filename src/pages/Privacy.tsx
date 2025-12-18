@@ -54,7 +54,7 @@ export default function Privacy() {
         4. Partage des données
       </h2>
       <p className="mb-4">
-        Servo ne vend ni ne loue vos données personnelles. Nous pouvons les
+        OLIPLUS ne vend ni ne loue vos données personnelles. Nous pouvons les
         partager uniquement avec :
       </p>
       <ul className="list-disc list-inside mb-4">

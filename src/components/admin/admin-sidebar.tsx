@@ -200,7 +200,7 @@ export function AdminSidebar() {
               {/* Remplacement de <Image> par <img> */}
               <img
                 src={logo}
-                alt="Servo Logo"
+                alt="OLIPLUSLogo"
                 className="w-10 h-10 rounded-full"
               />
             </div>

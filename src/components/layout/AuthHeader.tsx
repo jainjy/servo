@@ -480,11 +480,11 @@ export function AuthHeader() {
             <div className="absolute top-3 left-1/2 -translate-x-1/2 lg:hidden bg-[#FFFFFF]/95 backdrop-blur-sm border border-[#D3D3D3] shadow-xl z-50 rounded-2xl px-4 py-2 flex items-center gap-3">
               <img
                 src={logo}
-                alt="Servo Logo"
+                alt="OLIPLUSLogo"
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-[#D3D3D3]"
               />
               <span className="azonix tracking-widest text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">
-                Servo Admin
+                OLIPLUSAdmin
               </span>
             </div>
           )}

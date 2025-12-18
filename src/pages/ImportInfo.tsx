@@ -8,7 +8,7 @@ export default function ImportInfo() {
       </h1>
 
       <p className="text-gray-700 mb-4">
-        Servo permet à ses utilisateurs professionnels ou particuliers
+        OLIPLUSpermet à ses utilisateurs professionnels ou particuliers
         d’importer leurs contacts existants afin de faciliter les connexions
         et recommandations sur la plateforme.
       </p>

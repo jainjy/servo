@@ -645,7 +645,7 @@ const LocationVoiturePage = () => {
     if (navigator.share) {
       navigator.share({
         title: `${vehicule.marque} ${vehicule.modele}`,
-        text: `Découvrez ce véhicule à louer sur SERVO Réunion`,
+        text: `Découvrez ce véhicule à louer sur OLIPLUS Réunion`,
         url: window.location.href,
       });
     } else {
@@ -967,7 +967,7 @@ const LocationVoiturePage = () => {
             <Card className="mt-4 border-[#556B2F]">
               <CardContent className="pt-6">
                 <h3 className="font-semibold mb-4 text-[#8B4513]">
-                  Pourquoi choisir SERVO ?
+                  Pourquoi choisir OLIPLUS ?
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">

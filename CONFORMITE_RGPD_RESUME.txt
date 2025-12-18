@@ -1,6 +1,6 @@
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                     ✅ CONFORMITÉ RGPD IMPLEMENTÉE                        ║
-║                          SERVO PLATFORM v1.0                              ║
+║                          OLIPLUS PLATFORM v1.0                              ║
 ║                                                                           ║
 ║                   Mise à jour : 17 Décembre 2025                         ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
@@ -58,7 +58,7 @@
 │     ✓ Message d'information RGPD                                        │
 │                                                                           │
 │  🔧 MODIFIÉ : src/pages/Terms.tsx                                        │
-│     ✓ Mise à jour contenu - adapté à SERVO                             │
+│     ✓ Mise à jour contenu - adapté à OLIPLUS                             │
 │     ✓ 12 sections détaillées au lieu de 8 basiques                      │
 │     ✓ Interface accordéon interactive                                   │
 │     ✓ Liens vers politique confidentialité                              │
@@ -66,7 +66,7 @@
 │                                                                           │
 │  🔧 MODIFIÉ : src/pages/RGPDInfo.tsx                                     │
 │     ✓ Remplacement complet du contenu                                   │
-│     ✓ Ancien contenu Meta → Contenu SERVO personnalisé                 │
+│     ✓ Ancien contenu Meta → Contenu OLIPLUS personnalisé                 │
 │     ✓ 6 droits RGPD expliqués en détail                                │
 │     ✓ Comment exercer les droits                                        │
 │     ✓ Liens vers pages de gestion                                       │
@@ -206,7 +206,7 @@
 ═══════════════════════════════════════════════════════════════════════════
 
 Tous les fichiers ont été créés avec succès ! ✨
-Votre plateforme SERVO est maintenant beaucoup plus conforme au RGPD.
+Votre plateforme OLIPLUS est maintenant beaucoup plus conforme au RGPD.
 
 Prochaine étape recommandée : Ajouter les routes dans App.tsx
 

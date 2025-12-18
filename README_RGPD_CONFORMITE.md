@@ -1,4 +1,4 @@
-# 📋 Conformité RGPD - SERVO Platform
+# 📋 Conformité RGPD - OLIPLUS Platform
 
 ## ✅ Fichiers créés et modifiés
 
@@ -17,7 +17,7 @@
 | Fichier | Modifications | Chemin |
 |---------|---|--------|
 | **CookieConsent.tsx** | Ajout du consentement explicite géolocalisation (conforme RGPD) | `src/components/CookieConsent.tsx` |
-| **Terms.tsx** | Mise à jour complète - contenu adapté à SERVO (pas football) | `src/pages/Terms.tsx` |
+| **Terms.tsx** | Mise à jour complète - contenu adapté à OLIPLUS (pas football) | `src/pages/Terms.tsx` |
 | **RGPDInfo.tsx** | Remplacement contenu - explications complètes des droits RGPD | `src/pages/RGPDInfo.tsx` |
 
 ---
@@ -221,7 +221,7 @@ POST   /users/update-preferences       # Mettre à jour préférences
 
 ## ✨ **Résumé des Améliorations**
 
-Votre plateforme SERVO est maintenant beaucoup plus conforme au RGPD :
+Votre plateforme OLIPLUS est maintenant beaucoup plus conforme au RGPD :
 
 ✅ **Avant** : Manquait 12 éléments critiques
 ✅ **Après** : 11/12 éléments implémentés (1 reste : endpoints API)
@@ -236,5 +236,5 @@ Pour atteindre 100% :
 ---
 
 **Créé le** : 17 décembre 2025  
-**Plateforme** : SERVO  
+**Plateforme** : OLIPLUS  
 **Version** : 1.0

@@ -59,7 +59,7 @@ export default function MentionsLegales() {
                         <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 pl-11">
                             <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Dénomination sociale</p>
-                                <p className="text-gray-700 dark:text-gray-300">SERVO Platform</p>
+                                <p className="text-gray-700 dark:text-gray-300">OLIPLUS Platform</p>
                             </div>
                             <div className="pb-3 border-b border-gray-100 dark:border-gray-700">
                                 <p className="font-semibold text-gray-900 dark:text-white mb-1">Forme juridique</p>
@@ -189,7 +189,7 @@ export default function MentionsLegales() {
                         </div>
                         <div className="space-y-4 pl-11">
                             <p className="text-gray-700 dark:text-gray-300">
-                                L'ensemble des éléments composant le site SERVO Platform (textes, graphismes, logos, images, sons, vidéos, etc.) sont la propriété exclusive de SERVO Platform ou de ses partenaires.
+                                L'ensemble des éléments composant le site OLIPLUS Platform (textes, graphismes, logos, images, sons, vidéos, etc.) sont la propriété exclusive de OLIPLUS Platform ou de ses partenaires.
                             </p>
                             <div className="bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-yellow-500 p-4 rounded-r">
                                 <p className="text-gray-700 dark:text-gray-300 font-medium">
@@ -253,11 +253,11 @@ export default function MentionsLegales() {
                         </div>
                         <div className="space-y-4 pl-11">
                             <p className="text-gray-700 dark:text-gray-300">
-                                SERVO Platform met tout en œuvre pour assurer l'exactitude et la mise à jour des informations diffusées sur son site. Toutefois, nous ne pouvons garantir l'exactitude, la précision ou l'exhaustivité des informations mises à disposition.
+                                OLIPLUS Platform met tout en œuvre pour assurer l'exactitude et la mise à jour des informations diffusées sur son site. Toutefois, nous ne pouvons garantir l'exactitude, la précision ou l'exhaustivité des informations mises à disposition.
                             </p>
                             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 italic">
                                 <p className="text-gray-700 dark:text-gray-300">
-                                    SERVO Platform décline toute responsabilité pour tout dommage direct ou indirect résultant de l'accès ou de l'utilisation de ce site, ou de l'impossibilité d'y accéder.
+                                    OLIPLUS Platform décline toute responsabilité pour tout dommage direct ou indirect résultant de l'accès ou de l'utilisation de ce site, ou de l'impossibilité d'y accéder.
                                 </p>
                             </div>
                         </div>

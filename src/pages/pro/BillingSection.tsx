@@ -179,7 +179,7 @@ export default function BillingSection() {
               Gestion des paiements
             </h1>
             <p className="text-muted-foreground max-w-2xl">
-              Suivez vos transactions, gérez vos factures et analysez vos revenus SERVO en temps réel.
+              Suivez vos transactions, gérez vos factures et analysez vos revenus OLIPLUS en temps réel.
             </p>
           </div>
           <Button

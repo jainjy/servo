@@ -438,7 +438,7 @@ const ProfessionalSubscriptionPage = () => {
         </div>
         <div className="text-center mt-12 space-y-4">
           <div className="text-xs text-gray-500">
-            © 2025 SERVO . Tous droits réservés.
+            © 2025 OLIPLUS . Tous droits réservés.
           </div>
         </div>
       </div>

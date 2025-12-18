@@ -273,7 +273,7 @@ const App = () => {
       if (window.history.length > 1) {
         window.history.back();
       } else {
-        if (window.confirm("Voulez-vous quitter SERVO ?")) {
+        if (window.confirm("Voulez-vous quitter OLIPLUS?")) {
           CapacitorApp.exitApp();
         }
       }

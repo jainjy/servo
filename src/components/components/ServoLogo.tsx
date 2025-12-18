@@ -23,7 +23,7 @@ const ServoLogo: React.FC<ServoLogoProps> = ({
   const IconSVG = () => (
     <img
       src={logoImage}
-      alt="Servo Logo"
+      alt="OLIPLUSLogo"
       width={iconSize}
       height={iconSize}
       className="flex-shrink-0 rounded-full"

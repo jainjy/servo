@@ -74,7 +74,7 @@ export default function RGPDInfo() {
             Protection de vos données personnelles
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-            SERVO Platform s'engage à respecter vos droits fondamentaux concernant la protection de vos données personnelles. 
+            OLIPLUS Platform s'engage à respecter vos droits fondamentaux concernant la protection de vos données personnelles. 
             Conformément au <strong>Règlement Général sur la Protection des Données (RGPD)</strong> (Règlement UE 2016/679), 
             vous disposez de droits importants sur vos informations.
           </p>

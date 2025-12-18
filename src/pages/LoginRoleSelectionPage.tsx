@@ -201,7 +201,7 @@ const LoginRoleSelectionPage = () => {
             <span>Communauté vérifiée</span>
           </div>
           <div className="w-1 h-1 bg-[#D3D3D3] rounded-full"></div>
-          <div>© 2025 SERVO . Tous droits réservés.</div>
+          <div>© 2025 OLIPLUS . Tous droits réservés.</div>
         </div>
       </div>
     </div>

@@ -206,7 +206,7 @@ export default function ClientSection() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">Espace Clients</h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Gestion centralisée des profils clients SERVO - {clients.length} client(s) au total
+              Gestion centralisée des profils clients OLIPLUS - {clients.length} client(s) au total
             </p>
           </div>
 

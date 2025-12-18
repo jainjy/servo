@@ -312,7 +312,7 @@ export function ProSidebar() {
           <div className="p-1 rounded-full bg-[#FFFFFF] border-black border-2">
             <img
               src={logo}
-              alt="Servo Logo"
+              alt="OLIPLUSLogo"
               className="w-10 h-10 rounded-full"
             />
           </div>
@@ -361,7 +361,7 @@ export function ProSidebar() {
             <div className="p-1 rounded-full bg-[#FFFFFF] border-black border-2">
               <img
                 src={logo}
-                alt="Servo Logo"
+                alt="OLIPLUSLogo"
                 className="w-8 h-8 rounded-full"
               />
             </div>

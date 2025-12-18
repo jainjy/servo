@@ -24,7 +24,7 @@ export default function PolitiqueConfidentialiteComplete() {
       id: "intro",
       title: "Introduction",
       icon: Shield,
-      content: `SERVO Platform (ci-après "nous", "notre" ou "la plateforme") accorde la plus haute importance à la protection de vos données personnelles. Cette politique de confidentialité explique comment nous collectons, utilisons, partageons et protégeons vos informations en conformité avec le Règlement Général sur la Protection des Données (RGPD) et la législation applicable.`,
+      content: `OLIPLUS Platform (ci-après "nous", "notre" ou "la plateforme") accorde la plus haute importance à la protection de vos données personnelles. Cette politique de confidentialité explique comment nous collectons, utilisons, partageons et protégeons vos informations en conformité avec le Règlement Général sur la Protection des Données (RGPD) et la législation applicable.`,
     },
     {
       id: "collecte",
