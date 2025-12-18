@@ -1666,7 +1666,7 @@ const AdminConseilPage = () => {
               onClick={() => setShowStatsModal(false)}
               className="border-[#D3D3D3] text-[#000000] hover:bg-[#556B2F] hover:text-white"
             >
-              Fermer
+               Fermer
             </Button>
           </DialogFooter>
         </DialogContent>
