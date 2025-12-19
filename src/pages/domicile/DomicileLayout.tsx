@@ -490,7 +490,7 @@ const DomicileLayout = () => {
         />
       </div>
       <h1 className="text-5xl font-bold mb-6 text-white text-center">
-        Produits et accessoires
+        Entretien & Equipements
       </h1>
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
         <Tab.List className="flex flex-wrap gap-2 mb-4 mt-20 ">
