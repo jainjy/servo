@@ -701,6 +701,48 @@ const Header = () => {
           href: "/accompagnement",
           image:
             "https://i.pinimg.com/736x/6d/a9/3e/6da93e9378f71ef13bf0e1f360d55ed3.jpg",
+        }, // NOUVELLES CATÉGORIES AJOUTÉES
+        {
+          title: "Travaux & Matériaux",
+          description: "Construction, rénovation et fournitures",
+          href: "/travaux-materiaux",
+          image:
+            "https://i.pinimg.com/736x/6a/9a/66/6a9a661a89881207fcc24bf0c16e5bf5.jpg", // Image d'illustration travaux
+        },
+        {
+          title: "Entretien & Équipements",
+          description: "Services maison, décoration et équipements",
+          href: "/entretien-equipements",
+          image:
+            "https://i.pinimg.com/736x/5a/d7/d2/5ad7d27a5bdf37ce1826d5c9ac03b6f4.jpg", // Image d'illustration entretien
+        },
+        {
+          title: "Art & Créations",
+          description: "Œuvres d'art, artisanat et créateurs",
+          href: "/art-creations",
+          image:
+            "https://i.pinimg.com/736x/14/aa/e2/14aae20d25a8740ae4c4f2228c97bc3f.jpg", // Image d'illustration art
+        },
+        {
+          title: "Entreprise & Pro",
+          description: "Services professionnels pour entreprises",
+          href: "/entreprise-pro",
+          image:
+            "https://i.pinimg.com/736x/d8/7c/cf/d87ccf6c788636ccb74610dfb35380b2.jpg", // Image d'illustration entreprise
+        },
+        {
+          title: "Santé & Bien-être",
+          description: "Soins, nutrition et médecines naturelles",
+          href: "/sante-bien-etre",
+          image:
+            "https://i.pinimg.com/736x/a2/60/55/a260554ed14acf6dbcf9b19ed6e40429.jpg", // Image d'illustration santé
+        },
+        {
+          title: "Emploi & Formations",
+          description: "Offres d'emploi, formations et alternance",
+          href: "/emploi-formations",
+          image:
+            "https://i.pinimg.com/736x/06/b1/dc/06b1dc5f7bcca0813ec75fc60af71120.jpg", // Image d'illustration emploi
         },
         // {
         // title: "Comptabilité",
@@ -1068,7 +1110,8 @@ const Header = () => {
           title: "Construction",
           description: "Travaux de construction",
           href: "/travaux?categorie=constructions",
-          image: "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg"
+          image:
+            "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg",
         },
         {
           title: "Travaux Intérieur",
@@ -1084,18 +1127,20 @@ const Header = () => {
           image:
             "https://i.pinimg.com/736x/90/49/46/9049462b0f6124398a68da38949985a8.jpg",
         },
-        
+
         {
           title: "Matériaux",
           description: "Fournitures de matériaux de construction",
           href: "/travaux?categorie=constructions",
-          image: "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg"
+          image:
+            "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg",
         },
         {
           title: "Autres services travaux",
           description: "Services divers pour vos travaux",
           href: "/travaux?categorie=constructions",
-          image: "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg"
+          image:
+            "https://i.pinimg.com/736x/0d/78/24/0d7824617574c86c95a7d14399e90858.jpg",
         },
         {
           title: "Autres services travaux",
@@ -1113,13 +1158,15 @@ const Header = () => {
           title: "Services maison (ménage, jardinage, piscine, sécurité, etc.)",
           description: "Services professionnels pour votre domicile",
           href: "/domicile#service-maison",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Design & Décoration",
           description: "Solutions esthétiques pour votre intérieur",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Équipements (électroménager, ameublement, etc.)",
@@ -1132,22 +1179,24 @@ const Header = () => {
           title: "Outillages",
           description: "Outils et équipements de qualité professionnelle",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Produits & accessoires",
           description: "Tout pour votre domicile",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Marketplace d’occasion",
           description: "Achetez et vendez des articles d'occasion",
           href: "/produits#design",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
-        
-      ]
+      ],
     },
     {
       title: "ART & CREATIONS",
@@ -1156,31 +1205,36 @@ const Header = () => {
           title: "Photographie",
           description: "Captures artistiques et professionnelles",
           href: "/photographie",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+          image:
+            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Sculpture",
           description: "Œuvres sculpturales uniques",
           href: "/sculpture",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+          image:
+            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Peinture",
           description: "Toiles et fresques originales",
           href: "/peinture",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Artisanat",
           description: "Créations artisanales authentiques",
           href: "/artisanat",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Marketplace créateurs",
           description: "Plateforme pour artistes et artisans",
           href: "/marketplace-createurs",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
       ],
     },
@@ -1191,43 +1245,50 @@ const Header = () => {
           title: "Création",
           description: "Accompagnement à la création d'entreprise",
           href: "/reprise",
-          image: "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg"
+          image:
+            "https://i.pinimg.com/736x/8f/dc/36/8fdc36d9a41f8aee52f10fb511f25d91.jpg",
         },
         {
           title: "Rachat",
           description: "Accompagnement au rachat d'entreprise",
           href: "/rachat",
-          image: "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg"
+          image:
+            "https://i.pinimg.com/736x/57/09/8b/57098b38d3e638fa7b8323cfd3ff4cda.jpg",
         },
         {
           title: "Cession & liquidation",
           description: "Accompagnement à la cession ou liquidation",
           href: "/juridiqueLiquidation",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Communication & marketing",
           description: "Stratégies pour développer votre activité",
           href: "/communicationMarketing",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Comptabilité",
           description: "Gestion comptable et financière",
           href: "/comptabilite",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Juridique",
           description: "Conseils et services juridiques pour entreprises",
           href: "/juridique",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
         {
           title: "Conseils & accompagnement",
           description: "Support stratégique pour entrepreneurs",
           href: "/Conseil_accompagnement",
-          image: "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg"
+          image:
+            "https://i.pinimg.com/736x/b1/99/76/b199762f6e64a708a5f58eac07325119.jpg",
         },
       ],
     },
@@ -1272,45 +1333,44 @@ const Header = () => {
     // ],
     // },
     {
-    title: "SANTE & BIEN-ÊTRE",
-    items: [
-      {
-        title: "Nutrition",
-        description: "Conseils et plans alimentaires",
-        href: "/nutrition",
-        image:
-          "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
-      },
-      {
-        title: "Soins",
-        description: "Produits et services de soins",
-        href: "/soin",
-        image:
-          "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
-      },
-      {
-        title: "Thérapeutes",
-        description: "Professionnels du bien-être à domicile",
-        href: "/therapeute",
-        image:
-          "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
-      },
-      {
-        title: "Huiles essentielles",
-        description: "Bienfaits des huiles naturelles",
-        href: "/huiles-essentielles",
-        image:
-          "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
-      },
-      {
-        title: "Médecines naturelles (plantes, herbes, aliments)",
-        description: "Remèdes et traitements naturels",
-        href: "/produits-naturels",
-        image:
-          "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
-      },
-      
-    ],
+      title: "SANTE & BIEN-ÊTRE",
+      items: [
+        {
+          title: "Nutrition",
+          description: "Conseils et plans alimentaires",
+          href: "/nutrition",
+          image:
+            "https://i.pinimg.com/736x/2d/db/f5/2ddbf5d2f6316db5454bee1c028f5cdf.jpg",
+        },
+        {
+          title: "Soins",
+          description: "Produits et services de soins",
+          href: "/soin",
+          image:
+            "https://i.pinimg.com/736x/86/53/78/86537889c9adc8cd402651170f22c712.jpg",
+        },
+        {
+          title: "Thérapeutes",
+          description: "Professionnels du bien-être à domicile",
+          href: "/therapeute",
+          image:
+            "https://i.pinimg.com/1200x/32/9c/de/329cde5ea55b482c491c64cbee4048ea.jpg",
+        },
+        {
+          title: "Huiles essentielles",
+          description: "Bienfaits des huiles naturelles",
+          href: "/huiles-essentielles",
+          image:
+            "https://i.pinimg.com/736x/3e/72/20/3e7220bc57aa103638b239e0ba4742b4.jpg",
+        },
+        {
+          title: "Médecines naturelles (plantes, herbes, aliments)",
+          description: "Remèdes et traitements naturels",
+          href: "/produits-naturels",
+          image:
+            "https://i.pinimg.com/1200x/a7/a7/78/a7a778dfbb4199b45d864581411e7c0a.jpg",
+        },
+      ],
     },
     {
       title: "EMPLOI & FORMATIONS",
@@ -1693,9 +1753,9 @@ const Header = () => {
                 onOpenChange={handlePopoverOpenChange}
               >
                 <PopoverTrigger asChild>
-                  <Button className="h-9 hover:bg-logo/80 bg-logo">
+                  {/* <Button className="h-9 hover:bg-logo/80 bg-logo">
                     <Menu className="text-white" />
-                  </Button>
+                  </Button> */}
                 </PopoverTrigger>
                 <PopoverContent
                   side="bottom"
